@@ -1,0 +1,33 @@
+[gd_scene load_steps=5 format=2]
+
+[ext_resource path="res://MarkerNode.gd" type="Script" id=1]
+
+[sub_resource type="CylinderShape" id=1]
+radius = 0.1
+height = 0.1
+
+[sub_resource type="SpatialMaterial" id=2]
+albedo_color = Color( 0.933333, 0.898039, 0.376471, 1 )
+
+[sub_resource type="CylinderMesh" id=3]
+material = SubResource( 2 )
+top_radius = 0.05
+bottom_radius = 0.1
+height = 0.1
+
+[node name="RigidBody" type="RigidBody"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.649912, 0 )
+collision_layer = 12
+collision_mask = 7
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_group_": true
+}
+
+[node name="CollisionShape" type="CollisionShape" parent="."]
+transform = Transform( 4, 0, 0, 0, 8, 0, 0, 0, 4, 0, 0, 0 )
+shape = SubResource( 1 )
+
+[node name="MeshInstance" type="MeshInstance" parent="CollisionShape"]
+mesh = SubResource( 3 )
+material/0 = null
