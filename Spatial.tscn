@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=2]
+[gd_scene load_steps=16 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://addons/godot-xr-tools/misc/VR_Common_Shader_Cache.tscn" type="PackedScene" id=2]
@@ -10,12 +10,14 @@
 [ext_resource path="res://MarkerNode.tscn" type="PackedScene" id=8]
 [ext_resource path="res://PulledBody.tscn" type="PackedScene" id=9]
 [ext_resource path="res://SketchSystem.gd" type="Script" id=10]
+[ext_resource path="res://surveyscans/dukest1resurvey2009.tscn" type="PackedScene" id=11]
 
 [sub_resource type="SpatialMaterial" id=1]
+params_cull_mode = 2
 params_line_width = 8.3
 albedo_color = Color( 0.941176, 0.0784314, 0.0784314, 1 )
 
-[sub_resource type="ArrayMesh" id=2]
+[sub_resource type="ArrayMesh" id=5]
 surfaces/0 = {
 "aabb": AABB( 0, 0.1, -4.03536, 2.03536, 9.99868e-06, 1.08536 ),
 "array_data": PoolByteArray( 0, 0, 0, 0, 205, 204, 204, 61, 51, 51, 67, 192, 0, 127, 0, 0, 0, 0, 128, 63, 205, 204, 204, 61, 51, 51, 67, 192, 0, 127, 0, 0, 0, 0, 0, 0, 205, 204, 204, 61, 205, 204, 60, 192, 0, 127, 0, 0, 0, 0, 0, 0, 205, 204, 204, 61, 205, 204, 60, 192, 0, 127, 0, 0, 0, 0, 128, 63, 205, 204, 204, 61, 51, 51, 67, 192, 0, 127, 0, 0, 0, 0, 128, 63, 205, 204, 204, 61, 205, 204, 60, 192, 0, 127, 0, 0, 0, 0, 128, 63, 205, 204, 204, 61, 51, 51, 67, 192, 0, 127, 0, 0, 122, 121, 251, 63, 205, 204, 204, 61, 162, 33, 129, 192, 0, 127, 0, 0, 0, 0, 128, 63, 205, 204, 204, 61, 205, 204, 60, 192, 0, 127, 0, 0, 0, 0, 128, 63, 205, 204, 204, 61, 205, 204, 60, 192, 0, 127, 0, 0, 122, 121, 251, 63, 205, 204, 204, 61, 162, 33, 129, 192, 0, 127, 0, 0, 67, 67, 2, 64, 205, 204, 204, 61, 189, 188, 125, 192, 0, 127, 0, 0 ),
@@ -27,6 +29,12 @@ surfaces/0 = {
 "skeleton_aabb": [  ],
 "vertex_count": 12
 }
+
+[sub_resource type="CubeMesh" id=3]
+size = Vector3( 0.2, 0.1, 0.2 )
+
+[sub_resource type="SpatialMaterial" id=4]
+albedo_color = Color( 0.709804, 0.376471, 0.0509804, 1 )
 
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
@@ -52,6 +60,7 @@ drag_factor = 0.1
 controller_id = 2
 
 [node name="Function_pointer" parent="ARVROrigin/ARVRController_Right" instance=ExtResource( 5 )]
+distance = 50
 collision_mask = 8
 
 [node name="CSGMesh_righthand" parent="ARVROrigin/ARVRController_Right" instance=ExtResource( 6 )]
@@ -75,8 +84,16 @@ script = ExtResource( 10 )
 
 [node name="WorkingShell" type="MeshInstance" parent="SketchSystem"]
 material_override = SubResource( 1 )
-mesh = SubResource( 2 )
+mesh = SubResource( 5 )
 material/0 = null
 
 [node name="OnePathNodes" type="Spatial" parent="SketchSystem"]
+
+[node name="LaserSquare" type="MeshInstance" parent="SketchSystem"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 0 )
+mesh = SubResource( 3 )
+material/0 = SubResource( 4 )
+
+[node name="dukest1resurvey2009" parent="." instance=ExtResource( 11 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 2.76087, 14.7341, -10.6518 )
 [connection signal="button_pressed" from="ARVROrigin/ARVRController_Right" to="ARVROrigin/ARVRController_Left/Function_Direct_movement" method="_on_ARVRController_Right_button_pressed"]
