@@ -1,5 +1,7 @@
 extends StaticBody
 
+var i   # use for indexing the nodes on save
+
 func _ready():
 	pass
 
