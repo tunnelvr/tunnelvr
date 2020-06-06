@@ -3,7 +3,8 @@ extends Spatial
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	loadsketchsystem()
+	pass
+	
 	
 const OnePathNode = preload("res://OnePathNode.tscn")
 const linewidth = 0.05

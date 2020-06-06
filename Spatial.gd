@@ -64,9 +64,7 @@ func _ready():
 	pointer.sketchsystem = $SketchSystem
 	pointer.drawnfloor = $drawnfloor
 	pointer.guipanel3d = $GUIPanel3D
-	#pointer.guipanel3d.visible = false
-	
-	#print("moved", on, from, to)
+	pointer.guipanel3d.visible = false
 
 func _process(_delta):
 	if !perform_runtime_config:
