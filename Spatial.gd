@@ -7,8 +7,6 @@ var arvr_quest = null;
 
 # Stuff to do:
 # * Ray to have up arrow so twist option possible
-# * Select menu options popup panel using VR_BUTTON_BY 
-# * make save and load options then
 # * Separate OneTunnel class with all the geometry that drives the sketch system
 # * import centreline with LRUDs properly
 # * better select and shape colours

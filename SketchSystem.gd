@@ -154,6 +154,7 @@ func loadsketchsystem():
 		#var new_object = load(node_data["filename"]).instance()
 		#get_node(node_data["parent"]).add_child(new_object)
 	
+		print("llloading ", len(node_data["points"]), " ", len(node_data["paths"]))
 		var onepathnodes = get_node("OnePathNodes").get_children()
 		for i in range(len(node_data["points"])):
 			if i < len(onepathnodes):
