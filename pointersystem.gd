@@ -6,13 +6,7 @@ extends Spatial
 # variables set by the 
 var drawnfloor = null
 var sketchsystem = null
-
-signal pointer_pressed(on, at)
-signal pointer_released(on, at)
-signal pointer_moved(on, from, to)
-
-signal pointer_entered(body)
-signal pointer_exited(body)
+var guipanel3d = null
 
 enum Buttons { VR_TRIGGER = 15, VR_PAD=14, VR_BUTTON_BY=1, VR_GRIP=2 }
 onready var controller = get_parent()
@@ -64,8 +58,10 @@ func _ready():
 	print("LaserSquare ", LaserSquare)
 	print("LaserSpot ", LaserSpot)
 	pointinghighlightmaterial.albedo_color = Color(0.92, 0.49, 0.13, 1.0)
+	pointinghighlightmaterial.flags_no_depth_test = true
 	selectedhighlightmaterial.albedo_color = Color(0.92, 0.99, 0.13, 1.0)
 	selectedpointerhighlightmaterial.albedo_color = Color(0.82, 0.99, 0.93, 1.0)
+	selectedpointerhighlightmaterial.flags_no_depth_test = true
 	
 	# apply our world scale to our laser position
 	$Laser.translation.y = laser_y * ws
@@ -100,8 +96,19 @@ func onpointing(newpointertarget, newpointertargetpoint):
 			#LaserSquare.global_transform.origin = newpointertargetpoint 
 			
 
+
 func _on_button_pressed(p_button):
 	print("pppp ", pointertargetpoint)
+	if p_button == Buttons.VR_BUTTON_BY:
+		if not guipanel3d.visible:
+			var pos = controller.global_transform.origin - 0.8*(controller.global_transform.basis.z)
+			var trans = Transform(controller.global_transform)
+			trans.origin = pos
+			guipanel3d.global_transform = trans
+			guipanel3d.visible = true
+		else:
+			guipanel3d.visible = false
+			
 	if p_button == Buttons.VR_TRIGGER and is_instance_valid(pointertarget):
 		if pointertarget.has_method("jump_up"):
 			pointertarget.jump_up()
@@ -177,5 +184,5 @@ func _process(delta):
 func _on_ARVRController_Right_button_pressed(button):
 	print("right button pressed", button)
 	if button == Buttons.VR_BUTTON_BY:
-		sketchsystem.savesketchsystem()
-		#sketchsystem.loadsketchsystem()
+		#sketchsystem.savesketchsystem()
+		sketchsystem.loadsketchsystem()

@@ -6,12 +6,22 @@ var arvr_quest = null;
 # Notes: we have used Function_Direct_movement.drag_factor == 0 to disable velocity and gravity
 
 # Stuff to do:
-# * Prerecord a set of nodes
-# * Load in those nodes
-# * Do the assemble into polygons 
-# * Select menu options popup panel using VR_BUTTON_BY
-# * Use immediate_code to run tests on gdscript
-# * Would be good if triangle_mesh intersect gave which triangle was intersected
+# * Ray to have up arrow so twist option possible
+# * Select menu options popup panel using VR_BUTTON_BY 
+# * make save and load options then
+# * Separate OneTunnel class with all the geometry that drives the sketch system
+# * import centreline with LRUDs properly
+# * better select and shape colours
+# * Fall upward to celing when not on above the cave
+# * Special rods connecting centreline nodes to the sketch below
+# * active 2 node rods to lock the sketch
+# * move sketch up and down
+# * each sketch node retains the UV point on the drawing at time it was made
+# * Each node finds its normal plane and resolves lines around it
+# * nodes have push-pull or cross-section plane
+# * Line sections and triangle areas can be split
+# * floor and wall textures
+# * Boulders and gravel and particles
 
 var perform_runtime_config = true
 var ovr_init_config = null
@@ -21,7 +31,7 @@ func _ready():
 	print("Initializing VR");
 	print("  Available Interfaces are %s: " % str(ARVRServer.get_interfaces()));
 	arvr_openvr = ARVRServer.find_interface("OpenVR")
-	arvr_quest = ARVRServer.find_interface("OVRMobile");
+	arvr_quest = null # ARVRServer.find_interface("OVRMobile");
 
 	if arvr_quest:
 		print("found quest, initializing")
@@ -37,9 +47,11 @@ func _ready():
 	elif arvr_openvr:
 		print("found openvr, initializing")
 		if arvr_openvr.initialize():
-			get_viewport().arvr = true
-			print("tttt", get_viewport().keep_3d_linear)
-			get_viewport().keep_3d_linear = true
+			var viewport = get_viewport()
+			viewport.arvr = true
+			print("tttt", viewport.hdr, " ", viewport.keep_3d_linear)
+			#viewport.hdr = false
+			viewport.keep_3d_linear = true
 			Engine.target_fps = 90
 			OS.vsync_enabled = false;
 			print("  Success initializing OpenVR Interface.");
@@ -51,6 +63,9 @@ func _ready():
 	var pointer = $ARVROrigin/ARVRController_Right/pointersystem
 	pointer.sketchsystem = $SketchSystem
 	pointer.drawnfloor = $drawnfloor
+	pointer.guipanel3d = $GUIPanel3D
+	#pointer.guipanel3d.visible = false
+	
 	#print("moved", on, from, to)
 
 func _process(_delta):

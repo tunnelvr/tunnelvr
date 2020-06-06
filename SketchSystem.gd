@@ -3,7 +3,8 @@ extends Spatial
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	updateworkingshell()
+	loadsketchsystem()
+	
 const OnePathNode = preload("res://OnePathNode.tscn")
 const linewidth = 0.05
 
@@ -56,41 +57,70 @@ func updateonepaths():
 		surfaceTool.add_vertex(p1left)
 		surfaceTool.add_vertex(p1right)
 	surfaceTool.generate_normals()
-	$WorkingShell.mesh = surfaceTool.commit()
-	print("usus ", len($WorkingShell.mesh.get_faces()), " ", len($WorkingShell.mesh.get_faces())) #surfaceTool.generate_normals()
+	$PathLines.mesh = surfaceTool.commit()
+	print("usus ", len($PathLines.mesh.get_faces()), " ", len($PathLines.mesh.get_faces())) #surfaceTool.generate_normals()
+	
+	updateworkingshell()
 
+
+func sd0(a, b):
+	return a[0] < b[0]
 
 func updateworkingshell():
-	var cverts = PoolVector3Array()
+	var onepathnodes = get_node("OnePathNodes").get_children()
+	for opn in onepathnodes:
+		opn.pathvectorseq.clear()
 	
-	for opn in $OnePathNodes.get_children():
-		cverts.push_back(opn.global_transform.origin + Vector3(0, opn.scale.y, 0))
-	if len(cverts) < 2:
-		cverts.push_back(Vector3(0, 0.1, -3))
-		cverts.push_back(Vector3(1, 0.1, -3))
-		cverts.push_back(Vector3(2, 0.1, -4))
+	var opvisits2 = [ ]
+	for i in range(len(onepathpairs)):
+		var onepath = onepathpairs[i]
+		var vec = Vector2(onepath[1].global_transform.origin.x - onepath[0].global_transform.origin.x, onepath[1].global_transform.origin.z - onepath[0].global_transform.origin.z)
+		onepath[0].pathvectorseq.append([vec.angle(), i])
+		onepath[1].pathvectorseq.append([(-vec).angle(), i])
+		opvisits2.append(0)
+		opvisits2.append(0)
+	for opn in onepathnodes:
+		opn.pathvectorseq.sort_custom(self, "sd0")
+		print(opn.pathvectorseq)
+		
+	var polys = [ ]
+	for i in range(len(opvisits2)):
+		if opvisits2[i] != 0:
+			continue
+		# warning-ignore:integer_division
+		var ne = (i/2)
+		print("iiii", i)
+		var np = onepathpairs[ne][0 if ((i%2)==0) else 1]
+		polys.append([ ])
+		while (opvisits2[ne*2 + (0 if onepathpairs[ne][0] == np else 1)]) == 0:
+			opvisits2[ne*2 + (0 if onepathpairs[ne][0] == np else 1)] = len(polys)
+			polys[-1].append(Vector3(np.global_transform.origin.x, np.scale.y, np.global_transform.origin.z))
+			np = onepathpairs[ne][1  if onepathpairs[ne][0] == np  else 0]
+			for j in range(len(np.pathvectorseq)):
+				if np.pathvectorseq[j][1] == ne:
+					ne = np.pathvectorseq[(j+1)%len(np.pathvectorseq)][1]
+					break
+		print("pppp ", len(polys[-1]), " ", polys[-1][0])
 
 	var surfaceTool = SurfaceTool.new()
 	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
-	var p0left
-	var p0right; 
-	for i in range(len(cverts)):
-		var i1 = max(1, i)
-		var perp = linewidth*Vector2(-(cverts[i1].z - cverts[i1-1].z), cverts[i1].x - cverts[i1-1].x).normalized()
-		var p1left = cverts[i] - Vector3(perp.x, 0, perp.y)
-		var p1right = cverts[i] + Vector3(perp.x, 0, perp.y)
-		if i != 0:
-			surfaceTool.add_vertex(p0left)
-			surfaceTool.add_vertex(p1left)
-			surfaceTool.add_vertex(p0right)
-			surfaceTool.add_vertex(p0right)
-			surfaceTool.add_vertex(p1left)
-			surfaceTool.add_vertex(p1right)
-		p0left = p1left
-		p0right = p1right
+	var floorsize = get_node("../drawnfloor/MeshInstance").mesh.size
+	print("floorsize ", floorsize)
+	for poly in polys:
+		var pv = PoolVector2Array()
+		for p in poly:
+			pv.append(Vector2(p.x, p.z))
+		var pi = Geometry.triangulate_polygon(pv)
+		print("piiii", pi)
+		for u in pi:
+			surfaceTool.add_uv(Vector2(poly[u].x/floorsize.x + 0.5, poly[u].z/floorsize.y + 0.5))
+			surfaceTool.add_vertex(poly[u])
 	surfaceTool.generate_normals()
-	$WorkingShell.mesh = surfaceTool.commit()
-	print("usus ", len($WorkingShell.mesh.get_faces()), " ", len($WorkingShell.mesh.get_faces())) #surfaceTool.generate_normals()
+	$WorkingShell/MeshInstance.mesh = surfaceTool.commit()
+	#var col_shape = ConcavePolygonShape.new()
+	#col_shape.set_faces(mesh.get_faces())
+	#print("sssss", get_node("../CollisionShape").get_shape())
+	$WorkingShell/CollisionShape.shape.set_faces($WorkingShell/MeshInstance.mesh.get_faces())
 
 
 # Quick saving and loading of shape.  It goes to 
