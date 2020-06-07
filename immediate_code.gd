@@ -5,13 +5,34 @@ extends EditorScript
 # Control-Shift X to run this code in the editor
 # *******
 
+const CentrelineStationNode = preload("res://CentrelineStationNode.tscn")
+
 func _run():
 	print("Hello from the Godot Editor!")
-	#var k = get_scene().get_node("drawnfloor/MeshInstance").mesh
-	var k = get_scene().get_node("MeshInstance")
-	print(k)
-	print(k.mesh.size)
+	var centrelinedatafile = File.new()
+	centrelinedatafile.open("res://surveyscans/dukest1resurvey2009.json", File.READ)
+	var centrelinedata = parse_json(centrelinedatafile.get_line())
+
+	var centrelinegnodes = get_scene().get_node("SketchSystem/Centreline/CentrelineNodes")
+	# centrelinegnodes.clear()  queue_free() ?
+	#assert (len(centrelinegnodes.get_children()) == 0)
+	print(centrelinegnodes.get_children()[0])
+	var x = centrelinegnodes.get_children()[0]
+	var dcsn = CentrelineStationNode.instance()
+	print(dcsn.get_filename())
 	return
+	for i in range(2, len(centrelinedata.stationpointscoords), 3):
+		var csn = CentrelineStationNode.instance()
+		var stationpointscoords = centrelinedata.stationpointscoords
+		centrelinegnodes.add_child(csn)
+		print(csn)
+#	while save_game.get_position() < save_game.get_len():
+#		# Get the saved dictionary from the next line in the save file
+#		var node_data = parse_json(save_game.get_line())
+	
+#	print(k.mesh.size)
+	return
+	var k = get_scene().get_node("drawnfloor/MeshInstance").mesh
 	var ma = k.mesh.get_mesh_arrays()
 	#print(len(ma[ArrayMesh.ARRAY_VERTEX]), " VERTEX ", ma[ArrayMesh.ARRAY_VERTEX])
 	#print(len(ma[ArrayMesh.ARRAY_NORMAL]), " NORMAL ", ma[ArrayMesh.ARRAY_NORMAL])

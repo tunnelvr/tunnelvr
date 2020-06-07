@@ -1,10 +1,10 @@
-[gd_scene load_steps=24 format=2]
+[gd_scene load_steps=32 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://addons/godot-xr-tools/misc/VR_Common_Shader_Cache.tscn" type="PackedScene" id=2]
 [ext_resource path="res://drawnfloor.tscn" type="PackedScene" id=3]
 [ext_resource path="res://movementsystem.gd" type="Script" id=4]
-[ext_resource path="res://pointersystem.tscn" type="PackedScene" id=5]
+[ext_resource path="res://pointersystem.gd" type="Script" id=5]
 [ext_resource path="res://CSGMesh_righthand.tscn" type="PackedScene" id=6]
 [ext_resource path="res://CSGMesh_lefthand.tscn" type="PackedScene" id=7]
 [ext_resource path="res://MarkerNode.tscn" type="PackedScene" id=8]
@@ -15,19 +15,50 @@
 [ext_resource path="res://surveyscans/DukeStResurvey-drawnup-p3.jpg" type="Texture" id=13]
 [ext_resource path="res://gui_panel_3d.tscn" type="PackedScene" id=14]
 [ext_resource path="res://gui_panel_3d.gd" type="Script" id=15]
+[ext_resource path="res://addons/godot-xr-tools/materials/pointer.tres" type="Material" id=16]
+[ext_resource path="res://Centreline.gd" type="Script" id=17]
 
 [sub_resource type="CapsuleShape" id=9]
 radius = 0.3
 height = 1.2
 
+[sub_resource type="CubeMesh" id=10]
+resource_local_to_scene = true
+material = ExtResource( 16 )
+size = Vector3( 0.002, 0.002, 10 )
+subdivide_depth = 20
+
+[sub_resource type="SpatialMaterial" id=2]
+albedo_color = Color( 0.984314, 0.0705882, 0.0705882, 1 )
+metallic = 0.46
+roughness = 0.28
+
+[sub_resource type="SphereMesh" id=3]
+material = SubResource( 2 )
+radius = 0.05
+height = 0.1
+radial_segments = 8
+rings = 4
+
+[sub_resource type="SpatialMaterial" id=12]
+albedo_color = Color( 1, 0.439216, 0.439216, 1 )
+
+[sub_resource type="CylinderMesh" id=13]
+material = SubResource( 12 )
+top_radius = 0.001
+bottom_radius = 0.02
+height = 0.2
+radial_segments = 6
+rings = 1
+
 [sub_resource type="SpatialMaterial" id=1]
 params_cull_mode = 2
 albedo_color = Color( 0.972549, 0.278431, 0.0392157, 1 )
 
-[sub_resource type="SpatialMaterial" id=3]
+[sub_resource type="SpatialMaterial" id=11]
 
 [sub_resource type="PlaneMesh" id=4]
-material = SubResource( 3 )
+material = SubResource( 11 )
 size = Vector2( 4, 2 )
 
 [sub_resource type="SpatialMaterial" id=5]
@@ -60,6 +91,10 @@ surfaces/0 = {
 }
 
 [sub_resource type="ConcavePolygonShape" id=8]
+
+[sub_resource type="SpatialMaterial" id=14]
+params_cull_mode = 2
+albedo_color = Color( 0.87451, 0.964706, 0.247059, 1 )
 
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
@@ -99,7 +134,33 @@ controller_id = 2
 
 [node name="CSGMesh_righthand" parent="ARVROrigin/ARVRController_Right" instance=ExtResource( 6 )]
 
-[node name="pointersystem" parent="ARVROrigin/ARVRController_Right" instance=ExtResource( 5 )]
+[node name="pointersystem" type="Spatial" parent="ARVROrigin/ARVRController_Right"]
+transform = Transform( 1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, 0, 0, 0 )
+script = ExtResource( 5 )
+distance = 50
+collision_mask = 14
+
+[node name="Laser" type="MeshInstance" parent="ARVROrigin/ARVRController_Right/pointersystem"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.05, -5 )
+cast_shadow = 0
+mesh = SubResource( 10 )
+material/0 = null
+
+[node name="RayCast" type="RayCast" parent="ARVROrigin/ARVRController_Right/pointersystem/Laser"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.23517e-08, 5 )
+enabled = true
+cast_to = Vector3( 0, 0, -10 )
+collision_mask = 24
+
+[node name="LaserSpot" type="MeshInstance" parent="ARVROrigin/ARVRController_Right/pointersystem"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -4.96626, 4.96626 )
+mesh = SubResource( 3 )
+material/0 = null
+
+[node name="MeshInstance" type="MeshInstance" parent="ARVROrigin/ARVRController_Right/pointersystem/LaserSpot"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0 )
+mesh = SubResource( 13 )
+material/0 = null
 
 [node name="drawnfloor" parent="." instance=ExtResource( 3 )]
 collision_layer = 26
@@ -139,6 +200,14 @@ material/0 = null
 
 [node name="CollisionShape" type="CollisionShape" parent="SketchSystem/WorkingShell"]
 shape = SubResource( 8 )
+
+[node name="Centreline" type="Spatial" parent="SketchSystem"]
+script = ExtResource( 17 )
+
+[node name="CentrelineNodes" type="Spatial" parent="SketchSystem/Centreline"]
+
+[node name="CentrelineLegs" type="MeshInstance" parent="SketchSystem/Centreline"]
+material_override = SubResource( 14 )
 
 [node name="dukest1resurvey2009" parent="." instance=ExtResource( 11 )]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 2.76087, 14.7341, -10.6518 )

@@ -1,7 +1,9 @@
 extends StaticBody
 
 var i   # use for indexing the nodes on save
-var pathvectorseq = [ ]  # [ (arg, pathindex) ]for allocating the areas 
+
+# for cycling around each node anti-clockwise and using for generating the areas
+var pathvectorseq = [ ]  # [ (arg, pathindex) ]
 
 func _ready():
 	pass

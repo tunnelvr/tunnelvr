@@ -6,19 +6,17 @@ var arvr_quest = null;
 # Notes: we have used Function_Direct_movement.drag_factor == 0 to disable velocity and gravity
 
 # Stuff to do:
-# * Ray to have up arrow so twist option possible
-# * Separate OneTunnel class with all the geometry that drives the sketch system
 # * import centreline with LRUDs properly
-# * better select and shape colours
-# * Fall upward to celing when not on above the cave
+# * Separate OneTunnel class with all the geometry that drives the sketch system
+# * Fall upward to ceiling when not on above the cave
 # * Special rods connecting centreline nodes to the sketch below
 # * active 2 node rods to lock the sketch
-# * move sketch up and down
+# * move drawn sketch up and down when pull to ceiling and it's no longer floor
 # * each sketch node retains the UV point on the drawing at time it was made
 # * Each node finds its normal plane and resolves lines around it
 # * nodes have push-pull or cross-section plane
 # * Line sections and triangle areas can be split
-# * floor and wall textures
+# * floor and wall textures programmable
 # * Boulders and gravel and particles
 
 var perform_runtime_config = true

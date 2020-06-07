@@ -60,7 +60,7 @@ func _ready():
 	get_parent().connect("button_release", self, "_on_button_release")
 	print("LaserSquare ", LaserSquare)
 	print("LaserSpot ", LaserSpot)
-	pointinghighlightmaterial.albedo_color = Color(0.92, 0.49, 0.13, 1.0)
+	pointinghighlightmaterial.albedo_color = Color(0.99, 0.20, 0.20, 1.0)
 	pointinghighlightmaterial.flags_no_depth_test = true
 	selectedhighlightmaterial.albedo_color = Color(0.92, 0.99, 0.13, 1.0)
 	selectedpointerhighlightmaterial.albedo_color = Color(0.82, 0.99, 0.93, 1.0)
@@ -109,6 +109,7 @@ func _on_button_pressed(p_button):
 		guipanel3d.togglevisibility(controller.global_transform)
 			
 	if p_button == Buttons.VR_TRIGGER and is_instance_valid(pointertarget):
+		print("clclc ", pointertarget.get_filename(), pointertarget.get_parent())
 		if pointertarget.has_method("jump_up"):
 			pointertarget.jump_up()
 			
@@ -126,8 +127,9 @@ func _on_button_pressed(p_button):
 			else:
 				pointertarget = sketchsystem.newonepathnode(pointertargetpoint)
 				if is_instance_valid(selectedtarget) and selectedtarget.has_method("set_materialoverride"):
-					pointertarget.scale.y = selectedtarget.scale.y
-					sketchsystem.applyonepath(selectedtarget, pointertarget)
+					if selectedtarget.get_parent() == sketchsystem.get_node("OnePathNodes"):
+						pointertarget.scale.y = selectedtarget.scale.y
+						sketchsystem.applyonepath(selectedtarget, pointertarget)
 					selectedtarget.set_materialoverride(null)
 				if controller.is_button_pressed(Buttons.VR_GRIP):
 					selectedtarget = null
@@ -138,7 +140,8 @@ func _on_button_pressed(p_button):
 		# clear selected target by selecting again
 		elif pointertarget == selectedtarget:
 			if controller.is_button_pressed(Buttons.VR_GRIP):
-				sketchsystem.removeonepathnode(selectedtarget)
+				if selectedtarget == sketchsystem.get_node("OnePathNodes"):
+					sketchsystem.removeonepathnode(selectedtarget)
 				gripbuttonpressused = true
 			else:
 				selectedtarget.set_materialoverride(pointinghighlightmaterial)
@@ -148,12 +151,13 @@ func _on_button_pressed(p_button):
 		else:
 			if is_instance_valid(selectedtarget) and selectedtarget.has_method("set_materialoverride"):
 				selectedtarget.set_materialoverride(null)
-				sketchsystem.applyonepath(selectedtarget, pointertarget)
+				if pointertarget.get_parent() == sketchsystem.get_node("OnePathNodes"):
+					sketchsystem.applyonepath(selectedtarget, pointertarget)
 			selectedtarget = pointertarget
 			selectedtarget.set_materialoverride(selectedpointerhighlightmaterial)
 				
 	# change height of pointer target
-	if p_button == Buttons.VR_PAD and is_instance_valid(pointertarget):
+	if p_button == Buttons.VR_PAD and is_instance_valid(pointertarget) and pointertarget.get_class() == "OnePathNode":
 		var left_right = controller.get_joystick_axis(0)
 		var up_down = controller.get_joystick_axis(1)
 		if abs(up_down) < 0.5 and abs(left_right) > 0.1:
