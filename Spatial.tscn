@@ -10,7 +10,6 @@
 [ext_resource path="res://MarkerNode.tscn" type="PackedScene" id=8]
 [ext_resource path="res://PulledBody.tscn" type="PackedScene" id=9]
 [ext_resource path="res://SketchSystem.gd" type="Script" id=10]
-[ext_resource path="res://surveyscans/dukest1resurvey2009.tscn" type="PackedScene" id=11]
 [ext_resource path="res://LaserSquare.gd" type="Script" id=12]
 [ext_resource path="res://surveyscans/DukeStResurvey-drawnup-p3.jpg" type="Texture" id=13]
 [ext_resource path="res://gui_panel_3d.tscn" type="PackedScene" id=14]
@@ -56,12 +55,14 @@ params_cull_mode = 2
 albedo_color = Color( 0.972549, 0.278431, 0.0392157, 1 )
 
 [sub_resource type="SpatialMaterial" id=11]
+params_billboard_mode = 1
 
 [sub_resource type="PlaneMesh" id=4]
 material = SubResource( 11 )
 size = Vector2( 4, 2 )
 
 [sub_resource type="SpatialMaterial" id=5]
+params_billboard_mode = 1
 albedo_color = Color( 0.490196, 0.960784, 0.219608, 1 )
 albedo_texture = ExtResource( 13 )
 uv1_scale = Vector3( 2, 2, 0.12 )
@@ -95,6 +96,12 @@ surfaces/0 = {
 [sub_resource type="SpatialMaterial" id=14]
 params_cull_mode = 2
 albedo_color = Color( 0.87451, 0.964706, 0.247059, 1 )
+
+[sub_resource type="SpatialMaterial" id=15]
+flags_transparent = true
+flags_do_not_receive_shadows = true
+params_cull_mode = 2
+albedo_color = Color( 0.321569, 0.988235, 0.27451, 0.329412 )
 
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
@@ -209,8 +216,8 @@ script = ExtResource( 17 )
 [node name="CentrelineLegs" type="MeshInstance" parent="SketchSystem/Centreline"]
 material_override = SubResource( 14 )
 
-[node name="dukest1resurvey2009" parent="." instance=ExtResource( 11 )]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 2.76087, 14.7341, -10.6518 )
+[node name="CentrelineCrossSections" type="MeshInstance" parent="SketchSystem/Centreline"]
+material_override = SubResource( 15 )
 
 [node name="GUIPanel3D" parent="." instance=ExtResource( 14 )]
 transform = Transform( 0.512717, 0, -0.858558, 0, 1, 0, 0.858558, 0, 0.512717, 2.5832, 0.213841, -4.95236 )

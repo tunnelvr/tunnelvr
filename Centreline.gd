@@ -46,6 +46,33 @@ func Loadcentrelinefile(fname):
 	$CentrelineLegs.mesh = surfaceTool.commit()
 	print("udddddsus ", len($CentrelineLegs.mesh.get_faces()), " ", len($CentrelineLegs.mesh.get_faces())) #surfaceTool.generate_normals()
 
+	# create all the centreline joins
+	var xsectgps = centrelinedata.xsectgps
+	var surfaceToolXS = SurfaceTool.new()
+	surfaceToolXS.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for xsectgp in xsectgps:
+		var xsectindexes = xsectgp.xsectindexes
+		var xsectrightvecs = xsectgp.xsectrightvecs
+		var xsectlruds = xsectgp.xsectlruds
+		for i in range(len(xsectindexes)):
+			var p = stationpoints[xsectindexes[i]]
+			var vright = Vector3(xsectrightvecs[i*2], 0, xsectrightvecs[i*2+1])
+			var vup = Vector3(0, 1, 0)
+			var pRU = p + vright*xsectlruds[i*4 + 1] + vup*xsectlruds[i*4 + 2]
+			var pRD = p + vright*xsectlruds[i*4 + 1] - vup*xsectlruds[i*4 + 3]
+			var pLU = p - vright*xsectlruds[i*4] + vup*xsectlruds[i*4 + 2]
+			var pLD = p - vright*xsectlruds[i*4] - vup*xsectlruds[i*4 + 3]
+			surfaceToolXS.add_vertex(pLD)
+			surfaceToolXS.add_vertex(pLU)
+			surfaceToolXS.add_vertex(pRD)
+			surfaceToolXS.add_vertex(pRD)
+			surfaceToolXS.add_vertex(pLU)
+			surfaceToolXS.add_vertex(pRU)
+	surfaceToolXS.generate_normals()
+	$CentrelineCrossSections.mesh = surfaceToolXS.commit()
+	print("udddddsusXC ", len($CentrelineCrossSections.mesh.get_faces()), " ", len($CentrelineCrossSections.mesh.get_faces())) #surfaceTool.generate_normals()
+
+
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	Loadcentrelinefile("res://surveyscans/dukest1resurvey2009.json")

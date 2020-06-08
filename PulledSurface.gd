@@ -11,9 +11,7 @@ onready var meshInstance = self
 var angle = 0
 
 func _ready():
-	var material = SpatialMaterial.new()
-	material.albedo_color = Color(1.0, 0.0, 0.0, 1.0)
-	createMesh(5, material)
+	createMesh(5)
 
 var vpoints = [ ]
 func newmeshpoint(v):
@@ -38,7 +36,7 @@ func newmeshpoint(v):
 		print("sssss", get_node("../CollisionShape").get_shape())
 		get_node("../CollisionShape").set_shape(col_shape)
 
-func createMesh(size, material):
+func createMesh(size):
 	var surfaceTool = SurfaceTool.new()
 	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
 	

@@ -157,11 +157,11 @@ func _on_button_pressed(p_button):
 			selectedtarget.set_materialoverride(selectedpointerhighlightmaterial)
 				
 	# change height of pointer target
-	if p_button == Buttons.VR_PAD and is_instance_valid(pointertarget) and pointertarget.get_class() == "OnePathNode":
+	if p_button == Buttons.VR_PAD and is_instance_valid(pointertarget) and pointertarget.get_parent() == sketchsystem.get_node("OnePathNodes"):
 		var left_right = controller.get_joystick_axis(0)
 		var up_down = controller.get_joystick_axis(1)
 		if abs(up_down) < 0.5 and abs(left_right) > 0.1:
-			pointertarget.scale.y = max(0.1, pointertarget.scale.y + (1 if left_right > 0 else -1)*(1 if abs(left_right) < 0.8 else 0.1))
+			pointertarget.scale.y = max(0.1, pointertarget.scale.y + (1 if left_right > 0 else -1)*(1.0 if abs(left_right) < 0.8 else 0.1))
 
 	if p_button == Buttons.VR_GRIP:
 		gripbuttonpressused = false
@@ -172,7 +172,7 @@ func _on_button_release(p_button):
 		selectedtarget.set_materialoverride(pointinghighlightmaterial if selectedtarget == pointertarget else null)
 		selectedtarget = null
 
-func _process(delta):
+func _process(_delta):
 	if !is_inside_tree():
 		return
 	if $Laser/RayCast.is_colliding():

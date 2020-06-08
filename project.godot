@@ -19,6 +19,11 @@ config/name="digtunnel"
 run/main_scene="res://Spatial.tscn"
 config/icon="res://icon.png"
 
+[debug]
+
+gdscript/warnings/unused_argument=false
+gdscript/warnings/return_value_discarded=false
+
 [gdnative]
 
 singletons=[ "res://addons/godot-openvr/godot_openvr.gdnlib", "res://addons/godot_ovrmobile/godot_ovrmobile.gdnlib" ]

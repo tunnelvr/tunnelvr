@@ -16,9 +16,15 @@ func _on_buttonsave_pressed():
 	get_node("../SketchSystem").savesketchsystem()
 	$Viewport/GUI/Panel/Label.text = "Sketch Saved"
 
+func _on_buttonshowxs_toggled(button_pressed):
+	get_node("../SketchSystem/Centreline/CentrelineCrossSections").visible = button_pressed
+	$Viewport/GUI/Panel/Label.text = "XS shown" if button_pressed else "XS hidden"
+	
 func _ready():
 	$Viewport/GUI/Panel/ButtonLoad.connect("pressed", self, "_on_buttonload_pressed")
 	$Viewport/GUI/Panel/ButtonSave.connect("pressed", self, "_on_buttonsave_pressed")
+	$Viewport/GUI/Panel/ButtonShowXS.connect("toggled", self, "_on_buttonshowxs_toggled")
+
 
 func togglevisibility(controller_global_transform):
 	if not visible:
