@@ -8,7 +8,10 @@ var pathvectorseq = [ ]  # [ (arg, pathindex) ]
 func _ready():
 	pass
 
-func set_materialoverride(material):
+func getnodetype():
+	return "ntPath"
+
+func set_materialoverride(material, bselected_type):
 	$CollisionShape/MeshInstance.material_override = material
 
 	

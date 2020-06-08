@@ -6,7 +6,6 @@ var arvr_quest = null;
 # Notes: we have used Function_Direct_movement.drag_factor == 0 to disable velocity and gravity
 
 # Stuff to do:
-# * Make taller thing broken
 # * OnePathNode to record floorname.png and UV position 
 # * popup 2D viewport with node name when selected
 # * anchor node type (like normal node) which can be drawn and moved

@@ -79,14 +79,14 @@ func onpointing(newpointertarget, newpointertargetpoint):
 			guipanel3d.guipanelreleasemouse()
 		
 		if is_instance_valid(pointertarget) and pointertarget.has_method("set_materialoverride"):
-			pointertarget.set_materialoverride(selectedhighlightmaterial if pointertarget == selectedtarget else null)
+			pointertarget.set_materialoverride(selectedhighlightmaterial if pointertarget == selectedtarget else null, pointertarget == selectedtarget)
 			if pointertarget.scale.y != pointertargetscaley:
 				sketchsystem.updateonepaths()
 
 		pointertarget = newpointertarget
 		if is_instance_valid(pointertarget):
 			if pointertarget.has_method("set_materialoverride"):
-				pointertarget.set_materialoverride(selectedpointerhighlightmaterial if pointertarget == selectedtarget else pointinghighlightmaterial)
+				pointertarget.set_materialoverride(selectedpointerhighlightmaterial if pointertarget == selectedtarget else pointinghighlightmaterial, pointertarget == selectedtarget)
 				LaserSpot.visible = false
 				pointertargetscaley = pointertarget.scale.y
 			elif pointertarget == guipanel3d:
@@ -114,50 +114,54 @@ func _on_button_pressed(p_button):
 			pointertarget.jump_up()
 			
 		elif pointertarget == guipanel3d:
-			pass
+			pass  #this is elsewhere processed
 
 		elif pointertarget == drawnfloor:
 			# drag node to new position on floor
 			if controller.is_button_pressed(Buttons.VR_GRIP) and is_instance_valid(selectedtarget) and selectedtarget.has_method("set_materialoverride"):
-				selectedtarget.global_transform.origin = pointertargetpoint
-				sketchsystem.updateonepaths()
+				if pointertarget.getnodetype() == "ntPath":
+					selectedtarget.global_transform.origin = pointertargetpoint
+					sketchsystem.updateonepaths()
 				gripbuttonpressused = true
 				
 			# new node on floor (connect from selected target)
 			else:
 				pointertarget = sketchsystem.newonepathnode(pointertargetpoint)
 				if is_instance_valid(selectedtarget) and selectedtarget.has_method("set_materialoverride"):
-					if selectedtarget.get_parent() == sketchsystem.get_node("OnePathNodes"):
+					if selectedtarget.getnodetype() == "ntPath":
 						pointertarget.scale.y = selectedtarget.scale.y
 						sketchsystem.applyonepath(selectedtarget, pointertarget)
-					selectedtarget.set_materialoverride(null)
+					selectedtarget.set_materialoverride(null, true)
 				if controller.is_button_pressed(Buttons.VR_GRIP):
 					selectedtarget = null
 				else:
 					selectedtarget = pointertarget
-					selectedtarget.set_materialoverride(selectedpointerhighlightmaterial)
+					selectedtarget.set_materialoverride(selectedpointerhighlightmaterial, true)
 					
 		# clear selected target by selecting again
 		elif pointertarget == selectedtarget:
 			if controller.is_button_pressed(Buttons.VR_GRIP):
-				if selectedtarget == sketchsystem.get_node("OnePathNodes"):
+				if selectedtarget.getnodetype() == "ntPath":
 					sketchsystem.removeonepathnode(selectedtarget)
 				gripbuttonpressused = true
 			else:
-				selectedtarget.set_materialoverride(pointinghighlightmaterial)
+				selectedtarget.set_materialoverride(pointinghighlightmaterial, true)
+				if selectedtarget.getnodetype() == "ntStation":   # slight flaw in deselection where it can't tell reverting to highlight from selected
+					var textpanel = sketchsystem.get_node("Centreline/TextPanel")
+					textpanel.visible = false
 			selectedtarget = null
 			
 		# click on new selected target (connect from previous selected target)
 		else:
 			if is_instance_valid(selectedtarget) and selectedtarget.has_method("set_materialoverride"):
-				selectedtarget.set_materialoverride(null)
-				if pointertarget.get_parent() == sketchsystem.get_node("OnePathNodes"):
+				selectedtarget.set_materialoverride(null, true)
+				if selectedtarget.getnodetype() == "ntPath" and pointertarget.getnodetype() == "ntPath":
 					sketchsystem.applyonepath(selectedtarget, pointertarget)
 			selectedtarget = pointertarget
-			selectedtarget.set_materialoverride(selectedpointerhighlightmaterial)
+			selectedtarget.set_materialoverride(selectedpointerhighlightmaterial, true)
 				
 	# change height of pointer target
-	if p_button == Buttons.VR_PAD and is_instance_valid(pointertarget) and pointertarget.get_parent() == sketchsystem.get_node("OnePathNodes"):
+	if p_button == Buttons.VR_PAD and is_instance_valid(pointertarget) and selectedtarget.has_method("set_materialoverride") and pointertarget.has_method("getnodetype") and pointertarget.getnodetype() == "ntPath":
 		var left_right = controller.get_joystick_axis(0)
 		var up_down = controller.get_joystick_axis(1)
 		if abs(up_down) < 0.5 and abs(left_right) > 0.1:
@@ -167,9 +171,9 @@ func _on_button_pressed(p_button):
 		gripbuttonpressused = false
 
 func _on_button_release(p_button):
-	# clear selection by squeezing and releasing grip
+	# clear selection by squeezing and then releasing grip without doing anything in between
 	if p_button == Buttons.VR_GRIP and not gripbuttonpressused and is_instance_valid(selectedtarget) and selectedtarget.has_method("set_materialoverride"):
-		selectedtarget.set_materialoverride(pointinghighlightmaterial if selectedtarget == pointertarget else null)
+		selectedtarget.set_materialoverride(pointinghighlightmaterial if selectedtarget == pointertarget else null, selectedtarget == pointertarget)
 		selectedtarget = null
 
 func _process(_delta):
