@@ -44,7 +44,7 @@ func guipanelsendmousemotion(collision_point, controller_global_transform, contr
 	if collider_transform.xform_inv(controller_global_transform.origin).z < 0:
 		return # Don't allow pressing if we're behind the GUI.
 	
-	# Convert the collision to a relative position. Expects the 2nd child to be a CollisionShape.
+	# Convert the collision to a relative position. 
 	var shape_size = collisionshape.shape.extents * 2
 	var collider_scale = collider_transform.basis.get_scale()
 	var local_point = collider_transform.xform_inv(collision_point)

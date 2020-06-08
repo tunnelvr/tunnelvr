@@ -13,10 +13,11 @@ var viewport_point = null
 
 enum Buttons { VR_TRIGGER = 15, VR_PAD=14, VR_BUTTON_BY=1, VR_GRIP=2 }
 onready var controller = get_parent()
-export var distance = 10
+var distance = 50
 
 # Need to replace this with proper solution once support for layer selection has been added 
-export (int, FLAGS, "Layer 1", "Layer 2", "Layer 3", "Layer 4", "Layer 5", "Layer 6", "Layer 7", "Layer 8", "Layer 9", "Layer 10", "Layer 11", "Layer 12", "Layer 13", "Layer 14", "Layer 15", "Layer 16", "Layer 17", "Layer 18", "Layer 19", "Layer 20") var collision_mask = 15 
+#export (int, FLAGS, "Layer 1", "Layer 2", "Layer 3", "Layer 4", "Layer 5", "Layer 6", "Layer 7", "Layer 8", "Layer 9", "Layer 10", "Layer 11", "Layer 12", "Layer 13", "Layer  14", "Layer 15", "Layer 16", "Layer 17", "Layer 18", "Layer 19", "Layer 20") 
+var collision_mask = 14 
 
 const OnePathNode = preload("res://OnePathNode.tscn")
 
@@ -45,15 +46,6 @@ func set_collision_mask(p_new_mask):
 	if $Laser:
 		$Laser/RayCast.collision_mask = collision_mask
 
-func set_distance(p_new_value):
-	distance = p_new_value
-	print("distance", distance, p_new_value)
-	print(LaserSquare, "sss", LaserSpot)
-	if $Laser:
-		$Laser.mesh.size.z = distance
-		$Laser.translation.z = distance * -0.5
-		$Laser/RayCast.translation.z = distance * 0.5
-		$Laser/RayCast.cast_to.z = -distance
 
 func _ready():
 	get_parent().connect("button_pressed", self, "_on_button_pressed")
@@ -71,7 +63,21 @@ func _ready():
 	
 	# init our state
 	print("in the pointer onready")
-	set_distance(distance)
+	$Laser.mesh.size.z = distance
+	$Laser.translation.z = distance * -0.5
+	$Laser/RayCast.translation.z = distance * 0.5
+	$Laser/RayCast.cast_to.z = -distance
+
+
+
+# Not finished.  To replace the current forced division calculation
+func getflooruv(p):
+	var collider_scale = drawnfloor.basis.get_scale()
+	var local_point = drawnfloor.xform_inv(p)
+	local_point /= (collider_scale * collider_scale)
+	local_point += Vector3(0.5, -0.5, 0) # X is about 0 to 1, Y is about 0 to -1.
+	return local_point
+
 
 func onpointing(newpointertarget, newpointertargetpoint):
 	if newpointertarget != pointertarget:

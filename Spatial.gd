@@ -7,13 +7,15 @@ var arvr_quest = null;
 
 # Stuff to do:
 # * OnePathNode to record floorname.png and UV position 
-# * popup 2D viewport with node name when selected
+#    var drawingname = ""
+#    var uvpoint = null   # Vector2 of in the material
+# * use the drawingname and UV point to set the texture in the triangles
+
 # * anchor node type (like normal node) which can be drawn and moved
 #      and is connected to the centreline with another strip and gets UV of drawing
 # * two activated anchor nodes slide everything around relative to them
 # * Fall upward to ceiling when not on above the cave
 # * anchor nodes capable of pulling plane up and down
-# * import centreline with LRUDs properly
 # * Separate OneTunnel class with all the geometry that drives the sketch system
 # * each sketch node retains the UV point on the drawing at time it was made
 # * Each node finds its normal plane and resolves lines around it

@@ -19,7 +19,7 @@ albedo_texture = SubResource( 3 )
 
 [node name="TextPanel" type="StaticBody"]
 input_ray_pickable = false
-collision_layer = 8
+collision_layer = 0
 collision_mask = 0
 
 [node name="Viewport" type="Viewport" parent="."]
