@@ -70,13 +70,19 @@ func _ready():
 
 
 
-# Not finished.  To replace the current forced division calculation
-func getflooruv(p):
-	var collider_scale = drawnfloor.basis.get_scale()
-	var local_point = drawnfloor.xform_inv(p)
-	local_point /= (collider_scale * collider_scale)
-	local_point += Vector3(0.5, -0.5, 0) # X is about 0 to 1, Y is about 0 to -1.
-	return local_point
+func setopnpos(opn, p):
+	opn.global_transform.origin = p
+	var floorsize = drawnfloor.get_node("MeshInstance").mesh.size
+	var floorpoint = drawnfloor.global_transform.xform_inv(p)
+	opn.uvpoint = Vector2(floorpoint.x/floorsize.x/drawnfloor.scale.x/drawnfloor.scale.x + 0.5, floorpoint.z/floorsize.y/drawnfloor.scale.z/drawnfloor.scale.z + 0.5)
+	opn.drawingname = drawnfloor.get_node("MeshInstance").mesh.material.albedo_texture.resource_path
+	#var collider_scale = drawnfloor.basis.get_scale()
+	#var local_point = drawnfloor.xform_inv(p)
+	#local_point /= (collider_scale * collider_scale)
+	#local_point += Vector3(0.5, -0.5, 0) # X is about 0 to 1, Y is about 0 to -1.
+	#return local_point
+
+# (6.983112, 0.2, -3.402152)
 
 
 func onpointing(newpointertarget, newpointertargetpoint):
@@ -125,14 +131,15 @@ func _on_button_pressed(p_button):
 		elif pointertarget == drawnfloor:
 			# drag node to new position on floor
 			if controller.is_button_pressed(Buttons.VR_GRIP) and is_instance_valid(selectedtarget) and selectedtarget.has_method("set_materialoverride"):
-				if pointertarget.getnodetype() == "ntPath":
-					selectedtarget.global_transform.origin = pointertargetpoint
+				if selectedtarget.getnodetype() == "ntPath":
+					setopnpos(selectedtarget, pointertargetpoint)
 					sketchsystem.updateonepaths()
 				gripbuttonpressused = true
 				
 			# new node on floor (connect from selected target)
 			else:
-				pointertarget = sketchsystem.newonepathnode(pointertargetpoint)
+				pointertarget = sketchsystem.newonepathnode()
+				setopnpos(pointertarget, pointertargetpoint)
 				if is_instance_valid(selectedtarget) and selectedtarget.has_method("set_materialoverride"):
 					if selectedtarget.getnodetype() == "ntPath":
 						pointertarget.scale.y = selectedtarget.scale.y
@@ -167,7 +174,7 @@ func _on_button_pressed(p_button):
 			selectedtarget.set_materialoverride(selectedpointerhighlightmaterial, true)
 				
 	# change height of pointer target
-	if p_button == Buttons.VR_PAD and is_instance_valid(pointertarget) and selectedtarget.has_method("set_materialoverride") and pointertarget.has_method("getnodetype") and pointertarget.getnodetype() == "ntPath":
+	if p_button == Buttons.VR_PAD and is_instance_valid(pointertarget) and pointertarget.has_method("set_materialoverride") and pointertarget.has_method("getnodetype") and pointertarget.getnodetype() == "ntPath":
 		var left_right = controller.get_joystick_axis(0)
 		var up_down = controller.get_joystick_axis(1)
 		if abs(up_down) < 0.5 and abs(left_right) > 0.1:

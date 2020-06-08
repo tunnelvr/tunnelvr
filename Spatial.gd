@@ -6,11 +6,8 @@ var arvr_quest = null;
 # Notes: we have used Function_Direct_movement.drag_factor == 0 to disable velocity and gravity
 
 # Stuff to do:
-# * OnePathNode to record floorname.png and UV position 
-#    var drawingname = ""
-#    var uvpoint = null   # Vector2 of in the material
-# * use the drawingname and UV point to set the texture in the triangles
-
+# * check ray intersect plane is in the plane and report if not!
+# * check if this function handles rotated and scaled bitmap (which should be xy scaled by aspect ratio)
 # * anchor node type (like normal node) which can be drawn and moved
 #      and is connected to the centreline with another strip and gets UV of drawing
 # * two activated anchor nodes slide everything around relative to them

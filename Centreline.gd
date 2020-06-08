@@ -17,7 +17,7 @@ func Loadcentrelinefile(fname):
 	for i in range(len(stationpointsnames)):
 		var csn = CentrelineStationNode.instance()
 		centrelinegnodes.add_child(csn)
-		var stationpoint = Vector3(stationpointscoords[i*3], 8+stationpointscoords[i*3+2], stationpointscoords[i*3+1])
+		var stationpoint = Vector3(stationpointscoords[i*3], 8+stationpointscoords[i*3+2], -stationpointscoords[i*3+1])
 		stationpoints.append(stationpoint)
 		csn.global_transform.origin = stationpoint
 		csn.stationname = stationpointsnames[i]
@@ -32,6 +32,8 @@ func Loadcentrelinefile(fname):
 		var p0 = stationpoints[legsconnections[i*2]]
 		var p1 = stationpoints[legsconnections[i*2+1]]
 		var perp = linewidth*Vector2(-(p1.z - p0.z), p1.x - p0.x).normalized()
+		if perp == Vector2(0, 0):
+			perp = Vector2(0, linewidth)
 		var p0left = p0 - Vector3(perp.x, 0, perp.y)
 		var p0right = p0 + Vector3(perp.x, 0, perp.y)
 		var p1left = p1 - Vector3(perp.x, 0, perp.y)
@@ -56,7 +58,7 @@ func Loadcentrelinefile(fname):
 		var xsectlruds = xsectgp.xsectlruds
 		for i in range(len(xsectindexes)):
 			var p = stationpoints[xsectindexes[i]]
-			var vright = Vector3(xsectrightvecs[i*2], 0, xsectrightvecs[i*2+1])
+			var vright = Vector3(xsectrightvecs[i*2], 0, -xsectrightvecs[i*2+1])
 			var vup = Vector3(0, 1, 0)
 			var pRU = p + vright*xsectlruds[i*4 + 1] + vup*xsectlruds[i*4 + 2]
 			var pRD = p + vright*xsectlruds[i*4 + 1] - vup*xsectlruds[i*4 + 3]

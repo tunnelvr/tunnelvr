@@ -181,6 +181,7 @@ mesh = SubResource( 13 )
 material/0 = null
 
 [node name="drawnfloor" parent="." instance=ExtResource( 3 )]
+transform = Transform( 0.0822341, 0, -0.896952, 0, 1, 0, 0.996613, 0, 0.0740107, 1.0809, 0, 0 )
 collision_layer = 26
 
 [node name="DirectionalLight" type="DirectionalLight" parent="."]

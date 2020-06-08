@@ -8,8 +8,8 @@ albedo_texture = ExtResource( 1 )
 [sub_resource type="PlaneMesh" id=2]
 material = SubResource( 1 )
 size = Vector2( 128, 128 )
-subdivide_width = 32
-subdivide_depth = 32
+subdivide_width = 4
+subdivide_depth = 4
 
 [sub_resource type="BoxShape" id=3]
 extents = Vector3( 64, 1, 64 )

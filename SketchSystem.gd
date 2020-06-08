@@ -11,11 +11,10 @@ const linewidth = 0.05
 
 var onepathpairs = [ ]  # pairs of onepath nodes
 
-func newonepathnode(point):
+func newonepathnode():
 	var opn = OnePathNode.instance()
 	$OnePathNodes.add_child(opn)
 	opn.scale.y = 0.2
-	opn.global_transform.origin = point
 	return opn
 
 func removeonepathnode(opn):
@@ -95,7 +94,8 @@ func updateworkingshell():
 		polys.append([ ])
 		while (opvisits2[ne*2 + (0 if onepathpairs[ne][0] == np else 1)]) == 0:
 			opvisits2[ne*2 + (0 if onepathpairs[ne][0] == np else 1)] = len(polys)
-			polys[-1].append(Vector3(np.global_transform.origin.x, np.scale.y, np.global_transform.origin.z))
+			#polys[-1].append(Vector3(np.global_transform.origin.x, np.scale.y, np.global_transform.origin.z))
+			polys[-1].append(np)
 			np = onepathpairs[ne][1  if onepathpairs[ne][0] == np  else 0]
 			for j in range(len(np.pathvectorseq)):
 				if np.pathvectorseq[j][1] == ne:
@@ -110,12 +110,14 @@ func updateworkingshell():
 	for poly in polys:
 		var pv = PoolVector2Array()
 		for p in poly:
-			pv.append(Vector2(p.x, p.z))
+			pv.append(Vector2(p.global_transform.origin.x, p.global_transform.origin.z))
 		var pi = Geometry.triangulate_polygon(pv)
 		print("piiii", pi)
 		for u in pi:
-			surfaceTool.add_uv(Vector2(poly[u].x/floorsize.x + 0.5, poly[u].z/floorsize.y + 0.5))
-			surfaceTool.add_vertex(poly[u])
+			surfaceTool.add_uv(poly[u].uvpoint)
+			#surfaceTool.add_uv(Vector2(poly[u].x/floorsize.x + 0.5, poly[u].z/floorsize.y + 0.5))
+			surfaceTool.add_vertex(Vector3(poly[u].global_transform.origin.x, poly[u].scale.y, poly[u].global_transform.origin.z))
+			#surfaceTool.add_vertex(poly[u])
 	surfaceTool.generate_normals()
 	$WorkingShell/MeshInstance.mesh = surfaceTool.commit()
 	#var col_shape = ConcavePolygonShape.new()
@@ -135,7 +137,7 @@ func savesketchsystem():
 	for i in range(len(onepathnodes)):
 		var opn = onepathnodes[i]
 		opn.i = i
-		save_dict["points"].append([opn.global_transform.origin.x, opn.scale.y, opn.global_transform.origin.z])
+		save_dict["points"].append([opn.global_transform.origin.x, opn.scale.y, opn.global_transform.origin.z, opn.drawingname, opn.uvpoint.x, opn.uvpoint.y])
 	for onepath in onepathpairs:
 		save_dict["paths"].append(onepath[0].i)
 		save_dict["paths"].append(onepath[1].i)
@@ -157,13 +159,14 @@ func loadsketchsystem():
 		print("llloading ", len(node_data["points"]), " ", len(node_data["paths"]))
 		var onepathnodes = get_node("OnePathNodes").get_children()
 		for i in range(len(node_data["points"])):
-			if i < len(onepathnodes):
-				onepathnodes[i].global_transform.origin.x = node_data["points"][i][0]
-				onepathnodes[i].scale.y = node_data["points"][i][1]
-				onepathnodes[i].global_transform.origin.z = node_data["points"][i][2]
-			else:
-				var opn = newonepathnode(Vector3(node_data["points"][i][0], 0.0, node_data["points"][i][2]))
-				opn.scale.y = node_data["points"][i][1]
+			var opn = (onepathnodes[i]  if i < len(onepathnodes)  else newonepathnode())
+			var ndpi = node_data["points"][i]
+			opn.global_transform.origin.x = ndpi[0]
+			opn.scale.y = ndpi[1]
+			opn.global_transform.origin.z = ndpi[2]
+			opn.drawingname = ndpi[3]
+			opn.uvpoint.x = ndpi[4]
+			opn.uvpoint.y = ndpi[5]
 		onepathnodes = get_node("OnePathNodes").get_children()
 		for i in range(len(node_data["points"]), len(onepathnodes)):
 			onepathnodes[i].queue_free()
