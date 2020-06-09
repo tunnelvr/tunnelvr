@@ -6,11 +6,10 @@ var arvr_quest = null;
 # Notes: we have used Function_Direct_movement.drag_factor == 0 to disable velocity and gravity
 
 # Stuff to do:
-# * check ray intersect plane is in the plane and report if not!
 # * anchor node type (like normal node) which can be drawn and moved
-# * move the textpanel work back out of the set_material function
-#      and is connected to the centreline with another strip and gets UV of drawing
 # * two activated anchor nodes slide everything around relative to them
+#      and is connected to the centreline with another strip and gets UV of drawing
+# * check ray intersect plane is in the plane and report if not!
 # * Fall upward to ceiling when not on above the cave
 # * anchor nodes capable of pulling plane up and down
 # * Separate OneTunnel class with all the geometry that drives the sketch system

@@ -13,7 +13,7 @@ func _ready():
 func getnodetype():
 	return "ntPath"
 
-func set_materialoverride(material, bselected_type):
+func set_materialoverride(material):
 	$CollisionShape/MeshInstance.material_override = material
 
 	

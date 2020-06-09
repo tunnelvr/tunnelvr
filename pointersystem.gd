@@ -46,6 +46,15 @@ func set_collision_mask(p_new_mask):
 	if $Laser:
 		$Laser/RayCast.collision_mask = collision_mask
 
+func settextpanel(ltext, pos):
+	var textpanel = sketchsystem.get_node("Centreline/TextPanel")
+	if ltext != null:
+		print("ttttextpanel ", textpanel)
+		textpanel.get_node("Viewport/Label").text = ltext
+		textpanel.global_transform.origin = pos + Vector3(0, 0.3, 0)
+		textpanel.visible = true
+	else:
+		textpanel.visible = false
 
 func _ready():
 	get_parent().connect("button_pressed", self, "_on_button_pressed")
@@ -91,14 +100,14 @@ func onpointing(newpointertarget, newpointertargetpoint):
 			guipanel3d.guipanelreleasemouse()
 		
 		if is_instance_valid(pointertarget) and pointertarget.has_method("set_materialoverride"):
-			pointertarget.set_materialoverride(selectedhighlightmaterial if pointertarget == selectedtarget else null, pointertarget == selectedtarget)
+			pointertarget.set_materialoverride(selectedhighlightmaterial if pointertarget == selectedtarget else null)
 			if pointertarget.scale.y != pointertargetscaley:
 				sketchsystem.updateonepaths()
 
 		pointertarget = newpointertarget
 		if is_instance_valid(pointertarget):
 			if pointertarget.has_method("set_materialoverride"):
-				pointertarget.set_materialoverride(selectedpointerhighlightmaterial if pointertarget == selectedtarget else pointinghighlightmaterial, pointertarget == selectedtarget)
+				pointertarget.set_materialoverride(selectedpointerhighlightmaterial if pointertarget == selectedtarget else pointinghighlightmaterial)
 				LaserSpot.visible = false
 				pointertargetscaley = pointertarget.scale.y
 			elif pointertarget == guipanel3d:
@@ -144,34 +153,39 @@ func _on_button_pressed(p_button):
 					if selectedtarget.getnodetype() == "ntPath":
 						pointertarget.scale.y = selectedtarget.scale.y
 						sketchsystem.applyonepath(selectedtarget, pointertarget)
-					selectedtarget.set_materialoverride(null, true)
+					selectedtarget.set_materialoverride(null)
+					if selectedtarget.getnodetype() == "ntStation":
+						settextpanel(null, null)
 				if controller.is_button_pressed(Buttons.VR_GRIP):
 					selectedtarget = null
 				else:
 					selectedtarget = pointertarget
-					selectedtarget.set_materialoverride(selectedpointerhighlightmaterial, true)
+					selectedtarget.set_materialoverride(selectedpointerhighlightmaterial)
 					
 		# clear selected target by selecting again
 		elif pointertarget == selectedtarget:
+			if selectedtarget.getnodetype() == "ntStation":
+				settextpanel(null, null)
+			selectedtarget.set_materialoverride(pointinghighlightmaterial)
 			if controller.is_button_pressed(Buttons.VR_GRIP):
 				if selectedtarget.getnodetype() == "ntPath":
 					sketchsystem.removeonepathnode(selectedtarget)
 				gripbuttonpressused = true
-			else:
-				selectedtarget.set_materialoverride(pointinghighlightmaterial, true)
-				if selectedtarget.getnodetype() == "ntStation":   # slight flaw in deselection where it can't tell reverting to highlight from selected
-					var textpanel = sketchsystem.get_node("Centreline/TextPanel")
-					textpanel.visible = false
 			selectedtarget = null
 			
 		# click on new selected target (connect from previous selected target)
 		else:
 			if is_instance_valid(selectedtarget) and selectedtarget.has_method("set_materialoverride"):
-				selectedtarget.set_materialoverride(null, true)
+				selectedtarget.set_materialoverride(null)
+				if selectedtarget.getnodetype() == "ntStation":
+					settextpanel(null, null)
 				if selectedtarget.getnodetype() == "ntPath" and pointertarget.getnodetype() == "ntPath":
 					sketchsystem.applyonepath(selectedtarget, pointertarget)
+
 			selectedtarget = pointertarget
-			selectedtarget.set_materialoverride(selectedpointerhighlightmaterial, true)
+			selectedtarget.set_materialoverride(selectedpointerhighlightmaterial)
+			if selectedtarget.getnodetype() == "ntStation":
+				settextpanel(selectedtarget.stationname, selectedtarget.global_transform.origin)
 				
 	# change height of pointer target
 	if p_button == Buttons.VR_PAD and is_instance_valid(pointertarget) and pointertarget.has_method("set_materialoverride") and pointertarget.has_method("getnodetype") and pointertarget.getnodetype() == "ntPath":
@@ -186,7 +200,7 @@ func _on_button_pressed(p_button):
 func _on_button_release(p_button):
 	# clear selection by squeezing and then releasing grip without doing anything in between
 	if p_button == Buttons.VR_GRIP and not gripbuttonpressused and is_instance_valid(selectedtarget) and selectedtarget.has_method("set_materialoverride"):
-		selectedtarget.set_materialoverride(pointinghighlightmaterial if selectedtarget == pointertarget else null, selectedtarget == pointertarget)
+		selectedtarget.set_materialoverride(pointinghighlightmaterial if selectedtarget == pointertarget else null)
 		selectedtarget = null
 
 func _process(_delta):
