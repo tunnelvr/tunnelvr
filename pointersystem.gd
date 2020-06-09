@@ -3,9 +3,10 @@ extends Spatial
 # this has a pointer sphere added JGT
 # (and a lot of other hacking)
 
-# variables set by the 
+# variables set by the Spatial.gd
 var drawnfloor = null
 var sketchsystem = null
+var centrelinesystem =null
 
 var guipanel3d = null
 var _is_activating_gui = false
@@ -49,7 +50,6 @@ func set_collision_mask(p_new_mask):
 func settextpanel(ltext, pos):
 	var textpanel = sketchsystem.get_node("Centreline/TextPanel")
 	if ltext != null:
-		print("ttttextpanel ", textpanel)
 		textpanel.get_node("Viewport/Label").text = ltext
 		textpanel.global_transform.origin = pos + Vector3(0, 0.3, 0)
 		textpanel.visible = true
@@ -77,22 +77,12 @@ func _ready():
 	$Laser/RayCast.translation.z = distance * 0.5
 	$Laser/RayCast.cast_to.z = -distance
 
-
-
 func setopnpos(opn, p):
 	opn.global_transform.origin = p
 	var floorsize = drawnfloor.get_node("MeshInstance").mesh.size
 	var floorpoint = drawnfloor.global_transform.xform_inv(p)
 	opn.uvpoint = Vector2(floorpoint.x/floorsize.x/drawnfloor.scale.x/drawnfloor.scale.x + 0.5, floorpoint.z/floorsize.y/drawnfloor.scale.z/drawnfloor.scale.z + 0.5)
 	opn.drawingname = drawnfloor.get_node("MeshInstance").mesh.material.albedo_texture.resource_path
-	#var collider_scale = drawnfloor.basis.get_scale()
-	#var local_point = drawnfloor.xform_inv(p)
-	#local_point /= (collider_scale * collider_scale)
-	#local_point += Vector3(0.5, -0.5, 0) # X is about 0 to 1, Y is about 0 to -1.
-	#return local_point
-
-# (6.983112, 0.2, -3.402152)
-
 
 func onpointing(newpointertarget, newpointertargetpoint):
 	if newpointertarget != pointertarget:
@@ -145,17 +135,22 @@ func _on_button_pressed(p_button):
 					sketchsystem.updateonepaths()
 				gripbuttonpressused = true
 				
-			# new node on floor (connect from selected target)
+			# new node on floor (what happens depends on what is already selected)
+			elif is_instance_valid(selectedtarget) and selectedtarget.getnodetype() == "ntStation":
+				pointertarget = centrelinesystem.newdrawnstationnode()
+				print("pointertargetpointertargetpointertarget ", pointertarget.getnodetype())
+				setopnpos(pointertarget, pointertargetpoint)
+				pointertarget.stationname = selectedtarget.stationname
+				selectedtarget.set_materialoverride(null)
+				selectedtarget = null
+				settextpanel(null, null)
 			else:
 				pointertarget = sketchsystem.newonepathnode()
 				setopnpos(pointertarget, pointertargetpoint)
-				if is_instance_valid(selectedtarget) and selectedtarget.has_method("set_materialoverride"):
-					if selectedtarget.getnodetype() == "ntPath":
-						pointertarget.scale.y = selectedtarget.scale.y
-						sketchsystem.applyonepath(selectedtarget, pointertarget)
+				if is_instance_valid(selectedtarget) and selectedtarget.getnodetype() == "ntPath":
+					pointertarget.scale.y = selectedtarget.scale.y
+					sketchsystem.applyonepath(selectedtarget, pointertarget)
 					selectedtarget.set_materialoverride(null)
-					if selectedtarget.getnodetype() == "ntStation":
-						settextpanel(null, null)
 				if controller.is_button_pressed(Buttons.VR_GRIP):
 					selectedtarget = null
 				else:

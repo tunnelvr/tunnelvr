@@ -60,6 +60,7 @@ func _ready():
 	# pass across object pointers to the pointer system
 	var pointer = $ARVROrigin/ARVRController_Right/pointersystem
 	pointer.sketchsystem = $SketchSystem
+	pointer.centrelinesystem = $SketchSystem/Centreline
 	pointer.drawnfloor = $drawnfloor
 	pointer.guipanel3d = $GUIPanel3D
 	pointer.guipanel3d.visible = false
