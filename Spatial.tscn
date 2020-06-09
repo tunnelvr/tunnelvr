@@ -203,7 +203,7 @@ material_override = SubResource( 7 )
 [node name="JumpingRigidBody" parent="SketchSystem" instance=ExtResource( 8 )]
 
 [node name="LaserSquare" type="MeshInstance" parent="SketchSystem"]
-transform = Transform( -0.772091, -0.0522553, 0.63336, -0.546921, 0.562194, -0.620335, -0.323656, -0.825352, -0.462645, -0.944971, 1.18811, 0.0964239 )
+transform = Transform( -0.592393, -0.783466, -0.187751, -0.546921, 0.562194, -0.620335, 0.591564, -0.264797, -0.761535, -0.944971, 1.18811, 0.0964239 )
 mesh = SubResource( 8 )
 material/0 = SubResource( 9 )
 script = ExtResource( 12 )
@@ -222,7 +222,7 @@ shape = SubResource( 12 )
 [node name="Centreline" type="Spatial" parent="SketchSystem"]
 script = ExtResource( 17 )
 
-[node name="CentrelineNodes" type="Spatial" parent="SketchSystem/Centreline"]
+[node name="StationNodes" type="Spatial" parent="SketchSystem/Centreline"]
 
 [node name="CentrelineLegs" type="MeshInstance" parent="SketchSystem/Centreline"]
 material_override = SubResource( 13 )
@@ -233,6 +233,8 @@ material_override = SubResource( 14 )
 [node name="TextPanel" parent="SketchSystem/Centreline" instance=ExtResource( 11 )]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 1.91816, 0.304006, -4.61659 )
 visible = false
+
+[node name="DrawnStationNodes" type="Spatial" parent="SketchSystem/Centreline"]
 
 [node name="GUIPanel3D" parent="." instance=ExtResource( 14 )]
 transform = Transform( 0.512717, 0, -0.858558, 0, 1, 0, 0.858558, 0, 0.512717, 2.5832, 0.213841, -4.95236 )

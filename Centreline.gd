@@ -1,6 +1,6 @@
 extends Spatial
 
-const CentrelineStationNode = preload("res://nodescenes/CentrelineStationNode.tscn")
+const StationNode = preload("res://nodescenes/StationNode.tscn")
 
 func Loadcentrelinefile(fname):
 	var centrelinedatafile = File.new()
@@ -8,15 +8,15 @@ func Loadcentrelinefile(fname):
 	var centrelinedata = parse_json(centrelinedatafile.get_line())
 
 	# create all the centreline nodes
-	var centrelinegnodes = $CentrelineNodes
-	# centrelinegnodes.clear()  queue_free() ?
-	assert (len(centrelinegnodes.get_children()) == 0)
+	var stationgnodes = $StationNodes
+	# stationgnodes.clear()  queue_free() ?
+	assert (len(stationgnodes.get_children()) == 0)
 	var stationpointscoords = centrelinedata.stationpointscoords
 	var stationpointsnames = centrelinedata.stationpointsnames
 	var stationpoints = [ ]
 	for i in range(len(stationpointsnames)):
-		var csn = CentrelineStationNode.instance()
-		centrelinegnodes.add_child(csn)
+		var csn = StationNode.instance()
+		stationgnodes.add_child(csn)
 		var stationpoint = Vector3(stationpointscoords[i*3], 8+stationpointscoords[i*3+2], -stationpointscoords[i*3+1])
 		stationpoints.append(stationpoint)
 		csn.global_transform.origin = stationpoint

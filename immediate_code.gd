@@ -5,7 +5,7 @@ extends EditorScript
 # Control-Shift X to run this code in the editor
 # *******
 
-const CentrelineStationNode = preload("res://CentrelineStationNode.tscn")
+const CentrelineStationNode = preload("res://nodescenes/StationNode.tscn")
 
 func _run():
 	print("Hello from the Godot Editor!")

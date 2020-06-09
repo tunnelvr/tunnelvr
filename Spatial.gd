@@ -9,6 +9,7 @@ var arvr_quest = null;
 # * anchor node type (like normal node) which can be drawn and moved
 # * two activated anchor nodes slide everything around relative to them
 #      and is connected to the centreline with another strip and gets UV of drawing
+# * nodes should be located at their top position and scaled in y to go downwards
 # * check ray intersect plane is in the plane and report if not!
 # * Fall upward to ceiling when not on above the cave
 # * anchor nodes capable of pulling plane up and down
