@@ -19,7 +19,7 @@ var distance = 50
 #export (int, FLAGS, "Layer 1", "Layer 2", "Layer 3", "Layer 4", "Layer 5", "Layer 6", "Layer 7", "Layer 8", "Layer 9", "Layer 10", "Layer 11", "Layer 12", "Layer 13", "Layer  14", "Layer 15", "Layer 16", "Layer 17", "Layer 18", "Layer 19", "Layer 20") 
 var collision_mask = 14 
 
-const OnePathNode = preload("res://OnePathNode.tscn")
+const OnePathNode = preload("res://nodescenes/OnePathNode.tscn")
 
 var pointinghighlightmaterial = SpatialMaterial.new()
 var selectedhighlightmaterial = SpatialMaterial.new()

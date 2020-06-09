@@ -5,8 +5,7 @@ extends Spatial
 func _ready():
 	pass
 	
-	
-const OnePathNode = preload("res://OnePathNode.tscn")
+const OnePathNode = preload("res://nodescenes/OnePathNode.tscn")
 const linewidth = 0.05
 
 var onepathpairs = [ ]  # pairs of onepath nodes
