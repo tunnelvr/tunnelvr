@@ -7,14 +7,14 @@ var arvr_quest = null;
 
 # Stuff to do:
 # * check ray intersect plane is in the plane and report if not!
-# * check if this function handles rotated and scaled bitmap (which should be xy scaled by aspect ratio)
 # * anchor node type (like normal node) which can be drawn and moved
+# * move the textpanel work back out of the set_material function
 #      and is connected to the centreline with another strip and gets UV of drawing
 # * two activated anchor nodes slide everything around relative to them
 # * Fall upward to ceiling when not on above the cave
 # * anchor nodes capable of pulling plane up and down
 # * Separate OneTunnel class with all the geometry that drives the sketch system
-# * each sketch node retains the UV point on the drawing at time it was made
+#      and makes a much more efficient update system than doing all at once
 # * Each node finds its normal plane and resolves lines around it
 # * nodes have push-pull or cross-section plane
 # * Line sections and triangle areas can be split

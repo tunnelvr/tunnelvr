@@ -7,7 +7,7 @@
 [ext_resource path="res://pointersystem.gd" type="Script" id=5]
 [ext_resource path="res://CSGMesh_righthand.tscn" type="PackedScene" id=6]
 [ext_resource path="res://CSGMesh_lefthand.tscn" type="PackedScene" id=7]
-[ext_resource path="res://MarkerNode.tscn" type="PackedScene" id=8]
+[ext_resource path="res://nodescenes/MarkerNode.tscn" type="PackedScene" id=8]
 [ext_resource path="res://PulledBody.tscn" type="PackedScene" id=9]
 [ext_resource path="res://SketchSystem.gd" type="Script" id=10]
 [ext_resource path="res://text_panel_3d.tscn" type="PackedScene" id=11]
@@ -23,47 +23,47 @@
 [ext_resource path="res://textures/Rock028_2K-JPG/Rock028_2K_Displacement.jpg" type="Texture" id=21]
 [ext_resource path="res://textures/Rock028_2K-JPG/Rock028_2K_Normal.jpg" type="Texture" id=22]
 
-[sub_resource type="CapsuleShape" id=9]
+[sub_resource type="CapsuleShape" id=1]
 radius = 0.3
 height = 1.2
 
-[sub_resource type="CubeMesh" id=10]
+[sub_resource type="CubeMesh" id=2]
 resource_local_to_scene = true
 material = ExtResource( 16 )
 size = Vector3( 0.002, 0.002, 10 )
 subdivide_depth = 20
 
-[sub_resource type="SpatialMaterial" id=2]
+[sub_resource type="SpatialMaterial" id=3]
 albedo_color = Color( 0.984314, 0.0705882, 0.0705882, 1 )
 metallic = 0.46
 roughness = 0.28
 
-[sub_resource type="SphereMesh" id=3]
-material = SubResource( 2 )
+[sub_resource type="SphereMesh" id=4]
+material = SubResource( 3 )
 radius = 0.05
 height = 0.1
 radial_segments = 8
 rings = 4
 
-[sub_resource type="SpatialMaterial" id=12]
+[sub_resource type="SpatialMaterial" id=5]
 albedo_color = Color( 1, 0.439216, 0.439216, 1 )
 
-[sub_resource type="CylinderMesh" id=13]
-material = SubResource( 12 )
+[sub_resource type="CylinderMesh" id=6]
+material = SubResource( 5 )
 top_radius = 0.001
 bottom_radius = 0.02
 height = 0.2
 radial_segments = 6
 rings = 1
 
-[sub_resource type="SpatialMaterial" id=1]
+[sub_resource type="SpatialMaterial" id=7]
 params_cull_mode = 2
 albedo_color = Color( 0.972549, 0.278431, 0.0392157, 1 )
 
-[sub_resource type="PlaneMesh" id=4]
+[sub_resource type="PlaneMesh" id=8]
 size = Vector2( 4, 2 )
 
-[sub_resource type="SpatialMaterial" id=5]
+[sub_resource type="SpatialMaterial" id=9]
 albedo_texture = ExtResource( 20 )
 roughness_texture = ExtResource( 19 )
 normal_enabled = true
@@ -81,7 +81,7 @@ depth_flip_tangent = false
 depth_flip_binormal = false
 depth_texture = ExtResource( 21 )
 
-[sub_resource type="SpatialMaterial" id=6]
+[sub_resource type="SpatialMaterial" id=10]
 params_cull_mode = 2
 params_line_width = 8.3
 params_use_alpha_scissor = true
@@ -91,7 +91,7 @@ albedo_texture = ExtResource( 13 )
 metallic = 0.56
 roughness = 0.49
 
-[sub_resource type="ArrayMesh" id=7]
+[sub_resource type="ArrayMesh" id=11]
 surfaces/0 = {
 "aabb": AABB( 0, 0.1, -4.03536, 2.03536, 9.99868e-06, 1.08536 ),
 "array_data": PoolByteArray( 0, 0, 0, 0, 205, 204, 204, 61, 51, 51, 67, 192, 0, 127, 0, 0, 0, 0, 128, 63, 205, 204, 204, 61, 51, 51, 67, 192, 0, 127, 0, 0, 0, 0, 0, 0, 205, 204, 204, 61, 205, 204, 60, 192, 0, 127, 0, 0, 0, 0, 0, 0, 205, 204, 204, 61, 205, 204, 60, 192, 0, 127, 0, 0, 0, 0, 128, 63, 205, 204, 204, 61, 51, 51, 67, 192, 0, 127, 0, 0, 0, 0, 128, 63, 205, 204, 204, 61, 205, 204, 60, 192, 0, 127, 0, 0, 0, 0, 128, 63, 205, 204, 204, 61, 51, 51, 67, 192, 0, 127, 0, 0, 122, 121, 251, 63, 205, 204, 204, 61, 162, 33, 129, 192, 0, 127, 0, 0, 0, 0, 128, 63, 205, 204, 204, 61, 205, 204, 60, 192, 0, 127, 0, 0, 0, 0, 128, 63, 205, 204, 204, 61, 205, 204, 60, 192, 0, 127, 0, 0, 122, 121, 251, 63, 205, 204, 204, 61, 162, 33, 129, 192, 0, 127, 0, 0, 67, 67, 2, 64, 205, 204, 204, 61, 189, 188, 125, 192, 0, 127, 0, 0 ),
@@ -104,13 +104,13 @@ surfaces/0 = {
 "vertex_count": 12
 }
 
-[sub_resource type="ConcavePolygonShape" id=8]
+[sub_resource type="ConcavePolygonShape" id=12]
 
-[sub_resource type="SpatialMaterial" id=14]
+[sub_resource type="SpatialMaterial" id=13]
 params_cull_mode = 2
 albedo_color = Color( 0.87451, 0.964706, 0.247059, 1 )
 
-[sub_resource type="SpatialMaterial" id=15]
+[sub_resource type="SpatialMaterial" id=14]
 flags_transparent = true
 flags_do_not_receive_shadows = true
 params_cull_mode = 2
@@ -134,14 +134,13 @@ collision_mask = 5
 
 [node name="movementsystem" type="Node" parent="ARVROrigin/ARVRController_Left"]
 script = ExtResource( 4 )
-max_speed = 300.0
 
 [node name="KinematicBody" type="KinematicBody" parent="ARVROrigin/ARVRController_Left/movementsystem"]
 collision_mask = 1048574
 
 [node name="CollisionShape" type="CollisionShape" parent="ARVROrigin/ARVRController_Left/movementsystem/KinematicBody"]
 transform = Transform( 1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0.9, 0 )
-shape = SubResource( 9 )
+shape = SubResource( 1 )
 
 [node name="Tail" type="RayCast" parent="ARVROrigin/ARVRController_Left/movementsystem/KinematicBody"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0 )
@@ -161,7 +160,7 @@ script = ExtResource( 5 )
 [node name="Laser" type="MeshInstance" parent="ARVROrigin/ARVRController_Right/pointersystem"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.05, -5 )
 cast_shadow = 0
-mesh = SubResource( 10 )
+mesh = SubResource( 2 )
 material/0 = null
 
 [node name="RayCast" type="RayCast" parent="ARVROrigin/ARVRController_Right/pointersystem/Laser"]
@@ -172,12 +171,12 @@ collision_mask = 24
 
 [node name="LaserSpot" type="MeshInstance" parent="ARVROrigin/ARVRController_Right/pointersystem"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -4.96626, 4.96626 )
-mesh = SubResource( 3 )
+mesh = SubResource( 4 )
 material/0 = null
 
 [node name="MeshInstance" type="MeshInstance" parent="ARVROrigin/ARVRController_Right/pointersystem/LaserSpot"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0 )
-mesh = SubResource( 13 )
+mesh = SubResource( 6 )
 material/0 = null
 
 [node name="drawnfloor" parent="." instance=ExtResource( 3 )]
@@ -199,26 +198,26 @@ script = ExtResource( 10 )
 [node name="OnePathNodes" type="Spatial" parent="SketchSystem"]
 
 [node name="PathLines" type="MeshInstance" parent="SketchSystem"]
-material_override = SubResource( 1 )
+material_override = SubResource( 7 )
 
 [node name="JumpingRigidBody" parent="SketchSystem" instance=ExtResource( 8 )]
 
 [node name="LaserSquare" type="MeshInstance" parent="SketchSystem"]
 transform = Transform( -0.772091, -0.0522553, 0.63336, -0.546921, 0.562194, -0.620335, -0.323656, -0.825352, -0.462645, -0.944971, 1.18811, 0.0964239 )
-mesh = SubResource( 4 )
-material/0 = SubResource( 5 )
+mesh = SubResource( 8 )
+material/0 = SubResource( 9 )
 script = ExtResource( 12 )
 
 [node name="WorkingShell" type="StaticBody" parent="SketchSystem"]
 
 [node name="MeshInstance" type="MeshInstance" parent="SketchSystem/WorkingShell"]
 layers = 3
-material_override = SubResource( 6 )
-mesh = SubResource( 7 )
+material_override = SubResource( 10 )
+mesh = SubResource( 11 )
 material/0 = null
 
 [node name="CollisionShape" type="CollisionShape" parent="SketchSystem/WorkingShell"]
-shape = SubResource( 8 )
+shape = SubResource( 12 )
 
 [node name="Centreline" type="Spatial" parent="SketchSystem"]
 script = ExtResource( 17 )
@@ -226,10 +225,10 @@ script = ExtResource( 17 )
 [node name="CentrelineNodes" type="Spatial" parent="SketchSystem/Centreline"]
 
 [node name="CentrelineLegs" type="MeshInstance" parent="SketchSystem/Centreline"]
-material_override = SubResource( 14 )
+material_override = SubResource( 13 )
 
 [node name="CentrelineCrossSections" type="MeshInstance" parent="SketchSystem/Centreline"]
-material_override = SubResource( 15 )
+material_override = SubResource( 14 )
 
 [node name="TextPanel" parent="SketchSystem/Centreline" instance=ExtResource( 11 )]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 1.91816, 0.304006, -4.61659 )

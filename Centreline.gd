@@ -1,6 +1,6 @@
 extends Spatial
 
-const CentrelineStationNode = preload("res://CentrelineStationNode.tscn")
+const CentrelineStationNode = preload("res://nodescenes/CentrelineStationNode.tscn")
 
 func Loadcentrelinefile(fname):
 	var centrelinedatafile = File.new()
