@@ -58,10 +58,11 @@ __meta__ = {
 }
 
 [node name="ButtonSave" type="Button" parent="Viewport/GUI/Panel"]
-margin_left = 14.4633
+margin_left = 14.9266
 margin_top = 77.0405
-margin_right = 154.463
+margin_right = 154.926
 margin_bottom = 105.041
+rect_pivot_offset = Vector2( 111.073, 28.0005 )
 text = "Save"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -72,6 +73,7 @@ margin_left = 15.3899
 margin_top = 112.714
 margin_right = 155.39
 margin_bottom = 140.714
+rect_pivot_offset = Vector2( 79.3797, 41.4556 )
 hint_tooltip = "test tooltip"
 toggle_mode = true
 pressed = true
@@ -80,12 +82,16 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="HSlider" type="HSlider" parent="Viewport/GUI/Panel"]
-margin_left = 17.7063
-margin_top = 168.962
-margin_right = 157.706
-margin_bottom = 193.962
-ticks_on_borders = true
+[node name="ButtonShiftFloor" type="Button" parent="Viewport/GUI/Panel"]
+margin_left = 14.9266
+margin_top = 147.461
+margin_right = 154.926
+margin_bottom = 175.461
+rect_pivot_offset = Vector2( 111.073, 28.0005 )
+text = "ShiftFloor"
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="ColorRect" type="ColorRect" parent="Viewport/GUI/Panel"]
 margin_left = 180.0

@@ -19,11 +19,16 @@ func _on_buttonsave_pressed():
 func _on_buttonshowxs_toggled(button_pressed):
 	get_node("../SketchSystem/Centreline/CentrelineCrossSections").visible = button_pressed
 	$Viewport/GUI/Panel/Label.text = "XS shown" if button_pressed else "XS hidden"
+
+func _on_buttonshiftfloor_pressed():
+	get_node("../SketchSystem/Centreline").shiftfloorfromdrawnstations()
+	$Viewport/GUI/Panel/Label.text = "Floor shifted"
 	
 func _ready():
 	$Viewport/GUI/Panel/ButtonLoad.connect("pressed", self, "_on_buttonload_pressed")
 	$Viewport/GUI/Panel/ButtonSave.connect("pressed", self, "_on_buttonsave_pressed")
 	$Viewport/GUI/Panel/ButtonShowXS.connect("toggled", self, "_on_buttonshowxs_toggled")
+	$Viewport/GUI/Panel/ButtonShiftFloor.connect("pressed", self, "_on_buttonshiftfloor_pressed")
 
 
 func togglevisibility(controller_global_transform):
@@ -48,6 +53,7 @@ func guipanelsendmousemotion(collision_point, controller_global_transform, contr
 	var shape_size = collisionshape.shape.extents * 2
 	var collider_scale = collider_transform.basis.get_scale()
 	var local_point = collider_transform.xform_inv(collision_point)
+	# this rescaling because of no xform_affine_inv.  https://github.com/godotengine/godot/issues/39433
 	local_point /= (collider_scale * collider_scale)
 	local_point /= shape_size
 	local_point += Vector3(0.5, -0.5, 0) # X is about 0 to 1, Y is about 0 to -1.

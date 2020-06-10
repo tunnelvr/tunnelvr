@@ -11,19 +11,25 @@ func _run():
 	print("Hello from the Godot Editor!")
 	#var ma = k.mesh.get_mesh_arrays()
 	#print(ma)
-	var p = Vector3(39.992378, 3.824377, -20.602268)
+	# ajajaja (2.702797, 0.000828, -6.352633)  (2.297801, 0.000828, -6.319214)
+	# 0.082234, 0, -0.896952, 0, 1, 0, 0.996613, 0, 0.074011 - 1.0809, 0, 0
+	#var t = Transform(0.082234, 0, -0.896952, 0, 1, 0, 0.996613, 0, 0.074011 - 1.0809, 0, 0)
+	#var t = Transform(Vector3(0.082234, 0, 0.996613), Vector3(0, 0, 1), Vector3(-0.896952, 0, 0.074011).normalized(), Vector3(0, 0, 0))
+	#var t = Transform(Vector3(2,0,0), Vector3(0,1,0), Vector3(0,0,1), Vector3(0,0,0))
+	var t = Transform(Vector3(0.082234, 0, 0.996613), Vector3(0, 1, 0), Vector3(-0.896952, 0, 0.074011), Vector3(0, 0, 0))
+	var it = t.affine_inverse()
+	print(it)
+	var p = Vector3(2.702797, 0.000828, -6.352633)
+	print(p)
+	print(it.xform(t.xform(p)))
+	return
+		
 	var drawnfloor = get_scene().get_node("drawnfloor")
-	print(drawnfloor)
-	var floorsize = drawnfloor.get_node("MeshInstance").mesh.size
-	print(floorsize)
-	print(drawnfloor.global_transform)
-	print(drawnfloor.get_node("MeshInstance").global_transform)
-	#var collider_scale = drawnfloor.mesh.basis
 	var floorpoint = drawnfloor.global_transform.xform_inv(p)
-	var uvpoint = Vector2(floorpoint.x/floorsize.x + 0.5, floorpoint.z/floorsize.y + 0.5)
-	print(floorpoint)
-	print(uvpoint)
-	print(drawnfloor.scale)
-	#local_point /= (collider_scale * collider_scale)
+	var dp = drawnfloor.global_transform.xform(floorpoint)
+	#var t = Transform(Vector3(0.082234, 0, 0.996613), Vector3(0, 0, 1), Vector3(-0.896952, 0, 0.074011), Vector3(1.0809, 0, 0))
+	#print(p)
+	#print(t.xform(t.xform_inv(p)))
+
 	#local_point += Vector3(0.5, -0.5, 0) # X is about 0 to 1, Y is about 0 to -1.
 	#return local_point

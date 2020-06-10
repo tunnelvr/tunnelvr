@@ -3,12 +3,13 @@ extends Spatial
 var arvr_openvr = null; 
 var arvr_quest = null; 
 
-# Notes: we have used Function_Direct_movement.drag_factor == 0 to disable velocity and gravity
 
 # Stuff to do:
-# * anchor node type (like normal node) which can be drawn and moved
-# * two activated anchor nodes slide everything around relative to them
+# * selected drawn station node to have line to station with name above it
+# * shiftfloorfromdrawnstations last two touched drawn station nodes activated button slide everything around relative to them
 #      and is connected to the centreline with another strip and gets UV of drawing
+# * save and load drawn station nodes
+# * all other drawnstationnodes need moving same time
 # * nodes should be located at their top position and scaled in y to go downwards
 # * check ray intersect plane is in the plane and report if not!
 # * Fall upward to ceiling when not on above the cave
@@ -64,7 +65,8 @@ func _ready():
 	pointer.drawnfloor = $drawnfloor
 	pointer.guipanel3d = $GUIPanel3D
 	pointer.guipanel3d.visible = false
-
+	$SketchSystem/Centreline.drawnfloor = $drawnfloor
+	
 func _process(_delta):
 	if !perform_runtime_config:
 		ovr_performance.set_clock_levels(1, 1)

@@ -80,9 +80,11 @@ func _ready():
 func setopnpos(opn, p):
 	opn.global_transform.origin = p
 	var floorsize = drawnfloor.get_node("MeshInstance").mesh.size
-	var floorpoint = drawnfloor.global_transform.xform_inv(p)
-	opn.uvpoint = Vector2(floorpoint.x/floorsize.x/drawnfloor.scale.x/drawnfloor.scale.x + 0.5, floorpoint.z/floorsize.y/drawnfloor.scale.z/drawnfloor.scale.z + 0.5)
+	var dfinv = drawnfloor.global_transform.affine_inverse()
+	var afloorpoint = dfinv.xform(p)
+	opn.uvpoint = Vector2(afloorpoint.x/floorsize.x + 0.5, afloorpoint.z/floorsize.y + 0.5)
 	opn.drawingname = drawnfloor.get_node("MeshInstance").mesh.material.albedo_texture.resource_path
+
 
 func onpointing(newpointertarget, newpointertargetpoint):
 	if newpointertarget != pointertarget:
@@ -133,17 +135,20 @@ func _on_button_pressed(p_button):
 				if selectedtarget.getnodetype() == "ntPath":
 					setopnpos(selectedtarget, pointertargetpoint)
 					sketchsystem.updateonepaths()
+				if selectedtarget.getnodetype() == "ntDrawnStation":
+					setopnpos(selectedtarget, pointertargetpoint)
 				gripbuttonpressused = true
 				
-			# new node on floor (what happens depends on what is already selected)
+			# new node on floor with centreline node already connected
 			elif is_instance_valid(selectedtarget) and selectedtarget.getnodetype() == "ntStation":
 				pointertarget = centrelinesystem.newdrawnstationnode()
-				print("pointertargetpointertargetpointertarget ", pointertarget.getnodetype())
 				setopnpos(pointertarget, pointertargetpoint)
 				pointertarget.stationname = selectedtarget.stationname
 				selectedtarget.set_materialoverride(null)
 				selectedtarget = null
 				settextpanel(null, null)
+				
+			# new node on floor, with or without other node selected to connect to
 			else:
 				pointertarget = sketchsystem.newonepathnode()
 				setopnpos(pointertarget, pointertargetpoint)
@@ -179,7 +184,7 @@ func _on_button_pressed(p_button):
 
 			selectedtarget = pointertarget
 			selectedtarget.set_materialoverride(selectedpointerhighlightmaterial)
-			if selectedtarget.getnodetype() == "ntStation":
+			if selectedtarget.getnodetype() == "ntStation" or selectedtarget.getnodetype() == "ntDrawnStation":
 				settextpanel(selectedtarget.stationname, selectedtarget.global_transform.origin)
 				
 	# change height of pointer target

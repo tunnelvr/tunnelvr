@@ -2,11 +2,38 @@ extends Spatial
 
 const StationNode = preload("res://nodescenes/StationNode.tscn")
 const DrawnStationNode = preload("res://nodescenes/DrawnStationNode.tscn")
+var stationnodemap = { }
+var drawnfloor = null   # filled in by Spatial.gd
 
 func newdrawnstationnode():
 	var dsn = DrawnStationNode.instance()
 	$DrawnStationNodes.add_child(dsn)
 	return dsn
+
+func shiftfloorfromdrawnstations():
+	# compatible with setopnpos(opn, p)
+	var drawnstationnodes = $DrawnStationNodes.get_children()
+	var dsn0 = drawnstationnodes[-1] if len(drawnstationnodes) >= 1 else null
+	var dsn1 = drawnstationnodes[-2] if len(drawnstationnodes) >= 2 else null
+	var floorsize = drawnfloor.get_node("MeshInstance").mesh.size
+
+	var dfinv = drawnfloor.global_transform.affine_inverse()
+	if dsn0 != null:
+		var st0 = stationnodemap[dsn0.stationname]
+		var pst0 = st0.global_transform.origin
+		var pdsn0 = dsn0.global_transform.origin
+		#var uvdsn0 = dsn0.uvpoint
+		#var fp0 = Vector3((uvdsn0.x - 0.5)*floorsize.x, 0.0, (uvdsn0.y - 0.5)*floorsize.y)
+		#var cfp0 = dfinv.xform(pst0)
+		drawnfloor.global_translate(Vector3(pst0.x - pdsn0.x, 0, pst0.z - pdsn0.z)) 
+		print("floor shiftingggg")
+	
+	var drawnfloorheight = drawnfloor.global_transform.origin.y
+	for dsn in drawnstationnodes:
+		var uvdsn0 = dsn.uvpoint
+		var fp = Vector3((dsn.uvpoint.x - 0.5)*floorsize.x, 0.0, (dsn.uvpoint.y - 0.5)*floorsize.y)
+		var pdsn = drawnfloor.global_transform.xform(fp)
+		dsn.global_transform.origin = Vector3(pdsn.x, drawnfloorheight, pdsn.z)
 
 func Loadcentrelinefile(fname):
 	var centrelinedatafile = File.new()
@@ -26,6 +53,7 @@ func Loadcentrelinefile(fname):
 		stationpoints.append(stationpoint)
 		csn.global_transform.origin = stationpoint
 		csn.stationname = stationpointsnames[i]
+		stationnodemap[csn.stationname] = csn
 
 	# create all the centreline joins
 	var linewidth = 0.09
