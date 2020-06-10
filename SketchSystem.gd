@@ -126,17 +126,23 @@ func updateworkingshell():
 
 
 # Quick saving and loading of shape.  It goes to 
-# C:\Users\ViveOne\AppData\Roaming\Godot\app_userdata\Testvr
+# C:\Users\ViveOne\AppData\Roaming\Godot\app_userdata\digtunnel
 # We could check if we can export mesh things this way
 func savesketchsystem():
 	var save_dict = { "filename" : get_filename(),
 					  "parent" : get_parent().get_path(),
-					  "points":[ ], "paths":[ ] }
+					  "points":[ ], "paths":[ ], 
+					  "drawnstationnodes":[ ] }
 	var onepathnodes = get_node("OnePathNodes").get_children()
 	for i in range(len(onepathnodes)):
 		var opn = onepathnodes[i]
 		opn.i = i
 		save_dict["points"].append([opn.global_transform.origin.x, opn.scale.y, opn.global_transform.origin.z, opn.drawingname, opn.uvpoint.x, opn.uvpoint.y])
+	var drawnstationnodes = get_node("Centreline/DrawnStationNodes").get_children()
+	for i in range(len(drawnstationnodes)):
+		var dsn = drawnstationnodes[i]
+		save_dict["drawnstationnodes"].append([dsn.global_transform.origin.x, dsn.global_transform.origin.y, dsn.global_transform.origin.z, dsn.drawingname, dsn.uvpoint.x, dsn.uvpoint.y, dsn.stationname])
+
 	for onepath in onepathpairs:
 		save_dict["paths"].append(onepath[0].i)
 		save_dict["paths"].append(onepath[1].i)
@@ -175,6 +181,22 @@ func loadsketchsystem():
 		for i in range(1, len(node_data["paths"]), 2):
 			onepathpairs.append([onepathnodes[node_data["paths"][i-1]], onepathnodes[node_data["paths"][i]]])
 		updateonepaths()
+		
+		var drawnstationnodes = get_node("Centreline/DrawnStationNodes").get_children()
+		for i in range(len(node_data["drawnstationnodes"])):
+			var dsn = (drawnstationnodes[i]  if i < len(drawnstationnodes)  else get_node("Centreline").newdrawnstationnode())
+			var ndsn = node_data["drawnstationnodes"][i]
+			dsn.global_transform.origin.x = ndsn[0]
+			dsn.global_transform.origin.y = ndsn[1]
+			dsn.global_transform.origin.z = ndsn[2]
+			dsn.drawingname = ndsn[3]
+			dsn.uvpoint.x = ndsn[4]
+			dsn.uvpoint.y = ndsn[5]
+			dsn.stationname = ndsn[6]
+		drawnstationnodes = get_node("Centreline/DrawnStationNodes").get_children()
+		for i in range(len(node_data["drawnstationnodes"]), len(drawnstationnodes)):
+			drawnstationnodes[i].queue_free()
+		
 	print("lllloaded")
 		
 
