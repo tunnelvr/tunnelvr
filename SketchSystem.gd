@@ -42,8 +42,8 @@ func updateonepaths():
 	var surfaceTool = SurfaceTool.new()
 	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
 	for onepath in onepathpairs:
-		var p0 = onepath[0].global_transform.origin + Vector3(0, onepath[0].scale.y+0.005, 0)
-		var p1 = onepath[1].global_transform.origin + Vector3(0, onepath[1].scale.y+0.005, 0)
+		var p0 = onepath[0].global_transform.origin + Vector3(0, 0.005, 0)
+		var p1 = onepath[1].global_transform.origin + Vector3(0, 0.005, 0)
 		var perp = linewidth*Vector2(-(p1.z - p0.z), p1.x - p0.x).normalized()
 		var p0left = p0 - Vector3(perp.x, 0, perp.y)
 		var p0right = p0 + Vector3(perp.x, 0, perp.y)
@@ -115,14 +115,15 @@ func updateworkingshell():
 		for u in pi:
 			surfaceTool.add_uv(poly[u].uvpoint)
 			#surfaceTool.add_uv(Vector2(poly[u].x/floorsize.x + 0.5, poly[u].z/floorsize.y + 0.5))
-			surfaceTool.add_vertex(Vector3(poly[u].global_transform.origin.x, poly[u].scale.y, poly[u].global_transform.origin.z))
+			surfaceTool.add_vertex(Vector3(poly[u].global_transform.origin.x, poly[u].global_transform.origin.y, poly[u].global_transform.origin.z))
 			#surfaceTool.add_vertex(poly[u])
 	surfaceTool.generate_normals()
 	$WorkingShell/MeshInstance.mesh = surfaceTool.commit()
 	#var col_shape = ConcavePolygonShape.new()
 	#col_shape.set_faces(mesh.get_faces())
 	#print("sssss", get_node("../CollisionShape").get_shape())
-	$WorkingShell/CollisionShape.shape.set_faces($WorkingShell/MeshInstance.mesh.get_faces())
+	if len(polys) != 0:
+		$WorkingShell/CollisionShape.shape.set_faces($WorkingShell/MeshInstance.mesh.get_faces())
 
 
 # Quick saving and loading of shape.  It goes to 
@@ -137,7 +138,7 @@ func savesketchsystem():
 	for i in range(len(onepathnodes)):
 		var opn = onepathnodes[i]
 		opn.i = i
-		save_dict["points"].append([opn.global_transform.origin.x, opn.scale.y, opn.global_transform.origin.z, opn.drawingname, opn.uvpoint.x, opn.uvpoint.y])
+		save_dict["points"].append([opn.global_transform.origin.x, opn.global_transform.origin.y, opn.global_transform.origin.z, opn.drawingname, opn.uvpoint.x, opn.uvpoint.y])
 	var drawnstationnodes = get_node("Centreline/DrawnStationNodes").get_children()
 	for i in range(len(drawnstationnodes)):
 		var dsn = drawnstationnodes[i]
@@ -167,7 +168,8 @@ func loadsketchsystem():
 			var opn = (onepathnodes[i]  if i < len(onepathnodes)  else newonepathnode())
 			var ndpi = node_data["points"][i]
 			opn.global_transform.origin.x = ndpi[0]
-			opn.scale.y = ndpi[1]
+			opn.global_transform.origin.y = ndpi[1]
+			opn.scale.y = opn.global_transform.origin.y
 			opn.global_transform.origin.z = ndpi[2]
 			opn.drawingname = ndpi[3]
 			opn.uvpoint.x = ndpi[4]

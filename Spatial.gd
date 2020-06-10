@@ -5,8 +5,9 @@ var arvr_quest = null;
 
 
 # Stuff to do:
+# * quick sketch of secondary wall panel to draw on
+# * text panel should be in line with the pointersystem
 # * selected drawn station node to have line to station with name above it
-# * nodes should be located at their top position and scaled in y to go downwards
 # * shiftfloorfromdrawnstations last two touched drawn station nodes activated button slide everything around relative to them
 #      and is connected to the centreline with another strip and gets UV of drawing
 # * inline the pulled body

@@ -28,7 +28,7 @@ var selectedpointerhighlightmaterial = SpatialMaterial.new()
 
 var pointertarget = null
 var pointertargetpoint = Vector3(0, 0, 0)
-var pointertargetscaley = 0.0
+var pointertargetoriginy = 0.0
 var selectedtarget = null
 var gripbuttonpressused = false
 
@@ -93,7 +93,7 @@ func onpointing(newpointertarget, newpointertargetpoint):
 		
 		if is_instance_valid(pointertarget) and pointertarget.has_method("set_materialoverride"):
 			pointertarget.set_materialoverride(selectedhighlightmaterial if pointertarget == selectedtarget else null)
-			if pointertarget.scale.y != pointertargetscaley:
+			if pointertarget.global_transform.origin.y != pointertargetoriginy:
 				sketchsystem.updateonepaths()
 
 		pointertarget = newpointertarget
@@ -101,7 +101,7 @@ func onpointing(newpointertarget, newpointertargetpoint):
 			if pointertarget.has_method("set_materialoverride"):
 				pointertarget.set_materialoverride(selectedpointerhighlightmaterial if pointertarget == selectedtarget else pointinghighlightmaterial)
 				LaserSpot.visible = false
-				pointertargetscaley = pointertarget.scale.y
+				pointertargetoriginy = pointertarget.global_transform.origin.y
 			elif pointertarget == guipanel3d:
 				LaserSpot.visible = false
 			else:
@@ -119,7 +119,7 @@ func onpointing(newpointertarget, newpointertargetpoint):
 func _on_button_pressed(p_button):
 	print("pppp ", pointertargetpoint)
 	if p_button == Buttons.VR_BUTTON_BY:
-		guipanel3d.togglevisibility(controller.global_transform)
+		guipanel3d.togglevisibility(controller.get_node("pointersystem").global_transform)
 			
 	if p_button == Buttons.VR_TRIGGER and is_instance_valid(pointertarget):
 		print("clclc ", pointertarget.get_filename(), pointertarget.get_parent())
@@ -153,9 +153,13 @@ func _on_button_pressed(p_button):
 				pointertarget = sketchsystem.newonepathnode()
 				setopnpos(pointertarget, pointertargetpoint)
 				if is_instance_valid(selectedtarget) and selectedtarget.getnodetype() == "ntPath":
-					pointertarget.scale.y = selectedtarget.scale.y
+					pointertarget.global_transform.origin.y = selectedtarget.global_transform.origin.y
+					pointertarget.scale.y = pointertarget.global_transform.origin.y
 					sketchsystem.applyonepath(selectedtarget, pointertarget)
 					selectedtarget.set_materialoverride(null)
+				else:
+					pointertarget.global_transform.origin.y = 0.2
+					pointertarget.scale.y = pointertarget.global_transform.origin.y
 				if controller.is_button_pressed(Buttons.VR_GRIP):
 					selectedtarget = null
 				else:
@@ -170,6 +174,9 @@ func _on_button_pressed(p_button):
 			if controller.is_button_pressed(Buttons.VR_GRIP):
 				if selectedtarget.getnodetype() == "ntPath":
 					sketchsystem.removeonepathnode(selectedtarget)
+				elif selectedtarget.getnodetype() == "ntDrawnStation":
+					selectedtarget.queue_free()
+
 				gripbuttonpressused = true
 			selectedtarget = null
 			
@@ -192,8 +199,9 @@ func _on_button_pressed(p_button):
 		var left_right = controller.get_joystick_axis(0)
 		var up_down = controller.get_joystick_axis(1)
 		if abs(up_down) < 0.5 and abs(left_right) > 0.1:
-			pointertarget.scale.y = max(0.1, pointertarget.scale.y + (1 if left_right > 0 else -1)*(1.0 if abs(left_right) < 0.8 else 0.1))
-
+			pointertarget.global_transform.origin.y = max(0.1, pointertarget.global_transform.origin.y + (1 if left_right > 0 else -1)*(1.0 if abs(left_right) < 0.8 else 0.1))
+			pointertarget.scale.y = pointertarget.global_transform.origin.y
+					
 	if p_button == Buttons.VR_GRIP:
 		gripbuttonpressused = false
 
