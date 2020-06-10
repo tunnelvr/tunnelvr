@@ -38,4 +38,5 @@ singletons=[ "res://addons/godot-openvr/godot_openvr.gdnlib", "res://addons/godo
 
 [rendering]
 
+quality/directional_shadow/size=8192
 environment/default_environment="res://default_env.tres"

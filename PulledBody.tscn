@@ -4,7 +4,7 @@
 
 [sub_resource type="PlaneShape" id=1]
 
-[sub_resource type="SpatialMaterial" id=2]
+[sub_resource type="SpatialMaterial" id=19]
 params_cull_mode = 2
 albedo_color = Color( 0.956863, 0.270588, 0.270588, 1 )
 
@@ -14,5 +14,5 @@ albedo_color = Color( 0.956863, 0.270588, 0.270588, 1 )
 shape = SubResource( 1 )
 
 [node name="PulledSurface" type="MeshInstance" parent="."]
-material_override = SubResource( 2 )
+material_override = SubResource( 19 )
 script = ExtResource( 1 )

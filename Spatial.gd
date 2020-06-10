@@ -6,13 +6,7 @@ var arvr_quest = null;
 
 # Stuff to do:
 # * quick sketch of secondary wall panel to draw on
-# * text panel should be in line with the pointersystem
-# * selected drawn station node to have line to station with name above it
-# * shiftfloorfromdrawnstations last two touched drawn station nodes activated button slide everything around relative to them
-#      and is connected to the centreline with another strip and gets UV of drawing
-# * inline the pulled body
-# * set the floor shape size according to aspect ratio of the bitmap 1.285239=(3091/2405.0)
-# * all other drawnstationnodes need moving same time
+# * set the floor shape size according to aspect ratio read from the bitmap 1.285239=(3091/2405.0)
 # * check ray intersect plane is in the plane and report if not!
 # * Fall upward to ceiling when not on above the cave
 # * anchor nodes capable of pulling plane up and down
