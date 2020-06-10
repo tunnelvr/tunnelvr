@@ -9,6 +9,7 @@ var arvr_quest = null;
 # * shiftfloorfromdrawnstations last two touched drawn station nodes activated button slide everything around relative to them
 #      and is connected to the centreline with another strip and gets UV of drawing
 # * save and load drawn station nodes
+# * set the floor shape size according to aspect ratio of the bitmap 1.285239=(3091/2405.0)
 # * all other drawnstationnodes need moving same time
 # * nodes should be located at their top position and scaled in y to go downwards
 # * check ray intersect plane is in the plane and report if not!

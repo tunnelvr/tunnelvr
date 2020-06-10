@@ -16,6 +16,7 @@ func _run():
 	#var t = Transform(0.082234, 0, -0.896952, 0, 1, 0, 0.996613, 0, 0.074011 - 1.0809, 0, 0)
 	#var t = Transform(Vector3(0.082234, 0, 0.996613), Vector3(0, 0, 1), Vector3(-0.896952, 0, 0.074011).normalized(), Vector3(0, 0, 0))
 	#var t = Transform(Vector3(2,0,0), Vector3(0,1,0), Vector3(0,0,1), Vector3(0,0,0))
+	print(3091/2405.0)
 	var t = Transform(Vector3(0.082234, 0, 0.996613), Vector3(0, 1, 0), Vector3(-0.896952, 0, 0.074011), Vector3(0, 0, 0))
 	var it = t.affine_inverse()
 	print(it)

@@ -7,9 +7,14 @@ radius = 0.1
 height = 0.2
 
 [sub_resource type="SpatialMaterial" id=2]
-albedo_color = Color( 0.952941, 0.839216, 0.337255, 1 )
+albedo_color = Color( 0.905882, 0.337255, 0.952941, 1 )
 metallic = 0.81
 roughness = 0.31
+emission_enabled = true
+emission = Color( 0.556863, 0.0941176, 0.87451, 1 )
+emission_energy = 11.89
+emission_operator = 0
+emission_on_uv2 = false
 
 [sub_resource type="CylinderMesh" id=3]
 material = SubResource( 2 )
