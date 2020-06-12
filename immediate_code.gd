@@ -7,27 +7,28 @@ extends EditorScript
 
 const CentrelineStationNode = preload("res://nodescenes/StationNode.tscn")
 
+func _ready():
+	print("jjo")
+	
 func _run():
 	print("Hello from the Godot Editor!")
-	#var ma = k.mesh.get_mesh_arrays()
-	#print(ma)
-	# ajajaja (2.702797, 0.000828, -6.352633)  (2.297801, 0.000828, -6.319214)
-	# 0.082234, 0, -0.896952, 0, 1, 0, 0.996613, 0, 0.074011 - 1.0809, 0, 0
-	#var t = Transform(0.082234, 0, -0.896952, 0, 1, 0, 0.996613, 0, 0.074011 - 1.0809, 0, 0)
-	#var t = Transform(Vector3(0.082234, 0, 0.996613), Vector3(0, 0, 1), Vector3(-0.896952, 0, 0.074011).normalized(), Vector3(0, 0, 0))
-	#var t = Transform(Vector3(2,0,0), Vector3(0,1,0), Vector3(0,0,1), Vector3(0,0,0))
+
+	var a = PoolVector3Array()
+	a.append(Vector3(2,3,4))
+	var b = PoolRealArray()
+	b.append_array([1,2,3])
+	for c in a:
+		print("c", c)
+	print(b)
+	var x = {1:2, 9:a, "kk":b}
+	print(to_json(x))
+	print(a)
 	print(3091/2405.0)
-	var t = Transform(Vector3(0.082234, 0, 0.996613), Vector3(0, 1, 0), Vector3(-0.896952, 0, 0.074011), Vector3(0, 0, 0))
-	var it = t.affine_inverse()
-	print(it)
-	var p = Vector3(2.702797, 0.000828, -6.352633)
-	print(p)
-	print(it.xform(t.xform(p)))
 	return
 		
-	var drawnfloor = get_scene().get_node("drawnfloor")
-	var floorpoint = drawnfloor.global_transform.xform_inv(p)
-	var dp = drawnfloor.global_transform.xform(floorpoint)
+	#var drawnfloor = get_scene().get_node("drawnfloor")
+
+	#var dp = drawnfloor.global_transform.xform(floorpoint)
 	#var t = Transform(Vector3(0.082234, 0, 0.996613), Vector3(0, 0, 1), Vector3(-0.896952, 0, 0.074011), Vector3(1.0809, 0, 0))
 	#print(p)
 	#print(t.xform(t.xform_inv(p)))

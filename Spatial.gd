@@ -5,18 +5,25 @@ var arvr_quest = null;
 
 
 # Stuff to do:
-# * quick sketch of secondary wall panel to draw on
-# * set the floor shape size according to aspect ratio read from the bitmap 1.285239=(3091/2405.0)
-# * check ray intersect plane is in the plane and report if not!
-# * Fall upward to ceiling when not on above the cave
-# * anchor nodes capable of pulling plane up and down
+# * move the onepath stuff into onetunnel class
+# * keep the positions of the points and lines updated
+# * check the adds and deletes all match
+# * abolish onepathpairs in favour of OneTunnel.onepathpairs
+
 # * Separate OneTunnel class with all the geometry that drives the sketch system
 #      and makes a much more efficient update system than doing all at once
+# * Save and load wallangle from savegame file
+# * Fall upward to ceiling when not on above the cave
+# * move textpanel out to top level with the GUI stuff
+# * anchor nodes capable of pulling plane up and down
+# * floor and wall textures programmable
 # * Each node finds its normal plane and resolves lines around it
 # * nodes have push-pull or cross-section plane
 # * Line sections and triangle areas can be split
-# * floor and wall textures programmable
 # * Boulders and gravel and particles
+# * set the floor shape size according to aspect ratio read from the bitmap 1.285239=(3091/2405.0)
+# * Report bug that disable depth check puts transparent objects in front
+# * Report bug check ray intersect plane is in the plane and report if not!
 
 var perform_runtime_config = true
 var ovr_init_config = null
@@ -59,9 +66,11 @@ func _ready():
 	pointer.sketchsystem = $SketchSystem
 	pointer.centrelinesystem = $SketchSystem/Centreline
 	pointer.drawnfloor = $drawnfloor
+	pointer.drawingwall = $drawingwall
 	pointer.guipanel3d = $GUIPanel3D
 	pointer.guipanel3d.visible = false
 	$SketchSystem/Centreline.drawnfloor = $drawnfloor
+	$ARVROrigin/ARVRController_Right/pointersystem/LaserSpot.visible = false
 	
 func _process(_delta):
 	if !perform_runtime_config:

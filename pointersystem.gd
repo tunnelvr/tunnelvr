@@ -5,6 +5,7 @@ extends Spatial
 
 # variables set by the Spatial.gd
 var drawnfloor = null
+var drawingwall = null
 var sketchsystem = null
 var centrelinesystem =null
 
@@ -31,10 +32,11 @@ var pointertargetpoint = Vector3(0, 0, 0)
 var pointertargetoriginy = 0.0
 var selectedtarget = null
 var gripbuttonpressused = false
+var drawingwallangle = 0.0
 
 # set_materialoverride
 
-onready var LaserSquare = get_node("../../../SketchSystem/LaserSquare")
+onready var LaserSquare = get_node("../../../LaserSquare")
 onready var LaserSpot = get_node("LaserSpot"); 
 
 var laser_y = -0.05
@@ -77,13 +79,22 @@ func _ready():
 	$Laser/RayCast.translation.z = distance * 0.5
 	$Laser/RayCast.cast_to.z = -distance
 
-func setopnpos(opn, p):
+func setopnpos(opn, p, bonfloor):
 	opn.global_transform.origin = p
 	var floorsize = drawnfloor.get_node("MeshInstance").mesh.size
 	var dfinv = drawnfloor.global_transform.affine_inverse()
 	var afloorpoint = dfinv.xform(p)
 	opn.uvpoint = Vector2(afloorpoint.x/floorsize.x + 0.5, afloorpoint.z/floorsize.y + 0.5)
 	opn.drawingname = drawnfloor.get_node("MeshInstance").mesh.material.albedo_texture.resource_path
+	if opn.getnodetype() == "ntPath":
+		opn.wallangle = 0.0
+		if not bonfloor:
+			opn.wallangle = drawingwallangle
+			opn.global_transform = Transform(Basis(Vector3(0,1,0), drawingwallangle).scaled(Vector3(1,0.2,1)), p)
+		else:
+			opn.global_transform.origin = p + Vector3(0, 0.2, 0)
+			opn.scale.y = opn.global_transform.origin.y
+		sketchsystem.ot.copyopntootnode(opn)
 
 
 func onpointing(newpointertarget, newpointertargetpoint):
@@ -129,20 +140,21 @@ func _on_button_pressed(p_button):
 		elif pointertarget == guipanel3d:
 			pass  #this is elsewhere processed
 
-		elif pointertarget == drawnfloor:
+		elif pointertarget == drawnfloor or pointertarget == drawingwall:
+			var bonfloor = (pointertarget == drawnfloor)
 			# drag node to new position on floor
 			if controller.is_button_pressed(Buttons.VR_GRIP) and is_instance_valid(selectedtarget) and selectedtarget.has_method("set_materialoverride"):
 				if selectedtarget.getnodetype() == "ntPath":
-					setopnpos(selectedtarget, pointertargetpoint)
+					setopnpos(selectedtarget, pointertargetpoint, bonfloor)
 					sketchsystem.updateonepaths()
-				if selectedtarget.getnodetype() == "ntDrawnStation":
-					setopnpos(selectedtarget, pointertargetpoint)
+				if selectedtarget.getnodetype() == "ntDrawnStation" and bonfloor:
+					setopnpos(selectedtarget, pointertargetpoint, bonfloor)
 				gripbuttonpressused = true
 				
 			# new node on floor with centreline node already connected
-			elif is_instance_valid(selectedtarget) and selectedtarget.getnodetype() == "ntStation":
+			elif is_instance_valid(selectedtarget) and selectedtarget.getnodetype() == "ntStation" and bonfloor:
 				pointertarget = centrelinesystem.newdrawnstationnode()
-				setopnpos(pointertarget, pointertargetpoint)
+				setopnpos(pointertarget, pointertargetpoint, true)
 				pointertarget.stationname = selectedtarget.stationname
 				selectedtarget.set_materialoverride(null)
 				selectedtarget = null
@@ -150,21 +162,26 @@ func _on_button_pressed(p_button):
 				
 			# new node on floor, with or without other node selected to connect to
 			else:
-				pointertarget = sketchsystem.newonepathnode()
-				setopnpos(pointertarget, pointertargetpoint)
+				pointertarget = sketchsystem.newonepathnode(-1)
+				setopnpos(pointertarget, pointertargetpoint, bonfloor)
 				if is_instance_valid(selectedtarget) and selectedtarget.getnodetype() == "ntPath":
-					pointertarget.global_transform.origin.y = selectedtarget.global_transform.origin.y
-					pointertarget.scale.y = pointertarget.global_transform.origin.y
+					if bonfloor:
+						pointertarget.global_transform.origin.y = selectedtarget.global_transform.origin.y
+						pointertarget.scale.y = pointertarget.global_transform.origin.y
+						sketchsystem.ot.copyopntootnode(pointertarget)
 					sketchsystem.applyonepath(selectedtarget, pointertarget)
 					selectedtarget.set_materialoverride(null)
-				else:
+				elif bonfloor:
 					pointertarget.global_transform.origin.y = 0.2
 					pointertarget.scale.y = pointertarget.global_transform.origin.y
+					sketchsystem.ot.copyopntootnode(pointertarget)
 				if controller.is_button_pressed(Buttons.VR_GRIP):
 					selectedtarget = null
 				else:
 					selectedtarget = pointertarget
 					selectedtarget.set_materialoverride(selectedpointerhighlightmaterial)
+				assert (sketchsystem.ot.verifyonetunnelmatches(sketchsystem))
+
 					
 		# clear selected target by selecting again
 		elif pointertarget == selectedtarget:
@@ -191,16 +208,19 @@ func _on_button_pressed(p_button):
 
 			selectedtarget = pointertarget
 			selectedtarget.set_materialoverride(selectedpointerhighlightmaterial)
-			if selectedtarget.getnodetype() == "ntStation" or selectedtarget.getnodetype() == "ntDrawnStation":
+			if selectedtarget.getnodetype() == "ntStation":
 				settextpanel(selectedtarget.stationname, selectedtarget.global_transform.origin)
+			if selectedtarget.getnodetype() == "ntDrawnStation":
+				settextpanel(selectedtarget.stationname, centrelinesystem.stationnodemap[selectedtarget.stationname].global_transform.origin)				
 				
 	# change height of pointer target
-	if p_button == Buttons.VR_PAD and is_instance_valid(pointertarget) and pointertarget.has_method("set_materialoverride") and pointertarget.has_method("getnodetype") and pointertarget.getnodetype() == "ntPath":
+	if p_button == Buttons.VR_PAD and is_instance_valid(pointertarget) and ((pointertarget.has_method("set_materialoverride") and pointertarget.has_method("getnodetype") and pointertarget.getnodetype() == "ntPath" and pointertarget.wallangle == 0.0) or (pointertarget == drawingwall)):
 		var left_right = controller.get_joystick_axis(0)
 		var up_down = controller.get_joystick_axis(1)
 		if abs(up_down) < 0.5 and abs(left_right) > 0.1:
 			pointertarget.global_transform.origin.y = max(0.1, pointertarget.global_transform.origin.y + (1 if left_right > 0 else -1)*(1.0 if abs(left_right) < 0.8 else 0.1))
 			pointertarget.scale.y = pointertarget.global_transform.origin.y
+			sketchsystem.ot.copyopntootnode(pointertarget)
 					
 	if p_button == Buttons.VR_GRIP:
 		gripbuttonpressused = false
@@ -210,7 +230,15 @@ func _on_button_release(p_button):
 	if p_button == Buttons.VR_GRIP and not gripbuttonpressused and is_instance_valid(selectedtarget) and selectedtarget.has_method("set_materialoverride"):
 		selectedtarget.set_materialoverride(pointinghighlightmaterial if selectedtarget == pointertarget else null)
 		selectedtarget = null
-
+		
+	if p_button == Buttons.VR_TRIGGER and is_instance_valid(selectedtarget) and is_instance_valid(pointertarget) and pointertarget.has_method("set_materialoverride") and pointertarget != selectedtarget:
+		var vwall = pointertarget.global_transform.origin - selectedtarget.global_transform.origin
+		var vwall2 = Vector2(vwall.x, vwall.z)
+		drawingwallangle = -vwall2.angle()
+		var vwallsca = vwall2.length()
+		if vwallsca != 0.0:
+			drawingwall.global_transform = Transform(Basis().scaled(Vector3(vwallsca,selectedtarget.global_transform.origin.y,1)).rotated(Vector3(0,1,0), drawingwallangle), selectedtarget.global_transform.origin)
+			
 func _process(_delta):
 	if !is_inside_tree():
 		return
