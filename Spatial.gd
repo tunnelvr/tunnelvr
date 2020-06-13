@@ -5,13 +5,9 @@ var arvr_quest = null;
 
 
 # Stuff to do:
-# * laser spot laser spike
-# * change textpanel from static body to node
-# * disabled on the GUIDpanel.  Delete the collisionshape from textpanel
-# * add inward vector on selection of a node-point
+# * plot the direction of the bits after the spike
+# * label polys not to fill if there is a two sided edge
 # * abolish nodeuvs and others from OnePathNode object and ref directly
-# * inner vector from a node used for ordering the shell points
-# * prove we can make a ceiling and a donut
 # * Fall upward to ceiling when not on above the cave
 # * move textpanel out to top level with the GUI stuff
 # * anchor nodes capable of pulling plane up and down

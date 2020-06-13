@@ -96,7 +96,7 @@ func setopnpos(opn, p, bonfloor):
 			opn.global_transform.origin = p + Vector3(0, 0.2, 0)
 			opn.scale.y = opn.global_transform.origin.y
 		sketchsystem.ot.copyopntootnode(opn)
-		sketchsystem.ot.nodeinwardvec[opn.otIndex] = LaserSpike.global_transform.basis.y
+		sketchsystem.ot.nodeinwardvecs[opn.otIndex] = LaserSpike.global_transform.basis.y.normalized()
 		print("Thislaserspike ", LaserSpike.global_transform.basis.y)
 		
 func onpointing(newpointertarget, newpointertargetpoint):
@@ -212,8 +212,10 @@ func _on_button_pressed(p_button):
 			selectedtarget.set_materialoverride(selectedpointerhighlightmaterial)
 			if selectedtarget.getnodetype() == "ntStation":
 				settextpanel(selectedtarget.stationname, selectedtarget.global_transform.origin)
-			if selectedtarget.getnodetype() == "ntDrawnStation":
+			elif selectedtarget.getnodetype() == "ntDrawnStation":
 				settextpanel(selectedtarget.stationname, centrelinesystem.stationnodemap[selectedtarget.stationname].global_transform.origin)				
+			elif selectedtarget.getnodetype() == "ntPath":
+				sketchsystem.get_node("NodePreview").mesh = sketchsystem.ot.nodeplanepreview(selectedtarget.otIndex)
 				
 	# change height of pointer target
 	if p_button == Buttons.VR_PAD and is_instance_valid(pointertarget) and ((pointertarget.has_method("set_materialoverride") and pointertarget.has_method("getnodetype") and pointertarget.getnodetype() == "ntPath" and pointertarget.wallangle == 0.0) or (pointertarget == drawingwall)):

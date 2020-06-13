@@ -10,7 +10,7 @@ var nodepoints 		 : = PoolVector3Array()
 var nodedrawingindex : = PoolIntArray() 
 var nodeuvs 		 : = PoolVector2Array()
 var nodewallangle 	 : = PoolRealArray() 
-var nodeinwardvec 	 : = PoolVector3Array() 
+var nodeinwardvecs 	 : = PoolVector3Array() 
 
 var onepathpairs 	 : = PoolIntArray()  # 2* pairs indexing into nodepoints
 
@@ -30,7 +30,7 @@ func newotnodepoint():
 	nodedrawingindex.push_back(0)
 	nodeuvs.push_back(Vector2())
 	nodewallangle.push_back(0)
-	nodeinwardvec.push_back(Vector3())
+	nodeinwardvecs.push_back(Vector3())
 	return len(nodepoints) - 1
 
 func removeotnodepoint(i):
@@ -40,13 +40,13 @@ func removeotnodepoint(i):
 	nodedrawingindex[i] = nodedrawingindex[e]
 	nodeuvs[i] = nodeuvs[e]
 	nodewallangle[i] = nodewallangle[e]
-	nodeinwardvec[i] = nodeinwardvec[e]
+	nodeinwardvecs[i] = nodeinwardvecs[e]
 
 	nodepoints.resize(e)
 	nodedrawingindex.resize(e)
 	nodeuvs.resize(e)
 	nodewallangle.resize(e)
-	nodeinwardvec.resize(e)
+	nodeinwardvecs.resize(e)
 
 	for j in range(len(onepathpairs) - 2, -1, -2):
 		if (onepathpairs[j] == i) or (onepathpairs[j+1] == i):
@@ -111,6 +111,7 @@ func loadonetunnel(fname):
 	nodeuvs = unflattenpoolvector2(node_data["nodeuvs"])
 	nodewallangle = node_data["nodewallangle"]
 	onepathpairs = node_data["onepathpairs"]
+	nodeinwardvecs = unflattenpoolvector3(node_data["nodeinwardvecs"])
 	drawnstationnodesRAW = node_data["drawnstationnodes"]
 	save_game.close()
 
@@ -132,6 +133,7 @@ func saveonetunnel(fname):
 					  "drawingnames":drawingnames,
 					  "nodeuvs":flattenpoolvector2(nodeuvs),
 					  "nodewallangle":nodewallangle,
+					  "nodeinwardvecs":flattenpoolvector3(nodeinwardvecs),
 					  "onepathpairs":onepathpairs,
 					  "drawnstationnodes":drawnstationnodesRAW }
 	var save_game = File.new()
@@ -142,7 +144,7 @@ func saveonetunnel(fname):
 
 func verifyonetunnelmatches(sketchsystem):
 	var N = len(nodepoints)
-	assert ((N == len(nodeuvs)) and (N == len(nodedrawingindex)) and (N == len(nodedrawingindex)) and (N == len(nodeinwardvec)) and (N == len(nodewallangle)))
+	assert ((N == len(nodeuvs)) and (N == len(nodedrawingindex)) and (N == len(nodedrawingindex)) and (N == len(nodeinwardvecs)) and (N == len(nodewallangle)))
 	var onepathnodes = sketchsystem.get_node("OnePathNodes").get_children()
 	assert(N == len(onepathnodes))
 	for i in range(N):
@@ -161,20 +163,33 @@ func sd0(a, b):
 func makeworkingshell():
 	var Npaths = len(onepathpairs)/2
 
+	# quick generation of parallel arrays
 	var Lpathvectorseq = [ ] 
+	var iva0 = PoolVector3Array()
+	var iva1 = PoolVector3Array()
 	for i in range(len(nodepoints)):
 		Lpathvectorseq.append([])  # [ (arg, pathindex) ]
+		var iv0 = nodeinwardvecs[i].cross(Vector3(0, 0, 1)).normalized()
+		if iv0.length_squared() == 0:
+			iv0 = nodeinwardvecs[i].cross(Vector3(1, 0, 0))
+		var iv1 = iv0.cross(nodeinwardvecs[i])
+		iva0.push_back(iv0)
+		iva1.push_back(iv1)
 	
 	var opvisits2 = [ ]
 	for i in range(Npaths):
 		var i0 = onepathpairs[i*2]
 		var i1 = onepathpairs[i*2+1]
 		var vec3 = nodepoints[i1] - nodepoints[i0]
-		var vec = Vector2(vec3.x, vec3.z)
-		Lpathvectorseq[i0].append([vec.angle(), i])
-		Lpathvectorseq[i1].append([(-vec).angle(), i])
+		
+		var vec0 = Vector2(iva0[i0].dot(vec3), iva1[i0].dot(vec3))
+		var vec1 = Vector2(iva0[i1].dot(vec3), iva1[i1].dot(vec3))
+		
+		Lpathvectorseq[i0].append([vec0.angle(), i])
+		Lpathvectorseq[i1].append([(-vec1).angle(), i])
 		opvisits2.append(0)
 		opvisits2.append(0)
+		
 	for pathvectorseq in Lpathvectorseq:
 		pathvectorseq.sort_custom(self, "sd0")
 		print(pathvectorseq)
@@ -202,9 +217,11 @@ func makeworkingshell():
 	var surfaceTool = SurfaceTool.new()
 	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
 	for poly in polys:
+		if len(poly) < 3 or len(poly) > 4:
+			continue
 		var pv = PoolVector2Array()
 		for p in poly:
-			pv.append(Vector2(nodepoints[p].x, nodepoints[p].z))
+			pv.append(Vector2(iva0[poly[0]].dot(nodepoints[p]), iva1[poly[0]].dot(nodepoints[p])))
 		var pi = Geometry.triangulate_polygon(pv)
 		print("piiii", pi)
 		for u in pi:
@@ -213,3 +230,41 @@ func makeworkingshell():
 	surfaceTool.generate_normals()
 	return surfaceTool.commit()
 
+func nodeplanepreview(i):
+	var iv0 = nodeinwardvecs[i].cross(Vector3(0, 0, 1)).normalized()
+	if iv0.length_squared() == 0:
+		iv0 = nodeinwardvecs[i].cross(Vector3(1, 0, 0))
+	var iv1 = iv0.cross(nodeinwardvecs[i])
+	var p = nodepoints[i]
+
+	var surfaceTool = SurfaceTool.new()
+	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
+	surfaceTool.add_vertex(p + iv0*0.01)
+	surfaceTool.add_vertex(p - iv0*0.01)
+	surfaceTool.add_vertex(p + nodeinwardvecs[i]*0.4)
+	surfaceTool.add_vertex(p + iv1*0.01)
+	surfaceTool.add_vertex(p - iv1*0.01)
+	surfaceTool.add_vertex(p + nodeinwardvecs[i]*0.4)
+	
+	var pathvectorseq = [ ]
+	for j in range(len(onepathpairs)/2):
+		var i0 = onepathpairs[j*2]
+		var i1 = onepathpairs[j*2+1]
+		if i0 == i or i1 == i:
+			var vec3 = nodepoints[i1] - nodepoints[i0]
+			var vec0 = Vector2(iv0.dot(vec3), iv1.dot(vec3))
+			if i0 == i:
+				pathvectorseq.append([vec0.angle(), j])
+			else:
+				pathvectorseq.append([(-vec0).angle(), j])
+	pathvectorseq.sort_custom(self, "sd0")
+	for j in range(len(pathvectorseq)):
+		var i0 = onepathpairs[pathvectorseq[j][1]*2 if onepathpairs[pathvectorseq[j][1]*2] != i else pathvectorseq[j][1]*2+1] 
+		var j1 = (j+1)%len(pathvectorseq)
+		var i1 = onepathpairs[pathvectorseq[j1][1]*2 if onepathpairs[pathvectorseq[j1][1]*2] != i else pathvectorseq[j1][1]*2+1]
+		print("pppp---ppp ", i, "  ", i0, " ", i1, nodepoints[i0])		
+		surfaceTool.add_vertex(p + (nodepoints[i0]-p)*0.18)
+		surfaceTool.add_vertex(p + (nodepoints[i0]-p)*0.22)
+		surfaceTool.add_vertex(p + (nodepoints[i1]-p)*0.2)
+	
+	return surfaceTool.commit()

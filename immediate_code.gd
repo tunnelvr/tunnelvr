@@ -12,26 +12,15 @@ func _ready():
 	
 func _run():
 	print("Hello from the Godot Editor!")
+	var inwardvec = Vector3(0, 0.002, -1) 
+	var iv0 = inwardvec.cross(Vector3(0, 0, 1)).normalized()
+	if iv0.length_squared() == 0:
+		iv0 = inwardvec.cross(Vector3(1, 0, 0))
+	var iv1 = iv0.cross(inwardvec)
+	print(iv0, iv1)
 
-	var a = PoolVector3Array()
-	a.append(Vector3(2,3,4))
-	var b = PoolRealArray()
-	b.append_array([1,2,3])
-	for c in a:
-		print("c", c)
-	print(b)
-	var x = {1:2, 9:a, "kk":b}
-	print(to_json(x))
-	print(a)
-	print(3091/2405.0)
+#		var vec = Vector2(vec3.x, vec3.z)
+#		Lpathvectorseq[i0].append([vec.angle(), i])
+#		Lpathvectorseq[i1].append([(-vec).angle(), i])
+
 	return
-		
-	#var drawnfloor = get_scene().get_node("drawnfloor")
-
-	#var dp = drawnfloor.global_transform.xform(floorpoint)
-	#var t = Transform(Vector3(0.082234, 0, 0.996613), Vector3(0, 0, 1), Vector3(-0.896952, 0, 0.074011), Vector3(1.0809, 0, 0))
-	#print(p)
-	#print(t.xform(t.xform_inv(p)))
-
-	#local_point += Vector3(0.5, -0.5, 0) # X is about 0 to 1, Y is about 0 to -1.
-	#return local_point
