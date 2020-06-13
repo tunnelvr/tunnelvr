@@ -5,15 +5,22 @@ extends Resource
 # It is also used for loading and saving and generating derived stuff, like surfaces
 # and it can be used for communication -- syncronizing stuff across the network
 
-
-var nodepoints : = PoolVector3Array() 
-var drawingnames = [ "res://surveyscans/DukeStResurvey-drawnup-p3.jpg" ]  # indexed by nodedrawing
+# 
+var nodepoints 		 : = PoolVector3Array() 
 var nodedrawingindex : = PoolIntArray() 
-var nodeuvs : = PoolVector2Array()
-var nodewallangle : = PoolRealArray() 
+var nodeuvs 		 : = PoolVector2Array()
+var nodewallangle 	 : = PoolRealArray() 
+var nodeinwardvec 	 : = PoolVector3Array() 
 
-var onepathpairs : = PoolIntArray()  # pairs indexing into nodepoints
+var onepathpairs 	 : = PoolIntArray()  # 2* pairs indexing into nodepoints
+
+
+# indexed by nodedrawing; use a PoolStringArray?:
+var drawingnames = [ "res://surveyscans/DukeStResurvey-drawnup-p3.jpg" ]  
+
+# drawnstations should be made part of the centreline, in truth -- can we backport them into that data?
 var drawnstationnodesRAW = [ ]  # temporary case till we know what to do
+
 
 func _ready():
 	pass # Replace with function body
@@ -23,18 +30,24 @@ func newotnodepoint():
 	nodedrawingindex.push_back(0)
 	nodeuvs.push_back(Vector2())
 	nodewallangle.push_back(0)
+	nodeinwardvec.push_back(Vector3())
 	return len(nodepoints) - 1
 
 func removeotnodepoint(i):
 	var e = len(nodepoints) - 1
+
 	nodepoints[i] = nodepoints[e]
 	nodedrawingindex[i] = nodedrawingindex[e]
 	nodeuvs[i] = nodeuvs[e]
 	nodewallangle[i] = nodewallangle[e]
+	nodeinwardvec[i] = nodeinwardvec[e]
+
 	nodepoints.resize(e)
 	nodedrawingindex.resize(e)
 	nodeuvs.resize(e)
 	nodewallangle.resize(e)
+	nodeinwardvec.resize(e)
+
 	for j in range(len(onepathpairs) - 2, -1, -2):
 		if (onepathpairs[j] == i) or (onepathpairs[j+1] == i):
 			onepathpairs[j] = onepathpairs[-2]
@@ -128,16 +141,17 @@ func saveonetunnel(fname):
 
 
 func verifyonetunnelmatches(sketchsystem):
-	var ot = sketchsystem.ot
+	var N = len(nodepoints)
+	assert ((N == len(nodeuvs)) and (N == len(nodedrawingindex)) and (N == len(nodedrawingindex)) and (N == len(nodeinwardvec)) and (N == len(nodewallangle)))
 	var onepathnodes = sketchsystem.get_node("OnePathNodes").get_children()
-	assert(len(ot.nodepoints) == len(onepathnodes))
-	for i in range(len(ot.nodepoints)):
+	assert(N == len(onepathnodes))
+	for i in range(N):
 		var opn = onepathnodes[i]
 		assert (opn.otIndex == i)
-		print(i, opn.global_transform.origin, ot.nodepoints[i])
-		assert (opn.global_transform.origin == ot.nodepoints[i])
-		assert (opn.drawingname == ot.drawingnames[ot.nodedrawingindex[i]])
-		assert (opn.uvpoint == ot.nodeuvs[i])
+		print(i, opn.global_transform.origin, nodepoints[i])
+		assert (opn.global_transform.origin == nodepoints[i])
+		assert (opn.drawingname == drawingnames[nodedrawingindex[i]])
+		assert (opn.uvpoint == nodeuvs[i])
 	return true
 
 

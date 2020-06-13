@@ -5,8 +5,11 @@ var arvr_quest = null;
 
 
 # Stuff to do:
-# * updateonepaths from onetunneldata
-# * port across the updateworkingshell code to onetunnel
+# * laser spot laser spike
+# * change textpanel from static body to node
+# * disabled on the GUIDpanel.  Delete the collisionshape from textpanel
+# * add inward vector on selection of a node-point
+# * abolish nodeuvs and others from OnePathNode object and ref directly
 # * inner vector from a node used for ordering the shell points
 # * prove we can make a ceiling and a donut
 # * Fall upward to ceiling when not on above the cave

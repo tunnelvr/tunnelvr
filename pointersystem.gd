@@ -38,6 +38,7 @@ var drawingwallangle = 0.0
 
 onready var LaserSquare = get_node("../../../LaserSquare")
 onready var LaserSpot = get_node("LaserSpot"); 
+onready var LaserSpike = get_node("LaserSpot/LaserSpike"); 
 
 var laser_y = -0.05
 
@@ -95,8 +96,9 @@ func setopnpos(opn, p, bonfloor):
 			opn.global_transform.origin = p + Vector3(0, 0.2, 0)
 			opn.scale.y = opn.global_transform.origin.y
 		sketchsystem.ot.copyopntootnode(opn)
-
-
+		sketchsystem.ot.nodeinwardvec[opn.otIndex] = LaserSpike.global_transform.basis.y
+		print("Thislaserspike ", LaserSpike.global_transform.basis.y)
+		
 func onpointing(newpointertarget, newpointertargetpoint):
 	if newpointertarget != pointertarget:
 		if is_instance_valid(pointertarget) and pointertarget == guipanel3d:
@@ -220,8 +222,9 @@ func _on_button_pressed(p_button):
 		if abs(up_down) < 0.5 and abs(left_right) > 0.1:
 			pointertarget.global_transform.origin.y = max(0.1, pointertarget.global_transform.origin.y + (1 if left_right > 0 else -1)*(1.0 if abs(left_right) < 0.8 else 0.1))
 			pointertarget.scale.y = pointertarget.global_transform.origin.y
-			sketchsystem.ot.copyopntootnode(pointertarget)
-					
+			if (pointertarget != drawingwall):
+				sketchsystem.ot.copyopntootnode(pointertarget)
+			
 	if p_button == Buttons.VR_GRIP:
 		gripbuttonpressused = false
 

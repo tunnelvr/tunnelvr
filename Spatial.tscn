@@ -197,7 +197,7 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -4.96626, 4.96626 )
 mesh = SubResource( 4 )
 material/0 = null
 
-[node name="MeshInstance" type="MeshInstance" parent="ARVROrigin/ARVRController_Right/pointersystem/LaserSpot"]
+[node name="LaserSpike" type="MeshInstance" parent="ARVROrigin/ARVRController_Right/pointersystem/LaserSpot"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0 )
 mesh = SubResource( 6 )
 material/0 = null
@@ -267,7 +267,7 @@ material_override = SubResource( 19 )
 
 [node name="DrawnStationNodes" type="Spatial" parent="SketchSystem/Centreline"]
 
-[node name="TextPanel" parent="SketchSystem/Centreline" instance=ExtResource( 11 )]
+[node name="TextPanel" type="Spatial" parent="SketchSystem/Centreline" instance=ExtResource( 11 )]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 1.91816, 0.304006, -4.61659 )
 visible = false
 

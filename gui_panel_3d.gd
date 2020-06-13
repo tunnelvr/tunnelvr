@@ -41,8 +41,10 @@ func togglevisibility(controller_global_transform):
 		global_transform = paneltrans
 		$Viewport/GUI/Panel/Label.text = "Control panel"
 		visible = true
+		$CollisionShape.disabled = false
 	else:
 		visible = false	
+		$CollisionShape.disabled = true
 	
 func guipanelsendmousemotion(collision_point, controller_global_transform, controller_trigger):
 	var collider_transform = global_transform
