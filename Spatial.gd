@@ -5,14 +5,10 @@ var arvr_quest = null;
 
 
 # Stuff to do:
-# * move the onepath stuff into onetunnel class
-# * keep the positions of the points and lines updated
-# * check the adds and deletes all match
-# * abolish onepathpairs in favour of OneTunnel.onepathpairs
-
-# * Separate OneTunnel class with all the geometry that drives the sketch system
-#      and makes a much more efficient update system than doing all at once
-# * Save and load wallangle from savegame file
+# * updateonepaths from onetunneldata
+# * port across the updateworkingshell code to onetunnel
+# * inner vector from a node used for ordering the shell points
+# * prove we can make a ceiling and a donut
 # * Fall upward to ceiling when not on above the cave
 # * move textpanel out to top level with the GUI stuff
 # * anchor nodes capable of pulling plane up and down

@@ -140,5 +140,62 @@ func verifyonetunnelmatches(sketchsystem):
 		assert (opn.uvpoint == ot.nodeuvs[i])
 	return true
 
+
+func sd0(a, b):
+	return a[0] < b[0]
 	
+func makeworkingshell():
+	var Npaths = len(onepathpairs)/2
+
+	var Lpathvectorseq = [ ] 
+	for i in range(len(nodepoints)):
+		Lpathvectorseq.append([])  # [ (arg, pathindex) ]
+	
+	var opvisits2 = [ ]
+	for i in range(Npaths):
+		var i0 = onepathpairs[i*2]
+		var i1 = onepathpairs[i*2+1]
+		var vec3 = nodepoints[i1] - nodepoints[i0]
+		var vec = Vector2(vec3.x, vec3.z)
+		Lpathvectorseq[i0].append([vec.angle(), i])
+		Lpathvectorseq[i1].append([(-vec).angle(), i])
+		opvisits2.append(0)
+		opvisits2.append(0)
+	for pathvectorseq in Lpathvectorseq:
+		pathvectorseq.sort_custom(self, "sd0")
+		print(pathvectorseq)
+		
+	var polys = [ ]
+	for i in range(len(opvisits2)):
+		if opvisits2[i] != 0:
+			continue
+		# warning-ignore:integer_division
+		var ne = (i/2)
+		print("iiii", i)
+		var np = onepathpairs[ne*2 + (0 if ((i%2)==0) else 1)]
+		polys.append([ ])
+		while (opvisits2[ne*2 + (0 if onepathpairs[ne*2] == np else 1)]) == 0:
+			opvisits2[ne*2 + (0 if onepathpairs[ne*2] == np else 1)] = len(polys)
+			#polys[-1].append(Vector3(np.global_transform.origin.x, np.scale.y, np.global_transform.origin.z))
+			polys[-1].append(np)
+			np = onepathpairs[ne*2 + (1  if onepathpairs[ne*2] == np  else 0)]
+			for j in range(len(Lpathvectorseq[np])):
+				if Lpathvectorseq[np][j][1] == ne:
+					ne = Lpathvectorseq[np][(j+1)%len(Lpathvectorseq[np])][1]
+					break
+		print("pppp ", len(polys[-1]), " ", polys[-1][0])
+
+	var surfaceTool = SurfaceTool.new()
+	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for poly in polys:
+		var pv = PoolVector2Array()
+		for p in poly:
+			pv.append(Vector2(nodepoints[p].x, nodepoints[p].z))
+		var pi = Geometry.triangulate_polygon(pv)
+		print("piiii", pi)
+		for u in pi:
+			surfaceTool.add_uv(nodeuvs[poly[u]])
+			surfaceTool.add_vertex(nodepoints[poly[u]])
+	surfaceTool.generate_normals()
+	return surfaceTool.commit()
 

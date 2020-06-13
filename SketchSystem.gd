@@ -37,8 +37,8 @@ func updateonepaths():
 	var surfaceTool = SurfaceTool.new()
 	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
 	for j in range(0, len(ot.onepathpairs), 2):
-		var p0 = $OnePathNodes.get_child(ot.onepathpairs[j]).global_transform.origin + Vector3(0, 0.005, 0)
-		var p1 = $OnePathNodes.get_child(ot.onepathpairs[j+1]).global_transform.origin + Vector3(0, 0.005, 0)
+		var p0 = ot.nodepoints[ot.onepathpairs[j]] + Vector3(0, 0.005, 0)
+		var p1 = ot.nodepoints[ot.onepathpairs[j+1]] + Vector3(0, 0.005, 0)
 		var perp = linewidth*Vector2(-(p1.z - p0.z), p1.x - p0.x).normalized()
 		var p0left = p0 - Vector3(perp.x, 0, perp.y)
 		var p0right = p0 + Vector3(perp.x, 0, perp.y)
@@ -57,12 +57,14 @@ func updateonepaths():
 	updateworkingshell()
 
 
-func sd0(a, b):
-	return a[0] < b[0]
-
 func updateworkingshell():
-	pass
-
+	$WorkingShell/MeshInstance.mesh = ot.makeworkingshell()
+	#var col_shape = ConcavePolygonShape.new()
+	#col_shape.set_faces(mesh.get_faces())
+	#print("sssss", get_node("../CollisionShape").get_shape())
+	#if $WorkingShell/MeshInstance.mesh != null:
+	$WorkingShell/CollisionShape.shape.set_faces($WorkingShell/MeshInstance.mesh.get_faces())
+	
 
 # Quick saving and loading of shape.  It goes to 
 # C:\Users\ViveOne\AppData\Roaming\Godot\app_userdata\digtunnel
