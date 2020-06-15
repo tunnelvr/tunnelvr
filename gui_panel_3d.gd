@@ -6,22 +6,26 @@ onready var ARVRworld_scale = ARVRServer.world_scale
 
 var viewport_point := Vector2(0, 0)
 var viewport_mousedown := false
-
+var sketchsystem = null
 
 func _on_buttonload_pressed():
-	get_node("../SketchSystem").loadsketchsystem()
+	sketchsystem.loadsketchsystem()
 	$Viewport/GUI/Panel/Label.text = "Sketch Loaded"
 	
 func _on_buttonsave_pressed():
-	get_node("../SketchSystem").savesketchsystem()
+	sketchsystem.savesketchsystem()
 	$Viewport/GUI/Panel/Label.text = "Sketch Saved"
 
 func _on_buttonshowxs_toggled(button_pressed):
-	get_node("../SketchSystem/Centreline/CentrelineCrossSections").visible = button_pressed
+	sketchsystem.get_node("Centreline/CentrelineCrossSections").visible = button_pressed
 	$Viewport/GUI/Panel/Label.text = "XS shown" if button_pressed else "XS hidden"
 
+func _on_buttonupdateshell_toggled(button_pressed):
+	sketchsystem.updateworkingshell(button_pressed)
+	$Viewport/GUI/Panel/Label.text = "UpdateShell shown" if button_pressed else "Shell hidden"
+
 func _on_buttonshiftfloor_pressed():
-	get_node("../SketchSystem/Centreline").shiftfloorfromdrawnstations()
+	sketchsystem.get_node("Centreline").shiftfloorfromdrawnstations()
 	$Viewport/GUI/Panel/Label.text = "Floor shifted"
 	
 func _ready():
@@ -29,6 +33,7 @@ func _ready():
 	$Viewport/GUI/Panel/ButtonSave.connect("pressed", self, "_on_buttonsave_pressed")
 	$Viewport/GUI/Panel/ButtonShowXS.connect("toggled", self, "_on_buttonshowxs_toggled")
 	$Viewport/GUI/Panel/ButtonShiftFloor.connect("pressed", self, "_on_buttonshiftfloor_pressed")
+	$Viewport/GUI/Panel/ButtonUpdateShell.connect("toggled", self, "_on_buttonupdateshell_toggled")
 
 
 func togglevisibility(controller_global_transform):

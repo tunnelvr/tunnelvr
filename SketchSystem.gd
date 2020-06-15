@@ -53,17 +53,17 @@ func updateonepaths():
 	surfaceTool.generate_normals()
 	$PathLines.mesh = surfaceTool.commit()
 	print("usus ", len($PathLines.mesh.get_faces()), " ", len($PathLines.mesh.get_faces())) #surfaceTool.generate_normals()
-	
-	updateworkingshell()
+	#updateworkingshell()
 
-
-func updateworkingshell():
-	$WorkingShell/MeshInstance.mesh = ot.makeworkingshell()
-	#var col_shape = ConcavePolygonShape.new()
-	#col_shape.set_faces(mesh.get_faces())
-	#print("sssss", get_node("../CollisionShape").get_shape())
-	#if $WorkingShell/MeshInstance.mesh != null:
-	$WorkingShell/CollisionShape.shape.set_faces($WorkingShell/MeshInstance.mesh.get_faces())
+func updateworkingshell(makevisible):
+	if makevisible:
+		$WorkingShell/MeshInstance.mesh = ot.makeworkingshell()
+		$WorkingShell/CollisionShape.shape.set_faces($WorkingShell/MeshInstance.mesh.get_faces())
+		$WorkingShell.visible = true
+		$WorkingShell/CollisionShape.disabled = false
+	else:
+		$WorkingShell.visible = false
+		$WorkingShell/CollisionShape.disabled = true
 	
 
 # Quick saving and loading of shape.  It goes to 

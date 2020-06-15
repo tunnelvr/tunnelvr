@@ -203,22 +203,27 @@ func makeworkingshell():
 		print("iiii", i)
 		var np = onepathpairs[ne*2 + (0 if ((i%2)==0) else 1)]
 		polys.append([ ])
+		var polyhassinglenodes = false
 		while (opvisits2[ne*2 + (0 if onepathpairs[ne*2] == np else 1)]) == 0:
 			opvisits2[ne*2 + (0 if onepathpairs[ne*2] == np else 1)] = len(polys)
 			#polys[-1].append(Vector3(np.global_transform.origin.x, np.scale.y, np.global_transform.origin.z))
 			polys[-1].append(np)
 			np = onepathpairs[ne*2 + (1  if onepathpairs[ne*2] == np  else 0)]
+			if len(Lpathvectorseq[np]) == 1:
+				polyhassinglenodes = true
 			for j in range(len(Lpathvectorseq[np])):
 				if Lpathvectorseq[np][j][1] == ne:
 					ne = Lpathvectorseq[np][(j+1)%len(Lpathvectorseq[np])][1]
 					break
-		print("pppp ", len(polys[-1]), " ", polys[-1][0])
+		print("pppp ", len(polys[-1]), " ", polys[-1][0], " ", polyhassinglenodes)
+		if polyhassinglenodes:
+			polys.pop_back()
 
 	var surfaceTool = SurfaceTool.new()
 	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
 	for poly in polys:
-		if len(poly) < 3 or len(poly) > 4:
-			continue
+		#if len(poly) < 3 or len(poly) > 4:
+		#	continue
 		var pv = PoolVector2Array()
 		for p in poly:
 			pv.append(Vector2(iva0[poly[0]].dot(nodepoints[p]), iva1[poly[0]].dot(nodepoints[p])))

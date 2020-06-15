@@ -39,6 +39,10 @@ __meta__ = {
 [node name="Panel" type="Panel" parent="Viewport/GUI"]
 anchor_right = 1.0
 anchor_bottom = 1.0
+rect_pivot_offset = Vector2( 167.043, 64.2911 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="Label" type="Label" parent="Viewport/GUI/Panel"]
 margin_left = 44.0
@@ -70,14 +74,27 @@ __meta__ = {
 
 [node name="ButtonShowXS" type="Button" parent="Viewport/GUI/Panel"]
 margin_left = 15.3899
-margin_top = 112.714
+margin_top = 113.177
 margin_right = 155.39
-margin_bottom = 140.714
-rect_pivot_offset = Vector2( 79.3797, 41.4556 )
+margin_bottom = 141.177
+rect_pivot_offset = Vector2( 138.61, -8.13628 )
 hint_tooltip = "test tooltip"
 toggle_mode = true
 pressed = true
 text = "Show XS"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ButtonUpdateShell" type="Button" parent="Viewport/GUI/Panel"]
+margin_left = 160.4
+margin_top = 43.6836
+margin_right = 300.4
+margin_bottom = 71.6836
+rect_pivot_offset = Vector2( 138.61, -8.13628 )
+hint_tooltip = "test tooltip"
+toggle_mode = true
+text = "Update Shell"
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -94,10 +111,10 @@ __meta__ = {
 }
 
 [node name="ColorRect" type="ColorRect" parent="Viewport/GUI/Panel"]
-margin_left = 180.0
-margin_top = 26.0
-margin_right = 244.0
-margin_bottom = 90.0
+margin_left = 288.873
+margin_top = 89.0076
+margin_right = 352.873
+margin_bottom = 153.008
 color = Color( 1, 0, 0, 1 )
 
 [node name="TextureRect" type="TextureRect" parent="Viewport/GUI/Panel"]
@@ -105,27 +122,21 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-margin_left = 5.20758
-margin_top = -101.109
-margin_right = 45.2076
-margin_bottom = -61.1089
+margin_left = 101.0
+margin_top = -48.0
+margin_right = 159.0
+margin_bottom = 10.0
 texture = ExtResource( 2 )
 expand = true
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="VSlider" type="VSlider" parent="Viewport/GUI/Panel"]
-margin_left = 260.0
-margin_top = 26.0
-margin_right = 276.0
-margin_bottom = 166.0
-
 [node name="OptionButton" type="OptionButton" parent="Viewport/GUI/Panel"]
-margin_left = 283.97
-margin_top = 28.5342
-margin_right = 365.97
-margin_bottom = 82.5342
+margin_left = 282.58
+margin_top = 158.256
+margin_right = 364.58
+margin_bottom = 212.256
 text = "Item 0"
 items = [ "Item 0", null, false, 0, null, "Item 1", null, false, 1, null, "Item 2", null, false, 2, null ]
 selected = 0
