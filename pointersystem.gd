@@ -8,6 +8,7 @@ var drawnfloor = null
 var drawingwall = null
 var sketchsystem = null
 var centrelinesystem =null
+var nodeorientationpreview = null
 
 var guipanel3d = null
 var _is_activating_gui = false
@@ -32,6 +33,7 @@ var pointertargetpoint = Vector3(0, 0, 0)
 var pointertargetoriginy = 0.0
 var selectedtarget = null
 var gripbuttonpressused = false
+var nodeorientationpreviewheldtransform = null
 var drawingwallangle = 0.0
 
 # set_materialoverride
@@ -142,6 +144,9 @@ func _on_button_pressed(p_button):
 		elif pointertarget == guipanel3d:
 			pass  #this is elsewhere processed
 
+		elif pointertarget == nodeorientationpreview:
+			nodeorientationpreviewheldtransform = get_parent().global_transform.inverse()
+
 		elif pointertarget == drawnfloor or pointertarget == drawingwall:
 			var bonfloor = (pointertarget == drawnfloor)
 			# drag node to new position on floor
@@ -153,7 +158,7 @@ func _on_button_pressed(p_button):
 					setopnpos(selectedtarget, pointertargetpoint, bonfloor)
 				gripbuttonpressused = true
 				
-			# new node on floor with centreline node already connected
+			# new drawn station node on floor with centreline node already connected
 			elif is_instance_valid(selectedtarget) and selectedtarget.getnodetype() == "ntStation" and bonfloor:
 				pointertarget = centrelinesystem.newdrawnstationnode()
 				setopnpos(pointertarget, pointertargetpoint, true)
@@ -177,18 +182,28 @@ func _on_button_pressed(p_button):
 					pointertarget.global_transform.origin.y = 0.2
 					pointertarget.scale.y = pointertarget.global_transform.origin.y
 					sketchsystem.ot.copyopntootnode(pointertarget)
+					
 				if controller.is_button_pressed(Buttons.VR_GRIP):
 					selectedtarget = null
+					nodeorientationpreview.visible = false
+					nodeorientationpreview.get_node("CollisionShape").disabled = true
 				else:
 					selectedtarget = pointertarget
 					selectedtarget.set_materialoverride(selectedpointerhighlightmaterial)
+					nodeorientationpreview.global_transform = sketchsystem.ot.nodeplanetransform(selectedtarget.otIndex)
+					nodeorientationpreview.visible = true
+					nodeorientationpreview.get_node("CollisionShape").disabled = false
 				assert (sketchsystem.ot.verifyonetunnelmatches(sketchsystem))
 
 					
 		# clear selected target by selecting again
+		# (we may reconsider deselection on second selection)
 		elif pointertarget == selectedtarget:
 			if selectedtarget.getnodetype() == "ntStation":
 				settextpanel(null, null)
+			elif selectedtarget.getnodetype() == "ntPath":
+				nodeorientationpreview.visible = false
+				nodeorientationpreview.get_node("CollisionShape").disabled = true
 			selectedtarget.set_materialoverride(pointinghighlightmaterial)
 			if controller.is_button_pressed(Buttons.VR_GRIP):
 				if selectedtarget.getnodetype() == "ntPath":
@@ -204,6 +219,8 @@ func _on_button_pressed(p_button):
 			if is_instance_valid(selectedtarget) and selectedtarget.has_method("set_materialoverride"):
 				selectedtarget.set_materialoverride(null)
 				if selectedtarget.getnodetype() == "ntStation":
+					nodeorientationpreview.visible = false
+					nodeorientationpreview.get_node("CollisionShape").disabled = true
 					settextpanel(null, null)
 				if selectedtarget.getnodetype() == "ntPath" and pointertarget.getnodetype() == "ntPath":
 					sketchsystem.applyonepath(selectedtarget, pointertarget)
@@ -215,6 +232,9 @@ func _on_button_pressed(p_button):
 			elif selectedtarget.getnodetype() == "ntDrawnStation":
 				settextpanel(selectedtarget.stationname, centrelinesystem.stationnodemap[selectedtarget.stationname].global_transform.origin)				
 			elif selectedtarget.getnodetype() == "ntPath":
+				nodeorientationpreview.global_transform = sketchsystem.ot.nodeplanetransform(selectedtarget.otIndex)
+				nodeorientationpreview.visible = true
+				nodeorientationpreview.get_node("CollisionShape").disabled = false
 				sketchsystem.get_node("NodePreview").mesh = sketchsystem.ot.nodeplanepreview(selectedtarget.otIndex)
 				
 	# change height of pointer target
@@ -226,17 +246,29 @@ func _on_button_pressed(p_button):
 			pointertarget.scale.y = pointertarget.global_transform.origin.y
 			if (pointertarget != drawingwall):
 				sketchsystem.ot.copyopntootnode(pointertarget)
+				nodeorientationpreview.global_transform.origin = pointertarget.global_transform.origin
 			
 	if p_button == Buttons.VR_GRIP:
 		gripbuttonpressused = false
 
 func _on_button_release(p_button):
-	# clear selection by squeezing and then releasing grip without doing anything in between
+	# cancel selection by squeezing and then releasing grip without doing anything in between
 	if p_button == Buttons.VR_GRIP and not gripbuttonpressused and is_instance_valid(selectedtarget) and selectedtarget.has_method("set_materialoverride"):
 		selectedtarget.set_materialoverride(pointinghighlightmaterial if selectedtarget == pointertarget else null)
 		selectedtarget = null
+		if nodeorientationpreview.visible:
+			nodeorientationpreview.visible = false
+			nodeorientationpreview.get_node("CollisionShape").disabled = true
+			nodeorientationpreviewheldtransform = null
 		
-	if p_button == Buttons.VR_TRIGGER and is_instance_valid(selectedtarget) and is_instance_valid(pointertarget) and pointertarget.has_method("set_materialoverride") and pointertarget != selectedtarget:
+	elif p_button == Buttons.VR_TRIGGER and (nodeorientationpreviewheldtransform != null):
+		print("dosomethingwith nodeorientationpreview ", nodeorientationpreviewheldtransform)
+		var oiv = sketchsystem.ot.nodeinwardvecs[selectedtarget.otIndex]
+		var iv = get_parent().global_transform.basis.xform(nodeorientationpreviewheldtransform.basis.xform(oiv))
+		sketchsystem.ot.nodeinwardvecs[selectedtarget.otIndex] = iv
+		nodeorientationpreviewheldtransform = null
+
+	elif p_button == Buttons.VR_TRIGGER and is_instance_valid(selectedtarget) and is_instance_valid(pointertarget) and pointertarget.has_method("set_materialoverride") and pointertarget != selectedtarget:
 		var vwall = pointertarget.global_transform.origin - selectedtarget.global_transform.origin
 		var vwall2 = Vector2(vwall.x, vwall.z)
 		drawingwallangle = -vwall2.angle()
@@ -247,7 +279,16 @@ func _on_button_release(p_button):
 func _process(_delta):
 	if !is_inside_tree():
 		return
-	if $Laser/RayCast.is_colliding():
+	if nodeorientationpreviewheldtransform != null:
+		var oiv = sketchsystem.ot.nodeinwardvecs[selectedtarget.otIndex]
+		var iv = get_parent().global_transform.basis.xform(nodeorientationpreviewheldtransform.basis.xform(oiv))
+		var iv0 = iv.cross(Vector3(0, 0, 1)).normalized()
+		if iv0.length_squared() == 0:
+			iv0 = iv.cross(Vector3(1, 0, 0))
+		var iv1 = iv0.cross(iv)
+		# here could add the 3D push pull motions too
+		nodeorientationpreview.global_transform = Transform(Basis(iv0, iv, iv1), sketchsystem.ot.nodepoints[selectedtarget.otIndex])
+	elif $Laser/RayCast.is_colliding():
 		onpointing($Laser/RayCast.get_collider(), $Laser/RayCast.get_collision_point())
 	else:
 		onpointing(null, null)

@@ -5,8 +5,11 @@ var arvr_quest = null;
 
 
 # Stuff to do:
-# * plot the direction of the bits after the spike
-# * label polys not to fill if there is a two sided edge
+# * check we can walk through drawing wall (cannot)
+# * nodeorientation appear and disappear with selection of node
+# * nodeorientation drag capability
+# * mark polys not to fill if there is a two sided edge
+# * shell code should be a button on the guipanel
 # * abolish nodeuvs and others from OnePathNode object and ref directly
 # * Fall upward to ceiling when not on above the cave
 # * move textpanel out to top level with the GUI stuff
@@ -62,6 +65,7 @@ func _ready():
 	pointer.centrelinesystem = $SketchSystem/Centreline
 	pointer.drawnfloor = $drawnfloor
 	pointer.drawingwall = $drawingwall
+	pointer.nodeorientationpreview = $SketchSystem/NodeOrientationPreview
 	pointer.guipanel3d = $GUIPanel3D
 	pointer.guipanel3d.visible = false
 	$SketchSystem/Centreline.drawnfloor = $drawnfloor

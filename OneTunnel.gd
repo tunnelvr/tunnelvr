@@ -230,6 +230,14 @@ func makeworkingshell():
 	surfaceTool.generate_normals()
 	return surfaceTool.commit()
 
+func nodeplanetransform(i):
+	var iv = nodeinwardvecs[i]
+	var iv0 = iv.cross(Vector3(0, 0, 1)).normalized()
+	if iv0.length_squared() == 0:
+		iv0 = iv.cross(Vector3(1, 0, 0))
+	var iv1 = iv0.cross(iv)
+	return Transform(Basis(iv0, iv, iv1), nodepoints[i])
+
 func nodeplanepreview(i):
 	var iv0 = nodeinwardvecs[i].cross(Vector3(0, 0, 1)).normalized()
 	if iv0.length_squared() == 0:
