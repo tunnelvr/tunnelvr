@@ -11,8 +11,10 @@ var arvr_quest = null;
 # * abolish nodeuvs and others from OnePathNode object and ref directly
 # * Fall upward to ceiling when not on above the cave
 # * move textpanel out to top level with the GUI stuff
+# * triangulations to better reflect the normals given at the nodes
 # * anchor nodes capable of pulling plane up and down
 # * floor and wall textures programmable
+# * shadow from the pulled body and head-torch required
 # * nodes have push-pull or cross-section plane
 # * Line sections and triangle areas can be split
 # * Boulders and gravel and particles
