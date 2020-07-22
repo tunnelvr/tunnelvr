@@ -9,7 +9,6 @@ extends Resource
 var nodepoints 		 : = PoolVector3Array() 
 var nodedrawingindex : = PoolIntArray() 
 var nodeuvs 		 : = PoolVector2Array()
-var nodewallangle 	 : = PoolRealArray() 
 var nodeinwardvecs 	 : = PoolVector3Array() 
 
 var onepathpairs 	 : = PoolIntArray()  # 2* pairs indexing into nodepoints
@@ -29,7 +28,6 @@ func newotnodepoint():
 	nodepoints.push_back(Vector3())
 	nodedrawingindex.push_back(0)
 	nodeuvs.push_back(Vector2())
-	nodewallangle.push_back(0)
 	nodeinwardvecs.push_back(Vector3())
 	return len(nodepoints) - 1
 
@@ -39,13 +37,11 @@ func removeotnodepoint(i):
 	nodepoints[i] = nodepoints[e]
 	nodedrawingindex[i] = nodedrawingindex[e]
 	nodeuvs[i] = nodeuvs[e]
-	nodewallangle[i] = nodewallangle[e]
 	nodeinwardvecs[i] = nodeinwardvecs[e]
 
 	nodepoints.resize(e)
 	nodedrawingindex.resize(e)
 	nodeuvs.resize(e)
-	nodewallangle.resize(e)
 	nodeinwardvecs.resize(e)
 
 	for j in range(len(onepathpairs) - 2, -1, -2):
@@ -64,15 +60,13 @@ func copyopntootnode(opn):
 	nodepoints[opn.otIndex] = opn.global_transform.origin
 	nodedrawingindex[opn.otIndex] = 0
 	nodeuvs[opn.otIndex] = opn.uvpoint
-	nodewallangle[opn.otIndex] = opn.wallangle
 
 func copyotnodetoopn(opn):
 	opn.global_transform.origin = nodepoints[opn.otIndex]
 	nodedrawingindex[opn.otIndex] = 0
 	opn.drawingname = drawingnames[nodedrawingindex[opn.otIndex]]
 	opn.uvpoint = nodeuvs[opn.otIndex] 
-	opn.wallangle = nodewallangle[opn.otIndex]
-	opn.scale.y = opn.global_transform.origin.y if opn.wallangle == 0.0 else 0.2
+	opn.scale.y = opn.global_transform.origin.y
 
 func applyonepath(i0, i1):
 	for j in range(len(onepathpairs)-2, -3, -2):
@@ -109,7 +103,6 @@ func loadonetunnel(fname):
 	drawingnames = node_data["drawingnames"]
 	nodedrawingindex = node_data["nodedrawingindex"]
 	nodeuvs = unflattenpoolvector2(node_data["nodeuvs"])
-	nodewallangle = node_data["nodewallangle"]
 	onepathpairs = node_data["onepathpairs"]
 	nodeinwardvecs = unflattenpoolvector3(node_data["nodeinwardvecs"])
 	drawnstationnodesRAW = node_data["drawnstationnodes"]
@@ -132,7 +125,6 @@ func saveonetunnel(fname):
 					  "nodedrawingindex":nodedrawingindex, 
 					  "drawingnames":drawingnames,
 					  "nodeuvs":flattenpoolvector2(nodeuvs),
-					  "nodewallangle":nodewallangle,
 					  "nodeinwardvecs":flattenpoolvector3(nodeinwardvecs),
 					  "onepathpairs":onepathpairs,
 					  "drawnstationnodes":drawnstationnodesRAW }
@@ -144,7 +136,7 @@ func saveonetunnel(fname):
 
 func verifyonetunnelmatches(sketchsystem):
 	var N = len(nodepoints)
-	assert ((N == len(nodeuvs)) and (N == len(nodedrawingindex)) and (N == len(nodedrawingindex)) and (N == len(nodeinwardvecs)) and (N == len(nodewallangle)))
+	assert ((N == len(nodeuvs)) and (N == len(nodedrawingindex)) and (N == len(nodedrawingindex)) and (N == len(nodeinwardvecs)))
 	var onepathnodes = sketchsystem.get_node("OnePathNodes").get_children()
 	assert(N == len(onepathnodes))
 	for i in range(N):

@@ -5,7 +5,11 @@ var arvr_quest = null;
 
 
 # Stuff to do:
-# * Is the ground drawing actually just a 2D drawing which the cross sections will apply to?
+# * XCnodes to receive the modes in the same wall
+# * node on XC plane to have reflection on the floor
+# * replace the drawingwall with the XCdrawings (with a NodeOrientPreview in it?)
+# * We trace a network of nodes on the floor how we like
+# * Is the ground drawing actually just a 2D drawing which the cross sections will be guided by?
 # * Primary construction of cross-section contours around centreline nodes
 # * Nodes have floor/wall/ceiling type or-ed so that when edges and faces get anded by their point members their category is set
 # * Colour floor/wall/ceiling faces accordingly
@@ -16,7 +20,6 @@ var arvr_quest = null;
 # * abolish nodeuvs and others from OnePathNode object and ref directly
 # * Report bug that disable depth check puts transparent objects in front
 # * node flags of floor, wall, ceiling types so that edges and triangles inherit from this 
-# * check we can walk through drawing wall (cannot)
 # * nodeinwardvecs basis calculation to be moved
 # * Fall upward to ceiling when not on above the cave
 # * move textpanel out to top level with the GUI stuff

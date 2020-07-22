@@ -269,6 +269,8 @@ material/0 = null
 [node name="SketchSystem" type="Spatial" parent="."]
 script = ExtResource( 10 )
 
+[node name="XCdrawings" type="Spatial" parent="SketchSystem"]
+
 [node name="OnePathNodes" type="Spatial" parent="SketchSystem"]
 
 [node name="PathLines" type="MeshInstance" parent="SketchSystem"]
@@ -310,6 +312,7 @@ material/0 = null
 
 [node name="NodeOrientationPreview" type="StaticBody" parent="SketchSystem"]
 transform = Transform( 0.403146, 0.915136, 0, -0.915136, 0.403146, 0, 0, 0, 1, 4.21804, 0.609281, 0 )
+visible = false
 collision_layer = 8
 collision_mask = 0
 

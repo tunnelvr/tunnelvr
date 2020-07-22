@@ -34,9 +34,6 @@ var pointertargetoriginy = 0.0
 var selectedtarget = null
 var gripbuttonpressused = false
 var nodeorientationpreviewheldtransform = null
-var drawingwallangle = 0.0
-var drawingwallgroup = 0
-var drawingwallgroupcounter = 0
 
 
 # set_materialoverride
@@ -89,26 +86,20 @@ func _ready():
 	$Laser/RayCast.translation.z = distance * 0.5
 	$Laser/RayCast.cast_to.z = -distance
 
-func setopnpos(opn, p, bonfloor):
+func setopnpos(opn, p):
 	opn.global_transform.origin = p
 	var floorsize = drawnfloor.get_node("MeshInstance").mesh.size
 	var dfinv = drawnfloor.global_transform.affine_inverse()
 	var afloorpoint = dfinv.xform(p)
 	opn.uvpoint = Vector2(afloorpoint.x/floorsize.x + 0.5, afloorpoint.z/floorsize.y + 0.5)
 	opn.drawingname = drawnfloor.get_node("MeshInstance").mesh.material.albedo_texture.resource_path
-	if opn.getnodetype() == "ntPath":
-		if not bonfloor:
-			opn.wallangle = drawingwallangle
-			opn.wallgroup = drawingwallgroup
-			opn.global_transform = Transform(Basis(Vector3(0,1,0), drawingwallangle).scaled(Vector3(1,0.2,1)), p)
-		else:
-			opn.wallangle = 0.0
-			opn.wallgroup = 0
-			opn.global_transform.origin = p + Vector3(0, 0.2, 0)
-			opn.scale.y = opn.global_transform.origin.y
+	if opn.get_parent().get_name() == "OnePathNodes":
+		opn.global_transform.origin = p + Vector3(0, 0.2, 0)
+		opn.scale.y = opn.global_transform.origin.y
 		sketchsystem.ot.copyopntootnode(opn)
 		sketchsystem.ot.nodeinwardvecs[opn.otIndex] = LaserSpike.global_transform.basis.y.normalized()
 		print("Thislaserspike ", LaserSpike.global_transform.basis.y)
+		
 		
 func onpointing(newpointertarget, newpointertargetpoint):
 	if newpointertarget != pointertarget:
@@ -146,31 +137,56 @@ func _on_button_pressed(p_button):
 		guipanel3d.togglevisibility(controller.get_node("pointersystem").global_transform)
 			
 	if p_button == Buttons.VR_TRIGGER and is_instance_valid(pointertarget):
-		print("clclc ", pointertarget.get_filename(), pointertarget.get_parent())
+		print("clclc ", pointertarget.get_name(), "  filename:", pointertarget.get_filename(), " p:", pointertarget.get_parent())
 		if pointertarget.has_method("jump_up"):
 			pointertarget.jump_up()
 			
 		elif pointertarget == guipanel3d:
-			pass  #this is elsewhere processed
+			pass  #this is processed elsewhere
 
 		elif pointertarget == nodeorientationpreview:
 			nodeorientationpreviewheldtransform = get_parent().global_transform.inverse()
 
-		elif pointertarget == drawnfloor or pointertarget == drawingwall:
-			var bonfloor = (pointertarget == drawnfloor)
+		elif pointertarget.get_name() == "XCdrawingplane":
+			var xcdrawing = pointertarget.get_parent()
+			# drag node to new position on floor
+			if controller.is_button_pressed(Buttons.VR_GRIP) and is_instance_valid(selectedtarget) and selectedtarget.get_parent().get_name() == "XCnodes":
+				if selectedtarget.get_parent().get_parent() == xcdrawing:
+					selectedtarget.global_transform.origin = pointertargetpoint
+
+					#sketchsystem.updateonepaths()
+				gripbuttonpressused = true
+				
+			else:
+				var XCnode = preload("res://nodescenes/XCnode.tscn")
+				var pointertarget = XCnode.instance()
+				xcdrawing.get_node("XCnodes").add_child(pointertarget)
+				pointertarget.global_transform.origin = pointertargetpoint
+				if is_instance_valid(selectedtarget) and selectedtarget.get_parent().get_name() == "XCnodes" and selectedtarget.get_parent().get_parent() == xcdrawing:
+					#sketchsystem.applyonepath(selectedtarget, pointertarget)
+					selectedtarget.set_materialoverride(null)
+					
+				if controller.is_button_pressed(Buttons.VR_GRIP):
+					selectedtarget = null
+				else:
+					selectedtarget = pointertarget
+					selectedtarget.set_materialoverride(selectedpointerhighlightmaterial)
+
+
+		elif pointertarget == drawnfloor:
 			# drag node to new position on floor
 			if controller.is_button_pressed(Buttons.VR_GRIP) and is_instance_valid(selectedtarget) and selectedtarget.has_method("set_materialoverride"):
-				if selectedtarget.getnodetype() == "ntPath":
-					setopnpos(selectedtarget, pointertargetpoint, bonfloor)
+				if selectedtarget.get_parent().get_name() == "OnePathNodes":
+					setopnpos(selectedtarget, pointertargetpoint)
 					sketchsystem.updateonepaths()
-				if selectedtarget.getnodetype() == "ntDrawnStation" and bonfloor:
-					setopnpos(selectedtarget, pointertargetpoint, bonfloor)
+				if selectedtarget.get_parent().get_name() == "DrawnStationNodes":
+					setopnpos(selectedtarget, pointertargetpoint)
 				gripbuttonpressused = true
 				
 			# new drawn station node on floor with centreline node already connected
-			elif is_instance_valid(selectedtarget) and selectedtarget.getnodetype() == "ntStation" and bonfloor:
+			elif is_instance_valid(selectedtarget) and selectedtarget.get_parent().get_name() == "StationNodes":
 				pointertarget = centrelinesystem.newdrawnstationnode()
-				setopnpos(pointertarget, pointertargetpoint, true)
+				setopnpos(pointertarget, pointertargetpoint)
 				pointertarget.stationname = selectedtarget.stationname
 				selectedtarget.set_materialoverride(null)
 				selectedtarget = null
@@ -179,45 +195,36 @@ func _on_button_pressed(p_button):
 			# new node on floor, with or without other node selected to connect to
 			else:
 				pointertarget = sketchsystem.newonepathnode(-1)
-				setopnpos(pointertarget, pointertargetpoint, bonfloor)
-				if is_instance_valid(selectedtarget) and selectedtarget.getnodetype() == "ntPath":
-					if bonfloor:
-						pointertarget.global_transform.origin.y = selectedtarget.global_transform.origin.y
-						pointertarget.scale.y = pointertarget.global_transform.origin.y
-						sketchsystem.ot.copyopntootnode(pointertarget)
+				# this is where we add the xcpath into its XCdrawing
+				setopnpos(pointertarget, pointertargetpoint)
+				if is_instance_valid(selectedtarget) and selectedtarget.get_parent().get_name() == "OnePathNodes":
+					pointertarget.global_transform.origin.y = selectedtarget.global_transform.origin.y
+					pointertarget.scale.y = pointertarget.global_transform.origin.y
+					sketchsystem.ot.copyopntootnode(pointertarget)
 					sketchsystem.applyonepath(selectedtarget, pointertarget)
 					selectedtarget.set_materialoverride(null)
-				elif bonfloor:
+				else:
 					pointertarget.global_transform.origin.y = 0.2
 					pointertarget.scale.y = pointertarget.global_transform.origin.y
 					sketchsystem.ot.copyopntootnode(pointertarget)
 					
 				if controller.is_button_pressed(Buttons.VR_GRIP):
 					selectedtarget = null
-					nodeorientationpreview.visible = false
-					nodeorientationpreview.get_node("CollisionShape").disabled = true
 				else:
 					selectedtarget = pointertarget
 					selectedtarget.set_materialoverride(selectedpointerhighlightmaterial)
-					nodeorientationpreview.global_transform = sketchsystem.ot.nodeplanetransform(selectedtarget.otIndex)
-					nodeorientationpreview.visible = true
-					nodeorientationpreview.get_node("CollisionShape").disabled = false
-				assert (sketchsystem.ot.verifyonetunnelmatches(sketchsystem))
-
+				
 					
 		# clear selected target by selecting again
 		# (we may reconsider deselection on second selection)
 		elif pointertarget == selectedtarget:
-			if selectedtarget.getnodetype() == "ntStation":
+			if selectedtarget.get_parent().get_name() == "StationNodes":
 				settextpanel(null, null)
-			elif selectedtarget.getnodetype() == "ntPath":
-				nodeorientationpreview.visible = false
-				nodeorientationpreview.get_node("CollisionShape").disabled = true
 			selectedtarget.set_materialoverride(pointinghighlightmaterial)
 			if controller.is_button_pressed(Buttons.VR_GRIP):
-				if selectedtarget.getnodetype() == "ntPath":
+				if selectedtarget.get_parent().get_name() == "OnePathNodes":
 					sketchsystem.removeonepathnode(selectedtarget)
-				elif selectedtarget.getnodetype() == "ntDrawnStation":
+				elif selectedtarget.get_parent().get_name() == "DrawnStationNodes":
 					selectedtarget.queue_free()
 
 				gripbuttonpressused = true
@@ -227,33 +234,19 @@ func _on_button_pressed(p_button):
 		else:
 			if is_instance_valid(selectedtarget) and selectedtarget.has_method("set_materialoverride"):
 				selectedtarget.set_materialoverride(null)
-				if selectedtarget.getnodetype() == "ntStation":
-					nodeorientationpreview.visible = false
-					nodeorientationpreview.get_node("CollisionShape").disabled = true
+				if selectedtarget.get_parent().get_name() == "StationNodes":
 					settextpanel(null, null)
-				if selectedtarget.getnodetype() == "ntPath" and pointertarget.getnodetype() == "ntPath":
+				if selectedtarget.get_parent().get_name() == "OnePathNodes" and pointertarget.get_parent().get_name() == "OnePathNodes":
 					sketchsystem.applyonepath(selectedtarget, pointertarget)
 
 			selectedtarget = pointertarget
 			selectedtarget.set_materialoverride(selectedpointerhighlightmaterial)
-			if selectedtarget.getnodetype() == "ntStation":
+			if selectedtarget.get_parent().get_name() == "StationNodes":
 				settextpanel(selectedtarget.stationname, selectedtarget.global_transform.origin)
-			elif selectedtarget.getnodetype() == "ntDrawnStation":
+			elif selectedtarget.get_parent().get_name() == "DrawnStationNodes":
 				settextpanel(selectedtarget.stationname, centrelinesystem.stationnodemap[selectedtarget.stationname].global_transform.origin)				
-			elif selectedtarget.getnodetype() == "ntPath":
-				nodeorientationpreview.global_transform = sketchsystem.ot.nodeplanetransform(selectedtarget.otIndex)
-				nodeorientationpreview.visible = true
-				nodeorientationpreview.get_node("CollisionShape").disabled = false
+			elif selectedtarget.get_parent().get_name() == "OnePathNodes":
 				sketchsystem.get_node("NodePreview").mesh = sketchsystem.ot.nodeplanepreview(selectedtarget.otIndex)
-
-				# make the wall visible around this point if it's a change of group
-				if selectedtarget.wallgroup != 0 and selectedtarget.wallgroup != drawingwallgroup:
-					var vwall = pointertarget.global_transform.origin - selectedtarget.global_transform.origin
-					drawingwallangle = selectedtarget.wallangle
-					drawingwallgroup = selectedtarget.wallgroup
-					var vwallspan = 3.0
-					drawingwall.global_transform = Transform(Basis().scaled(Vector3(vwallspan*2, selectedtarget.global_transform.origin.y+vwallspan, 1)).rotated(Vector3(0,1,0), drawingwallangle), selectedtarget.global_transform.origin)
-					drawingwall.global_transform.origin += -drawingwall.global_transform.basis.x*0.5 + drawingwall.global_transform.basis.y*vwallspan/(selectedtarget.global_transform.origin.y+vwallspan)
 				
 	# change height of pointer target
 	if p_button == Buttons.VR_PAD:
@@ -261,13 +254,14 @@ func _on_button_pressed(p_button):
 		var up_down = controller.get_joystick_axis(1)
 		if abs(up_down) < 0.5 and abs(left_right) > 0.1:
 			var dy = (1 if left_right > 0 else -1)*(1.0 if abs(left_right) < 0.8 else 0.1)
-			if is_instance_valid(pointertarget) and ((pointertarget.has_method("set_materialoverride") and pointertarget.has_method("getnodetype") and pointertarget.getnodetype() == "ntPath" and pointertarget.wallangle == 0.0) or (pointertarget == drawingwall)):
+			if is_instance_valid(pointertarget) and pointertarget.get_parent().get_name() == "OnePathNodes":
 				pointertarget.global_transform.origin.y = max(0.1, pointertarget.global_transform.origin.y + dy)
 				pointertarget.scale.y = pointertarget.global_transform.origin.y
-				if (pointertarget != drawingwall):
-					sketchsystem.ot.copyopntootnode(pointertarget)
-					nodeorientationpreview.global_transform.origin = pointertarget.global_transform.origin
-			if is_instance_valid(pointertarget) and pointertarget.has_method("set_materialoverride") and pointertarget.has_method("getnodetype") and pointertarget.getnodetype() == "ntDrawnStation":
+				sketchsystem.ot.copyopntootnode(pointertarget)
+				nodeorientationpreview.global_transform.origin = pointertarget.global_transform.origin
+				
+			# raise the whole drawn floor case!
+			if is_instance_valid(pointertarget) and pointertarget.get_parent().get_name() == "DrawnStationNodes":
 				drawnfloor.global_transform.origin.y = drawnfloor.global_transform.origin.y + dy
 				centrelinesystem.get_node("DrawnStationNodes").global_transform.origin.y = drawnfloor.global_transform.origin.y
 			
@@ -279,10 +273,6 @@ func _on_button_release(p_button):
 	if p_button == Buttons.VR_GRIP and not gripbuttonpressused and is_instance_valid(selectedtarget) and selectedtarget.has_method("set_materialoverride"):
 		selectedtarget.set_materialoverride(pointinghighlightmaterial if selectedtarget == pointertarget else null)
 		selectedtarget = null
-		if nodeorientationpreview.visible:
-			nodeorientationpreview.visible = false
-			nodeorientationpreview.get_node("CollisionShape").disabled = true
-			nodeorientationpreviewheldtransform = null
 		
 	elif p_button == Buttons.VR_TRIGGER and (nodeorientationpreviewheldtransform != null):
 		print("dosomethingwith nodeorientationpreview ", nodeorientationpreviewheldtransform)
@@ -294,13 +284,15 @@ func _on_button_release(p_button):
 	# new drawing wall position made
 	elif p_button == Buttons.VR_TRIGGER and is_instance_valid(selectedtarget) and is_instance_valid(pointertarget) and pointertarget.has_method("set_materialoverride") and pointertarget != selectedtarget:
 		var vwall = pointertarget.global_transform.origin - selectedtarget.global_transform.origin
+		var vwallmid = (pointertarget.global_transform.origin + selectedtarget.global_transform.origin)/2
 		var vwall2 = Vector2(vwall.x, vwall.z)
-		drawingwallangle = -vwall2.angle()
-		drawingwallgroupcounter += 1
-		drawingwallgroup = drawingwallgroupcounter
+		var drawingwallangle = -vwall2.angle()
 		var vwallsca = vwall2.length()
-		if vwallsca != 0.0:
-			drawingwall.global_transform = Transform(Basis().scaled(Vector3(vwallsca,selectedtarget.global_transform.origin.y,1)).rotated(Vector3(0,1,0), drawingwallangle), selectedtarget.global_transform.origin)
+		var XCdrawing = preload("res://nodescenes/XCdrawing.tscn")
+		var xcdrawing = XCdrawing.instance()
+		sketchsystem.get_node("XCdrawings").add_child(xcdrawing)
+		xcdrawing.global_transform = Transform(Basis().rotated(Vector3(0,1,0), drawingwallangle), vwallmid)
+		xcdrawing.get_node("XCdrawingplane").scale = Vector3(vwallsca/2.0+1.0, 3.0, 1.0)
 			
 func _process(_delta):
 	if !is_inside_tree():
