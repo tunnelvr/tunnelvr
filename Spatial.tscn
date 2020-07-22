@@ -65,23 +65,23 @@ subdivide_depth = 4
 [sub_resource type="BoxShape" id=9]
 extents = Vector3( 0.5, 0.5, 0.643 )
 
-[sub_resource type="BoxShape" id=20]
+[sub_resource type="BoxShape" id=10]
 extents = Vector3( 0.5, 0.5, 0.01 )
 
-[sub_resource type="SpatialMaterial" id=10]
+[sub_resource type="SpatialMaterial" id=11]
 flags_transparent = true
 params_cull_mode = 2
 albedo_color = Color( 0.368627, 0.980392, 0.921569, 0.623529 )
 
-[sub_resource type="PlaneMesh" id=11]
-material = SubResource( 10 )
+[sub_resource type="PlaneMesh" id=12]
+material = SubResource( 11 )
 size = Vector2( 1, 1 )
 
-[sub_resource type="SpatialMaterial" id=12]
+[sub_resource type="SpatialMaterial" id=13]
 params_cull_mode = 2
 albedo_color = Color( 0.972549, 0.278431, 0.0392157, 1 )
 
-[sub_resource type="SpatialMaterial" id=15]
+[sub_resource type="SpatialMaterial" id=14]
 params_cull_mode = 2
 params_line_width = 8.3
 params_use_alpha_scissor = true
@@ -91,7 +91,7 @@ albedo_texture = ExtResource( 13 )
 metallic = 0.56
 roughness = 0.49
 
-[sub_resource type="ArrayMesh" id=16]
+[sub_resource type="ArrayMesh" id=15]
 surfaces/0 = {
 "aabb": AABB( 0, 0.1, -4.03536, 2.03536, 9.99868e-06, 1.08536 ),
 "array_data": PoolByteArray( 0, 0, 0, 0, 205, 204, 204, 61, 51, 51, 67, 192, 0, 127, 0, 0, 0, 0, 128, 63, 205, 204, 204, 61, 51, 51, 67, 192, 0, 127, 0, 0, 0, 0, 0, 0, 205, 204, 204, 61, 205, 204, 60, 192, 0, 127, 0, 0, 0, 0, 0, 0, 205, 204, 204, 61, 205, 204, 60, 192, 0, 127, 0, 0, 0, 0, 128, 63, 205, 204, 204, 61, 51, 51, 67, 192, 0, 127, 0, 0, 0, 0, 128, 63, 205, 204, 204, 61, 205, 204, 60, 192, 0, 127, 0, 0, 0, 0, 128, 63, 205, 204, 204, 61, 51, 51, 67, 192, 0, 127, 0, 0, 122, 121, 251, 63, 205, 204, 204, 61, 162, 33, 129, 192, 0, 127, 0, 0, 0, 0, 128, 63, 205, 204, 204, 61, 205, 204, 60, 192, 0, 127, 0, 0, 0, 0, 128, 63, 205, 204, 204, 61, 205, 204, 60, 192, 0, 127, 0, 0, 122, 121, 251, 63, 205, 204, 204, 61, 162, 33, 129, 192, 0, 127, 0, 0, 67, 67, 2, 64, 205, 204, 204, 61, 189, 188, 125, 192, 0, 127, 0, 0 ),
@@ -104,52 +104,52 @@ surfaces/0 = {
 "vertex_count": 12
 }
 
-[sub_resource type="ConcavePolygonShape" id=17]
+[sub_resource type="ConcavePolygonShape" id=16]
 
-[sub_resource type="SpatialMaterial" id=18]
+[sub_resource type="SpatialMaterial" id=17]
 params_cull_mode = 2
 albedo_color = Color( 0.87451, 0.964706, 0.247059, 1 )
 
-[sub_resource type="SpatialMaterial" id=19]
+[sub_resource type="SpatialMaterial" id=18]
 flags_transparent = true
 flags_do_not_receive_shadows = true
 params_cull_mode = 2
 albedo_color = Color( 0.321569, 0.988235, 0.27451, 0.329412 )
 
-[sub_resource type="SpatialMaterial" id=21]
+[sub_resource type="SpatialMaterial" id=19]
 params_cull_mode = 2
 albedo_color = Color( 0.827451, 0.501961, 0.992157, 1 )
 
-[sub_resource type="CubeMesh" id=22]
+[sub_resource type="CubeMesh" id=20]
 
-[sub_resource type="BoxShape" id=27]
+[sub_resource type="BoxShape" id=21]
 extents = Vector3( 0.1, 0.4, 0.1 )
 
-[sub_resource type="SpatialMaterial" id=23]
+[sub_resource type="SpatialMaterial" id=22]
 albedo_color = Color( 0.380392, 0.94902, 0.431373, 1 )
 
-[sub_resource type="CylinderMesh" id=24]
-material = SubResource( 23 )
+[sub_resource type="CylinderMesh" id=23]
+material = SubResource( 22 )
 top_radius = 0.1
 bottom_radius = 0.001
 height = 0.4
 radial_segments = 4
 rings = 1
 
-[sub_resource type="SpatialMaterial" id=25]
+[sub_resource type="SpatialMaterial" id=24]
 albedo_color = Color( 0.968627, 0.054902, 0.054902, 1 )
 
-[sub_resource type="CylinderMesh" id=26]
-material = SubResource( 25 )
+[sub_resource type="CylinderMesh" id=25]
+material = SubResource( 24 )
 top_radius = 0.001
 bottom_radius = 0.1
 height = 0.4
 radial_segments = 4
 
-[sub_resource type="PlaneMesh" id=13]
+[sub_resource type="PlaneMesh" id=26]
 size = Vector2( 4, 2 )
 
-[sub_resource type="SpatialMaterial" id=14]
+[sub_resource type="SpatialMaterial" id=27]
 albedo_texture = ExtResource( 18 )
 roughness_texture = ExtResource( 3 )
 normal_enabled = true
@@ -190,7 +190,7 @@ collision_mask = 5
 script = ExtResource( 4 )
 
 [node name="KinematicBody" type="KinematicBody" parent="ARVROrigin/ARVRController_Left/movementsystem"]
-collision_mask = 1048574
+collision_mask = 1048558
 
 [node name="CollisionShape" type="CollisionShape" parent="ARVROrigin/ARVRController_Left/movementsystem/KinematicBody"]
 transform = Transform( 1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0.9, 0 )
@@ -200,7 +200,7 @@ shape = SubResource( 1 )
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0 )
 enabled = true
 cast_to = Vector3( 0, -0.6, 0 )
-collision_mask = 1048574
+collision_mask = 1048558
 
 [node name="ARVRController_Right" type="ARVRController" parent="ARVROrigin"]
 
@@ -251,18 +251,19 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0 )
 shape = SubResource( 9 )
 
 [node name="drawingwall" type="StaticBody" parent="."]
-transform = Transform( 9.95004, 0, 0.998334, 0, 0.2, 0, -0.0998334, 0, 0.995004, 100, 0, 0 )
+transform = Transform( 9.95004, 0, 0.998334, 0, 0.2, 0, -0.0998334, 0, 0.995004, 26.5811, 0.302048, 0 )
 collision_layer = 16
+collision_mask = 0
 
 [node name="CollisionShape" type="CollisionShape" parent="drawingwall"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, -0.5, 0 )
-shape = SubResource( 20 )
+shape = SubResource( 10 )
 
 [node name="MeshInstance" type="MeshInstance" parent="drawingwall/CollisionShape"]
 transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, 0, 0, 0 )
 layers = 18
 cast_shadow = 0
-mesh = SubResource( 11 )
+mesh = SubResource( 12 )
 material/0 = null
 
 [node name="SketchSystem" type="Spatial" parent="."]
@@ -271,18 +272,18 @@ script = ExtResource( 10 )
 [node name="OnePathNodes" type="Spatial" parent="SketchSystem"]
 
 [node name="PathLines" type="MeshInstance" parent="SketchSystem"]
-material_override = SubResource( 12 )
+material_override = SubResource( 13 )
 
 [node name="WorkingShell" type="StaticBody" parent="SketchSystem"]
 
 [node name="MeshInstance" type="MeshInstance" parent="SketchSystem/WorkingShell"]
 layers = 3
-material_override = SubResource( 15 )
-mesh = SubResource( 16 )
+material_override = SubResource( 14 )
+mesh = SubResource( 15 )
 material/0 = null
 
 [node name="CollisionShape" type="CollisionShape" parent="SketchSystem/WorkingShell"]
-shape = SubResource( 17 )
+shape = SubResource( 16 )
 
 [node name="Centreline" type="Spatial" parent="SketchSystem"]
 script = ExtResource( 17 )
@@ -290,10 +291,10 @@ script = ExtResource( 17 )
 [node name="StationNodes" type="Spatial" parent="SketchSystem/Centreline"]
 
 [node name="CentrelineLegs" type="MeshInstance" parent="SketchSystem/Centreline"]
-material_override = SubResource( 18 )
+material_override = SubResource( 17 )
 
 [node name="CentrelineCrossSections" type="MeshInstance" parent="SketchSystem/Centreline"]
-material_override = SubResource( 19 )
+material_override = SubResource( 18 )
 
 [node name="DrawnStationNodes" type="Spatial" parent="SketchSystem/Centreline"]
 
@@ -302,9 +303,9 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 1.91816, 0.304006, -4.61659 )
 visible = false
 
 [node name="NodePreview" type="MeshInstance" parent="SketchSystem"]
-material_override = SubResource( 21 )
+material_override = SubResource( 19 )
 cast_shadow = 0
-mesh = SubResource( 22 )
+mesh = SubResource( 20 )
 material/0 = null
 
 [node name="NodeOrientationPreview" type="StaticBody" parent="SketchSystem"]
@@ -313,17 +314,17 @@ collision_layer = 8
 collision_mask = 0
 
 [node name="CollisionShape" type="CollisionShape" parent="SketchSystem/NodeOrientationPreview"]
-shape = SubResource( 27 )
+shape = SubResource( 21 )
 
 [node name="MeshInstance" type="MeshInstance" parent="SketchSystem/NodeOrientationPreview/CollisionShape"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 0 )
 cast_shadow = 0
-mesh = SubResource( 24 )
+mesh = SubResource( 23 )
 material/0 = null
 
 [node name="MeshInstance2" type="MeshInstance" parent="SketchSystem/NodeOrientationPreview/CollisionShape"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -2.38419e-07, -0.200001, 0 )
-mesh = SubResource( 26 )
+mesh = SubResource( 25 )
 material/0 = null
 
 [node name="GUIPanel3D" parent="." instance=ExtResource( 14 )]
@@ -334,5 +335,5 @@ script = ExtResource( 15 )
 
 [node name="LaserSquare" type="MeshInstance" parent="."]
 transform = Transform( -0.592393, -0.783466, -0.187751, -0.546921, 0.562194, -0.620335, 0.591564, -0.264797, -0.761535, -0.944971, 1.18811, 0.0964239 )
-mesh = SubResource( 13 )
-material/0 = SubResource( 14 )
+mesh = SubResource( 26 )
+material/0 = SubResource( 27 )

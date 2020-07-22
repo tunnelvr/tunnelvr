@@ -25,7 +25,6 @@ radial_segments = 8
 rings = 2
 
 [node name="DrawnStationNode" type="StaticBody"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0 )
 collision_layer = 8
 collision_mask = 0
 script = ExtResource( 1 )

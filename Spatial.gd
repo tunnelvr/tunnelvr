@@ -5,21 +5,28 @@ var arvr_quest = null;
 
 
 # Stuff to do:
-# * nodeorientation drag capability
+# * Is the ground drawing actually just a 2D drawing which the cross sections will apply to?
+# * Primary construction of cross-section contours around centreline nodes
+# * Nodes have floor/wall/ceiling type or-ed so that when edges and faces get anded by their point members their category is set
+# * Colour floor/wall/ceiling faces accordingly
+# * Interpolate cross sections that are joined along the plan2D contour and slinky tubes not straight pipes
+# * This means we have driving edges that run the interpolation over what gets interpolated
+# * Requires an undo of each of these settings
+# * capability of selecting faces and splitting with points
+# * abolish nodeuvs and others from OnePathNode object and ref directly
+# * Report bug that disable depth check puts transparent objects in front
+# * node flags of floor, wall, ceiling types so that edges and triangles inherit from this 
 # * check we can walk through drawing wall (cannot)
 # * nodeinwardvecs basis calculation to be moved
-# * abolish nodeuvs and others from OnePathNode object and ref directly
 # * Fall upward to ceiling when not on above the cave
 # * move textpanel out to top level with the GUI stuff
 # * triangulations to better reflect the normals given at the nodes
-# * anchor nodes capable of pulling plane up and down
 # * floor and wall textures programmable
 # * shadow from the pulled body and head-torch required
 # * nodes have push-pull or cross-section plane
 # * Line sections and triangle areas can be split
 # * Boulders and gravel and particles
 # * set the floor shape size according to aspect ratio read from the bitmap 1.285239=(3091/2405.0)
-# * Report bug that disable depth check puts transparent objects in front
 # * Report bug check ray intersect plane is in the plane and report if not!
 
 var perform_runtime_config = true

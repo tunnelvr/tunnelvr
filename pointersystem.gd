@@ -35,6 +35,9 @@ var selectedtarget = null
 var gripbuttonpressused = false
 var nodeorientationpreviewheldtransform = null
 var drawingwallangle = 0.0
+var drawingwallgroup = 0
+var drawingwallgroupcounter = 0
+
 
 # set_materialoverride
 
@@ -68,9 +71,13 @@ func _ready():
 	print("LaserSpot ", LaserSpot)
 	pointinghighlightmaterial.albedo_color = Color(0.99, 0.20, 0.20, 1.0)
 	pointinghighlightmaterial.flags_no_depth_test = true
+	pointinghighlightmaterial.params_grow = true
+	pointinghighlightmaterial.params_grow_amount = 0.02
 	selectedhighlightmaterial.albedo_color = Color(0.92, 0.99, 0.13, 1.0)
 	selectedpointerhighlightmaterial.albedo_color = Color(0.82, 0.99, 0.93, 1.0)
 	selectedpointerhighlightmaterial.flags_no_depth_test = true
+	selectedpointerhighlightmaterial.params_grow = true
+	selectedpointerhighlightmaterial.params_grow_amount = 0.02
 	
 	# apply our world scale to our laser position
 	$Laser.translation.y = laser_y * ARVRworld_scale
@@ -90,11 +97,13 @@ func setopnpos(opn, p, bonfloor):
 	opn.uvpoint = Vector2(afloorpoint.x/floorsize.x + 0.5, afloorpoint.z/floorsize.y + 0.5)
 	opn.drawingname = drawnfloor.get_node("MeshInstance").mesh.material.albedo_texture.resource_path
 	if opn.getnodetype() == "ntPath":
-		opn.wallangle = 0.0
 		if not bonfloor:
 			opn.wallangle = drawingwallangle
+			opn.wallgroup = drawingwallgroup
 			opn.global_transform = Transform(Basis(Vector3(0,1,0), drawingwallangle).scaled(Vector3(1,0.2,1)), p)
 		else:
+			opn.wallangle = 0.0
+			opn.wallgroup = 0
 			opn.global_transform.origin = p + Vector3(0, 0.2, 0)
 			opn.scale.y = opn.global_transform.origin.y
 		sketchsystem.ot.copyopntootnode(opn)
@@ -236,17 +245,31 @@ func _on_button_pressed(p_button):
 				nodeorientationpreview.visible = true
 				nodeorientationpreview.get_node("CollisionShape").disabled = false
 				sketchsystem.get_node("NodePreview").mesh = sketchsystem.ot.nodeplanepreview(selectedtarget.otIndex)
+
+				# make the wall visible around this point if it's a change of group
+				if selectedtarget.wallgroup != 0 and selectedtarget.wallgroup != drawingwallgroup:
+					var vwall = pointertarget.global_transform.origin - selectedtarget.global_transform.origin
+					drawingwallangle = selectedtarget.wallangle
+					drawingwallgroup = selectedtarget.wallgroup
+					var vwallspan = 3.0
+					drawingwall.global_transform = Transform(Basis().scaled(Vector3(vwallspan*2, selectedtarget.global_transform.origin.y+vwallspan, 1)).rotated(Vector3(0,1,0), drawingwallangle), selectedtarget.global_transform.origin)
+					drawingwall.global_transform.origin += -drawingwall.global_transform.basis.x*0.5 + drawingwall.global_transform.basis.y*vwallspan/(selectedtarget.global_transform.origin.y+vwallspan)
 				
 	# change height of pointer target
-	if p_button == Buttons.VR_PAD and is_instance_valid(pointertarget) and ((pointertarget.has_method("set_materialoverride") and pointertarget.has_method("getnodetype") and pointertarget.getnodetype() == "ntPath" and pointertarget.wallangle == 0.0) or (pointertarget == drawingwall)):
+	if p_button == Buttons.VR_PAD:
 		var left_right = controller.get_joystick_axis(0)
 		var up_down = controller.get_joystick_axis(1)
 		if abs(up_down) < 0.5 and abs(left_right) > 0.1:
-			pointertarget.global_transform.origin.y = max(0.1, pointertarget.global_transform.origin.y + (1 if left_right > 0 else -1)*(1.0 if abs(left_right) < 0.8 else 0.1))
-			pointertarget.scale.y = pointertarget.global_transform.origin.y
-			if (pointertarget != drawingwall):
-				sketchsystem.ot.copyopntootnode(pointertarget)
-				nodeorientationpreview.global_transform.origin = pointertarget.global_transform.origin
+			var dy = (1 if left_right > 0 else -1)*(1.0 if abs(left_right) < 0.8 else 0.1)
+			if is_instance_valid(pointertarget) and ((pointertarget.has_method("set_materialoverride") and pointertarget.has_method("getnodetype") and pointertarget.getnodetype() == "ntPath" and pointertarget.wallangle == 0.0) or (pointertarget == drawingwall)):
+				pointertarget.global_transform.origin.y = max(0.1, pointertarget.global_transform.origin.y + dy)
+				pointertarget.scale.y = pointertarget.global_transform.origin.y
+				if (pointertarget != drawingwall):
+					sketchsystem.ot.copyopntootnode(pointertarget)
+					nodeorientationpreview.global_transform.origin = pointertarget.global_transform.origin
+			if is_instance_valid(pointertarget) and pointertarget.has_method("set_materialoverride") and pointertarget.has_method("getnodetype") and pointertarget.getnodetype() == "ntDrawnStation":
+				drawnfloor.global_transform.origin.y = drawnfloor.global_transform.origin.y + dy
+				centrelinesystem.get_node("DrawnStationNodes").global_transform.origin.y = drawnfloor.global_transform.origin.y
 			
 	if p_button == Buttons.VR_GRIP:
 		gripbuttonpressused = false
@@ -268,10 +291,13 @@ func _on_button_release(p_button):
 		sketchsystem.ot.nodeinwardvecs[selectedtarget.otIndex] = iv
 		nodeorientationpreviewheldtransform = null
 
+	# new drawing wall position made
 	elif p_button == Buttons.VR_TRIGGER and is_instance_valid(selectedtarget) and is_instance_valid(pointertarget) and pointertarget.has_method("set_materialoverride") and pointertarget != selectedtarget:
 		var vwall = pointertarget.global_transform.origin - selectedtarget.global_transform.origin
 		var vwall2 = Vector2(vwall.x, vwall.z)
 		drawingwallangle = -vwall2.angle()
+		drawingwallgroupcounter += 1
+		drawingwallgroup = drawingwallgroupcounter
 		var vwallsca = vwall2.length()
 		if vwallsca != 0.0:
 			drawingwall.global_transform = Transform(Basis().scaled(Vector3(vwallsca,selectedtarget.global_transform.origin.y,1)).rotated(Vector3(0,1,0), drawingwallangle), selectedtarget.global_transform.origin)

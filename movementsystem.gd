@@ -112,8 +112,8 @@ func _ready():
 		camera_node = origin_node.get_node('ARVRCamera')
 	
 	# Our properties are set before our children are constructed so just re-issue
-	set_collision_layer(collision_layer)
-	set_collision_mask(collision_mask)
+	#set_collision_layer(collision_layer)
+	#set_collision_mask(collision_mask)
 	set_player_radius(player_radius)
 	
 	collision_shape.disabled = !enabled
