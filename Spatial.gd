@@ -5,12 +5,17 @@ var arvr_quest = null;
 
 
 # Stuff to do:
+# * work through the bugs in updatexclinkpaths when things are moved or deleted
+# * make the shell for the tube
+# * xcdrawinglink.push_back is place to do delete of links
+# * deleting drawing link paths
+# * remove poolintarrays because of all by value
+# * node on floor used for making new XCs
+# * duplicate and move XC across
 # * tap right and up to grow XC drawing
-# * draw connecting lines between nodes on xcdrawing and other edits (the pathlines)
+# * XC to record its UV and X-vector position on the sketch maybe
+# * connecting lines from one XC to another
 # * save and load the xcdrawings to the file as pools of vectors
-# * XCnodes to receive the modes in the same wall
-# * node on XC plane to have reflection on the floor to match the sketch that's there
-# * replace the drawingwall with the XCdrawings (with a NodeOrientPreview in it?)
 # * We trace a network of nodes on the floor how we like
 # * Is the ground drawing actually just a 2D drawing which the cross sections will be guided by?
 # * Primary construction of cross-section contours around centreline nodes
@@ -76,13 +81,13 @@ func _ready():
 	pointer.sketchsystem = $SketchSystem
 	pointer.centrelinesystem = $SketchSystem/Centreline
 	pointer.drawnfloor = $drawnfloor
-	pointer.drawingwall = $drawingwall
 	pointer.nodeorientationpreview = $SketchSystem/NodeOrientationPreview
 	pointer.guipanel3d = $GUIPanel3D
 	pointer.guipanel3d.visible = false
 	
 	$SketchSystem/Centreline.drawnfloor = $drawnfloor
 	$ARVROrigin/ARVRController_Right/pointersystem/LaserSpot.visible = false
+	$ARVROrigin/ARVRController_Right/pointersystem/LaserShadow.visible = false
 	$GUIPanel3D.sketchsystem = $SketchSystem
 	
 func _process(_delta):

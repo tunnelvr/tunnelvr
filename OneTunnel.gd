@@ -5,13 +5,15 @@ extends Resource
 # It is also used for loading and saving and generating derived stuff, like surfaces
 # and it can be used for communication -- syncronizing stuff across the network
 
-# 
+onready var OneTube = load("res://OneTube.gd")
+
 var nodepoints 		 : = PoolVector3Array() 
 var nodedrawingindex : = PoolIntArray() 
 var nodeuvs 		 : = PoolVector2Array()
 var nodeinwardvecs 	 : = PoolVector3Array() 
 
 var onepathpairs 	 : = PoolIntArray()  # 2* pairs indexing into nodepoints
+
 
 
 # indexed by nodedrawing; use a PoolStringArray?:

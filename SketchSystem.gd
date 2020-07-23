@@ -8,6 +8,8 @@ func _ready():
 	print("oooooo", ot)
 	
 const OnePathNode = preload("res://nodescenes/OnePathNode.tscn")
+const XCtube = preload("res://nodescenes/XCtube.tscn")
+
 const linewidth = 0.05
 
 func newonepathnode(lotIndex):
@@ -31,6 +33,36 @@ func applyonepath(opn0, opn1):
 	ot.applyonepath(opn0.otIndex, opn1.otIndex)
 	updateonepaths()
 	assert (ot.verifyonetunnelmatches(self))
+
+func xcapplyonepath(xcn0, xcn1):
+	var xcdrawing0 = xcn0.get_parent().get_parent()
+	var xcdrawing1 = xcn1.get_parent().get_parent()
+	if xcdrawing0 == xcdrawing1:
+		xcdrawing0.xcotapplyonepath(xcn0.otIndex, xcn1.otIndex)
+		xcdrawing0.updatexcpaths()
+		return
+	if xcdrawing0.otxcdIndex > xcdrawing1.otxcdIndex:
+		var tt = xcn0
+		xcn0 = xcn1
+		xcn1 = tt
+		xcdrawing0 = xcn0.get_parent().get_parent()
+		xcdrawing1 = xcn1.get_parent().get_parent()
+	var xctube = null
+	for lxctube in $XCtubes.get_children():
+		if lxctube.otxcdIndex0 == xcdrawing0.otxcdIndex and lxctube.otxcdIndex1 == xcdrawing1.otxcdIndex:
+			xctube = lxctube
+			break
+	if xctube == null:
+		xctube = XCtube.instance()
+		xctube.otxcdIndex0 = xcdrawing0.otxcdIndex
+		xctube.otxcdIndex1 = xcdrawing1.otxcdIndex
+		xcdrawing0.xctubesconn.append(xctube)
+		xcdrawing1.xctubesconn.append(xctube)
+		$XCtubes.add_child(xctube)
+	
+	xctube.xcapplyonepath(xcn0, xcn1)
+	print("fasdasdasd", xctube)
+
 
 func updateonepaths():
 	print("iupdatingpaths ", len(ot.onepathpairs))

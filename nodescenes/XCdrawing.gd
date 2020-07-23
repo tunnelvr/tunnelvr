@@ -3,9 +3,11 @@ extends Spatial
 	
 const XCnode = preload("res://nodescenes/XCnode.tscn")
 const linewidth = 0.05
+var otxcdIndex: int = 0
 
-var nodepoints 		 : = PoolVector3Array() 
-var onepathpairs 	 : = PoolIntArray()  # 2* pairs indexing into nodepoints
+var nodepoints = [ ]	# : = PoolVector3Array() 
+var onepathpairs = [ ]  # : = PoolIntArray()  # 2* pairs indexing into nodepoints
+var xctubesconn = [ ]
 
 func newotnodepoint():
 	nodepoints.push_back(Vector3())
@@ -35,7 +37,7 @@ func copyotnodetoxcn(xcn):
 	#xcn.global_transform.origin = nodepoints[xcn.otIndex]
 	xcn.translation = nodepoints[xcn.otIndex]
 
-func otapplyonepath(i0, i1):
+func xcotapplyonepath(i0, i1):
 	for j in range(len(onepathpairs)-2, -3, -2):
 		if j == -2:
 			print("addingonepath ", len(onepathpairs))
@@ -63,10 +65,6 @@ func removexcnode(xcn):
 	if removeotnodepoint(xcn.otIndex):
 		copyotnodetoxcn($XCnodes.get_child(xcn.otIndex))
 	$XCnodes.get_child($XCnodes.get_child_count()-1).free()
-	updatexcpaths()
-
-func applyonepath(xcn0, xcn1):
-	otapplyonepath(xcn0.otIndex, xcn1.otIndex)
 	updatexcpaths()
 
 func updatexcpaths():

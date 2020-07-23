@@ -5,7 +5,6 @@ extends Spatial
 
 # variables set by the Spatial.gd
 var drawnfloor = null
-var drawingwall = null
 var sketchsystem = null
 var centrelinesystem =null
 var nodeorientationpreview = null
@@ -41,8 +40,9 @@ var nodeorientationpreviewheldtransform = null
 # set_materialoverride
 
 onready var LaserSquare = get_node("../../../LaserSquare")
-onready var LaserSpot = get_node("LaserSpot"); 
-onready var LaserSpike = get_node("LaserSpot/LaserSpike"); 
+onready var LaserSpot = get_node("LaserSpot") 
+onready var LaserSpike = get_node("LaserSpot/LaserSpike") 
+onready var LaserShadow = get_node("LaserShadow") 
 
 var laser_y = -0.05
 
@@ -118,19 +118,25 @@ func onpointing(newpointertarget, newpointertargetpoint):
 			if pointertarget.has_method("set_materialoverride"):
 				pointertarget.set_materialoverride(selectedpointerhighlightmaterial if pointertarget == selectedtarget else pointinghighlightmaterial)
 				LaserSpot.visible = false
+				LaserShadow.visible = true
 				pointertargetoriginy = pointertarget.global_transform.origin.y
 			elif pointertarget == guipanel3d:
 				LaserSpot.visible = false
+				LaserShadow.visible = false
 			else:
 				LaserSpot.visible = true
+				LaserShadow.visible = (pointertarget.get_name() == "XCdrawingplane")
 		else:
 			LaserSpot.visible = false
+			LaserShadow.visible = false
 	pointertargetpoint = newpointertargetpoint
 	if is_instance_valid(pointertarget) and pointertarget == guipanel3d:
 		guipanel3d.guipanelsendmousemotion(pointertargetpoint, controller.global_transform, controller.is_button_pressed(Buttons.VR_TRIGGER))
 
 	if LaserSpot.visible:
 		LaserSpot.global_transform.origin = pointertargetpoint
+	if LaserShadow.visible:
+		LaserShadow.global_transform = Transform(Basis(), Vector3(pointertargetpoint.x, drawnfloor.global_transform.origin.y, pointertargetpoint.z))
 
 
 func _on_button_pressed(p_button):
@@ -158,6 +164,8 @@ func _on_button_pressed(p_button):
 					selectedtarget.global_transform.origin = pointertargetpoint
 					xcdrawing.copyxcntootnode(selectedtarget)
 					xcdrawing.updatexcpaths()
+					for xctube in xcdrawing.xctubesconn:
+						xctube.updatexclinkpaths(xcdrawing.get_parent())
 				else:
 					selectedtarget.set_materialoverride(null)
 					selectedtarget = null
@@ -166,12 +174,13 @@ func _on_button_pressed(p_button):
 			
 			# make new node on XCdrawingplane
 			elif not controller.is_button_pressed(Buttons.VR_GRIP):
-				var pointertarget = xcdrawing.newxcnode(-1)
+				pointertarget = xcdrawing.newxcnode(-1)
 				xcdrawing.get_node("XCnodes").add_child(pointertarget)
 				pointertarget.global_transform.origin = pointertargetpoint
 				xcdrawing.copyxcntootnode(pointertarget)
 				if is_instance_valid(selectedtarget) and selectedtarget.get_parent().get_parent() == xcdrawing:
-					xcdrawing.applyonepath(selectedtarget, pointertarget)
+					sketchsystem.xcapplyonepath(selectedtarget, pointertarget)
+				if is_instance_valid(selectedtarget) and selectedtarget.has_method("set_materialoverride"):
 					selectedtarget.set_materialoverride(null)
 					
 				if controller.is_button_pressed(Buttons.VR_GRIP):
@@ -215,7 +224,9 @@ func _on_button_pressed(p_button):
 					pointertarget.global_transform.origin.y = 0.2
 					pointertarget.scale.y = pointertarget.global_transform.origin.y
 					sketchsystem.ot.copyopntootnode(pointertarget)
-					
+					if is_instance_valid(selectedtarget) and selectedtarget.has_method("set_materialoverride"):
+						selectedtarget.set_materialoverride(null)
+										
 				if controller.is_button_pressed(Buttons.VR_GRIP):
 					selectedtarget = null
 				else:
@@ -226,17 +237,17 @@ func _on_button_pressed(p_button):
 		# clear selected target by selecting again
 		# (we may reconsider deselection on second selection)
 		elif pointertarget == selectedtarget:
-			if selectedtarget.get_parent().get_name() == "StationNodes":
+			var selectedtargettype = selectedtarget.get_parent().get_name()			
+			if selectedtargettype == "StationNodes":
 				settextpanel(null, null)
 			selectedtarget.set_materialoverride(pointinghighlightmaterial)
 			if controller.is_button_pressed(Buttons.VR_GRIP):
-				if selectedtarget.get_parent().get_name() == "OnePathNodes":
+				if selectedtargettype == "OnePathNodes":
 					sketchsystem.removeonepathnode(selectedtarget)
-				elif selectedtarget.get_parent().get_name() == "DrawnStationNodes":
+				elif selectedtargettype == "DrawnStationNodes":
 					selectedtarget.queue_free()
-				elif selectedtarget.get_parent().get_name() == "XCnodes":
+				elif selectedtargettype == "XCnodes":
 					selectedtarget.get_parent().get_parent().removexcnode(selectedtarget)
-
 				gripbuttonpressused = true
 			selectedtarget = null
 			
@@ -252,8 +263,8 @@ func _on_button_pressed(p_button):
 					settextpanel(null, null)
 				if selectedtargettype == "OnePathNodes" and pointertargettype == "OnePathNodes":
 					sketchsystem.applyonepath(selectedtarget, pointertarget)
-				if selectedtargettype == "XCnodes" and pointertargettype == "XCnodes" and pointertarget.get_parent() == selectedtarget.get_parent():
-					selectedtarget.get_parent().get_parent().applyonepath(selectedtarget, pointertarget)
+				if selectedtargettype == "XCnodes" and pointertargettype == "XCnodes":
+					sketchsystem.xcapplyonepath(selectedtarget, pointertarget)
 
 			selectedtarget = pointertarget
 			selectedtarget.set_materialoverride(selectedpointerhighlightmaterial)
@@ -265,6 +276,7 @@ func _on_button_pressed(p_button):
 				sketchsystem.get_node("NodePreview").mesh = sketchsystem.ot.nodeplanepreview(selectedtarget.otIndex)
 			elif pointertargettype == "XCnodes":
 				selectedtarget.get_node("../../XCdrawingplane").visible = true
+				selectedtarget.get_node("../../XCdrawingplane/CollisionShape").disabled = false
 				
 	# change height of pointer target
 	if p_button == Buttons.VR_PAD:
@@ -294,6 +306,7 @@ func _on_button_release(p_button):
 			selectedtarget = null
 		elif is_instance_valid(pointertarget) and pointertarget.get_name() == "XCdrawingplane":
 			pointertarget.visible = false
+			pointertarget.get_node("CollisionShape").disabled = true
 			pointertarget = null
 		
 	elif p_button == Buttons.VR_TRIGGER and (nodeorientationpreviewheldtransform != null):
@@ -311,7 +324,9 @@ func _on_button_release(p_button):
 		var drawingwallangle = -vwall2.angle()
 		var vwallsca = vwall2.length()
 		var xcdrawing = XCdrawing.instance()
+		xcdrawing.otxcdIndex = sketchsystem.get_node("XCdrawings").get_child_count()
 		sketchsystem.get_node("XCdrawings").add_child(xcdrawing)
+
 		xcdrawing.global_transform = Transform(Basis().rotated(Vector3(0,1,0), drawingwallangle), vwallmid)
 		xcdrawing.get_node("XCdrawingplane").scale = Vector3(vwallsca/2.0+1.0, 3.0, 1.0)
 			

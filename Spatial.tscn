@@ -1,4 +1,4 @@
-[gd_scene load_steps=47 format=2]
+[gd_scene load_steps=46 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://addons/godot-xr-tools/misc/VR_Common_Shader_Cache.tscn" type="PackedScene" id=2]
@@ -53,6 +53,24 @@ height = 0.2
 radial_segments = 6
 rings = 1
 
+[sub_resource type="SpatialMaterial" id=28]
+albedo_color = Color( 0.976471, 0.67451, 0.0313726, 1 )
+metallic = 0.68
+roughness = 0.53
+emission_enabled = true
+emission = Color( 0.835294, 0.729412, 0.196078, 1 )
+emission_energy = 1.0
+emission_operator = 0
+emission_on_uv2 = false
+
+[sub_resource type="CylinderMesh" id=29]
+material = SubResource( 28 )
+top_radius = 0.05
+bottom_radius = 0.05
+height = 0.02
+radial_segments = 8
+rings = 1
+
 [sub_resource type="SpatialMaterial" id=7]
 albedo_texture = ExtResource( 13 )
 
@@ -64,18 +82,6 @@ subdivide_depth = 4
 
 [sub_resource type="BoxShape" id=9]
 extents = Vector3( 0.5, 0.5, 0.643 )
-
-[sub_resource type="BoxShape" id=10]
-extents = Vector3( 0.5, 0.5, 0.01 )
-
-[sub_resource type="SpatialMaterial" id=11]
-flags_transparent = true
-params_cull_mode = 2
-albedo_color = Color( 0.368627, 0.980392, 0.921569, 0.623529 )
-
-[sub_resource type="PlaneMesh" id=12]
-material = SubResource( 11 )
-size = Vector2( 1, 1 )
 
 [sub_resource type="SpatialMaterial" id=13]
 params_cull_mode = 2
@@ -179,6 +185,16 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.24823, -6.41158 )
 
 [node name="vr_common_shader_cache" parent="ARVROrigin/ARVRCamera" instance=ExtResource( 2 )]
 
+[node name="SpotLight" type="SpotLight" parent="ARVROrigin/ARVRCamera"]
+transform = Transform( 1, 0, 0, 0, 0.939693, 0.34202, 0, -0.34202, 0.939693, 0, 0.8, 0 )
+visible = false
+light_energy = 4.1
+shadow_enabled = true
+spot_range = 90.2
+spot_attenuation = 0.406126
+spot_angle = 41.0
+spot_angle_attenuation = 0.63728
+
 [node name="ARVRController_Left" type="ARVRController" parent="ARVROrigin"]
 controller_id = 2
 
@@ -232,8 +248,13 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0 )
 mesh = SubResource( 6 )
 material/0 = null
 
+[node name="LaserShadow" type="MeshInstance" parent="ARVROrigin/ARVRController_Right/pointersystem"]
+transform = Transform( 1, 0, 0, 0, 0.707107, -0.707107, 0, 0.707107, 0.707107, 0, -5.76777, 4.06674 )
+mesh = SubResource( 29 )
+material/0 = null
+
 [node name="DirectionalLight" type="DirectionalLight" parent="."]
-transform = Transform( -1.62921e-07, 0.5, -0.866025, 0, 0.866025, 0.5, 1, 8.14605e-08, -1.41094e-07, -8.01609, 6.06234, 0 )
+transform = Transform( 1, 0, 0, 0, 0.5, 0.866025, 0, -0.866025, 0.5, 0, 50, 0 )
 light_energy = 0.6
 shadow_enabled = true
 shadow_color = Color( 0.388235, 0.0705882, 0.0705882, 1 )
@@ -250,30 +271,19 @@ material/0 = null
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0 )
 shape = SubResource( 9 )
 
-[node name="drawingwall" type="StaticBody" parent="."]
-transform = Transform( 9.95004, 0, 0.998334, 0, 0.2, 0, -0.0998334, 0, 0.995004, 26.5811, 0.302048, 0 )
-collision_layer = 16
-collision_mask = 0
-
-[node name="CollisionShape" type="CollisionShape" parent="drawingwall"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, -0.5, 0 )
-shape = SubResource( 10 )
-
-[node name="MeshInstance" type="MeshInstance" parent="drawingwall/CollisionShape"]
-transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, 0, 0, 0 )
-layers = 18
-cast_shadow = 0
-mesh = SubResource( 12 )
-material/0 = null
-
 [node name="SketchSystem" type="Spatial" parent="."]
 script = ExtResource( 10 )
 
 [node name="XCdrawings" type="Spatial" parent="SketchSystem"]
 
+[node name="XCtubes" type="Spatial" parent="SketchSystem"]
+
 [node name="OnePathNodes" type="Spatial" parent="SketchSystem"]
 
 [node name="PathLines" type="MeshInstance" parent="SketchSystem"]
+material_override = SubResource( 13 )
+
+[node name="PathXCLinks" type="MeshInstance" parent="SketchSystem"]
 material_override = SubResource( 13 )
 
 [node name="WorkingShell" type="StaticBody" parent="SketchSystem"]
@@ -305,6 +315,7 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 1.91816, 0.304006, -4.61659 )
 visible = false
 
 [node name="NodePreview" type="MeshInstance" parent="SketchSystem"]
+visible = false
 material_override = SubResource( 19 )
 cast_shadow = 0
 mesh = SubResource( 20 )
