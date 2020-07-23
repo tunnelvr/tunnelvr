@@ -5,8 +5,11 @@ var arvr_quest = null;
 
 
 # Stuff to do:
+# * tap right and up to grow XC drawing
+# * draw connecting lines between nodes on xcdrawing and other edits (the pathlines)
+# * save and load the xcdrawings to the file as pools of vectors
 # * XCnodes to receive the modes in the same wall
-# * node on XC plane to have reflection on the floor
+# * node on XC plane to have reflection on the floor to match the sketch that's there
 # * replace the drawingwall with the XCdrawings (with a NodeOrientPreview in it?)
 # * We trace a network of nodes on the floor how we like
 # * Is the ground drawing actually just a 2D drawing which the cross sections will be guided by?

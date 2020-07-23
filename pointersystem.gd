@@ -23,7 +23,9 @@ var distance = 50
 var collision_mask = 14 
 
 const OnePathNode = preload("res://nodescenes/OnePathNode.tscn")
-
+const XCdrawing = preload("res://nodescenes/XCdrawing.tscn")
+const XCnode = preload("res://nodescenes/XCnode.tscn")
+				
 var pointinghighlightmaterial = SpatialMaterial.new()
 var selectedhighlightmaterial = SpatialMaterial.new()
 var selectedpointerhighlightmaterial = SpatialMaterial.new()
@@ -149,21 +151,27 @@ func _on_button_pressed(p_button):
 
 		elif pointertarget.get_name() == "XCdrawingplane":
 			var xcdrawing = pointertarget.get_parent()
-			# drag node to new position on floor
+			
+			# drag node to new position on XCdrawingplane
 			if controller.is_button_pressed(Buttons.VR_GRIP) and is_instance_valid(selectedtarget) and selectedtarget.get_parent().get_name() == "XCnodes":
 				if selectedtarget.get_parent().get_parent() == xcdrawing:
 					selectedtarget.global_transform.origin = pointertargetpoint
+					xcdrawing.copyxcntootnode(selectedtarget)
+					xcdrawing.updatexcpaths()
+				else:
+					selectedtarget.set_materialoverride(null)
+					selectedtarget = null
 
-					#sketchsystem.updateonepaths()
 				gripbuttonpressused = true
-				
-			else:
-				var XCnode = preload("res://nodescenes/XCnode.tscn")
-				var pointertarget = XCnode.instance()
+			
+			# make new node on XCdrawingplane
+			elif not controller.is_button_pressed(Buttons.VR_GRIP):
+				var pointertarget = xcdrawing.newxcnode(-1)
 				xcdrawing.get_node("XCnodes").add_child(pointertarget)
 				pointertarget.global_transform.origin = pointertargetpoint
-				if is_instance_valid(selectedtarget) and selectedtarget.get_parent().get_name() == "XCnodes" and selectedtarget.get_parent().get_parent() == xcdrawing:
-					#sketchsystem.applyonepath(selectedtarget, pointertarget)
+				xcdrawing.copyxcntootnode(pointertarget)
+				if is_instance_valid(selectedtarget) and selectedtarget.get_parent().get_parent() == xcdrawing:
+					xcdrawing.applyonepath(selectedtarget, pointertarget)
 					selectedtarget.set_materialoverride(null)
 					
 				if controller.is_button_pressed(Buttons.VR_GRIP):
@@ -179,7 +187,7 @@ func _on_button_pressed(p_button):
 				if selectedtarget.get_parent().get_name() == "OnePathNodes":
 					setopnpos(selectedtarget, pointertargetpoint)
 					sketchsystem.updateonepaths()
-				if selectedtarget.get_parent().get_name() == "DrawnStationNodes":
+				elif selectedtarget.get_parent().get_name() == "DrawnStationNodes":
 					setopnpos(selectedtarget, pointertargetpoint)
 				gripbuttonpressused = true
 				
@@ -226,27 +234,37 @@ func _on_button_pressed(p_button):
 					sketchsystem.removeonepathnode(selectedtarget)
 				elif selectedtarget.get_parent().get_name() == "DrawnStationNodes":
 					selectedtarget.queue_free()
+				elif selectedtarget.get_parent().get_name() == "XCnodes":
+					selectedtarget.get_parent().get_parent().removexcnode(selectedtarget)
 
 				gripbuttonpressused = true
 			selectedtarget = null
 			
 		# click on new selected target (connect from previous selected target)
 		else:
+			var pointertargettype = pointertarget.get_parent().get_name()
+			
+			# connect from selected node if exists
 			if is_instance_valid(selectedtarget) and selectedtarget.has_method("set_materialoverride"):
+				var selectedtargettype = selectedtarget.get_parent().get_name()
 				selectedtarget.set_materialoverride(null)
-				if selectedtarget.get_parent().get_name() == "StationNodes":
+				if selectedtargettype == "StationNodes":
 					settextpanel(null, null)
-				if selectedtarget.get_parent().get_name() == "OnePathNodes" and pointertarget.get_parent().get_name() == "OnePathNodes":
+				if selectedtargettype == "OnePathNodes" and pointertargettype == "OnePathNodes":
 					sketchsystem.applyonepath(selectedtarget, pointertarget)
+				if selectedtargettype == "XCnodes" and pointertargettype == "XCnodes" and pointertarget.get_parent() == selectedtarget.get_parent():
+					selectedtarget.get_parent().get_parent().applyonepath(selectedtarget, pointertarget)
 
 			selectedtarget = pointertarget
 			selectedtarget.set_materialoverride(selectedpointerhighlightmaterial)
-			if selectedtarget.get_parent().get_name() == "StationNodes":
+			if pointertargettype == "StationNodes":
 				settextpanel(selectedtarget.stationname, selectedtarget.global_transform.origin)
-			elif selectedtarget.get_parent().get_name() == "DrawnStationNodes":
+			elif pointertargettype == "DrawnStationNodes":
 				settextpanel(selectedtarget.stationname, centrelinesystem.stationnodemap[selectedtarget.stationname].global_transform.origin)				
-			elif selectedtarget.get_parent().get_name() == "OnePathNodes":
+			elif pointertargettype == "OnePathNodes":
 				sketchsystem.get_node("NodePreview").mesh = sketchsystem.ot.nodeplanepreview(selectedtarget.otIndex)
+			elif pointertargettype == "XCnodes":
+				selectedtarget.get_node("../../XCdrawingplane").visible = true
 				
 	# change height of pointer target
 	if p_button == Buttons.VR_PAD:
@@ -270,9 +288,13 @@ func _on_button_pressed(p_button):
 
 func _on_button_release(p_button):
 	# cancel selection by squeezing and then releasing grip without doing anything in between
-	if p_button == Buttons.VR_GRIP and not gripbuttonpressused and is_instance_valid(selectedtarget) and selectedtarget.has_method("set_materialoverride"):
-		selectedtarget.set_materialoverride(pointinghighlightmaterial if selectedtarget == pointertarget else null)
-		selectedtarget = null
+	if p_button == Buttons.VR_GRIP and not gripbuttonpressused:
+		if is_instance_valid(selectedtarget) and selectedtarget.has_method("set_materialoverride"):
+			selectedtarget.set_materialoverride(pointinghighlightmaterial if selectedtarget == pointertarget else null)
+			selectedtarget = null
+		elif is_instance_valid(pointertarget) and pointertarget.get_name() == "XCdrawingplane":
+			pointertarget.visible = false
+			pointertarget = null
 		
 	elif p_button == Buttons.VR_TRIGGER and (nodeorientationpreviewheldtransform != null):
 		print("dosomethingwith nodeorientationpreview ", nodeorientationpreviewheldtransform)
@@ -288,7 +310,6 @@ func _on_button_release(p_button):
 		var vwall2 = Vector2(vwall.x, vwall.z)
 		var drawingwallangle = -vwall2.angle()
 		var vwallsca = vwall2.length()
-		var XCdrawing = preload("res://nodescenes/XCdrawing.tscn")
 		var xcdrawing = XCdrawing.instance()
 		sketchsystem.get_node("XCdrawings").add_child(xcdrawing)
 		xcdrawing.global_transform = Transform(Basis().rotated(Vector3(0,1,0), drawingwallangle), vwallmid)

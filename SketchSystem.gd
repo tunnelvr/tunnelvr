@@ -52,7 +52,7 @@ func updateonepaths():
 		surfaceTool.add_vertex(p1right)
 	surfaceTool.generate_normals()
 	$PathLines.mesh = surfaceTool.commit()
-	print("usus ", len($PathLines.mesh.get_faces()), " ", len($PathLines.mesh.get_faces())) #surfaceTool.generate_normals()
+	print("ususxc ", len($PathLines.mesh.get_faces()), " ", len($PathLines.mesh.get_faces())) #surfaceTool.generate_normals()
 	#updateworkingshell()
 
 func updateworkingshell(makevisible):
