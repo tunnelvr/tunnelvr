@@ -88,14 +88,18 @@ func updateonepaths():
 	#updateworkingshell()
 
 func updateworkingshell(makevisible):
-	if makevisible:
-		$WorkingShell/MeshInstance.mesh = ot.makeworkingshell()
-		$WorkingShell/CollisionShape.shape.set_faces($WorkingShell/MeshInstance.mesh.get_faces())
-		$WorkingShell.visible = true
-		$WorkingShell/CollisionShape.disabled = false
-	else:
-		$WorkingShell.visible = false
-		$WorkingShell/CollisionShape.disabled = true
+	for xctube in $XCtubes.get_children():
+		xctube.updatetubeshell(makevisible)
+	
+	
+	#if makevisible:
+	#	$WorkingShell/MeshInstance.mesh = ot.makeworkingshell()
+	#	$WorkingShell/CollisionShape.shape.set_faces($WorkingShell/MeshInstance.mesh.get_faces())
+	#	$WorkingShell.visible = true
+	#	$WorkingShell/CollisionShape.disabled = false
+	#else:
+	#	$WorkingShell.visible = false
+	#	$WorkingShell/CollisionShape.disabled = true
 	
 
 # Quick saving and loading of shape.  It goes to 

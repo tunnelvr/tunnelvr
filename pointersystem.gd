@@ -161,11 +161,7 @@ func _on_button_pressed(p_button):
 			# drag node to new position on XCdrawingplane
 			if controller.is_button_pressed(Buttons.VR_GRIP) and is_instance_valid(selectedtarget) and selectedtarget.get_parent().get_name() == "XCnodes":
 				if selectedtarget.get_parent().get_parent() == xcdrawing:
-					selectedtarget.global_transform.origin = pointertargetpoint
-					xcdrawing.copyxcntootnode(selectedtarget)
-					xcdrawing.updatexcpaths()
-					for xctube in xcdrawing.xctubesconn:
-						xctube.updatexclinkpaths(xcdrawing.get_parent())
+					xcdrawing.movexcnode(selectedtarget, pointertargetpoint)
 				else:
 					selectedtarget.set_materialoverride(null)
 					selectedtarget = null
@@ -252,7 +248,7 @@ func _on_button_pressed(p_button):
 			selectedtarget = null
 			
 		# click on new selected target (connect from previous selected target)
-		else:
+		elif pointertarget.has_method("set_materialoverride"):
 			var pointertargettype = pointertarget.get_parent().get_name()
 			
 			# connect from selected node if exists

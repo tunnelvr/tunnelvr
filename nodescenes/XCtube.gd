@@ -6,17 +6,34 @@ var xcdrawinglink = [ ]  # [ nodepoints_ifrom0, nodepoints_ito0, nodepoints_ifro
 const linewidth = 0.02
 
 func xcapplyonepath(xcn0, xcn1):
+	print("xcapplyonepathxcapplyonepath-pre", xcn0, xcn1, xcdrawinglink)
 	for j in range(0, len(xcdrawinglink), 2):
 		if xcdrawinglink[j] == xcn0.otIndex and xcdrawinglink[j+1] == xcn1.otIndex:
-			xcdrawinglink.remove(xcn1.otIndex)
-			xcdrawinglink.remove(xcn0.otIndex)
+			xcdrawinglink.remove(j+1)
+			xcdrawinglink.remove(j)
 			xcn0 = null
 			break
 	if xcn0 != null:
 		xcdrawinglink.append(xcn0.otIndex)
 		xcdrawinglink.append(xcn1.otIndex)
 	var xcdrawings = xcn1.get_parent().get_parent().get_parent()
+	print("xcapplyonepathxcapplyonepath-post", xcdrawinglink)
+	assert ((len(xcdrawinglink)%2) == 0)
 	updatexclinkpaths(xcdrawings)
+
+func removetubenodepoint(otxcdIndex, xcnIndex, xcnIndexE):
+	# this function very closely bound with the tail copy onto deleted one method
+	assert ((otxcdIndex == otxcdIndex0) or (otxcdIndex == otxcdIndex1))
+	var m = 0 if otxcdIndex == otxcdIndex0 else 1
+	print("rrremoveotnodepoint-pre ", otxcdIndex, " ", xcnIndex, xcdrawinglink)
+	for j in range(len(xcdrawinglink) - 2, -1, -2):
+		if xcdrawinglink[j+m] == xcnIndex:
+			xcdrawinglink[j] = xcdrawinglink[-2]
+			xcdrawinglink[j+1] = xcdrawinglink[-1]
+			xcdrawinglink.resize(len(xcdrawinglink) - 2)
+		elif xcdrawinglink[j+m] == xcnIndexE:
+			xcdrawinglink[j+m] = xcnIndex
+	print("rrremoveotnodepoint-post ", otxcdIndex, " ", xcnIndex, xcdrawinglink)
 
 		
 func updatexclinkpaths(xcdrawings):
@@ -24,7 +41,8 @@ func updatexclinkpaths(xcdrawings):
 	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var xcdrawing0 = xcdrawings.get_child(otxcdIndex0)
 	var xcdrawing1 = xcdrawings.get_child(otxcdIndex1)
-	print("llll", xcdrawings, xcdrawing0, xcdrawing1)
+	print("llll", xcdrawings, xcdrawing0, xcdrawing1, xcdrawinglink)
+	assert ((len(xcdrawinglink)%2) == 0)
 	for j in range(0, len(xcdrawinglink), 2):
 		#var p0 = xcdrawing0.nodepoints[xcdrawinglink[j]]
 		#var p1 = xcdrawing1.nodepoints[xcdrawinglink[j+1]]
@@ -46,3 +64,81 @@ func updatexclinkpaths(xcdrawings):
 	$PathLines.mesh = surfaceTool.commit()
 	print("ususxxxxc ", len($PathLines.mesh.get_faces()), " ", len($PathLines.mesh.get_faces())) #surfaceTool.generate_normals()
 	#updateworkingshell()
+	
+	
+func fa(a, b):
+	return a[0] < b[0] or (a[0] == b[0] and a[1] < b[1])
+
+func maketubeshell():
+	var xcdrawings = get_node("../../XCdrawings")
+	var xcdrawing0 = xcdrawings.get_child(otxcdIndex0)
+	var xcdrawing1 = xcdrawings.get_child(otxcdIndex1)
+	var polys0 = xcdrawing0.makexcdpolys()  # arrays of indexes to nodes ending with [Nsinglenodes, orientation]
+	var polys1 = xcdrawing1.makexcdpolys()  # arrays of indexes to nodes ending with [Nsinglenodes, orientation]
+	
+	# for now just the single good polygon
+	var poly0 = null
+	for poly in polys0:
+		if poly[-2] == 1000 and poly[-1]:
+			poly0 = poly.slice(0, len(poly)-3)
+	var poly1 = null
+	for poly in polys1:
+		if poly[-2] == 1000 and poly[-1]:
+			poly1 = poly.slice(0, len(poly)-3)
+	print("opopolys", poly0, poly1)
+	if xcdrawing0.global_transform.basis.z.dot(xcdrawing1.global_transform.basis.z) < 0:
+		poly1.invert()
+		print("reversssing poly1", xcdrawing0.global_transform.basis.z, xcdrawing1.global_transform.basis.z, poly1)
+		
+	# get all the connections in here between the polygons but in the right order
+	var ila = [ ]  # [ [ il0, il1 ] ]
+	for j in range(0, len(xcdrawinglink), 2):
+		var il0 = poly0.find(xcdrawinglink[j])
+		var il1 = poly1.find(xcdrawinglink[j+1])
+		if il0 != -1 and il1 != -1:
+			ila.append([il0, il1])
+	ila.sort_custom(self, "fa")
+	print("ilililia", xcdrawinglink, ila)
+	
+	var surfaceTool = SurfaceTool.new()
+	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var xcnodes0 = xcdrawing0.get_node("XCnodes")
+	var xcnodes1 = xcdrawing1.get_node("XCnodes")
+	for i in range(len(ila)):
+		var ila0 = ila[i][0]
+		var ila0N = ila[i+1][0] - ila0  if i < len(ila)-1  else len(poly0) + ila[0][0] - ila0 
+		var ila1 = ila[i][1]
+		var ila1N = ila[(i+1)%len(ila)][1] - ila1
+		if ila1N < 0 or len(ila) == 1:   # there's a V-shaped case where this isn't good enough
+			ila1N += len(poly1)
+		print("  iiilla ", [ila0, ila0N, ila1, ila1N])
+
+		var acc = -ila0N/2  if ila0N>=ila1N  else  ila1N/2
+		var i0 = 0
+		var i1 = 0
+		while i0 < ila0N or i1 < ila1N:
+			if acc < 0:
+				acc += ila1N
+				surfaceTool.add_vertex(xcnodes0.get_child(poly0[(ila0+i0)%len(poly0)]).global_transform.origin)
+				surfaceTool.add_vertex(xcnodes1.get_child(poly1[(ila1+i1)%len(poly1)]).global_transform.origin)
+				i0 += 1
+				surfaceTool.add_vertex(xcnodes0.get_child(poly0[(ila0+i0)%len(poly0)]).global_transform.origin)
+			else:
+				acc -= ila0N
+				surfaceTool.add_vertex(xcnodes0.get_child(poly0[(ila0+i0)%len(poly0)]).global_transform.origin)
+				surfaceTool.add_vertex(xcnodes1.get_child(poly1[(ila1+i1)%len(poly1)]).global_transform.origin)
+				i1 += 1
+				surfaceTool.add_vertex(xcnodes1.get_child(poly1[(ila1+i1)%len(poly1)]).global_transform.origin)
+		
+	surfaceTool.generate_normals()
+	return surfaceTool.commit()
+
+func updatetubeshell(makevisible):
+	if makevisible:
+		$XCtubeshell/MeshInstance.mesh = maketubeshell()
+		$XCtubeshell/CollisionShape.shape.set_faces($XCtubeshell/MeshInstance.mesh.get_faces())
+		$XCtubeshell.visible = true
+		$XCtubeshell/CollisionShape.disabled = false
+	else:
+		$XCtubeshell.visible = false
+		$XCtubeshell/CollisionShape.disabled = true

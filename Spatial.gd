@@ -5,16 +5,20 @@ var arvr_quest = null;
 
 
 # Stuff to do:
-# * work through the bugs in updatexclinkpaths when things are moved or deleted
-# * make the shell for the tube
-# * xcdrawinglink.push_back is place to do delete of links
-# * deleting drawing link paths
+# * debug xcdrawinglink becoming non even
+# * Now look for the polys to correspond
+# * make the shell for the tube.  cycle around
+# * substitute updatetubeshell for all working shell cases and delete code
+# * Fill in unused flats of the XCdrawing
+# * lower part of shell should have the texture from the drawing
+# * experiment with making an offset of the XC and a pipeline
 # * remove poolintarrays because of all by value
+# * interpolate the XC as we drag along the runs traced in the floor
+# * allocate junctions and curved XCs
+
 # * node on floor used for making new XCs
-# * duplicate and move XC across
 # * tap right and up to grow XC drawing
 # * XC to record its UV and X-vector position on the sketch maybe
-# * connecting lines from one XC to another
 # * save and load the xcdrawings to the file as pools of vectors
 # * We trace a network of nodes on the floor how we like
 # * Is the ground drawing actually just a 2D drawing which the cross sections will be guided by?
