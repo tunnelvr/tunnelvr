@@ -3,18 +3,21 @@ extends Spatial
 var arvr_openvr = null; 
 var arvr_quest = null; 
 
-
 # Stuff to do:
-# * debug xcdrawinglink becoming non even
-# * Now look for the polys to correspond
-# * make the shell for the tube.  cycle around
-# * substitute updatetubeshell for all working shell cases and delete code
+# * shell code should show the UV of the texture below when normal is down
+# * delete all other shell making code
+# * and_child should be with node names set the same as the otIndex
 # * Fill in unused flats of the XCdrawing
-# * lower part of shell should have the texture from the drawing
+# * control panel option to show head-torch and sunlight off (shadows on from cave)
+# * right tapping on touchpad to make XC area larger
 # * experiment with making an offset of the XC and a pipeline
+# * how to duplicate, move and shift an XCdrawing with gestures
 # * remove poolintarrays because of all by value
 # * interpolate the XC as we drag along the runs traced in the floor
-# * allocate junctions and curved XCs
+# * show cursor and XC plane in front of the shell if we want to 
+# * update shells incrementally per tube, not whole thing at once
+# * try some rock texture onto the shells (esp the ceilings)
+# * allocate junctions and curved XCs (or with a split panel at 0 and different angle)
 
 # * node on floor used for making new XCs
 # * tap right and up to grow XC drawing

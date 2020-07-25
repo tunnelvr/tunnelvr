@@ -89,7 +89,7 @@ func updateonepaths():
 
 func updateworkingshell(makevisible):
 	for xctube in $XCtubes.get_children():
-		xctube.updatetubeshell(makevisible)
+		xctube.updatetubeshell(get_node("../drawnfloor"), makevisible)
 	
 	
 	#if makevisible:

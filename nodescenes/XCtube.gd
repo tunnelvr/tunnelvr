@@ -64,12 +64,23 @@ func updatexclinkpaths(xcdrawings):
 	$PathLines.mesh = surfaceTool.commit()
 	print("ususxxxxc ", len($PathLines.mesh.get_faces()), " ", len($PathLines.mesh.get_faces())) #surfaceTool.generate_normals()
 	#updateworkingshell()
-	
+
+
+
+func add_uvvertex(surfaceTool, xcnodes, poly, ila, i, floorsize, dfinv):
+	var pt = xcnodes.get_child(poly[(ila+i)%len(poly)]).global_transform.origin
+	var afloorpoint = dfinv.xform(pt)
+	var uvpt = Vector2(afloorpoint.x/floorsize.x + 0.5, afloorpoint.z/floorsize.y + 0.5)
+	surfaceTool.add_uv(uvpt)
+	surfaceTool.add_vertex(pt)
 	
 func fa(a, b):
 	return a[0] < b[0] or (a[0] == b[0] and a[1] < b[1])
 
-func maketubeshell():
+func maketubeshell(drawnfloor):
+	var floorsize = drawnfloor.get_node("MeshInstance").mesh.size
+	var dfinv = drawnfloor.global_transform.affine_inverse()
+	
 	var xcdrawings = get_node("../../XCdrawings")
 	var xcdrawing0 = xcdrawings.get_child(otxcdIndex0)
 	var xcdrawing1 = xcdrawings.get_child(otxcdIndex1)
@@ -119,23 +130,23 @@ func maketubeshell():
 		while i0 < ila0N or i1 < ila1N:
 			if acc < 0:
 				acc += ila1N
-				surfaceTool.add_vertex(xcnodes0.get_child(poly0[(ila0+i0)%len(poly0)]).global_transform.origin)
-				surfaceTool.add_vertex(xcnodes1.get_child(poly1[(ila1+i1)%len(poly1)]).global_transform.origin)
+				add_uvvertex(surfaceTool, xcnodes0, poly0, ila0, i0, floorsize, dfinv)
+				add_uvvertex(surfaceTool, xcnodes1, poly1, ila1, i1, floorsize, dfinv)
 				i0 += 1
-				surfaceTool.add_vertex(xcnodes0.get_child(poly0[(ila0+i0)%len(poly0)]).global_transform.origin)
+				add_uvvertex(surfaceTool, xcnodes0, poly0, ila0, i0, floorsize, dfinv)
 			else:
 				acc -= ila0N
-				surfaceTool.add_vertex(xcnodes0.get_child(poly0[(ila0+i0)%len(poly0)]).global_transform.origin)
-				surfaceTool.add_vertex(xcnodes1.get_child(poly1[(ila1+i1)%len(poly1)]).global_transform.origin)
+				add_uvvertex(surfaceTool, xcnodes0, poly0, ila0, i0, floorsize, dfinv)
+				add_uvvertex(surfaceTool, xcnodes1, poly1, ila1, i1, floorsize, dfinv)
 				i1 += 1
-				surfaceTool.add_vertex(xcnodes1.get_child(poly1[(ila1+i1)%len(poly1)]).global_transform.origin)
+				add_uvvertex(surfaceTool, xcnodes1, poly1, ila1, i1, floorsize, dfinv)
 		
 	surfaceTool.generate_normals()
 	return surfaceTool.commit()
 
-func updatetubeshell(makevisible):
+func updatetubeshell(drawnfloor, makevisible):
 	if makevisible:
-		$XCtubeshell/MeshInstance.mesh = maketubeshell()
+		$XCtubeshell/MeshInstance.mesh = maketubeshell(drawnfloor)
 		$XCtubeshell/CollisionShape.shape.set_faces($XCtubeshell/MeshInstance.mesh.get_faces())
 		$XCtubeshell.visible = true
 		$XCtubeshell/CollisionShape.disabled = false

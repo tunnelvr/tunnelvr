@@ -89,7 +89,6 @@ albedo_color = Color( 0.972549, 0.278431, 0.0392157, 1 )
 
 [sub_resource type="SpatialMaterial" id=14]
 params_cull_mode = 2
-params_line_width = 8.3
 params_use_alpha_scissor = true
 params_alpha_scissor_threshold = 0.98
 albedo_color = Color( 0.752941, 0.992157, 0.717647, 1 )
