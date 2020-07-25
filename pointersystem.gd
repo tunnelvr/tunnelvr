@@ -15,10 +15,9 @@ var viewport_point = null
 
 enum Buttons { VR_TRIGGER = 15, VR_PAD=14, VR_BUTTON_BY=1, VR_GRIP=2 }
 onready var controller = get_parent()
+onready var arvrcamera = get_node("../../ARVRCamera")
 var distance = 50
 
-# Need to replace this with proper solution once support for layer selection has been added 
-#export (int, FLAGS, "Layer 1", "Layer 2", "Layer 3", "Layer 4", "Layer 5", "Layer 6", "Layer 7", "Layer 8", "Layer 9", "Layer 10", "Layer 11", "Layer 12", "Layer 13", "Layer  14", "Layer 15", "Layer 16", "Layer 17", "Layer 18", "Layer 19", "Layer 20") 
 var collision_mask = 14 
 
 const OnePathNode = preload("res://nodescenes/OnePathNode.tscn")
@@ -134,7 +133,16 @@ func onpointing(newpointertarget, newpointertargetpoint):
 func _on_button_pressed(p_button):
 	print("pppp ", pointertargetpoint)
 	if p_button == Buttons.VR_BUTTON_BY:
-		guipanel3d.togglevisibility(controller.get_node("pointersystem").global_transform)
+		var cameracontrollervec = controller.global_transform.origin - arvrcamera.global_transform.origin
+		var ccaxvec = arvrcamera.global_transform.basis.x.dot(controller.global_transform.basis.z)
+		var pswitchpos = arvrcamera.global_transform.origin + arvrcamera.global_transform.basis.x*0.15 + arvrcamera.global_transform.basis.y*0.1
+		var pswitchdist = controller.global_transform.origin.distance_to(pswitchpos)
+		print("cccctranslation  ", ccaxvec, "  ", pswitchdist)
+		if ccaxvec > 0.85 and pswitchdist < 0.1:
+			#print("    translation  ", controller.get_node("../ARVRCamera").translation, "  ", controller.get_node("../ARVRCamera").rotation_degrees)
+			guipanel3d.clickbuttonheadtorch()
+		else:
+			guipanel3d.togglevisibility(controller.get_node("pointersystem").global_transform)
 			
 	if p_button == Buttons.VR_TRIGGER and is_instance_valid(pointertarget):
 		print("clclc ", pointertarget.get_name(), "  filename:", pointertarget.get_filename(), " p:", pointertarget.get_parent())

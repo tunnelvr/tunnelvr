@@ -5,7 +5,7 @@
 
 [sub_resource type="SpatialMaterial" id=1]
 params_cull_mode = 2
-albedo_color = Color( 0.384314, 0.968627, 0.34902, 1 )
+albedo_color = Color( 0.976471, 0.811765, 0.415686, 1 )
 albedo_texture = ExtResource( 2 )
 metallic = 0.57
 roughness = 0.49

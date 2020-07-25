@@ -4,7 +4,10 @@ var arvr_openvr = null;
 var arvr_quest = null; 
 
 # Stuff to do:
-# 
+# * save and load files incl all XCtubes
+# * auto update the shells on path join or node moved
+# * gesture menu select when pointing at side of head to turn on and off light
+# * auto shift drawing on load and station nodes exist
 # * squeeze grip deselect XCdrawing even when node is selected (instead of node deselect)
 # * squeeze grip on menu to deselect
 # * experiment with making an offset of the XC and a tube

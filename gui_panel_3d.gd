@@ -44,6 +44,9 @@ func _ready():
 	$Viewport/GUI/Panel/ButtonShiftFloor.connect("pressed", self, "_on_buttonshiftfloor_pressed")
 	$Viewport/GUI/Panel/ButtonUpdateShell.connect("toggled", self, "_on_buttonupdateshell_toggled")
 
+func clickbuttonheadtorch():
+	$Viewport/GUI/Panel/ButtonHeadtorch.pressed = not $Viewport/GUI/Panel/ButtonHeadtorch.pressed
+	_on_buttonheadtorch_toggled($Viewport/GUI/Panel/ButtonHeadtorch.pressed)
 
 func togglevisibility(controller_global_transform):
 	if not visible:
@@ -86,7 +89,7 @@ func guipanelsendmousemotion(collision_point, controller_global_transform, contr
 	var new_viewport_mousedown := false
 	var distance = controller_global_transform.origin.distance_to(collision_point) / ARVRworld_scale
 	if distance < 0.1:
-		new_viewport_mousedown = true # Allow "touching" the GUI.
+		new_viewport_mousedown = true # Allow poking the GUI with finger
 	else:
 		new_viewport_mousedown = controller_trigger
 	
@@ -96,6 +99,7 @@ func guipanelsendmousemotion(collision_point, controller_global_transform, contr
 		event.pressed = new_viewport_mousedown
 		event.button_index = BUTTON_LEFT
 		event.position = viewport_point
+		print("vvvv viewport_point ", viewport_point)
 		viewport.input(event)
 		viewport_mousedown = new_viewport_mousedown
 

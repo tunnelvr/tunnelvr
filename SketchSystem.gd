@@ -57,6 +57,7 @@ func xcapplyonepath(xcn0, xcn1):
 		xctube.get_node("XCtubeshell/CollisionShape").shape = ConcavePolygonShape.new()   # bug.  this fails to get cloned
 		xctube.otxcdIndex0 = xcdrawing0.otxcdIndex
 		xctube.otxcdIndex1 = xcdrawing1.otxcdIndex
+		xctube.set_name("XCtube"+String(xcdrawing0.otxcdIndex)+"_"+String(xcdrawing1.otxcdIndex))
 		xcdrawing0.xctubesconn.append(xctube)
 		xcdrawing1.xctubesconn.append(xctube)
 		$XCtubes.add_child(xctube)
