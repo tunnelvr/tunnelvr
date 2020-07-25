@@ -1,4 +1,4 @@
-[gd_scene load_steps=41 format=2]
+[gd_scene load_steps=42 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://addons/godot-xr-tools/misc/VR_Common_Shader_Cache.tscn" type="PackedScene" id=2]
@@ -11,6 +11,7 @@
 [ext_resource path="res://textures/Rock017_2K-JPG/Rock017_2K_AmbientOcclusion.jpg" type="Texture" id=9]
 [ext_resource path="res://SketchSystem.gd" type="Script" id=10]
 [ext_resource path="res://text_panel_3d.tscn" type="PackedScene" id=11]
+[ext_resource path="res://default_env.tres" type="Environment" id=12]
 [ext_resource path="res://surveyscans/DukeStResurvey-drawnup-p3.jpg" type="Texture" id=13]
 [ext_resource path="res://gui_panel_3d.tscn" type="PackedScene" id=14]
 [ext_resource path="res://gui_panel_3d.gd" type="Script" id=15]
@@ -53,7 +54,7 @@ height = 0.2
 radial_segments = 6
 rings = 1
 
-[sub_resource type="SpatialMaterial" id=28]
+[sub_resource type="SpatialMaterial" id=7]
 albedo_color = Color( 0.976471, 0.67451, 0.0313726, 1 )
 metallic = 0.68
 roughness = 0.53
@@ -63,68 +64,68 @@ emission_energy = 1.0
 emission_operator = 0
 emission_on_uv2 = false
 
-[sub_resource type="CylinderMesh" id=29]
-material = SubResource( 28 )
+[sub_resource type="CylinderMesh" id=8]
+material = SubResource( 7 )
 top_radius = 0.05
 bottom_radius = 0.05
 height = 0.02
 radial_segments = 8
 rings = 1
 
-[sub_resource type="SpatialMaterial" id=7]
+[sub_resource type="SpatialMaterial" id=9]
 albedo_texture = ExtResource( 13 )
 
-[sub_resource type="PlaneMesh" id=8]
-material = SubResource( 7 )
+[sub_resource type="PlaneMesh" id=10]
+material = SubResource( 9 )
 size = Vector2( 1, 1.285 )
 subdivide_width = 4
 subdivide_depth = 4
 
-[sub_resource type="BoxShape" id=9]
+[sub_resource type="BoxShape" id=11]
 extents = Vector3( 0.5, 0.5, 0.643 )
 
-[sub_resource type="SpatialMaterial" id=13]
+[sub_resource type="SpatialMaterial" id=12]
 params_cull_mode = 2
 albedo_color = Color( 0.972549, 0.278431, 0.0392157, 1 )
 
-[sub_resource type="SpatialMaterial" id=17]
+[sub_resource type="SpatialMaterial" id=13]
 params_cull_mode = 2
 albedo_color = Color( 0.87451, 0.964706, 0.247059, 1 )
 
-[sub_resource type="SpatialMaterial" id=18]
+[sub_resource type="SpatialMaterial" id=14]
 flags_transparent = true
 flags_do_not_receive_shadows = true
 params_cull_mode = 2
 albedo_color = Color( 0.321569, 0.988235, 0.27451, 0.329412 )
 
-[sub_resource type="BoxShape" id=21]
+[sub_resource type="BoxShape" id=15]
 extents = Vector3( 0.1, 0.4, 0.1 )
 
-[sub_resource type="SpatialMaterial" id=22]
+[sub_resource type="SpatialMaterial" id=16]
 albedo_color = Color( 0.380392, 0.94902, 0.431373, 1 )
 
-[sub_resource type="CylinderMesh" id=23]
-material = SubResource( 22 )
+[sub_resource type="CylinderMesh" id=17]
+material = SubResource( 16 )
 top_radius = 0.1
 bottom_radius = 0.001
 height = 0.4
 radial_segments = 4
 rings = 1
 
-[sub_resource type="SpatialMaterial" id=24]
+[sub_resource type="SpatialMaterial" id=18]
 albedo_color = Color( 0.968627, 0.054902, 0.054902, 1 )
 
-[sub_resource type="CylinderMesh" id=25]
-material = SubResource( 24 )
+[sub_resource type="CylinderMesh" id=19]
+material = SubResource( 18 )
 top_radius = 0.001
 bottom_radius = 0.1
 height = 0.4
 radial_segments = 4
 
-[sub_resource type="PlaneMesh" id=26]
+[sub_resource type="PlaneMesh" id=20]
 size = Vector2( 4, 2 )
 
-[sub_resource type="SpatialMaterial" id=27]
+[sub_resource type="SpatialMaterial" id=21]
 albedo_texture = ExtResource( 18 )
 roughness_texture = ExtResource( 3 )
 normal_enabled = true
@@ -151,18 +152,21 @@ script = ExtResource( 1 )
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.24823, -6.41158 )
 
 [node name="ARVRCamera" type="ARVRCamera" parent="ARVROrigin"]
+environment = ExtResource( 12 )
 
 [node name="vr_common_shader_cache" parent="ARVROrigin/ARVRCamera" instance=ExtResource( 2 )]
 
-[node name="SpotLight" type="SpotLight" parent="ARVROrigin/ARVRCamera"]
-transform = Transform( 1, 0, 0, 0, 0.939693, 0.34202, 0, -0.34202, 0.939693, 0, 0.8, 0 )
+[node name="HeadtorchLight" type="SpotLight" parent="ARVROrigin/ARVRCamera"]
+transform = Transform( 1, 0, 0, 0, 0.939693, 0.34202, 0, -0.34202, 0.939693, 0, 0.3, 0 )
 visible = false
-light_energy = 4.1
+light_energy = 1.66
+light_indirect_energy = 6.93
 shadow_enabled = true
-spot_range = 90.2
-spot_attenuation = 0.406126
-spot_angle = 41.0
-spot_angle_attenuation = 0.63728
+shadow_color = Color( 0.0823529, 0.0431373, 0.254902, 1 )
+spot_range = 721.6
+spot_attenuation = 0.378929
+spot_angle = 28.9
+spot_angle_attenuation = 1.27456
 
 [node name="ARVRController_Left" type="ARVRController" parent="ARVROrigin"]
 controller_id = 2
@@ -219,11 +223,11 @@ material/0 = null
 
 [node name="LaserShadow" type="MeshInstance" parent="ARVROrigin/ARVRController_Right/pointersystem"]
 transform = Transform( 1, 0, 0, 0, 0.707107, -0.707107, 0, 0.707107, 0.707107, 0, -5.76777, 4.06674 )
-mesh = SubResource( 29 )
+mesh = SubResource( 8 )
 material/0 = null
 
-[node name="DirectionalLight" type="DirectionalLight" parent="."]
-transform = Transform( 1, 0, 0, 0, 0.5, 0.866025, 0, -0.866025, 0.5, 0, 50, 0 )
+[node name="DirectionalLight" type="DirectionalLight" parent="ARVROrigin"]
+transform = Transform( -1, 2.66914e-07, -1.86895e-07, 0, 0.573576, 0.819152, 3.25841e-07, 0.819152, -0.573576, 0, 48.7518, 6.41158 )
 light_energy = 0.6
 shadow_enabled = true
 shadow_color = Color( 0.388235, 0.0705882, 0.0705882, 1 )
@@ -233,12 +237,12 @@ transform = Transform( 100, 0, 0, 0, 1, 0, 0, 0, 100, 0, 0, 0 )
 collision_layer = 18
 
 [node name="MeshInstance" type="MeshInstance" parent="drawnfloor"]
-mesh = SubResource( 8 )
+mesh = SubResource( 10 )
 material/0 = null
 
 [node name="CollisionShape" type="CollisionShape" parent="drawnfloor"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0 )
-shape = SubResource( 9 )
+shape = SubResource( 11 )
 
 [node name="SketchSystem" type="Spatial" parent="."]
 script = ExtResource( 10 )
@@ -250,10 +254,10 @@ script = ExtResource( 10 )
 [node name="OnePathNodes" type="Spatial" parent="SketchSystem"]
 
 [node name="PathLines" type="MeshInstance" parent="SketchSystem"]
-material_override = SubResource( 13 )
+material_override = SubResource( 12 )
 
 [node name="PathXCLinks" type="MeshInstance" parent="SketchSystem"]
-material_override = SubResource( 13 )
+material_override = SubResource( 12 )
 
 [node name="Centreline" type="Spatial" parent="SketchSystem"]
 script = ExtResource( 17 )
@@ -261,10 +265,10 @@ script = ExtResource( 17 )
 [node name="StationNodes" type="Spatial" parent="SketchSystem/Centreline"]
 
 [node name="CentrelineLegs" type="MeshInstance" parent="SketchSystem/Centreline"]
-material_override = SubResource( 17 )
+material_override = SubResource( 13 )
 
 [node name="CentrelineCrossSections" type="MeshInstance" parent="SketchSystem/Centreline"]
-material_override = SubResource( 18 )
+material_override = SubResource( 14 )
 
 [node name="DrawnStationNodes" type="Spatial" parent="SketchSystem/Centreline"]
 
@@ -279,17 +283,17 @@ collision_layer = 8
 collision_mask = 0
 
 [node name="CollisionShape" type="CollisionShape" parent="SketchSystem/NodeOrientationPreview"]
-shape = SubResource( 21 )
+shape = SubResource( 15 )
 
 [node name="MeshInstance" type="MeshInstance" parent="SketchSystem/NodeOrientationPreview/CollisionShape"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 0 )
 cast_shadow = 0
-mesh = SubResource( 23 )
+mesh = SubResource( 17 )
 material/0 = null
 
 [node name="MeshInstance2" type="MeshInstance" parent="SketchSystem/NodeOrientationPreview/CollisionShape"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -2.38419e-07, -0.200001, 0 )
-mesh = SubResource( 25 )
+mesh = SubResource( 19 )
 material/0 = null
 
 [node name="GUIPanel3D" parent="." instance=ExtResource( 14 )]
@@ -300,5 +304,5 @@ script = ExtResource( 15 )
 
 [node name="LaserSquare" type="MeshInstance" parent="."]
 transform = Transform( -0.592393, -0.783466, -0.187751, -0.546921, 0.562194, -0.620335, 0.591564, -0.264797, -0.761535, -0.944971, 1.18811, 0.0964239 )
-mesh = SubResource( 26 )
-material/0 = SubResource( 27 )
+mesh = SubResource( 20 )
+material/0 = SubResource( 21 )

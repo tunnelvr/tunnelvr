@@ -270,16 +270,21 @@ func _on_button_pressed(p_button):
 	if p_button == Buttons.VR_PAD:
 		var left_right = controller.get_joystick_axis(0)
 		var up_down = controller.get_joystick_axis(1)
-		if abs(up_down) < 0.5 and abs(left_right) > 0.1:
+		if abs(up_down) < 0.5 and abs(left_right) > 0.1 and is_instance_valid(pointertarget):
 			var dy = (1 if left_right > 0 else -1)*(1.0 if abs(left_right) < 0.8 else 0.1)
-			if is_instance_valid(pointertarget) and pointertarget.get_parent().get_name() == "OnePathNodes":
+			var pointertargettype = pointertarget.get_parent().get_name()
+			if pointertargettype == "OnePathNodes":
 				pointertarget.global_transform.origin.y = max(0.1, pointertarget.global_transform.origin.y + dy)
 				pointertarget.scale.y = pointertarget.global_transform.origin.y
 				sketchsystem.ot.copyopntootnode(pointertarget)
 				nodeorientationpreview.global_transform.origin = pointertarget.global_transform.origin
+
+			if pointertarget.get_name() == "XCdrawingplane":
+				pointertarget.scale.y = max(0.1, pointertarget.scale.y + dy)
+				pointertarget.scale.x = max(0.1, pointertarget.scale.x + dy)
 				
 			# raise the whole drawn floor case!
-			if is_instance_valid(pointertarget) and pointertarget.get_parent().get_name() == "DrawnStationNodes":
+			if pointertargettype == "DrawnStationNodes":
 				drawnfloor.global_transform.origin.y = drawnfloor.global_transform.origin.y + dy
 				centrelinesystem.get_node("DrawnStationNodes").global_transform.origin.y = drawnfloor.global_transform.origin.y
 			
@@ -309,9 +314,10 @@ func _on_button_release(p_button):
 		var drawingwallangle = -vwall2.angle()
 		var vwallsca = vwall2.length()
 		var xcdrawing = XCdrawing.instance()
-		xcdrawing.otxcdIndex = sketchsystem.get_node("XCdrawings").get_child_count()
+		var otxcdIndex = sketchsystem.get_node("XCdrawings").get_child_count()
+		xcdrawing.set_name("XCdrawing"+String(otxcdIndex))
+		xcdrawing.otxcdIndex = otxcdIndex   # could use the name in the list to avoid the index number
 		sketchsystem.get_node("XCdrawings").add_child(xcdrawing)
-
 		xcdrawing.global_transform = Transform(Basis().rotated(Vector3(0,1,0), drawingwallangle), vwallmid)
 		xcdrawing.get_node("XCdrawingplane").scale = Vector3(vwallsca/2.0+1.0, 3.0, 1.0)
 			

@@ -19,8 +19,8 @@ func newonepathnode(lotIndex):
 		opn.otIndex = ot.newotnodepoint()
 	else:
 		opn.otIndex = lotIndex
+	opn.set_name("OnePathNode"+String(opn.otIndex))  # We could use to_int on this to abolish need for otIndex
 	return opn
-
 
 func removeonepathnode(opn):
 	if ot.removeotnodepoint(opn.otIndex):

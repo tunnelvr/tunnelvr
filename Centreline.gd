@@ -15,7 +15,6 @@ func shiftfloorfromdrawnstations():
 	var drawnstationnodes = $DrawnStationNodes.get_children()
 	var dsn0 = drawnstationnodes[-1] if len(drawnstationnodes) >= 1 else null
 	var dsn1 = drawnstationnodes[-2] if len(drawnstationnodes) >= 2 else null
-	var floorsize = drawnfloor.get_node("MeshInstance").mesh.size
 	var dfinv = drawnfloor.global_transform.affine_inverse()
 	if dsn0 != null:
 		var st0 = stationnodemap[dsn0.stationname]

@@ -86,6 +86,19 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="ButtonHeadtorch" type="Button" parent="Viewport/GUI/Panel"]
+margin_left = 15.3899
+margin_top = 181.177
+margin_right = 155.39
+margin_bottom = 209.177
+rect_pivot_offset = Vector2( 138.61, -8.13628 )
+hint_tooltip = "test tooltip"
+toggle_mode = true
+text = "Headtorch"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [node name="ButtonUpdateShell" type="Button" parent="Viewport/GUI/Panel"]
 margin_left = 160.4
 margin_top = 43.6836
@@ -149,5 +162,6 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.01 )
 shape = SubResource( 1 )
 
 [node name="Quad" type="MeshInstance" parent="."]
+cast_shadow = 0
 mesh = SubResource( 2 )
 material/0 = SubResource( 4 )

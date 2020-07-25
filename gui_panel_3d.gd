@@ -7,6 +7,8 @@ onready var ARVRworld_scale = ARVRServer.world_scale
 var viewport_point := Vector2(0, 0)
 var viewport_mousedown := false
 var sketchsystem = null
+var arvrorigin = null
+var vr_undergroundenvironment = preload("res://vr_underground.tres")
 
 func _on_buttonload_pressed():
 	sketchsystem.loadsketchsystem()
@@ -20,6 +22,12 @@ func _on_buttonshowxs_toggled(button_pressed):
 	sketchsystem.get_node("Centreline/CentrelineCrossSections").visible = button_pressed
 	$Viewport/GUI/Panel/Label.text = "XS shown" if button_pressed else "XS hidden"
 
+func _on_buttonheadtorch_toggled(button_pressed):
+	arvrorigin.get_node("ARVRCamera/HeadtorchLight").visible = button_pressed
+	arvrorigin.get_node("DirectionalLight").visible = not button_pressed
+	arvrorigin.get_node("ARVRCamera").environment = vr_undergroundenvironment if button_pressed else null
+	$Viewport/GUI/Panel/Label.text = "Headtorch on" if button_pressed else "Headtorch off"
+
 func _on_buttonupdateshell_toggled(button_pressed):
 	sketchsystem.updateworkingshell(button_pressed)
 	$Viewport/GUI/Panel/Label.text = "UpdateShell shown" if button_pressed else "Shell hidden"
@@ -32,6 +40,7 @@ func _ready():
 	$Viewport/GUI/Panel/ButtonLoad.connect("pressed", self, "_on_buttonload_pressed")
 	$Viewport/GUI/Panel/ButtonSave.connect("pressed", self, "_on_buttonsave_pressed")
 	$Viewport/GUI/Panel/ButtonShowXS.connect("toggled", self, "_on_buttonshowxs_toggled")
+	$Viewport/GUI/Panel/ButtonHeadtorch.connect("toggled", self, "_on_buttonheadtorch_toggled")
 	$Viewport/GUI/Panel/ButtonShiftFloor.connect("pressed", self, "_on_buttonshiftfloor_pressed")
 	$Viewport/GUI/Panel/ButtonUpdateShell.connect("toggled", self, "_on_buttonupdateshell_toggled")
 

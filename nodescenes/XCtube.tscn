@@ -29,7 +29,6 @@ collision_mask = 0
 [node name="MeshInstance" type="MeshInstance" parent="XCtubeshell"]
 layers = 18
 material_override = SubResource( 1 )
-cast_shadow = 0
 mesh = SubResource( 2 )
 
 [node name="CollisionShape" type="CollisionShape" parent="XCtubeshell"]

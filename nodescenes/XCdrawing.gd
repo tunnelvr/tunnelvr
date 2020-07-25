@@ -55,6 +55,7 @@ func newxcnode(lotIndex):
 		xcn.otIndex = newotnodepoint()
 	else:
 		xcn.otIndex = lotIndex
+	xcn.set_name("XCnode"+String(xcn.otIndex))  # We could use to_int on this to abolish need for otIndex
 	return xcn
 
 func removexcnode(xcn):
@@ -104,7 +105,7 @@ func sd0(a, b):
 
 func makexcdpolys():
 	var Lpathvectorseq = [ ] 
-	for i in range(len(nodepoints)):
+	for _i in range(len(nodepoints)):
 		Lpathvectorseq.append([])  # [ (arg, pathindex) ]
 	var Npaths = len(onepathpairs)/2
 	var opvisits2 = [ ]

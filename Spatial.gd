@@ -4,13 +4,11 @@ var arvr_openvr = null;
 var arvr_quest = null; 
 
 # Stuff to do:
-# * shell code should show the UV of the texture below when normal is down
-# * set uv value thing not and check centreline moving still works
-# * and_child should be with node names set the same as the otIndex
-# * Fill in unused flats of the XCdrawing
+# 
+# * right tapping on touchpad to make XC area larger
 # * control panel option to show head-torch and sunlight off (shadows on from cave)
 # * right tapping on touchpad to make XC area larger
-# * experiment with making an offset of the XC and a pipeline
+# * experiment with making an offset of the XC and a tube
 # * how to duplicate, move and shift an XCdrawing with gestures
 # * remove poolintarrays because of all by value
 # * interpolate the XC as we drag along the runs traced in the floor
@@ -18,6 +16,7 @@ var arvr_quest = null;
 # * update shells incrementally per tube, not whole thing at once
 # * try some rock texture onto the shells (esp the ceilings)
 # * allocate junctions and curved XCs (or with a split panel at 0 and different angle)
+# * shell code should have rocky texture on ceilings
 
 # * node on floor used for making new XCs
 # * tap right and up to grow XC drawing
@@ -94,7 +93,8 @@ func _ready():
 	$ARVROrigin/ARVRController_Right/pointersystem/LaserSpot.visible = false
 	$ARVROrigin/ARVRController_Right/pointersystem/LaserShadow.visible = false
 	$GUIPanel3D.sketchsystem = $SketchSystem
-	
+	$GUIPanel3D.arvrorigin = $ARVROrigin
+		
 func _process(_delta):
 	if !perform_runtime_config:
 		ovr_performance.set_clock_levels(1, 1)
