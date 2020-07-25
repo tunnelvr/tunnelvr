@@ -5,7 +5,7 @@ var arvr_quest = null;
 
 # Stuff to do:
 # * shell code should show the UV of the texture below when normal is down
-# * delete all other shell making code
+# * set uv value thing not and check centreline moving still works
 # * and_child should be with node names set the same as the otIndex
 # * Fill in unused flats of the XCdrawing
 # * control panel option to show head-torch and sunlight off (shadows on from cave)
@@ -32,10 +32,8 @@ var arvr_quest = null;
 # * This means we have driving edges that run the interpolation over what gets interpolated
 # * Requires an undo of each of these settings
 # * capability of selecting faces and splitting with points
-# * abolish nodeuvs and others from OnePathNode object and ref directly
 # * Report bug that disable depth check puts transparent objects in front
 # * node flags of floor, wall, ceiling types so that edges and triangles inherit from this 
-# * nodeinwardvecs basis calculation to be moved
 # * Fall upward to ceiling when not on above the cave
 # * move textpanel out to top level with the GUI stuff
 # * triangulations to better reflect the normals given at the nodes

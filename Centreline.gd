@@ -16,6 +16,7 @@ func shiftfloorfromdrawnstations():
 	var dsn0 = drawnstationnodes[-1] if len(drawnstationnodes) >= 1 else null
 	var dsn1 = drawnstationnodes[-2] if len(drawnstationnodes) >= 2 else null
 	var floorsize = drawnfloor.get_node("MeshInstance").mesh.size
+	var dfinv = drawnfloor.global_transform.affine_inverse()
 	if dsn0 != null:
 		var st0 = stationnodemap[dsn0.stationname]
 		var pst0 = st0.global_transform.origin
@@ -31,7 +32,7 @@ func shiftfloorfromdrawnstations():
 			print("sssca ", sca, "  ", ang)
 			drawnfloor.rotate_y(-ang) 
 			drawnfloor.scale_object_local(Vector3(sca, 1.0, sca)) 
-			var fpR = Vector3((dsn0.uvpoint.x - 0.5)*floorsize.x, 0.0, (dsn0.uvpoint.y - 0.5)*floorsize.y)
+			var fpR = dfinv.xform(pdsn0)
 			var pdsnR = drawnfloor.global_transform.xform(fpR)
 			drawnfloor.global_translate(Vector3(pst0.x - pdsnR.x, 0, pst0.z - pdsnR.z)) 
 			
@@ -41,7 +42,7 @@ func shiftfloorfromdrawnstations():
 	
 	var drawnfloorheight = drawnfloor.global_transform.origin.y
 	for dsn in drawnstationnodes:
-		var fp = Vector3((dsn.uvpoint.x - 0.5)*floorsize.x, 0.0, (dsn.uvpoint.y - 0.5)*floorsize.y)
+		var fp = dfinv.xform(dsn.global_transform.origin)
 		var pdsn = drawnfloor.global_transform.xform(fp)
 		dsn.global_transform.origin = Vector3(pdsn.x, drawnfloorheight, pdsn.z)
 

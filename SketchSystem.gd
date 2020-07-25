@@ -91,16 +91,6 @@ func updateworkingshell(makevisible):
 	for xctube in $XCtubes.get_children():
 		xctube.updatetubeshell(get_node("../drawnfloor"), makevisible)
 	
-	
-	#if makevisible:
-	#	$WorkingShell/MeshInstance.mesh = ot.makeworkingshell()
-	#	$WorkingShell/CollisionShape.shape.set_faces($WorkingShell/MeshInstance.mesh.get_faces())
-	#	$WorkingShell.visible = true
-	#	$WorkingShell/CollisionShape.disabled = false
-	#else:
-	#	$WorkingShell.visible = false
-	#	$WorkingShell/CollisionShape.disabled = true
-	
 
 # Quick saving and loading of shape.  It goes to 
 # C:\Users\ViveOne\AppData\Roaming\Godot\app_userdata\digtunnel
@@ -111,7 +101,7 @@ func savesketchsystem():
 	ot.drawnstationnodesRAW.clear()	
 	for i in range(len(drawnstationnodes)):
 		var dsn = drawnstationnodes[i]
-		ot.drawnstationnodesRAW.append([dsn.global_transform.origin.x, dsn.global_transform.origin.y, dsn.global_transform.origin.z, dsn.drawingname, dsn.uvpoint.x, dsn.uvpoint.y, dsn.stationname])
+		ot.drawnstationnodesRAW.append([dsn.global_transform.origin.x, dsn.global_transform.origin.y, dsn.global_transform.origin.z, dsn.stationname])
 	ot.saveonetunnel("user://savegame.save")
 	print("sssssaved")
 
@@ -138,10 +128,7 @@ func loadsketchsystem():
 		dsn.global_transform.origin.x = ndsn[0]
 		dsn.global_transform.origin.y = ndsn[1]
 		dsn.global_transform.origin.z = ndsn[2]
-		dsn.drawingname = ndsn[3]
-		dsn.uvpoint.x = ndsn[4]
-		dsn.uvpoint.y = ndsn[5]
-		dsn.stationname = ndsn[6]
+		dsn.stationname = ndsn[3]
 	drawnstationnodes = get_node("Centreline/DrawnStationNodes").get_children()
 	for i in range(len(ot.drawnstationnodesRAW), len(drawnstationnodes)):
 		drawnstationnodes[i].queue_free()

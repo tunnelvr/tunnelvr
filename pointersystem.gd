@@ -90,18 +90,10 @@ func _ready():
 
 func setopnpos(opn, p):
 	opn.global_transform.origin = p
-	var floorsize = drawnfloor.get_node("MeshInstance").mesh.size
-	var dfinv = drawnfloor.global_transform.affine_inverse()
-	var afloorpoint = dfinv.xform(p)
-	opn.uvpoint = Vector2(afloorpoint.x/floorsize.x + 0.5, afloorpoint.z/floorsize.y + 0.5)
-	opn.drawingname = drawnfloor.get_node("MeshInstance").mesh.material.albedo_texture.resource_path
 	if opn.get_parent().get_name() == "OnePathNodes":
 		opn.global_transform.origin = p + Vector3(0, 0.2, 0)
 		opn.scale.y = opn.global_transform.origin.y
-		sketchsystem.ot.copyopntootnode(opn)
-		sketchsystem.ot.nodeinwardvecs[opn.otIndex] = LaserSpike.global_transform.basis.y.normalized()
-		print("Thislaserspike ", LaserSpike.global_transform.basis.y)
-		
+		sketchsystem.ot.copyopntootnode(opn)		
 		
 func onpointing(newpointertarget, newpointertargetpoint):
 	if newpointertarget != pointertarget:
@@ -269,7 +261,7 @@ func _on_button_pressed(p_button):
 			elif pointertargettype == "DrawnStationNodes":
 				settextpanel(selectedtarget.stationname, centrelinesystem.stationnodemap[selectedtarget.stationname].global_transform.origin)				
 			elif pointertargettype == "OnePathNodes":
-				sketchsystem.get_node("NodePreview").mesh = sketchsystem.ot.nodeplanepreview(selectedtarget.otIndex)
+				pass
 			elif pointertargettype == "XCnodes":
 				selectedtarget.get_node("../../XCdrawingplane").visible = true
 				selectedtarget.get_node("../../XCdrawingplane/CollisionShape").disabled = false
@@ -307,9 +299,6 @@ func _on_button_release(p_button):
 		
 	elif p_button == Buttons.VR_TRIGGER and (nodeorientationpreviewheldtransform != null):
 		print("dosomethingwith nodeorientationpreview ", nodeorientationpreviewheldtransform)
-		var oiv = sketchsystem.ot.nodeinwardvecs[selectedtarget.otIndex]
-		var iv = get_parent().global_transform.basis.xform(nodeorientationpreviewheldtransform.basis.xform(oiv))
-		sketchsystem.ot.nodeinwardvecs[selectedtarget.otIndex] = iv
 		nodeorientationpreviewheldtransform = null
 
 	# new drawing wall position made
@@ -330,7 +319,7 @@ func _process(_delta):
 	if !is_inside_tree():
 		return
 	if nodeorientationpreviewheldtransform != null:
-		var oiv = sketchsystem.ot.nodeinwardvecs[selectedtarget.otIndex]
+		var oiv = Vector3(0,1,0)   # direction of orientation preview we are dragging from
 		var iv = get_parent().global_transform.basis.xform(nodeorientationpreviewheldtransform.basis.xform(oiv))
 		var iv0 = iv.cross(Vector3(0, 0, 1)).normalized()
 		if iv0.length_squared() == 0:
