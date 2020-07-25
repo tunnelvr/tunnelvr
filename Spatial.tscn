@@ -7,7 +7,6 @@
 [ext_resource path="res://pointersystem.gd" type="Script" id=5]
 [ext_resource path="res://CSGMesh_righthand.tscn" type="PackedScene" id=6]
 [ext_resource path="res://CSGMesh_lefthand.tscn" type="PackedScene" id=7]
-[ext_resource path="res://nodescenes/MarkerNode.tscn" type="PackedScene" id=8]
 [ext_resource path="res://textures/Rock017_2K-JPG/Rock017_2K_AmbientOcclusion.jpg" type="Texture" id=9]
 [ext_resource path="res://SketchSystem.gd" type="Script" id=10]
 [ext_resource path="res://text_panel_3d.tscn" type="PackedScene" id=11]
@@ -20,6 +19,7 @@
 [ext_resource path="res://textures/Rock017_2K-JPG/Rock017_2K_Color.jpg" type="Texture" id=18]
 [ext_resource path="res://textures/Rock017_2K-JPG/Rock017_2K_Displacement.jpg" type="Texture" id=19]
 [ext_resource path="res://textures/Rock017_2K-JPG/Rock017_2K_Normal.jpg" type="Texture" id=20]
+[ext_resource path="res://BoulderClutter.gd" type="Script" id=21]
 
 [sub_resource type="CapsuleShape" id=1]
 radius = 0.3
@@ -179,7 +179,7 @@ collision_mask = 5
 script = ExtResource( 4 )
 
 [node name="KinematicBody" type="KinematicBody" parent="ARVROrigin/ARVRController_Left/movementsystem"]
-collision_mask = 1048558
+collision_mask = 38
 
 [node name="CollisionShape" type="CollisionShape" parent="ARVROrigin/ARVRController_Left/movementsystem/KinematicBody"]
 transform = Transform( 1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0.9, 0 )
@@ -209,7 +209,7 @@ material/0 = null
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.23517e-08, 5 )
 enabled = true
 cast_to = Vector3( 0, 0, -10 )
-collision_mask = 24
+collision_mask = 56
 
 [node name="LaserSpot" type="MeshInstance" parent="ARVROrigin/ARVRController_Right/pointersystem"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -4.96626, 4.96626 )
@@ -235,6 +235,7 @@ shadow_color = Color( 0.388235, 0.0705882, 0.0705882, 1 )
 [node name="drawnfloor" type="StaticBody" parent="."]
 transform = Transform( 100, 0, 0, 0, 1, 0, 0, 0, 100, 0, 0, 0 )
 collision_layer = 18
+collision_mask = 0
 
 [node name="MeshInstance" type="MeshInstance" parent="drawnfloor"]
 mesh = SubResource( 10 )
@@ -300,9 +301,10 @@ material/0 = null
 transform = Transform( 0.512717, 0, -0.858558, 0, 1, 0, 0.858558, 0, 0.512717, 2.5832, 0.213841, -4.95236 )
 script = ExtResource( 15 )
 
-[node name="JumpingRigidBody" parent="." instance=ExtResource( 8 )]
-
 [node name="LaserSquare" type="MeshInstance" parent="."]
 transform = Transform( -0.592393, -0.783466, -0.187751, -0.546921, 0.562194, -0.620335, 0.591564, -0.264797, -0.761535, -0.944971, 1.18811, 0.0964239 )
 mesh = SubResource( 20 )
 material/0 = SubResource( 21 )
+
+[node name="BoulderClutter" type="Spatial" parent="."]
+script = ExtResource( 21 )

@@ -9,7 +9,7 @@ export var enabled = true setget set_enabled, get_enabled
 export (NodePath) var camera = null
 
 # size of our player
-export var player_radius = 0.4 setget set_player_radius, get_player_radius
+export var player_radius = 0.25 setget set_player_radius, get_player_radius
 
 # to combat motion sickness we'll 'step' our left/right turning
 export var smooth_rotation = false
@@ -55,12 +55,6 @@ var gravity = -30.0
 onready var collision_shape: CollisionShape = get_node("KinematicBody/CollisionShape")
 onready var tail : RayCast = get_node("KinematicBody/Tail")
 
-# Set our collision layer (need to change this once we can add the proper UI)
-export  (int, FLAGS, "Layer 1", "Layer 2", "Layer 3", "Layer 4", "Layer 5", "Layer 6", "Layer 7", "Layer 8", "Layer 9", "Layer 10", "Layer 11", "Layer 12", "Layer 13", "Layer 14", "Layer 15", "Layer 16", "Layer 17", "Layer 18", "Layer 19", "Layer 20") var collision_layer = 1 setget set_collision_layer, get_collision_layer
-
-# Set our collision mask (need to change this once we can add the proper UI)
-export  (int, FLAGS, "Layer 1", "Layer 2", "Layer 3", "Layer 4", "Layer 5", "Layer 6", "Layer 7", "Layer 8", "Layer 9", "Layer 10", "Layer 11", "Layer 12", "Layer 13", "Layer 14", "Layer 15", "Layer 16", "Layer 17", "Layer 18", "Layer 19", "Layer 20") var collision_mask = 1022 setget set_collision_mask, get_collision_mask
-
 
 func set_enabled(new_value):
 	enabled = new_value
@@ -78,22 +72,6 @@ func set_enabled(new_value):
 func get_enabled():
 	return enabled
 
-func set_collision_layer(new_layer):
-	collision_layer = new_layer
-	if $KinematicBody:
-		$KinematicBody.collision_layer = collision_layer
-
-func get_collision_layer():
-	return collision_layer
-
-func set_collision_mask(new_mask):
-	collision_mask = new_mask
-	if $KinematicBody:
-		$KinematicBody.collision_mask = collision_mask
-		$KinematicBody/Tail.collision_mask = collision_mask
-
-func get_collision_mask():
-	return collision_mask
 
 func get_player_radius():
 	return player_radius
@@ -112,8 +90,6 @@ func _ready():
 		camera_node = origin_node.get_node('ARVRCamera')
 	
 	# Our properties are set before our children are constructed so just re-issue
-	#set_collision_layer(collision_layer)
-	#set_collision_mask(collision_mask)
 	set_player_radius(player_radius)
 	
 	collision_shape.disabled = !enabled

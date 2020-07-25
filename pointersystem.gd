@@ -163,7 +163,6 @@ func _on_button_pressed(p_button):
 			# make new node on XCdrawingplane
 			elif not controller.is_button_pressed(Buttons.VR_GRIP):
 				pointertarget = xcdrawing.newxcnode(-1)
-				xcdrawing.get_node("XCnodes").add_child(pointertarget)
 				pointertarget.global_transform.origin = pointertargetpoint
 				xcdrawing.copyxcntootnode(pointertarget)
 				if is_instance_valid(selectedtarget) and selectedtarget.get_parent().get_parent() == xcdrawing:

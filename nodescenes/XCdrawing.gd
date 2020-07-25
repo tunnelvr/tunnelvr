@@ -121,7 +121,6 @@ func makexcdpolys():
 		
 	for pathvectorseq in Lpathvectorseq:
 		pathvectorseq.sort_custom(self, "sd0")
-		print(pathvectorseq)
 		
 	var polys = [ ]
 	for i in range(len(opvisits2)):
@@ -129,7 +128,6 @@ func makexcdpolys():
 			continue
 		# warning-ignore:integer_division
 		var ne = (i/2)
-		print("iiii", i)
 		var np = onepathpairs[ne*2 + (0 if ((i%2)==0) else 1)]
 		var poly = [ ]
 		var Nsinglenodes = 0
@@ -156,12 +154,10 @@ func makexcdpolys():
 		var ptblBack = nodepoints[poly[(jbl+len(poly)-1)%len(poly)]]
 		var angFore = Vector2(ptblFore.x-ptbl.x, ptblFore.y-ptbl.y).angle()
 		var angBack = Vector2(ptblBack.x-ptbl.x, ptblBack.y-ptbl.y).angle()
-		print("AnglesAAA should be <180 ", [angFore, angBack])
 		
 		# add in the trailing two settings into the poly array
 		poly.append(1000+Nsinglenodes)
 		poly.append(angBack < angFore)
-		print("pppp ", len(poly), " ", poly)
 		polys.append(poly)
 
 	return polys
@@ -178,7 +174,6 @@ func makexcdworkingshell():
 			var p = poly[i]
 			pv.append(Vector2(nodepoints[p].x, nodepoints[p].y))
 		var pi = Geometry.triangulate_polygon(pv)
-		print("piiii", pi)
 		for u in pi:
 			surfaceTool.add_vertex($XCnodes.get_child(poly[u]).global_transform.origin + global_transform.basis.z*0.002)
 	surfaceTool.generate_normals()

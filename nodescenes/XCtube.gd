@@ -108,6 +108,8 @@ func maketubeshell(drawnfloor):
 		var il1 = poly1.find(xcdrawinglink[j+1])
 		if il0 != -1 and il1 != -1:
 			ila.append([il0, il1])
+	if len(ila) == 0:
+		return null
 	ila.sort_custom(self, "fa")
 	print("ilililia", xcdrawinglink, ila)
 	
@@ -146,10 +148,15 @@ func maketubeshell(drawnfloor):
 
 func updatetubeshell(drawnfloor, makevisible):
 	if makevisible:
-		$XCtubeshell/MeshInstance.mesh = maketubeshell(drawnfloor)
-		$XCtubeshell/CollisionShape.shape.set_faces($XCtubeshell/MeshInstance.mesh.get_faces())
-		$XCtubeshell.visible = true
-		$XCtubeshell/CollisionShape.disabled = false
+		var tubeshellmesh = maketubeshell(drawnfloor)
+		if tubeshellmesh != null:
+			$XCtubeshell/MeshInstance.mesh = tubeshellmesh
+			$XCtubeshell/CollisionShape.shape.set_faces(tubeshellmesh.get_faces())
+			$XCtubeshell.visible = true
+			$XCtubeshell/CollisionShape.disabled = false
+		else:
+			$XCtubeshell.visible = false
+			$XCtubeshell/CollisionShape.disabled = true
 	else:
 		$XCtubeshell.visible = false
 		$XCtubeshell/CollisionShape.disabled = true

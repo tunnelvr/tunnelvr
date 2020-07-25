@@ -5,9 +5,8 @@ var arvr_quest = null;
 
 # Stuff to do:
 # 
-# * right tapping on touchpad to make XC area larger
-# * control panel option to show head-torch and sunlight off (shadows on from cave)
-# * right tapping on touchpad to make XC area larger
+# * squeeze grip deselect XCdrawing even when node is selected (instead of node deselect)
+# * squeeze grip on menu to deselect
 # * experiment with making an offset of the XC and a tube
 # * how to duplicate, move and shift an XCdrawing with gestures
 # * remove poolintarrays because of all by value

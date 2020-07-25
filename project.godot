@@ -36,6 +36,7 @@ singletons=[ "res://addons/godot-openvr/godot_openvr.gdnlib", "res://addons/godo
 3d_physics/layer_3="Objects"
 3d_physics/layer_4="Pointer"
 3d_physics/layer_5="PointerFloor"
+3d_physics/layer_6="CaveWall"
 
 [rendering]
 

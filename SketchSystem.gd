@@ -54,6 +54,7 @@ func xcapplyonepath(xcn0, xcn1):
 			break
 	if xctube == null:
 		xctube = XCtube.instance()
+		xctube.get_node("XCtubeshell/CollisionShape").shape = ConcavePolygonShape.new()   # bug.  this fails to get cloned
 		xctube.otxcdIndex0 = xcdrawing0.otxcdIndex
 		xctube.otxcdIndex1 = xcdrawing1.otxcdIndex
 		xcdrawing0.xctubesconn.append(xctube)
@@ -61,7 +62,6 @@ func xcapplyonepath(xcn0, xcn1):
 		$XCtubes.add_child(xctube)
 	
 	xctube.xcapplyonepath(xcn0, xcn1)
-	print("fasdasdasd", xctube)
 
 
 func updateonepaths():
@@ -84,12 +84,12 @@ func updateonepaths():
 		surfaceTool.add_vertex(p1right)
 	surfaceTool.generate_normals()
 	$PathLines.mesh = surfaceTool.commit()
-	print("ususxc ", len($PathLines.mesh.get_faces()), " ", len($PathLines.mesh.get_faces())) #surfaceTool.generate_normals()
 	#updateworkingshell()
 
 func updateworkingshell(makevisible):
+	var drawnfloor = get_node("../drawnfloor")
 	for xctube in $XCtubes.get_children():
-		xctube.updatetubeshell(get_node("../drawnfloor"), makevisible)
+		xctube.updatetubeshell(drawnfloor, makevisible)
 	
 
 # Quick saving and loading of shape.  It goes to 
