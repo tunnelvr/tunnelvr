@@ -15,7 +15,8 @@ func fa(a, b):
 	return a[0] < b[0] or (a[0] == b[0] and a[1] < b[1])
 	
 func _run():
-	print(get_scene().get_parent().get_parent().get_parent())	
+	var a = range(100,110)
+	print(a.slice(1, len(a), 2).has(109))
 	
 func D_run():
 	# get all the connections in here between the polygons but in the right order

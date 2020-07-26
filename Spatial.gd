@@ -4,12 +4,14 @@ var arvr_openvr = null;
 var arvr_quest = null; 
 
 # Stuff to do:
+# * duplicate xcdrawing but towards me
+# * drag and shift all nodes up or expand in an xcdrawing (part of group node moving with circular paint brushing pushing)
+# * Normal drawing to be XCdrawing, but horizontal and with a connections between XCdrawings
+# * third (middle) connection point on xcdrawing bends it into 2 planes
 # * save and load files incl all XCtubes
 # * auto update the shells on path join or node moved
-# * gesture menu select when pointing at side of head to turn on and off light
 # * auto shift drawing on load and station nodes exist
-# * squeeze grip deselect XCdrawing even when node is selected (instead of node deselect)
-# * squeeze grip on menu to deselect
+# * abolish the set_materialoverride use and remove those 3 line scripts
 # * experiment with making an offset of the XC and a tube
 # * how to duplicate, move and shift an XCdrawing with gestures
 # * remove poolintarrays because of all by value
@@ -23,7 +25,6 @@ var arvr_quest = null;
 # * node on floor used for making new XCs
 # * tap right and up to grow XC drawing
 # * XC to record its UV and X-vector position on the sketch maybe
-# * save and load the xcdrawings to the file as pools of vectors
 # * We trace a network of nodes on the floor how we like
 # * Is the ground drawing actually just a 2D drawing which the cross sections will be guided by?
 # * Primary construction of cross-section contours around centreline nodes

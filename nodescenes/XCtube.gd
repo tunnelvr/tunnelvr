@@ -1,12 +1,14 @@
 extends Spatial
 
 var otxcdIndex0 : int
-var otxcdIndex1 : int
+var otxcdIndex1 : int    # setting to -1 means the floor sketch
 var xcdrawinglink = [ ]  # [ nodepoints_ifrom0, nodepoints_ito0, nodepoints_ifrom1, nodepoints_ito1, ... ]
 const linewidth = 0.02
 
-func xcapplyonepath(xcn0, xcn1):
+func xctubeapplyonepath(xcn0, xcn1):
 	print("xcapplyonepathxcapplyonepath-pre", xcn0, xcn1, xcdrawinglink)
+	var xcdrawings = xcn0.get_parent().get_parent().get_parent()
+	var sketchsystem = xcdrawings.get_parent()
 	for j in range(0, len(xcdrawinglink), 2):
 		if xcdrawinglink[j] == xcn0.otIndex and xcdrawinglink[j+1] == xcn1.otIndex:
 			xcdrawinglink.remove(j+1)
@@ -16,10 +18,9 @@ func xcapplyonepath(xcn0, xcn1):
 	if xcn0 != null:
 		xcdrawinglink.append(xcn0.otIndex)
 		xcdrawinglink.append(xcn1.otIndex)
-	var xcdrawings = xcn1.get_parent().get_parent().get_parent()
 	print("xcapplyonepathxcapplyonepath-post", xcdrawinglink)
 	assert ((len(xcdrawinglink)%2) == 0)
-	updatexclinkpaths(xcdrawings)
+	updatetubelinkpaths(xcdrawings, sketchsystem)
 
 func removetubenodepoint(otxcdIndex, xcnIndex, xcnIndexE):
 	# this function very closely bound with the tail copy onto deleted one method
@@ -35,21 +36,63 @@ func removetubenodepoint(otxcdIndex, xcnIndex, xcnIndexE):
 			xcdrawinglink[j+m] = xcnIndex
 	print("rrremoveotnodepoint-post ", otxcdIndex, " ", xcnIndex, xcdrawinglink)
 
+func shiftxcdrawingposition(xcdrawings, sketchsystem):
+	print("...shiftxcdrawingposition")
+	var xcdrawing = xcdrawings.get_child(otxcdIndex0)
+	var xcdrawing0nodes = xcdrawing.get_node("XCnodes")
+	var xcdrawing1nodes = sketchsystem.get_node("OnePathNodes")
+	if len(xcdrawinglink) == 0:
+		return
+	var bscalexcnodepointspointsx_called = false
+	var bsingledrag = len(xcdrawinglink) == 2
+	var xcn0 = xcdrawing0nodes.get_child(xcdrawinglink[-2 if bsingledrag else -4])
+	var opn0 = xcdrawing1nodes.get_child(xcdrawinglink[-1 if bsingledrag else -3])
+	if bsingledrag:
+		var vx = xcdrawing.global_transform.basis.x
+		var xcn0rel = xcn0.global_transform.origin - xcdrawing.global_transform.origin
+		var pt0 = opn0.global_transform.origin - Vector3(xcn0rel.x, 0, xcn0rel.z)
+		xcdrawing.setxcpositionorigin(pt0)
+
+	else:
+		var xcn1 = xcdrawing0nodes.get_child(xcdrawinglink[-2])
+		var opn1 = xcdrawing1nodes.get_child(xcdrawinglink[-1])  # OnePathNodes
+		var vx = opn1.global_transform.origin - opn0.global_transform.origin
+		var vxc = xcn1.global_transform.origin - xcn0.global_transform.origin
+		var vxlen = vx.length()
+		var vxclen = vxc.length()
+		if vxlen != 0 and vxclen != 0:
+			xcdrawing.scalexcnodepointspointsx(vxlen/vxclen)
+			bscalexcnodepointspointsx_called = true
+		xcdrawing.setxcpositionangle(Vector2(vx.x, vx.z).angle())
+		var xco = opn0.global_transform.origin - xcn0.global_transform.origin + xcdrawing.global_transform.origin
+		xcdrawing.setxcpositionorigin(xco)
 		
-func updatexclinkpaths(xcdrawings):
+	if bscalexcnodepointspointsx_called:
+		xcdrawing.updatexcpaths()
+	for xctube in xcdrawing.xctubesconn:
+		if xctube.otxcdIndex1 != -1:
+			xctube.updatetubelinkpaths(xcdrawings, sketchsystem)
+		
+func updatetubelinkpaths(xcdrawings, sketchsystem):
+	var bgroundanchortype = otxcdIndex1 == -1
+	if bgroundanchortype:
+		shiftxcdrawingposition(xcdrawings, sketchsystem)
+	
 	var surfaceTool = SurfaceTool.new()
 	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
-	var xcdrawing0 = xcdrawings.get_child(otxcdIndex0)
-	var xcdrawing1 = xcdrawings.get_child(otxcdIndex1)
-	print("llll", xcdrawings, xcdrawing0, xcdrawing1, xcdrawinglink)
+	var xcdrawing0nodes = xcdrawings.get_child(otxcdIndex0).get_node("XCnodes")
+	var xcdrawing1nodes = xcdrawings.get_child(otxcdIndex1).get_node("XCnodes") if not bgroundanchortype else sketchsystem.get_node("OnePathNodes")
+	print("llll", xcdrawings, xcdrawing0nodes, xcdrawing1nodes, xcdrawinglink)
 	assert ((len(xcdrawinglink)%2) == 0)
 	for j in range(0, len(xcdrawinglink), 2):
 		#var p0 = xcdrawing0.nodepoints[xcdrawinglink[j]]
 		#var p1 = xcdrawing1.nodepoints[xcdrawinglink[j+1]]
-		var p0 = xcdrawing0.get_node("XCnodes").get_child(xcdrawinglink[j]).global_transform.origin
-		var p1 = xcdrawing1.get_node("XCnodes").get_child(xcdrawinglink[j+1]).global_transform.origin
+		var p0 = xcdrawing0nodes.get_child(xcdrawinglink[j]).global_transform.origin
+		var p1 = xcdrawing1nodes.get_child(xcdrawinglink[j+1]).global_transform.origin
 		print("jjjjuj", j, p0, p1)
 		var perp = linewidth*Vector2(-(p1.z - p0.z), p1.x - p0.x).normalized()
+		if perp == Vector2(0, 0):
+			perp = Vector2(linewidth, 0)
 		var p0left = p0 - Vector3(perp.x, 0, perp.y)
 		var p0right = p0 + Vector3(perp.x, 0, perp.y)
 		var p1left = p1 - Vector3(perp.x, 0, perp.y)

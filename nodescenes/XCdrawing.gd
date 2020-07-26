@@ -4,9 +4,22 @@ const XCnode = preload("res://nodescenes/XCnode.tscn")
 const linewidth = 0.05
 var otxcdIndex: int = 0
 
-var nodepoints = [ ]    # : = PoolVector3Array() 
-var onepathpairs = [ ]  # : = PoolIntArray()  # 2* pairs indexing into nodepoints
-var xctubesconn = [ ]
+var nodepoints = [ ]    # list of Vector3
+var onepathpairs = [ ]  # sequence of pairs indexing the nodepoints
+var xctubesconn = [ ]   # references to xctubes that connect to here (could use their names instead)
+
+# these transforming operations work in sequence, each correcting the relative position change caused by the other
+func scalexcnodepointspointsx(sca):
+	for i in range(len(nodepoints)):
+		nodepoints[i] = Vector3(nodepoints[i].x*sca, nodepoints[i].y, nodepoints[i].z)
+		copyotnodetoxcn($XCnodes.get_child(i))
+
+func setxcpositionangle(drawingwallangle):
+	global_transform = Transform(Basis().rotated(Vector3(0,-1,0), drawingwallangle), global_transform.origin)
+
+func setxcpositionorigin(pt0):
+	global_transform.origin = Vector3(pt0.x, 0, pt0.z)
+
 
 func newotnodepoint():
 	nodepoints.push_back(Vector3())
@@ -47,7 +60,6 @@ func xcotapplyonepath(i0, i1):
 			print("deletedonepath ", j)
 			break
 
-
 func newxcnode(lotIndex):
 	var xcn = XCnode.instance()
 	$XCnodes.add_child(xcn)
@@ -67,14 +79,14 @@ func removexcnode(xcn):
 		xctube.removetubenodepoint(otxcdIndex, xcnIndex, len(nodepoints))
 	updatexcpaths()
 	for xctube in xctubesconn:
-		xctube.updatexclinkpaths(get_parent())
+		xctube.updatetubelinkpaths(get_parent(), get_parent().get_parent(), true)
 
 func movexcnode(xcn, pt):
 	xcn.global_transform.origin = pt
 	copyxcntootnode(xcn)
 	updatexcpaths()
 	for xctube in xctubesconn:
-		xctube.updatexclinkpaths(get_parent())
+		xctube.updatetubelinkpaths(get_parent(), get_parent().get_parent())
 
 func updatexcpaths():
 	print("iupdatingxxccpaths ", len(onepathpairs))

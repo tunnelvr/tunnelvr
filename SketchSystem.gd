@@ -36,34 +36,41 @@ func applyonepath(opn0, opn1):
 
 func xcapplyonepath(xcn0, xcn1):
 	var xcdrawing0 = xcn0.get_parent().get_parent()
-	var xcdrawing1 = xcn1.get_parent().get_parent()
+	var bgroundanchortype = xcn1.get_parent().get_name() == "OnePathNodes"
+	var xcdrawing1 = xcn1.get_parent().get_parent()  if not bgroundanchortype  else null
+					
 	if xcdrawing0 == xcdrawing1:
 		xcdrawing0.xcotapplyonepath(xcn0.otIndex, xcn1.otIndex)
 		xcdrawing0.updatexcpaths()
 		return
-	if xcdrawing0.otxcdIndex > xcdrawing1.otxcdIndex:
+		
+	if not bgroundanchortype and xcdrawing0.otxcdIndex > xcdrawing1.otxcdIndex:
 		var tt = xcn0
 		xcn0 = xcn1
 		xcn1 = tt
 		xcdrawing0 = xcn0.get_parent().get_parent()
 		xcdrawing1 = xcn1.get_parent().get_parent()
+		
+	var xcdrawing0otxcdIndex = xcdrawing0.otxcdIndex
+	var xcdrawing1otxcdIndex = xcdrawing1.otxcdIndex if not bgroundanchortype else -1
+
 	var xctube = null
 	for lxctube in $XCtubes.get_children():
-		if lxctube.otxcdIndex0 == xcdrawing0.otxcdIndex and lxctube.otxcdIndex1 == xcdrawing1.otxcdIndex:
+		if lxctube.otxcdIndex0 == xcdrawing0otxcdIndex and lxctube.otxcdIndex1 == xcdrawing1otxcdIndex:
 			xctube = lxctube
 			break
 	if xctube == null:
 		xctube = XCtube.instance()
 		xctube.get_node("XCtubeshell/CollisionShape").shape = ConcavePolygonShape.new()   # bug.  this fails to get cloned
-		xctube.otxcdIndex0 = xcdrawing0.otxcdIndex
-		xctube.otxcdIndex1 = xcdrawing1.otxcdIndex
-		xctube.set_name("XCtube"+String(xcdrawing0.otxcdIndex)+"_"+String(xcdrawing1.otxcdIndex))
+		xctube.otxcdIndex0 = xcdrawing0otxcdIndex
+		xctube.otxcdIndex1 = xcdrawing1otxcdIndex
+		xctube.set_name("XCtube"+String(xcdrawing0otxcdIndex)+"_"+String(xcdrawing1otxcdIndex))
 		xcdrawing0.xctubesconn.append(xctube)
-		xcdrawing1.xctubesconn.append(xctube)
+		if xcdrawing1 != null:
+			xcdrawing1.xctubesconn.append(xctube)
 		$XCtubes.add_child(xctube)
 	
-	xctube.xcapplyonepath(xcn0, xcn1)
-
+	xctube.xctubeapplyonepath(xcn0, xcn1)
 
 func updateonepaths():
 	print("iupdatingpaths ", len(ot.onepathpairs))
@@ -90,7 +97,10 @@ func updateonepaths():
 func updateworkingshell(makevisible):
 	var drawnfloor = get_node("../drawnfloor")
 	for xctube in $XCtubes.get_children():
-		xctube.updatetubeshell(drawnfloor, makevisible)
+		if xctube.otxcdIndex1 != -1:
+			xctube.updatetubeshell(drawnfloor, makevisible)
+		else:
+			print("SSSkipping xctube to floor case")
 	
 
 # Quick saving and loading of shape.  It goes to 
