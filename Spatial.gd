@@ -4,10 +4,12 @@ var arvr_openvr = null;
 var arvr_quest = null; 
 
 # Stuff to do:
-# * duplicate xcdrawing but towards me
+# * duplicate xcdrawing squeeze when drawing a selected node
+# * really need the laser select line to go on and off accordingly
 # * drag and shift all nodes up or expand in an xcdrawing (part of group node moving with circular paint brushing pushing)
 # * Normal drawing to be XCdrawing, but horizontal and with a connections between XCdrawings
 # * third (middle) connection point on xcdrawing bends it into 2 planes
+# * select cursor should be present when connecting to other nodes, even when point node is hidden
 # * save and load files incl all XCtubes
 # * auto update the shells on path join or node moved
 # * auto shift drawing on load and station nodes exist

@@ -41,6 +41,7 @@ var nodeorientationpreviewheldtransform = null
 onready var LaserSquare = get_node("../../../LaserSquare")
 onready var LaserSpot = get_node("LaserSpot") 
 onready var LaserSpike = get_node("LaserSpot/LaserSpike") 
+onready var LaserSelectLine = get_node("LaserSpot/LaserSelectLine") 
 onready var LaserShadow = get_node("LaserShadow") 
 
 var laser_y = -0.05
@@ -65,8 +66,7 @@ func settextpanel(ltext, pos):
 func _ready():
 	get_parent().connect("button_pressed", self, "_on_button_pressed")
 	get_parent().connect("button_release", self, "_on_button_release")
-	print("LaserSquare ", LaserSquare)
-	print("LaserSpot ", LaserSpot)
+	
 	pointinghighlightmaterial.albedo_color = Color(0.99, 0.20, 0.20, 1.0)
 	pointinghighlightmaterial.flags_no_depth_test = true
 	pointinghighlightmaterial.params_grow = true
@@ -93,6 +93,7 @@ func setopnpos(opn, p):
 		opn.global_transform.origin = p + Vector3(0, 0.2, 0)
 		opn.scale.y = opn.global_transform.origin.y
 		sketchsystem.ot.copyopntootnode(opn)		
+		
 		
 func onpointing(newpointertarget, newpointertargetpoint):
 	if newpointertarget != pointertarget:
@@ -126,20 +127,27 @@ func onpointing(newpointertarget, newpointertargetpoint):
 
 	if LaserSpot.visible:
 		LaserSpot.global_transform.origin = pointertargetpoint
+		if is_instance_valid(selectedtarget):
+			LaserSelectLine.get_node("Scale").scale.z = LaserSpot.global_transform.origin.distance_to(selectedtarget.global_transform.origin)
+			LaserSelectLine.global_transform = LaserSpot.global_transform.looking_at(selectedtarget.global_transform.origin, Vector3(0,1,0))
+			LaserSelectLine.visible = true
+		else:
+			LaserSelectLine.visible = false
+
+		
 	if LaserShadow.visible:
 		LaserShadow.global_transform = Transform(Basis(), Vector3(pointertargetpoint.x, drawnfloor.global_transform.origin.y, pointertargetpoint.z))
 
 
 func _on_button_pressed(p_button):
 	print("pppp ", pointertargetpoint)
+	
 	if p_button == Buttons.VR_BUTTON_BY:
 		var cameracontrollervec = controller.global_transform.origin - arvrcamera.global_transform.origin
 		var ccaxvec = arvrcamera.global_transform.basis.x.dot(controller.global_transform.basis.z)
 		var pswitchpos = arvrcamera.global_transform.origin + arvrcamera.global_transform.basis.x*0.15 + arvrcamera.global_transform.basis.y*0.1
 		var pswitchdist = controller.global_transform.origin.distance_to(pswitchpos)
-		print("cccctranslation  ", ccaxvec, "  ", pswitchdist)
 		if ccaxvec > 0.85 and pswitchdist < 0.1:
-			#print("    translation  ", controller.get_node("../ARVRCamera").translation, "  ", controller.get_node("../ARVRCamera").rotation_degrees)
 			guipanel3d.clickbuttonheadtorch()
 		else:
 			guipanel3d.togglevisibility(controller.get_node("pointersystem").global_transform)
@@ -262,8 +270,32 @@ func _on_button_pressed(p_button):
 				selectedtarget.set_materialoverride(null)
 				if selectedtargettype == "StationNodes":
 					settextpanel(null, null)
+
+				if controller.is_button_pressed(Buttons.VR_GRIP):
+					if selectedtargettype == "OnePathNodes" and pointertargettype == "OnePathNodes":
+						var xcdrawingtocopy = null
+						var xcdrawingtocopynodelink = null
+						var btargetclear = true
+						for xctube in sketchsystem.get_node("XCtubes").get_children():
+							if xctube.otxcdIndex1 == -1:
+								if xctube.xcdrawinglink.slice(1, len(xctube.xcdrawinglink), 2).has(pointertarget.otIndex):
+									btargetclear = false
+								for i in range(0, len(xctube.xcdrawinglink), 2):
+									#if xctube.xcdrawinglink.slice(1, len(xctube.xcdrawinglink), 2).has(selectedtarget.otIndex):
+									if xctube.xcdrawinglink[i+1] == selectedtarget.otIndex:
+										xcdrawingtocopy = sketchsystem.get_node("XCdrawings").get_child(xctube.otxcdIndex0)
+										xcdrawingtocopynodelink = xctube.xcdrawinglink[i]
+										break
+						if btargetclear and xcdrawingtocopy != null:
+							print("making new copiued drawing¬!!!!")
+							var xcdrawing = xcdrawingtocopy.duplicatexcdrawing()
+							xcdrawing.setxcpositionorigin(pointertargetpoint)
+							sketchsystem.xcapplyonepath(xcdrawing.get_node("XCnodes").get_child(xcdrawingtocopynodelink), pointertarget)
+							sketchsystem.xcapplyonepath(xcdrawingtocopy.get_node("XCnodes").get_child(xcdrawingtocopynodelink), xcdrawing.get_node("XCnodes").get_child(xcdrawingtocopynodelink))
+												
+					gripbuttonpressused = true
 					
-				if selectedtargettype == "XCnodes" and pointertargettype == "XCnodes":  # this will be the only case left at some point
+				elif selectedtargettype == "XCnodes" and pointertargettype == "XCnodes":  # this will be the only case left at some point
 					sketchsystem.xcapplyonepath(selectedtarget, pointertarget)
 				elif selectedtargettype == "OnePathNodes" and pointertargettype == "OnePathNodes":
 					sketchsystem.applyonepath(selectedtarget, pointertarget)
@@ -363,3 +395,5 @@ func _process(_delta):
 	else:
 		onpointing(null, null)
 	
+
+

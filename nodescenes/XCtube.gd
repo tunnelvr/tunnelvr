@@ -140,6 +140,10 @@ func maketubeshell(drawnfloor):
 		if poly[-2] == 1000 and poly[-1]:
 			poly1 = poly.slice(0, len(poly)-3)
 	print("opopolys", poly0, poly1)
+	if poly0 == null or poly1 == null:
+		print("no connecting poly available", polys0, polys1)
+		return null
+		
 	if xcdrawing0.global_transform.basis.z.dot(xcdrawing1.global_transform.basis.z) < 0:
 		poly1.invert()
 		print("reversssing poly1", xcdrawing0.global_transform.basis.z, xcdrawing1.global_transform.basis.z, poly1)

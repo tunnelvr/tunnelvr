@@ -1,6 +1,8 @@
 extends Spatial
 
 const XCnode = preload("res://nodescenes/XCnode.tscn")
+
+
 const linewidth = 0.05
 var otxcdIndex: int = 0
 
@@ -21,10 +23,24 @@ func setxcpositionorigin(pt0):
 	global_transform.origin = Vector3(pt0.x, 0, pt0.z)
 
 
-func newotnodepoint():
-	nodepoints.push_back(Vector3())
-	return len(nodepoints) - 1
 
+func duplicatexcdrawing():
+	var XCdrawing = load("res://nodescenes/XCdrawing.tscn")  # self-instance
+	var xcdrawing = XCdrawing.instance()
+	var xcdrawings = get_parent()
+	var otxcdIndex = xcdrawings.get_child_count()
+	xcdrawing.set_name("XCdrawing"+String(otxcdIndex))
+	xcdrawing.otxcdIndex = otxcdIndex
+	xcdrawings.add_child(xcdrawing)
+	xcdrawing.global_transform = global_transform
+	for i in range(len(nodepoints)):
+		var xcn = xcdrawing.newxcnode(-1)
+		xcdrawing.nodepoints[i] = nodepoints[i]
+		copyotnodetoxcn(xcn)
+	xcdrawing.onepathpairs = onepathpairs.duplicate()
+	xcdrawing.updatexcpaths()
+	return xcdrawing
+	
 func removeotnodepoint(i):
 	var e = len(nodepoints) - 1
 	nodepoints[i] = nodepoints[e]
@@ -64,7 +80,8 @@ func newxcnode(lotIndex):
 	var xcn = XCnode.instance()
 	$XCnodes.add_child(xcn)
 	if lotIndex == -1:
-		xcn.otIndex = newotnodepoint()
+		nodepoints.push_back(Vector3())
+		xcn.otIndex = len(nodepoints) - 1
 	else:
 		xcn.otIndex = lotIndex
 	xcn.set_name("XCnode"+String(xcn.otIndex))  # We could use to_int on this to abolish need for otIndex
@@ -79,7 +96,7 @@ func removexcnode(xcn):
 		xctube.removetubenodepoint(otxcdIndex, xcnIndex, len(nodepoints))
 	updatexcpaths()
 	for xctube in xctubesconn:
-		xctube.updatetubelinkpaths(get_parent(), get_parent().get_parent(), true)
+		xctube.updatetubelinkpaths(get_parent(), get_parent().get_parent())
 
 func movexcnode(xcn, pt):
 	xcn.global_transform.origin = pt

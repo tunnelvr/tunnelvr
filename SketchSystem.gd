@@ -73,7 +73,6 @@ func xcapplyonepath(xcn0, xcn1):
 	xctube.xctubeapplyonepath(xcn0, xcn1)
 
 func updateonepaths():
-	print("iupdatingpaths ", len(ot.onepathpairs))
 	var surfaceTool = SurfaceTool.new()
 	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
 	for j in range(0, len(ot.onepathpairs), 2):

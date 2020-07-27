@@ -1,4 +1,4 @@
-[gd_scene load_steps=42 format=2]
+[gd_scene load_steps=44 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://addons/godot-xr-tools/misc/VR_Common_Shader_Cache.tscn" type="PackedScene" id=2]
@@ -53,6 +53,14 @@ bottom_radius = 0.02
 height = 0.2
 radial_segments = 6
 rings = 1
+
+[sub_resource type="SpatialMaterial" id=22]
+flags_unshaded = true
+albedo_color = Color( 0.937255, 0.901961, 0.0431373, 0.67451 )
+
+[sub_resource type="CubeMesh" id=23]
+material = SubResource( 22 )
+size = Vector3( 0.01, 0.01, 1 )
 
 [sub_resource type="SpatialMaterial" id=7]
 albedo_color = Color( 0.976471, 0.67451, 0.0313726, 1 )
@@ -219,6 +227,15 @@ material/0 = null
 [node name="LaserSpike" type="MeshInstance" parent="ARVROrigin/ARVRController_Right/pointersystem/LaserSpot"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0 )
 mesh = SubResource( 6 )
+material/0 = null
+
+[node name="LaserSelectLine" type="Spatial" parent="ARVROrigin/ARVRController_Right/pointersystem/LaserSpot"]
+
+[node name="Scale" type="Spatial" parent="ARVROrigin/ARVRController_Right/pointersystem/LaserSpot/LaserSelectLine"]
+
+[node name="Mesh" type="MeshInstance" parent="ARVROrigin/ARVRController_Right/pointersystem/LaserSpot/LaserSelectLine/Scale"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.5 )
+mesh = SubResource( 23 )
 material/0 = null
 
 [node name="LaserShadow" type="MeshInstance" parent="ARVROrigin/ARVRController_Right/pointersystem"]

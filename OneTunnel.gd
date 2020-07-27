@@ -105,7 +105,6 @@ func saveonetunnel(fname):
 	save_game.store_line(to_json(save_dict))
 	save_game.close()
 
-
 func verifyonetunnelmatches(sketchsystem):
 	var N = len(nodepoints)
 	var onepathnodes = sketchsystem.get_node("OnePathNodes").get_children()
@@ -113,7 +112,6 @@ func verifyonetunnelmatches(sketchsystem):
 	for i in range(N):
 		var opn = onepathnodes[i]
 		assert (opn.otIndex == i)
-		print(i, opn.global_transform.origin, nodepoints[i])
 		assert (opn.global_transform.origin == nodepoints[i])
 	return true
 
