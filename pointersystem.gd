@@ -30,7 +30,7 @@ var selectedpointerhighlightmaterial = SpatialMaterial.new()
 
 var pointertarget = null
 var pointertargetpoint = Vector3(0, 0, 0)
-var pointertargetoriginy = 0.0
+var pointertargetoriginy = 0.0   # used for redrawing the connecting lines when something made taller
 var selectedtarget = null
 var gripbuttonpressused = false
 var nodeorientationpreviewheldtransform = null
@@ -41,8 +41,9 @@ var nodeorientationpreviewheldtransform = null
 onready var LaserSquare = get_node("../../../LaserSquare")
 onready var LaserSpot = get_node("LaserSpot") 
 onready var LaserSpike = get_node("LaserSpot/LaserSpike") 
-onready var LaserSelectLine = get_node("LaserSpot/LaserSelectLine") 
+onready var LaserSelectLine = get_node("LaserSelectLine") 
 onready var LaserShadow = get_node("LaserShadow") 
+var laserspothighlightmaterial = null; 
 
 var laser_y = -0.05
 
@@ -76,6 +77,9 @@ func _ready():
 	selectedpointerhighlightmaterial.flags_no_depth_test = true
 	selectedpointerhighlightmaterial.params_grow = true
 	selectedpointerhighlightmaterial.params_grow_amount = 0.02
+
+	laserspothighlightmaterial = LaserSpot.material_override
+	LaserSpot.material_override = null
 	
 	# apply our world scale to our laser position
 	$Laser.translation.y = laser_y * ARVRworld_scale
@@ -107,6 +111,9 @@ func onpointing(newpointertarget, newpointertargetpoint):
 
 		pointertarget = newpointertarget
 		if is_instance_valid(pointertarget):
+			var selectedtargettype = selectedtarget.get_parent().get_name() if selectedtarget != null else null
+			var pointertargettype = pointertarget.get_parent().get_name() if pointertarget.has_method("set_materialoverride") else pointertarget.get_name()
+			print("ppp  ", selectedtargettype, " ", pointertargettype)
 			if pointertarget.has_method("set_materialoverride"):
 				pointertarget.set_materialoverride(selectedpointerhighlightmaterial if pointertarget == selectedtarget else pointinghighlightmaterial)
 				LaserSpot.visible = false
@@ -118,22 +125,40 @@ func onpointing(newpointertarget, newpointertargetpoint):
 			else:
 				LaserSpot.visible = true
 				LaserShadow.visible = (pointertarget.get_name() == "XCdrawingplane")
+				
+			# work out the logic for the LaserSelectLine here
+			if controller.is_button_pressed(Buttons.VR_GRIP):
+				LaserSelectLine.visible = ((pointertargettype == "drawnfloor") and ((selectedtargettype == "OnePathNodes") or (selectedtargettype == "DrawnStationNodes")))
+			elif pointertargettype == "drawnfloor":
+				LaserSelectLine.visible = ((selectedtargettype == "OnePathNodes") or (selectedtargettype == "StationNodes"))
+			elif pointertargettype == "XCdrawingplane":
+				LaserSelectLine.visible = ((selectedtargettype == "XCnodes"))
+			elif pointertargettype == "XCnodes":
+				LaserSelectLine.visible = ((selectedtargettype == "XCnodes") or (selectedtargettype == "OnePathNodes"))
+			elif pointertargettype == "OnePathNodes":
+				LaserSelectLine.visible = ((selectedtargettype == "XCnodes") or (selectedtargettype == "OnePathNodes"))
+			else:
+				LaserSelectLine.visible = false
+
+			
 		else:
 			LaserSpot.visible = false
 			LaserShadow.visible = false
+			LaserSelectLine.visible = false
+			
 	pointertargetpoint = newpointertargetpoint
 	if is_instance_valid(pointertarget) and pointertarget == guipanel3d:
 		guipanel3d.guipanelsendmousemotion(pointertargetpoint, controller.global_transform, controller.is_button_pressed(Buttons.VR_TRIGGER))
 
 	if LaserSpot.visible:
 		LaserSpot.global_transform.origin = pointertargetpoint
-		if is_instance_valid(selectedtarget):
-			LaserSelectLine.get_node("Scale").scale.z = LaserSpot.global_transform.origin.distance_to(selectedtarget.global_transform.origin)
+	if LaserSelectLine.visible:
+		if pointertarget != null and selectedtarget != null:
+			LaserSelectLine.global_transform.origin = pointertargetpoint
+			LaserSelectLine.get_node("Scale").scale.z = LaserSelectLine.global_transform.origin.distance_to(selectedtarget.global_transform.origin)
 			LaserSelectLine.global_transform = LaserSpot.global_transform.looking_at(selectedtarget.global_transform.origin, Vector3(0,1,0))
-			LaserSelectLine.visible = true
 		else:
 			LaserSelectLine.visible = false
-
 		
 	if LaserShadow.visible:
 		LaserShadow.global_transform = Transform(Basis(), Vector3(pointertargetpoint.x, drawnfloor.global_transform.origin.y, pointertargetpoint.z))
@@ -173,6 +198,7 @@ func _on_button_pressed(p_button):
 				else:
 					selectedtarget.set_materialoverride(null)
 					selectedtarget = null
+					LaserSpot.material_override = null
 
 				gripbuttonpressused = true
 			
@@ -185,12 +211,14 @@ func _on_button_pressed(p_button):
 					sketchsystem.xcapplyonepath(selectedtarget, pointertarget)
 				if is_instance_valid(selectedtarget) and selectedtarget.has_method("set_materialoverride"):
 					selectedtarget.set_materialoverride(null)
+					LaserSpot.material_override = null
 					
 				if controller.is_button_pressed(Buttons.VR_GRIP):
 					selectedtarget = null
 				else:
 					selectedtarget = pointertarget
 					selectedtarget.set_materialoverride(selectedpointerhighlightmaterial)
+					LaserSpot.material_override = laserspothighlightmaterial
 
 		elif pointertarget == drawnfloor:
 			# drag node to new position on floor
@@ -216,6 +244,7 @@ func _on_button_pressed(p_button):
 				pointertarget.stationname = selectedtarget.stationname
 				selectedtarget.set_materialoverride(null)
 				selectedtarget = null
+				LaserSpot.material_override = null
 				settextpanel(null, null)
 				
 			# new node on floor, with or without other node selected to connect to
@@ -238,9 +267,11 @@ func _on_button_pressed(p_button):
 										
 				if controller.is_button_pressed(Buttons.VR_GRIP):
 					selectedtarget = null
+					LaserSpot.material_override = null
 				else:
 					selectedtarget = pointertarget
 					selectedtarget.set_materialoverride(selectedpointerhighlightmaterial)
+					LaserSpot.material_override = laserspothighlightmaterial
 				
 					
 		# clear selected target by selecting again
@@ -259,6 +290,7 @@ func _on_button_pressed(p_button):
 					selectedtarget.get_parent().get_parent().removexcnode(selectedtarget)
 				gripbuttonpressused = true
 			selectedtarget = null
+			LaserSpot.material_override = null
 			
 		# click on new selected target (connect from previous selected target)
 		elif pointertarget.has_method("set_materialoverride"):
@@ -289,6 +321,8 @@ func _on_button_pressed(p_button):
 						if btargetclear and xcdrawingtocopy != null:
 							print("making new copiued drawing¬!!!!")
 							var xcdrawing = xcdrawingtocopy.duplicatexcdrawing()
+							var vline = pointertargetpoint - selectedtarget.global_transform.origin
+							xcdrawing.setxcpositionangle(Vector2(vline.z, -vline.x).angle())
 							xcdrawing.setxcpositionorigin(pointertargetpoint)
 							sketchsystem.xcapplyonepath(xcdrawing.get_node("XCnodes").get_child(xcdrawingtocopynodelink), pointertarget)
 							sketchsystem.xcapplyonepath(xcdrawingtocopy.get_node("XCnodes").get_child(xcdrawingtocopynodelink), xcdrawing.get_node("XCnodes").get_child(xcdrawingtocopynodelink))
@@ -308,6 +342,7 @@ func _on_button_pressed(p_button):
 					
 			selectedtarget = pointertarget
 			selectedtarget.set_materialoverride(selectedpointerhighlightmaterial)
+			LaserSpot.material_override = laserspothighlightmaterial
 			if pointertargettype == "StationNodes":
 				settextpanel(selectedtarget.stationname, selectedtarget.global_transform.origin)
 			elif pointertargettype == "DrawnStationNodes":
@@ -357,6 +392,7 @@ func _on_button_release(p_button):
 		elif is_instance_valid(selectedtarget) and selectedtarget.has_method("set_materialoverride"):
 			selectedtarget.set_materialoverride(pointinghighlightmaterial if selectedtarget == pointertarget else null)
 			selectedtarget = null
+			LaserSpot.material_override = null
 		
 	elif p_button == Buttons.VR_TRIGGER and (nodeorientationpreviewheldtransform != null):
 		print("dosomethingwith nodeorientationpreview ", nodeorientationpreviewheldtransform)
@@ -372,7 +408,6 @@ func _on_button_release(p_button):
 			xcdrawing.set_name("XCdrawing"+String(otxcdIndex))
 			xcdrawing.otxcdIndex = otxcdIndex   # could use the name in the list to avoid the index number
 			sketchsystem.get_node("XCdrawings").add_child(xcdrawing)
-			
 			var vx = pointertarget.global_transform.origin - selectedtarget.global_transform.origin
 			xcdrawing.setxcpositionangle(Vector2(vx.x, vx.z).angle())
 			var vwallmid = (pointertarget.global_transform.origin + selectedtarget.global_transform.origin)/2

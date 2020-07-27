@@ -1,4 +1,4 @@
-[gd_scene load_steps=44 format=2]
+[gd_scene load_steps=45 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://addons/godot-xr-tools/misc/VR_Common_Shader_Cache.tscn" type="PackedScene" id=2]
@@ -31,6 +31,12 @@ material = ExtResource( 16 )
 size = Vector3( 0.002, 0.002, 10 )
 subdivide_depth = 20
 
+[sub_resource type="SpatialMaterial" id=24]
+albedo_color = Color( 0.980392, 0.741176, 0.027451, 1 )
+metallic = 0.52
+metallic_specular = 0.67
+roughness = 0.37
+
 [sub_resource type="SpatialMaterial" id=3]
 albedo_color = Color( 0.984314, 0.0705882, 0.0705882, 1 )
 metallic = 0.46
@@ -54,14 +60,6 @@ height = 0.2
 radial_segments = 6
 rings = 1
 
-[sub_resource type="SpatialMaterial" id=22]
-flags_unshaded = true
-albedo_color = Color( 0.937255, 0.901961, 0.0431373, 0.67451 )
-
-[sub_resource type="CubeMesh" id=23]
-material = SubResource( 22 )
-size = Vector3( 0.01, 0.01, 1 )
-
 [sub_resource type="SpatialMaterial" id=7]
 albedo_color = Color( 0.976471, 0.67451, 0.0313726, 1 )
 metallic = 0.68
@@ -79,6 +77,14 @@ bottom_radius = 0.05
 height = 0.02
 radial_segments = 8
 rings = 1
+
+[sub_resource type="SpatialMaterial" id=22]
+flags_unshaded = true
+albedo_color = Color( 0.937255, 0.901961, 0.0431373, 0.67451 )
+
+[sub_resource type="CubeMesh" id=23]
+material = SubResource( 22 )
+size = Vector3( 0.01, 0.01, 1 )
 
 [sub_resource type="SpatialMaterial" id=9]
 albedo_texture = ExtResource( 13 )
@@ -221,6 +227,7 @@ collision_mask = 56
 
 [node name="LaserSpot" type="MeshInstance" parent="ARVROrigin/ARVRController_Right/pointersystem"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -4.96626, 4.96626 )
+material_override = SubResource( 24 )
 mesh = SubResource( 4 )
 material/0 = null
 
@@ -229,18 +236,20 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0 )
 mesh = SubResource( 6 )
 material/0 = null
 
-[node name="LaserSelectLine" type="Spatial" parent="ARVROrigin/ARVRController_Right/pointersystem/LaserSpot"]
-
-[node name="Scale" type="Spatial" parent="ARVROrigin/ARVRController_Right/pointersystem/LaserSpot/LaserSelectLine"]
-
-[node name="Mesh" type="MeshInstance" parent="ARVROrigin/ARVRController_Right/pointersystem/LaserSpot/LaserSelectLine/Scale"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.5 )
-mesh = SubResource( 23 )
-material/0 = null
-
 [node name="LaserShadow" type="MeshInstance" parent="ARVROrigin/ARVRController_Right/pointersystem"]
 transform = Transform( 1, 0, 0, 0, 0.707107, -0.707107, 0, 0.707107, 0.707107, 0, -5.76777, 4.06674 )
 mesh = SubResource( 8 )
+material/0 = null
+
+[node name="LaserSelectLine" type="Spatial" parent="ARVROrigin/ARVRController_Right/pointersystem"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -4.96626, 4.96626 )
+visible = false
+
+[node name="Scale" type="Spatial" parent="ARVROrigin/ARVRController_Right/pointersystem/LaserSelectLine"]
+
+[node name="Mesh" type="MeshInstance" parent="ARVROrigin/ARVRController_Right/pointersystem/LaserSelectLine/Scale"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.5 )
+mesh = SubResource( 23 )
 material/0 = null
 
 [node name="DirectionalLight" type="DirectionalLight" parent="ARVROrigin"]
