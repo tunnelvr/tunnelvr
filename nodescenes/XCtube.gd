@@ -120,9 +120,9 @@ func add_uvvertex(surfaceTool, xcnodes, poly, ila, i, floorsize, dfinv):
 func fa(a, b):
 	return a[0] < b[0] or (a[0] == b[0] and a[1] < b[1])
 
-func maketubeshell(drawnfloor):
-	var floorsize = drawnfloor.get_node("MeshInstance").mesh.size
-	var dfinv = drawnfloor.global_transform.affine_inverse()
+func maketubeshell(floordrawing):
+	var floorsize = floordrawing.get_node("XCdrawingplane/CollisionShape/MeshInstance").mesh.size
+	var dfinv = floordrawing.get_node("XCdrawingplane/CollisionShape/MeshInstance").global_transform.affine_inverse()
 	
 	var xcdrawings = get_node("../../XCdrawings")
 	var xcdrawing0 = xcdrawings.get_child(otxcdIndex0)
@@ -193,9 +193,9 @@ func maketubeshell(drawnfloor):
 	surfaceTool.generate_normals()
 	return surfaceTool.commit()
 
-func updatetubeshell(drawnfloor, makevisible):
+func updatetubeshell(floordrawing, makevisible):
 	if makevisible:
-		var tubeshellmesh = maketubeshell(drawnfloor)
+		var tubeshellmesh = maketubeshell(floordrawing)
 		if tubeshellmesh != null:
 			$XCtubeshell/MeshInstance.mesh = tubeshellmesh
 			$XCtubeshell/CollisionShape.shape.set_faces(tubeshellmesh.get_faces())

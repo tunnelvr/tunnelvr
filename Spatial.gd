@@ -4,19 +4,16 @@ var arvr_openvr = null;
 var arvr_quest = null; 
 
 # Stuff to do:
-# * carry on with the tmpAnchorNode case and debug shiftfloor
-# * replace drawnfloor with an xcdrawing and use its drawnfloor accordingly
-# * delete all references to drawnfloor
+# * check stationdrawnnode moves the ground up
 # * change "OnePathNodes" to "floordrawingnode"
-# * report mismatch error in if x==" " else x == thing giving an error in wrong place
-# * tie centreline nodes to the drawn floor same way other movements are
-# * make tubes automatically update on moves.  
+# * save and load files incl all XCtubes
+# * redo shiftfloorfromdrawnstations with nodes in the area of some kind (decide what to do about the scale)
+# * make tubes automatically update on moves of nodes.  
+# * tie centreline nodes to the drawn floor same way other movements are?
 # * grip click to hide a tube segment (how to bring back?)
 # * cycle through textures on a tube section (as well as hiding)
-# * copy xcdrawingplane to flip when copied 
 # * xcdrawingplane background thing be scaled when copied
 # * xcdrawingplane background thing change colour on grip and hide
-# * save and load files incl all XCtubes
 # * think about the height plane
 # * drag and shift all nodes up or expand in an xcdrawing (part of group node moving with circular paint brushing pushing)
 # * Normal drawing to be XCdrawing, but horizontal and with a connections between XCdrawings
@@ -100,12 +97,11 @@ func _ready():
 	var pointer = $ARVROrigin/ARVRController_Right/pointersystem
 	pointer.sketchsystem = $SketchSystem
 	pointer.centrelinesystem = $SketchSystem/Centreline
-	pointer.drawnfloor = $drawnfloor
 	pointer.nodeorientationpreview = $SketchSystem/NodeOrientationPreview
 	pointer.guipanel3d = $GUIPanel3D
 	pointer.guipanel3d.visible = false
+	pointer.floordrawing = $SketchSystem/floordrawing
 	
-	$SketchSystem/Centreline.drawnfloor = $drawnfloor
 	$SketchSystem/Centreline.floordrawing = $SketchSystem/floordrawing
 	$ARVROrigin/ARVRController_Right/pointersystem/LaserSpot.visible = false
 	$ARVROrigin/ARVRController_Right/pointersystem/LaserShadow.visible = false

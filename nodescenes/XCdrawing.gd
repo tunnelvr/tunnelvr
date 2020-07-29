@@ -102,6 +102,7 @@ func removexcnode(xcn):
 			xctube.updatetubelinkpaths(get_parent(), get_parent().get_parent())
 
 func movexcnode(xcn, pt):
+	print("m,mmmmxmxmxm ", xcn.global_transform.origin, pt)
 	xcn.global_transform.origin = pt
 	copyxcntootnode(xcn)
 	updatexcpaths()

@@ -20,7 +20,7 @@ func _run():
 	var i = 10
 	var z = 0
 	
-	#i = 11  # uncomment this line to create the errors
+	i = 10  # uncomment this line to create the errors
 	
 	if i == 20:
 		print("i is twenty")

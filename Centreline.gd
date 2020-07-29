@@ -3,7 +3,6 @@ extends Spatial
 const StationNode = preload("res://nodescenes/StationNode.tscn")
 const DrawnStationNode = preload("res://nodescenes/DrawnStationNode.tscn")
 var stationnodemap = { }
-var drawnfloor = null   # filled in by Spatial.gd
 var floordrawing = null
 
 func newdrawnstationnode():

@@ -102,10 +102,10 @@ func updateonepaths():
 	#updateworkingshell()
 
 func updateworkingshell(makevisible):
-	var drawnfloor = get_node("../drawnfloor")
+	var floordrawing = get_node("floordrawing")
 	for xctube in $XCtubes.get_children():
 		if xctube.otxcdIndex1 != -1:
-			xctube.updatetubeshell(drawnfloor, makevisible)
+			xctube.updatetubeshell(floordrawing, makevisible)
 		else:
 			print("SSSkipping xctube to floor case")
 	

@@ -4,7 +4,6 @@ extends Spatial
 # (and a lot of other hacking)
 
 # variables set by the Spatial.gd
-var drawnfloor = null
 var sketchsystem = null
 var centrelinesystem =null
 var nodeorientationpreview = null
@@ -17,6 +16,7 @@ enum Buttons { VR_TRIGGER = 15, VR_PAD=14, VR_BUTTON_BY=1, VR_GRIP=2 }
 onready var controller = get_parent()
 onready var arvrcamera = get_node("../../ARVRCamera")
 var distance = 50
+var floordrawing = null
 
 var collision_mask = 14 
 
@@ -98,8 +98,6 @@ func targettype(target):
 	var targetparentname = target.get_parent().get_name()
 	if targetname == "XCdrawingplane":
 		return targetparentname if targetparentname == "floordrawing" else targetname
-	if targetname == "drawnfloor":
-		return "floordrawing"
 	if targetname == "GUIPanel3D":
 		return targetname
 	if targetparentname == "OnePathNodes" or targetparentname == "StationNodes" or targetparentname == "DrawnStationNodes":
@@ -148,8 +146,8 @@ func onpointing(newpointertarget, newpointertargetpoint):
 				
 			# work out the logic for the LaserSelectLine here
 			if controller.is_button_pressed(Buttons.VR_GRIP):
-				LaserSelectLine.visible = ((pointertargettype == "drawnfloor") and ((selectedtargettype == "OnePathNodes") or (selectedtargettype == "DrawnStationNodes")))
-			elif pointertargettype == "drawnfloor":
+				LaserSelectLine.visible = ((pointertargettype == "floordrawing") and ((selectedtargettype == "OnePathNodes") or (selectedtargettype == "DrawnStationNodes")))
+			elif pointertargettype == "floordrawing":
 				LaserSelectLine.visible = ((selectedtargettype == "OnePathNodes") or (selectedtargettype == "StationNodes"))
 			elif pointertargettype == "XCdrawingplane":
 				LaserSelectLine.visible = ((selectedtargettype == "XCnodes"))
@@ -181,7 +179,7 @@ func onpointing(newpointertarget, newpointertargetpoint):
 			LaserSelectLine.visible = false
 		
 	if LaserShadow.visible:
-		LaserShadow.global_transform = Transform(Basis(), Vector3(pointertargetpoint.x, drawnfloor.global_transform.origin.y, pointertargetpoint.z))
+		LaserShadow.global_transform = Transform(Basis(), Vector3(pointertargetpoint.x, floordrawing.global_transform.origin.y, pointertargetpoint.z))
 
 
 func _on_button_pressed(p_button):
@@ -222,9 +220,8 @@ func _on_button_pressed(p_button):
 
 		elif pointertargettype == "XCdrawingplane" or pointertargettype == "floordrawing":
 			var xcdrawing = pointertarget.get_parent()
-			
 			# drag node to new position on XCdrawingplane
-			if controller.is_button_pressed(Buttons.VR_GRIP) and selectedtarget != null and (pointertargettype == "XCnodes" or pointertargettype == "floordrawing"):
+			if controller.is_button_pressed(Buttons.VR_GRIP) and selectedtarget != null and (pointertargettype == "XCdrawingplane" or pointertargettype == "floordrawing"):
 				if selectedtargettype == "DrawnStationNodes":
 					print("should move ", selectedtarget, " to ", pointertargetpoint)
 					setopnpos(selectedtarget, pointertargetpoint)
@@ -254,60 +251,7 @@ func _on_button_pressed(p_button):
 				else:
 					selectedtarget = pointertarget
 					selectedtarget.set_materialoverride(selectedpointerhighlightmaterial)
-					LaserSpot.material_override = laserspothighlightmaterial
-
-		elif pointertarget == drawnfloor:
-			# drag node to new position on floor
-			if controller.is_button_pressed(Buttons.VR_GRIP) and is_instance_valid(selectedtarget) and selectedtarget.has_method("set_materialoverride"):
-				if selectedtargettype == "OnePathNodes":
-					setopnpos(selectedtarget, pointertargetpoint)
-					sketchsystem.updateonepaths()
-					for xctube in sketchsystem.get_node("XCtubes").get_children():
-						print("chch match updatetubelinkpaths ", xctube.xcdrawinglink)
-						if xctube.otxcdIndex1 == -1 and xctube.xcdrawinglink.slice(1, len(xctube.xcdrawinglink), 2).has(selectedtarget.otIndex):
-							xctube.updatetubelinkpaths(sketchsystem.get_node("XCdrawings"), sketchsystem)
-					
-				elif selectedtargettype == "DrawnStationNodes":
-					setopnpos(selectedtarget, pointertargetpoint)
-
-				gripbuttonpressused = true
-				
-			# new drawn station node on floor with centreline node already connected
-			elif selectedtargettype == "StationNodes":
-				pointertarget = centrelinesystem.newdrawnstationnode()
-				setopnpos(pointertarget, pointertargetpoint)
-				pointertarget.stationname = selectedtarget.stationname
-				selectedtarget.set_materialoverride(null)
-				selectedtarget = null
-				LaserSpot.material_override = null
-				settextpanel(null, null)
-				
-			# new node on floor, with or without other node selected to connect to
-			else:
-				pointertarget = sketchsystem.newonepathnode(-1)
-				# this is where we add the xcpath into its XCdrawing
-				setopnpos(pointertarget, pointertargetpoint)
-				if is_instance_valid(selectedtarget) and selectedtarget.get_parent().get_name() == "OnePathNodes":
-					pointertarget.global_transform.origin.y = selectedtarget.global_transform.origin.y
-					pointertarget.scale.y = pointertarget.global_transform.origin.y
-					sketchsystem.ot.copyopntootnode(pointertarget)
-					sketchsystem.applyonepath(selectedtarget, pointertarget)
-					selectedtarget.set_materialoverride(null)
-				else:
-					pointertarget.global_transform.origin.y = 0.2
-					pointertarget.scale.y = pointertarget.global_transform.origin.y
-					sketchsystem.ot.copyopntootnode(pointertarget)
-					if is_instance_valid(selectedtarget) and selectedtarget.has_method("set_materialoverride"):
-						selectedtarget.set_materialoverride(null)
-										
-				if controller.is_button_pressed(Buttons.VR_GRIP):
-					selectedtarget = null
-					LaserSpot.material_override = null
-				else:
-					selectedtarget = pointertarget
-					selectedtarget.set_materialoverride(selectedpointerhighlightmaterial)
-					LaserSpot.material_override = laserspothighlightmaterial
-				
+					LaserSpot.material_override = laserspothighlightmaterial		
 					
 		# clear selected target by selecting again
 		# (we may reconsider deselection on second selection)
@@ -407,8 +351,8 @@ func _on_button_pressed(p_button):
 				
 			# raise the whole drawn floor case!
 			if pointertargettype == "DrawnStationNodes":
-				drawnfloor.global_transform.origin.y = drawnfloor.global_transform.origin.y + dy
-				centrelinesystem.get_node("DrawnStationNodes").global_transform.origin.y = drawnfloor.global_transform.origin.y
+				floordrawing.global_transform.origin.y = floordrawing.global_transform.origin.y + dy
+				centrelinesystem.get_node("DrawnStationNodes").global_transform.origin.y = floordrawing.global_transform.origin.y
 			
 	if p_button == Buttons.VR_GRIP:
 		gripbuttonpressused = false
