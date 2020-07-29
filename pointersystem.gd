@@ -91,6 +91,24 @@ func _ready():
 	$Laser/RayCast.translation.z = distance * 0.5
 	$Laser/RayCast.cast_to.z = -distance
 
+func targettype(target):
+	if not is_instance_valid(target):
+		return null
+	var targetname = target.get_name()
+	var targetparentname = target.get_parent().get_name()
+	if targetname == "XCdrawingplane":
+		return targetparentname if targetparentname == "floordrawing" else targetname
+	if targetname == "drawnfloor":
+		return "floordrawing"
+	if targetname == "GUIPanel3D":
+		return targetname
+	if targetparentname == "OnePathNodes" or targetparentname == "StationNodes" or targetparentname == "DrawnStationNodes":
+		return targetparentname
+	if targetparentname == "XCnodes":
+		var targetgrandparentname = target.get_parent().get_parent().get_name()
+		return "OnePathNodes"  if targetgrandparentname == "floordrawing"  else targetparentname
+	return "unknown"
+		
 func setopnpos(opn, p):
 	opn.global_transform.origin = p
 	if opn.get_parent().get_name() == "OnePathNodes":
@@ -111,8 +129,10 @@ func onpointing(newpointertarget, newpointertargetpoint):
 
 		pointertarget = newpointertarget
 		if is_instance_valid(pointertarget):
-			var selectedtargettype = selectedtarget.get_parent().get_name() if selectedtarget != null else null
-			var pointertargettype = pointertarget.get_parent().get_name() if pointertarget.has_method("set_materialoverride") else pointertarget.get_name()
+			#var selectedtargettype = selectedtarget.get_parent().get_name() if selectedtarget != null else null
+			#var pointertargettype = pointertarget.get_parent().get_name() if pointertarget.has_method("set_materialoverride") else pointertarget.get_name()
+			var selectedtargettype = targettype(selectedtarget)
+			var pointertargettype = targettype(pointertarget)
 			print("ppp  ", selectedtargettype, " ", pointertargettype)
 			if pointertarget.has_method("set_materialoverride"):
 				pointertarget.set_materialoverride(selectedpointerhighlightmaterial if pointertarget == selectedtarget else pointinghighlightmaterial)
@@ -165,7 +185,9 @@ func onpointing(newpointertarget, newpointertargetpoint):
 
 
 func _on_button_pressed(p_button):
-	print("pppp ", pointertargetpoint)
+	var selectedtargettype = targettype(selectedtarget)
+	var pointertargettype = targettype(pointertarget)
+	print("pppp ", pointertargetpoint, " ", [selectedtargettype, pointertargettype])
 	
 	if p_button == Buttons.VR_BUTTON_BY:
 		var cameracontrollervec = controller.global_transform.origin - arvrcamera.global_transform.origin
@@ -178,22 +200,35 @@ func _on_button_pressed(p_button):
 			guipanel3d.togglevisibility(controller.get_node("pointersystem").global_transform)
 			
 	if p_button == Buttons.VR_TRIGGER and is_instance_valid(pointertarget):
-		print("clclc ", pointertarget.get_name(), "  filename:", pointertarget.get_filename(), " p:", pointertarget.get_parent())
-		if pointertarget.has_method("jump_up"):
-			pointertarget.jump_up()
+		print("clclc ", pointertarget, "--", pointertarget.get_name(), "  filename:", pointertarget.get_filename(), " p:", pointertarget.get_parent())
 			
-		elif pointertarget == guipanel3d:
+		if pointertarget == guipanel3d:
 			pass  #this is processed elsewhere
+
+		elif pointertarget.has_method("jump_up"):
+			pointertarget.jump_up()
 
 		elif pointertarget == nodeorientationpreview:
 			nodeorientationpreviewheldtransform = get_parent().global_transform.inverse()
 
-		elif pointertarget.get_name() == "XCdrawingplane":
+		elif pointertargettype == "floordrawing" and selectedtargettype == "StationNodes":
+			pointertarget = centrelinesystem.newdrawnstationnode()
+			setopnpos(pointertarget, pointertargetpoint)
+			pointertarget.stationname = selectedtarget.stationname
+			selectedtarget.set_materialoverride(null)
+			selectedtarget = null
+			LaserSpot.material_override = null
+			settextpanel(null, null)
+
+		elif pointertargettype == "XCdrawingplane" or pointertargettype == "floordrawing":
 			var xcdrawing = pointertarget.get_parent()
 			
 			# drag node to new position on XCdrawingplane
-			if controller.is_button_pressed(Buttons.VR_GRIP) and is_instance_valid(selectedtarget) and selectedtarget.get_parent().get_name() == "XCnodes":
-				if selectedtarget.get_parent().get_parent() == xcdrawing:
+			if controller.is_button_pressed(Buttons.VR_GRIP) and selectedtarget != null and (pointertargettype == "XCnodes" or pointertargettype == "floordrawing"):
+				if selectedtargettype == "DrawnStationNodes":
+					print("should move ", selectedtarget, " to ", pointertargetpoint)
+					setopnpos(selectedtarget, pointertargetpoint)
+				elif selectedtarget.get_parent().get_parent() == xcdrawing:
 					xcdrawing.movexcnode(selectedtarget, pointertargetpoint)
 				else:
 					selectedtarget.set_materialoverride(null)
@@ -201,6 +236,7 @@ func _on_button_pressed(p_button):
 					LaserSpot.material_override = null
 
 				gripbuttonpressused = true
+
 			
 			# make new node on XCdrawingplane
 			elif not controller.is_button_pressed(Buttons.VR_GRIP):
@@ -223,7 +259,6 @@ func _on_button_pressed(p_button):
 		elif pointertarget == drawnfloor:
 			# drag node to new position on floor
 			if controller.is_button_pressed(Buttons.VR_GRIP) and is_instance_valid(selectedtarget) and selectedtarget.has_method("set_materialoverride"):
-				var selectedtargettype = selectedtarget.get_parent().get_name()			
 				if selectedtargettype == "OnePathNodes":
 					setopnpos(selectedtarget, pointertargetpoint)
 					sketchsystem.updateonepaths()
@@ -238,7 +273,7 @@ func _on_button_pressed(p_button):
 				gripbuttonpressused = true
 				
 			# new drawn station node on floor with centreline node already connected
-			elif is_instance_valid(selectedtarget) and selectedtarget.get_parent().get_name() == "StationNodes":
+			elif selectedtargettype == "StationNodes":
 				pointertarget = centrelinesystem.newdrawnstationnode()
 				setopnpos(pointertarget, pointertargetpoint)
 				pointertarget.stationname = selectedtarget.stationname
@@ -277,13 +312,12 @@ func _on_button_pressed(p_button):
 		# clear selected target by selecting again
 		# (we may reconsider deselection on second selection)
 		elif pointertarget == selectedtarget:
-			var selectedtargettype = selectedtarget.get_parent().get_name()			
 			if selectedtargettype == "StationNodes":
 				settextpanel(null, null)
 			selectedtarget.set_materialoverride(pointinghighlightmaterial)
 			if controller.is_button_pressed(Buttons.VR_GRIP):
 				if selectedtargettype == "OnePathNodes":
-					sketchsystem.removeonepathnode(selectedtarget)
+					selectedtarget.get_parent().get_parent().removexcnode(selectedtarget)
 				elif selectedtargettype == "DrawnStationNodes":
 					selectedtarget.queue_free()
 				elif selectedtargettype == "XCnodes":
@@ -294,11 +328,9 @@ func _on_button_pressed(p_button):
 			
 		# click on new selected target (connect from previous selected target)
 		elif pointertarget.has_method("set_materialoverride"):
-			var pointertargettype = pointertarget.get_parent().get_name()
 			
 			# connect from selected node if exists
 			if is_instance_valid(selectedtarget) and selectedtarget.has_method("set_materialoverride"):
-				var selectedtargettype = selectedtarget.get_parent().get_name()
 				selectedtarget.set_materialoverride(null)
 				if selectedtargettype == "StationNodes":
 					settextpanel(null, null)
@@ -322,7 +354,10 @@ func _on_button_pressed(p_button):
 							print("making new copiued drawing¬!!!!")
 							var xcdrawing = xcdrawingtocopy.duplicatexcdrawing()
 							var vline = pointertargetpoint - selectedtarget.global_transform.origin
-							xcdrawing.setxcpositionangle(Vector2(vline.z, -vline.x).angle())
+							var drawingwallangle = Vector2(vline.z, -vline.x).angle()
+							if vline.dot(xcdrawing.global_transform.basis.z) < 0:
+								drawingwallangle = Vector2(-vline.z, vline.x).angle()
+							xcdrawing.setxcpositionangle(drawingwallangle)
 							xcdrawing.setxcpositionorigin(pointertargetpoint)
 							sketchsystem.xcapplyonepath(xcdrawing.get_node("XCnodes").get_child(xcdrawingtocopynodelink), pointertarget)
 							sketchsystem.xcapplyonepath(xcdrawingtocopy.get_node("XCnodes").get_child(xcdrawingtocopynodelink), xcdrawing.get_node("XCnodes").get_child(xcdrawingtocopynodelink))
@@ -332,7 +367,8 @@ func _on_button_pressed(p_button):
 				elif selectedtargettype == "XCnodes" and pointertargettype == "XCnodes":  # this will be the only case left at some point
 					sketchsystem.xcapplyonepath(selectedtarget, pointertarget)
 				elif selectedtargettype == "OnePathNodes" and pointertargettype == "OnePathNodes":
-					sketchsystem.applyonepath(selectedtarget, pointertarget)
+					sketchsystem.xcapplyonepath(selectedtarget, pointertarget)
+					#sketchsystem.applyonepath(selectedtarget, pointertarget)
 					
 				# these might require a grip to be held case to make them
 				elif selectedtargettype == "XCnodes" and pointertargettype == "OnePathNodes":
@@ -359,12 +395,11 @@ func _on_button_pressed(p_button):
 		var up_down = controller.get_joystick_axis(1)
 		if abs(up_down) < 0.5 and abs(left_right) > 0.1 and is_instance_valid(pointertarget):
 			var dy = (1 if left_right > 0 else -1)*(1.0 if abs(left_right) < 0.8 else 0.1)
-			var pointertargettype = pointertarget.get_parent().get_name()
-			if pointertargettype == "OnePathNodes":
-				pointertarget.global_transform.origin.y = max(0.1, pointertarget.global_transform.origin.y + dy)
-				pointertarget.scale.y = pointertarget.global_transform.origin.y
-				sketchsystem.ot.copyopntootnode(pointertarget)
-				nodeorientationpreview.global_transform.origin = pointertarget.global_transform.origin
+			#if pointertargettype == "OnePathNodes":
+			#	pointertarget.global_transform.origin.y = max(0.1, pointertarget.global_transform.origin.y + dy)
+			#	pointertarget.scale.y = pointertarget.global_transform.origin.y
+			#	sketchsystem.ot.copyopntootnode(pointertarget)
+			#	nodeorientationpreview.global_transform.origin = pointertarget.global_transform.origin
 
 			if pointertarget.get_name() == "XCdrawingplane":
 				pointertarget.scale.y = max(0.1, pointertarget.scale.y + dy)
@@ -380,12 +415,14 @@ func _on_button_pressed(p_button):
 
 func _on_button_release(p_button):
 	# cancel selection by squeezing and then releasing grip without doing anything in between
+	var pointertargettype = targettype(pointertarget)
+	var selectedtargettype = targettype(selectedtarget)
 	if p_button == Buttons.VR_GRIP and not gripbuttonpressused:
-		if pointertarget == guipanel3d:
+		if pointertargettype == "GUIPanel3D":
 			if guipanel3d.visible:
 				guipanel3d.togglevisibility(controller.get_node("pointersystem").global_transform)
 
-		elif is_instance_valid(pointertarget) and pointertarget.get_name() == "XCdrawingplane":
+		elif pointertargettype == "XCdrawingplane":
 			pointertarget.visible = false
 			pointertarget.get_node("CollisionShape").disabled = true
 			pointertarget = null
@@ -399,19 +436,17 @@ func _on_button_release(p_button):
 		nodeorientationpreviewheldtransform = null
 
 	# new drawing wall position made
-	elif p_button == Buttons.VR_TRIGGER and is_instance_valid(selectedtarget) and is_instance_valid(pointertarget) and pointertarget.has_method("set_materialoverride") and pointertarget != selectedtarget:
-		var pointertargettype = pointertarget.get_parent().get_name()
-		var selectedtargettype = selectedtarget.get_parent().get_name()
-		if pointertargettype == "OnePathNodes" and selectedtargettype == "OnePathNodes":
-			var xcdrawing = XCdrawing.instance()
-			var otxcdIndex = sketchsystem.get_node("XCdrawings").get_child_count()
-			xcdrawing.set_name("XCdrawing"+String(otxcdIndex))
-			xcdrawing.otxcdIndex = otxcdIndex   # could use the name in the list to avoid the index number
-			sketchsystem.get_node("XCdrawings").add_child(xcdrawing)
-			var vx = pointertarget.global_transform.origin - selectedtarget.global_transform.origin
-			xcdrawing.setxcpositionangle(Vector2(vx.x, vx.z).angle())
-			var vwallmid = (pointertarget.global_transform.origin + selectedtarget.global_transform.origin)/2
-			xcdrawing.setxcpositionorigin(vwallmid)
+	elif p_button == Buttons.VR_TRIGGER and pointertargettype == "OnePathNodes" and selectedtargettype == "OnePathNodes" and pointertarget != selectedtarget:
+		print("makingxcplane")
+		var xcdrawing = XCdrawing.instance()
+		var otxcdIndex = sketchsystem.get_node("XCdrawings").get_child_count()
+		xcdrawing.set_name("XCdrawing"+String(otxcdIndex))
+		xcdrawing.otxcdIndex = otxcdIndex   # could use the name in the list to avoid the index number
+		sketchsystem.get_node("XCdrawings").add_child(xcdrawing)
+		var vx = pointertarget.global_transform.origin - selectedtarget.global_transform.origin
+		xcdrawing.setxcpositionangle(Vector2(vx.x, vx.z).angle())
+		var vwallmid = (pointertarget.global_transform.origin + selectedtarget.global_transform.origin)/2
+		xcdrawing.setxcpositionorigin(vwallmid)
 			
 func _process(_delta):
 	if !is_inside_tree():

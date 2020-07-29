@@ -40,7 +40,7 @@ func shiftxcdrawingposition(xcdrawings, sketchsystem):
 	print("...shiftxcdrawingposition")
 	var xcdrawing = xcdrawings.get_child(otxcdIndex0)
 	var xcdrawing0nodes = xcdrawing.get_node("XCnodes")
-	var xcdrawing1nodes = sketchsystem.get_node("OnePathNodes")
+	var xcdrawing1nodes = sketchsystem.get_node("floordrawing/XCnodes")
 	if len(xcdrawinglink) == 0:
 		return
 	var bscalexcnodepointspointsx_called = false
@@ -63,7 +63,7 @@ func shiftxcdrawingposition(xcdrawings, sketchsystem):
 		if vxlen != 0 and vxclen != 0:
 			xcdrawing.scalexcnodepointspointsx(vxlen/vxclen)
 			bscalexcnodepointspointsx_called = true
-		xcdrawing.setxcpositionangle(Vector2(vx.x, vx.z).angle())
+		xcdrawing.setxcpositionangle(Vector2(-vx.x, -vx.z).angle())
 		var xco = opn0.global_transform.origin - xcn0.global_transform.origin + xcdrawing.global_transform.origin
 		xcdrawing.setxcpositionorigin(xco)
 		
@@ -81,7 +81,7 @@ func updatetubelinkpaths(xcdrawings, sketchsystem):
 	var surfaceTool = SurfaceTool.new()
 	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var xcdrawing0nodes = xcdrawings.get_child(otxcdIndex0).get_node("XCnodes")
-	var xcdrawing1nodes = xcdrawings.get_child(otxcdIndex1).get_node("XCnodes") if not bgroundanchortype else sketchsystem.get_node("OnePathNodes")
+	var xcdrawing1nodes = xcdrawings.get_child(otxcdIndex1).get_node("XCnodes") if not bgroundanchortype else sketchsystem.get_node("floordrawing/XCnodes")
 	print("llll", xcdrawings, xcdrawing0nodes, xcdrawing1nodes, xcdrawinglink)
 	assert ((len(xcdrawinglink)%2) == 0)
 	for j in range(0, len(xcdrawinglink), 2):

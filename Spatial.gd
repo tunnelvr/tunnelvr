@@ -4,18 +4,20 @@ var arvr_openvr = null;
 var arvr_quest = null; 
 
 # Stuff to do:
+# * carry on with the tmpAnchorNode case and debug shiftfloor
 # * replace drawnfloor with an xcdrawing and use its drawnfloor accordingly
-# *   start by making a drawn floor thing higher up (or drawn floor lower down)
-# *   start porting the functions to the xcdrawing that's horizontal
-# *   tie centreline nodes to the drawn floor same way other movements are
-# *   make tubes automatically update on moves.  
-# *   grip click to hide a tube segment (how to bring back?)
-# *   cycle through textures on a tube section (as well as hiding)
+# * delete all references to drawnfloor
+# * change "OnePathNodes" to "floordrawingnode"
+# * report mismatch error in if x==" " else x == thing giving an error in wrong place
+# * tie centreline nodes to the drawn floor same way other movements are
+# * make tubes automatically update on moves.  
+# * grip click to hide a tube segment (how to bring back?)
+# * cycle through textures on a tube section (as well as hiding)
+# * copy xcdrawingplane to flip when copied 
 # * xcdrawingplane background thing be scaled when copied
 # * xcdrawingplane background thing change colour on grip and hide
 # * save and load files incl all XCtubes
 # * think about the height plane
-# * abolish onepathnodes and replace with xcdrawing and its
 # * drag and shift all nodes up or expand in an xcdrawing (part of group node moving with circular paint brushing pushing)
 # * Normal drawing to be XCdrawing, but horizontal and with a connections between XCdrawings
 # * third (middle) connection point on xcdrawing bends it into 2 planes
@@ -104,11 +106,17 @@ func _ready():
 	pointer.guipanel3d.visible = false
 	
 	$SketchSystem/Centreline.drawnfloor = $drawnfloor
+	$SketchSystem/Centreline.floordrawing = $SketchSystem/floordrawing
 	$ARVROrigin/ARVRController_Right/pointersystem/LaserSpot.visible = false
 	$ARVROrigin/ARVRController_Right/pointersystem/LaserShadow.visible = false
 	$GUIPanel3D.sketchsystem = $SketchSystem
 	$GUIPanel3D.arvrorigin = $ARVROrigin
 		
+	$SketchSystem/floordrawing.floortype = true
+	$SketchSystem/floordrawing.otxcdIndex = -1
+	
+	$LaserSquare.material_override = load("res://surveyscans/scanimagefloor.material")
+
 func _process(_delta):
 	if !perform_runtime_config:
 		ovr_performance.set_clock_levels(1, 1)

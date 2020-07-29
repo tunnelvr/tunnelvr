@@ -4,6 +4,7 @@ const StationNode = preload("res://nodescenes/StationNode.tscn")
 const DrawnStationNode = preload("res://nodescenes/DrawnStationNode.tscn")
 var stationnodemap = { }
 var drawnfloor = null   # filled in by Spatial.gd
+var floordrawing = null
 
 func newdrawnstationnode():
 	var dsn = DrawnStationNode.instance()
@@ -13,37 +14,51 @@ func newdrawnstationnode():
 func shiftfloorfromdrawnstations():
 	# compatible with setopnpos(opn, p)
 	var drawnstationnodes = $DrawnStationNodes.get_children()
-	var dsn0 = drawnstationnodes[-1] if len(drawnstationnodes) >= 1 else null
-	var dsn1 = drawnstationnodes[-2] if len(drawnstationnodes) >= 2 else null
-	var dfinv = drawnfloor.global_transform.affine_inverse()
-	if dsn0 != null:
-		var st0 = stationnodemap[dsn0.stationname]
-		var pst0 = st0.global_transform.origin
-		var pdsn0 = dsn0.global_transform.origin
-		if dsn1 != null:
-			var st1 = stationnodemap[dsn1.stationname]
-			var pst1 = st1.global_transform.origin
-			var pdsn1 = dsn1.global_transform.origin
-			var vpst = Vector2(pst1.x, pst1.z) - Vector2(pst0.x, pst0.z)
-			var vdsn = Vector2(pdsn1.x, pdsn1.z) - Vector2(pdsn0.x, pdsn0.z)
-			var sca = vpst.length()/vdsn.length()
-			var ang = vpst.angle() - vdsn.angle()
-			print("sssca ", sca, "  ", ang)
-			drawnfloor.rotate_y(-ang) 
-			drawnfloor.scale_object_local(Vector3(sca, 1.0, sca)) 
-			var fpR = dfinv.xform(pdsn0)
-			var pdsnR = drawnfloor.global_transform.xform(fpR)
-			drawnfloor.global_translate(Vector3(pst0.x - pdsnR.x, 0, pst0.z - pdsnR.z)) 
+	if len(drawnstationnodes) == 0:
+		return
+		
+	var drawnstationnodesCopiesInFloor = [ ]
+	for i in range(len(drawnstationnodes)):
+		var drawnstationnodeCopy = Spatial.new()
+		floordrawing.get_node("XCdrawingplane").add_child(drawnstationnodeCopy)
+		drawnstationnodeCopy.global_transform.origin = drawnstationnodes[i].global_transform.origin
+		drawnstationnodesCopiesInFloor.append(drawnstationnodeCopy)
+
+	var dsn0 = drawnstationnodes[-1]
+	var dsnC0 = drawnstationnodesCopiesInFloor[-1]
+	var pdsn0 = dsn0.global_transform.origin
+	var st0 = stationnodemap[dsn0.stationname]
+	var pst0 = st0.global_transform.origin
+	print(" dsnC0", dsnC0.global_transform.origin)	
+
+	if len(drawnstationnodes) >= 2:
+		var dsn1 = drawnstationnodes[-2]
+		var dsnC1 = drawnstationnodesCopiesInFloor[-2]
+		var st1 = stationnodemap[dsn1.stationname]
+		var pst1 = st1.global_transform.origin
+		var pdsn1 = dsn1.global_transform.origin
 			
-		else:
-			drawnfloor.global_translate(Vector3(pst0.x - pdsn0.x, 0, pst0.z - pdsn0.z)) 
-		print("floor shiftingggg")
+		var vpst = Vector2(pst1.x, pst1.z) - Vector2(pst0.x, pst0.z)
+		var vdsn = Vector2(pdsn1.x, pdsn1.z) - Vector2(pdsn0.x, pdsn0.z)
+		var sca = vpst.length()/vdsn.length()
+		var ang = vpst.angle() - vdsn.angle()
+		
+		print(" vpst", vpst, vpst.length())	
+		print(" vdsn", vdsn, vdsn.length())	
+		print(" sssca ", sca, "  ", ang)
+		floordrawing.get_node("XCdrawingplane").scale_object_local(Vector3(sca, sca, 1.0)) 
+		floordrawing.rotate_y(-ang)
 	
-	var drawnfloorheight = drawnfloor.global_transform.origin.y
-	for dsn in drawnstationnodes:
-		var fp = dfinv.xform(dsn.global_transform.origin)
-		var pdsn = drawnfloor.global_transform.xform(fp)
-		dsn.global_transform.origin = Vector3(pdsn.x, drawnfloorheight, pdsn.z)
+	# now translate to match the new position dsnC0 has gone to
+	print(" dsnC0", dsnC0.global_transform.origin)	
+	print(" st0", st0.global_transform.origin)
+	floordrawing.global_translate(Vector3(st0.global_transform.origin.x - dsnC0.global_transform.origin.x, 0, st0.global_transform.origin.z - dsnC0.global_transform.origin.z)) 
+	
+	for i in range(len(drawnstationnodes)):
+		drawnstationnodes[i].global_transform.origin = drawnstationnodesCopiesInFloor[i].global_transform.origin
+		floordrawing.get_node("XCdrawingplane").remove_child(drawnstationnodesCopiesInFloor[i])
+		print("floor shiftingggg")
+		
 
 func Loadcentrelinefile(fname):
 	var centrelinedatafile = File.new()

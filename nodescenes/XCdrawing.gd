@@ -2,13 +2,14 @@ extends Spatial
 
 const XCnode = preload("res://nodescenes/XCnode.tscn")
 
-
 const linewidth = 0.05
 var otxcdIndex: int = 0
 
 var nodepoints = [ ]    # list of Vector3
 var onepathpairs = [ ]  # sequence of pairs indexing the nodepoints
 var xctubesconn = [ ]   # references to xctubes that connect to here (could use their names instead)
+
+var floortype = false
 
 # these transforming operations work in sequence, each correcting the relative position change caused by the other
 func scalexcnodepointspointsx(sca):
@@ -21,7 +22,6 @@ func setxcpositionangle(drawingwallangle):
 
 func setxcpositionorigin(pt0):
 	global_transform.origin = Vector3(pt0.x, 0, pt0.z)
-
 
 
 func duplicatexcdrawing():
@@ -96,14 +96,20 @@ func removexcnode(xcn):
 		xctube.removetubenodepoint(otxcdIndex, xcnIndex, len(nodepoints))
 	updatexcpaths()
 	for xctube in xctubesconn:
-		xctube.updatetubelinkpaths(get_parent(), get_parent().get_parent())
+		if get_name() == "floordrawing":
+			xctube.updatetubelinkpaths(get_parent().get_node("XCdrawings"), get_parent())
+		else:
+			xctube.updatetubelinkpaths(get_parent(), get_parent().get_parent())
 
 func movexcnode(xcn, pt):
 	xcn.global_transform.origin = pt
 	copyxcntootnode(xcn)
 	updatexcpaths()
 	for xctube in xctubesconn:
-		xctube.updatetubelinkpaths(get_parent(), get_parent().get_parent())
+		if get_name() == "floordrawing":
+			xctube.updatetubelinkpaths(get_parent().get_node("XCdrawings"), get_parent())
+		else:
+			xctube.updatetubelinkpaths(get_parent(), get_parent().get_parent())
 
 func updatexcpaths():
 	print("iupdatingxxccpaths ", len(onepathpairs))
@@ -127,7 +133,6 @@ func updatexcpaths():
 	$PathLines.mesh = surfaceTool.commit()
 	print("usus ", len($PathLines.mesh.get_faces()), " ", len($PathLines.mesh.get_faces())) #surfaceTool.generate_normals()
 	#updateworkingshell()
-
 
 func sd0(a, b):
 	return a[0] < b[0]

@@ -1,24 +1,20 @@
-[gd_scene load_steps=45 format=2]
+[gd_scene load_steps=41 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://addons/godot-xr-tools/misc/VR_Common_Shader_Cache.tscn" type="PackedScene" id=2]
-[ext_resource path="res://textures/Rock017_2K-JPG/Rock017_2K_Roughness.jpg" type="Texture" id=3]
+[ext_resource path="res://surveyscans/fancyrocktexture.material" type="Material" id=3]
 [ext_resource path="res://movementsystem.gd" type="Script" id=4]
 [ext_resource path="res://pointersystem.gd" type="Script" id=5]
 [ext_resource path="res://CSGMesh_righthand.tscn" type="PackedScene" id=6]
 [ext_resource path="res://CSGMesh_lefthand.tscn" type="PackedScene" id=7]
-[ext_resource path="res://textures/Rock017_2K-JPG/Rock017_2K_AmbientOcclusion.jpg" type="Texture" id=9]
+[ext_resource path="res://nodescenes/XCdrawing.tscn" type="PackedScene" id=8]
 [ext_resource path="res://SketchSystem.gd" type="Script" id=10]
 [ext_resource path="res://text_panel_3d.tscn" type="PackedScene" id=11]
 [ext_resource path="res://default_env.tres" type="Environment" id=12]
-[ext_resource path="res://surveyscans/DukeStResurvey-drawnup-p3.jpg" type="Texture" id=13]
 [ext_resource path="res://gui_panel_3d.tscn" type="PackedScene" id=14]
 [ext_resource path="res://gui_panel_3d.gd" type="Script" id=15]
 [ext_resource path="res://addons/godot-xr-tools/materials/pointer.tres" type="Material" id=16]
 [ext_resource path="res://Centreline.gd" type="Script" id=17]
-[ext_resource path="res://textures/Rock017_2K-JPG/Rock017_2K_Color.jpg" type="Texture" id=18]
-[ext_resource path="res://textures/Rock017_2K-JPG/Rock017_2K_Displacement.jpg" type="Texture" id=19]
-[ext_resource path="res://textures/Rock017_2K-JPG/Rock017_2K_Normal.jpg" type="Texture" id=20]
 [ext_resource path="res://BoulderClutter.gd" type="Script" id=21]
 
 [sub_resource type="CapsuleShape" id=1]
@@ -86,11 +82,17 @@ albedo_color = Color( 0.937255, 0.901961, 0.0431373, 0.67451 )
 material = SubResource( 22 )
 size = Vector3( 0.01, 0.01, 1 )
 
-[sub_resource type="SpatialMaterial" id=9]
-albedo_texture = ExtResource( 13 )
+[sub_resource type="StreamTexture" id=25]
+flags = 23
+load_path = "res://.import/DukeStResurvey-drawnup-p3.jpg-0879ecaf32e6ebe816442b6097f62a78.s3tc.stex"
+
+[sub_resource type="SpatialMaterial" id=26]
+params_cull_mode = 2
+albedo_color = Color( 0.992157, 0.992157, 0.666667, 1 )
+albedo_texture = SubResource( 25 )
 
 [sub_resource type="PlaneMesh" id=10]
-material = SubResource( 9 )
+material = SubResource( 26 )
 size = Vector2( 1, 1.285 )
 subdivide_width = 4
 subdivide_depth = 4
@@ -138,26 +140,6 @@ radial_segments = 4
 
 [sub_resource type="PlaneMesh" id=20]
 size = Vector2( 4, 2 )
-
-[sub_resource type="SpatialMaterial" id=21]
-albedo_texture = ExtResource( 18 )
-roughness_texture = ExtResource( 3 )
-normal_enabled = true
-normal_scale = 1.54
-normal_texture = ExtResource( 20 )
-ao_enabled = true
-ao_light_affect = 0.9
-ao_texture = ExtResource( 9 )
-ao_on_uv2 = false
-ao_texture_channel = 0
-depth_enabled = true
-depth_scale = 0.1
-depth_deep_parallax = true
-depth_min_layers = 8
-depth_max_layers = 32
-depth_flip_tangent = false
-depth_flip_binormal = false
-depth_texture = ExtResource( 19 )
 
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
@@ -323,6 +305,9 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -2.38419e-07, -0.200001, 0 )
 mesh = SubResource( 19 )
 material/0 = null
 
+[node name="floordrawing" parent="SketchSystem" instance=ExtResource( 8 )]
+transform = Transform( 1, 0, 0, 0, -1.62921e-07, 1, 0, -1, -1.62921e-07, 0, 0.5, 5 )
+
 [node name="GUIPanel3D" parent="." instance=ExtResource( 14 )]
 transform = Transform( 0.512717, 0, -0.858558, 0, 1, 0, 0.858558, 0, 0.512717, 2.5832, 0.213841, -4.95236 )
 script = ExtResource( 15 )
@@ -330,7 +315,7 @@ script = ExtResource( 15 )
 [node name="LaserSquare" type="MeshInstance" parent="."]
 transform = Transform( -0.592393, -0.783466, -0.187751, -0.546921, 0.562194, -0.620335, 0.591564, -0.264797, -0.761535, -0.944971, 1.18811, 0.0964239 )
 mesh = SubResource( 20 )
-material/0 = SubResource( 21 )
+material/0 = ExtResource( 3 )
 
 [node name="BoulderClutter" type="Spatial" parent="."]
 script = ExtResource( 21 )

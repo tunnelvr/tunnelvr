@@ -5,7 +5,13 @@ onready var ot = load("res://OneTunnel.gd").new()
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	print("oooooo", ot)
+	$floordrawing.floortype = true
+	$floordrawing/XCdrawingplane.scale = Vector3(50, 50, 1)
+	$floordrawing/XCdrawingplane.collision_layer |= 2
+	print("mmmm ", load("res://surveyscans/scanimagefloor.material"))
+	
+	$floordrawing/XCdrawingplane/CollisionShape/MeshInstance.material_override = load("res://surveyscans/scanimagefloor.material")
+	
 	
 const OnePathNode = preload("res://nodescenes/OnePathNode.tscn")
 const XCtube = preload("res://nodescenes/XCtube.tscn")
@@ -36,8 +42,10 @@ func applyonepath(opn0, opn1):
 
 func xcapplyonepath(xcn0, xcn1):
 	var xcdrawing0 = xcn0.get_parent().get_parent()
-	var bgroundanchortype = xcn1.get_parent().get_name() == "OnePathNodes"
-	var xcdrawing1 = xcn1.get_parent().get_parent()  if not bgroundanchortype  else null
+	var xcdrawing1 = xcn1.get_parent().get_parent()
+	var bgroundanchortype = false
+	if xcn0 != xcn1 and xcn1.get_parent().get_parent().get_name() == "floordrawing":
+		bgroundanchortype = true
 					
 	if xcdrawing0 == xcdrawing1:
 		xcdrawing0.xcotapplyonepath(xcn0.otIndex, xcn1.otIndex)

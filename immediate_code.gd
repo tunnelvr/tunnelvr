@@ -11,12 +11,34 @@ func _ready():
 	print("jjo")
 	
 func fa(a, b):
+	
 	print(a, b)
 	return a[0] < b[0] or (a[0] == b[0] and a[1] < b[1])
 	
+	
 func _run():
-	var a = range(100,110)
-	print(a.slice(1, len(a), 2).has(109))
+	var i = 10
+	var z = 0
+	
+	#i = 11  # uncomment this line to create the errors
+	
+	if i == 20:
+		print("i is twenty")
+	elif i == 10:
+		print("i is ten")
+	
+	# Error 1	
+	elif i == "three":
+		print("garbage in garbage out")
+	
+	# Error 2	
+	elif i == 1/z:
+		print("more garbage")
+	
+	# Error 3	
+	elif len(i) == 3:
+		print("more garbage")
+	print("reached the end", i=="99")
 	
 func D_run():
 	# get all the connections in here between the polygons but in the right order
