@@ -20,7 +20,6 @@ var floordrawing = null
 
 var collision_mask = 14 
 
-const OnePathNode = preload("res://nodescenes/OnePathNode.tscn")
 const XCdrawing = preload("res://nodescenes/XCdrawing.tscn")
 const XCnode = preload("res://nodescenes/XCnode.tscn")
 				
