@@ -1,4 +1,4 @@
-[gd_scene load_steps=41 format=2]
+[gd_scene load_steps=40 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://addons/godot-xr-tools/misc/VR_Common_Shader_Cache.tscn" type="PackedScene" id=2]
@@ -81,10 +81,6 @@ albedo_color = Color( 0.937255, 0.901961, 0.0431373, 0.67451 )
 [sub_resource type="CubeMesh" id=11]
 material = SubResource( 10 )
 size = Vector3( 0.01, 0.01, 1 )
-
-[sub_resource type="SpatialMaterial" id=16]
-params_cull_mode = 2
-albedo_color = Color( 0.972549, 0.278431, 0.0392157, 1 )
 
 [sub_resource type="SpatialMaterial" id=17]
 params_cull_mode = 2
@@ -246,14 +242,6 @@ script = ExtResource( 10 )
 [node name="XCdrawings" type="Spatial" parent="SketchSystem"]
 
 [node name="XCtubes" type="Spatial" parent="SketchSystem"]
-
-[node name="OnePathNodes" type="Spatial" parent="SketchSystem"]
-
-[node name="PathLines" type="MeshInstance" parent="SketchSystem"]
-material_override = SubResource( 16 )
-
-[node name="PathXCLinks" type="MeshInstance" parent="SketchSystem"]
-material_override = SubResource( 16 )
 
 [node name="Centreline" type="Spatial" parent="SketchSystem"]
 script = ExtResource( 17 )

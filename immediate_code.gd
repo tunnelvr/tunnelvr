@@ -17,28 +17,30 @@ func fa(a, b):
 	
 	
 func _run():
-	var i = 10
-	var z = 0
+	print([10,20,30,40].find(30))   # gives 2
+	print(parse_json(to_json([10,20,30,40])).find(30))  # gives -1
+	print("jj")
 	
-	i = 10  # uncomment this line to create the errors
+	# In Javascript
+	JSON.parse(JSON.stringify([10,20,30,40])).indexOf(30)  # gives 2
+
+	# In Python
+	json.loads(json.dumps([10,20,30,40])).index(30)   # gives 2
+
+	var a = [10,20,30,40]
+	var b = parse_json(to_json(a))
+	print("a is ", a)
+	print("a.find(30) gives ", a.find(30))
+	print("b is ", a)
+	print("b.find(30) gives ", b.find(30), " even though b[2]==30 is ", b[2]==30)
 	
-	if i == 20:
-		print("i is twenty")
-	elif i == 10:
-		print("i is ten")
-	
-	# Error 1	
-	elif i == "three":
-		print("garbage in garbage out")
-	
-	# Error 2	
-	elif i == 1/z:
-		print("more garbage")
-	
-	# Error 3	
-	elif len(i) == 3:
-		print("more garbage")
-	print("reached the end", i=="99")
+	var typeslookup = { TYPE_INT:"int", TYPE_REAL:"float"}
+	print("a[2] is ", typeslookup[typeof(a[2])])
+	print("b[2] is ", typeslookup[typeof(b[2])])
+
+	print(int(9))
+	print(b[2])
+
 	
 func D_run():
 	# get all the connections in here between the polygons but in the right order

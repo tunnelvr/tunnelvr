@@ -48,7 +48,6 @@ func shiftxcdrawingposition(xcdrawings, sketchsystem):
 	var xcn0 = xcdrawing0nodes.get_child(xcdrawinglink[-2 if bsingledrag else -4])
 	var opn0 = xcdrawing1nodes.get_child(xcdrawinglink[-1 if bsingledrag else -3])
 	if bsingledrag:
-		var vx = xcdrawing.global_transform.basis.x
 		var xcn0rel = xcn0.global_transform.origin - xcdrawing.global_transform.origin
 		var pt0 = opn0.global_transform.origin - Vector3(xcn0rel.x, 0, xcn0rel.z)
 		xcdrawing.setxcpositionorigin(pt0)
@@ -72,6 +71,7 @@ func shiftxcdrawingposition(xcdrawings, sketchsystem):
 	for xctube in xcdrawing.xctubesconn:
 		if xctube.otxcdIndex1 != -1:
 			xctube.updatetubelinkpaths(xcdrawings, sketchsystem)
+		
 		
 func updatetubelinkpaths(xcdrawings, sketchsystem):
 	var bgroundanchortype = otxcdIndex1 == -1
@@ -198,6 +198,7 @@ func updatetubeshell(floordrawing, makevisible):
 		var tubeshellmesh = maketubeshell(floordrawing)
 		if tubeshellmesh != null:
 			$XCtubeshell/MeshInstance.mesh = tubeshellmesh
+			#$XCtubeshell/MeshInstance.material_override = preload("res://surveyscans/simplerocktexture.material")   # this can cause crashes
 			$XCtubeshell/CollisionShape.shape.set_faces(tubeshellmesh.get_faces())
 			$XCtubeshell.visible = true
 			$XCtubeshell/CollisionShape.disabled = false

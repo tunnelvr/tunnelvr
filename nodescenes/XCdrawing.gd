@@ -23,6 +23,48 @@ func setxcpositionangle(drawingwallangle):
 func setxcpositionorigin(pt0):
 	global_transform.origin = Vector3(pt0.x, 0, pt0.z)
 
+func exportdata():
+	var nodepointsData = [ ]
+	for i in range(len(nodepoints)):
+		nodepointsData.append(nodepoints[i].x)
+		nodepointsData.append(nodepoints[i].y)
+		nodepointsData.append(nodepoints[i].z)
+	var xvec = Vector2(global_transform.basis.x.x, global_transform.basis.x.z)
+	return { "name":get_name(),
+			 "transpos": [xvec.angle(), get_node("XCdrawingplane").scale.x, global_transform.origin.x, global_transform.origin.y, global_transform.origin.z], 
+			 "nodepoints": nodepointsData, 
+			 "onepathpairs":onepathpairs 
+		   }
+
+func importdata(xcdrawingData):
+	var transpos = xcdrawingData["transpos"]
+	$XCdrawingplane.set_scale(Vector3(transpos[1], transpos[1], 1.0))
+	if floortype:
+		rotate_y(transpos[0])
+	else:
+		setxcpositionangle(transpos[0])
+	global_transform.origin = Vector3(transpos[2], transpos[3], transpos[4])
+
+	var nodepointsData = xcdrawingData["nodepoints"]
+	for i in range(0, len(nodepointsData), 3):
+		nodepoints.append(Vector3(nodepointsData[i], nodepointsData[i+1], nodepointsData[i+2]))
+	
+	for xcn in $XCnodes.get_children():
+		xcn.free()
+	nodepoints.clear()
+	for i in range(len(nodepointsData)/3):
+		nodepoints.append(Vector3(nodepointsData[i*3], nodepointsData[i*3+1], nodepointsData[i*3+2]))
+		var xcn = XCnode.instance()
+		xcn.otIndex = i
+		$XCnodes.add_child(xcn)
+		xcn.set_name("XCnode"+String(xcn.otIndex))  # We could use to_int on this to abolish need for otIndex
+		xcn.translation = nodepoints[xcn.otIndex]
+			
+	onepathpairs = xcdrawingData["onepathpairs"]
+	for i in range(len(onepathpairs)):
+		onepathpairs[i] = int(onepathpairs[i])    # parse_json brings all ints back as floats!
+	xctubesconn.clear()
+	updatexcpaths()
 
 func duplicatexcdrawing():
 	var XCdrawing = load("res://nodescenes/XCdrawing.tscn")  # self-instance

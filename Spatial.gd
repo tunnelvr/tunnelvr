@@ -4,7 +4,19 @@ var arvr_openvr = null;
 var arvr_quest = null; 
 
 # Stuff to do:
+# * delete onepathnode scene and gd file
+# * get rid of the OneTunnel class.  It's all sketch system
 # * check stationdrawnnode moves the ground up
+# * xcdrawing plane texture should be a 1m checkerboard (maybe as a shader)
+# * find a way to push and pull the contour dynamically in place.  
+# *  some kind of poke tool that you spin the wrist with, maybe push in and out
+# *  a mapping distortion field perhaps (that could be done with a vertex shader if I knew how)
+# *  because distortions don't ruin the topology of the area and do a whole set at once, and lend self to subdividing edges if curvature too great
+# * xcdrawing mesh needs to be larger than the stations that are on it
+# * should the XCdrawing be flat and lifted up for XC, rather than tipped back for floordrawing
+# * finish floordrawingData save
+# * and loading (remembering the transforms) so it starts exactly where it left off
+# * get rid of set_materialoverride
 # * change "OnePathNodes" to "floordrawingnode"
 # * save and load files incl all XCtubes
 # * redo shiftfloorfromdrawnstations with nodes in the area of some kind (decide what to do about the scale)
@@ -32,12 +44,8 @@ var arvr_quest = null;
 # * allocate junctions and curved XCs (or with a split panel at 0 and different angle)
 # * shell code should have rocky texture on ceilings
 
-# * node on floor used for making new XCs
 # * tap right and up to grow XC drawing
 # * XC to record its UV and X-vector position on the sketch maybe
-# * We trace a network of nodes on the floor how we like
-# * Is the ground drawing actually just a 2D drawing which the cross sections will be guided by?
-# * Primary construction of cross-section contours around centreline nodes
 # * Nodes have floor/wall/ceiling type or-ed so that when edges and faces get anded by their point members their category is set
 # * Colour floor/wall/ceiling faces accordingly
 # * Interpolate cross sections that are joined along the plan2D contour and slinky tubes not straight pipes
@@ -111,7 +119,7 @@ func _ready():
 	$SketchSystem/floordrawing.floortype = true
 	$SketchSystem/floordrawing.otxcdIndex = -1
 	
-	$LaserSquare.material_override = load("res://surveyscans/scanimagefloor.material")
+	#$LaserSquare.material_override = load("res://surveyscans/scanimagefloor.material")
 
 func _process(_delta):
 	if !perform_runtime_config:

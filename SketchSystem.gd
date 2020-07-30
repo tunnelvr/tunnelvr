@@ -2,6 +2,8 @@ tool
 extends Spatial
 
 onready var ot = load("res://OneTunnel.gd").new()
+const XCdrawing = preload("res://nodescenes/XCdrawing.tscn")
+const XCtube = preload("res://nodescenes/XCtube.tscn")
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -11,34 +13,12 @@ func _ready():
 	print("mmmm ", load("res://surveyscans/scanimagefloor.material"))
 	
 	$floordrawing/XCdrawingplane/CollisionShape/MeshInstance.material_override = load("res://surveyscans/scanimagefloor.material")
+	#$floordrawing/XCdrawingplane/CollisionShape/MeshInstance.material_override = load("res://surveyscans/fancyrocktexture.material")
 	
 	
-const OnePathNode = preload("res://nodescenes/OnePathNode.tscn")
-const XCtube = preload("res://nodescenes/XCtube.tscn")
 
 const linewidth = 0.05
 
-func newonepathnode(lotIndex):
-	var opn = OnePathNode.instance()
-	$OnePathNodes.add_child(opn)
-	if lotIndex == -1:
-		opn.otIndex = ot.newotnodepoint()
-	else:
-		opn.otIndex = lotIndex
-	opn.set_name("OnePathNode"+String(opn.otIndex))  # We could use to_int on this to abolish need for otIndex
-	return opn
-
-func removeonepathnode(opn):
-	if ot.removeotnodepoint(opn.otIndex):
-		ot.copyotnodetoopn($OnePathNodes.get_child(opn.otIndex))
-	$OnePathNodes.get_child($OnePathNodes.get_child_count()-1).free()
-	updateonepaths()
-	assert (ot.verifyonetunnelmatches(self))
-
-func applyonepath(opn0, opn1):
-	ot.applyonepath(opn0.otIndex, opn1.otIndex)
-	updateonepaths()
-	assert (ot.verifyonetunnelmatches(self))
 
 func xcapplyonepath(xcn0, xcn1):
 	var xcdrawing0 = xcn0.get_parent().get_parent()
@@ -72,7 +52,7 @@ func xcapplyonepath(xcn0, xcn1):
 		xctube.get_node("XCtubeshell/CollisionShape").shape = ConcavePolygonShape.new()   # bug.  this fails to get cloned
 		xctube.otxcdIndex0 = xcdrawing0otxcdIndex
 		xctube.otxcdIndex1 = xcdrawing1otxcdIndex
-		xctube.set_name("XCtube"+String(xcdrawing0otxcdIndex)+"_"+String(xcdrawing1otxcdIndex))
+		xctube.set_name("XCtube"+String(xctube.otxcdIndex0)+"_"+String(xctube.otxcdIndex1))
 		xcdrawing0.xctubesconn.append(xctube)
 		if xcdrawing1 != null:
 			xcdrawing1.xctubesconn.append(xctube)
@@ -80,26 +60,6 @@ func xcapplyonepath(xcn0, xcn1):
 	
 	xctube.xctubeapplyonepath(xcn0, xcn1)
 
-func updateonepaths():
-	var surfaceTool = SurfaceTool.new()
-	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
-	for j in range(0, len(ot.onepathpairs), 2):
-		var p0 = ot.nodepoints[ot.onepathpairs[j]] + Vector3(0, 0.005, 0)
-		var p1 = ot.nodepoints[ot.onepathpairs[j+1]] + Vector3(0, 0.005, 0)
-		var perp = linewidth*Vector2(-(p1.z - p0.z), p1.x - p0.x).normalized()
-		var p0left = p0 - Vector3(perp.x, 0, perp.y)
-		var p0right = p0 + Vector3(perp.x, 0, perp.y)
-		var p1left = p1 - Vector3(perp.x, 0, perp.y)
-		var p1right = p1 + Vector3(perp.x, 0, perp.y)
-		surfaceTool.add_vertex(p0left)
-		surfaceTool.add_vertex(p1left)
-		surfaceTool.add_vertex(p0right)
-		surfaceTool.add_vertex(p0right)
-		surfaceTool.add_vertex(p1left)
-		surfaceTool.add_vertex(p1right)
-	surfaceTool.generate_normals()
-	$PathLines.mesh = surfaceTool.commit()
-	#updateworkingshell()
 
 func updateworkingshell(makevisible):
 	var floordrawing = get_node("floordrawing")
@@ -112,44 +72,87 @@ func updateworkingshell(makevisible):
 
 # Quick saving and loading of shape.  It goes to 
 # C:\Users\ViveOne\AppData\Roaming\Godot\app_userdata\digtunnel
-# We could check if we can export mesh things this way
 func savesketchsystem():
-	assert (ot.verifyonetunnelmatches(self))
-	var drawnstationnodes = get_node("Centreline/DrawnStationNodes").get_children()
-	ot.drawnstationnodesRAW.clear()	
+	var fname = "user://savegame.save"
+	var floordrawingData = $floordrawing.exportdata()
+	var xcdrawingsData = [ ]
+	for i in range($XCdrawings.get_child_count()):
+		xcdrawingsData.append($XCdrawings.get_child(i).exportdata())
+	var xctubesData = [ ]
+	for i in range($XCtubes.get_child_count()):
+		var xctube = $XCtubes.get_child(i)
+		xctubesData.append([xctube.otxcdIndex0, xctube.otxcdIndex1, xctube.xcdrawinglink])
+	var drawnstationnodes = $Centreline/DrawnStationNodes.get_children()
+	var drawnstationnodesData = [ ]	
 	for i in range(len(drawnstationnodes)):
 		var dsn = drawnstationnodes[i]
-		ot.drawnstationnodesRAW.append([dsn.global_transform.origin.x, dsn.global_transform.origin.y, dsn.global_transform.origin.z, dsn.stationname])
-	ot.saveonetunnel("user://savegame.save")
+		drawnstationnodesData.append([dsn.stationname, dsn.global_transform.origin.x, dsn.global_transform.origin.y, dsn.global_transform.origin.z])
+	var save_dict = { "floordrawing":floordrawingData,
+					  "xcdrawings":xcdrawingsData,
+					  "xctubes":xctubesData,
+					  "drawnstationnodes":drawnstationnodesData }
+	var save_game = File.new()
+	save_game.open(fname, File.WRITE)
+	save_game.store_line(to_json(save_dict))
+	save_game.close()
 	print("sssssaved")
 
 func loadsketchsystem():
-	ot.loadonetunnel("user://savegame.save")
-	var onepathnodes = get_node("OnePathNodes").get_children()
-	for i in range(len(onepathnodes)):
-		onepathnodes[i].free()
-	print("sdfsdf", get_node("OnePathNodes").get_child_count())
-	assert (get_node("OnePathNodes").get_child_count() == 0)
+	var fname = "user://savegame.save"
+	var save_game = File.new()
+	save_game.open(fname, File.READ)
+	var save_dict = parse_json(save_game.get_line())
+
+	var drawnstationnodesData = save_dict["drawnstationnodes"]
+	var xcdrawingsData = save_dict["xcdrawings"]
+	var xctubesData = save_dict["xctubes"]
+	var floordrawingData = save_dict["floordrawing"]
 	
-	for i in range(len(ot.nodepoints)):
-		var opn = newonepathnode(i)
-		ot.copyotnodetoopn(opn)
-				
-	onepathnodes = get_node("OnePathNodes").get_children()
-	assert (len(ot.nodepoints) == len(onepathnodes))
-	updateonepaths()
-		
-	var drawnstationnodes = get_node("Centreline/DrawnStationNodes").get_children()
-	for i in range(len(ot.drawnstationnodesRAW)):
-		var dsn = (drawnstationnodes[i]  if i < len(drawnstationnodes)  else get_node("Centreline").newdrawnstationnode())
-		var ndsn = ot.drawnstationnodesRAW[i]
-		dsn.global_transform.origin.x = ndsn[0]
-		dsn.global_transform.origin.y = ndsn[1]
-		dsn.global_transform.origin.z = ndsn[2]
-		dsn.stationname = ndsn[3]
-	drawnstationnodes = get_node("Centreline/DrawnStationNodes").get_children()
-	for i in range(len(ot.drawnstationnodesRAW), len(drawnstationnodes)):
-		drawnstationnodes[i].queue_free()
+	for drawnstationnode in $Centreline/DrawnStationNodes.get_children():
+		drawnstationnode.free()
+	for drawnstationnodeData in drawnstationnodesData:
+		var drawnstationnode = $Centreline.newdrawnstationnode()
+		drawnstationnode.stationname = drawnstationnodeData[0]
+		drawnstationnode.global_transform.origin = Vector3(drawnstationnodeData[1], drawnstationnodeData[2], drawnstationnodeData[3])
+
+	$floordrawing.importdata(floordrawingData)
+	# then move the floor by the drawnstationnodes (it should be done auto when we make the nodes connected)
+	
+	# then do the xcdrawings
+	for xcdrawing in $XCdrawings.get_children():
+		xcdrawing.free()
+	for i in range(len(xcdrawingsData)):
+		var xcdrawingData = xcdrawingsData[i]
+		print("iiii", xcdrawingData)
+		var xcdrawing = XCdrawing.instance()
+		assert (i == get_node("XCdrawings").get_child_count())
+		xcdrawing.otxcdIndex = i
+		xcdrawing.set_name("XCdrawing"+String(xcdrawing.otxcdIndex))
+		get_node("XCdrawings").add_child(xcdrawing)
+		xcdrawing.importdata(xcdrawingData)
+
+	# should move each into position by its connections
+
+	# then do the tubes
+	for xctube in $XCtubes.get_children():
+		xctube.free()
+	for i in range(len(xctubesData)):
+		var xctubeData = xctubesData[i]
+		var xctube = XCtube.instance()
+		xctube.get_node("XCtubeshell/CollisionShape").shape = ConcavePolygonShape.new()   # bug.  this fails to get cloned
+		xctube.otxcdIndex0 = int(xctubeData[0])
+		xctube.otxcdIndex1 = int(xctubeData[1])
+		xctube.set_name("XCtube"+String(xctube.otxcdIndex0)+"_"+String(xctube.otxcdIndex1))
+		get_node("XCdrawings").get_child(xctube.otxcdIndex0).xctubesconn.append(xctube)
+		if xctube.otxcdIndex1 != -1:
+			get_node("XCdrawings").get_child(xctube.otxcdIndex1).xctubesconn.append(xctube)
+		$XCtubes.add_child(xctube)
+		xctube.xcdrawinglink = xctubeData[2]
+		for j in range(len(xctube.xcdrawinglink)):
+			xctube.xcdrawinglink[j] = int(xctube.xcdrawinglink[j])
+		xctube.updatetubelinkpaths($XCdrawings, self)
+	
+	save_game.close()
 		
 	print("lllloaded")
 		

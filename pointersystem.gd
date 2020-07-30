@@ -30,7 +30,6 @@ var selectedpointerhighlightmaterial = SpatialMaterial.new()
 
 var pointertarget = null
 var pointertargetpoint = Vector3(0, 0, 0)
-var pointertargetoriginy = 0.0   # used for redrawing the connecting lines when something made taller
 var selectedtarget = null
 var gripbuttonpressused = false
 var nodeorientationpreviewheldtransform = null
@@ -100,7 +99,7 @@ func targettype(target):
 		return targetparentname if targetparentname == "floordrawing" else targetname
 	if targetname == "GUIPanel3D":
 		return targetname
-	if targetparentname == "OnePathNodes" or targetparentname == "StationNodes" or targetparentname == "DrawnStationNodes":
+	if  targetparentname == "StationNodes" or targetparentname == "DrawnStationNodes":
 		return targetparentname
 	if targetparentname == "XCnodes":
 		var targetgrandparentname = target.get_parent().get_parent().get_name()
@@ -109,11 +108,6 @@ func targettype(target):
 		
 func setopnpos(opn, p):
 	opn.global_transform.origin = p
-	if opn.get_parent().get_name() == "OnePathNodes":
-		opn.global_transform.origin = p + Vector3(0, 0.2, 0)
-		opn.scale.y = opn.global_transform.origin.y
-		sketchsystem.ot.copyopntootnode(opn)		
-		
 		
 func onpointing(newpointertarget, newpointertargetpoint):
 	if newpointertarget != pointertarget:
@@ -122,8 +116,6 @@ func onpointing(newpointertarget, newpointertargetpoint):
 		
 		if is_instance_valid(pointertarget) and pointertarget.has_method("set_materialoverride"):
 			pointertarget.set_materialoverride(selectedhighlightmaterial if pointertarget == selectedtarget else null)
-			if pointertarget.global_transform.origin.y != pointertargetoriginy:
-				sketchsystem.updateonepaths()
 
 		pointertarget = newpointertarget
 		if is_instance_valid(pointertarget):
@@ -136,7 +128,6 @@ func onpointing(newpointertarget, newpointertargetpoint):
 				pointertarget.set_materialoverride(selectedpointerhighlightmaterial if pointertarget == selectedtarget else pointinghighlightmaterial)
 				LaserSpot.visible = false
 				LaserShadow.visible = true
-				pointertargetoriginy = pointertarget.global_transform.origin.y
 			elif pointertarget == guipanel3d:
 				LaserSpot.visible = false
 				LaserShadow.visible = false
@@ -308,17 +299,10 @@ func _on_button_pressed(p_button):
 												
 					gripbuttonpressused = true
 					
-				elif selectedtargettype == "XCnodes" and pointertargettype == "XCnodes":  # this will be the only case left at some point
-					sketchsystem.xcapplyonepath(selectedtarget, pointertarget)
-				elif selectedtargettype == "OnePathNodes" and pointertargettype == "OnePathNodes":
-					sketchsystem.xcapplyonepath(selectedtarget, pointertarget)
-					#sketchsystem.applyonepath(selectedtarget, pointertarget)
-					
-				# these might require a grip to be held case to make them
-				elif selectedtargettype == "XCnodes" and pointertargettype == "OnePathNodes":
-					sketchsystem.xcapplyonepath(selectedtarget, pointertarget)
-				elif selectedtargettype == "OnePathNodes" and pointertargettype == "XCnodes":
+				elif (selectedtargettype == "OnePathNodes") and (pointertargettype == "XCnodes"):
 					sketchsystem.xcapplyonepath(pointertarget, selectedtarget)
+				elif (selectedtargettype == "XCnodes" or selectedtargettype == "OnePathNodes") and (pointertargettype == "XCnodes" or pointertargettype == "OnePathNodes"):
+					sketchsystem.xcapplyonepath(selectedtarget, pointertarget)
 					
 			selectedtarget = pointertarget
 			selectedtarget.set_materialoverride(selectedpointerhighlightmaterial)

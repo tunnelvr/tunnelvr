@@ -17,11 +17,11 @@ var drawnstationnodesRAW = [ ]  # temporary case till we know what to do
 func _ready():
 	pass # Replace with function body
 
-func newotnodepoint():
+func Dnewotnodepoint():
 	nodepoints.push_back(Vector3())
 	return len(nodepoints) - 1
 
-func removeotnodepoint(i):
+func Dremoveotnodepoint(i):
 	var e = len(nodepoints) - 1
 
 	nodepoints[i] = nodepoints[e]
@@ -41,14 +41,14 @@ func removeotnodepoint(i):
 				onepathpairs[j+1] = i
 	return i != e
 	
-func copyopntootnode(opn):
+func Dcopyopntootnode(opn):
 	nodepoints[opn.otIndex] = opn.global_transform.origin
 
-func copyotnodetoopn(opn):
+func Dcopyotnodetoopn(opn):
 	opn.global_transform.origin = nodepoints[opn.otIndex]
 	opn.scale.y = opn.global_transform.origin.y
 
-func applyonepath(i0, i1):
+func Dapplyonepath(i0, i1):
 	for j in range(len(onepathpairs)-2, -3, -2):
 		if j == -2:
 			print("addingonepath ", len(onepathpairs))
@@ -74,7 +74,7 @@ func unflattenpoolvector2(r):
 		v.append(Vector2(r[i-1], r[i]))
 	return v
 
-func loadonetunnel(fname):
+func Dloadonetunnel(fname):
 	var save_game = File.new()
 	save_game.open(fname, File.READ)
 	var node_data = parse_json(save_game.get_line())
@@ -96,7 +96,7 @@ func flattenpoolvector2(v):
 		r.append_array([p.x, p.y])
 	return r
 	
-func saveonetunnel(fname):
+func Dsaveonetunnel(fname):
 	var save_dict = { "nodepoints":flattenpoolvector3(nodepoints), 
 					  "onepathpairs":onepathpairs,
 					  "drawnstationnodes":drawnstationnodesRAW }
@@ -104,16 +104,5 @@ func saveonetunnel(fname):
 	save_game.open(fname, File.WRITE)
 	save_game.store_line(to_json(save_dict))
 	save_game.close()
-
-func verifyonetunnelmatches(sketchsystem):
-	return true
-	var N = len(nodepoints)
-	var onepathnodes = sketchsystem.get_node("OnePathNodes").get_children()
-	assert(N == len(onepathnodes))
-	for i in range(N):
-		var opn = onepathnodes[i]
-		assert (opn.otIndex == i)
-		assert (opn.global_transform.origin == nodepoints[i])
-	return true
 
 
