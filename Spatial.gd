@@ -4,10 +4,15 @@ var arvr_openvr = null;
 var arvr_quest = null; 
 
 # Stuff to do:
+# * allow for toggling surfaces of a tube
+# * grip when pointed at XC right and left tapping will distort out and in the nodes of the contour
 # * make the xcdrawing alpha channel albedo lower when using headlight
+# * should put some sounds on the cursor when doing changes
 # * delete onepathnode scene and gd file
 # * get rid of the OneTunnel class.  It's all sketch system
 # * check stationdrawnnode moves the ground up
+# * Need to improve the documentation on https://docs.godotengine.org/en/latest/classes/class_meshinstance.html#class-meshinstance-method-set-surface-material
+# *   See also https://godotengine.org/qa/3488/how-to-generate-a-mesh-with-multiple-materials
 # * xcdrawing plane texture should be a 1m checkerboard (maybe as a shader)
 # * find a way to push and pull the contour dynamically in place.  
 # *  some kind of poke tool that you spin the wrist with, maybe push in and out
@@ -19,6 +24,7 @@ var arvr_quest = null;
 # * and loading (remembering the transforms) so it starts exactly where it left off
 # * get rid of set_materialoverride
 # * change "OnePathNodes" to "floordrawingnode"
+# * the headtorch should have ability to rotate down or up
 # * save and load files incl all XCtubes
 # * redo shiftfloorfromdrawnstations with nodes in the area of some kind (decide what to do about the scale)
 # * make tubes automatically update on moves of nodes.  

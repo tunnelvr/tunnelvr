@@ -18,8 +18,6 @@ onready var arvrcamera = get_node("../../ARVRCamera")
 var distance = 50
 var floordrawing = null
 
-var collision_mask = 14 
-
 const XCdrawing = preload("res://nodescenes/XCdrawing.tscn")
 const XCnode = preload("res://nodescenes/XCnode.tscn")
 				
@@ -32,7 +30,6 @@ var pointertargetpoint = Vector3(0, 0, 0)
 var selectedtarget = null
 var gripbuttonpressused = false
 var nodeorientationpreviewheldtransform = null
-
 
 # set_materialoverride
 
@@ -47,11 +44,6 @@ var laser_y = -0.05
 
 onready var ARVRworld_scale = ARVRServer.world_scale
 
-func set_collision_mask(p_new_mask):
-	collision_mask = p_new_mask
-	print("collision_maskcollision_maskcollision_mask ", collision_mask)
-	if $Laser:
-		$Laser/RayCast.collision_mask = collision_mask
 
 func settextpanel(ltext, pos):
 	var textpanel = sketchsystem.get_node("Centreline/TextPanel")
@@ -100,9 +92,11 @@ func targettype(target):
 		return targetname
 	if  targetparentname == "StationNodes" or targetparentname == "DrawnStationNodes":
 		return targetparentname
+	var targetgrandparentname = target.get_parent().get_parent().get_name()
 	if targetparentname == "XCnodes":
-		var targetgrandparentname = target.get_parent().get_parent().get_name()
 		return "OnePathNodes"  if targetgrandparentname == "floordrawing"  else targetparentname
+	if targetgrandparentname == "XCtubes":
+		return "XCtube"
 	return "unknown"
 		
 func setopnpos(opn, p):
@@ -357,6 +351,8 @@ func _on_button_release(p_button):
 			selectedtarget.set_materialoverride(pointinghighlightmaterial if selectedtarget == pointertarget else null)
 			selectedtarget = null
 			LaserSpot.material_override = null
+		elif pointertargettype == "XCtube":
+			pointertarget.get_parent().togglematerialcycle()
 		
 	elif p_button == Buttons.VR_TRIGGER and (nodeorientationpreviewheldtransform != null):
 		print("dosomethingwith nodeorientationpreview ", nodeorientationpreviewheldtransform)

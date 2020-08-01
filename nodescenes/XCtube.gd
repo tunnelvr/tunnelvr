@@ -5,6 +5,17 @@ var otxcdIndex1 : int    # setting to -1 means the floor sketch
 var xcdrawinglink = [ ]  # [ nodepoints_ifrom0, nodepoints_ito0, nodepoints_ifrom1, nodepoints_ito1, ... ]
 const linewidth = 0.02
 
+const materialdirt = preload("res://lightweighttextures/simpledirt.material")
+const materialscanimage = preload("res://surveyscans/scanimagefloor.material")
+const materialrock = preload("res://lightweighttextures/partialrock.material")
+
+const materials = [ materialdirt, materialscanimage, materialrock ]
+
+func togglematerialcycle():
+	var m = materials.find($XCtubeshell/MeshInstance.get_surface_material(0))
+	for i in range($XCtubeshell/MeshInstance.get_surface_material_count()):
+		$XCtubeshell/MeshInstance.set_surface_material(i, materials[(i+1+m)%len(materials)])
+
 func xctubeapplyonepath(xcn0, xcn1):
 	print("xcapplyonepathxcapplyonepath-pre", xcn0, xcn1, xcdrawinglink)
 	var xcdrawings = xcn0.get_parent().get_parent().get_parent()
@@ -160,8 +171,11 @@ func maketubeshell(floordrawing):
 	ila.sort_custom(self, "fa")
 	print("ilililia", xcdrawinglink, ila)
 	
-	var surfaceTool = SurfaceTool.new()
-	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
+	#var surfaceTool = SurfaceTool.new()
+	#surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var arraymesh = ArrayMesh.new()
+	#var surfaceTool = SurfaceTool.new()
+
 	var xcnodes0 = xcdrawing0.get_node("XCnodes")
 	var xcnodes1 = xcdrawing1.get_node("XCnodes")
 	for i in range(len(ila)):
@@ -172,6 +186,9 @@ func maketubeshell(floordrawing):
 		if ila1N < 0 or len(ila) == 1:   # there's a V-shaped case where this isn't good enough
 			ila1N += len(poly1)
 		print("  iiilla ", [ila0, ila0N, ila1, ila1N])
+		var surfaceTool = SurfaceTool.new()
+		surfaceTool.set_material(materialdirt if i != 0 else materialscanimage)
+		surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
 
 		var acc = -ila0N/2  if ila0N>=ila1N  else  ila1N/2
 		var i0 = 0
@@ -190,16 +207,20 @@ func maketubeshell(floordrawing):
 				i1 += 1
 				add_uvvertex(surfaceTool, xcnodes1, poly1, ila1, i1, floorsize, dfinv)
 		
-	surfaceTool.generate_normals()
-	return surfaceTool.commit()
+		surfaceTool.generate_normals()
+		surfaceTool.commit(arraymesh)
+	return arraymesh
+	#return surfaceTool.commit()
 
 func updatetubeshell(floordrawing, makevisible):
 	if makevisible:
 		var tubeshellmesh = maketubeshell(floordrawing)
 		if tubeshellmesh != null:
 			$XCtubeshell/MeshInstance.mesh = tubeshellmesh
-			#$XCtubeshell/MeshInstance.material_override = preload("res://surveyscans/simplerocktexture.material")   # this can cause crashes
-			$XCtubeshell/MeshInstance.material_override = preload("res://lightweighttextures/simpledirt.material")   # this can cause crashes
+			$XCtubeshell/MeshInstance.set_surface_material(0, materialrock)
+			$XCtubeshell/MeshInstance.set_surface_material(1, materialdirt)
+				#$XCtubeshell/MeshInstance.material_override = preload("res://surveyscans/simplerocktexture.material")   # this can cause crashes
+			#$XCtubeshell/MeshInstance.material_override = preload("res://lightweighttextures/simpledirt.material")
 			$XCtubeshell/CollisionShape.shape.set_faces(tubeshellmesh.get_faces())
 			$XCtubeshell.visible = true
 			$XCtubeshell/CollisionShape.disabled = false

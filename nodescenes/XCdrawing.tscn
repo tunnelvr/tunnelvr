@@ -8,7 +8,10 @@ extents = Vector3( 0.5, 0.5, 0.01 )
 [sub_resource type="SpatialMaterial" id=2]
 flags_transparent = true
 params_cull_mode = 2
-albedo_color = Color( 0.368627, 0.980392, 0.921569, 0.623529 )
+albedo_color = Color( 0.368627, 0.980392, 0.921569, 0.196078 )
+metallic = 0.01
+metallic_specular = 0.22
+roughness = 0.43
 
 [sub_resource type="PlaneMesh" id=3]
 material = SubResource( 2 )
