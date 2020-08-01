@@ -199,6 +199,7 @@ func updatetubeshell(floordrawing, makevisible):
 		if tubeshellmesh != null:
 			$XCtubeshell/MeshInstance.mesh = tubeshellmesh
 			#$XCtubeshell/MeshInstance.material_override = preload("res://surveyscans/simplerocktexture.material")   # this can cause crashes
+			$XCtubeshell/MeshInstance.material_override = preload("res://lightweighttextures/simpledirt.material")   # this can cause crashes
 			$XCtubeshell/CollisionShape.shape.set_faces(tubeshellmesh.get_faces())
 			$XCtubeshell.visible = true
 			$XCtubeshell/CollisionShape.disabled = false

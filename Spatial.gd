@@ -4,6 +4,7 @@ var arvr_openvr = null;
 var arvr_quest = null; 
 
 # Stuff to do:
+# * make the xcdrawing alpha channel albedo lower when using headlight
 # * delete onepathnode scene and gd file
 # * get rid of the OneTunnel class.  It's all sketch system
 # * check stationdrawnnode moves the ground up

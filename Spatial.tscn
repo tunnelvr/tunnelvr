@@ -2,7 +2,7 @@
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://addons/godot-xr-tools/misc/VR_Common_Shader_Cache.tscn" type="PackedScene" id=2]
-[ext_resource path="res://surveyscans/fancyrocktexture.material" type="Material" id=3]
+[ext_resource path="res://lightweighttextures/watersurface.material" type="Material" id=3]
 [ext_resource path="res://movementsystem.gd" type="Script" id=4]
 [ext_resource path="res://pointersystem.gd" type="Script" id=5]
 [ext_resource path="res://CSGMesh_righthand.tscn" type="PackedScene" id=6]
@@ -82,59 +82,59 @@ albedo_color = Color( 0.937255, 0.901961, 0.0431373, 0.67451 )
 material = SubResource( 10 )
 size = Vector3( 0.01, 0.01, 1 )
 
-[sub_resource type="SpatialMaterial" id=17]
+[sub_resource type="SpatialMaterial" id=12]
 params_cull_mode = 2
 albedo_color = Color( 0.87451, 0.964706, 0.247059, 1 )
 
-[sub_resource type="SpatialMaterial" id=18]
+[sub_resource type="SpatialMaterial" id=13]
 flags_transparent = true
 flags_do_not_receive_shadows = true
 params_cull_mode = 2
 albedo_color = Color( 0.321569, 0.988235, 0.27451, 0.329412 )
 
-[sub_resource type="BoxShape" id=19]
+[sub_resource type="BoxShape" id=14]
 extents = Vector3( 0.1, 0.4, 0.1 )
 
-[sub_resource type="SpatialMaterial" id=20]
+[sub_resource type="SpatialMaterial" id=15]
 albedo_color = Color( 0.380392, 0.94902, 0.431373, 1 )
 
-[sub_resource type="CylinderMesh" id=21]
-material = SubResource( 20 )
+[sub_resource type="CylinderMesh" id=16]
+material = SubResource( 15 )
 top_radius = 0.1
 bottom_radius = 0.001
 height = 0.4
 radial_segments = 4
 rings = 1
 
-[sub_resource type="SpatialMaterial" id=22]
+[sub_resource type="SpatialMaterial" id=17]
 albedo_color = Color( 0.968627, 0.054902, 0.054902, 1 )
 
-[sub_resource type="CylinderMesh" id=23]
-material = SubResource( 22 )
+[sub_resource type="CylinderMesh" id=18]
+material = SubResource( 17 )
 top_radius = 0.001
 bottom_radius = 0.1
 height = 0.4
 radial_segments = 4
 
-[sub_resource type="PlaneMesh" id=24]
+[sub_resource type="PlaneMesh" id=19]
 size = Vector2( 4, 2 )
 
-[sub_resource type="StreamTexture" id=12]
+[sub_resource type="StreamTexture" id=20]
 flags = 23
 load_path = "res://.import/DukeStResurvey-drawnup-p3.jpg-0879ecaf32e6ebe816442b6097f62a78.s3tc.stex"
 
-[sub_resource type="SpatialMaterial" id=13]
+[sub_resource type="SpatialMaterial" id=21]
 params_cull_mode = 2
 albedo_color = Color( 0.992157, 0.992157, 0.666667, 1 )
-albedo_texture = SubResource( 12 )
+albedo_texture = SubResource( 20 )
 
-[sub_resource type="PlaneMesh" id=14]
-material = SubResource( 13 )
+[sub_resource type="PlaneMesh" id=22]
+material = SubResource( 21 )
 size = Vector2( 1, 1.285 )
 subdivide_width = 4
 subdivide_depth = 4
 
-[sub_resource type="BoxShape" id=15]
+[sub_resource type="BoxShape" id=23]
 extents = Vector3( 0.5, 0.5, 0.643 )
 
 [node name="Spatial" type="Spatial"]
@@ -249,10 +249,10 @@ script = ExtResource( 17 )
 [node name="StationNodes" type="Spatial" parent="SketchSystem/Centreline"]
 
 [node name="CentrelineLegs" type="MeshInstance" parent="SketchSystem/Centreline"]
-material_override = SubResource( 17 )
+material_override = SubResource( 12 )
 
 [node name="CentrelineCrossSections" type="MeshInstance" parent="SketchSystem/Centreline"]
-material_override = SubResource( 18 )
+material_override = SubResource( 13 )
 
 [node name="DrawnStationNodes" type="Spatial" parent="SketchSystem/Centreline"]
 
@@ -267,29 +267,29 @@ collision_layer = 8
 collision_mask = 0
 
 [node name="CollisionShape" type="CollisionShape" parent="SketchSystem/NodeOrientationPreview"]
-shape = SubResource( 19 )
+shape = SubResource( 14 )
 
 [node name="MeshInstance" type="MeshInstance" parent="SketchSystem/NodeOrientationPreview/CollisionShape"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 0 )
 cast_shadow = 0
-mesh = SubResource( 21 )
+mesh = SubResource( 16 )
 material/0 = null
 
 [node name="MeshInstance2" type="MeshInstance" parent="SketchSystem/NodeOrientationPreview/CollisionShape"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -2.38419e-07, -0.200001, 0 )
-mesh = SubResource( 23 )
+mesh = SubResource( 18 )
 material/0 = null
 
 [node name="floordrawing" parent="SketchSystem" instance=ExtResource( 8 )]
 transform = Transform( 1, 0, 0, 0, -1.62921e-07, 1, 0, -1, -1.62921e-07, 0, 0.5, 5 )
 
 [node name="GUIPanel3D" parent="." instance=ExtResource( 14 )]
-transform = Transform( 0.512717, 0, -0.858558, 0, 1, 0, 0.858558, 0, 0.512717, 2.5832, 0.213841, -4.95236 )
+transform = Transform( 0.512717, 0, -0.858558, 0, 1, 0, 0.858558, 0, 0.512717, 2.5832, 1.13491, 1.00429 )
 script = ExtResource( 15 )
 
 [node name="LaserSquare" type="MeshInstance" parent="."]
-transform = Transform( -0.592393, -0.783466, -0.187751, -0.546921, 0.562194, -0.620335, 0.591564, -0.264797, -0.761535, -0.944971, 1.18811, 0.0964239 )
-mesh = SubResource( 24 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 2.42691, 1.24388, 1.94417 )
+mesh = SubResource( 19 )
 material/0 = ExtResource( 3 )
 
 [node name="BoulderClutter" type="Spatial" parent="."]
@@ -302,9 +302,9 @@ collision_layer = 18
 collision_mask = 0
 
 [node name="MeshInstance" type="MeshInstance" parent="drawnfloor"]
-mesh = SubResource( 14 )
+mesh = SubResource( 22 )
 material/0 = null
 
 [node name="CollisionShape" type="CollisionShape" parent="drawnfloor"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0 )
-shape = SubResource( 15 )
+shape = SubResource( 23 )

@@ -2,27 +2,27 @@
 
 [ext_resource path="res://nodescenes/MarkerNode.gd" type="Script" id=1]
 
-[sub_resource type="PhysicsMaterial" id=4]
+[sub_resource type="PhysicsMaterial" id=1]
 rough = true
 bounce = 0.2
 
-[sub_resource type="BoxShape" id=1]
+[sub_resource type="BoxShape" id=2]
 extents = Vector3( 0.5, 0.5, 0.5 )
 
-[sub_resource type="SpatialMaterial" id=2]
+[sub_resource type="SpatialMaterial" id=3]
 albedo_color = Color( 0.647059, 0.337255, 0.0313726, 1 )
 metallic = 0.12
 roughness = 0.71
 
-[sub_resource type="CubeMesh" id=3]
-material = SubResource( 2 )
+[sub_resource type="CubeMesh" id=4]
+material = SubResource( 3 )
 size = Vector3( 1, 1, 1 )
 
 [node name="RigidBody" type="RigidBody"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.649912, 0 )
 collision_layer = 2147483660
 collision_mask = 39
-physics_material_override = SubResource( 4 )
+physics_material_override = SubResource( 1 )
 script = ExtResource( 1 )
 __meta__ = {
 "_edit_group_": true
@@ -30,8 +30,8 @@ __meta__ = {
 
 [node name="CollisionShape" type="CollisionShape" parent="."]
 transform = Transform( 0.141421, -0.212132, 0, 0.1, 0.15, -0.141421, 0.1, 0.15, 0.141421, 0, 0, 0 )
-shape = SubResource( 1 )
+shape = SubResource( 2 )
 
 [node name="MeshInstance" type="MeshInstance" parent="CollisionShape"]
-mesh = SubResource( 3 )
+mesh = SubResource( 4 )
 material/0 = null
