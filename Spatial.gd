@@ -4,12 +4,11 @@ var arvr_openvr = null;
 var arvr_quest = null; 
 
 # Stuff to do:
-# * allow for toggling surfaces of a tube
+# * 
 # * grip when pointed at XC right and left tapping will distort out and in the nodes of the contour
 # * make the xcdrawing alpha channel albedo lower when using headlight
 # * should put some sounds on the cursor when doing changes
 # * delete onepathnode scene and gd file
-# * get rid of the OneTunnel class.  It's all sketch system
 # * check stationdrawnnode moves the ground up
 # * Need to improve the documentation on https://docs.godotengine.org/en/latest/classes/class_meshinstance.html#class-meshinstance-method-set-surface-material
 # *   See also https://godotengine.org/qa/3488/how-to-generate-a-mesh-with-multiple-materials

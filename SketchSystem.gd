@@ -1,7 +1,6 @@
 tool
 extends Spatial
 
-onready var ot = load("res://OneTunnel.gd").new()
 const XCdrawing = preload("res://nodescenes/XCdrawing.tscn")
 const XCtube = preload("res://nodescenes/XCtube.tscn")
 
