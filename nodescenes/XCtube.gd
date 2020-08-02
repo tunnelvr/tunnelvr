@@ -117,9 +117,10 @@ func updatetubelinkpaths(xcdrawings, sketchsystem):
 	surfaceTool.generate_normals()
 	$PathLines.mesh = surfaceTool.commit()
 	print("ususxxxxc ", len($PathLines.mesh.get_faces()), " ", len($PathLines.mesh.get_faces())) #surfaceTool.generate_normals()
+
+	if not bgroundanchortype:
+		updatetubeshell(sketchsystem.get_node("floordrawing"), $XCtubeshell.visible)
 	#updateworkingshell()
-
-
 
 func add_uvvertex(surfaceTool, xcnodes, poly, ila, i, floorsize, dfinv):
 	var pt = xcnodes.get_child(poly[(ila+i)%len(poly)]).global_transform.origin

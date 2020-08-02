@@ -5,9 +5,10 @@ var arvr_quest = null;
 
 # Stuff to do:
 # * 
-# * Make XCcursor scene that can be grabbed
+# * grip on XCcursor to make it disappear
+# * XCcursor capable of inserting extra nodes (maybe tap on top or bottom)
+# * make the tubes recalculate by segment nodes move
 # * all core materials should be exported as own assets (eg select materials) to make them easier to edit
-# * grip when pointed at XC right and left tapping will distort out and in the nodes of the contour
 # * always check xcdrawing mesh needs to be larger than the stations that are on it with each added node
 # * xcdrawing plane texture should be a 1m checkerboard (maybe as a shader)
 # * find a way to push and pull the contour dynamically in place.  
