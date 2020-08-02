@@ -5,26 +5,23 @@ var arvr_quest = null;
 
 # Stuff to do:
 # * 
+# * Make XCcursor scene that can be grabbed
+# * all core materials should be exported as own assets (eg select materials) to make them easier to edit
 # * grip when pointed at XC right and left tapping will distort out and in the nodes of the contour
-# * make the xcdrawing alpha channel albedo lower when using headlight
-# * should put some sounds on the cursor when doing changes
-# * delete onepathnode scene and gd file
-# * check stationdrawnnode moves the ground up
-# * Need to improve the documentation on https://docs.godotengine.org/en/latest/classes/class_meshinstance.html#class-meshinstance-method-set-surface-material
-# *   See also https://godotengine.org/qa/3488/how-to-generate-a-mesh-with-multiple-materials
+# * always check xcdrawing mesh needs to be larger than the stations that are on it with each added node
 # * xcdrawing plane texture should be a 1m checkerboard (maybe as a shader)
 # * find a way to push and pull the contour dynamically in place.  
 # *  some kind of poke tool that you spin the wrist with, maybe push in and out
 # *  a mapping distortion field perhaps (that could be done with a vertex shader if I knew how)
+# * check stationdrawnnode moves the ground up
+# * Need to ask to improve the documentation on https://docs.godotengine.org/en/latest/classes/class_meshinstance.html#class-meshinstance-method-set-surface-material
+# *   See also https://godotengine.org/qa/3488/how-to-generate-a-mesh-with-multiple-materials
 # *  because distortions don't ruin the topology of the area and do a whole set at once, and lend self to subdividing edges if curvature too great
-# * xcdrawing mesh needs to be larger than the stations that are on it
 # * should the XCdrawing be flat and lifted up for XC, rather than tipped back for floordrawing
 # * finish floordrawingData save
 # * and loading (remembering the transforms) so it starts exactly where it left off
-# * get rid of set_materialoverride
 # * change "OnePathNodes" to "floordrawingnode"
 # * the headtorch should have ability to rotate down or up
-# * save and load files incl all XCtubes
 # * redo shiftfloorfromdrawnstations with nodes in the area of some kind (decide what to do about the scale)
 # * make tubes automatically update on moves of nodes.  
 # * tie centreline nodes to the drawn floor same way other movements are?

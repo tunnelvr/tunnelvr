@@ -145,6 +145,8 @@ func loadsketchsystem():
 		get_node("XCdrawings").get_child(xctube.otxcdIndex0).xctubesconn.append(xctube)
 		if xctube.otxcdIndex1 != -1:
 			get_node("XCdrawings").get_child(xctube.otxcdIndex1).xctubesconn.append(xctube)
+		else:
+			$floordrawing.xctubesconn.append(xctube)
 		$XCtubes.add_child(xctube)
 		xctube.xcdrawinglink = xctubeData[2]
 		for j in range(len(xctube.xcdrawinglink)):
