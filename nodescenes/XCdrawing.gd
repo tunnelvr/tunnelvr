@@ -83,12 +83,14 @@ func duplicatexcdrawing():
 	xcdrawing.updatexcpaths()
 	return xcdrawing
 	
-func removeotnodepoint(i):
+func removeotnodepoint(i, brejoinlines):
 	var e = len(nodepoints) - 1
 	nodepoints[i] = nodepoints[e]
 	nodepoints.resize(e)
+	var rejoinnodes = [ ]
 	for j in range(len(onepathpairs) - 2, -1, -2):
 		if (onepathpairs[j] == i) or (onepathpairs[j+1] == i):
+			rejoinnodes.append(onepathpairs[j+1]  if onepathpairs[j] == i  else onepathpairs[j])
 			onepathpairs[j] = onepathpairs[-2]
 			onepathpairs[j+1] = onepathpairs[-1]
 			onepathpairs.resize(len(onepathpairs) - 2)
@@ -97,6 +99,10 @@ func removeotnodepoint(i):
 				onepathpairs[j] = i
 			if onepathpairs[j+1] == e:
 				onepathpairs[j+1] = i
+	print("brejoinlinesbrejoinlinesbrejoinlinesbrejoinlines ", brejoinlines, " ", rejoinnodes)
+	if brejoinlines and len(rejoinnodes) >= 2:
+		onepathpairs.append(i if rejoinnodes[0] == e else rejoinnodes[0])
+		onepathpairs.append(i if rejoinnodes[1] == e else rejoinnodes[1])
 	return i != e
 	
 func copyxcntootnode(xcn):
@@ -129,30 +135,77 @@ func newxcnode(lotIndex):
 	xcn.set_name("XCnode"+String(xcn.otIndex))  # We could use to_int on this to abolish need for otIndex
 	return xcn
 
-func removexcnode(xcn):
+func removexcnode(xcn, brejoinlines, sketchsystem):
 	var xcnIndex = xcn.otIndex
-	if removeotnodepoint(xcnIndex):
+	if removeotnodepoint(xcnIndex, brejoinlines):
 		copyotnodetoxcn($XCnodes.get_child(xcnIndex))
 	$XCnodes.get_child($XCnodes.get_child_count()-1).free()
 	for xctube in xctubesconn:
 		xctube.removetubenodepoint(otxcdIndex, xcnIndex, len(nodepoints))
 	updatexcpaths()
 	for xctube in xctubesconn:
-		if get_name() == "floordrawing":
-			xctube.updatetubelinkpaths(get_parent().get_node("XCdrawings"), get_parent())
-		else:
-			xctube.updatetubelinkpaths(get_parent(), get_parent().get_parent())
+		xctube.updatetubelinkpaths(sketchsystem.get_node("XCdrawings"), sketchsystem)
 
-func movexcnode(xcn, pt):
+func movexcnode(xcn, pt, sketchsystem):
 	print("m,mmmmxmxmxm ", xcn.global_transform.origin, pt)
 	xcn.global_transform.origin = pt
 	copyxcntootnode(xcn)
 	updatexcpaths()
 	for xctube in xctubesconn:
-		if get_name() == "floordrawing":
-			xctube.updatetubelinkpaths(get_parent().get_node("XCdrawings"), get_parent())
-		else:
-			xctube.updatetubelinkpaths(get_parent(), get_parent().get_parent())
+		xctube.updatetubelinkpaths(sketchsystem.get_node("XCdrawings"), sketchsystem)
+
+func distortnodesaroundcursor(radx, sfac, distortorigin, sketchsystem):
+	for i in range(len(nodepoints)):
+		var v = nodepoints[i] - distortorigin
+		var v2 = Vector2(v.x, v.y)
+		var v2len = v2.length()
+		var v2fac = v2len/radx
+		v2fac = min(v2fac, 2-v2fac)
+		if v2fac > 0:
+			nodepoints[i] += v2fac*sfac*Vector3(v.x, v.y, 0.0)
+		copyotnodetoxcn(get_node("XCnodes").get_child(i))
+	updatexcpaths()
+	for xctube in xctubesconn:
+		xctube.updatetubelinkpaths(sketchsystem.get_node("XCdrawings"), sketchsystem)
+
+func makeextrapoints(sketchsystem):
+	if len(onepathpairs) == 0:
+		return
+	var rsum = 0.0
+	var pairpairslengths = [ ]
+	for i in range(0, len(onepathpairs), 2):
+		var rleng = (nodepoints[onepathpairs[i]] - nodepoints[onepathpairs[i+1]]).length()
+		pairpairslengths.append([rleng, i])
+		rsum += rleng
+	pairpairslengths.sort_custom(self, "sd0")
+	var rmean = rsum/(len(onepathpairs)/2)
+	var rmedian = pairpairslengths[int(len(pairpairslengths)/2)][0]
+	var rmid = (pairpairslengths[0][0] + pairpairslengths[-1][0])/2
+	print("rmeanrmeanrmean ", rmean, " rmedian ", rmedian, " rmid ", rmid, pairpairslengths)
+	var rcut = rmid*0.8
+	while len(pairpairslengths) > 0 and pairpairslengths[-1][0] > rcut:
+		var leng = pairpairslengths[-1][0]
+		var i = pairpairslengths.pop_back()[1]
+		var nsplits = max(1, int(leng/rcut))
+		var opne = onepathpairs[i+1]
+		var xcnmidprev = null
+		for j in range(nsplits):
+			var xcnmid = newxcnode(-1)
+			nodepoints[xcnmid.otIndex] = lerp(nodepoints[onepathpairs[i]], nodepoints[opne], (j+1.0)/(nsplits+1))
+			copyotnodetoxcn(xcnmid)
+			if j == 0:
+				onepathpairs[i+1] = xcnmid.otIndex
+			else:
+				onepathpairs.append(xcnmidprev.otIndex)
+				onepathpairs.append(xcnmid.otIndex)
+			xcnmidprev = xcnmid
+		onepathpairs.append(xcnmidprev.otIndex)
+		onepathpairs.append(opne)
+	updatexcpaths()
+	for xctube in xctubesconn:
+		xctube.updatetubelinkpaths(sketchsystem.get_node("XCdrawings"), sketchsystem)
+
+
 
 func updatexcpaths():
 	print("iupdatingxxccpaths ", len(onepathpairs))

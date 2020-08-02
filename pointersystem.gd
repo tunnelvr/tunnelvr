@@ -247,22 +247,20 @@ func _on_button_pressed(p_button):
 			pointertarget.scale.y *= sfac
 
 		elif pointertargettype == "XCcursor":
-			var sidedot = pointertarget.global_transform.basis.x.dot(pointertargetpoint - pointertarget.global_transform.origin)
-			var sfac = 0.25 if sidedot <= 0.0 else -0.25
-			var radx = pointertarget.scale.x/4
-			for i in range(len(pointertargetwall.nodepoints)):
-				var v = pointertargetwall.nodepoints[i] - pointertarget.translation
-				var v2 = Vector2(v.x, v.y)
-				var v2len = v2.length()
-				var v2fac = v2len/radx
-				v2fac = min(v2fac, 2-v2fac)
-				if v2fac > 0:
-					pointertargetwall.nodepoints[i] += v2fac*sfac*Vector3(v.x, v.y, 0.0)
-				pointertargetwall.copyotnodetoxcn(pointertargetwall.get_node("XCnodes").get_child(i))
-			pointertargetwall.updatexcpaths()
-			for xctube in pointertargetwall.xctubesconn:
-				xctube.updatetubelinkpaths(sketchsystem.get_node("XCdrawings"), sketchsystem)
-	
+			var vtarget = pointertargetpoint - pointertarget.global_transform.origin
+			var sidedot = 2*pointertarget.global_transform.basis.x.dot(vtarget)/pointertarget.global_transform.basis.x.length_squared()
+			var updot = 2*pointertarget.global_transform.basis.y.dot(vtarget)/pointertarget.global_transform.basis.x.length_squared()
+			print("XCcursor ", updot, " ", sidedot)
+			if abs(updot) < 0.5 and abs(sidedot) > 0.2:
+				var sfac = 0.25 if sidedot <= 0.0 else -0.25
+				var radx = pointertarget.scale.x/4
+				pointertargetwall.distortnodesaroundcursor(radx, sfac, pointertarget.translation, sketchsystem)
+			elif abs(updot) > 0.5:
+				if updot > 0.0:
+					pointertargetwall.makeextrapoints(sketchsystem)
+				#else:
+				#	pointertargetwall.removeextrapoints(sketchsystem)
+	 
 		elif pointertarget == nodeorientationpreview:
 			nodeorientationpreviewheldtransform = get_parent().global_transform.inverse()
 
@@ -278,11 +276,11 @@ func _on_button_pressed(p_button):
 
 		# grip click moves node on floor
 		elif gripbuttonheld and selectedtargettype == "OnePathNode" and pointertargettype == "floordrawing":
-			selectedtargetwall.movexcnode(selectedtarget, pointertargetpoint)
+			selectedtargetwall.movexcnode(selectedtarget, pointertargetpoint, sketchsystem)
 
 		# grip click moves node on xcwall
 		elif gripbuttonheld and selectedtargettype == "XCnode" and pointertargettype == "XCdrawing" and pointertargetwall == selectedtargetwall:
-			selectedtargetwall.movexcnode(selectedtarget, pointertargetpoint)
+			selectedtargetwall.movexcnode(selectedtarget, pointertargetpoint, sketchsystem)
 
 		# reselection when selected on grip deletes the node		
 		elif gripbuttonheld and selectedtargettype == "DrawnStationNode" and pointertarget == selectedtarget:
@@ -296,7 +294,13 @@ func _on_button_pressed(p_button):
 		elif gripbuttonheld and (selectedtargettype == "OnePathNode" or selectedtargettype == "XCnode") and pointertarget == selectedtarget:
 			var todelete = selectedtarget
 			clearselection(selectedtargettype)
-			selectedtargetwall.removexcnode(todelete)
+			selectedtargetwall.removexcnode(todelete, false, sketchsystem)
+			sketchsystem.get_node("SoundPos2").global_transform.origin = pointertargetpoint
+			sketchsystem.get_node("SoundPos2").play()
+
+		# reselection when selected on grip deletes the node		
+		elif gripbuttonheld and selectedtargettype == "none" and pointertargettype == "XCnode" and pointertargetwall.get_node("XCcursor") != null:
+			pointertargetwall.removexcnode(pointertarget, true, sketchsystem)
 			sketchsystem.get_node("SoundPos2").global_transform.origin = pointertargetpoint
 			sketchsystem.get_node("SoundPos2").play()
 
