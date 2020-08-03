@@ -4,21 +4,20 @@ var arvr_openvr = null;
 var arvr_quest = null; 
 
 # Stuff to do:
-# * XCcursor able to inserting extra points 
-# * XCcursor able to remove excess points
+# * selected/active XCcrossing by pointing with own material
+# * nodes and mesh all to be on top when XCcrossing is active (active by having node selected in it and not being deactivated)
+# * show selected XCdrawing in front.  then see the ability to reselect
+# * shift pick connection to delete nodes up to next junction
+# * stream out the positions of the player and their activities to a file and reload it to get the multiplayer experience 
 # * always check xcdrawing mesh needs to be larger than the stations that are on it with each added node
 # * xcdrawing plane texture should be a 1m checkerboard as a shader repeating
-# * XCcursor capable of inserting extra nodes (maybe tap on top or bottom)
 # * all core materials should be exported as own assets (eg select materials) to make them easier to edit
-# * find a way to push and pull the contour dynamically in place.  
-# *  some kind of poke tool that you spin the wrist with, maybe push in and out
-# *  a mapping distortion field perhaps (that could be done with a vertex shader if I knew how)
+# * scan through other drawings on back of hand
 # * check stationdrawnnode moves the ground up
 # * Need to ask to improve the documentation on https://docs.godotengine.org/en/latest/classes/class_meshinstance.html#class-meshinstance-method-set-surface-material
 # *   See also https://godotengine.org/qa/3488/how-to-generate-a-mesh-with-multiple-materials
 # *  because distortions don't ruin the topology of the area and do a whole set at once, and lend self to subdividing edges if curvature too great
 # * should the XCdrawing be flat and lifted up for XC, rather than tipped back for floordrawing
-# * finish floordrawingData save
 # * and loading (remembering the transforms) so it starts exactly where it left off
 # * change "OnePathNodes" to "floordrawingnode"
 # * the headtorch should have ability to rotate down or up

@@ -36,6 +36,7 @@ metallic_specular = 0.67
 roughness = 0.37
 
 [sub_resource type="SpatialMaterial" id=4]
+flags_no_depth_test = true
 albedo_color = Color( 0.984314, 0.0705882, 0.0705882, 1 )
 metallic = 0.46
 roughness = 0.28
@@ -203,7 +204,7 @@ material/0 = null
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.23517e-08, 5 )
 enabled = true
 cast_to = Vector3( 0, 0, -10 )
-collision_mask = 56
+collision_mask = 24
 
 [node name="LaserSpot" type="MeshInstance" parent="ARVROrigin/ARVRController_Right/pointersystem"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -4.96626, 4.96626 )

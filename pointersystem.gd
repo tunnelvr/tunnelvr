@@ -22,15 +22,16 @@ const XCdrawing = preload("res://nodescenes/XCdrawing.tscn")
 const XCnode = preload("res://nodescenes/XCnode.tscn")
 const XCcursor = preload("res://nodescenes/XCcursor.tscn")
 				
-var pointinghighlightmaterial = SpatialMaterial.new()
-var selectedhighlightmaterial = SpatialMaterial.new()
-var selectedpointerhighlightmaterial = SpatialMaterial.new()
+var pointinghighlightmaterial = preload("res://guimaterials/XCnode_highlight.material")
+var selectedhighlightmaterial = preload("res://guimaterials/XCnode_selected.material")
+var selectedpointerhighlightmaterial = preload("res://guimaterials/XCnode_selectedhighlight.material")
 
 var pointertarget = null
 var pointertargetpoint = Vector3(0, 0, 0)
 var selectedtarget = null
 var gripbuttonpressused = false
 var nodeorientationpreviewheldtransform = null
+var activexc = null
 
 # set_materialoverride
 
@@ -59,16 +60,6 @@ func _ready():
 	get_parent().connect("button_pressed", self, "_on_button_pressed")
 	get_parent().connect("button_release", self, "_on_button_release")
 	
-	pointinghighlightmaterial.albedo_color = Color(0.99, 0.20, 0.20, 1.0)
-	pointinghighlightmaterial.flags_no_depth_test = true
-	pointinghighlightmaterial.params_grow = true
-	pointinghighlightmaterial.params_grow_amount = 0.02
-	selectedhighlightmaterial.albedo_color = Color(0.92, 0.99, 0.13, 1.0)
-	selectedpointerhighlightmaterial.albedo_color = Color(0.82, 0.99, 0.93, 1.0)
-	selectedpointerhighlightmaterial.flags_no_depth_test = true
-	selectedpointerhighlightmaterial.params_grow = true
-	selectedpointerhighlightmaterial.params_grow_amount = 0.02
-
 	laserspothighlightmaterial = LaserSpot.material_override
 	LaserSpot.material_override = null
 	
@@ -394,6 +385,9 @@ func _on_button_pressed(p_button):
 		elif pointertargettype == "XCnode":
 			clearselection(selectedtargettype)
 			pointertargetwall.get_node("XCdrawingplane").visible = true
+			pointertargetwall.get_node("XCdrawingplane").visible = true
+			var Dmaterial = load("res://lightweighttextures/XCnode.material")
+			Dmaterial.flags_no_depth_test = true
 			pointertargetwall.get_node("XCdrawingplane/CollisionShape").disabled = false
 			selectedtarget = pointertarget
 			selectedtarget.get_node("CollisionShape/MeshInstance").material_override = selectedpointerhighlightmaterial

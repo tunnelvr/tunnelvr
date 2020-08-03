@@ -1,27 +1,15 @@
 [gd_scene load_steps=6 format=2]
 
 [ext_resource path="res://nodescenes/XCdrawing.gd" type="Script" id=1]
+[ext_resource path="res://guimaterials/XCdrawing.material" type="Material" id=2]
+[ext_resource path="res://guimaterials/XCdrawingPathlines.material" type="Material" id=3]
 
 [sub_resource type="BoxShape" id=1]
 extents = Vector3( 0.5, 0.5, 0.01 )
 
-[sub_resource type="SpatialMaterial" id=2]
-flags_transparent = true
-params_cull_mode = 2
-albedo_color = Color( 0.368627, 0.980392, 0.921569, 0.196078 )
-metallic = 0.01
-metallic_specular = 0.22
-roughness = 0.43
-
 [sub_resource type="PlaneMesh" id=3]
-material = SubResource( 2 )
+material = ExtResource( 2 )
 size = Vector2( 1, 1 )
-
-[sub_resource type="SpatialMaterial" id=4]
-params_cull_mode = 2
-albedo_color = Color( 0.866667, 0.498039, 0.105882, 1 )
-metallic = 0.45
-roughness = 0.42
 
 [node name="XCdrawing" type="Spatial"]
 script = ExtResource( 1 )
@@ -44,4 +32,4 @@ material/0 = null
 [node name="XCnodes" type="Spatial" parent="."]
 
 [node name="PathLines" type="MeshInstance" parent="."]
-material_override = SubResource( 4 )
+material_override = ExtResource( 3 )
