@@ -4,12 +4,13 @@ var arvr_openvr = null;
 var arvr_quest = null; 
 
 # Stuff to do:
+# * deselect xcwall should deactivate wall
 # * xcdrawing set active in all cases so we can see where our points are going
-# * activate further when pointing at it
+# * make drawn points and materials active
 # * laser pointer materials into the guimaterials box as well
+# * change laser pointer collision when XCdrawing is active or not
 # * clear up the laser pointer logic and materials
 # * shorten laser pointer to end on the node
-# * selected/active XCcrossing by pointing with own material
 # * nodes and mesh all to be on top when XCcrossing is active (active by having node selected in it and not being deactivated)
 # * show selected XCdrawing in front.  then see the ability to reselect
 # * shift pick connection to delete nodes up to next junction

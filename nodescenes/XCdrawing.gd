@@ -11,8 +11,6 @@ var xctubesconn = [ ]   # references to xctubes that connect to here (could use 
 
 var floortype = false
 
-
-
 # these transforming operations work in sequence, each correcting the relative position change caused by the other
 func scalexcnodepointspointsx(sca):
 	for i in range(len(nodepoints)):
@@ -207,10 +205,9 @@ func makeextrapoints(sketchsystem):
 	for xctube in xctubesconn:
 		xctube.updatetubelinkpaths(sketchsystem.get_node("XCdrawings"), sketchsystem)
 
-
-
 func updatexcpaths():
 	print("iupdatingxxccpaths ", len(onepathpairs))
+	var prevsurfacematerial = $PathLines.get_surface_material(0)
 	var surfaceTool = SurfaceTool.new()
 	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
 	for j in range(0, len(onepathpairs), 2):
@@ -231,7 +228,7 @@ func updatexcpaths():
 	$PathLines.mesh = surfaceTool.commit()
 	print("usus ", len($PathLines.mesh.get_faces()), " ", len($PathLines.mesh.get_faces())) #surfaceTool.generate_normals()
 	#updateworkingshell()
-	$PathLines.set_surface_material(0, load("res://guimaterials/XCdrawingPathlines.material"))
+	$PathLines.set_surface_material(0, prevsurfacematerial if prevsurfacematerial != null else load("res://guimaterials/XCdrawingPathlines.material"))
 
 func sd0(a, b):
 	return a[0] < b[0]
