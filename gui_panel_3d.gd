@@ -8,9 +8,10 @@ var viewport_point := Vector2(0, 0)
 var viewport_mousedown := false
 var sketchsystem = null
 var arvrorigin = null
-var vr_undergroundenvironment = preload("res://vr_underground.tres")
+
 
 func _on_buttonload_pressed():
+	sketchsystem.get_node("../ARVROrigin/ARVRController_Right/pointersystem").setselectedtarget(null)
 	sketchsystem.loadsketchsystem()
 	$Viewport/GUI/Panel/Label.text = "Sketch Loaded"
 	
@@ -23,9 +24,7 @@ func _on_buttonshowxs_toggled(button_pressed):
 	$Viewport/GUI/Panel/Label.text = "XS shown" if button_pressed else "XS hidden"
 
 func _on_buttonheadtorch_toggled(button_pressed):
-	arvrorigin.get_node("ARVRCamera/HeadtorchLight").visible = button_pressed
-	arvrorigin.get_node("DirectionalLight").visible = not button_pressed
-	arvrorigin.get_node("ARVRCamera").environment = vr_undergroundenvironment if button_pressed else null
+	arvrorigin.settorchlight(button_pressed)
 	$Viewport/GUI/Panel/Label.text = "Headtorch on" if button_pressed else "Headtorch off"
 
 func _on_buttonupdateshell_toggled(button_pressed):

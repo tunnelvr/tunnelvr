@@ -4,6 +4,11 @@ var arvr_openvr = null;
 var arvr_quest = null; 
 
 # Stuff to do:
+# * xcdrawing set active in all cases so we can see where our points are going
+# * activate further when pointing at it
+# * laser pointer materials into the guimaterials box as well
+# * clear up the laser pointer logic and materials
+# * shorten laser pointer to end on the node
 # * selected/active XCcrossing by pointing with own material
 # * nodes and mesh all to be on top when XCcrossing is active (active by having node selected in it and not being deactivated)
 # * show selected XCdrawing in front.  then see the ability to reselect
@@ -16,6 +21,7 @@ var arvr_quest = null;
 # * check stationdrawnnode moves the ground up
 # * Need to ask to improve the documentation on https://docs.godotengine.org/en/latest/classes/class_meshinstance.html#class-meshinstance-method-set-surface-material
 # *   See also https://godotengine.org/qa/3488/how-to-generate-a-mesh-with-multiple-materials
+# *   And explain how meshes can have their own materials, that are copied into material/0, and the material reappears if material/0 set to null
 # *  because distortions don't ruin the topology of the area and do a whole set at once, and lend self to subdividing edges if curvature too great
 # * should the XCdrawing be flat and lifted up for XC, rather than tipped back for floordrawing
 # * and loading (remembering the transforms) so it starts exactly where it left off
@@ -121,7 +127,7 @@ func _ready():
 	$SketchSystem/floordrawing.floortype = true
 	$SketchSystem/floordrawing.otxcdIndex = -1
 	
-	#$LaserSquare.material_override = load("res://surveyscans/scanimagefloor.material")
+
 
 func _process(_delta):
 	if !perform_runtime_config:

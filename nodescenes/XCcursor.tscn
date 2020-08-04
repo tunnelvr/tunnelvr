@@ -1,0 +1,48 @@
+[gd_scene load_steps=6 format=2]
+
+[sub_resource type="CylinderShape" id=1]
+radius = 0.5
+height = 0.2
+
+[sub_resource type="CylinderMesh" id=2]
+top_radius = 0.5
+bottom_radius = 0.5
+height = 0.2
+radial_segments = 12
+
+[sub_resource type="SpatialMaterial" id=3]
+flags_transparent = true
+albedo_color = Color( 0.988235, 0.866667, 0.380392, 0.164706 )
+metallic = 0.04
+metallic_specular = 0.0
+roughness = 0.14
+
+[sub_resource type="CubeMesh" id=4]
+size = Vector3( 0.1, 0.3, 0.3 )
+
+[sub_resource type="SpatialMaterial" id=5]
+flags_transparent = true
+albedo_color = Color( 0.988235, 0.368627, 0.368627, 0.588235 )
+
+[node name="XCcursor" type="StaticBody"]
+collision_layer = 8
+collision_mask = 0
+
+[node name="CollisionShape" type="CollisionShape" parent="."]
+transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, 0, 0, 0 )
+shape = SubResource( 1 )
+
+[node name="MeshInstance" type="MeshInstance" parent="CollisionShape"]
+layers = 18
+mesh = SubResource( 2 )
+material/0 = SubResource( 3 )
+
+[node name="MeshInstance" type="MeshInstance" parent="CollisionShape/MeshInstance"]
+mesh = SubResource( 4 )
+material/0 = SubResource( 5 )
+
+[node name="MeshInstance2" type="MeshInstance" parent="CollisionShape"]
+transform = Transform( 0.5, 0, 0, 0, 1, 0, 0, 0, 0.5, 0, 0, 0 )
+layers = 18
+mesh = SubResource( 2 )
+material/0 = SubResource( 3 )

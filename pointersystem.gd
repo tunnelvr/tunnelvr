@@ -27,15 +27,54 @@ var selectedhighlightmaterial = preload("res://guimaterials/XCnode_selected.mate
 var selectedpointerhighlightmaterial = preload("res://guimaterials/XCnode_selectedhighlight.material")
 
 var pointertarget = null
+var pointertargettype = "none"
 var pointertargetpoint = Vector3(0, 0, 0)
 var selectedtarget = null
+var selectedtargettype = "none"
 var gripbuttonpressused = false
 var nodeorientationpreviewheldtransform = null
-var activexc = null
+var activetargetwall = null
 
-# set_materialoverride
+func clearpointertargetmaterial():
+	if pointertarget != null:
+		if pointertargettype == "OnePathNode" or pointertargettype == "XCnode" or pointertargettype == "DrawnStationNode" or pointertargettype == "StationNode":
+			pointertarget.get_node("CollisionShape/MeshInstance").set_surface_material(0, selectedhighlightmaterial if pointertarget == selectedtarget else null)
+	if pointertargettype == "XCdrawing":
+		var pointertargetwall = targetwall(pointertarget, pointertargettype)
+		pointertargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").set_surface_material(0, preload("res://guimaterials/XCdrawing.material"))
+		
+func setpointertargetmaterial():
+	if pointertarget != null:
+		if pointertargettype == "OnePathNode" or pointertargettype == "XCnode" or pointertargettype == "DrawnStationNode" or pointertargettype == "StationNode":
+			pointertarget.get_node("CollisionShape/MeshInstance").set_surface_material(0, selectedpointerhighlightmaterial if pointertarget == selectedtarget else pointinghighlightmaterial)
+	if pointertargettype == "XCdrawing":
+		var pointertargetwall = targetwall(pointertarget, pointertargettype)
+		pointertargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").set_surface_material(0, preload("res://guimaterials/XCdrawing_highlight.material"))
+	
+func setselectedtarget(newselectedtarget):
+	settextpanel(null, null)
+	if selectedtargettype == "OnePathNode" or selectedtargettype == "XCnode" or selectedtargettype == "DrawnStationNode" or selectedtargettype == "StationNode":
+		selectedtarget.get_node("CollisionShape/MeshInstance").set_surface_material(0, null)
+	LaserSpot.material_override = null
+	selectedtarget = newselectedtarget
+	selectedtargettype = targettype(newselectedtarget)
+	if selectedtarget != pointertarget and (selectedtargettype == "OnePathNode" or selectedtargettype == "XCnode" or selectedtargettype == "DrawnStationNode" or selectedtargettype == "StationNode"):
+		selectedtarget.get_node("CollisionShape/MeshInstance").set_surface_material(0, selectedhighlightmaterial)
+	setpointertargetmaterial()
 
-onready var LaserSquare = get_node("../../../LaserSquare")
+func setactivetargetwall(newactivetargetwall):
+	if activetargetwall != null:
+		activetargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").set_surface_material(0, preload("res://guimaterials/XCdrawing.material"))
+		activetargetwall.get_node("PathLines").set_surface_material(0, preload("res://guimaterials/XCdrawingPathlines.material"))
+		for xcnode in activetargetwall.get_node("XCnodes").get_children():
+			xcnode.get_node("CollisionShape/MeshInstance").set_surface_material(0, preload("res://guimaterials/XCnode.material"))
+	activetargetwall = newactivetargetwall
+	if activetargetwall != null:
+		activetargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").set_surface_material(0, preload("res://guimaterials/XCdrawing_active.material"))
+		activetargetwall.get_node("PathLines").set_surface_material(0, preload("res://guimaterials/XCdrawingPathlines_nodepthtest.material"))
+		for xcnode in activetargetwall.get_node("XCnodes").get_children():
+			xcnode.get_node("CollisionShape/MeshInstance").set_surface_material(0, preload("res://guimaterials/XCnode_nodepthtest.material"))
+
 onready var LaserSpot = get_node("LaserSpot") 
 onready var LaserSpike = get_node("LaserSpot/LaserSpike") 
 onready var LaserSelectLine = get_node("LaserSelectLine") 
@@ -45,7 +84,6 @@ var laserspothighlightmaterial = null;
 var laser_y = -0.05
 
 onready var ARVRworld_scale = ARVRServer.world_scale
-
 
 func settextpanel(ltext, pos):
 	var textpanel = sketchsystem.get_node("Centreline/TextPanel")
@@ -118,21 +156,16 @@ func onpointing(newpointertarget, newpointertargetpoint):
 		if is_instance_valid(pointertarget) and pointertarget == guipanel3d:
 			guipanel3d.guipanelreleasemouse()
 		
-		var pointertargettype = targettype(pointertarget)
-		if pointertargettype == "OnePathNode" or pointertargettype == "XCnode" or pointertargettype == "DrawnStationNode" or pointertargettype == "StationNode":
-			pointertarget.get_node("CollisionShape/MeshInstance").material_override = selectedhighlightmaterial if pointertarget == selectedtarget else null
-		elif pointertargettype == "XCcursor":
-			pointertarget.get_node("CollisionShape/MeshInstance/MeshInstance").material_override = null
-
+		clearpointertargetmaterial()
 		pointertarget = newpointertarget
 		pointertargettype = targettype(pointertarget)
+		setpointertargetmaterial()
+		
 		if is_instance_valid(pointertarget):
 			#var selectedtargettype = selectedtarget.get_parent().get_name() if selectedtarget != null else null
 			#var pointertargettype = pointertarget.get_parent().get_name() if pointertarget.has_method("set_materialoverride") else pointertarget.get_name()
-			var selectedtargettype = targettype(selectedtarget)
 			print("ppp  ", selectedtargettype, " ", pointertargettype)
 			if pointertargettype == "OnePathNode" or pointertargettype == "XCnode" or pointertargettype == "DrawnStationNode" or pointertargettype == "StationNode":
-				pointertarget.get_node("CollisionShape/MeshInstance").material_override = selectedpointerhighlightmaterial if pointertarget == selectedtarget else pointinghighlightmaterial
 				LaserSpot.visible = false
 				LaserShadow.visible = true
 			elif pointertargettype == "XCcursor":
@@ -182,17 +215,9 @@ func onpointing(newpointertarget, newpointertargetpoint):
 	if LaserShadow.visible:
 		LaserShadow.global_transform = Transform(Basis(), Vector3(pointertargetpoint.x, floordrawing.global_transform.origin.y, pointertargetpoint.z))
 
-func clearselection(selectedtargettype):
-	settextpanel(null, null)
-	if selectedtargettype == "OnePathNode" or selectedtargettype == "XCnode" or selectedtargettype == "DrawnStationNode" or selectedtargettype == "StationNode":
-		selectedtarget.get_node("CollisionShape/MeshInstance").material_override = null
-	selectedtarget = null
-	LaserSpot.material_override = null
 
 func _on_button_pressed(p_button):
-	var selectedtargettype = targettype(selectedtarget)
 	var selectedtargetwall = targetwall(selectedtarget, selectedtargettype)
-	var pointertargettype = targettype(pointertarget)
 	var pointertargetwall = targetwall(pointertarget, pointertargettype)
 	var gripbuttonheld = controller.is_button_pressed(Buttons.VR_GRIP)
 
@@ -259,7 +284,7 @@ func _on_button_pressed(p_button):
 			pointertarget = centrelinesystem.newdrawnstationnode()
 			setopnpos(pointertarget, pointertargetpoint)
 			pointertarget.stationname = selectedtarget.stationname
-			clearselection(selectedtargettype)
+			setselectedtarget(null)
 
 		# grip click moves stationnode
 		elif gripbuttonheld and selectedtargettype == "DrawnStationNode" and pointertargettype == "floordrawing":
@@ -276,7 +301,7 @@ func _on_button_pressed(p_button):
 		# reselection when selected on grip deletes the node		
 		elif gripbuttonheld and selectedtargettype == "DrawnStationNode" and pointertarget == selectedtarget:
 			var todelete = selectedtarget
-			clearselection(selectedtargettype)
+			setselectedtarget(null)
 			todelete.queue_free()
 			sketchsystem.get_node("SoundPos2").global_transform.origin = pointertargetpoint
 			sketchsystem.get_node("SoundPos2").play()
@@ -284,7 +309,7 @@ func _on_button_pressed(p_button):
 		# reselection when selected on grip deletes the node		
 		elif gripbuttonheld and (selectedtargettype == "OnePathNode" or selectedtargettype == "XCnode") and pointertarget == selectedtarget:
 			var todelete = selectedtarget
-			clearselection(selectedtargettype)
+			setselectedtarget(null)
 			selectedtargetwall.removexcnode(todelete, false, sketchsystem)
 			sketchsystem.get_node("SoundPos2").global_transform.origin = pointertargetpoint
 			sketchsystem.get_node("SoundPos2").play()
@@ -321,10 +346,8 @@ func _on_button_pressed(p_button):
 				xcdrawing.setxcpositionorigin(pointertargetpoint)
 				sketchsystem.xcapplyonepath(xcdrawing.get_node("XCnodes").get_child(xcdrawingtocopynodelink), pointertarget)
 				sketchsystem.xcapplyonepath(xcdrawingtocopy.get_node("XCnodes").get_child(xcdrawingtocopynodelink), xcdrawing.get_node("XCnodes").get_child(xcdrawingtocopynodelink))
-				
-			clearselection(selectedtargettype)
-			selectedtarget = pointertarget
-			selectedtarget.get_node("CollisionShape/MeshInstance").material_override = selectedpointerhighlightmaterial
+				setactivetargetwall(xcdrawing)
+			setselectedtarget(pointertarget)
 		
 		# grip condition is ignored (assumed off) her on
 		#elif gripbuttonheld:
@@ -340,57 +363,40 @@ func _on_button_pressed(p_button):
 			if (selectedtargettype == "OnePathNode" or selectedtargettype == "XCnode"):
 				if selectedtargetwall == pointertargetwall:
 					sketchsystem.xcapplyonepath(selectedtarget, newpointertarget)
-			clearselection(selectedtargettype)
-			selectedtarget = newpointertarget
-			selectedtarget.get_node("CollisionShape/MeshInstance").material_override = selectedpointerhighlightmaterial
+			setselectedtarget(newpointertarget)
 			LaserSpot.material_override = laserspothighlightmaterial		
 									
 		# reselection clears selection
 		elif (selectedtargettype == "StationNode" or selectedtargettype == "DrawnStationNode" or selectedtargettype == "OnePathNode" or selectedtargettype == "XCnode") and pointertarget == selectedtarget:
-			clearselection(selectedtargettype)
+			setselectedtarget(null)
 
 		# connecting lines between xctype nodes
 		elif (selectedtargettype == "OnePathNode") and (pointertargettype == "XCnode"):
 			sketchsystem.xcapplyonepath(pointertarget, selectedtarget)   # note reversed case
-			clearselection(selectedtargettype)
-			selectedtarget = pointertarget
-			selectedtarget.get_node("CollisionShape/MeshInstance").material_override = selectedpointerhighlightmaterial
+			setselectedtarget(pointertarget)
 
 		# connecting lines between xctype nodes
 		elif (selectedtargettype == "XCnode" or selectedtargettype == "OnePathNode") and (pointertargettype == "XCnode" or pointertargettype == "OnePathNode"):
 			sketchsystem.xcapplyonepath(selectedtarget, pointertarget)
-			clearselection(selectedtargettype)
-			selectedtarget = pointertarget
-			selectedtarget.get_node("CollisionShape/MeshInstance").material_override = selectedpointerhighlightmaterial
-								
+			setselectedtarget(pointertarget)
 								
 		# just select new node (ignoring current selection)
 		elif pointertargettype == "StationNode":
-			clearselection(selectedtargettype)
-			selectedtarget = pointertarget
-			selectedtarget.get_node("CollisionShape/MeshInstance").material_override = selectedpointerhighlightmaterial
+			setselectedtarget(pointertarget)
 			settextpanel(selectedtarget.stationname, selectedtarget.global_transform.origin)
 
 		elif pointertargettype == "DrawnStationNode":
-			clearselection(selectedtargettype)
-			selectedtarget = pointertarget
-			selectedtarget.get_node("CollisionShape/MeshInstance").material_override = selectedpointerhighlightmaterial
+			setselectedtarget(pointertarget)
 			settextpanel(selectedtarget.stationname, centrelinesystem.stationnodemap[selectedtarget.stationname].global_transform.origin)
 				
 		elif pointertargettype == "OnePathNode":
-			clearselection(selectedtargettype)
-			selectedtarget = pointertarget
-			selectedtarget.get_node("CollisionShape/MeshInstance").material_override = selectedpointerhighlightmaterial
+			setselectedtarget(pointertarget)
 
 		elif pointertargettype == "XCnode":
-			clearselection(selectedtargettype)
 			pointertargetwall.get_node("XCdrawingplane").visible = true
-			pointertargetwall.get_node("XCdrawingplane").visible = true
-			var Dmaterial = load("res://lightweighttextures/XCnode.material")
-			Dmaterial.flags_no_depth_test = true
 			pointertargetwall.get_node("XCdrawingplane/CollisionShape").disabled = false
-			selectedtarget = pointertarget
-			selectedtarget.get_node("CollisionShape/MeshInstance").material_override = selectedpointerhighlightmaterial
+			setactivetargetwall(pointertargetwall)
+			setselectedtarget(pointertarget)
 
 				
 	# change height of pointer target
@@ -417,8 +423,6 @@ func _on_button_pressed(p_button):
 
 func _on_button_release(p_button):
 	# cancel selection by squeezing and then releasing grip without doing anything in between
-	var pointertargettype = targettype(pointertarget)
-	var selectedtargettype = targettype(selectedtarget)
 	if p_button == Buttons.VR_GRIP and not gripbuttonpressused:
 		if pointertargettype == "GUIPanel3D":
 			if guipanel3d.visible:
@@ -434,7 +438,7 @@ func _on_button_release(p_button):
 			pointertarget = null
 
 		elif selectedtargettype == "OnePathNode" or selectedtargettype == "XCnode" or selectedtargettype == "DrawnStationNode" or selectedtargettype == "StationNode":
-			clearselection(selectedtargettype)
+			setselectedtarget(null)
 			
 		elif pointertargettype == "XCtube":
 			pointertarget.get_parent().togglematerialcycle()
@@ -455,7 +459,8 @@ func _on_button_release(p_button):
 		xcdrawing.setxcpositionangle(Vector2(vx.x, vx.z).angle())
 		var vwallmid = (pointertarget.global_transform.origin + selectedtarget.global_transform.origin)/2
 		xcdrawing.setxcpositionorigin(vwallmid)
-			
+		setactivetargetwall(xcdrawing)
+						
 func _process(_delta):
 	if !is_inside_tree():
 		return

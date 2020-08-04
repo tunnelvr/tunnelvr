@@ -1,4 +1,4 @@
-[gd_scene load_steps=42 format=2]
+[gd_scene load_steps=43 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://addons/godot-xr-tools/misc/VR_Common_Shader_Cache.tscn" type="PackedScene" id=2]
@@ -17,6 +17,7 @@
 [ext_resource path="res://gui_panel_3d.gd" type="Script" id=15]
 [ext_resource path="res://addons/godot-xr-tools/materials/pointer.tres" type="Material" id=16]
 [ext_resource path="res://Centreline.gd" type="Script" id=17]
+[ext_resource path="res://ARVROrigin.gd" type="Script" id=18]
 [ext_resource path="res://BoulderClutter.gd" type="Script" id=21]
 
 [sub_resource type="CapsuleShape" id=1]
@@ -145,6 +146,7 @@ script = ExtResource( 1 )
 
 [node name="ARVROrigin" type="ARVROrigin" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.24823, -6.41158 )
+script = ExtResource( 18 )
 
 [node name="ARVRCamera" type="ARVRCamera" parent="ARVROrigin"]
 environment = ExtResource( 12 )

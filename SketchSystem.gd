@@ -107,6 +107,7 @@ func loadsketchsystem():
 	var xctubesData = save_dict["xctubes"]
 	var floordrawingData = save_dict["floordrawing"]
 	
+	
 	for drawnstationnode in $Centreline/DrawnStationNodes.get_children():
 		drawnstationnode.free()
 	for drawnstationnodeData in drawnstationnodesData:
