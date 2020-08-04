@@ -4,11 +4,13 @@ var arvr_openvr = null;
 var arvr_quest = null; 
 
 # Stuff to do:
-# * deselect xcwall should deactivate wall
-# * xcdrawing set active in all cases so we can see where our points are going
-# * make drawn points and materials active
-# * laser pointer materials into the guimaterials box as well
+# * delete the xccursor
+# * removexcnode to do sequences (trim back)
+# * deselect xcwall should deactivate wall and enable laserspot to hit tubes again
 # * change laser pointer collision when XCdrawing is active or not
+# * recselectedtargetwall.removexcnode(recselectedtarget, false, sketchsystem)
+# * xcdrawing set active in all cases so we can see where our points are going
+# * laser pointer materials into the guimaterials box as well
 # * clear up the laser pointer logic and materials
 # * shorten laser pointer to end on the node
 # * nodes and mesh all to be on top when XCcrossing is active (active by having node selected in it and not being deactivated)
