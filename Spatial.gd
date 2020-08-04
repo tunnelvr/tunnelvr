@@ -4,22 +4,18 @@ var arvr_openvr = null;
 var arvr_quest = null; 
 
 # Stuff to do:
-# * removexcnode to do sequences (trim back)
-# * deselect xcwall should deactivate wall and enable laserspot to hit tubes again
-# * capsule tall enough to contain the headtorch
-# * change laser pointer collision when XCdrawing is active or not
-# * recselectedtargetwall.removexcnode(recselectedtarget, false, sketchsystem)
-# * xcdrawing set active in all cases so we can see where our points are going
-# * laser pointer materials into the guimaterials box as well
+
+# something messed up with the scale
+
+# * make xcmaterial always big enough
 # * clear up the laser pointer logic and materials
 # * shorten laser pointer to end on the node
-# * nodes and mesh all to be on top when XCcrossing is active (active by having node selected in it and not being deactivated)
-# * show selected XCdrawing in front.  then see the ability to reselect
 # * shift pick connection to delete nodes up to next junction
 # * stream out the positions of the player and their activities to a file and reload it to get the multiplayer experience 
 # * always check xcdrawing mesh needs to be larger than the stations that are on it with each added node
 # * xcdrawing plane texture should be a 1m checkerboard as a shader repeating
 # * all core materials should be exported as own assets (eg select materials) to make them easier to edit
+# * capsule tall enough to contain the headtorch
 # * scan through other drawings on back of hand
 # * check stationdrawnnode moves the ground up
 # * Need to ask to improve the documentation on https://docs.godotengine.org/en/latest/classes/class_meshinstance.html#class-meshinstance-method-set-surface-material

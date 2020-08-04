@@ -11,6 +11,21 @@ var xctubesconn = [ ]   # references to xctubes that connect to here (could use 
 
 var floortype = false
 
+func setxcdrawingvisibility(makevisible):
+	if not makevisible:
+		$XCdrawingplane.visible = false
+		$XCdrawingplane/CollisionShape.disabled = true
+	elif makevisible != $XCdrawingplane.visible:
+		$XCdrawingplane.visible = true
+		$XCdrawingplane/CollisionShape.disabled = false
+		var sca = 1.0
+		for nodepoint in nodepoints:
+			sca = max(sca, abs(nodepoint.x) + 1)
+			sca = max(sca, abs(nodepoint.y) + 1)
+		if sca > $XCdrawingplane.scale.x:
+			$XCdrawingplane.set_scale(Vector3(sca, sca, 1.0))
+
+
 # these transforming operations work in sequence, each correcting the relative position change caused by the other
 func scalexcnodepointspointsx(sca):
 	for i in range(len(nodepoints)):
@@ -31,7 +46,7 @@ func exportdata():
 		nodepointsData.append(nodepoints[i].z)
 	var xvec = Vector2(global_transform.basis.x.x, global_transform.basis.x.z)
 	return { "name":get_name(),
-			 "transpos": [xvec.angle(), get_node("XCdrawingplane").scale.x, global_transform.origin.x, global_transform.origin.y, global_transform.origin.z], 
+			 "transpos": [xvec.angle(), $XCdrawingplane/CollisionShape.scale.x, global_transform.origin.x, global_transform.origin.y, global_transform.origin.z], 
 			 "nodepoints": nodepointsData, 
 			 "onepathpairs":onepathpairs 
 		   }
@@ -150,57 +165,6 @@ func movexcnode(xcn, pt, sketchsystem):
 	print("m,mmmmxmxmxm ", xcn.global_transform.origin, pt)
 	xcn.global_transform.origin = pt
 	copyxcntootnode(xcn)
-	updatexcpaths()
-	for xctube in xctubesconn:
-		xctube.updatetubelinkpaths(sketchsystem.get_node("XCdrawings"), sketchsystem)
-
-func distortnodesaroundcursor(radx, sfac, distortorigin, sketchsystem):
-	for i in range(len(nodepoints)):
-		var v = nodepoints[i] - distortorigin
-		var v2 = Vector2(v.x, v.y)
-		var v2len = v2.length()
-		var v2fac = v2len/radx
-		v2fac = min(v2fac, 2-v2fac)
-		if v2fac > 0:
-			nodepoints[i] += v2fac*sfac*Vector3(v.x, v.y, 0.0)
-		copyotnodetoxcn(get_node("XCnodes").get_child(i))
-	updatexcpaths()
-	for xctube in xctubesconn:
-		xctube.updatetubelinkpaths(sketchsystem.get_node("XCdrawings"), sketchsystem)
-
-func makeextrapoints(sketchsystem):
-	if len(onepathpairs) == 0:
-		return
-	var rsum = 0.0
-	var pairpairslengths = [ ]
-	for i in range(0, len(onepathpairs), 2):
-		var rleng = (nodepoints[onepathpairs[i]] - nodepoints[onepathpairs[i+1]]).length()
-		pairpairslengths.append([rleng, i])
-		rsum += rleng
-	pairpairslengths.sort_custom(self, "sd0")
-	var rmean = rsum/(len(onepathpairs)/2)
-	var rmedian = pairpairslengths[int(len(pairpairslengths)/2)][0]
-	var rmid = (pairpairslengths[0][0] + pairpairslengths[-1][0])/2
-	print("rmeanrmeanrmean ", rmean, " rmedian ", rmedian, " rmid ", rmid, pairpairslengths)
-	var rcut = rmid*0.8
-	while len(pairpairslengths) > 0 and pairpairslengths[-1][0] > rcut:
-		var leng = pairpairslengths[-1][0]
-		var i = pairpairslengths.pop_back()[1]
-		var nsplits = max(1, int(leng/rcut))
-		var opne = onepathpairs[i+1]
-		var xcnmidprev = null
-		for j in range(nsplits):
-			var xcnmid = newxcnode(-1)
-			nodepoints[xcnmid.otIndex] = lerp(nodepoints[onepathpairs[i]], nodepoints[opne], (j+1.0)/(nsplits+1))
-			copyotnodetoxcn(xcnmid)
-			if j == 0:
-				onepathpairs[i+1] = xcnmid.otIndex
-			else:
-				onepathpairs.append(xcnmidprev.otIndex)
-				onepathpairs.append(xcnmid.otIndex)
-			xcnmidprev = xcnmid
-		onepathpairs.append(xcnmidprev.otIndex)
-		onepathpairs.append(opne)
 	updatexcpaths()
 	for xctube in xctubesconn:
 		xctube.updatetubelinkpaths(sketchsystem.get_node("XCdrawings"), sketchsystem)

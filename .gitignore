@@ -1,0 +1,13 @@
+*.o
+*.os
+.import/
+*.dblite
+*.exp
+*.lib
+*.obj
+*.TMP
+*.import
+*.ipynb_checkpoints
+__pycache__
+logs
+Thumbs.db

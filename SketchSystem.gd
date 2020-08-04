@@ -17,7 +17,7 @@ func _ready():
 	
 
 const linewidth = 0.05
-
+var tubeshellsvisible = false
 
 func xcapplyonepath(xcn0, xcn1):
 	var xcdrawing0 = xcn0.get_parent().get_parent()
@@ -62,6 +62,7 @@ func xcapplyonepath(xcn0, xcn1):
 
 func updateworkingshell(makevisible):
 	var floordrawing = get_node("floordrawing")
+	tubeshellsvisible = makevisible
 	for xctube in $XCtubes.get_children():
 		if xctube.otxcdIndex1 != -1:
 			xctube.updatetubeshell(floordrawing, makevisible)
@@ -128,6 +129,8 @@ func loadsketchsystem():
 		assert (i == get_node("XCdrawings").get_child_count())
 		xcdrawing.otxcdIndex = i
 		xcdrawing.set_name("XCdrawing"+String(xcdrawing.otxcdIndex))
+		xcdrawing.get_node("XCdrawingplane").visible = false
+		xcdrawing.get_node("XCdrawingplane/CollisionShape").disabled = true
 		get_node("XCdrawings").add_child(xcdrawing)
 		xcdrawing.importdata(xcdrawingData)
 

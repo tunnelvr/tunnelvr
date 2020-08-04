@@ -57,12 +57,12 @@ func setselectedtarget(newselectedtarget):
 	if selectedtargettype == "XCnode":
 		selectedtarget.get_node("CollisionShape/MeshInstance").set_surface_material(0, preload("res://guimaterials/XCnode_nodepthtest.material") if selectedtargetwall == activetargetwall else preload("res://guimaterials/XCnode.material"))
 		
-	LaserSpot.material_override = null
 	selectedtarget = newselectedtarget
 	selectedtargettype = targettype(newselectedtarget)
 	selectedtargetwall = targetwall(selectedtarget, selectedtargettype)
 	if selectedtarget != pointertarget and (selectedtargettype == "OnePathNode" or selectedtargettype == "XCnode" or selectedtargettype == "DrawnStationNode" or selectedtargettype == "StationNode"):
 		selectedtarget.get_node("CollisionShape/MeshInstance").set_surface_material(0, selectedhighlightmaterial)
+	LaserSpot.material_override = preload("res://guimaterials/laserspot_selected.material") if selectedtarget != null else null
 	setpointertargetmaterial()
 
 func setactivetargetwall(newactivetargetwall):
@@ -71,6 +71,11 @@ func setactivetargetwall(newactivetargetwall):
 		activetargetwall.get_node("PathLines").set_surface_material(0, preload("res://guimaterials/XCdrawingPathlines.material"))
 		for xcnode in activetargetwall.get_node("XCnodes").get_children():
 			xcnode.get_node("CollisionShape/MeshInstance").set_surface_material(0, preload("res://guimaterials/XCnode_selected.material") if xcnode == selectedtarget else preload("res://guimaterials/XCnode.material"))
+		if not activetargetwall.floortype:
+			for xctube in activetargetwall.xctubesconn:
+				if xctube.otxcdIndex1 != -1:
+					xctube.updatetubeshell(sketchsystem.get_node("floordrawing"), sketchsystem.tubeshellsvisible)
+	
 	activetargetwall = newactivetargetwall
 	if activetargetwall != null:
 		activetargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").set_surface_material(0, preload("res://guimaterials/XCdrawing_active.material"))
@@ -78,6 +83,7 @@ func setactivetargetwall(newactivetargetwall):
 		for xcnode in activetargetwall.get_node("XCnodes").get_children():
 			if xcnode != selectedtarget:
 				xcnode.get_node("CollisionShape/MeshInstance").set_surface_material(0, preload("res://guimaterials/XCnode_nodepthtest.material"))
+	$Laser/RayCast.collision_mask = 8 + 16 + (32 if activetargetwall == null else 0)  # pointer, floor, cavewall(tube)=bit5
 
 onready var LaserSpot = get_node("LaserSpot") 
 onready var LaserSpike = get_node("LaserSpot/LaserSpike") 
@@ -324,7 +330,6 @@ func _on_button_pressed(p_button):
 				if selectedtargetwall == pointertargetwall:
 					sketchsystem.xcapplyonepath(selectedtarget, newpointertarget)
 			setselectedtarget(newpointertarget)
-			LaserSpot.material_override = preload("res://guimaterials/laserspot_selected.material")		
 									
 		# reselection clears selection
 		elif (selectedtargettype == "StationNode" or selectedtargettype == "DrawnStationNode" or selectedtargettype == "OnePathNode" or selectedtargettype == "XCnode") and pointertarget == selectedtarget:
@@ -353,9 +358,9 @@ func _on_button_pressed(p_button):
 			setselectedtarget(pointertarget)
 
 		elif pointertargettype == "XCnode":
-			pointertargetwall.get_node("XCdrawingplane").visible = true
-			pointertargetwall.get_node("XCdrawingplane/CollisionShape").disabled = false
-			setactivetargetwall(pointertargetwall)
+			pointertargetwall.setxcdrawingvisibility(true)
+			if pointertargetwall != activetargetwall:
+				setactivetargetwall(pointertargetwall)
 			setselectedtarget(pointertarget)
 
 				
@@ -372,8 +377,8 @@ func _on_button_pressed(p_button):
 			#	nodeorientationpreview.global_transform.origin = pointertarget.global_transform.origin
 
 			if pointertargettype == "XCdrawing":
-				pointertarget.scale.y = max(0.1, pointertarget.scale.y + dy)
-				pointertarget.scale.x = max(0.1, pointertarget.scale.x + dy)
+				pointertargetwall.get_node("XCdrawingplane").scale.x = max(1, pointertargetwall.get_node("XCdrawingplane").scale.x + dy)
+				pointertargetwall.get_node("XCdrawingplane").scale.y = max(1, pointertargetwall.get_node("XCdrawingplane").scale.y + dy)
 				
 			# raise the whole drawn floor case!
 			if pointertargettype == "DrawnStationNode":
@@ -390,8 +395,7 @@ func _on_button_release(p_button):
 
 		elif pointertargettype == "XCdrawing":
 			clearpointertargetmaterial()
-			pointertarget.visible = false
-			pointertarget.get_node("CollisionShape").disabled = true
+			pointertargetwall.setxcdrawingvisibility(false)
 			setactivetargetwall(null)
 			pointertarget = null
 			pointertargettype = "none"
@@ -401,7 +405,7 @@ func _on_button_release(p_button):
 			setselectedtarget(null)
 			
 		elif pointertargettype == "XCtube":
-			pointertarget.get_parent().togglematerialcycle()
+			pointertargetwall.togglematerialcycle()
 		
 	elif p_button == Buttons.VR_TRIGGER and (nodeorientationpreviewheldtransform != null):
 		print("dosomethingwith nodeorientationpreview ", nodeorientationpreviewheldtransform)

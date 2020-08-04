@@ -181,7 +181,7 @@ material/0 = null
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.23517e-08, 5 )
 enabled = true
 cast_to = Vector3( 0, 0, -10 )
-collision_mask = 24
+collision_mask = 56
 
 [node name="LaserSpot" type="MeshInstance" parent="ARVROrigin/ARVRController_Right/pointersystem"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -4.96626, 4.96626 )
