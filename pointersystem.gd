@@ -83,7 +83,7 @@ onready var LaserSpot = get_node("LaserSpot")
 onready var LaserSpike = get_node("LaserSpot/LaserSpike") 
 onready var LaserSelectLine = get_node("LaserSelectLine") 
 onready var LaserShadow = get_node("LaserShadow") 
-var laserspothighlightmaterial = null; 
+var laserspothighlightmaterial = preload("res://guimaterials/laserspot_selected.material"); 
 
 var laser_y = -0.05
 
@@ -101,9 +101,6 @@ func settextpanel(ltext, pos):
 func _ready():
 	get_parent().connect("button_pressed", self, "_on_button_pressed")
 	get_parent().connect("button_release", self, "_on_button_release")
-	
-	laserspothighlightmaterial = LaserSpot.material_override
-	LaserSpot.material_override = null
 	
 	# apply our world scale to our laser position
 	$Laser.translation.y = laser_y * ARVRworld_scale
@@ -327,7 +324,7 @@ func _on_button_pressed(p_button):
 				if selectedtargetwall == pointertargetwall:
 					sketchsystem.xcapplyonepath(selectedtarget, newpointertarget)
 			setselectedtarget(newpointertarget)
-			LaserSpot.material_override = laserspothighlightmaterial		
+			LaserSpot.material_override = preload("res://guimaterials/laserspot_selected.material")		
 									
 		# reselection clears selection
 		elif (selectedtargettype == "StationNode" or selectedtargettype == "DrawnStationNode" or selectedtargettype == "OnePathNode" or selectedtargettype == "XCnode") and pointertarget == selectedtarget:

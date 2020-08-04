@@ -4,9 +4,9 @@ var arvr_openvr = null;
 var arvr_quest = null; 
 
 # Stuff to do:
-# * delete the xccursor
 # * removexcnode to do sequences (trim back)
 # * deselect xcwall should deactivate wall and enable laserspot to hit tubes again
+# * capsule tall enough to contain the headtorch
 # * change laser pointer collision when XCdrawing is active or not
 # * recselectedtargetwall.removexcnode(recselectedtarget, false, sketchsystem)
 # * xcdrawing set active in all cases so we can see where our points are going
