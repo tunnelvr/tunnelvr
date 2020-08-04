@@ -46,7 +46,7 @@ func exportdata():
 		nodepointsData.append(nodepoints[i].z)
 	var xvec = Vector2(global_transform.basis.x.x, global_transform.basis.x.z)
 	return { "name":get_name(),
-			 "transpos": [xvec.angle(), $XCdrawingplane/CollisionShape.scale.x, global_transform.origin.x, global_transform.origin.y, global_transform.origin.z], 
+			 "transpos": [xvec.angle(), $XCdrawingplane.scale.x, global_transform.origin.x, global_transform.origin.y, global_transform.origin.z], 
 			 "nodepoints": nodepointsData, 
 			 "onepathpairs":onepathpairs 
 		   }
@@ -81,14 +81,13 @@ func importdata(xcdrawingData):
 	xctubesconn.clear()
 	updatexcpaths()
 
-func duplicatexcdrawing():
+func duplicatexcdrawing(sketchsystem):
 	var XCdrawing = load("res://nodescenes/XCdrawing.tscn")  # self-instance
 	var xcdrawing = XCdrawing.instance()
-	var xcdrawings = get_parent()
-	var otxcdIndex = xcdrawings.get_child_count()
+	var otxcdIndex = sketchsystem.get_node("XCdrawings").get_child_count()
 	xcdrawing.set_name("XCdrawing"+String(otxcdIndex))
 	xcdrawing.otxcdIndex = otxcdIndex
-	xcdrawings.add_child(xcdrawing)
+	sketchsystem.get_node("XCdrawings").add_child(xcdrawing)
 	xcdrawing.global_transform = global_transform
 	for i in range(len(nodepoints)):
 		var xcn = xcdrawing.newxcnode(-1)

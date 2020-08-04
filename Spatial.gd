@@ -5,16 +5,13 @@ var arvr_quest = null;
 
 # Stuff to do:
 
-# something messed up with the scale
-
-# * make xcmaterial always big enough
+# * make an xc cut on a tube
 # * clear up the laser pointer logic and materials
 # * shorten laser pointer to end on the node
+# * automatically make the xcplane big enough as you draw close to its edge
 # * shift pick connection to delete nodes up to next junction
-# * stream out the positions of the player and their activities to a file and reload it to get the multiplayer experience 
-# * always check xcdrawing mesh needs to be larger than the stations that are on it with each added node
+# * option to start recording of the person to a file, and then stop recording, then replay recording -- in anticipation of multiplayer
 # * xcdrawing plane texture should be a 1m checkerboard as a shader repeating
-# * all core materials should be exported as own assets (eg select materials) to make them easier to edit
 # * capsule tall enough to contain the headtorch
 # * scan through other drawings on back of hand
 # * check stationdrawnnode moves the ground up

@@ -286,7 +286,7 @@ func _on_button_pressed(p_button):
 			sketchsystem.get_node("SoundPos2").global_transform.origin = pointertargetpoint
 			sketchsystem.get_node("SoundPos2").play()
 
-		# duplication of XCdrawing 
+		# duplication of XCdrawing (in special cases)
 		elif gripbuttonheld and selectedtargettype == "OnePathNode" and pointertargettype == "OnePathNode":
 			var xcdrawingtocopy = null
 			var xcdrawingtocopynodelink = null
@@ -303,7 +303,7 @@ func _on_button_pressed(p_button):
 							break
 			if btargetclear and xcdrawingtocopy != null:
 				print("making new copiued drawing¬!!!!")
-				var xcdrawing = xcdrawingtocopy.duplicatexcdrawing()
+				var xcdrawing = xcdrawingtocopy.duplicatexcdrawing(sketchsystem)
 				var vline = pointertargetpoint - selectedtarget.global_transform.origin
 				var drawingwallangle = Vector2(vline.z, -vline.x).angle()
 				if vline.dot(xcdrawing.global_transform.basis.z) < 0:
@@ -315,6 +315,71 @@ func _on_button_pressed(p_button):
 				setactivetargetwall(xcdrawing)
 			setselectedtarget(pointertarget)
 		
+		# new XCintersecting in tube case
+		elif gripbuttonheld and selectedtargettype == "XCnode" and pointertargettype == "XCtube" and (selectedtargetwall.otxcdIndex == pointertargetwall.otxcdIndex0 or selectedtargetwall.otxcdIndex == pointertargetwall.otxcdIndex1):
+			var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_child(pointertargetwall.otxcdIndex0)
+			var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_child(pointertargetwall.otxcdIndex1)
+			var v0c = pointertargetpoint - xcdrawing0.global_transform.origin
+			var v1c = pointertargetpoint - xcdrawing1.global_transform.origin
+			v0c.y = 0
+			v1c.y = 0
+			var h0c = abs(xcdrawing0.global_transform.basis.z.dot(v0c))
+			var h1c = abs(xcdrawing1.global_transform.basis.z.dot(v1c))
+			var lam = h0c/(h0c+h1c)
+			print(" dd ", v0c, h0c, v1c, h1c, "  ", lam)
+			if 0.1 < lam and lam < 0.9:
+				var va0c = Vector2(xcdrawing0.global_transform.basis.x.x, xcdrawing0.global_transform.basis.x.z)
+				var va1c = Vector2(xcdrawing1.global_transform.basis.x.x, xcdrawing1.global_transform.basis.x.z)
+				if va1c.dot(va0c) < 0:
+					va1c = -va1c
+				var vang = lerp_angle(va0c.angle(), va1c.angle(), lam)				
+				var vwallmid = lerp(xcdrawing0.global_transform.origin, xcdrawing1.global_transform.origin, lam)
+				var xcdrawing = XCdrawing.instance()
+				var otxcdIndex = sketchsystem.get_node("XCdrawings").get_child_count()
+				xcdrawing.set_name("XCdrawing"+String(otxcdIndex))
+				xcdrawing.otxcdIndex = otxcdIndex   # could use the name in the list to avoid the index number
+				sketchsystem.get_node("XCdrawings").add_child(xcdrawing)
+				xcdrawing.setxcpositionangle(vang)
+				xcdrawing.setxcpositionorigin(vwallmid)
+				var xcdrawinglink0 = [ ]
+				var xcdrawinglink1 = [ ]
+				pointertargetwall.slicetubetoxcdrawing(xcdrawing, xcdrawinglink0, xcdrawinglink1, lam)
+				xcdrawing.updatexcpaths()
+				setactivetargetwall(xcdrawing)
+				setselectedtarget(null)
+				xcdrawing0.xctubesconn.remove(xcdrawing0.xctubesconn.find(pointertargetwall))
+				xcdrawing1.xctubesconn.remove(xcdrawing1.xctubesconn.find(pointertargetwall))
+
+				var xctube0 = preload("res://nodescenes/XCtube.tscn").instance()
+				xctube0.get_node("XCtubeshell/CollisionShape").shape = ConcavePolygonShape.new()   # bug.  this fails to get cloned
+				xctube0.otxcdIndex0 = pointertargetwall.otxcdIndex0
+				xctube0.otxcdIndex1 = xcdrawing.otxcdIndex
+				xcdrawing0.xctubesconn.append(xctube0)
+				xcdrawing.xctubesconn.append(xctube0)
+				xctube0.set_name("XCtube0"+String(xctube0.otxcdIndex0)+"_"+String(xctube0.otxcdIndex1))
+				sketchsystem.get_node("XCtubes").add_child(xctube0)
+				xctube0.xcdrawinglink = xcdrawinglink0
+				xctube0.updatetubelinkpaths(sketchsystem.get_node("XCdrawings"), sketchsystem)
+				xctube0.updatetubeshell(sketchsystem.get_node("floordrawing"), sketchsystem.tubeshellsvisible)
+				
+				var xctube1 = preload("res://nodescenes/XCtube.tscn").instance()
+				xctube1.get_node("XCtubeshell/CollisionShape").shape = ConcavePolygonShape.new()   # bug.  this fails to get cloned
+				xctube1.otxcdIndex0 = pointertargetwall.otxcdIndex1
+				xctube1.otxcdIndex1 = xcdrawing.otxcdIndex  # keep order
+				xcdrawing1.xctubesconn.append(xctube1)
+				xcdrawing.xctubesconn.append(xctube1)
+				xctube1.set_name("XCtube0"+String(xctube1.otxcdIndex0)+"_"+String(xctube1.otxcdIndex1))
+				sketchsystem.get_node("XCtubes").add_child(xctube1)
+				xctube1.xcdrawinglink = xcdrawinglink1
+				xctube1.updatetubelinkpaths(sketchsystem.get_node("XCdrawings"), sketchsystem)
+				xctube1.updatetubeshell(sketchsystem.get_node("floordrawing"), sketchsystem.tubeshellsvisible)
+
+
+				pointertargettype = "none"
+				pointertarget = null
+				pointertargetwall.queue_free()
+				pointertargetwall = null
+				
 		# grip condition is ignored (assumed off) her on
 		#elif gripbuttonheld:
 		#	pass
@@ -345,6 +410,7 @@ func _on_button_pressed(p_button):
 			sketchsystem.xcapplyonepath(selectedtarget, pointertarget)
 			setselectedtarget(pointertarget)
 								
+
 		# just select new node (ignoring current selection)
 		elif pointertargettype == "StationNode":
 			setselectedtarget(pointertarget)
@@ -423,7 +489,9 @@ func _on_button_release(p_button):
 		xcdrawing.setxcpositionangle(Vector2(vx.x, vx.z).angle())
 		var vwallmid = (pointertarget.global_transform.origin + selectedtarget.global_transform.origin)/2
 		xcdrawing.setxcpositionorigin(vwallmid)
+		setselectedtarget(null)
 		setactivetargetwall(xcdrawing)
+		
 						
 func _process(_delta):
 	if !is_inside_tree():

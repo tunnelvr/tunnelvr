@@ -120,23 +120,10 @@ func updatetubelinkpaths(xcdrawings, sketchsystem):
 	#if not bgroundanchortype:
 	#	updatetubeshell(sketchsystem.get_node("floordrawing"), $XCtubeshell.visible)
 
-func add_uvvertex(surfaceTool, xcnodes, poly, ila, i, floorsize, dfinv):
-	var pt = xcnodes.get_child(poly[(ila+i)%len(poly)]).global_transform.origin
-	var afloorpoint = dfinv.xform(pt)
-	var uvpt = Vector2(afloorpoint.x/floorsize.x + 0.5, afloorpoint.z/floorsize.y + 0.5)
-	surfaceTool.add_uv(uvpt)
-	surfaceTool.add_vertex(pt)
-	
 func fa(a, b):
 	return a[0] < b[0] or (a[0] == b[0] and a[1] < b[1])
 
-func maketubeshell(floordrawing):
-	var floorsize = floordrawing.get_node("XCdrawingplane/CollisionShape/MeshInstance").mesh.size
-	var dfinv = floordrawing.get_node("XCdrawingplane/CollisionShape/MeshInstance").global_transform.affine_inverse()
-	
-	var xcdrawings = get_node("../../XCdrawings")
-	var xcdrawing0 = xcdrawings.get_child(otxcdIndex0)
-	var xcdrawing1 = xcdrawings.get_child(otxcdIndex1)
+func maketubepolyassociation(xcdrawing0, xcdrawing1):
 	var polys0 = xcdrawing0.makexcdpolys()  # arrays of indexes to nodes ending with [Nsinglenodes, orientation]
 	var polys1 = xcdrawing1.makexcdpolys()  # arrays of indexes to nodes ending with [Nsinglenodes, orientation]
 	
@@ -152,7 +139,7 @@ func maketubeshell(floordrawing):
 	print("opopolys", poly0, poly1)
 	if poly0 == null or poly1 == null:
 		print("no connecting poly available", polys0, polys1)
-		return null
+		return [[], [], []]
 		
 	if xcdrawing0.global_transform.basis.z.dot(xcdrawing1.global_transform.basis.z) < 0:
 		poly1.invert()
@@ -165,10 +152,30 @@ func maketubeshell(floordrawing):
 		var il1 = poly1.find(xcdrawinglink[j+1])
 		if il0 != -1 and il1 != -1:
 			ila.append([il0, il1])
-	if len(ila) == 0:
-		return null
 	ila.sort_custom(self, "fa")
 	print("ilililia", xcdrawinglink, ila)
+	return [poly0, poly1, ila]
+
+func add_uvvertex(surfaceTool, xcnodes, poly, ila, i, floorsize, dfinv):
+	var pt = xcnodes.get_child(poly[(ila+i)%len(poly)]).global_transform.origin
+	var afloorpoint = dfinv.xform(pt)
+	var uvpt = Vector2(afloorpoint.x/floorsize.x + 0.5, afloorpoint.z/floorsize.y + 0.5)
+	surfaceTool.add_uv(uvpt)
+	surfaceTool.add_vertex(pt)
+
+func maketubeshell(floordrawing):
+	var floorsize = floordrawing.get_node("XCdrawingplane/CollisionShape/MeshInstance").mesh.size
+	var dfinv = floordrawing.get_node("XCdrawingplane/CollisionShape/MeshInstance").global_transform.affine_inverse()
+	
+	var xcdrawings = get_node("../../XCdrawings")
+	var xcdrawing0 = xcdrawings.get_child(otxcdIndex0)
+	var xcdrawing1 = xcdrawings.get_child(otxcdIndex1)
+	var mtpa = maketubepolyassociation(xcdrawing0, xcdrawing1)
+	var poly0 = mtpa[0]
+	var poly1 = mtpa[1]
+	var ila = mtpa[2]
+	if len(ila) == 0:
+		return null
 	
 	#var surfaceTool = SurfaceTool.new()
 	#surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
@@ -210,6 +217,58 @@ func maketubeshell(floordrawing):
 		surfaceTool.commit(arraymesh)
 	return arraymesh
 	#return surfaceTool.commit()
+
+func slicetubetoxcdrawing(xcdrawing, xcdrawinglink0, xcdrawinglink1, lam):
+	var xcdrawings = get_node("../../XCdrawings")
+	var xcdrawing0 = xcdrawings.get_child(otxcdIndex0)
+	var xcdrawing1 = xcdrawings.get_child(otxcdIndex1)
+	var mtpa = maketubepolyassociation(xcdrawing0, xcdrawing1)
+	var poly0 = mtpa[0]
+	var poly1 = mtpa[1]
+	var ila = mtpa[2]
+	if len(ila) == 0:
+		return false
+	
+	var xcnodes0 = xcdrawing0.get_node("XCnodes")
+	var xcnodes1 = xcdrawing1.get_node("XCnodes")
+	for i in range(len(ila)):
+		var ila0 = ila[i][0]
+		var ila0N = ila[i+1][0] - ila0  if i < len(ila)-1  else len(poly0) + ila[0][0] - ila0 
+		var ila1 = ila[i][1]
+		var ila1N = ila[(i+1)%len(ila)][1] - ila1
+		if ila1N < 0 or len(ila) == 1:   # there's a V-shaped case where this isn't good enough
+			ila1N += len(poly1)
+		print("  iiilla ", [ila0, ila0N, ila1, ila1N])
+
+		var acc = -ila0N/2  if ila0N>=ila1N  else  ila1N/2
+		var i0 = 0
+		var i1 = 0
+		xcdrawinglink0.append(poly0[ila0])
+		xcdrawinglink0.append(len(xcdrawing.nodepoints))
+		xcdrawinglink1.append(poly1[ila1])
+		xcdrawinglink1.append(len(xcdrawing.nodepoints))
+		var xcnlast = null
+		while i0 < ila0N or i1 < ila1N:
+			var pt0 = xcnodes0.get_child(poly0[(ila0+i0)%len(poly0)]).global_transform.origin
+			var pt1 = xcnodes1.get_child(poly1[(ila1+i1)%len(poly1)]).global_transform.origin
+			var xcn = xcdrawing.newxcnode(-1)
+			xcn.global_transform.origin = lerp(pt0, pt1, lam)
+			xcdrawing.copyxcntootnode(xcn)
+			xcdrawing.nodepoints[xcn.otIndex].z = 0  # flatten into the plane
+			xcdrawing.copyotnodetoxcn(xcn)
+			if acc < 0:
+				acc += ila1N
+				i0 += 1
+			else:
+				acc -= ila0N
+				i1 += 1
+			if xcnlast != null:
+				xcdrawing.onepathpairs.append(xcnlast.otIndex)
+				xcdrawing.onepathpairs.append(xcn.otIndex)
+			xcnlast = xcn
+		xcdrawing.onepathpairs.append(xcnlast.otIndex)
+		xcdrawing.onepathpairs.append(0)
+	return true
 
 func updatetubeshell(floordrawing, makevisible):
 	if makevisible:
