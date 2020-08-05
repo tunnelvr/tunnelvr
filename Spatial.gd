@@ -5,7 +5,10 @@ var arvr_quest = null;
 
 # Stuff to do:
 
-# * make an xc cut on a tube
+# * bug in xc cut on a tube with 2 sections
+# * simplify the double points we get in the slices (take the mid-point of them)
+# * make a doppleganger of the ARVR origin and controller and hands, for use with the networking
+# *  starting with a character who moves around and is a reflection of current character
 # * clear up the laser pointer logic and materials
 # * shorten laser pointer to end on the node
 # * automatically make the xcplane big enough as you draw close to its edge

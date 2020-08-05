@@ -231,6 +231,7 @@ func slicetubetoxcdrawing(xcdrawing, xcdrawinglink0, xcdrawinglink1, lam):
 	
 	var xcnodes0 = xcdrawing0.get_node("XCnodes")
 	var xcnodes1 = xcdrawing1.get_node("XCnodes")
+	var xcnlast = null	
 	for i in range(len(ila)):
 		var ila0 = ila[i][0]
 		var ila0N = ila[i+1][0] - ila0  if i < len(ila)-1  else len(poly0) + ila[0][0] - ila0 
@@ -243,15 +244,16 @@ func slicetubetoxcdrawing(xcdrawing, xcdrawinglink0, xcdrawinglink1, lam):
 		var acc = -ila0N/2  if ila0N>=ila1N  else  ila1N/2
 		var i0 = 0
 		var i1 = 0
-		xcdrawinglink0.append(poly0[ila0])
-		xcdrawinglink0.append(len(xcdrawing.nodepoints))
-		xcdrawinglink1.append(poly1[ila1])
-		xcdrawinglink1.append(len(xcdrawing.nodepoints))
-		var xcnlast = null
 		while i0 < ila0N or i1 < ila1N:
 			var pt0 = xcnodes0.get_child(poly0[(ila0+i0)%len(poly0)]).global_transform.origin
 			var pt1 = xcnodes1.get_child(poly1[(ila1+i1)%len(poly1)]).global_transform.origin
 			var xcn = xcdrawing.newxcnode(-1)
+			if i0 == 0 and i1 == 0:
+				xcdrawinglink0.append(poly0[ila0])
+				xcdrawinglink0.append(xcn.otIndex)
+				xcdrawinglink1.append(poly1[ila1])
+				xcdrawinglink1.append(xcn.otIndex)
+			
 			xcn.global_transform.origin = lerp(pt0, pt1, lam)
 			xcdrawing.copyxcntootnode(xcn)
 			xcdrawing.nodepoints[xcn.otIndex].z = 0  # flatten into the plane
@@ -266,8 +268,8 @@ func slicetubetoxcdrawing(xcdrawing, xcdrawinglink0, xcdrawinglink1, lam):
 				xcdrawing.onepathpairs.append(xcnlast.otIndex)
 				xcdrawing.onepathpairs.append(xcn.otIndex)
 			xcnlast = xcn
-		xcdrawing.onepathpairs.append(xcnlast.otIndex)
-		xcdrawing.onepathpairs.append(0)
+	xcdrawing.onepathpairs.append(xcnlast.otIndex)
+	xcdrawing.onepathpairs.append(0)
 	return true
 
 func updatetubeshell(floordrawing, makevisible):

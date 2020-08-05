@@ -1,4 +1,4 @@
-[gd_scene load_steps=41 format=2]
+[gd_scene load_steps=42 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://addons/godot-xr-tools/misc/VR_Common_Shader_Cache.tscn" type="PackedScene" id=2]
@@ -11,6 +11,7 @@
 [ext_resource path="res://sounds/switch7.wav" type="AudioStream" id=9]
 [ext_resource path="res://SketchSystem.gd" type="Script" id=10]
 [ext_resource path="res://text_panel_3d.tscn" type="PackedScene" id=11]
+[ext_resource path="res://CSGMesh_head.tscn" type="PackedScene" id=12]
 [ext_resource path="res://sounds/laser8.wav" type="AudioStream" id=13]
 [ext_resource path="res://gui_panel_3d.tscn" type="PackedScene" id=14]
 [ext_resource path="res://gui_panel_3d.gd" type="Script" id=15]
@@ -216,6 +217,26 @@ transform = Transform( -1, 2.66914e-07, -1.86895e-07, 0, 0.573576, 0.819152, 3.2
 light_energy = 0.6
 shadow_enabled = true
 shadow_color = Color( 0.388235, 0.0705882, 0.0705882, 1 )
+
+[node name="Players" type="Spatial" parent="."]
+
+[node name="Doppelganger" type="Spatial" parent="Players"]
+transform = Transform( -1, 0, -3.25841e-07, 0, 1, 0, 3.25841e-07, 0, -1, 0, 0, -8 )
+
+[node name="HeadCam" type="Spatial" parent="Players/Doppelganger"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.691634, 0 )
+
+[node name="CSGMesh_head" parent="Players/Doppelganger/HeadCam" instance=ExtResource( 12 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0 )
+
+[node name="HandLeft" type="Spatial" parent="Players/Doppelganger"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.251003, 0 )
+
+[node name="CSGMesh_lefthand" parent="Players/Doppelganger/HandLeft" instance=ExtResource( 7 )]
+
+[node name="HandRight" type="Spatial" parent="Players/Doppelganger"]
+
+[node name="CSGMesh_righthand" parent="Players/Doppelganger/HandRight" instance=ExtResource( 6 )]
 
 [node name="SketchSystem" type="Spatial" parent="."]
 script = ExtResource( 10 )

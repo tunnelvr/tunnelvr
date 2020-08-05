@@ -13,6 +13,5 @@ func _ready():
 	
 	
 func _run():
-	var a = [10,20,30]
-	a.remove(-1)
-	print(a)
+	var x = IP.get_local_addresses()
+	print(x)
