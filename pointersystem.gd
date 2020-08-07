@@ -3,10 +3,12 @@ extends Spatial
 onready var sketchsystem = get_node("/root/Spatial/SketchSystem")
 onready var centrelinesystem = sketchsystem.get_node("Centreline")
 onready var nodeorientationpreview = sketchsystem.get_node("NodeOrientationPreview")
-onready var guipanel3d = get_node("/root/Spatial/GUIPanel3D")
 onready var floordrawing = sketchsystem.get_node("floordrawing")
+
+onready var arvrorigin = get_node("../..")
 onready var controller = get_parent()
-onready var arvrcamera = get_node("../../ARVRCamera")
+onready var arvrcamera = arvrorigin.get_node("HeadCam")
+onready var guipanel3d = arvrorigin.get_node("GUIPanel3D")
 
 var viewport_point = null
 
@@ -100,7 +102,8 @@ func settextpanel(ltext, pos):
 		textpanel.visible = false
 
 func _ready():
-	# apply our world scale to our laser position
+	controller.connect("button_pressed", self, "_on_button_pressed")
+	controller.connect("button_release", self, "_on_button_release")
 	$Laser.translation.y = laser_y * ARVRworld_scale
 	
 	# init our state

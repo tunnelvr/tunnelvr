@@ -3,9 +3,9 @@ extends Node
 enum MOVEMENT_TYPE { MOVE_AND_ROTATE, MOVE_AND_STRAFE }
 
 onready var origin_node = get_node("..")
-onready var camera_node = origin_node.get_node('ARVRCamera')
-onready var controller = get_node("../ARVRController_Left")
-onready var controllerRight = get_node("../ARVRController_Right")
+onready var camera_node = origin_node.get_node('HeadCam')
+onready var controller = origin_node.get_node("HandLeft")
+onready var controllerRight = origin_node.get_node("HandRight")
 onready var kinematic_body: KinematicBody = origin_node.get_node("KinematicBody")
 onready var collision_shape: CollisionShape = origin_node.get_node("KinematicBody/CollisionShape")
 onready var tail : RayCast = origin_node.get_node("KinematicBody/Tail")
@@ -44,6 +44,16 @@ func _input(event):
 				Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 			else:
 				Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+		if event.is_action_pressed("newboulder"):
+			print("making new boulder")
+			var righthand = controllerRight
+			var markernode = preload("res://nodescenes/MarkerNode.tscn").instance()
+			var boulderclutter = get_node("/root/Spatial/BoulderClutter")
+			var nc = boulderclutter.get_child_count()
+			markernode.get_node("CollisionShape").scale = Vector3(0.4, 0.6, 0.4) if ((nc%2) == 0) else Vector3(0.2, 0.4, 0.2)
+			markernode.global_transform.origin = righthand.global_transform.origin - 0.9*righthand.global_transform.basis.z
+			markernode.linear_velocity = -5.1*righthand.global_transform.basis.z
+			boulderclutter.add_child(markernode)
 
 	if event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
 		if origin_node.arvrinterface == null or origin_node.arvrinterface.get_tracking_status() == ARVRInterface.ARVR_NOT_TRACKING:

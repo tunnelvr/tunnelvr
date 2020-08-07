@@ -8,9 +8,9 @@ onready var doppelganger = get_node("../Players/Doppelganger")
 var arvrinterface = null
 
 func settorchlight(torchon):
-	$ARVRCamera/HeadtorchLight.visible = torchon
-	$DirectionalLight.visible = not torchon
-	$ARVRCamera.environment = preload("res://vr_underground.tres") if torchon else null
+	$HeadCam/HeadtorchLight.visible = torchon
+	get_node("/root/Spatial/DirectionalLight").visible = not torchon
+	$HeadCam.environment = preload("res://vr_underground.tres") if torchon else null
 	# translucent walls reflect too much when torchlight is on
 	xcdrawing_material.albedo_color.a = 0.1 if torchon else xcdrawing_material_albedoa
 	xcdrawing_active_material.albedo_color.a = 0.1 if torchon else xcdrawing_active_material_albedoa
@@ -26,6 +26,6 @@ func _physics_process(_delta):
 #		doppelganger.get_node("HandRight").global_transform = Transform($ARVRController_Right.global_transform.basis, $ARVRController_Right.global_transform.origin + vdisp)
 		doppelganger.global_transform.origin.y = global_transform.origin.y
 		doppelganger.global_transform.basis = global_transform.basis
-		doppelganger.get_node("HeadCam").transform = Transform($ARVRCamera.transform.basis, $ARVRCamera.transform.origin)
-		doppelganger.get_node("HandLeft").transform = Transform($ARVRController_Left.transform.basis, $ARVRController_Left.transform.origin)
-		doppelganger.get_node("HandRight").transform = Transform($ARVRController_Right.transform.basis, $ARVRController_Right.transform.origin)
+		doppelganger.get_node("HeadCam").transform = Transform($HeadCam.transform.basis, $HeadCam.transform.origin)
+		doppelganger.get_node("HandLeft").transform = Transform($HandLeft.transform.basis, $HandLeft.transform.origin)
+		doppelganger.get_node("HandRight").transform = Transform($HandRight.transform.basis, $HandRight.transform.origin)

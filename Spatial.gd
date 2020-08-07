@@ -5,14 +5,12 @@ var arvr_quest = null;
 
 # Stuff to do:
 
-# * make a keyboard player with moving and mouse
-# * make apply to doppelganger 
-# * has to be click rotate by fixed amnount.  smooth rotation is terrible
-# * move the KinematicBody to the ARVROrigin   get_viewport().get_mouse_position()
-# * Input.MOUSE_MODE_CAPTURED for moving head view.  and for moving right hand
-#get_viewport().get_mouse_position()
-#Input.set_mouse_mode (Input.MOUSE_MODE_CAPTURED)
-
+# * move GUIPanel3D to ARVROrigin
+# * Rename ARVR stuff to headcam handleft eft
+# * Move the Laser into the CSGMesh_righthand
+# * laser/spot/laser shadow/laser-selectline all more global (shared selection, or not)
+# * boulder clutter to HandRight/pointersystem
+# * HeadCam.environment moved somewhere more global
 
 # * XCdrawing texture to scale as meters with scale and offsets sorted out to be on the origin
 # * simplify the double points we get in the slices (take the mid-point of them)
@@ -146,12 +144,6 @@ remotesync func ding(t):
 	print("ding ding ding ", t)	
 	print("currentpath ", get_path())
 	
-remote func tunnelvrfunc():
-	print("GOT TUNNELVRFUNC!!!")
-	var id = get_tree().get_rpc_sender_id()
-	print("from id=", id)
-	get_node("ARVROrigin").rpc("ReceiveCallFromTunnelVR", [10,20,30])
-
 
 func _process(_delta):
 	if !perform_runtime_config:

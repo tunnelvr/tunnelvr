@@ -7,10 +7,10 @@ onready var ARVRworld_scale = ARVRServer.world_scale
 var viewport_point := Vector2(0, 0)
 var viewport_mousedown := false
 onready var sketchsystem = get_node("/root/Spatial/SketchSystem")
-onready var arvrorigin = get_node("/root/Spatial/ARVROrigin")
+onready var arvrorigin = get_node("..")
 
 func _on_buttonload_pressed():
-	arvrorigin.get_node("ARVRController_Right/pointersystem").setselectedtarget(null)
+	arvrorigin.get_node("HandRight/pointersystem").setselectedtarget(null)
 	sketchsystem.loadsketchsystem()
 	$Viewport/GUI/Panel/Label.text = "Sketch Loaded"
 	
