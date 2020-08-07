@@ -62,7 +62,6 @@ func _input(event):
 			rhvec.y = clamp(rhvec.y, -0.3, 0.6)
 			mousecontrollervec = rhvec.normalized()*0.8
 
-		
 func _physics_process(delta):
 	# Adjust the height of our player according to our camera position
 	var player_height = max(player_radius, camera_node.transform.origin.y + player_radius)

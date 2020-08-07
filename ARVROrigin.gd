@@ -4,7 +4,7 @@ var xcdrawing_material = preload("res://guimaterials/XCdrawing.material")
 var xcdrawing_active_material = preload("res://guimaterials/XCdrawing_active.material")
 onready var xcdrawing_material_albedoa = xcdrawing_material.albedo_color.a
 onready var xcdrawing_active_material_albedoa = xcdrawing_active_material.albedo_color.a
-onready var doppelganger = get_node("../Players/Doppelganger")
+onready var doppelganger = get_node("../Doppelganger")
 var arvrinterface = null
 
 func settorchlight(torchon):

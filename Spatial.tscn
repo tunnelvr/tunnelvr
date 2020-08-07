@@ -1,7 +1,6 @@
-[gd_scene load_steps=44 format=2]
+[gd_scene load_steps=43 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
-[ext_resource path="res://addons/godot-xr-tools/misc/VR_Common_Shader_Cache.tscn" type="PackedScene" id=2]
 [ext_resource path="res://lightweighttextures/watersurface.material" type="Material" id=3]
 [ext_resource path="res://movementsystem.gd" type="Script" id=4]
 [ext_resource path="res://pointersystem.gd" type="Script" id=5]
@@ -163,16 +162,17 @@ extents = Vector3( 0.5, 0.5, 0.643 )
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
 
-[node name="ARVROrigin" type="ARVROrigin" parent="."]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.24823, -6.41158 )
+[node name="Players" type="Spatial" parent="."]
+transform = Transform( -1, 0, -3.25841e-07, 0, 1, 0, 3.25841e-07, 0, -1, 0, 0, 0 )
+
+[node name="PlayerVR" type="ARVROrigin" parent="Players"]
+transform = Transform( -1, 0, 3.25841e-07, 0, 1, 0, -3.25841e-07, 0, -1, -2.08916e-06, 1.24823, 6.41158 )
 script = ExtResource( 18 )
 
-[node name="HeadCam" type="ARVRCamera" parent="ARVROrigin"]
+[node name="HeadCam" type="ARVRCamera" parent="Players/PlayerVR"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0 )
 
-[node name="vr_common_shader_cache" parent="ARVROrigin/HeadCam" instance=ExtResource( 2 )]
-
-[node name="HeadtorchLight" type="SpotLight" parent="ARVROrigin/HeadCam"]
+[node name="HeadtorchLight" type="SpotLight" parent="Players/PlayerVR/HeadCam"]
 transform = Transform( 1, 0, 0, 0, 0.939693, 0.34202, 0, -0.34202, 0.939693, 0, 0.24, 0 )
 visible = false
 light_energy = 1.66
@@ -184,91 +184,88 @@ spot_attenuation = 0.378929
 spot_angle = 28.9
 spot_angle_attenuation = 1.27456
 
-[node name="HandLeft" type="ARVRController" parent="ARVROrigin"]
+[node name="HandLeft" type="ARVRController" parent="Players/PlayerVR"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.2, 1.5, -0.5 )
 controller_id = 2
 
-[node name="CSGMesh_lefthand" parent="ARVROrigin/HandLeft" instance=ExtResource( 7 )]
+[node name="CSGMesh_lefthand" parent="Players/PlayerVR/HandLeft" instance=ExtResource( 7 )]
 use_collision = true
 collision_mask = 5
 
-[node name="HandRight" type="ARVRController" parent="ARVROrigin"]
+[node name="HandRight" type="ARVRController" parent="Players/PlayerVR"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.2, 1.5, -0.5 )
 
-[node name="CSGMesh_righthand" parent="ARVROrigin/HandRight" instance=ExtResource( 6 )]
+[node name="CSGMesh_righthand" parent="Players/PlayerVR/HandRight" instance=ExtResource( 6 )]
 
-[node name="pointersystem" type="Spatial" parent="ARVROrigin/HandRight"]
+[node name="pointersystem" type="Spatial" parent="Players/PlayerVR/HandRight"]
 transform = Transform( 1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, 0, 0, 0 )
 script = ExtResource( 5 )
 
-[node name="Laser" type="MeshInstance" parent="ARVROrigin/HandRight/pointersystem"]
+[node name="Laser" type="MeshInstance" parent="Players/PlayerVR/HandRight/pointersystem"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.05, -5 )
 cast_shadow = 0
 mesh = SubResource( 1 )
 material/0 = null
 
-[node name="RayCast" type="RayCast" parent="ARVROrigin/HandRight/pointersystem/Laser"]
+[node name="RayCast" type="RayCast" parent="Players/PlayerVR/HandRight/pointersystem/Laser"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.23517e-08, 5 )
 enabled = true
 cast_to = Vector3( 0, 0, -10 )
 collision_mask = 56
 
-[node name="LaserSpot" type="MeshInstance" parent="ARVROrigin/HandRight/pointersystem"]
+[node name="LaserSpot" type="MeshInstance" parent="Players/PlayerVR/HandRight/pointersystem"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -4.96626, 4.96626 )
 visible = false
 mesh = SubResource( 2 )
 material/0 = null
 
-[node name="LaserSpike" type="MeshInstance" parent="ARVROrigin/HandRight/pointersystem/LaserSpot"]
+[node name="LaserSpike" type="MeshInstance" parent="Players/PlayerVR/HandRight/pointersystem/LaserSpot"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0 )
 mesh = SubResource( 3 )
 material/0 = null
 
-[node name="LaserShadow" type="MeshInstance" parent="ARVROrigin/HandRight/pointersystem"]
+[node name="LaserShadow" type="MeshInstance" parent="Players/PlayerVR/HandRight/pointersystem"]
 transform = Transform( 1, 0, 0, 0, 0.707107, -0.707107, 0, 0.707107, 0.707107, 0, -5.76777, 4.06674 )
 visible = false
 mesh = SubResource( 4 )
 material/0 = null
 
-[node name="LaserSelectLine" type="Spatial" parent="ARVROrigin/HandRight/pointersystem"]
+[node name="LaserSelectLine" type="Spatial" parent="Players/PlayerVR/HandRight/pointersystem"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -4.96626, 4.96626 )
 visible = false
 
-[node name="Scale" type="Spatial" parent="ARVROrigin/HandRight/pointersystem/LaserSelectLine"]
+[node name="Scale" type="Spatial" parent="Players/PlayerVR/HandRight/pointersystem/LaserSelectLine"]
 
-[node name="Mesh" type="MeshInstance" parent="ARVROrigin/HandRight/pointersystem/LaserSelectLine/Scale"]
+[node name="Mesh" type="MeshInstance" parent="Players/PlayerVR/HandRight/pointersystem/LaserSelectLine/Scale"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.5 )
 mesh = SubResource( 5 )
 material/0 = null
 
-[node name="SoundPointer" type="AudioStreamPlayer3D" parent="ARVROrigin/HandRight/pointersystem"]
+[node name="SoundPointer" type="AudioStreamPlayer3D" parent="Players/PlayerVR/HandRight/pointersystem"]
 transform = Transform( 1, 0, 0, 0, 0.707107, -0.707107, 0, 0.707107, 0.707107, 0, 0, 0 )
 stream = ExtResource( 9 )
 
-[node name="KinematicBody" type="KinematicBody" parent="ARVROrigin"]
+[node name="KinematicBody" type="KinematicBody" parent="Players/PlayerVR"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.24823, 6.41158 )
 collision_mask = 38
 
-[node name="CollisionShape" type="CollisionShape" parent="ARVROrigin/KinematicBody"]
+[node name="CollisionShape" type="CollisionShape" parent="Players/PlayerVR/KinematicBody"]
 transform = Transform( 1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0.9, 0 )
 shape = SubResource( 6 )
 
-[node name="Tail" type="RayCast" parent="ARVROrigin/KinematicBody"]
+[node name="Tail" type="RayCast" parent="Players/PlayerVR/KinematicBody"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0 )
 enabled = true
 cast_to = Vector3( 0, -0.6, 0 )
 collision_mask = 1048558
 
-[node name="movementsystem" type="Node" parent="ARVROrigin"]
+[node name="movementsystem" type="Node" parent="Players/PlayerVR"]
 script = ExtResource( 4 )
 
-[node name="GUIPanel3D" parent="ARVROrigin" instance=ExtResource( 14 )]
+[node name="GUIPanel3D" parent="Players/PlayerVR" instance=ExtResource( 14 )]
 transform = Transform( 0.512717, 0, -0.858558, 0, 1, 0, 0.858558, 0, 0.512717, 2.5832, -0.11332, 7.41587 )
 visible = false
 script = ExtResource( 15 )
-
-[node name="Players" type="Spatial" parent="."]
-transform = Transform( -1, 0, -3.25841e-07, 0, 1, 0, 3.25841e-07, 0, -1, 0, 0, 0 )
 
 [node name="Doppelganger" type="Spatial" parent="Players"]
 transform = Transform( -1, 0, -3.25841e-07, 0, 1, 0, 3.25841e-07, 0, -1, 0, 0, -8 )

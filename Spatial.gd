@@ -110,7 +110,7 @@ func _ready():
 			Engine.target_fps = 90
 			OS.vsync_enabled = false;
 			print("  Success initializing OpenVR Interface.");
-			$ARVROrigin.arvrinterface = arvr_openvr
+			$Players/PlayerVR.arvrinterface = arvr_openvr
 
 	else:
 		print("*** VR not working")
