@@ -2,264 +2,154 @@ extends Node
 
 enum MOVEMENT_TYPE { MOVE_AND_ROTATE, MOVE_AND_STRAFE }
 
-# Is this active?
-export var enabled = true setget set_enabled, get_enabled
+onready var origin_node = get_node("..")
+onready var camera_node = origin_node.get_node('ARVRCamera')
+onready var controller = get_node("../ARVRController_Left")
+onready var controllerRight = get_node("../ARVRController_Right")
+onready var kinematic_body: KinematicBody = origin_node.get_node("KinematicBody")
+onready var collision_shape: CollisionShape = origin_node.get_node("KinematicBody/CollisionShape")
+onready var tail : RayCast = origin_node.get_node("KinematicBody/Tail")
+onready var world_scale = ARVRServer.world_scale
 
-# We don't know the name of the camera node... 
-export (NodePath) var camera = null
-
-# size of our player
-export var player_radius = 0.25 setget set_player_radius, get_player_radius
-
-# to combat motion sickness we'll 'step' our left/right turning
-export var smooth_rotation = false
-export var smooth_turn_speed = 2.0
-export var step_turn_delay = 0.2
-export var step_turn_angle = 20.0
-
-# and movement
-export var max_speed = 300.0
-export var drag_factor = 0.1
-
-# enum our buttons, should find a way to put this more central
-enum Buttons {
-	VR_BUTTON_BY = 1,
-	VR_GRIP = 2,
-	VR_BUTTON_3 = 3,
-	VR_BUTTON_4 = 4,
-	VR_BUTTON_5 = 5,
-	VR_BUTTON_6 = 6,
-	VR_BUTTON_AX = 7,
-	VR_BUTTON_8 = 8,
-	VR_BUTTON_9 = 9,
-	VR_BUTTON_10 = 10,
-	VR_BUTTON_11 = 11,
-	VR_BUTTON_12 = 12,
-	VR_BUTTON_13 = 13,
-	VR_PAD = 14,
-	VR_TRIGGER = 15
-}
-
-# fly mode and strafe movement management
-export (MOVEMENT_TYPE) var move_type = MOVEMENT_TYPE.MOVE_AND_ROTATE
-export var canFly = true
-export (Buttons) var fly_move_button_id = Buttons.VR_TRIGGER
-export (Buttons) var fly_activate_button_id = Buttons.VR_GRIP
-var isflying = false
-
-var turn_step = 0.0
-var origin_node = null
-var camera_node = null
+var player_radius = 0.25
+var nextphysicsrotatestep = 0.0  # avoid flicker if done in _physics_process 
+var mousecontrollervec = Vector3(0.2, -0.1, -0.5)
 var velocity = Vector3(0.0, 0.0, 0.0)
 var gravity = -30.0
 
-onready var kinematic_body: KinematicBody = get_node("KinematicBody")
-onready var collision_shape: CollisionShape = get_node("KinematicBody/CollisionShape")
-onready var tail : RayCast = get_node("KinematicBody/Tail")
+export var max_speed = 300.0
+export var drag_factor = 0.1
 
-
-func set_enabled(new_value):
-	enabled = new_value
-	if collision_shape:
-		collision_shape.disabled = !enabled
-	if tail:
-		tail.enabled = enabled
-	if enabled:
-		# make sure our physics process is on
-		set_physics_process(true)
-	else:
-		# we turn this off in physics process just in case we want to do some cleanup
-		pass
-
-func get_enabled():
-	return enabled
-
-
-func get_player_radius():
-	return player_radius
-
-func set_player_radius(p_radius):
-	player_radius = p_radius
+enum Buttons { VR_TRIGGER = 15, VR_PAD=14, VR_BUTTON_BY=1, VR_GRIP=2 }
 
 func _ready():
-	# origin node should always be the parent of our parent
-	origin_node = get_node("../..")
-	if camera:
-		camera_node = get_node(camera)
-	else:
-		# see if we can find our default
-		camera_node = origin_node.get_node('ARVRCamera')
-	print("___movementready ", origin_node, " ", camera, " ", camera_node, "  ee=", enabled)
-	
-	# Our properties are set before our children are constructed so just re-issue
-	set_player_radius(player_radius)
-	
-	collision_shape.disabled = !enabled
-	tail.enabled = enabled
+	controller.connect("button_pressed", self, "_on_button_pressed")
+	print("ARVRinterfaces ", ARVRServer.get_interfaces())
 
+func _on_button_pressed(p_button):
+	if p_button == Buttons.VR_PAD:
+		var left_right = controller.get_joystick_axis(0)
+		var up_down = controller.get_joystick_axis(1)
+		if abs(up_down) < 0.5 and abs(left_right) > 0.1:
+			nextphysicsrotatestep += (1 if left_right > 0 else -1)*(22.5 if abs(left_right) > 0.8 else 90.0)
+
+func _input(event):
+	if event is InputEventKey and event.pressed:
+		if event.is_action_pressed("lh_left") and not Input.is_action_pressed("lh_shift"):
+			nextphysicsrotatestep += -22.5
+		if event.is_action_pressed("lh_right") and not Input.is_action_pressed("lh_shift"):
+			nextphysicsrotatestep += 22.5
+		if event.is_action_pressed("ui_cancel"):
+			if Input.get_mouse_mode() == Input.MOUSE_MODE_VISIBLE:
+				Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+			else:
+				Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+
+	if event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
+		if origin_node.arvrinterface == null or origin_node.arvrinterface.get_tracking_status() == ARVRInterface.ARVR_NOT_TRACKING:
+			var rhvec = mousecontrollervec + Vector3(event.relative.x, event.relative.y, 0)*0.006
+			rhvec.x = clamp(rhvec.x, -0.4, 0.4)
+			rhvec.y = clamp(rhvec.y, -0.3, 0.6)
+			mousecontrollervec = rhvec.normalized()*0.8
+
+		
 func _physics_process(delta):
-	if !origin_node:
-		return
-	
-	if !camera_node:
-		return
-	
-	if !enabled:
-		set_physics_process(false)
-		return
-	
 	# Adjust the height of our player according to our camera position
-	var player_height = camera_node.transform.origin.y + player_radius
-	if player_height < player_radius:
-		# not smaller than this
-		player_height = player_radius
-	
+	var player_height = max(player_radius, camera_node.transform.origin.y + player_radius)
 	collision_shape.shape.radius = player_radius
 	collision_shape.shape.height = player_height - (player_radius * 2.0)
 	collision_shape.transform.origin.y = (player_height / 2.0)
-	
-	# We should be the child or the controller on which the teleport is implemented
-	var controller = get_parent()
-	if true or controller.get_is_active():
-		var left_right = controller.get_joystick_axis(0)
-		var forwards_backwards = controller.get_joystick_axis(1)
-		if Input.is_action_pressed("lh_forward"):
-			forwards_backwards = 0.6
-		elif Input.is_action_pressed("lh_backward"):
-			forwards_backwards = -0.6
-		if Input.is_action_pressed("lh_left"):
-			left_right = -0.6
-		elif Input.is_action_pressed("lh_right"):
-			left_right = 0.6
+	#print(get_viewport().get_mouse_position(), Input.get_mouse_mode())
+	controller.visible = controller.get_is_active() and origin_node.arvrinterface != null
+
+	if nextphysicsrotatestep != 0:
+		var t1 = Transform()
+		var t2 = Transform()
+		var rot = Transform()
+		t1.origin = -camera_node.transform.origin
+		t2.origin = camera_node.transform.origin
+		rot = rot.rotated(Vector3(0.0, -1, 0.0), deg2rad(nextphysicsrotatestep))
+		origin_node.transform *= t2 * rot * t1
+		nextphysicsrotatestep = 0.0
 		
-		# if fly_action_button_id is pressed it activates the FLY MODE
-		# if fly_action_button_id is released it deactivates the FLY MODE
-		if (controller.is_button_pressed(fly_activate_button_id) or Input.is_action_pressed("lh_fly")) && canFly:
-			isflying =  true
-		else:
-			isflying = false
+	var left_right = controller.get_joystick_axis(0) if controller.get_is_active() else 0.0
+	var forwards_backwards = controller.get_joystick_axis(1) if controller.get_is_active() else 0.0
+
+	var lhkeyvec = Vector2(0, 0)
+	if Input.is_action_pressed("lh_forward"):
+		lhkeyvec.y += 1
+	if Input.is_action_pressed("lh_backward"):
+		lhkeyvec.y += -1
+	if Input.is_action_pressed("lh_left"):
+		lhkeyvec.x += 1
+	if Input.is_action_pressed("lh_right"):
+		lhkeyvec.x += -1
+	if not Input.is_action_pressed("lh_shift"):
+		forwards_backwards += 0.6*lhkeyvec.y*60*delta
+		left_right += -0.6*lhkeyvec.x*60*delta
 		
-		# if player is flying, he moves following the controller's orientation
-		if isflying:	
-			if controller.is_button_pressed(fly_move_button_id):
-				# is flying, so we will use the controller's transform to move the VR capsule follow its orientation					
-				var curr_transform = kinematic_body.global_transform
-				velocity = controller.global_transform.basis.z.normalized() * -delta * max_speed * ARVRServer.world_scale
-				velocity = kinematic_body.move_and_slide(velocity)
-				var movement = (kinematic_body.global_transform.origin - curr_transform.origin)
-				origin_node.global_transform.origin += movement
+	if origin_node.arvrinterface == null:
+		if Input.is_action_pressed("lh_shift") and lhkeyvec != Vector2(0,0):
+			var vtarget = -camera_node.global_transform.basis.z*20 + camera_node.global_transform.basis.x*lhkeyvec.x*15*delta + Vector3(0, lhkeyvec.y, 0)*15*delta
+			camera_node.look_at(camera_node.global_transform.origin + vtarget, Vector3(0,1,0))
+			origin_node.rotation_degrees.y += camera_node.rotation_degrees.y
+			camera_node.rotation_degrees.y = 0
+		var mvec = camera_node.global_transform.basis.xform(mousecontrollervec)
+		controllerRight.global_transform.origin = camera_node.global_transform.origin + mvec
+		controllerRight.look_at(controllerRight.global_transform.origin + 1.0*mvec + 0.0*camera_node.global_transform.basis.z, Vector3(0,1,0))
+		controllerRight.global_transform.origin.y -= 0.3
 		
-		################################################################
-		# first process turning, no problems there :)
-		# move_type == MOVEMENT_TYPE.move_and_strafe
-		else:
-			if(move_type == MOVEMENT_TYPE.MOVE_AND_ROTATE && abs(left_right) > 0.1):
-				if smooth_rotation:
-					# we rotate around our Camera, but we adjust our origin, so we need a little bit of trickery
-					var t1 = Transform()
-					var t2 = Transform()
-					var rot = Transform()
-					
-					t1.origin = -camera_node.transform.origin
-					t2.origin = camera_node.transform.origin
-					rot = rot.rotated(Vector3(0.0, -1.0, 0.0), smooth_turn_speed * delta * left_right)
-					origin_node.transform *= t2 * rot * t1
-					
-					# reset turn step, doesn't apply
-					turn_step = 0.0
-				else:
-					if left_right > 0.0:
-						if turn_step < 0.0:
-							# reset step
-							turn_step = 0
-						
-						turn_step += left_right * delta
-					else:
-						if turn_step > 0.0:
-							# reset step
-							turn_step = 0
-						
-						turn_step += left_right * delta
-					
-					if abs(turn_step) > step_turn_delay:
-						# we rotate around our Camera, but we adjust our origin, so we need a little bit of trickery
-						var t1 = Transform()
-						var t2 = Transform()
-						var rot = Transform()
-						
-						t1.origin = -camera_node.transform.origin
-						t2.origin = camera_node.transform.origin
-						
-						# Rotating
-						while abs(turn_step) > step_turn_delay:
-							if (turn_step > 0.0):
-								rot = rot.rotated(Vector3(0.0, -1.0, 0.0), step_turn_angle * PI / 180.0)
-								turn_step -= step_turn_delay
-							else:
-								rot = rot.rotated(Vector3(0.0, 1.0, 0.0), step_turn_angle * PI / 180.0)
-								turn_step += step_turn_delay
-						
-						origin_node.transform *= t2 * rot * t1
-			else:
-				# reset turn step, no longer turning
-				turn_step = 0.0
-			
-			# disable all gravity and velocities JGT
-			if drag_factor == 0.0:
-				return
-			
-			################################################################
-			# now we do our movement
-			# We start with placing our KinematicBody in the right place
-			# by centering it on the camera but placing it on the ground
+	if controller.is_button_pressed(Buttons.VR_GRIP) or Input.is_action_pressed("lh_fly"):
+		if controller.is_button_pressed(Buttons.VR_TRIGGER) or Input.is_action_pressed("lh_forward") or Input.is_action_pressed("lh_backward"):
 			var curr_transform = kinematic_body.global_transform
-			var camera_transform = camera_node.global_transform
-			curr_transform.origin = camera_transform.origin
-			curr_transform.origin.y = origin_node.global_transform.origin.y
-			
-			# now we move it slightly back
-			var forward_dir = -camera_transform.basis.z
-			forward_dir.y = 0.0
-			if forward_dir.length() > 0.01:
-				curr_transform.origin += forward_dir.normalized() * -0.75 * player_radius
-			
-			kinematic_body.global_transform = curr_transform
-			
-			# we'll handle gravity separately
-			var gravity_velocity = Vector3(0.0, velocity.y, 0.0)
-			velocity.y = 0.0
-			
-			# Apply our drag
-			velocity *= (1.0 - drag_factor)
-			
-			if move_type == MOVEMENT_TYPE.MOVE_AND_ROTATE:
-				if (abs(forwards_backwards) > 0.1 and tail.is_colliding()):
-					var dir = camera_transform.basis.z
-					dir.y = 0.0					
-					velocity = dir.normalized() * -forwards_backwards * delta * max_speed * ARVRServer.world_scale
-					#velocity = velocity.linear_interpolate(dir, delta * 100.0)		
-			elif move_type == MOVEMENT_TYPE.MOVE_AND_STRAFE:
-				if ((abs(forwards_backwards) > 0.1 ||  abs(left_right) > 0.1) and tail.is_colliding()):
-					var dir_forward = camera_transform.basis.z
-					dir_forward.y = 0.0				
-					# VR Capsule will strafe left and right
-					var dir_right = camera_transform.basis.x;
-					dir_right.y = 0.0				
-					velocity = (dir_forward * -forwards_backwards + dir_right * left_right).normalized() * delta * max_speed * ARVRServer.world_scale
-			
-			# apply move and slide to our kinematic body
-			velocity = kinematic_body.move_and_slide(velocity, Vector3(0.0, 1.0, 0.0))
-			
-			# apply our gravity
-			gravity_velocity.y += gravity * delta
-			gravity_velocity = kinematic_body.move_and_slide(gravity_velocity, Vector3(0.0, 1.0, 0.0))
-			velocity.y = gravity_velocity.y
-			
-			# now use our new position to move our origin point
+			var flydir = controller.global_transform.basis.z if controller.get_is_active() else camera_node.global_transform.basis.z
+			if forwards_backwards < -0.5:
+				flydir = -flydir
+			velocity = flydir.normalized() * -delta * max_speed * world_scale
+			velocity = kinematic_body.move_and_slide(velocity)
 			var movement = (kinematic_body.global_transform.origin - curr_transform.origin)
 			origin_node.global_transform.origin += movement
-			
-			# Return this back to where it was so we can use its collision shape for other things too
-			kinematic_body.global_transform.origin = curr_transform.origin
+	
+	else:
+		var curr_transform = kinematic_body.global_transform
+		var camera_transform = camera_node.global_transform
+		curr_transform.origin = camera_transform.origin
+		curr_transform.origin.y = origin_node.global_transform.origin.y
+		
+		# now we move it slightly back
+		var forward_dir = -camera_transform.basis.z
+		forward_dir.y = 0.0
+		if forward_dir.length() > 0.01:
+			curr_transform.origin += forward_dir.normalized() * -0.75 * player_radius
+		
+		kinematic_body.global_transform = curr_transform
+		
+		# we'll handle gravity separately
+		var gravity_velocity = Vector3(0.0, velocity.y, 0.0)
+		velocity.y = 0.0
+		
+		# Apply our drag
+		velocity *= (1.0 - drag_factor)
+		
+		if (abs(forwards_backwards) > 0.1 and tail.is_colliding()):
+			var dir = camera_transform.basis.z
+			dir.y = 0.0					
+			velocity = dir.normalized() * -forwards_backwards * delta * max_speed * world_scale
+			#velocity = velocity.linear_interpolate(dir, delta * 100.0)		
+		
+		# apply move and slide to our kinematic body
+		velocity = kinematic_body.move_and_slide(velocity, Vector3(0.0, 1.0, 0.0))
+		
+		# apply our gravity
+		gravity_velocity.y += gravity * delta
+		gravity_velocity = kinematic_body.move_and_slide(gravity_velocity, Vector3(0.0, 1.0, 0.0))
+		velocity.y = gravity_velocity.y
+		
+		# now use our new position to move our origin point
+		var movement = (kinematic_body.global_transform.origin - curr_transform.origin)
+		origin_node.global_transform.origin += movement
+		
+		# Return this back to where it was so we can use its collision shape for other things too
+		kinematic_body.global_transform.origin = curr_transform.origin
 
 	

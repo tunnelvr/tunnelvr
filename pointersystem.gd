@@ -100,9 +100,6 @@ func settextpanel(ltext, pos):
 		textpanel.visible = false
 
 func _ready():
-	get_parent().connect("button_pressed", self, "_on_button_pressed")
-	get_parent().connect("button_release", self, "_on_button_release")
-	
 	# apply our world scale to our laser position
 	$Laser.translation.y = laser_y * ARVRworld_scale
 	

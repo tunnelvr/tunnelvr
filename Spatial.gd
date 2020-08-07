@@ -5,14 +5,16 @@ var arvr_quest = null;
 
 # Stuff to do:
 
-# * XCdrawing texture to scale as meters
 # * make a keyboard player with moving and mouse
-# * make apply to doppelganger
+# * make apply to doppelganger 
+# * has to be click rotate by fixed amnount.  smooth rotation is terrible
 # * move the KinematicBody to the ARVROrigin   get_viewport().get_mouse_position()
 # * Input.MOUSE_MODE_CAPTURED for moving head view.  and for moving right hand
+#get_viewport().get_mouse_position()
+#Input.set_mouse_mode (Input.MOUSE_MODE_CAPTURED)
 
 
-
+# * XCdrawing texture to scale as meters with scale and offsets sorted out to be on the origin
 # * simplify the double points we get in the slices (take the mid-point of them)
 # * make a doppleganger of the ARVR origin and controller and hands, for use with the networking
 # * clear up the laser pointer logic and materials
@@ -110,11 +112,13 @@ func _ready():
 			Engine.target_fps = 90
 			OS.vsync_enabled = false;
 			print("  Success initializing OpenVR Interface.");
+			$ARVROrigin.arvrinterface = arvr_openvr
 
 	else:
 		print("*** VR not working")
 
-
+	return 
+	
 	get_tree().connect("network_peer_connected", self, "_player_connected")
 	get_tree().connect("network_peer_disconnected", self, "_player_disconnected")
 	var host = NetworkedMultiplayerENet.new()

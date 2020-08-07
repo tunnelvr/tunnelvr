@@ -5,7 +5,8 @@ var xcdrawing_active_material = preload("res://guimaterials/XCdrawing_active.mat
 onready var xcdrawing_material_albedoa = xcdrawing_material.albedo_color.a
 onready var xcdrawing_active_material_albedoa = xcdrawing_active_material.albedo_color.a
 onready var doppelganger = get_node("../Players/Doppelganger")
-	
+var arvrinterface = null
+
 func settorchlight(torchon):
 	$ARVRCamera/HeadtorchLight.visible = torchon
 	$DirectionalLight.visible = not torchon
@@ -16,10 +17,9 @@ func settorchlight(torchon):
 
 func _ready():
 	#settorchlight(false)
-	pass
 	print("dddd ", doppelganger, get_node(".."))
 
-func _process(_delta):
+func _physics_process(_delta):
 	if is_inside_tree() and is_instance_valid(doppelganger):
 #		doppelganger.get_node("HeadCam").global_transform = Transform($ARVRCamera.global_transform.basis, $ARVRCamera.global_transform.origin + vdisp)
 #		doppelganger.get_node("HandLeft").global_transform = Transform($ARVRController_Left.global_transform.basis, $ARVRController_Left.global_transform.origin + vdisp)

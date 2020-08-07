@@ -24,24 +24,20 @@
 [ext_resource path="res://guimaterials/laserspot.material" type="Material" id=22]
 [ext_resource path="res://guimaterials/lasershadow.material" type="Material" id=23]
 
-[sub_resource type="CapsuleShape" id=1]
-radius = 0.3
-height = 1.2
-
-[sub_resource type="CubeMesh" id=2]
+[sub_resource type="CubeMesh" id=1]
 resource_local_to_scene = true
 material = ExtResource( 20 )
 size = Vector3( 0.002, 0.002, 10 )
 subdivide_depth = 20
 
-[sub_resource type="SphereMesh" id=3]
+[sub_resource type="SphereMesh" id=2]
 material = ExtResource( 22 )
 radius = 0.05
 height = 0.1
 radial_segments = 8
 rings = 4
 
-[sub_resource type="CylinderMesh" id=4]
+[sub_resource type="CylinderMesh" id=3]
 material = ExtResource( 16 )
 top_radius = 0.001
 bottom_radius = 0.02
@@ -49,7 +45,7 @@ height = 0.2
 radial_segments = 6
 rings = 1
 
-[sub_resource type="CylinderMesh" id=5]
+[sub_resource type="CylinderMesh" id=4]
 material = ExtResource( 23 )
 top_radius = 0.05
 bottom_radius = 0.05
@@ -57,9 +53,13 @@ height = 0.02
 radial_segments = 8
 rings = 1
 
-[sub_resource type="CubeMesh" id=6]
+[sub_resource type="CubeMesh" id=5]
 material = ExtResource( 19 )
 size = Vector3( 0.01, 0.01, 1 )
+
+[sub_resource type="CapsuleShape" id=6]
+radius = 0.3
+height = 1.2
 
 [sub_resource type="SpatialMaterial" id=7]
 params_cull_mode = 2
@@ -95,7 +95,7 @@ bottom_radius = 0.1
 height = 0.4
 radial_segments = 4
 
-[sub_resource type="Shader" id=19]
+[sub_resource type="Shader" id=14]
 code = "shader_type spatial;
 render_mode blend_mix,depth_draw_opaque,cull_back,diffuse_burley,specular_schlick_ggx;
 uniform vec4 albedo : hint_color;
@@ -126,10 +126,10 @@ void fragment() {
 }
 "
 
-[sub_resource type="ProxyTexture" id=20]
+[sub_resource type="ProxyTexture" id=15]
 
-[sub_resource type="ShaderMaterial" id=21]
-shader = SubResource( 19 )
+[sub_resource type="ShaderMaterial" id=16]
+shader = SubResource( 14 )
 shader_param/albedo = Color( 0.435294, 0.215686, 0.141176, 0.454902 )
 shader_param/specular = 0.5
 shader_param/metallic = 0.48
@@ -137,28 +137,28 @@ shader_param/roughness = 0.71
 shader_param/point_size = 1.0
 shader_param/uv1_scale = Vector3( 3, 1, 1 )
 shader_param/uv1_offset = Vector3( 0, 0, 0 )
-shader_param/texture_albedo = SubResource( 20 )
-
-[sub_resource type="PlaneMesh" id=14]
-material = SubResource( 21 )
-size = Vector2( 4, 2 )
-
-[sub_resource type="StreamTexture" id=15]
-flags = 23
-load_path = "res://.import/DukeStResurvey-drawnup-p3.jpg-0879ecaf32e6ebe816442b6097f62a78.s3tc.stex"
-
-[sub_resource type="SpatialMaterial" id=16]
-params_cull_mode = 2
-albedo_color = Color( 0.992157, 0.992157, 0.666667, 1 )
-albedo_texture = SubResource( 15 )
+shader_param/texture_albedo = SubResource( 15 )
 
 [sub_resource type="PlaneMesh" id=17]
 material = SubResource( 16 )
+size = Vector2( 4, 2 )
+
+[sub_resource type="StreamTexture" id=18]
+flags = 23
+load_path = "res://.import/DukeStResurvey-drawnup-p3.jpg-0879ecaf32e6ebe816442b6097f62a78.s3tc.stex"
+
+[sub_resource type="SpatialMaterial" id=19]
+params_cull_mode = 2
+albedo_color = Color( 0.992157, 0.992157, 0.666667, 1 )
+albedo_texture = SubResource( 18 )
+
+[sub_resource type="PlaneMesh" id=20]
+material = SubResource( 19 )
 size = Vector2( 1, 1.285 )
 subdivide_width = 4
 subdivide_depth = 4
 
-[sub_resource type="BoxShape" id=18]
+[sub_resource type="BoxShape" id=21]
 extents = Vector3( 0.5, 0.5, 0.643 )
 
 [node name="Spatial" type="Spatial"]
@@ -169,6 +169,7 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.24823, -6.41158 )
 script = ExtResource( 18 )
 
 [node name="ARVRCamera" type="ARVRCamera" parent="ARVROrigin"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0 )
 
 [node name="vr_common_shader_cache" parent="ARVROrigin/ARVRCamera" instance=ExtResource( 2 )]
 
@@ -185,30 +186,15 @@ spot_angle = 28.9
 spot_angle_attenuation = 1.27456
 
 [node name="ARVRController_Left" type="ARVRController" parent="ARVROrigin"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.2, 1.5, -0.5 )
 controller_id = 2
 
 [node name="CSGMesh_lefthand" parent="ARVROrigin/ARVRController_Left" instance=ExtResource( 7 )]
 use_collision = true
 collision_mask = 5
 
-[node name="movementsystem" type="Node" parent="ARVROrigin/ARVRController_Left"]
-script = ExtResource( 4 )
-smooth_rotation = true
-
-[node name="KinematicBody" type="KinematicBody" parent="ARVROrigin/ARVRController_Left/movementsystem"]
-collision_mask = 38
-
-[node name="CollisionShape" type="CollisionShape" parent="ARVROrigin/ARVRController_Left/movementsystem/KinematicBody"]
-transform = Transform( 1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0.9, 0 )
-shape = SubResource( 1 )
-
-[node name="Tail" type="RayCast" parent="ARVROrigin/ARVRController_Left/movementsystem/KinematicBody"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0 )
-enabled = true
-cast_to = Vector3( 0, -0.6, 0 )
-collision_mask = 1048558
-
 [node name="ARVRController_Right" type="ARVRController" parent="ARVROrigin"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.2, 1.5, -0.5 )
 
 [node name="CSGMesh_righthand" parent="ARVROrigin/ARVRController_Right" instance=ExtResource( 6 )]
 
@@ -219,7 +205,7 @@ script = ExtResource( 5 )
 [node name="Laser" type="MeshInstance" parent="ARVROrigin/ARVRController_Right/pointersystem"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.05, -5 )
 cast_shadow = 0
-mesh = SubResource( 2 )
+mesh = SubResource( 1 )
 material/0 = null
 
 [node name="RayCast" type="RayCast" parent="ARVROrigin/ARVRController_Right/pointersystem/Laser"]
@@ -231,18 +217,18 @@ collision_mask = 56
 [node name="LaserSpot" type="MeshInstance" parent="ARVROrigin/ARVRController_Right/pointersystem"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -4.96626, 4.96626 )
 visible = false
-mesh = SubResource( 3 )
+mesh = SubResource( 2 )
 material/0 = null
 
 [node name="LaserSpike" type="MeshInstance" parent="ARVROrigin/ARVRController_Right/pointersystem/LaserSpot"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0 )
-mesh = SubResource( 4 )
+mesh = SubResource( 3 )
 material/0 = null
 
 [node name="LaserShadow" type="MeshInstance" parent="ARVROrigin/ARVRController_Right/pointersystem"]
 transform = Transform( 1, 0, 0, 0, 0.707107, -0.707107, 0, 0.707107, 0.707107, 0, -5.76777, 4.06674 )
 visible = false
-mesh = SubResource( 5 )
+mesh = SubResource( 4 )
 material/0 = null
 
 [node name="LaserSelectLine" type="Spatial" parent="ARVROrigin/ARVRController_Right/pointersystem"]
@@ -253,7 +239,7 @@ visible = false
 
 [node name="Mesh" type="MeshInstance" parent="ARVROrigin/ARVRController_Right/pointersystem/LaserSelectLine/Scale"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.5 )
-mesh = SubResource( 6 )
+mesh = SubResource( 5 )
 material/0 = null
 
 [node name="SoundPointer" type="AudioStreamPlayer3D" parent="ARVROrigin/ARVRController_Right/pointersystem"]
@@ -266,7 +252,25 @@ light_energy = 0.6
 shadow_enabled = true
 shadow_color = Color( 0.388235, 0.0705882, 0.0705882, 1 )
 
+[node name="KinematicBody" type="KinematicBody" parent="ARVROrigin"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.24823, 6.41158 )
+collision_mask = 38
+
+[node name="CollisionShape" type="CollisionShape" parent="ARVROrigin/KinematicBody"]
+transform = Transform( 1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0.9, 0 )
+shape = SubResource( 6 )
+
+[node name="Tail" type="RayCast" parent="ARVROrigin/KinematicBody"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0 )
+enabled = true
+cast_to = Vector3( 0, -0.6, 0 )
+collision_mask = 1048558
+
+[node name="movementsystem" type="Node" parent="ARVROrigin"]
+script = ExtResource( 4 )
+
 [node name="Players" type="Spatial" parent="."]
+transform = Transform( -1, 0, -3.25841e-07, 0, 1, 0, 3.25841e-07, 0, -1, 0, 0, 0 )
 
 [node name="Doppelganger" type="Spatial" parent="Players"]
 transform = Transform( -1, 0, -3.25841e-07, 0, 1, 0, 3.25841e-07, 0, -1, 0, 0, -8 )
@@ -349,7 +353,7 @@ script = ExtResource( 15 )
 [node name="LaserSquare" type="MeshInstance" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 2.42691, 1.24388, 1.94417 )
 material_override = ExtResource( 3 )
-mesh = SubResource( 14 )
+mesh = SubResource( 17 )
 material/0 = ExtResource( 3 )
 
 [node name="BoulderClutter" type="Spatial" parent="."]
@@ -362,9 +366,9 @@ collision_layer = 18
 collision_mask = 0
 
 [node name="MeshInstance" type="MeshInstance" parent="drawnfloor"]
-mesh = SubResource( 17 )
+mesh = SubResource( 20 )
 material/0 = null
 
 [node name="CollisionShape" type="CollisionShape" parent="drawnfloor"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0 )
-shape = SubResource( 18 )
+shape = SubResource( 21 )
