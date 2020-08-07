@@ -5,10 +5,16 @@ var arvr_quest = null;
 
 # Stuff to do:
 
-# * bug in xc cut on a tube with 2 sections
+# * XCdrawing texture to scale as meters
+# * make a keyboard player with moving and mouse
+# * make apply to doppelganger
+# * move the KinematicBody to the ARVROrigin   get_viewport().get_mouse_position()
+# * Input.MOUSE_MODE_CAPTURED for moving head view.  and for moving right hand
+
+
+
 # * simplify the double points we get in the slices (take the mid-point of them)
 # * make a doppleganger of the ARVR origin and controller and hands, for use with the networking
-# *  starting with a character who moves around and is a reflection of current character
 # * clear up the laser pointer logic and materials
 # * shorten laser pointer to end on the node
 # * automatically make the xcplane big enough as you draw close to its edge
@@ -107,25 +113,40 @@ func _ready():
 
 	else:
 		print("*** VR not working")
+
+
+	get_tree().connect("network_peer_connected", self, "_player_connected")
+	get_tree().connect("network_peer_disconnected", self, "_player_disconnected")
+	var host = NetworkedMultiplayerENet.new()
+	host.create_server(10567, 5)
+	#host.create_client("127.0.0.1", 10567)
+	get_tree().set_network_peer(host)
+	print("nnet-id ", get_tree().get_network_unique_id())
+	rpc("ding", 999)
+	print("ding called")
 	
-	# pass across object pointers to the pointer system
-	var pointer = $ARVROrigin/ARVRController_Right/pointersystem
-	pointer.sketchsystem = $SketchSystem
-	pointer.centrelinesystem = $SketchSystem/Centreline
-	pointer.nodeorientationpreview = $SketchSystem/NodeOrientationPreview
-	pointer.guipanel3d = $GUIPanel3D
-	pointer.guipanel3d.visible = false
-	pointer.floordrawing = $SketchSystem/floordrawing
+	#var client = NetworkedMultiplayerENet.new()
+	#client.create_client("127.0.0.1", 9009)
+	#get_tree().set_network_peer(client)
+	#print("nnet-id ", get_tree().get_network_unique_id())
+	#rpc("ding", 9991)
+	#print("ding called again")
+
+func _player_connected(id):
+	print("_player_connected ", id)
 	
-	$SketchSystem/Centreline.floordrawing = $SketchSystem/floordrawing
-	$ARVROrigin/ARVRController_Right/pointersystem/LaserSpot.visible = false
-	$ARVROrigin/ARVRController_Right/pointersystem/LaserShadow.visible = false
-	$GUIPanel3D.sketchsystem = $SketchSystem
-	$GUIPanel3D.arvrorigin = $ARVROrigin
-		
-	$SketchSystem/floordrawing.floortype = true
-	$SketchSystem/floordrawing.otxcdIndex = -1
+func _player_disconnected(id):
+	print("_player_disconnected ", id)
 	
+remotesync func ding(t):
+	print("ding ding ding ", t)	
+	print("currentpath ", get_path())
+	
+remote func tunnelvrfunc():
+	print("GOT TUNNELVRFUNC!!!")
+	var id = get_tree().get_rpc_sender_id()
+	print("from id=", id)
+	get_node("ARVROrigin").rpc("ReceiveCallFromTunnelVR", [10,20,30])
 
 
 func _process(_delta):

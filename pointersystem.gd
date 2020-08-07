@@ -1,22 +1,17 @@
 extends Spatial
 
-# this has a pointer sphere added JGT
-# (and a lot of other hacking)
+onready var sketchsystem = get_node("/root/Spatial/SketchSystem")
+onready var centrelinesystem = sketchsystem.get_node("Centreline")
+onready var nodeorientationpreview = sketchsystem.get_node("NodeOrientationPreview")
+onready var guipanel3d = get_node("/root/Spatial/GUIPanel3D")
+onready var floordrawing = sketchsystem.get_node("floordrawing")
+onready var controller = get_parent()
+onready var arvrcamera = get_node("../../ARVRCamera")
 
-# variables set by the Spatial.gd
-var sketchsystem = null
-var centrelinesystem =null
-var nodeorientationpreview = null
-
-var guipanel3d = null
-var _is_activating_gui = false
 var viewport_point = null
 
 enum Buttons { VR_TRIGGER = 15, VR_PAD=14, VR_BUTTON_BY=1, VR_GRIP=2 }
-onready var controller = get_parent()
-onready var arvrcamera = get_node("../../ARVRCamera")
 var distance = 50
-var floordrawing = null
 
 const XCdrawing = preload("res://nodescenes/XCdrawing.tscn")
 const XCnode = preload("res://nodescenes/XCnode.tscn")

@@ -52,6 +52,8 @@ var origin_node = null
 var camera_node = null
 var velocity = Vector3(0.0, 0.0, 0.0)
 var gravity = -30.0
+
+onready var kinematic_body: KinematicBody = get_node("KinematicBody")
 onready var collision_shape: CollisionShape = get_node("KinematicBody/CollisionShape")
 onready var tail : RayCast = get_node("KinematicBody/Tail")
 
@@ -82,12 +84,12 @@ func set_player_radius(p_radius):
 func _ready():
 	# origin node should always be the parent of our parent
 	origin_node = get_node("../..")
-	
 	if camera:
 		camera_node = get_node(camera)
 	else:
 		# see if we can find our default
 		camera_node = origin_node.get_node('ARVRCamera')
+	print("___movementready ", origin_node, " ", camera, " ", camera_node, "  ee=", enabled)
 	
 	# Our properties are set before our children are constructed so just re-issue
 	set_player_radius(player_radius)
@@ -118,13 +120,21 @@ func _physics_process(delta):
 	
 	# We should be the child or the controller on which the teleport is implemented
 	var controller = get_parent()
-	if controller.get_is_active():
+	if true or controller.get_is_active():
 		var left_right = controller.get_joystick_axis(0)
 		var forwards_backwards = controller.get_joystick_axis(1)
+		if Input.is_action_pressed("lh_forward"):
+			forwards_backwards = 0.6
+		elif Input.is_action_pressed("lh_backward"):
+			forwards_backwards = -0.6
+		if Input.is_action_pressed("lh_left"):
+			left_right = -0.6
+		elif Input.is_action_pressed("lh_right"):
+			left_right = 0.6
 		
 		# if fly_action_button_id is pressed it activates the FLY MODE
 		# if fly_action_button_id is released it deactivates the FLY MODE
-		if controller.is_button_pressed(fly_activate_button_id) && canFly:
+		if (controller.is_button_pressed(fly_activate_button_id) or Input.is_action_pressed("lh_fly")) && canFly:
 			isflying =  true
 		else:
 			isflying = false
@@ -133,10 +143,10 @@ func _physics_process(delta):
 		if isflying:	
 			if controller.is_button_pressed(fly_move_button_id):
 				# is flying, so we will use the controller's transform to move the VR capsule follow its orientation					
-				var curr_transform = $KinematicBody.global_transform
+				var curr_transform = kinematic_body.global_transform
 				velocity = controller.global_transform.basis.z.normalized() * -delta * max_speed * ARVRServer.world_scale
-				velocity = $KinematicBody.move_and_slide(velocity)
-				var movement = ($KinematicBody.global_transform.origin - curr_transform.origin)
+				velocity = kinematic_body.move_and_slide(velocity)
+				var movement = (kinematic_body.global_transform.origin - curr_transform.origin)
 				origin_node.global_transform.origin += movement
 		
 		################################################################
@@ -202,7 +212,7 @@ func _physics_process(delta):
 			# now we do our movement
 			# We start with placing our KinematicBody in the right place
 			# by centering it on the camera but placing it on the ground
-			var curr_transform = $KinematicBody.global_transform
+			var curr_transform = kinematic_body.global_transform
 			var camera_transform = camera_node.global_transform
 			curr_transform.origin = camera_transform.origin
 			curr_transform.origin.y = origin_node.global_transform.origin.y
@@ -213,7 +223,7 @@ func _physics_process(delta):
 			if forward_dir.length() > 0.01:
 				curr_transform.origin += forward_dir.normalized() * -0.75 * player_radius
 			
-			$KinematicBody.global_transform = curr_transform
+			kinematic_body.global_transform = curr_transform
 			
 			# we'll handle gravity separately
 			var gravity_velocity = Vector3(0.0, velocity.y, 0.0)
@@ -238,18 +248,18 @@ func _physics_process(delta):
 					velocity = (dir_forward * -forwards_backwards + dir_right * left_right).normalized() * delta * max_speed * ARVRServer.world_scale
 			
 			# apply move and slide to our kinematic body
-			velocity = $KinematicBody.move_and_slide(velocity, Vector3(0.0, 1.0, 0.0))
+			velocity = kinematic_body.move_and_slide(velocity, Vector3(0.0, 1.0, 0.0))
 			
 			# apply our gravity
 			gravity_velocity.y += gravity * delta
-			gravity_velocity = $KinematicBody.move_and_slide(gravity_velocity, Vector3(0.0, 1.0, 0.0))
+			gravity_velocity = kinematic_body.move_and_slide(gravity_velocity, Vector3(0.0, 1.0, 0.0))
 			velocity.y = gravity_velocity.y
 			
 			# now use our new position to move our origin point
-			var movement = ($KinematicBody.global_transform.origin - curr_transform.origin)
+			var movement = (kinematic_body.global_transform.origin - curr_transform.origin)
 			origin_node.global_transform.origin += movement
 			
 			# Return this back to where it was so we can use its collision shape for other things too
-			# $KinematicBody.global_transform.origin = curr_transform.origin
+			kinematic_body.global_transform.origin = curr_transform.origin
 
 	

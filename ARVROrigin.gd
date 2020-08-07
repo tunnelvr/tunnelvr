@@ -24,8 +24,8 @@ func _process(_delta):
 #		doppelganger.get_node("HeadCam").global_transform = Transform($ARVRCamera.global_transform.basis, $ARVRCamera.global_transform.origin + vdisp)
 #		doppelganger.get_node("HandLeft").global_transform = Transform($ARVRController_Left.global_transform.basis, $ARVRController_Left.global_transform.origin + vdisp)
 #		doppelganger.get_node("HandRight").global_transform = Transform($ARVRController_Right.global_transform.basis, $ARVRController_Right.global_transform.origin + vdisp)
-
 		doppelganger.global_transform.origin.y = global_transform.origin.y
+		doppelganger.global_transform.basis = global_transform.basis
 		doppelganger.get_node("HeadCam").transform = Transform($ARVRCamera.transform.basis, $ARVRCamera.transform.origin)
 		doppelganger.get_node("HandLeft").transform = Transform($ARVRController_Left.transform.basis, $ARVRController_Left.transform.origin)
 		doppelganger.get_node("HandRight").transform = Transform($ARVRController_Right.transform.basis, $ARVRController_Right.transform.origin)

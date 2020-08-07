@@ -7,14 +7,11 @@ const XCtube = preload("res://nodescenes/XCtube.tscn")
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	$floordrawing.floortype = true
+	$floordrawing.otxcdIndex = -1
 	$floordrawing/XCdrawingplane.scale = Vector3(50, 50, 1)
 	$floordrawing/XCdrawingplane.collision_layer |= 2
-	print("mmmm ", load("res://surveyscans/scanimagefloor.material"))
-	
 	$floordrawing/XCdrawingplane/CollisionShape/MeshInstance.material_override = load("res://surveyscans/scanimagefloor.material")
-	#$floordrawing/XCdrawingplane/CollisionShape/MeshInstance.material_override = load("res://surveyscans/fancyrocktexture.material")
-	
-	
+	$Centreline.floordrawing = $floordrawing
 
 const linewidth = 0.05
 var tubeshellsvisible = false
