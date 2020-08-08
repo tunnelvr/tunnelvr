@@ -5,12 +5,10 @@ var arvr_quest = null;
 
 # Stuff to do:
 
-# * move GUIPanel3D to ARVROrigin
-# * Rename ARVR stuff to headcam handleft eft
 # * Move the Laser into the CSGMesh_righthand
 # * laser/spot/laser shadow/laser-selectline all more global (shared selection, or not)
 # * boulder clutter to HandRight/pointersystem
-# * HeadCam.environment moved somewhere more global
+# * HeadCam.environment moved somewhere more global for lighting
 
 # * XCdrawing texture to scale as meters with scale and offsets sorted out to be on the origin
 # * simplify the double points we get in the slices (take the mid-point of them)

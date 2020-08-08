@@ -33,19 +33,28 @@ var gripbuttonpressused = false
 var nodeorientationpreviewheldtransform = null
 var activetargetwall = null
 
+var xcdrawingactivematerial = preload("res://guimaterials/XCdrawing_active.material")
+var xcdrawingmaterial = preload("res://guimaterials/XCdrawing.material")
+var xcdrawinghighlightmaterial = preload("res://guimaterials/XCdrawing_highlight.material")
+
 func clearpointertargetmaterial():
 	if pointertargettype == "OnePathNode" or pointertargettype == "DrawnStationNode" or pointertargettype == "StationNode":
 		pointertarget.get_node("CollisionShape/MeshInstance").set_surface_material(0, selectedhighlightmaterial if pointertarget == selectedtarget else null)
 	if pointertargettype == "XCnode":
 		pointertarget.get_node("CollisionShape/MeshInstance").set_surface_material(0, selectedhighlightmaterial if pointertarget == selectedtarget else (preload("res://guimaterials/XCnode_nodepthtest.material") if pointertargetwall == activetargetwall else preload("res://guimaterials/XCnode.material")))
 	if pointertargettype == "XCdrawing" or pointertargettype == "XCnode":
-		pointertargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").set_surface_material(0, preload("res://guimaterials/XCdrawing_active.material") if pointertargetwall == activetargetwall else preload("res://guimaterials/XCdrawing.material"))
+		if pointertargetwall == activetargetwall:
+			xcdrawingactivematerial.uv1_scale = pointertargetwall.get_node("XCdrawingplane").get_scale()
+			xcdrawingactivematerial.uv1_offset = -xcdrawingactivematerial.uv1_scale/2
+		pointertargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").set_surface_material(0, xcdrawingactivematerial if pointertargetwall == activetargetwall else xcdrawingmaterial)
 		
 func setpointertargetmaterial():
 	if pointertargettype == "OnePathNode" or pointertargettype == "XCnode" or pointertargettype == "DrawnStationNode" or pointertargettype == "StationNode":
 		pointertarget.get_node("CollisionShape/MeshInstance").set_surface_material(0, selectedpointerhighlightmaterial if pointertarget == selectedtarget else pointinghighlightmaterial)
 	if pointertargettype == "XCdrawing" or pointertargettype == "XCnode":
-		pointertargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").set_surface_material(0, preload("res://guimaterials/XCdrawing_highlight.material"))
+		xcdrawinghighlightmaterial.uv1_scale = pointertargetwall.get_node("XCdrawingplane").get_scale()
+		xcdrawinghighlightmaterial.uv1_offset = -xcdrawinghighlightmaterial.uv1_scale/2
+		pointertargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").set_surface_material(0, xcdrawinghighlightmaterial)
 	
 func setselectedtarget(newselectedtarget):
 	settextpanel(null, null)
@@ -440,6 +449,8 @@ func _on_button_pressed(p_button):
 			if pointertargettype == "XCdrawing":
 				pointertargetwall.get_node("XCdrawingplane").scale.x = max(1, pointertargetwall.get_node("XCdrawingplane").scale.x + dy)
 				pointertargetwall.get_node("XCdrawingplane").scale.y = max(1, pointertargetwall.get_node("XCdrawingplane").scale.y + dy)
+				xcdrawinghighlightmaterial.uv1_scale = pointertargetwall.get_node("XCdrawingplane").get_scale()
+				xcdrawinghighlightmaterial.uv1_offset = -xcdrawinghighlightmaterial.uv1_scale/2
 				
 			# raise the whole drawn floor case!
 			if pointertargettype == "DrawnStationNode":

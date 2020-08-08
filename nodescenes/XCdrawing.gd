@@ -25,7 +25,6 @@ func setxcdrawingvisibility(makevisible):
 		if sca > $XCdrawingplane.scale.x:
 			$XCdrawingplane.set_scale(Vector3(sca, sca, 1.0))
 
-
 # these transforming operations work in sequence, each correcting the relative position change caused by the other
 func scalexcnodepointspointsx(sca):
 	for i in range(len(nodepoints)):
