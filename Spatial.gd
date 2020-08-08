@@ -3,6 +3,7 @@ extends Spatial
 
 # Stuff to do:
 
+
 # * can doppelganger use the directly call the setavatarposition() function instead
 # * avoid calling network peer when not connected
 # * change colour of head and hands of avatar
