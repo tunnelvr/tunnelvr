@@ -3,9 +3,8 @@ extends Spatial
 
 # Stuff to do:
 
-
 # * can doppelganger use the directly call the setavatarposition() function instead
-# * check the avatar works across to becka's computer
+# * avoid calling network peer when not connected
 # * change colour of head and hands of avatar
 # * Move the Laser into the CSGMesh_righthand
 # * start the sending over of positions from the server as updates happen
@@ -141,7 +140,7 @@ func _ready():
 		get_tree().connect("connection_failed", self, "_connection_failed")
 		get_tree().connect("server_disconnected", self, "_server_disconnected")
 		playerMe.rotate_y(180)
-		playerMe.global_transform.origin += 3*Vector3(playerMe.global_transform.basis.z)
+		playerMe.global_transform.origin += 3*Vector3(playerMe.get_node("HeadCam").global_transform.basis.z.x, 0, playerMe.get_node("HeadCam").global_transform.basis.z.z).normalized()
 	get_tree().set_network_peer(networkedmultiplayerenet)
 	networkID = get_tree().get_network_unique_id()
 	print("nnet-id ", networkID)
