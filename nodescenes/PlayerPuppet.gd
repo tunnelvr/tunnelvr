@@ -1,9 +1,12 @@
 extends Spatial
 
 remote func setavatarposition(playertransform, headcamtransform, handlefttransform, handrighttransform):
-	#print("ppt ", playertransform.origin.x, " ", headcamtransform.origin.x)
 	global_transform = playertransform
 	$HeadCam.transform = headcamtransform
-	$HandLeft.transform = handlefttransform
-	$HandRight.transform = handrighttransform
+	$HandLeft.visible = (handlefttransform != null)
+	if $HandLeft.visible:
+		$HandLeft.transform = handlefttransform
+	$HandRight.visible = (handrighttransform != null)
+	if $HandRight.visible:
+		$HandRight.transform = handrighttransform
 

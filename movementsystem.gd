@@ -1,12 +1,12 @@
 extends Node
 
-onready var origin_node = get_parent()
-onready var camera_node = origin_node.get_node('HeadCam')
-onready var controller = origin_node.get_node("HandLeft")
-onready var controllerRight = origin_node.get_node("HandRight")
-onready var kinematic_body: KinematicBody = origin_node.get_node("KinematicBody")
-onready var collision_shape: CollisionShape = origin_node.get_node("KinematicBody/CollisionShape")
-onready var tail : RayCast = origin_node.get_node("KinematicBody/Tail")
+onready var playernode = get_parent()
+onready var headcam = playernode.get_node('HeadCam')
+onready var handleft = playernode.get_node("HandLeft")
+onready var handright = playernode.get_node("HandRight")
+onready var kinematic_body: KinematicBody = playernode.get_node("KinematicBody")
+onready var collision_shape: CollisionShape = playernode.get_node("KinematicBody/CollisionShape")
+onready var tail : RayCast = playernode.get_node("KinematicBody/Tail")
 onready var world_scale = ARVRServer.world_scale
 
 var player_radius = 0.25
@@ -21,13 +21,13 @@ export var drag_factor = 0.1
 enum Buttons { VR_TRIGGER = 15, VR_PAD=14, VR_BUTTON_BY=1, VR_GRIP=2 }
 
 func _ready():
-	controller.connect("button_pressed", self, "_on_button_pressed")
+	handleft.connect("button_pressed", self, "_on_button_pressed")
 	print("ARVRinterfaces ", ARVRServer.get_interfaces())
 
 func _on_button_pressed(p_button):
 	if p_button == Buttons.VR_PAD:
-		var left_right = controller.get_joystick_axis(0)
-		var up_down = controller.get_joystick_axis(1)
+		var left_right = handleft.get_joystick_axis(0)
+		var up_down = handleft.get_joystick_axis(1)
 		if abs(up_down) < 0.5 and abs(left_right) > 0.1:
 			nextphysicsrotatestep += (1 if left_right > 0 else -1)*(22.5 if abs(left_right) > 0.8 else 90.0)
 
@@ -44,17 +44,16 @@ func _input(event):
 				Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 		if event.is_action_pressed("newboulder"):
 			print("making new boulder")
-			var righthand = controllerRight
 			var markernode = preload("res://nodescenes/MarkerNode.tscn").instance()
 			var boulderclutter = get_node("/root/Spatial/BoulderClutter")
 			var nc = boulderclutter.get_child_count()
 			markernode.get_node("CollisionShape").scale = Vector3(0.4, 0.6, 0.4) if ((nc%2) == 0) else Vector3(0.2, 0.4, 0.2)
-			markernode.global_transform.origin = righthand.global_transform.origin - 0.9*righthand.global_transform.basis.z
-			markernode.linear_velocity = -5.1*righthand.global_transform.basis.z
+			markernode.global_transform.origin = handright.global_transform.origin - 0.9*handright.global_transform.basis.z
+			markernode.linear_velocity = -5.1*handright.global_transform.basis.z
 			boulderclutter.add_child(markernode)
 
 	if event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
-		if origin_node.arvrinterface == null or origin_node.arvrinterface.get_tracking_status() == ARVRInterface.ARVR_NOT_TRACKING:
+		if playernode.arvrinterface == null or playernode.arvrinterface.get_tracking_status() == ARVRInterface.ARVR_NOT_TRACKING:
 			var rhvec = mousecontrollervec + Vector3(event.relative.x, event.relative.y, 0)*0.002
 			rhvec.x = clamp(rhvec.x, -0.4, 0.4)
 			rhvec.y = clamp(rhvec.y, -0.3, 0.6)
@@ -62,25 +61,25 @@ func _input(event):
 
 func _physics_process(delta):
 	# Adjust the height of our player according to our camera position
-	var player_height = max(player_radius, camera_node.transform.origin.y + player_radius)
+	var player_height = max(player_radius, headcam.transform.origin.y + player_radius)
 	collision_shape.shape.radius = player_radius
 	collision_shape.shape.height = player_height - (player_radius * 2.0)
 	collision_shape.transform.origin.y = (player_height / 2.0)
 	#print(get_viewport().get_mouse_position(), Input.get_mouse_mode())
-	controller.visible = origin_node.arvrinterface != null and controller.get_is_active()
+	handleft.visible = playernode.arvrinterface != null and handleft.get_is_active()
 
 	if nextphysicsrotatestep != 0:
 		var t1 = Transform()
 		var t2 = Transform()
 		var rot = Transform()
-		t1.origin = -camera_node.transform.origin
-		t2.origin = camera_node.transform.origin
+		t1.origin = -headcam.transform.origin
+		t2.origin = headcam.transform.origin
 		rot = rot.rotated(Vector3(0.0, -1, 0.0), deg2rad(nextphysicsrotatestep))
-		origin_node.transform *= t2 * rot * t1
+		playernode.transform *= t2 * rot * t1
 		nextphysicsrotatestep = 0.0
 		
-	var left_right = controller.get_joystick_axis(0) if controller.get_is_active() else 0.0
-	var forwards_backwards = controller.get_joystick_axis(1) if controller.get_is_active() else 0.0
+	var left_right = handleft.get_joystick_axis(0) if handleft.get_is_active() else 0.0
+	var forwards_backwards = handleft.get_joystick_axis(1) if handleft.get_is_active() else 0.0
 
 	var lhkeyvec = Vector2(0, 0)
 	if Input.is_action_pressed("lh_forward"):
@@ -95,33 +94,33 @@ func _physics_process(delta):
 		forwards_backwards += 0.6*lhkeyvec.y*60*delta
 		left_right += -0.6*lhkeyvec.x*60*delta
 		
-	if origin_node.arvrinterface == null:
+	if playernode.arvrinterface == null:
 		if Input.is_action_pressed("lh_shift") and lhkeyvec != Vector2(0,0):
-			var vtarget = -camera_node.global_transform.basis.z*20 + camera_node.global_transform.basis.x*lhkeyvec.x*15*delta + Vector3(0, lhkeyvec.y, 0)*15*delta
-			camera_node.look_at(camera_node.global_transform.origin + vtarget, Vector3(0,1,0))
-			origin_node.rotation_degrees.y += camera_node.rotation_degrees.y
-			camera_node.rotation_degrees.y = 0
-		var mvec = camera_node.global_transform.basis.xform(mousecontrollervec)
-		controllerRight.global_transform.origin = camera_node.global_transform.origin + mvec
-		controllerRight.look_at(controllerRight.global_transform.origin + 1.0*mvec + 0.0*camera_node.global_transform.basis.z, Vector3(0,1,0))
-		controllerRight.global_transform.origin.y -= 0.3
+			var vtarget = -headcam.global_transform.basis.z*20 + headcam.global_transform.basis.x*lhkeyvec.x*15*delta + Vector3(0, lhkeyvec.y, 0)*15*delta
+			headcam.look_at(headcam.global_transform.origin + vtarget, Vector3(0,1,0))
+			playernode.rotation_degrees.y += headcam.rotation_degrees.y
+			headcam.rotation_degrees.y = 0
+		var mvec = headcam.global_transform.basis.xform(mousecontrollervec)
+		handright.global_transform.origin = headcam.global_transform.origin + mvec
+		handright.look_at(handright.global_transform.origin + 1.0*mvec + 0.0*headcam.global_transform.basis.z, Vector3(0,1,0))
+		handright.global_transform.origin.y -= 0.3
 		
-	if controller.is_button_pressed(Buttons.VR_GRIP) or Input.is_action_pressed("lh_fly"):
-		if controller.is_button_pressed(Buttons.VR_TRIGGER) or Input.is_action_pressed("lh_forward") or Input.is_action_pressed("lh_backward"):
+	if handleft.is_button_pressed(Buttons.VR_GRIP) or Input.is_action_pressed("lh_fly"):
+		if handleft.is_button_pressed(Buttons.VR_TRIGGER) or Input.is_action_pressed("lh_forward") or Input.is_action_pressed("lh_backward"):
 			var curr_transform = kinematic_body.global_transform
-			var flydir = controller.global_transform.basis.z if controller.get_is_active() else camera_node.global_transform.basis.z
+			var flydir = handleft.global_transform.basis.z if handleft.get_is_active() else headcam.global_transform.basis.z
 			if forwards_backwards < -0.5:
 				flydir = -flydir
 			velocity = flydir.normalized() * -delta * max_speed * world_scale
 			velocity = kinematic_body.move_and_slide(velocity)
 			var movement = (kinematic_body.global_transform.origin - curr_transform.origin)
-			origin_node.global_transform.origin += movement
+			playernode.global_transform.origin += movement
 	
 	else:
 		var curr_transform = kinematic_body.global_transform
-		var camera_transform = camera_node.global_transform
+		var camera_transform = headcam.global_transform
 		curr_transform.origin = camera_transform.origin
-		curr_transform.origin.y = origin_node.global_transform.origin.y
+		curr_transform.origin.y = playernode.global_transform.origin.y
 		
 		# now we move it slightly back
 		var forward_dir = -camera_transform.basis.z
@@ -154,21 +153,20 @@ func _physics_process(delta):
 		
 		# now use our new position to move our origin point
 		var movement = (kinematic_body.global_transform.origin - curr_transform.origin)
-		origin_node.global_transform.origin += movement
+		playernode.global_transform.origin += movement
 		
 		# Return this back to where it was so we can use its collision shape for other things too
 		kinematic_body.global_transform.origin = curr_transform.origin
 
-	var doppelganger = get_parent().doppelganger
-	var headcam = camera_node
-	var handleft = controller
-	var handright = controllerRight
+	var doppelganger = playernode.doppelganger
 	if is_inside_tree() and is_instance_valid(doppelganger):
-		doppelganger.global_transform.origin.y = get_parent().global_transform.origin.y
-		doppelganger.global_transform.basis = Basis(-get_parent().global_transform.basis.x, get_parent().global_transform.basis.y, -get_parent().global_transform.basis.z)
+		doppelganger.global_transform.origin.y = playernode.global_transform.origin.y
+		doppelganger.global_transform.basis = Basis(-playernode.global_transform.basis.x, playernode.global_transform.basis.y, -playernode.global_transform.basis.z)
 		#doppelganger.global_transform.rotate_y(PI/2)
 		doppelganger.get_node("HeadCam").transform = headcam.transform
+		doppelganger.get_node("HandLeft").visible = handleft.visible
 		doppelganger.get_node("HandLeft").transform = handleft.transform
+		doppelganger.get_node("HandRight").visible = handright.visible
 		doppelganger.get_node("HandRight").transform = handright.transform
-	get_parent().rpc_unreliable("setavatarposition", get_parent().global_transform, headcam.transform, handleft.transform, handright.transform)
+	playernode.rpc_unreliable("setavatarposition", playernode.global_transform, headcam.transform, handleft.transform if handleft.visible else null, handright.transform if handright.visible else null)
 	

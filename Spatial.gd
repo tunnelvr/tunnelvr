@@ -3,7 +3,8 @@ extends Spatial
 
 # Stuff to do:
 
-# * rename origin_node and other crap in movementsystem
+
+# * can doppelganger use the directly call the setavatarposition() function instead
 # * check the avatar works across to becka's computer
 # * change colour of head and hands of avatar
 # * Move the Laser into the CSGMesh_righthand
@@ -139,7 +140,8 @@ func _ready():
 		get_tree().connect("connected_to_server", self, "_connected_to_server")
 		get_tree().connect("connection_failed", self, "_connection_failed")
 		get_tree().connect("server_disconnected", self, "_server_disconnected")
-
+		playerMe.rotate_y(180)
+		playerMe.global_transform.origin += 3*Vector3(playerMe.global_transform.basis.z)
 	get_tree().set_network_peer(networkedmultiplayerenet)
 	networkID = get_tree().get_network_unique_id()
 	print("nnet-id ", networkID)
@@ -148,6 +150,7 @@ func _ready():
 	
 func _player_connected(id):
 	print("_player_connected ", id)
+	playerMe.set_name("NetworkedPlayer"+String(networkID))
 	var playerothername = "NetworkedPlayer"+String(id)
 	if not $Players.has_node(playerothername):
 		var playerOther = preload("res://nodescenes/PlayerPuppet.tscn").instance()
