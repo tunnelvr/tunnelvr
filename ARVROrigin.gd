@@ -7,10 +7,10 @@ onready var xcdrawing_active_material_albedoa = xcdrawing_active_material.albedo
 onready var doppelganger = get_node("../Doppelganger")
 var arvrinterface = null
 
-func settorchlight(torchon):
+func setheadtorchlight(torchon):
 	$HeadCam/HeadtorchLight.visible = torchon
-	get_node("/root/Spatial/DirectionalLight").visible = not torchon
-	$HeadCam.environment = preload("res://vr_underground.tres") if torchon else null
+	get_node("/root/Spatial/WorldEnvironment").environment = preload("res://vr_underground.tres") if torchon else preload("res://default_env.tres")
+	get_node("/root/Spatial/WorldEnvironment/DirectionalLight").visible = not torchon
 	# translucent walls reflect too much when torchlight is on
 	xcdrawing_material.albedo_color.a = 0.1 if torchon else xcdrawing_material_albedoa
 	xcdrawing_active_material.albedo_color.a = 0.1 if torchon else xcdrawing_active_material_albedoa

@@ -23,7 +23,7 @@ func _on_buttonshowxs_toggled(button_pressed):
 	$Viewport/GUI/Panel/Label.text = "XS shown" if button_pressed else "XS hidden"
 
 func _on_buttonheadtorch_toggled(button_pressed):
-	arvrorigin.settorchlight(button_pressed)
+	arvrorigin.setheadtorchlight(button_pressed)
 	$Viewport/GUI/Panel/Label.text = "Headtorch on" if button_pressed else "Headtorch off"
 
 func _on_buttonupdateshell_toggled(button_pressed):

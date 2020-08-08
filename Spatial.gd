@@ -5,12 +5,10 @@ var arvr_quest = null;
 
 # Stuff to do:
 
+
 # * Move the Laser into the CSGMesh_righthand
 # * laser/spot/laser shadow/laser-selectline all more global (shared selection, or not)
-# * boulder clutter to HandRight/pointersystem
-# * HeadCam.environment moved somewhere more global for lighting
 
-# * XCdrawing texture to scale as meters with scale and offsets sorted out to be on the origin
 # * simplify the double points we get in the slices (take the mid-point of them)
 # * make a doppleganger of the ARVR origin and controller and hands, for use with the networking
 # * clear up the laser pointer logic and materials
