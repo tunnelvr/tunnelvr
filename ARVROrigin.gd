@@ -4,7 +4,7 @@ var xcdrawing_material = preload("res://guimaterials/XCdrawing.material")
 var xcdrawing_active_material = preload("res://guimaterials/XCdrawing_active.material")
 onready var xcdrawing_material_albedoa = xcdrawing_material.albedo_color.a
 onready var xcdrawing_active_material_albedoa = xcdrawing_active_material.albedo_color.a
-onready var doppelganger = get_node("../Doppelganger")
+onready var doppelganger = null # get_node("../Doppelganger")
 var arvrinterface = null
 
 func setheadtorchlight(torchon):
@@ -15,17 +15,28 @@ func setheadtorchlight(torchon):
 	xcdrawing_material.albedo_color.a = 0.1 if torchon else xcdrawing_material_albedoa
 	xcdrawing_active_material.albedo_color.a = 0.1 if torchon else xcdrawing_active_material_albedoa
 
+func setdoppelganger(doppelgangeron):
+	if doppelgangeron:
+		if doppelganger == null:
+			doppelganger = preload("res://nodescenes/PlayerPuppet.tscn").instance()
+			doppelganger.set_name("Doppelganger")
+			get_parent().add_child(doppelganger)
+		doppelganger.visible = true
+		doppelganger.global_transform.origin = $HeadCam.global_transform.origin - 3*Vector3($HeadCam.global_transform.basis.z.x, 0, $HeadCam.global_transform.basis.z.z).normalized()
+		
+	elif not doppelgangeron and doppelganger != null:
+		doppelganger.queue_free()
+		doppelganger = null
+
 func _ready():
-	#settorchlight(false)
 	print("dddd ", doppelganger, get_node(".."))
 
 func _physics_process(_delta):
-	if is_inside_tree() and is_instance_valid(doppelganger):
-#		doppelganger.get_node("HeadCam").global_transform = Transform($ARVRCamera.global_transform.basis, $ARVRCamera.global_transform.origin + vdisp)
-#		doppelganger.get_node("HandLeft").global_transform = Transform($ARVRController_Left.global_transform.basis, $ARVRController_Left.global_transform.origin + vdisp)
-#		doppelganger.get_node("HandRight").global_transform = Transform($ARVRController_Right.global_transform.basis, $ARVRController_Right.global_transform.origin + vdisp)
-		doppelganger.global_transform.origin.y = global_transform.origin.y
-		doppelganger.global_transform.basis = global_transform.basis
-		doppelganger.get_node("HeadCam").transform = Transform($HeadCam.transform.basis, $HeadCam.transform.origin)
-		doppelganger.get_node("HandLeft").transform = Transform($HandLeft.transform.basis, $HandLeft.transform.origin)
-		doppelganger.get_node("HandRight").transform = Transform($HandRight.transform.basis, $HandRight.transform.origin)
+	pass
+
+remote func setavatarposition(playertransform, headcamtransform, handlefttransform, handrighttransform):
+	print("ppt_nope ", playertransform.origin.x, " ", headcamtransform.origin.x)
+	#global_transform = playertransform
+	#$HeadCam.transform = headcamtransform
+	#$HandLeft.transform = handlefttransform
+	#$HandRight.transform = handrighttransform

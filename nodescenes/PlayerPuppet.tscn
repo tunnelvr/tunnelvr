@@ -1,0 +1,45 @@
+[gd_scene load_steps=10 format=2]
+
+[ext_resource path="res://nodescenes/PlayerPuppet.gd" type="Script" id=1]
+[ext_resource path="res://CSGMesh_lefthand.tscn" type="PackedScene" id=2]
+[ext_resource path="res://CSGMesh_head.tscn" type="PackedScene" id=3]
+[ext_resource path="res://CSGMesh_righthand.tscn" type="PackedScene" id=4]
+
+[sub_resource type="CubeMesh" id=1]
+size = Vector3( 0.2, 0.1, 0.1 )
+
+[sub_resource type="SpatialMaterial" id=2]
+albedo_color = Color( 0.105882, 0.188235, 0.509804, 1 )
+
+[sub_resource type="CubeMesh" id=3]
+size = Vector3( 0.1, 0.1, 0.2 )
+
+[sub_resource type="SpatialMaterial" id=4]
+albedo_color = Color( 0.509804, 0.192157, 0.105882, 1 )
+
+[sub_resource type="CubeMesh" id=5]
+size = Vector3( 0.1, 0.1, 0.2 )
+
+[node name="Doppelganger" type="Spatial"]
+transform = Transform( -1, 0, -3.25841e-07, 0, 1, 0, 3.25841e-07, 0, -1, 0, 0, -8 )
+script = ExtResource( 1 )
+
+[node name="HeadCam" type="Spatial" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.691634, 0 )
+
+[node name="CSGMesh_head" parent="HeadCam" instance=ExtResource( 3 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0 )
+mesh = SubResource( 1 )
+material = SubResource( 2 )
+
+[node name="HandLeft" type="Spatial" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.251003, 0 )
+
+[node name="CSGMesh_lefthand" parent="HandLeft" instance=ExtResource( 2 )]
+mesh = SubResource( 3 )
+material = SubResource( 4 )
+
+[node name="HandRight" type="Spatial" parent="."]
+
+[node name="CSGMesh_righthand" parent="HandRight" instance=ExtResource( 4 )]
+mesh = SubResource( 5 )

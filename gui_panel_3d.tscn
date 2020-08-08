@@ -86,6 +86,17 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="ButtonShiftFloor" type="Button" parent="Viewport/GUI/Panel"]
+margin_left = 14.9266
+margin_top = 147.461
+margin_right = 154.926
+margin_bottom = 175.461
+rect_pivot_offset = Vector2( 111.073, 28.0005 )
+text = "ShiftFloor"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [node name="ButtonHeadtorch" type="Button" parent="Viewport/GUI/Panel"]
 margin_left = 15.3899
 margin_top = 181.177
@@ -95,6 +106,19 @@ rect_pivot_offset = Vector2( 138.61, -8.13628 )
 hint_tooltip = "test tooltip"
 toggle_mode = true
 text = "Headtorch"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ButtonDoppelganger" type="Button" parent="Viewport/GUI/Panel"]
+margin_left = 15.3899
+margin_top = 215.177
+margin_right = 155.39
+margin_bottom = 243.177
+rect_pivot_offset = Vector2( 138.61, -8.13628 )
+hint_tooltip = "test tooltip"
+toggle_mode = true
+text = "Doppelganger"
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -112,22 +136,11 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ButtonShiftFloor" type="Button" parent="Viewport/GUI/Panel"]
-margin_left = 14.9266
-margin_top = 147.461
-margin_right = 154.926
-margin_bottom = 175.461
-rect_pivot_offset = Vector2( 111.073, 28.0005 )
-text = "ShiftFloor"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
 [node name="ColorRect" type="ColorRect" parent="Viewport/GUI/Panel"]
-margin_left = 288.873
-margin_top = 89.0076
-margin_right = 352.873
-margin_bottom = 153.008
+margin_left = 296.873
+margin_top = 131.008
+margin_right = 360.873
+margin_bottom = 195.008
 color = Color( 1, 0, 0, 1 )
 
 [node name="TextureRect" type="TextureRect" parent="Viewport/GUI/Panel"]
@@ -135,10 +148,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-margin_left = 101.0
-margin_top = -48.0
-margin_right = 159.0
-margin_bottom = 10.0
+margin_left = 111.0
+margin_top = -4.0
+margin_right = 169.0
+margin_bottom = 54.0
 texture = ExtResource( 2 )
 expand = true
 __meta__ = {
@@ -147,9 +160,9 @@ __meta__ = {
 
 [node name="OptionButton" type="OptionButton" parent="Viewport/GUI/Panel"]
 margin_left = 282.58
-margin_top = 158.256
+margin_top = 204.256
 margin_right = 364.58
-margin_bottom = 212.256
+margin_bottom = 258.256
 text = "Item 0"
 items = [ "Item 0", null, false, 0, null, "Item 1", null, false, 1, null, "Item 2", null, false, 2, null ]
 selected = 0

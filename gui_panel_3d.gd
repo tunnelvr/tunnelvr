@@ -1,16 +1,13 @@
 extends StaticBody
 
-onready var viewport: Viewport = get_child(0)
-onready var collisionshape: CollisionShape = get_child(1)
 onready var ARVRworld_scale = ARVRServer.world_scale
 
 var viewport_point := Vector2(0, 0)
 var viewport_mousedown := false
 onready var sketchsystem = get_node("/root/Spatial/SketchSystem")
-onready var arvrorigin = get_node("..")
 
 func _on_buttonload_pressed():
-	arvrorigin.get_node("HandRight/pointersystem").setselectedtarget(null)
+	get_node("../HandRight/pointersystem").setselectedtarget(null)
 	sketchsystem.loadsketchsystem()
 	$Viewport/GUI/Panel/Label.text = "Sketch Loaded"
 	
@@ -23,8 +20,13 @@ func _on_buttonshowxs_toggled(button_pressed):
 	$Viewport/GUI/Panel/Label.text = "XS shown" if button_pressed else "XS hidden"
 
 func _on_buttonheadtorch_toggled(button_pressed):
-	arvrorigin.setheadtorchlight(button_pressed)
+	get_parent().setheadtorchlight(button_pressed)
 	$Viewport/GUI/Panel/Label.text = "Headtorch on" if button_pressed else "Headtorch off"
+
+func _on_buttondoppelganger_toggled(button_pressed):
+	get_parent().setdoppelganger(button_pressed)
+	$Viewport/GUI/Panel/Label.text = "Doppelganger on" if button_pressed else "Doppelganger off"
+
 
 func _on_buttonupdateshell_toggled(button_pressed):
 	sketchsystem.updateworkingshell(button_pressed)
@@ -38,8 +40,9 @@ func _ready():
 	$Viewport/GUI/Panel/ButtonLoad.connect("pressed", self, "_on_buttonload_pressed")
 	$Viewport/GUI/Panel/ButtonSave.connect("pressed", self, "_on_buttonsave_pressed")
 	$Viewport/GUI/Panel/ButtonShowXS.connect("toggled", self, "_on_buttonshowxs_toggled")
-	$Viewport/GUI/Panel/ButtonHeadtorch.connect("toggled", self, "_on_buttonheadtorch_toggled")
 	$Viewport/GUI/Panel/ButtonShiftFloor.connect("pressed", self, "_on_buttonshiftfloor_pressed")
+	$Viewport/GUI/Panel/ButtonHeadtorch.connect("toggled", self, "_on_buttonheadtorch_toggled")
+	$Viewport/GUI/Panel/ButtonDoppelganger.connect("toggled", self, "_on_buttondoppelganger_toggled")
 	$Viewport/GUI/Panel/ButtonUpdateShell.connect("toggled", self, "_on_buttonupdateshell_toggled")
 
 func clickbuttonheadtorch():
@@ -67,7 +70,7 @@ func guipanelsendmousemotion(collision_point, controller_global_transform, contr
 		return # Don't allow pressing if we're behind the GUI.
 	
 	# Convert the collision to a relative position. 
-	var shape_size = collisionshape.shape.extents * 2
+	var shape_size = $CollisionShape.shape.extents * 2
 	var collider_scale = collider_transform.basis.get_scale()
 	var local_point = collider_transform.xform_inv(collision_point)
 	# this rescaling because of no xform_affine_inv.  https://github.com/godotengine/godot/issues/39433
@@ -76,12 +79,12 @@ func guipanelsendmousemotion(collision_point, controller_global_transform, contr
 	local_point += Vector3(0.5, -0.5, 0) # X is about 0 to 1, Y is about 0 to -1.
 	
 	# Find the viewport position by scaling the relative position by the viewport size. Discard Z.
-	viewport_point = Vector2(local_point.x, -local_point.y) * viewport.size
+	viewport_point = Vector2(local_point.x, -local_point.y) * $Viewport.size
 	
 	# Send mouse motion to the GUI.
 	var event = InputEventMouseMotion.new()
 	event.position = viewport_point
-	viewport.input(event)
+	$Viewport.input(event)
 	
 	# Figure out whether or not we should trigger a click.
 	var new_viewport_mousedown := false
@@ -98,7 +101,7 @@ func guipanelsendmousemotion(collision_point, controller_global_transform, contr
 		event.button_index = BUTTON_LEFT
 		event.position = viewport_point
 		print("vvvv viewport_point ", viewport_point)
-		viewport.input(event)
+		$Viewport.input(event)
 		viewport_mousedown = new_viewport_mousedown
 
 func guipanelreleasemouse():
@@ -106,6 +109,6 @@ func guipanelreleasemouse():
 		var event = InputEventMouseButton.new()
 		event.button_index = 1
 		event.position = viewport_point
-		viewport.input(event)
+		$Viewport.input(event)
 		viewport_mousedown = false
 		

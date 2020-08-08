@@ -1,23 +1,31 @@
 extends Spatial
 
-var arvr_openvr = null; 
-var arvr_quest = null; 
 
 # Stuff to do:
 
-
+# * rename origin_node and other crap in movementsystem
+# * check the avatar works across to becka's computer
+# * change colour of head and hands of avatar
 # * Move the Laser into the CSGMesh_righthand
+# * start the sending over of positions from the server as updates happen
+# * spot laser on other avatar hand (or hand to hand) to make it rumble when you shake hands, or flash
+# * hands to rumble when touch things.
+# * avatars to have caving light
+# * avatars to change colour of palms and sides when buttons are pressed
+# * able to change angle of laser pointer with other hand manipulation (same with 
+# * should light up hotspot when hand is in posistion to activate the light or laser pointer
 # * laser/spot/laser shadow/laser-selectline all more global (shared selection, or not)
+# * make the laser spot update on physics process so it doesn't flicker
+# * make a doppleganger of the ARVR origin and controller and hands, for use with the networking
+# * begin with mapfinding system from downloaded png files that are snipped up and placed in relation to a cave model
 
 # * simplify the double points we get in the slices (take the mid-point of them)
-# * make a doppleganger of the ARVR origin and controller and hands, for use with the networking
 # * clear up the laser pointer logic and materials
 # * shorten laser pointer to end on the node
 # * automatically make the xcplane big enough as you draw close to its edge
 # * shift pick connection to delete nodes up to next junction
 # * option to start recording of the person to a file, and then stop recording, then replay recording -- in anticipation of multiplayer
 # * xcdrawing plane texture should be a 1m checkerboard as a shader repeating
-# * capsule tall enough to contain the headtorch
 # * scan through other drawings on back of hand
 # * check stationdrawnnode moves the ground up
 # * Need to ask to improve the documentation on https://docs.godotengine.org/en/latest/classes/class_meshinstance.html#class-meshinstance-method-set-surface-material
@@ -74,15 +82,25 @@ var arvr_quest = null;
 # * set the floor shape size according to aspect ratio read from the bitmap 1.285239=(3091/2405.0)
 # * Report bug check ray intersect plane is in the plane and report if not!
 
+var arvr_openvr = null; 
+var arvr_quest = null; 
+
+export var hostipnumber: String = ""
+export var hostportnumber: int = 8002
+
 var perform_runtime_config = true
 var ovr_init_config = null
 var ovr_performance = null
+var networkID = 0
+
+onready var playerMe = $Players/PlayerMe
 
 func _ready():
-	print("Initializing VR");
-	print("  Available Interfaces are %s: " % str(ARVRServer.get_interfaces()));
-	arvr_openvr = ARVRServer.find_interface("OpenVR")
-	arvr_quest = null # ARVRServer.find_interface("OVRMobile");
+	if hostipnumber == "":
+		print("Initializing VR");
+		print("  Available Interfaces are %s: " % str(ARVRServer.get_interfaces()));
+		arvr_openvr = ARVRServer.find_interface("OpenVR")
+		arvr_quest = null # ARVRServer.find_interface("OVRMobile");
 
 	if arvr_quest:
 		print("found quest, NOT initializing")
@@ -106,40 +124,53 @@ func _ready():
 			Engine.target_fps = 90
 			OS.vsync_enabled = false;
 			print("  Success initializing OpenVR Interface.");
-			$Players/PlayerVR.arvrinterface = arvr_openvr
+			playerMe.arvrinterface = arvr_openvr
 
 	else:
 		print("*** VR not working")
 
-	return 
-	
+	var networkedmultiplayerenet = NetworkedMultiplayerENet.new()
 	get_tree().connect("network_peer_connected", self, "_player_connected")
 	get_tree().connect("network_peer_disconnected", self, "_player_disconnected")
-	var host = NetworkedMultiplayerENet.new()
-	host.create_server(10567, 5)
-	#host.create_client("127.0.0.1", 10567)
-	get_tree().set_network_peer(host)
-	print("nnet-id ", get_tree().get_network_unique_id())
-	rpc("ding", 999)
-	print("ding called")
-	
-	#var client = NetworkedMultiplayerENet.new()
-	#client.create_client("127.0.0.1", 9009)
-	#get_tree().set_network_peer(client)
-	#print("nnet-id ", get_tree().get_network_unique_id())
-	#rpc("ding", 9991)
-	#print("ding called again")
+	if hostipnumber == "":
+		networkedmultiplayerenet.create_server(hostportnumber, 5)
+	else:
+		networkedmultiplayerenet.create_client(hostipnumber, hostportnumber)
+		get_tree().connect("connected_to_server", self, "_connected_to_server")
+		get_tree().connect("connection_failed", self, "_connection_failed")
+		get_tree().connect("server_disconnected", self, "_server_disconnected")
 
+	get_tree().set_network_peer(networkedmultiplayerenet)
+	networkID = get_tree().get_network_unique_id()
+	print("nnet-id ", networkID)
+	rpc("ding", 999, networkID)
+	playerMe.set_network_master(networkID)
+	
 func _player_connected(id):
 	print("_player_connected ", id)
+	var playerothername = "NetworkedPlayer"+String(id)
+	if not $Players.has_node(playerothername):
+		var playerOther = preload("res://nodescenes/PlayerPuppet.tscn").instance()
+		playerOther.set_network_master(id)
+		playerOther.set_name(playerothername)
+		$Players.add_child(playerOther)
 	
 func _player_disconnected(id):
 	print("_player_disconnected ", id)
+	var playerothername = "NetworkedPlayer"+String(id)
+	if $Players.has_node(playerothername):
+		$Players.get_node(playerothername).queue_free()
+		
+func _connected_to_server():
+	print("_connected_to_server")
+func _connection_failed():
+	print("_connection_failed")
+func _server_disconnected():
+	print("_server_disconnected")
 	
-remotesync func ding(t):
+remotesync func ding(t, dd):
 	print("ding ding ding ", t)	
 	print("currentpath ", get_path())
-	
 
 func _process(_delta):
 	if !perform_runtime_config:

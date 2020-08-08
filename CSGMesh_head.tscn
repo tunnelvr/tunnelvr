@@ -9,8 +9,8 @@ albedo_color = Color( 0.105882, 0.188235, 0.509804, 1 )
 [sub_resource type="SphereMesh" id=3]
 radius = 0.14
 height = 0.3
-radial_segments = 12
-rings = 12
+radial_segments = 24
+rings = 24
 
 [node name="CSGMesh_head" type="CSGMesh"]
 transform = Transform( -1.62921e-07, 0, 1, 0, 1, 0, -1, 0, -1.62921e-07, 0, 0, 0 )

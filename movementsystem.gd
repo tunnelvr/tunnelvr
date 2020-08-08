@@ -1,8 +1,6 @@
 extends Node
 
-enum MOVEMENT_TYPE { MOVE_AND_ROTATE, MOVE_AND_STRAFE }
-
-onready var origin_node = get_node("..")
+onready var origin_node = get_parent()
 onready var camera_node = origin_node.get_node('HeadCam')
 onready var controller = origin_node.get_node("HandLeft")
 onready var controllerRight = origin_node.get_node("HandRight")
@@ -57,7 +55,7 @@ func _input(event):
 
 	if event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
 		if origin_node.arvrinterface == null or origin_node.arvrinterface.get_tracking_status() == ARVRInterface.ARVR_NOT_TRACKING:
-			var rhvec = mousecontrollervec + Vector3(event.relative.x, event.relative.y, 0)*0.006
+			var rhvec = mousecontrollervec + Vector3(event.relative.x, event.relative.y, 0)*0.002
 			rhvec.x = clamp(rhvec.x, -0.4, 0.4)
 			rhvec.y = clamp(rhvec.y, -0.3, 0.6)
 			mousecontrollervec = rhvec.normalized()*0.8
@@ -69,7 +67,7 @@ func _physics_process(delta):
 	collision_shape.shape.height = player_height - (player_radius * 2.0)
 	collision_shape.transform.origin.y = (player_height / 2.0)
 	#print(get_viewport().get_mouse_position(), Input.get_mouse_mode())
-	controller.visible = controller.get_is_active() and origin_node.arvrinterface != null
+	controller.visible = origin_node.arvrinterface != null and controller.get_is_active()
 
 	if nextphysicsrotatestep != 0:
 		var t1 = Transform()
@@ -161,4 +159,16 @@ func _physics_process(delta):
 		# Return this back to where it was so we can use its collision shape for other things too
 		kinematic_body.global_transform.origin = curr_transform.origin
 
+	var doppelganger = get_parent().doppelganger
+	var headcam = camera_node
+	var handleft = controller
+	var handright = controllerRight
+	if is_inside_tree() and is_instance_valid(doppelganger):
+		doppelganger.global_transform.origin.y = get_parent().global_transform.origin.y
+		doppelganger.global_transform.basis = Basis(-get_parent().global_transform.basis.x, get_parent().global_transform.basis.y, -get_parent().global_transform.basis.z)
+		#doppelganger.global_transform.rotate_y(PI/2)
+		doppelganger.get_node("HeadCam").transform = headcam.transform
+		doppelganger.get_node("HandLeft").transform = handleft.transform
+		doppelganger.get_node("HandRight").transform = handright.transform
+	get_parent().rpc_unreliable("setavatarposition", get_parent().global_transform, headcam.transform, handleft.transform, handright.transform)
 	
