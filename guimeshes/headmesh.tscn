@@ -12,8 +12,7 @@ height = 0.3
 radial_segments = 24
 rings = 24
 
-[node name="CSGMesh_head" type="CSGMesh"]
-transform = Transform( -1.62921e-07, 0, 1, 0, 1, 0, -1, 0, -1.62921e-07, 0, 0, 0 )
+[node name="csgheadmesh" type="CSGMesh"]
 mesh = SubResource( 1 )
 material = SubResource( 2 )
 
