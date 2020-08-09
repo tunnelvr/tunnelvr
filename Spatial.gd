@@ -4,7 +4,7 @@ extends Spatial
 # Stuff to do:
 
 # * Laser 
-
+# * remove CSG top level meshes
 # * Move the Laser into the HandRight and make it go yellow on pointing accordingly
 #   -- use a short ray spike that intersects only with hands 
 # * Get the left hand gesture highlight when held in place for adjusting the laser angle

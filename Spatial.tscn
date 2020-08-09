@@ -1,4 +1,4 @@
-[gd_scene load_steps=42 format=2]
+[gd_scene load_steps=43 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://default_env.tres" type="Environment" id=2]
@@ -56,6 +56,9 @@ rings = 1
 [sub_resource type="CubeMesh" id=5]
 material = ExtResource( 19 )
 size = Vector3( 0.01, 0.01, 1 )
+
+[sub_resource type="BoxShape" id=24]
+extents = Vector3( 0.02, 0.05, 0.025 )
 
 [sub_resource type="CapsuleShape" id=6]
 radius = 0.3
@@ -189,6 +192,12 @@ controller_id = 2
 [node name="csghandleft" parent="Players/PlayerMe/HandLeft" instance=ExtResource( 6 )]
 transform = Transform( -1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0 )
 
+[node name="TipTouchRay" type="RayCast" parent="Players/PlayerMe/HandLeft"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0261416, -0.00699997, -0.069097 )
+enabled = true
+cast_to = Vector3( 0, 0, -0.1 )
+collision_mask = 1024
+
 [node name="HandRight" type="ARVRController" parent="Players/PlayerMe"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.2, 1.5, -0.5 )
 
@@ -238,6 +247,14 @@ visible = false
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.5 )
 mesh = SubResource( 5 )
 material/0 = null
+
+[node name="HeelHotspot" type="StaticBody" parent="Players/PlayerMe/HandRight"]
+collision_layer = 1024
+collision_mask = 0
+
+[node name="CollisionShape" type="CollisionShape" parent="Players/PlayerMe/HandRight/HeelHotspot"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0577492, 0, 0.0749998 )
+shape = SubResource( 24 )
 
 [node name="KinematicBody" type="KinematicBody" parent="Players/PlayerMe"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.24823, 6.41158 )
