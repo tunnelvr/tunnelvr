@@ -3,13 +3,21 @@ extends Spatial
 
 # Stuff to do:
 
+# * Laser 
 
-# * can doppelganger use the directly call the setavatarposition() function instead
-# * avoid calling network peer when not connected
-# * change colour of head and hands of avatar
-# * Move the Laser into the CSGMesh_righthand
-# * start the sending over of positions from the server as updates happen
+# * Move the Laser into the HandRight and make it go yellow on pointing accordingly
+#   -- use a short ray spike that intersects only with hands 
+# * Get the left hand gesture highlight when held in place for adjusting the laser angle
+# * CSG avatar head should be moved into its same meshes directory and committed
+# * CSG avatar head to have headtorch light that goes on or off
+# * change colour of head and hands of each avatar
+# * change hue of hands (and head) to show up in avatar with another rotate spot on back
+# * replace otxcdIndex with map instead of array and use int from names to look up.  shorter names all beginning with "p"
+# * swap controllers around button
+
 # * spot laser on other avatar hand (or hand to hand) to make it rumble when you shake hands, or flash
+# * avoid calling network peer when not connected to anything
+# * start the sending over of positions from the server as updates happen
 # * hands to rumble when touch things.
 # * avatars to have caving light
 # * avatars to change colour of palms and sides when buttons are pressed
@@ -32,6 +40,8 @@ extends Spatial
 # * Need to ask to improve the documentation on https://docs.godotengine.org/en/latest/classes/class_meshinstance.html#class-meshinstance-method-set-surface-material
 # *   See also https://godotengine.org/qa/3488/how-to-generate-a-mesh-with-multiple-materials
 # *   And explain how meshes can have their own materials, that are copied into material/0, and the material reappears if material/0 set to null
+# * CSG mesh with multiple materials group should have material0, material1 etc
+
 # *  because distortions don't ruin the topology of the area and do a whole set at once, and lend self to subdividing edges if curvature too great
 # * should the XCdrawing be flat and lifted up for XC, rather than tipped back for floordrawing
 # * and loading (remembering the transforms) so it starts exactly where it left off

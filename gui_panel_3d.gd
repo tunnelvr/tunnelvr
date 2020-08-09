@@ -7,7 +7,7 @@ var viewport_mousedown := false
 onready var sketchsystem = get_node("/root/Spatial/SketchSystem")
 
 func _on_buttonload_pressed():
-	get_node("../HandRight/pointersystem").setselectedtarget(null)
+	get_node("../pointersystem").setselectedtarget(null)
 	sketchsystem.loadsketchsystem()
 	$Viewport/GUI/Panel/Label.text = "Sketch Loaded"
 	

@@ -1,14 +1,26 @@
-extends Spatial
+extends Node
 
 onready var sketchsystem = get_node("/root/Spatial/SketchSystem")
 onready var centrelinesystem = sketchsystem.get_node("Centreline")
 onready var nodeorientationpreview = sketchsystem.get_node("NodeOrientationPreview")
 onready var floordrawing = sketchsystem.get_node("floordrawing")
 
-onready var arvrorigin = get_node("../..")
-onready var controller = get_parent()
-onready var arvrcamera = arvrorigin.get_node("HeadCam")
-onready var guipanel3d = arvrorigin.get_node("GUIPanel3D")
+#onready var arvrorigin = get_node("../..")
+#onready var controller = get_parent()
+#onready var arvrcamera = arvrorigin.get_node("HeadCam")
+#onready var guipanel3d = arvrorigin.get_node("GUIPanel3D")
+
+onready var playernode = get_parent()
+onready var headcam = playernode.get_node('HeadCam')
+onready var handleft = playernode.get_node("HandLeft")
+onready var handright = playernode.get_node("HandRight")
+onready var guipanel3d = playernode.get_node("GUIPanel3D")
+
+onready var Laser = handright.get_node("LaserOrient/Length/Laser") 
+onready var LaserRayCast = handright.get_node("LaserOrient/RayCast") 
+onready var LaserSpot = handright.get_node("LaserOrient/LaserSpot") 
+onready var LaserShadow = handright.get_node("LaserShadow") 
+onready var LaserSelectLine = handright.get_node("LaserSelectLine") 
 
 var viewport_point = null
 
@@ -21,6 +33,14 @@ const XCnode = preload("res://nodescenes/XCnode.tscn")
 var pointinghighlightmaterial = preload("res://guimaterials/XCnode_highlight.material")
 var selectedhighlightmaterial = preload("res://guimaterials/XCnode_selected.material")
 var selectedpointerhighlightmaterial = preload("res://guimaterials/XCnode_selectedhighlight.material")
+
+var laserspothighlightmaterial = preload("res://guimaterials/laserspot_selected.material"); 
+
+
+#var laser_y = -0.05
+
+onready var ARVRworld_scale = ARVRServer.world_scale
+
 
 var pointertarget = null
 var pointertargettype = "none"
@@ -47,14 +67,17 @@ func clearpointertargetmaterial():
 			xcdrawingactivematerial.uv1_scale = pointertargetwall.get_node("XCdrawingplane").get_scale()
 			xcdrawingactivematerial.uv1_offset = -xcdrawingactivematerial.uv1_scale/2
 		pointertargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").set_surface_material(0, xcdrawingactivematerial if pointertargetwall == activetargetwall else xcdrawingmaterial)
-		
+	handright.get_node("csghandright").setpartcolor(2, "#FFFFFF")
+			
 func setpointertargetmaterial():
 	if pointertargettype == "OnePathNode" or pointertargettype == "XCnode" or pointertargettype == "DrawnStationNode" or pointertargettype == "StationNode":
 		pointertarget.get_node("CollisionShape/MeshInstance").set_surface_material(0, selectedpointerhighlightmaterial if pointertarget == selectedtarget else pointinghighlightmaterial)
+		handright.get_node("csghandright").setpartcolor(2, "#FFFF60")
 	if pointertargettype == "XCdrawing" or pointertargettype == "XCnode":
 		xcdrawinghighlightmaterial.uv1_scale = pointertargetwall.get_node("XCdrawingplane").get_scale()
 		xcdrawinghighlightmaterial.uv1_offset = -xcdrawinghighlightmaterial.uv1_scale/2
 		pointertargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").set_surface_material(0, xcdrawinghighlightmaterial)
+		handright.get_node("csghandright").setpartcolor(2, "#FFFF60")
 	
 func setselectedtarget(newselectedtarget):
 	settextpanel(null, null)
@@ -89,17 +112,8 @@ func setactivetargetwall(newactivetargetwall):
 		for xcnode in activetargetwall.get_node("XCnodes").get_children():
 			if xcnode != selectedtarget:
 				xcnode.get_node("CollisionShape/MeshInstance").set_surface_material(0, preload("res://guimaterials/XCnode_nodepthtest.material"))
-	$Laser/RayCast.collision_mask = 8 + 16 + (32 if activetargetwall == null else 0)  # pointer, floor, cavewall(tube)=bit5
+	LaserRayCast.collision_mask = 8 + 16 + (32 if activetargetwall == null else 0)  # pointer, floor, cavewall(tube)=bit5
 
-onready var LaserSpot = get_node("LaserSpot") 
-onready var LaserSpike = get_node("LaserSpot/LaserSpike") 
-onready var LaserSelectLine = get_node("LaserSelectLine") 
-onready var LaserShadow = get_node("LaserShadow") 
-var laserspothighlightmaterial = preload("res://guimaterials/laserspot_selected.material"); 
-
-var laser_y = -0.05
-
-onready var ARVRworld_scale = ARVRServer.world_scale
 
 func settextpanel(ltext, pos):
 	var textpanel = sketchsystem.get_node("Centreline/TextPanel")
@@ -111,16 +125,16 @@ func settextpanel(ltext, pos):
 		textpanel.visible = false
 
 func _ready():
-	controller.connect("button_pressed", self, "_on_button_pressed")
-	controller.connect("button_release", self, "_on_button_release")
-	$Laser.translation.y = laser_y * ARVRworld_scale
+	handright.connect("button_pressed", self, "_on_button_pressed")
+	handright.connect("button_release", self, "_on_button_release")
+	#Laser.translation.y = laser_y * ARVRworld_scale
 	
 	# init our state
 	print("in the pointer onready")
-	$Laser.mesh.size.z = distance
-	$Laser.translation.z = distance * -0.5
-	$Laser/RayCast.translation.z = distance * 0.5
-	$Laser/RayCast.cast_to.z = -distance
+	#Laser.mesh.size.z = distance
+	#Laser.translation.z = distance * -0.5
+	#LaserRayCast.translation.z = distance * 0.5
+	#LaserRayCast.cast_to.z = -distance
 
 func targettype(target):
 	if not is_instance_valid(target):
@@ -184,7 +198,7 @@ func onpointing(newpointertarget, newpointertargetpoint):
 				LaserShadow.visible = (pointertargettype == "XCdrawing")
 				
 			# work out the logic for the LaserSelectLine here
-			if controller.is_button_pressed(Buttons.VR_GRIP):
+			if handright.is_button_pressed(Buttons.VR_GRIP):
 				LaserSelectLine.visible = ((pointertargettype == "floordrawing") and ((selectedtargettype == "OnePathNode") or (selectedtargettype == "DrawnStationNode")))
 			elif pointertargettype == "floordrawing":
 				LaserSelectLine.visible = ((selectedtargettype == "OnePathNode") or (selectedtargettype == "StationNode"))
@@ -204,7 +218,7 @@ func onpointing(newpointertarget, newpointertargetpoint):
 			
 	pointertargetpoint = newpointertargetpoint
 	if is_instance_valid(pointertarget) and pointertarget == guipanel3d:
-		guipanel3d.guipanelsendmousemotion(pointertargetpoint, controller.global_transform, controller.is_button_pressed(Buttons.VR_TRIGGER))
+		guipanel3d.guipanelsendmousemotion(pointertargetpoint, handright.global_transform, handright.is_button_pressed(Buttons.VR_TRIGGER))
 
 	if LaserSpot.visible:
 		LaserSpot.global_transform.origin = pointertargetpoint
@@ -221,19 +235,19 @@ func onpointing(newpointertarget, newpointertargetpoint):
 
 
 func _on_button_pressed(p_button):
-	var gripbuttonheld = controller.is_button_pressed(Buttons.VR_GRIP)
+	var gripbuttonheld = handright.is_button_pressed(Buttons.VR_GRIP)
 	print("pppp ", pointertargetpoint, " ", [selectedtargettype, pointertargettype])
 	#$SoundPointer.play()
 	
 	if p_button == Buttons.VR_BUTTON_BY:
-		var cameracontrollervec = controller.global_transform.origin - arvrcamera.global_transform.origin
-		var ccaxvec = arvrcamera.global_transform.basis.x.dot(controller.global_transform.basis.z)
-		var pswitchpos = arvrcamera.global_transform.origin + arvrcamera.global_transform.basis.x*0.15 + arvrcamera.global_transform.basis.y*0.1
-		var pswitchdist = controller.global_transform.origin.distance_to(pswitchpos)
+		var cameracontrollervec = handright.global_transform.origin - headcam.global_transform.origin
+		var ccaxvec = headcam.global_transform.basis.x.dot(handright.global_transform.basis.z)
+		var pswitchpos = headcam.global_transform.origin + headcam.global_transform.basis.x*0.15 + headcam.global_transform.basis.y*0.1
+		var pswitchdist = handright.global_transform.origin.distance_to(pswitchpos)
 		if ccaxvec > 0.85 and pswitchdist < 0.1:
 			guipanel3d.clickbuttonheadtorch()
 		else:
-			guipanel3d.togglevisibility(controller.get_node("pointersystem").global_transform)
+			guipanel3d.togglevisibility(handright.get_node("LaserOrient").global_transform)
 
 	if p_button == Buttons.VR_GRIP:
 		gripbuttonpressused = false
@@ -436,8 +450,8 @@ func _on_button_pressed(p_button):
 				
 	# change height of pointer target
 	if p_button == Buttons.VR_PAD:
-		var left_right = controller.get_joystick_axis(0)
-		var up_down = controller.get_joystick_axis(1)
+		var left_right = handright.get_joystick_axis(0)
+		var up_down = handright.get_joystick_axis(1)
 		if abs(up_down) < 0.5 and abs(left_right) > 0.1 and is_instance_valid(pointertarget):
 			var dy = (1 if left_right > 0 else -1)*(1.0 if abs(left_right) < 0.8 else 0.1)
 			#if pointertargettype == "OnePathNodes":
@@ -457,13 +471,12 @@ func _on_button_pressed(p_button):
 				floordrawing.global_transform.origin.y = floordrawing.global_transform.origin.y + dy
 				centrelinesystem.get_node("DrawnStationNodes").global_transform.origin.y = floordrawing.global_transform.origin.y
 			
-
 func _on_button_release(p_button):
 	# cancel selection by squeezing and then releasing grip without doing anything in between
 	if p_button == Buttons.VR_GRIP and not gripbuttonpressused:
 		if pointertargettype == "GUIPanel3D":
 			if guipanel3d.visible:
-				guipanel3d.togglevisibility(controller.get_node("pointersystem").global_transform)
+				guipanel3d.togglevisibility(handright.get_node("LaserOrient").global_transform)
 
 		elif pointertargettype == "XCdrawing":
 			clearpointertargetmaterial()
@@ -499,7 +512,7 @@ func _on_button_release(p_button):
 		setactivetargetwall(xcdrawing)
 		
 						
-func _process(_delta):
+func _physics_process(_delta):
 	if !is_inside_tree():
 		return
 	if nodeorientationpreviewheldtransform != null:
@@ -511,8 +524,8 @@ func _process(_delta):
 		var iv1 = iv0.cross(iv)
 		# here could add the 3D push pull motions too
 		nodeorientationpreview.global_transform = Transform(Basis(iv0, iv, iv1), sketchsystem.ot.nodepoints[selectedtarget.otIndex])
-	elif $Laser/RayCast.is_colliding():
-		onpointing($Laser/RayCast.get_collider(), $Laser/RayCast.get_collision_point())
+	elif LaserRayCast.is_colliding():
+		onpointing(LaserRayCast.get_collider(), LaserRayCast.get_collision_point())
 	else:
 		onpointing(null, null)
 	

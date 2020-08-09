@@ -1,0 +1,41 @@
+[gd_scene load_steps=5 format=2]
+
+[sub_resource type="SpatialMaterial" id=1]
+albedo_color = Color( 0.509804, 0.192157, 0.105882, 1 )
+
+[sub_resource type="CubeMesh" id=2]
+material = SubResource( 1 )
+size = Vector3( 0.1, 0.1, 0.2 )
+
+[sub_resource type="SpatialMaterial" id=3]
+albedo_color = Color( 0.988235, 0.976471, 0.117647, 1 )
+metallic = 0.51
+roughness = 0.62
+
+[sub_resource type="SpatialMaterial" id=4]
+albedo_color = Color( 0.972549, 0.262745, 0.247059, 1 )
+metallic = 0.51
+roughness = 0.62
+
+[node name="csghandright" type="CSGMesh"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.0830178 )
+operation = 2
+mesh = SubResource( 2 )
+__meta__ = {
+"_editor_description_": ""
+}
+
+[node name="csgtip" type="CSGBox" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.102893 )
+width = 0.102
+height = 0.102
+depth = 0.01
+material = SubResource( 3 )
+
+[node name="csgback" type="CSGBox" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0526733, -0.00675011, 0 )
+operation = 2
+width = 0.01
+height = 0.12
+depth = 0.22
+material = SubResource( 4 )

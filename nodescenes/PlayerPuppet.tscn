@@ -20,7 +20,7 @@ albedo_color = Color( 0.509804, 0.192157, 0.105882, 1 )
 [sub_resource type="CubeMesh" id=5]
 size = Vector3( 0.1, 0.1, 0.2 )
 
-[node name="Doppelganger" type="Spatial"]
+[node name="PlayerPuppet" type="Spatial"]
 transform = Transform( -1, 0, -3.25841e-07, 0, 1, 0, 3.25841e-07, 0, -1, 0, 0, -8 )
 script = ExtResource( 1 )
 

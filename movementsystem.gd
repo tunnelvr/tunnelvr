@@ -4,6 +4,7 @@ onready var playernode = get_parent()
 onready var headcam = playernode.get_node('HeadCam')
 onready var handleft = playernode.get_node("HandLeft")
 onready var handright = playernode.get_node("HandRight")
+
 onready var kinematic_body: KinematicBody = playernode.get_node("KinematicBody")
 onready var collision_shape: CollisionShape = playernode.get_node("KinematicBody/CollisionShape")
 onready var tail : RayCast = playernode.get_node("KinematicBody/Tail")
@@ -160,13 +161,10 @@ func _physics_process(delta):
 
 	var doppelganger = playernode.doppelganger
 	if is_inside_tree() and is_instance_valid(doppelganger):
-		doppelganger.global_transform.origin.y = playernode.global_transform.origin.y
-		doppelganger.global_transform.basis = Basis(-playernode.global_transform.basis.x, playernode.global_transform.basis.y, -playernode.global_transform.basis.z)
-		#doppelganger.global_transform.rotate_y(PI/2)
-		doppelganger.get_node("HeadCam").transform = headcam.transform
-		doppelganger.get_node("HandLeft").visible = handleft.visible
-		doppelganger.get_node("HandLeft").transform = handleft.transform
-		doppelganger.get_node("HandRight").visible = handright.visible
-		doppelganger.get_node("HandRight").transform = handright.transform
-	playernode.rpc_unreliable("setavatarposition", playernode.global_transform, headcam.transform, handleft.transform if handleft.visible else null, handright.transform if handright.visible else null)
+		var dgt = Transform(Basis(-playernode.global_transform.basis.x, playernode.global_transform.basis.y, -playernode.global_transform.basis.z), 
+							Vector3(doppelganger.global_transform.origin.x, playernode.global_transform.origin.y, doppelganger.global_transform.origin.z))
+		doppelganger.setavatarposition(dgt, headcam.transform, handleft.transform if handleft.visible else null, handright.transform if handright.visible else null)
+	playernode.rpc_unreliable("setavatarposition", playernode.global_transform, headcam.transform, 
+												   handleft.transform if handleft.visible else null, 
+												   handright.transform if handright.visible else null)
 	

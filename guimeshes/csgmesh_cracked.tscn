@@ -1,0 +1,30 @@
+[gd_scene load_steps=5 format=2]
+
+[sub_resource type="SpatialMaterial" id=1]
+albedo_color = Color( 0.509804, 0.192157, 0.105882, 1 )
+
+[sub_resource type="CubeMesh" id=2]
+material = SubResource( 1 )
+size = Vector3( 0.1, 0.1, 0.2 )
+
+[sub_resource type="SphereMesh" id=5]
+radius = 0.1
+height = 0.2
+radial_segments = 12
+rings = 12
+
+[sub_resource type="SpatialMaterial" id=6]
+albedo_color = Color( 0.87, 0.87, 0.87, 1 )
+
+[node name="csg_cracked" type="CSGMesh"]
+operation = 2
+mesh = SubResource( 2 )
+__meta__ = {
+"_editor_description_": ""
+}
+
+[node name="csgpalm" type="CSGMesh" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0544916, 0, -0.0286622 )
+operation = 2
+mesh = SubResource( 5 )
+material = SubResource( 6 )

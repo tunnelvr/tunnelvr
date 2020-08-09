@@ -29,7 +29,9 @@ func setdoppelganger(doppelgangeron):
 		doppelganger = null
 
 func _ready():
-	print("dddd ", doppelganger, get_node(".."))
+	$HandRight/csghandright.setpartcolor(1, "#FFFFFF")
+	$HandRight/csghandright.setpartcolor(2, Color("#FFFFFF"))
+	$HandLeft/csghandleft.setpartcolor(2, Color("#FFFFFF"))
 
 func _physics_process(_delta):
 	pass
