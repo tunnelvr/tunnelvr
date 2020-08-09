@@ -42,3 +42,9 @@ remote func setavatarposition(playertransform, headcamtransform, handlefttransfo
 	#$HeadCam.transform = headcamtransform
 	#$HandLeft.transform = handlefttransform
 	#$HandRight.transform = handrighttransform
+
+remotesync func playvoicerecording(wavrecording):
+	print("playing recording ", len(wavrecording.data)) 
+	$HandLeft/AudioStreamPlayer3D.stream = wavrecording
+	$HandLeft/AudioStreamPlayer3D.play()
+

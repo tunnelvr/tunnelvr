@@ -30,11 +30,9 @@ var laserangleadjustmode = false
 var laserangleoriginal = 0
 var laserhandanglevector = Vector2(0,0)
 
-func _on_button_release(p_button):
-	if laserangleadjustmode:
-		laserangleadjustmode = false
-		handright.rumble = 0.0
-	
+onready var idx = AudioServer.get_bus_index("Record")
+onready var effect = AudioServer.get_bus_effect(idx, 0)
+
 func _on_button_pressed(p_button):
 	if p_button == Buttons.VR_PAD:
 		var left_right = handleft.get_joystick_axis(0)
@@ -47,6 +45,25 @@ func _on_button_pressed(p_button):
 		laserangleoriginal = handright.get_node("LaserOrient").rotation.x
 		laserhandanglevector = Vector2(handleft.global_transform.basis.x.dot(handright.global_transform.basis.y), handleft.global_transform.basis.y.dot(handright.global_transform.basis.y))
 		
+	if p_button == Buttons.VR_BUTTON_BY:
+		effect.set_recording_active(true)
+		print("Doing the recording ", idx, effect)
+		
+func _on_button_release(p_button):
+	if laserangleadjustmode:
+		laserangleadjustmode = false
+		handright.rumble = 0.0
+
+	if p_button == Buttons.VR_BUTTON_BY:
+		var recording = effect.get_recording()
+		recording.save_to_wav("user://record3.wav")
+		effect.set_recording_active(false)
+		#print("Saved WAV file to: %s\n(%s)" % ["user://record3.wav", ProjectSettings.globalize_path("user://record3.wav")])
+		print("end_recording ", idx, effect)
+		#handleft.get_node("AudioStreamPlayer3D").stream = recording
+		#handleft.get_node("AudioStreamPlayer3D").play()
+		playernode.rpc("playvoicerecording", recording)
+
 func _input(event):
 	if event is InputEventKey and event.pressed:
 		if event.is_action_pressed("lh_left") and not Input.is_action_pressed("lh_shift"):
