@@ -62,7 +62,7 @@ func _on_button_release(p_button):
 		print("end_recording ", idx, effect)
 		#handleft.get_node("AudioStreamPlayer3D").stream = recording
 		#handleft.get_node("AudioStreamPlayer3D").play()
-		playernode.rpc("playvoicerecording", recording)
+		playernode.rpc("playvoicerecording", recording.get_data())
 
 func _input(event):
 	if event is InputEventKey and event.pressed:
