@@ -7,7 +7,7 @@ const XCtube = preload("res://nodescenes/XCtube.tscn")
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	$floordrawing.floortype = true
-	$floordrawing.otxcdIndex = $floordrawing.get_name()
+	#$floordrawing.otxcdIndex = $floordrawing.get_name()
 	$floordrawing/XCdrawingplane.scale = Vector3(50, 50, 1)
 	$floordrawing/XCdrawingplane.collision_layer |= 2
 	$floordrawing/XCdrawingplane/CollisionShape/MeshInstance.material_override = load("res://surveyscans/scanimagefloor.material")
@@ -28,16 +28,17 @@ func xcapplyonepath(xcn0, xcn1):
 		xcdrawing0.updatexcpaths()
 		return
 		
-	if not bgroundanchortype and xcdrawing0.otxcdIndex > xcdrawing1.otxcdIndex:
+	if not bgroundanchortype and xcdrawing0.get_name() > xcdrawing1.get_name():
 		var tt = xcn0
 		xcn0 = xcn1
 		xcn1 = tt
 		xcdrawing0 = xcn0.get_parent().get_parent()
 		xcdrawing1 = xcn1.get_parent().get_parent()
 		
-	var xcdrawing0otxcdIndex = xcdrawing0.otxcdIndex
-	var xcdrawing1otxcdIndex = xcdrawing1.otxcdIndex if not bgroundanchortype else "floordrawing"
-
+	var xcdrawing0otxcdIndex = xcdrawing0.get_name()
+	var xcdrawing1otxcdIndex = xcdrawing1.get_name()
+	assert (xcdrawing1otxcdIndex == xcdrawing1.get_name() if not bgroundanchortype else "floordrawing")
+	
 	var xctube = null
 	for lxctube in $XCtubes.get_children():
 		if lxctube.otxcdIndex0 == xcdrawing0otxcdIndex and lxctube.otxcdIndex1 == xcdrawing1otxcdIndex:
@@ -160,10 +161,9 @@ func newXCuniquedrawing(sname=null):
 		var largestxcdrawingnumber = 0
 		for xcdrawing in get_node("XCdrawings").get_children():
 			largestxcdrawingnumber = max(largestxcdrawingnumber, int(xcdrawing.get_name()))
-		sname = "s"+String(largestxcdrawingnumber+1)
+		sname = "s%04d" % (largestxcdrawingnumber+1)
 	var xcdrawing = XCdrawing.instance()
 	xcdrawing.set_name(sname)
-	xcdrawing.otxcdIndex = xcdrawing.get_name()
 	get_node("XCdrawings").add_child(xcdrawing)
 	return xcdrawing
 

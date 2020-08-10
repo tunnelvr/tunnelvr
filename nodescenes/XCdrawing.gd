@@ -3,7 +3,6 @@ extends Spatial
 const XCnode = preload("res://nodescenes/XCnode.tscn")
 
 const linewidth = 0.05
-var otxcdIndex: String = ""
 
 var nodepoints = [ ]    # list of Vector3
 var onepathpairs = [ ]  # sequence of pairs indexing the nodepoints
@@ -150,7 +149,7 @@ func removexcnode(xcn, brejoinlines, sketchsystem):
 		copyotnodetoxcn($XCnodes.get_child(xcnIndex))
 	$XCnodes.get_child($XCnodes.get_child_count()-1).free()
 	for xctube in xctubesconn:
-		xctube.removetubenodepoint(otxcdIndex, xcnIndex, len(nodepoints))
+		xctube.removetubenodepoint(get_name(), xcnIndex, len(nodepoints))
 	updatexcpaths()
 	for xctube in xctubesconn:
 		xctube.updatetubelinkpaths(sketchsystem.get_node("XCdrawings"), sketchsystem)

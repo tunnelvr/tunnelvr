@@ -338,7 +338,7 @@ func _on_button_pressed(p_button):
 			setselectedtarget(pointertarget)
 		
 		# new XCintersecting in tube case
-		elif gripbuttonheld and selectedtargettype == "XCnode" and pointertargettype == "XCtube" and (selectedtargetwall.otxcdIndex == pointertargetwall.otxcdIndex0 or selectedtargetwall.otxcdIndex == pointertargetwall.otxcdIndex1):
+		elif gripbuttonheld and selectedtargettype == "XCnode" and pointertargettype == "XCtube" and (selectedtargetwall.get_name() == pointertargetwall.otxcdIndex0 or selectedtargetwall.get_name() == pointertargetwall.otxcdIndex1):
 			var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(pointertargetwall.otxcdIndex0)
 			var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(pointertargetwall.otxcdIndex1)
 			var v0c = pointertargetpoint - xcdrawing0.global_transform.origin
@@ -372,7 +372,7 @@ func _on_button_pressed(p_button):
 				var xctube0 = preload("res://nodescenes/XCtube.tscn").instance()
 				xctube0.get_node("XCtubeshell/CollisionShape").shape = ConcavePolygonShape.new()   # bug.  this fails to get cloned
 				xctube0.otxcdIndex0 = pointertargetwall.otxcdIndex0
-				xctube0.otxcdIndex1 = xcdrawing.otxcdIndex
+				xctube0.otxcdIndex1 = xcdrawing.get_name()
 				xcdrawing0.xctubesconn.append(xctube0)
 				xcdrawing.xctubesconn.append(xctube0)
 				xctube0.set_name("XCtube0_"+xctube0.otxcdIndex0+"_"+xctube0.otxcdIndex1)
@@ -384,7 +384,8 @@ func _on_button_pressed(p_button):
 				var xctube1 = preload("res://nodescenes/XCtube.tscn").instance()
 				xctube1.get_node("XCtubeshell/CollisionShape").shape = ConcavePolygonShape.new()   # bug.  this fails to get cloned
 				xctube1.otxcdIndex0 = pointertargetwall.otxcdIndex1
-				xctube1.otxcdIndex1 = xcdrawing.otxcdIndex  # keep order
+				xctube1.otxcdIndex1 = xcdrawing.get_name()  # keep order
+				assert (xctube1.otxcdIndex0 < xctube1.otxcdIndex1)
 				xcdrawing1.xctubesconn.append(xctube1)
 				xcdrawing.xctubesconn.append(xctube1)
 				xctube1.set_name("XCtube0"+String(xctube1.otxcdIndex0)+"_"+String(xctube1.otxcdIndex1))

@@ -16,5 +16,6 @@ func t(x=null):
 func _run():
 	var x = IP.get_local_addresses()
 	print("b" < "a")
-	print(int("hifff")+2)
+	print(int("hif0008ff")+2)
 	t("ff")
+	print()
