@@ -1,7 +1,7 @@
 extends Spatial
 
-var otxcdIndex0 : String 
-var otxcdIndex1 : String    # setting to -1 means the floor sketch
+var xcname0 : String 
+var xcname1 : String    # setting to -1 means the floor sketch
 var xcdrawinglink = [ ]  # [ nodepoints_ifrom0, nodepoints_ito0, nodepoints_ifrom1, nodepoints_ito1, ... ]
 const linewidth = 0.02
 
@@ -33,11 +33,11 @@ func xctubeapplyonepath(xcn0, xcn1):
 	assert ((len(xcdrawinglink)%2) == 0)
 	updatetubelinkpaths(xcdrawings, sketchsystem)
 
-func removetubenodepoint(otxcdIndex, xcnIndex, xcnIndexE):
+func removetubenodepoint(xcname, xcnIndex, xcnIndexE):
 	# this function very closely bound with the tail copy onto deleted one method
-	assert ((otxcdIndex == otxcdIndex0) or (otxcdIndex == otxcdIndex1))
-	var m = 0 if otxcdIndex == otxcdIndex0 else 1
-	print("rrremoveotnodepoint-pre ", otxcdIndex, " ", xcnIndex, xcdrawinglink)
+	assert ((xcname == xcname0) or (xcname == xcname1))
+	var m = 0 if xcname == xcname0 else 1
+	print("rrremoveotnodepoint-pre ", xcname, " ", xcnIndex, xcdrawinglink)
 	for j in range(len(xcdrawinglink) - 2, -1, -2):
 		if xcdrawinglink[j+m] == xcnIndex:
 			xcdrawinglink[j] = xcdrawinglink[-2]
@@ -45,11 +45,11 @@ func removetubenodepoint(otxcdIndex, xcnIndex, xcnIndexE):
 			xcdrawinglink.resize(len(xcdrawinglink) - 2)
 		elif xcdrawinglink[j+m] == xcnIndexE:
 			xcdrawinglink[j+m] = xcnIndex
-	print("rrremoveotnodepoint-post ", otxcdIndex, " ", xcnIndex, xcdrawinglink)
+	print("rrremoveotnodepoint-post ", xcname, " ", xcnIndex, xcdrawinglink)
 
 func shiftxcdrawingposition(xcdrawings, sketchsystem):
 	print("...shiftxcdrawingposition")
-	var xcdrawing = xcdrawings.get_node(otxcdIndex0)
+	var xcdrawing = xcdrawings.get_node(xcname0)
 	var xcdrawing0nodes = xcdrawing.get_node("XCnodes")
 	var xcdrawing1nodes = sketchsystem.get_node("floordrawing/XCnodes")
 	if len(xcdrawinglink) == 0:
@@ -80,19 +80,19 @@ func shiftxcdrawingposition(xcdrawings, sketchsystem):
 	if bscalexcnodepointspointsx_called:
 		xcdrawing.updatexcpaths()
 	for xctube in xcdrawing.xctubesconn:
-		if xctube.otxcdIndex1 != "floordrawing":
+		if xctube.xcname1 != "floordrawing":
 			xctube.updatetubelinkpaths(xcdrawings, sketchsystem)
 		
 		
 func updatetubelinkpaths(xcdrawings, sketchsystem):
-	var bgroundanchortype = otxcdIndex1 == "floordrawing"
+	var bgroundanchortype = xcname1 == "floordrawing"
 	if bgroundanchortype:
 		shiftxcdrawingposition(xcdrawings, sketchsystem)
 	
 	var surfaceTool = SurfaceTool.new()
 	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
-	var xcdrawing0nodes = xcdrawings.get_node(otxcdIndex0).get_node("XCnodes")
-	var xcdrawing1nodes = xcdrawings.get_node(otxcdIndex1).get_node("XCnodes") if not bgroundanchortype else sketchsystem.get_node("floordrawing/XCnodes")
+	var xcdrawing0nodes = xcdrawings.get_node(xcname0).get_node("XCnodes")
+	var xcdrawing1nodes = xcdrawings.get_node(xcname1).get_node("XCnodes") if not bgroundanchortype else sketchsystem.get_node("floordrawing/XCnodes")
 	print("llll", xcdrawings, xcdrawing0nodes, xcdrawing1nodes, xcdrawinglink)
 	assert ((len(xcdrawinglink)%2) == 0)
 	for j in range(0, len(xcdrawinglink), 2):
@@ -168,8 +168,8 @@ func maketubeshell(floordrawing):
 	var dfinv = floordrawing.get_node("XCdrawingplane/CollisionShape/MeshInstance").global_transform.affine_inverse()
 	
 	var xcdrawings = get_node("../../XCdrawings")
-	var xcdrawing0 = xcdrawings.get_node(otxcdIndex0)
-	var xcdrawing1 = xcdrawings.get_node(otxcdIndex1)
+	var xcdrawing0 = xcdrawings.get_node(xcname0)
+	var xcdrawing1 = xcdrawings.get_node(xcname1)
 	var mtpa = maketubepolyassociation(xcdrawing0, xcdrawing1)
 	var poly0 = mtpa[0]
 	var poly1 = mtpa[1]
@@ -220,8 +220,8 @@ func maketubeshell(floordrawing):
 
 func slicetubetoxcdrawing(xcdrawing, xcdrawinglink0, xcdrawinglink1, lam):
 	var xcdrawings = get_node("../../XCdrawings")
-	var xcdrawing0 = xcdrawings.get_node(otxcdIndex0)
-	var xcdrawing1 = xcdrawings.get_node(otxcdIndex1)
+	var xcdrawing0 = xcdrawings.get_node(xcname0)
+	var xcdrawing1 = xcdrawings.get_node(xcname1)
 	var mtpa = maketubepolyassociation(xcdrawing0, xcdrawing1)
 	var poly0 = mtpa[0]
 	var poly1 = mtpa[1]

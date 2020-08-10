@@ -3,11 +3,20 @@ extends Spatial
 
 # Stuff to do:
 
+# * make tubes tolerate going either way round
+# * otxcdIndex0 to xcname0 etc
 # * turn all the otxcdIndex stuff into a sNumber name  (points will be pNumber)
+# * floor drawing to be just an element in XCdrawings like any other (but with different name and flag)
+# * work on apply one path
+# * XCdrawing to have dict of otIndex name values to look up
+# * xcdrawing.importdata
+# * gui option to swap controllers left-right
+
+# * then merge the centreline as just another XCdrawing with links and jolting positions
+# * click position of XC doesn't cause XCtube to redraw
 
 # * Laser change colour when pointing onto something (according to what it points onto)
 # * pointer target and selected target from pointersystem into sketchsystem
-# * gui option to swap controllers left-right
 # * CSG avatar head to have headtorch light that goes on or off
 # * simulate microphone with raycast to mouth area (tip goes black, flashing during recording, blue during play)
 # * replace otxcdIndex with map instead of array and use int from names to look up.  shorter names all beginning with "p"

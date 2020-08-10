@@ -102,7 +102,7 @@ func setactivetargetwall(newactivetargetwall):
 			xcnode.get_node("CollisionShape/MeshInstance").set_surface_material(0, preload("res://guimaterials/XCnode_selected.material") if xcnode == selectedtarget else preload("res://guimaterials/XCnode.material"))
 		if not activetargetwall.floortype:
 			for xctube in activetargetwall.xctubesconn:
-				if xctube.otxcdIndex1 != "floordrawing":
+				if xctube.xcname1 != "floordrawing":
 					xctube.updatetubeshell(sketchsystem.get_node("floordrawing"), sketchsystem.tubeshellsvisible)
 	
 	activetargetwall = newactivetargetwall
@@ -314,13 +314,13 @@ func _on_button_pressed(p_button):
 			var xcdrawingtocopynodelink = null
 			var btargetclear = true
 			for xctube in sketchsystem.get_node("XCtubes").get_children():
-				if xctube.otxcdIndex1 == "floordrawing":
+				if xctube.xcname1 == "floordrawing":
 					if xctube.xcdrawinglink.slice(1, len(xctube.xcdrawinglink), 2).has(pointertarget.otIndex):
 						btargetclear = false
 					for i in range(0, len(xctube.xcdrawinglink), 2):
 						#if xctube.xcdrawinglink.slice(1, len(xctube.xcdrawinglink), 2).has(selectedtarget.otIndex):
 						if xctube.xcdrawinglink[i+1] == selectedtarget.otIndex:
-							xcdrawingtocopy = sketchsystem.get_node("XCdrawings").get_node(xctube.otxcdIndex0)
+							xcdrawingtocopy = sketchsystem.get_node("XCdrawings").get_node(xctube.xcname0)
 							xcdrawingtocopynodelink = xctube.xcdrawinglink[i]
 							break
 			if btargetclear and xcdrawingtocopy != null:
@@ -338,9 +338,9 @@ func _on_button_pressed(p_button):
 			setselectedtarget(pointertarget)
 		
 		# new XCintersecting in tube case
-		elif gripbuttonheld and selectedtargettype == "XCnode" and pointertargettype == "XCtube" and (selectedtargetwall.get_name() == pointertargetwall.otxcdIndex0 or selectedtargetwall.get_name() == pointertargetwall.otxcdIndex1):
-			var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(pointertargetwall.otxcdIndex0)
-			var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(pointertargetwall.otxcdIndex1)
+		elif gripbuttonheld and selectedtargettype == "XCnode" and pointertargettype == "XCtube" and (selectedtargetwall.get_name() == pointertargetwall.xcname0 or selectedtargetwall.get_name() == pointertargetwall.xcname1):
+			var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(pointertargetwall.xcname0)
+			var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(pointertargetwall.xcname1)
 			var v0c = pointertargetpoint - xcdrawing0.global_transform.origin
 			var v1c = pointertargetpoint - xcdrawing1.global_transform.origin
 			v0c.y = 0
@@ -369,31 +369,16 @@ func _on_button_pressed(p_button):
 				xcdrawing0.xctubesconn.remove(xcdrawing0.xctubesconn.find(pointertargetwall))
 				xcdrawing1.xctubesconn.remove(xcdrawing1.xctubesconn.find(pointertargetwall))
 
-				var xctube0 = preload("res://nodescenes/XCtube.tscn").instance()
-				xctube0.get_node("XCtubeshell/CollisionShape").shape = ConcavePolygonShape.new()   # bug.  this fails to get cloned
-				xctube0.otxcdIndex0 = pointertargetwall.otxcdIndex0
-				xctube0.otxcdIndex1 = xcdrawing.get_name()
-				xcdrawing0.xctubesconn.append(xctube0)
-				xcdrawing.xctubesconn.append(xctube0)
-				xctube0.set_name("XCtube0_"+xctube0.otxcdIndex0+"_"+xctube0.otxcdIndex1)
-				sketchsystem.get_node("XCtubes").add_child(xctube0)
+				var xctube0 = sketchsystem.newXCtube(xcdrawing0, xcdrawing)
 				xctube0.xcdrawinglink = xcdrawinglink0
 				xctube0.updatetubelinkpaths(sketchsystem.get_node("XCdrawings"), sketchsystem)
 				xctube0.updatetubeshell(sketchsystem.get_node("floordrawing"), sketchsystem.tubeshellsvisible)
 				
-				var xctube1 = preload("res://nodescenes/XCtube.tscn").instance()
-				xctube1.get_node("XCtubeshell/CollisionShape").shape = ConcavePolygonShape.new()   # bug.  this fails to get cloned
-				xctube1.otxcdIndex0 = pointertargetwall.otxcdIndex1
-				xctube1.otxcdIndex1 = xcdrawing.get_name()  # keep order
-				assert (xctube1.otxcdIndex0 < xctube1.otxcdIndex1)
-				xcdrawing1.xctubesconn.append(xctube1)
-				xcdrawing.xctubesconn.append(xctube1)
-				xctube1.set_name("XCtube0"+String(xctube1.otxcdIndex0)+"_"+String(xctube1.otxcdIndex1))
-				sketchsystem.get_node("XCtubes").add_child(xctube1)
+				var xctube1 = sketchsystem.newXCtube(xcdrawing1, xcdrawing)
+				assert (xctube1.xcname0 < xctube1.xcname1)
 				xctube1.xcdrawinglink = xcdrawinglink1
 				xctube1.updatetubelinkpaths(sketchsystem.get_node("XCdrawings"), sketchsystem)
 				xctube1.updatetubeshell(sketchsystem.get_node("floordrawing"), sketchsystem.tubeshellsvisible)
-
 
 				pointertargettype = "none"
 				pointertarget = null

@@ -7,7 +7,6 @@ const XCtube = preload("res://nodescenes/XCtube.tscn")
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	$floordrawing.floortype = true
-	#$floordrawing.otxcdIndex = $floordrawing.get_name()
 	$floordrawing/XCdrawingplane.scale = Vector3(50, 50, 1)
 	$floordrawing/XCdrawingplane.collision_layer |= 2
 	$floordrawing/XCdrawingplane/CollisionShape/MeshInstance.material_override = load("res://surveyscans/scanimagefloor.material")
@@ -37,24 +36,14 @@ func xcapplyonepath(xcn0, xcn1):
 		
 	var xcdrawing0otxcdIndex = xcdrawing0.get_name()
 	var xcdrawing1otxcdIndex = xcdrawing1.get_name()
-	assert (xcdrawing1otxcdIndex == xcdrawing1.get_name() if not bgroundanchortype else "floordrawing")
 	
 	var xctube = null
 	for lxctube in $XCtubes.get_children():
-		if lxctube.otxcdIndex0 == xcdrawing0otxcdIndex and lxctube.otxcdIndex1 == xcdrawing1otxcdIndex:
+		if lxctube.xcname0 == xcdrawing0.get_name() and lxctube.xcname1 == xcdrawing1.get_name():
 			xctube = lxctube
 			break
 	if xctube == null:
-		xctube = XCtube.instance()
-		xctube.get_node("XCtubeshell/CollisionShape").shape = ConcavePolygonShape.new()   # bug.  this fails to get cloned
-		xctube.otxcdIndex0 = xcdrawing0otxcdIndex
-		xctube.otxcdIndex1 = xcdrawing1otxcdIndex
-		xctube.set_name("XCtube_"+xctube.otxcdIndex0+"_"+xctube.otxcdIndex1)
-		xcdrawing0.xctubesconn.append(xctube)
-		if xcdrawing1 != null:
-			xcdrawing1.xctubesconn.append(xctube)
-		$XCtubes.add_child(xctube)
-	
+		xctube = newXCtube(xcdrawing0, xcdrawing1)
 	xctube.xctubeapplyonepath(xcn0, xcn1)
 
 
@@ -62,7 +51,7 @@ func updateworkingshell(makevisible):
 	var floordrawing = get_node("floordrawing")
 	tubeshellsvisible = makevisible
 	for xctube in $XCtubes.get_children():
-		if xctube.otxcdIndex1 != "floordrawing":
+		if xctube.xcname1 != "floordrawing":
 			xctube.updatetubeshell(floordrawing, makevisible)
 		else:
 			print("SSSkipping xctube to floor case")
@@ -79,7 +68,7 @@ func savesketchsystem():
 	var xctubesData = [ ]
 	for i in range($XCtubes.get_child_count()):
 		var xctube = $XCtubes.get_child(i)
-		xctubesData.append([xctube.otxcdIndex0, xctube.otxcdIndex1, xctube.xcdrawinglink])
+		xctubesData.append([xctube.xcname0, xctube.xcname1, xctube.xcdrawinglink])
 	var drawnstationnodes = $Centreline/DrawnStationNodes.get_children()
 	var drawnstationnodesData = [ ]	
 	for i in range(len(drawnstationnodes)):
@@ -105,7 +94,6 @@ func loadsketchsystem():
 	var xcdrawingsData = save_dict["xcdrawings"]
 	var xctubesData = save_dict["xctubes"]
 	var floordrawingData = save_dict["floordrawing"]
-	
 	
 	for drawnstationnode in $Centreline/DrawnStationNodes.get_children():
 		drawnstationnode.free()
@@ -136,17 +124,9 @@ func loadsketchsystem():
 		xctube.free()
 	for i in range(len(xctubesData)):
 		var xctubeData = xctubesData[i]
-		var xctube = XCtube.instance()
-		xctube.get_node("XCtubeshell/CollisionShape").shape = ConcavePolygonShape.new()   # bug.  this fails to get cloned
-		xctube.otxcdIndex0 = xctubeData[0]
-		xctube.otxcdIndex1 = xctubeData[1]
-		xctube.set_name("XCtube_"+xctube.otxcdIndex0+"_"+xctube.otxcdIndex1)
-		get_node("XCdrawings").get_node(xctube.otxcdIndex0).xctubesconn.append(xctube)
-		if xctube.otxcdIndex1 != "floordrawing":
-			get_node("XCdrawings").get_node(xctube.otxcdIndex1).xctubesconn.append(xctube)
-		else:
-			$floordrawing.xctubesconn.append(xctube)
-		$XCtubes.add_child(xctube)
+		var xctube = newXCtube(get_node("XCdrawings").get_node(xctubeData[0]), 
+							   $floordrawing if xctubeData[1] == "floordrawing" else get_node("XCdrawings").get_node(xctubeData[1]))
+		
 		xctube.xcdrawinglink = xctubeData[2]
 		for j in range(len(xctube.xcdrawinglink)):
 			xctube.xcdrawinglink[j] = int(xctube.xcdrawinglink[j])
@@ -167,3 +147,13 @@ func newXCuniquedrawing(sname=null):
 	get_node("XCdrawings").add_child(xcdrawing)
 	return xcdrawing
 
+func newXCtube(xcdrawing0, xcdrawing1):
+	var xctube = XCtube.instance()
+	xctube.xcname0 = xcdrawing0.get_name()
+	xctube.xcname1 = xcdrawing1.get_name()
+	xctube.set_name("XCtube_"+xctube.xcname0+"_"+xctube.xcname1)
+	xcdrawing0.xctubesconn.append(xctube)
+	xcdrawing1.xctubesconn.append(xctube)
+	$XCtubes.add_child(xctube)
+	return xctube
+	
