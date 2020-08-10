@@ -3,7 +3,7 @@ extends Spatial
 
 # Stuff to do:
 
-# * floor drawing to be just an element in XCdrawings like any other (but with different name and flag)
+
 # * work on apply one path
 # * XCdrawing to have dict of otIndex name values to look up of p-values
 # * xcdrawing.importdata
@@ -44,7 +44,6 @@ extends Spatial
 
 # * should the XCdrawing be flat and lifted up for XC, rather than tipped back for floordrawing
 # * and loading (remembering the transforms) so it starts exactly where it left off
-# * change "OnePathNodes" to "floordrawingnode"
 # * redo shiftfloorfromdrawnstations with nodes in the area of some kind (decide what to do about the scale)
 # * make tubes automatically update on moves of nodes.  
 # * tie centreline nodes to the drawn floor same way other movements are?

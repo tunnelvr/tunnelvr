@@ -3,12 +3,6 @@ extends Node
 onready var sketchsystem = get_node("/root/Spatial/SketchSystem")
 onready var centrelinesystem = sketchsystem.get_node("Centreline")
 onready var nodeorientationpreview = sketchsystem.get_node("NodeOrientationPreview")
-onready var floordrawing = sketchsystem.get_node("floordrawing")
-
-#onready var arvrorigin = get_node("../..")
-#onready var controller = get_parent()
-#onready var arvrcamera = arvrorigin.get_node("HeadCam")
-#onready var guipanel3d = arvrorigin.get_node("GUIPanel3D")
 
 onready var playernode = get_parent()
 onready var headcam = playernode.get_node('HeadCam')
@@ -102,8 +96,8 @@ func setactivetargetwall(newactivetargetwall):
 			xcnode.get_node("CollisionShape/MeshInstance").set_surface_material(0, preload("res://guimaterials/XCnode_selected.material") if xcnode == selectedtarget else preload("res://guimaterials/XCnode.material"))
 		if not activetargetwall.floortype:
 			for xctube in activetargetwall.xctubesconn:
-				if xctube.xcname1 != "floordrawing":
-					xctube.updatetubeshell(sketchsystem.get_node("floordrawing"), sketchsystem.tubeshellsvisible)
+				if (not sketchsystem.get_node("XCdrawings").get_node(xctube.xcname0).floortype) and (not sketchsystem.get_node("XCdrawings").get_node(xctube.xcname1).floortype):
+					xctube.updatetubeshell(sketchsystem.get_node("XCdrawings/floordrawing"), sketchsystem.tubeshellsvisible)
 	
 	activetargetwall = newactivetargetwall
 	if activetargetwall != null:
@@ -235,7 +229,7 @@ func onpointing(newpointertarget, newpointertargetpoint):
 			LaserSelectLine.visible = false
 		
 	if LaserShadow.visible and pointertargetpoint != null:
-		LaserShadow.global_transform = Transform(Basis(), Vector3(pointertargetpoint.x, floordrawing.global_transform.origin.y, pointertargetpoint.z))
+		LaserShadow.global_transform = Transform(Basis(), Vector3(pointertargetpoint.x, sketchsystem.get_node("XCdrawings/floordrawing").global_transform.origin.y, pointertargetpoint.z))
 
 
 func _on_button_pressed(p_button):
@@ -372,13 +366,12 @@ func _on_button_pressed(p_button):
 				var xctube0 = sketchsystem.newXCtube(xcdrawing0, xcdrawing)
 				xctube0.xcdrawinglink = xcdrawinglink0
 				xctube0.updatetubelinkpaths(sketchsystem.get_node("XCdrawings"), sketchsystem)
-				xctube0.updatetubeshell(sketchsystem.get_node("floordrawing"), sketchsystem.tubeshellsvisible)
+				xctube0.updatetubeshell(sketchsystem.get_node("XCdrawings/floordrawing"), sketchsystem.tubeshellsvisible)
 				
 				var xctube1 = sketchsystem.newXCtube(xcdrawing1, xcdrawing)
-				assert (xctube1.xcname0 < xctube1.xcname1)
 				xctube1.xcdrawinglink = xcdrawinglink1
 				xctube1.updatetubelinkpaths(sketchsystem.get_node("XCdrawings"), sketchsystem)
-				xctube1.updatetubeshell(sketchsystem.get_node("floordrawing"), sketchsystem.tubeshellsvisible)
+				xctube1.updatetubeshell(sketchsystem.get_node("XCdrawings/floordrawing"), sketchsystem.tubeshellsvisible)
 
 				pointertargettype = "none"
 				pointertarget = null
@@ -415,7 +408,6 @@ func _on_button_pressed(p_button):
 			sketchsystem.xcapplyonepath(selectedtarget, pointertarget)
 			setselectedtarget(pointertarget)
 								
-
 		# just select new node (ignoring current selection)
 		elif pointertargettype == "StationNode":
 			setselectedtarget(pointertarget)
@@ -441,11 +433,6 @@ func _on_button_pressed(p_button):
 		var up_down = handright.get_joystick_axis(1)
 		if abs(up_down) < 0.5 and abs(left_right) > 0.1 and is_instance_valid(pointertarget):
 			var dy = (1 if left_right > 0 else -1)*(1.0 if abs(left_right) < 0.8 else 0.1)
-			#if pointertargettype == "OnePathNodes":
-			#	pointertarget.global_transform.origin.y = max(0.1, pointertarget.global_transform.origin.y + dy)
-			#	pointertarget.scale.y = pointertarget.global_transform.origin.y
-			#	sketchsystem.ot.copyopntootnode(pointertarget)
-			#	nodeorientationpreview.global_transform.origin = pointertarget.global_transform.origin
 
 			if pointertargettype == "XCdrawing":
 				pointertargetwall.get_node("XCdrawingplane").scale.x = max(1, pointertargetwall.get_node("XCdrawingplane").scale.x + dy)
@@ -455,6 +442,7 @@ func _on_button_pressed(p_button):
 				
 			# raise the whole drawn floor case!
 			if pointertargettype == "DrawnStationNode":
+				var floordrawing = sketchsystem.get_node("XCdrawings/floordrawing")
 				floordrawing.global_transform.origin.y = floordrawing.global_transform.origin.y + dy
 				centrelinesystem.get_node("DrawnStationNodes").global_transform.origin.y = floordrawing.global_transform.origin.y
 			

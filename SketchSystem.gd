@@ -6,11 +6,8 @@ const XCtube = preload("res://nodescenes/XCtube.tscn")
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	$floordrawing.floortype = true
-	$floordrawing/XCdrawingplane.scale = Vector3(50, 50, 1)
-	$floordrawing/XCdrawingplane.collision_layer |= 2
-	$floordrawing/XCdrawingplane/CollisionShape/MeshInstance.material_override = load("res://surveyscans/scanimagefloor.material")
-	$Centreline.floordrawing = $floordrawing
+	$XCdrawings/floordrawing.setasfloortype()
+	$Centreline.floordrawing = $XCdrawings/floordrawing
 
 const linewidth = 0.05
 var tubeshellsvisible = false
@@ -46,10 +43,10 @@ func xcapplyonepath(xcn0, xcn1):
 	xctube.updatetubelinkpaths(xcdrawings, sketchsystem)
 
 func updateworkingshell(makevisible):
-	var floordrawing = get_node("floordrawing")
+	var floordrawing = get_node("XCdrawings/floordrawing")
 	tubeshellsvisible = makevisible
 	for xctube in $XCtubes.get_children():
-		if xctube.xcname1 != "floordrawing":
+		if (not get_node("XCdrawings").get_node(xctube.xcname0).floortype) and (not get_node("XCdrawings").get_node(xctube.xcname1).floortype):
 			xctube.updatetubeshell(floordrawing, makevisible)
 		else:
 			print("SSSkipping xctube to floor case")
@@ -59,7 +56,6 @@ func updateworkingshell(makevisible):
 # C:\Users\ViveOne\AppData\Roaming\Godot\app_userdata\digtunnel
 func savesketchsystem():
 	var fname = "user://savegame.save"
-	var floordrawingData = $floordrawing.exportdata()
 	var xcdrawingsData = [ ]
 	for i in range($XCdrawings.get_child_count()):
 		xcdrawingsData.append($XCdrawings.get_child(i).exportdata())
@@ -72,8 +68,7 @@ func savesketchsystem():
 	for i in range(len(drawnstationnodes)):
 		var dsn = drawnstationnodes[i]
 		drawnstationnodesData.append([dsn.stationname, dsn.global_transform.origin.x, dsn.global_transform.origin.y, dsn.global_transform.origin.z])
-	var save_dict = { "floordrawing":floordrawingData,
-					  "xcdrawings":xcdrawingsData,
+	var save_dict = { "xcdrawings":xcdrawingsData,
 					  "xctubes":xctubesData,
 					  "drawnstationnodes":drawnstationnodesData }
 	var save_game = File.new()
@@ -91,7 +86,6 @@ func loadsketchsystem():
 	var drawnstationnodesData = save_dict["drawnstationnodes"]
 	var xcdrawingsData = save_dict["xcdrawings"]
 	var xctubesData = save_dict["xctubes"]
-	var floordrawingData = save_dict["floordrawing"]
 	
 	for drawnstationnode in $Centreline/DrawnStationNodes.get_children():
 		drawnstationnode.free()
@@ -100,7 +94,6 @@ func loadsketchsystem():
 		drawnstationnode.stationname = drawnstationnodeData[0]
 		drawnstationnode.global_transform.origin = Vector3(drawnstationnodeData[1], drawnstationnodeData[2], drawnstationnodeData[3])
 
-	$floordrawing.importdata(floordrawingData)
 	# then move the floor by the drawnstationnodes (it should be done auto when we make the nodes connected)
 	
 	# then do the xcdrawings
@@ -113,8 +106,11 @@ func loadsketchsystem():
 		xcdrawing.importdata(xcdrawingData)
 		xcdrawing.get_node("XCdrawingplane").visible = false
 		xcdrawing.get_node("XCdrawingplane/CollisionShape").disabled = true
+		if xcdrawing.floortype:
+			xcdrawing.setasfloortype()
 		get_node("XCdrawings").add_child(xcdrawing)
 
+	$Centreline.floordrawing = $XCdrawings/floordrawing
 	# should move each into position by its connections
 
 	# then do the tubes
@@ -122,8 +118,7 @@ func loadsketchsystem():
 		xctube.free()
 	for i in range(len(xctubesData)):
 		var xctubeData = xctubesData[i]
-		var xctube = newXCtube(get_node("XCdrawings").get_node(xctubeData[0]), 
-							   $floordrawing if xctubeData[1] == "floordrawing" else get_node("XCdrawings").get_node(xctubeData[1]))
+		var xctube = newXCtube(get_node("XCdrawings").get_node(xctubeData[0]), get_node("XCdrawings").get_node(xctubeData[1]))
 		
 		xctube.xcdrawinglink = xctubeData[2]
 		for j in range(len(xctube.xcdrawinglink)):

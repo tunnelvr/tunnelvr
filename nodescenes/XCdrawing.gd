@@ -2,13 +2,16 @@ extends Spatial
 
 const XCnode = preload("res://nodescenes/XCnode.tscn")
 
-const linewidth = 0.05
 
+# primary data
 var nodepoints = [ ]    # list of Vector3
 var onepathpairs = [ ]  # sequence of pairs indexing the nodepoints
+var floortype = false
+
+# derived data
 var xctubesconn = [ ]   # references to xctubes that connect to here (could use their names instead)
 
-var floortype = false
+const linewidth = 0.05
 
 func setxcdrawingvisibility(makevisible):
 	if not makevisible:
@@ -36,6 +39,16 @@ func setxcpositionangle(drawingwallangle):
 func setxcpositionorigin(pt0):
 	global_transform.origin = Vector3(pt0.x, 0, pt0.z)
 
+func setasfloortype():
+	floortype = true
+	assert (get_name() == "floordrawing")
+	$XCdrawingplane.scale = Vector3(50, 50, 1)
+	$XCdrawingplane.collision_layer |= 2
+	$XCdrawingplane.visible = true
+	$XCdrawingplane/CollisionShape.disabled = false
+	$XCdrawingplane/CollisionShape/MeshInstance.material_override = load("res://surveyscans/scanimagefloor.material")
+	rotation_degrees = Vector3(-90, 0, 0)
+
 func exportdata():
 	var nodepointsData = [ ]
 	for i in range(len(nodepoints)):
@@ -44,12 +57,14 @@ func exportdata():
 		nodepointsData.append(nodepoints[i].z)
 	var xvec = Vector2(global_transform.basis.x.x, global_transform.basis.x.z)
 	return { "name":get_name(),
+			 "floortype":floortype,
 			 "transpos": [xvec.angle(), $XCdrawingplane.scale.x, global_transform.origin.x, global_transform.origin.y, global_transform.origin.z], 
 			 "nodepoints": nodepointsData, 
 			 "onepathpairs":onepathpairs 
 		   }
 
 func importdata(xcdrawingData):
+	floortype = xcdrawingData["floortype"]
 	var transpos = xcdrawingData["transpos"]
 	$XCdrawingplane.set_scale(Vector3(transpos[1], transpos[1], 1.0))
 	if floortype:

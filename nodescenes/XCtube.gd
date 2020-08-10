@@ -51,7 +51,7 @@ func shiftxcdrawingposition(xcdrawings, sketchsystem):
 	print("...shiftxcdrawingposition")
 	var xcdrawing = xcdrawings.get_node(xcname0)
 	var xcdrawing0nodes = xcdrawing.get_node("XCnodes")
-	var xcdrawing1nodes = sketchsystem.get_node("floordrawing/XCnodes")
+	var xcdrawing1nodes = sketchsystem.get_node("XCdrawings/floordrawing/XCnodes")
 	if len(xcdrawinglink) == 0:
 		return
 	var bscalexcnodepointspointsx_called = false
@@ -85,14 +85,14 @@ func shiftxcdrawingposition(xcdrawings, sketchsystem):
 		
 		
 func updatetubelinkpaths(xcdrawings, sketchsystem):
-	var bgroundanchortype = xcname1 == "floordrawing"
+	var bgroundanchortype = xcdrawings.get_node(xcname0).floortype or xcdrawings.get_node(xcname1).floortype
 	if bgroundanchortype:
 		shiftxcdrawingposition(xcdrawings, sketchsystem)
 	
 	var surfaceTool = SurfaceTool.new()
 	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var xcdrawing0nodes = xcdrawings.get_node(xcname0).get_node("XCnodes")
-	var xcdrawing1nodes = xcdrawings.get_node(xcname1).get_node("XCnodes") if not bgroundanchortype else sketchsystem.get_node("floordrawing/XCnodes")
+	var xcdrawing1nodes = xcdrawings.get_node(xcname1).get_node("XCnodes")
 	print("llll", xcdrawings, xcdrawing0nodes, xcdrawing1nodes, xcdrawinglink)
 	assert ((len(xcdrawinglink)%2) == 0)
 	for j in range(0, len(xcdrawinglink), 2):
@@ -117,8 +117,6 @@ func updatetubelinkpaths(xcdrawings, sketchsystem):
 	surfaceTool.generate_normals()
 	$PathLines.mesh = surfaceTool.commit()
 	print("ususxxxxc ", len($PathLines.mesh.get_faces()), " ", len($PathLines.mesh.get_faces())) #surfaceTool.generate_normals()
-	#if not bgroundanchortype:
-	#	updatetubeshell(sketchsystem.get_node("floordrawing"), $XCtubeshell.visible)
 
 func fa(a, b):
 	return a[0] < b[0] or (a[0] == b[0] and a[1] < b[1])

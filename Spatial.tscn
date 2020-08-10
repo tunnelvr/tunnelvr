@@ -294,6 +294,9 @@ script = ExtResource( 10 )
 
 [node name="XCdrawings" type="Spatial" parent="SketchSystem"]
 
+[node name="floordrawing" parent="SketchSystem/XCdrawings" instance=ExtResource( 8 )]
+transform = Transform( 1, 0, 0, 0, -1.62921e-07, 1, 0, -1, -1.62921e-07, 0, 0.5, 5 )
+
 [node name="XCtubes" type="Spatial" parent="SketchSystem"]
 
 [node name="Centreline" type="Spatial" parent="SketchSystem"]
@@ -332,9 +335,6 @@ material/0 = null
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -2.38419e-07, -0.200001, 0 )
 mesh = SubResource( 16 )
 material/0 = null
-
-[node name="floordrawing" parent="SketchSystem" instance=ExtResource( 8 )]
-transform = Transform( 1, 0, 0, 0, -1.62921e-07, 1, 0, -1, -1.62921e-07, 0, 0.5, 5 )
 
 [node name="SoundPos1" type="AudioStreamPlayer3D" parent="SketchSystem"]
 stream = ExtResource( 9 )
