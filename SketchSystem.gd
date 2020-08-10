@@ -18,34 +18,32 @@ var tubeshellsvisible = false
 func xcapplyonepath(xcn0, xcn1):
 	var xcdrawing0 = xcn0.get_parent().get_parent()
 	var xcdrawing1 = xcn1.get_parent().get_parent()
-	var bgroundanchortype = false
-	if xcn0 != xcn1 and xcn1.get_parent().get_parent().get_name() == "floordrawing":
-		bgroundanchortype = true
 					
 	if xcdrawing0 == xcdrawing1:
 		xcdrawing0.xcotapplyonepath(xcn0.otIndex, xcn1.otIndex)
 		xcdrawing0.updatexcpaths()
 		return
 		
-	if not bgroundanchortype and xcdrawing0.get_name() > xcdrawing1.get_name():
-		var tt = xcn0
-		xcn0 = xcn1
-		xcn1 = tt
-		xcdrawing0 = xcn0.get_parent().get_parent()
-		xcdrawing1 = xcn1.get_parent().get_parent()
-		
-	var xcdrawing0otxcdIndex = xcdrawing0.get_name()
-	var xcdrawing1otxcdIndex = xcdrawing1.get_name()
-	
 	var xctube = null
+	var xctubeRev = null
 	for lxctube in $XCtubes.get_children():
 		if lxctube.xcname0 == xcdrawing0.get_name() and lxctube.xcname1 == xcdrawing1.get_name():
 			xctube = lxctube
 			break
-	if xctube == null:
+		if lxctube.xcname0 == xcdrawing1.get_name() and lxctube.xcname1 == xcdrawing0.get_name():
+			xctubeRev = lxctube
+			break
+	if xctube != null:
+		xctube.xctubeapplyonepath(xcn0, xcn1)
+	elif xctubeRev != null:
+		xctubeRev.xctubeapplyonepath(xcn1, xcn0)
+		xctube = xctubeRev
+	else:
 		xctube = newXCtube(xcdrawing0, xcdrawing1)
-	xctube.xctubeapplyonepath(xcn0, xcn1)
-
+		xctube.xctubeapplyonepath(xcn0, xcn1)
+	var xcdrawings = xcn0.get_parent().get_parent().get_parent()
+	var sketchsystem = xcdrawings.get_parent()
+	xctube.updatetubelinkpaths(xcdrawings, sketchsystem)
 
 func updateworkingshell(makevisible):
 	var floordrawing = get_node("floordrawing")
@@ -141,7 +139,7 @@ func newXCuniquedrawing(sname=null):
 		var largestxcdrawingnumber = 0
 		for xcdrawing in get_node("XCdrawings").get_children():
 			largestxcdrawingnumber = max(largestxcdrawingnumber, int(xcdrawing.get_name()))
-		sname = "s%04d" % (largestxcdrawingnumber+1)
+		sname = "s%d" % (largestxcdrawingnumber+1)
 	var xcdrawing = XCdrawing.instance()
 	xcdrawing.set_name(sname)
 	get_node("XCdrawings").add_child(xcdrawing)

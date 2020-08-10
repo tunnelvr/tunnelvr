@@ -3,12 +3,9 @@ extends Spatial
 
 # Stuff to do:
 
-# * make tubes tolerate going either way round
-# * otxcdIndex0 to xcname0 etc
-# * turn all the otxcdIndex stuff into a sNumber name  (points will be pNumber)
 # * floor drawing to be just an element in XCdrawings like any other (but with different name and flag)
 # * work on apply one path
-# * XCdrawing to have dict of otIndex name values to look up
+# * XCdrawing to have dict of otIndex name values to look up of p-values
 # * xcdrawing.importdata
 # * gui option to swap controllers left-right
 

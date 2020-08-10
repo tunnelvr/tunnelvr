@@ -1,8 +1,10 @@
 extends Spatial
 
 var xcname0 : String 
-var xcname1 : String    # setting to -1 means the floor sketch
+var xcname1 : String
+
 var xcdrawinglink = [ ]  # [ nodepoints_ifrom0, nodepoints_ito0, nodepoints_ifrom1, nodepoints_ito1, ... ]
+
 const linewidth = 0.02
 
 const materialdirt = preload("res://lightweighttextures/simpledirt.material")
@@ -18,8 +20,7 @@ func togglematerialcycle():
 
 func xctubeapplyonepath(xcn0, xcn1):
 	print("xcapplyonepathxcapplyonepath-pre", xcn0, xcn1, xcdrawinglink)
-	var xcdrawings = xcn0.get_parent().get_parent().get_parent()
-	var sketchsystem = xcdrawings.get_parent()
+	assert (xcn0.get_parent().get_parent().get_name() == xcname0 and xcn1.get_parent().get_parent().get_name() == xcname1)
 	for j in range(0, len(xcdrawinglink), 2):
 		if xcdrawinglink[j] == xcn0.otIndex and xcdrawinglink[j+1] == xcn1.otIndex:
 			xcdrawinglink.remove(j+1)
@@ -31,7 +32,6 @@ func xctubeapplyonepath(xcn0, xcn1):
 		xcdrawinglink.append(xcn1.otIndex)
 	print("xcapplyonepathxcapplyonepath-post", xcdrawinglink)
 	assert ((len(xcdrawinglink)%2) == 0)
-	updatetubelinkpaths(xcdrawings, sketchsystem)
 
 func removetubenodepoint(xcname, xcnIndex, xcnIndexE):
 	# this function very closely bound with the tail copy onto deleted one method
