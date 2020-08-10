@@ -2,11 +2,11 @@
 
 [ext_resource path="res://nodescenes/XCtube.gd" type="Script" id=1]
 
-[sub_resource type="ArrayMesh" id=2]
+[sub_resource type="ArrayMesh" id=1]
 
-[sub_resource type="ConcavePolygonShape" id=3]
+[sub_resource type="ConcavePolygonShape" id=2]
 
-[sub_resource type="SpatialMaterial" id=4]
+[sub_resource type="SpatialMaterial" id=3]
 params_cull_mode = 2
 albedo_color = Color( 0.866667, 0.498039, 0.105882, 1 )
 
@@ -20,11 +20,11 @@ collision_mask = 0
 
 [node name="MeshInstance" type="MeshInstance" parent="XCtubeshell"]
 layers = 18
-mesh = SubResource( 2 )
+mesh = SubResource( 1 )
 
 [node name="CollisionShape" type="CollisionShape" parent="XCtubeshell"]
-shape = SubResource( 3 )
+shape = SubResource( 2 )
 disabled = true
 
 [node name="PathLines" type="MeshInstance" parent="."]
-material_override = SubResource( 4 )
+material_override = SubResource( 3 )

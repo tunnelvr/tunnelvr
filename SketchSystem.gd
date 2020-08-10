@@ -7,7 +7,7 @@ const XCtube = preload("res://nodescenes/XCtube.tscn")
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	$floordrawing.floortype = true
-	$floordrawing.otxcdIndex = -1
+	$floordrawing.otxcdIndex = $floordrawing.get_name()
 	$floordrawing/XCdrawingplane.scale = Vector3(50, 50, 1)
 	$floordrawing/XCdrawingplane.collision_layer |= 2
 	$floordrawing/XCdrawingplane/CollisionShape/MeshInstance.material_override = load("res://surveyscans/scanimagefloor.material")
@@ -36,7 +36,7 @@ func xcapplyonepath(xcn0, xcn1):
 		xcdrawing1 = xcn1.get_parent().get_parent()
 		
 	var xcdrawing0otxcdIndex = xcdrawing0.otxcdIndex
-	var xcdrawing1otxcdIndex = xcdrawing1.otxcdIndex if not bgroundanchortype else -1
+	var xcdrawing1otxcdIndex = xcdrawing1.otxcdIndex if not bgroundanchortype else "floordrawing"
 
 	var xctube = null
 	for lxctube in $XCtubes.get_children():
@@ -48,7 +48,7 @@ func xcapplyonepath(xcn0, xcn1):
 		xctube.get_node("XCtubeshell/CollisionShape").shape = ConcavePolygonShape.new()   # bug.  this fails to get cloned
 		xctube.otxcdIndex0 = xcdrawing0otxcdIndex
 		xctube.otxcdIndex1 = xcdrawing1otxcdIndex
-		xctube.set_name("XCtube"+String(xctube.otxcdIndex0)+"_"+String(xctube.otxcdIndex1))
+		xctube.set_name("XCtube_"+xctube.otxcdIndex0+"_"+xctube.otxcdIndex1)
 		xcdrawing0.xctubesconn.append(xctube)
 		if xcdrawing1 != null:
 			xcdrawing1.xctubesconn.append(xctube)
@@ -61,7 +61,7 @@ func updateworkingshell(makevisible):
 	var floordrawing = get_node("floordrawing")
 	tubeshellsvisible = makevisible
 	for xctube in $XCtubes.get_children():
-		if xctube.otxcdIndex1 != -1:
+		if xctube.otxcdIndex1 != "floordrawing":
 			xctube.updatetubeshell(floordrawing, makevisible)
 		else:
 			print("SSSkipping xctube to floor case")
@@ -122,14 +122,11 @@ func loadsketchsystem():
 	for i in range(len(xcdrawingsData)):
 		var xcdrawingData = xcdrawingsData[i]
 		print("iiii", xcdrawingData)
-		var xcdrawing = XCdrawing.instance()
-		assert (i == get_node("XCdrawings").get_child_count())
-		xcdrawing.otxcdIndex = i
-		xcdrawing.set_name("XCdrawing"+String(xcdrawing.otxcdIndex))
+		var xcdrawing = newXCuniquedrawing(xcdrawingData["name"])
+		xcdrawing.importdata(xcdrawingData)
 		xcdrawing.get_node("XCdrawingplane").visible = false
 		xcdrawing.get_node("XCdrawingplane/CollisionShape").disabled = true
 		get_node("XCdrawings").add_child(xcdrawing)
-		xcdrawing.importdata(xcdrawingData)
 
 	# should move each into position by its connections
 
@@ -140,12 +137,12 @@ func loadsketchsystem():
 		var xctubeData = xctubesData[i]
 		var xctube = XCtube.instance()
 		xctube.get_node("XCtubeshell/CollisionShape").shape = ConcavePolygonShape.new()   # bug.  this fails to get cloned
-		xctube.otxcdIndex0 = int(xctubeData[0])
-		xctube.otxcdIndex1 = int(xctubeData[1])
-		xctube.set_name("XCtube"+String(xctube.otxcdIndex0)+"_"+String(xctube.otxcdIndex1))
-		get_node("XCdrawings").get_child(xctube.otxcdIndex0).xctubesconn.append(xctube)
-		if xctube.otxcdIndex1 != -1:
-			get_node("XCdrawings").get_child(xctube.otxcdIndex1).xctubesconn.append(xctube)
+		xctube.otxcdIndex0 = xctubeData[0]
+		xctube.otxcdIndex1 = xctubeData[1]
+		xctube.set_name("XCtube_"+xctube.otxcdIndex0+"_"+xctube.otxcdIndex1)
+		get_node("XCdrawings").get_node(xctube.otxcdIndex0).xctubesconn.append(xctube)
+		if xctube.otxcdIndex1 != "floordrawing":
+			get_node("XCdrawings").get_node(xctube.otxcdIndex1).xctubesconn.append(xctube)
 		else:
 			$floordrawing.xctubesconn.append(xctube)
 		$XCtubes.add_child(xctube)
@@ -158,5 +155,15 @@ func loadsketchsystem():
 		
 	print("lllloaded")
 		
-
+func newXCuniquedrawing(sname=null):
+	if sname == null:
+		var largestxcdrawingnumber = 0
+		for xcdrawing in get_node("XCdrawings").get_children():
+			largestxcdrawingnumber = max(largestxcdrawingnumber, int(xcdrawing.get_name()))
+		sname = "s"+String(largestxcdrawingnumber+1)
+	var xcdrawing = XCdrawing.instance()
+	xcdrawing.set_name(sname)
+	xcdrawing.otxcdIndex = xcdrawing.get_name()
+	get_node("XCdrawings").add_child(xcdrawing)
+	return xcdrawing
 

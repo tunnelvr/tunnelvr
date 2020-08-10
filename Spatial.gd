@@ -3,6 +3,8 @@ extends Spatial
 
 # Stuff to do:
 
+# * turn all the otxcdIndex stuff into a sNumber name  (points will be pNumber)
+
 # * Laser change colour when pointing onto something (according to what it points onto)
 # * pointer target and selected target from pointersystem into sketchsystem
 # * gui option to swap controllers left-right

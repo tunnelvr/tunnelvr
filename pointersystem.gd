@@ -102,7 +102,7 @@ func setactivetargetwall(newactivetargetwall):
 			xcnode.get_node("CollisionShape/MeshInstance").set_surface_material(0, preload("res://guimaterials/XCnode_selected.material") if xcnode == selectedtarget else preload("res://guimaterials/XCnode.material"))
 		if not activetargetwall.floortype:
 			for xctube in activetargetwall.xctubesconn:
-				if xctube.otxcdIndex1 != -1:
+				if xctube.otxcdIndex1 != "floordrawing":
 					xctube.updatetubeshell(sketchsystem.get_node("floordrawing"), sketchsystem.tubeshellsvisible)
 	
 	activetargetwall = newactivetargetwall
@@ -234,7 +234,7 @@ func onpointing(newpointertarget, newpointertargetpoint):
 		else:
 			LaserSelectLine.visible = false
 		
-	if LaserShadow.visible:
+	if LaserShadow.visible and pointertargetpoint != null:
 		LaserShadow.global_transform = Transform(Basis(), Vector3(pointertargetpoint.x, floordrawing.global_transform.origin.y, pointertargetpoint.z))
 
 
@@ -314,13 +314,13 @@ func _on_button_pressed(p_button):
 			var xcdrawingtocopynodelink = null
 			var btargetclear = true
 			for xctube in sketchsystem.get_node("XCtubes").get_children():
-				if xctube.otxcdIndex1 == -1:
+				if xctube.otxcdIndex1 == "floordrawing":
 					if xctube.xcdrawinglink.slice(1, len(xctube.xcdrawinglink), 2).has(pointertarget.otIndex):
 						btargetclear = false
 					for i in range(0, len(xctube.xcdrawinglink), 2):
 						#if xctube.xcdrawinglink.slice(1, len(xctube.xcdrawinglink), 2).has(selectedtarget.otIndex):
 						if xctube.xcdrawinglink[i+1] == selectedtarget.otIndex:
-							xcdrawingtocopy = sketchsystem.get_node("XCdrawings").get_child(xctube.otxcdIndex0)
+							xcdrawingtocopy = sketchsystem.get_node("XCdrawings").get_node(xctube.otxcdIndex0)
 							xcdrawingtocopynodelink = xctube.xcdrawinglink[i]
 							break
 			if btargetclear and xcdrawingtocopy != null:
@@ -339,8 +339,8 @@ func _on_button_pressed(p_button):
 		
 		# new XCintersecting in tube case
 		elif gripbuttonheld and selectedtargettype == "XCnode" and pointertargettype == "XCtube" and (selectedtargetwall.otxcdIndex == pointertargetwall.otxcdIndex0 or selectedtargetwall.otxcdIndex == pointertargetwall.otxcdIndex1):
-			var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_child(pointertargetwall.otxcdIndex0)
-			var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_child(pointertargetwall.otxcdIndex1)
+			var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(pointertargetwall.otxcdIndex0)
+			var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(pointertargetwall.otxcdIndex1)
 			var v0c = pointertargetpoint - xcdrawing0.global_transform.origin
 			var v1c = pointertargetpoint - xcdrawing1.global_transform.origin
 			v0c.y = 0
@@ -356,11 +356,8 @@ func _on_button_pressed(p_button):
 					va1c = -va1c
 				var vang = lerp_angle(va0c.angle(), va1c.angle(), lam)				
 				var vwallmid = lerp(xcdrawing0.global_transform.origin, xcdrawing1.global_transform.origin, lam)
-				var xcdrawing = XCdrawing.instance()
-				var otxcdIndex = sketchsystem.get_node("XCdrawings").get_child_count()
-				xcdrawing.set_name("XCdrawing"+String(otxcdIndex))
-				xcdrawing.otxcdIndex = otxcdIndex   # could use the name in the list to avoid the index number
-				sketchsystem.get_node("XCdrawings").add_child(xcdrawing)
+				
+				var xcdrawing = sketchsystem.newXCuniquedrawing()
 				xcdrawing.setxcpositionangle(vang)
 				xcdrawing.setxcpositionorigin(vwallmid)
 				var xcdrawinglink0 = [ ]
@@ -378,7 +375,7 @@ func _on_button_pressed(p_button):
 				xctube0.otxcdIndex1 = xcdrawing.otxcdIndex
 				xcdrawing0.xctubesconn.append(xctube0)
 				xcdrawing.xctubesconn.append(xctube0)
-				xctube0.set_name("XCtube0"+String(xctube0.otxcdIndex0)+"_"+String(xctube0.otxcdIndex1))
+				xctube0.set_name("XCtube0_"+xctube0.otxcdIndex0+"_"+xctube0.otxcdIndex1)
 				sketchsystem.get_node("XCtubes").add_child(xctube0)
 				xctube0.xcdrawinglink = xcdrawinglink0
 				xctube0.updatetubelinkpaths(sketchsystem.get_node("XCdrawings"), sketchsystem)
@@ -503,11 +500,8 @@ func _on_button_release(p_button):
 	# new drawing wall position made
 	elif p_button == Buttons.VR_TRIGGER and pointertargettype == "OnePathNode" and selectedtargettype == "OnePathNode" and pointertarget != selectedtarget:
 		print("makingxcplane")
-		var xcdrawing = XCdrawing.instance()
-		var otxcdIndex = sketchsystem.get_node("XCdrawings").get_child_count()
-		xcdrawing.set_name("XCdrawing"+String(otxcdIndex))
-		xcdrawing.otxcdIndex = otxcdIndex   # could use the name in the list to avoid the index number
-		sketchsystem.get_node("XCdrawings").add_child(xcdrawing)
+		
+		var xcdrawing = sketchsystem.newXCuniquedrawing()
 		var vx = pointertarget.global_transform.origin - selectedtarget.global_transform.origin
 		xcdrawing.setxcpositionangle(Vector2(vx.x, vx.z).angle())
 		var vwallmid = (pointertarget.global_transform.origin + selectedtarget.global_transform.origin)/2

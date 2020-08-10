@@ -3,7 +3,7 @@ extends Spatial
 const XCnode = preload("res://nodescenes/XCnode.tscn")
 
 const linewidth = 0.05
-var otxcdIndex: int = 0
+var otxcdIndex: String = ""
 
 var nodepoints = [ ]    # list of Vector3
 var onepathpairs = [ ]  # sequence of pairs indexing the nodepoints
@@ -81,12 +81,8 @@ func importdata(xcdrawingData):
 	updatexcpaths()
 
 func duplicatexcdrawing(sketchsystem):
-	var XCdrawing = load("res://nodescenes/XCdrawing.tscn")  # self-instance
-	var xcdrawing = XCdrawing.instance()
-	var otxcdIndex = sketchsystem.get_node("XCdrawings").get_child_count()
-	xcdrawing.set_name("XCdrawing"+String(otxcdIndex))
-	xcdrawing.otxcdIndex = otxcdIndex
-	sketchsystem.get_node("XCdrawings").add_child(xcdrawing)
+	var xcdrawing = sketchsystem.newXCuniquedrawing()
+	
 	xcdrawing.global_transform = global_transform
 	for i in range(len(nodepoints)):
 		var xcn = xcdrawing.newxcnode(-1)

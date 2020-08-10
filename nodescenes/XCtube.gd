@@ -1,7 +1,7 @@
 extends Spatial
 
-var otxcdIndex0 : int
-var otxcdIndex1 : int    # setting to -1 means the floor sketch
+var otxcdIndex0 : String 
+var otxcdIndex1 : String    # setting to -1 means the floor sketch
 var xcdrawinglink = [ ]  # [ nodepoints_ifrom0, nodepoints_ito0, nodepoints_ifrom1, nodepoints_ito1, ... ]
 const linewidth = 0.02
 
@@ -49,7 +49,7 @@ func removetubenodepoint(otxcdIndex, xcnIndex, xcnIndexE):
 
 func shiftxcdrawingposition(xcdrawings, sketchsystem):
 	print("...shiftxcdrawingposition")
-	var xcdrawing = xcdrawings.get_child(otxcdIndex0)
+	var xcdrawing = xcdrawings.get_node(otxcdIndex0)
 	var xcdrawing0nodes = xcdrawing.get_node("XCnodes")
 	var xcdrawing1nodes = sketchsystem.get_node("floordrawing/XCnodes")
 	if len(xcdrawinglink) == 0:
@@ -80,19 +80,19 @@ func shiftxcdrawingposition(xcdrawings, sketchsystem):
 	if bscalexcnodepointspointsx_called:
 		xcdrawing.updatexcpaths()
 	for xctube in xcdrawing.xctubesconn:
-		if xctube.otxcdIndex1 != -1:
+		if xctube.otxcdIndex1 != "floordrawing":
 			xctube.updatetubelinkpaths(xcdrawings, sketchsystem)
 		
 		
 func updatetubelinkpaths(xcdrawings, sketchsystem):
-	var bgroundanchortype = otxcdIndex1 == -1
+	var bgroundanchortype = otxcdIndex1 == "floordrawing"
 	if bgroundanchortype:
 		shiftxcdrawingposition(xcdrawings, sketchsystem)
 	
 	var surfaceTool = SurfaceTool.new()
 	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
-	var xcdrawing0nodes = xcdrawings.get_child(otxcdIndex0).get_node("XCnodes")
-	var xcdrawing1nodes = xcdrawings.get_child(otxcdIndex1).get_node("XCnodes") if not bgroundanchortype else sketchsystem.get_node("floordrawing/XCnodes")
+	var xcdrawing0nodes = xcdrawings.get_node(otxcdIndex0).get_node("XCnodes")
+	var xcdrawing1nodes = xcdrawings.get_node(otxcdIndex1).get_node("XCnodes") if not bgroundanchortype else sketchsystem.get_node("floordrawing/XCnodes")
 	print("llll", xcdrawings, xcdrawing0nodes, xcdrawing1nodes, xcdrawinglink)
 	assert ((len(xcdrawinglink)%2) == 0)
 	for j in range(0, len(xcdrawinglink), 2):
@@ -168,8 +168,8 @@ func maketubeshell(floordrawing):
 	var dfinv = floordrawing.get_node("XCdrawingplane/CollisionShape/MeshInstance").global_transform.affine_inverse()
 	
 	var xcdrawings = get_node("../../XCdrawings")
-	var xcdrawing0 = xcdrawings.get_child(otxcdIndex0)
-	var xcdrawing1 = xcdrawings.get_child(otxcdIndex1)
+	var xcdrawing0 = xcdrawings.get_node(otxcdIndex0)
+	var xcdrawing1 = xcdrawings.get_node(otxcdIndex1)
 	var mtpa = maketubepolyassociation(xcdrawing0, xcdrawing1)
 	var poly0 = mtpa[0]
 	var poly1 = mtpa[1]
@@ -220,8 +220,8 @@ func maketubeshell(floordrawing):
 
 func slicetubetoxcdrawing(xcdrawing, xcdrawinglink0, xcdrawinglink1, lam):
 	var xcdrawings = get_node("../../XCdrawings")
-	var xcdrawing0 = xcdrawings.get_child(otxcdIndex0)
-	var xcdrawing1 = xcdrawings.get_child(otxcdIndex1)
+	var xcdrawing0 = xcdrawings.get_node(otxcdIndex0)
+	var xcdrawing1 = xcdrawings.get_node(otxcdIndex1)
 	var mtpa = maketubepolyassociation(xcdrawing0, xcdrawing1)
 	var poly0 = mtpa[0]
 	var poly1 = mtpa[1]
