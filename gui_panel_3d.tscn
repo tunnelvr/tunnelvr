@@ -136,6 +136,18 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="ButtonSwapControllers" type="Button" parent="Viewport/GUI/Panel"]
+margin_left = 160.4
+margin_top = 77.6836
+margin_right = 300.4
+margin_bottom = 105.684
+rect_pivot_offset = Vector2( 138.61, -8.13628 )
+hint_tooltip = "test tooltip"
+text = "Swap Controllers"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [node name="ColorRect" type="ColorRect" parent="Viewport/GUI/Panel"]
 margin_left = 296.873
 margin_top = 131.008

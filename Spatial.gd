@@ -7,7 +7,6 @@ extends Spatial
 # * work on apply one path
 # * XCdrawing to have dict of otIndex name values to look up of p-values
 # * xcdrawing.importdata
-# * gui option to swap controllers left-right
 
 # * then merge the centreline as just another XCdrawing with links and jolting positions
 # * click position of XC doesn't cause XCtube to redraw

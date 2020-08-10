@@ -189,7 +189,6 @@ spot_angle_attenuation = 1.27456
 
 [node name="HandLeft" type="ARVRController" parent="Players/PlayerMe"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.2, 1.5, -0.5 )
-controller_id = 2
 
 [node name="csghandleft" parent="Players/PlayerMe/HandLeft" instance=ExtResource( 6 )]
 transform = Transform( -1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0 )
@@ -209,6 +208,7 @@ bus = "Record"
 
 [node name="HandRight" type="ARVRController" parent="Players/PlayerMe"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.2, 1.5, -0.5 )
+controller_id = 2
 
 [node name="csghandright" parent="Players/PlayerMe/HandRight" instance=ExtResource( 6 )]
 
