@@ -220,8 +220,12 @@ func onpointing(newpointertarget, newpointertargetpoint):
 	if is_instance_valid(pointertarget) and pointertarget == guipanel3d:
 		guipanel3d.guipanelsendmousemotion(pointertargetpoint, handright.global_transform, handright.is_button_pressed(Buttons.VR_TRIGGER))
 
-	if LaserSpot.visible:
+	if pointertargetpoint != null:
 		LaserSpot.global_transform.origin = pointertargetpoint
+		LaserSpot.get_node("../Length").scale.z = -LaserSpot.translation.z
+	else:
+		LaserSpot.get_node("../Length").scale.z = -LaserRayCast.cast_to.z
+		
 	if LaserSelectLine.visible:
 		if pointertarget != null and selectedtarget != null:
 			LaserSelectLine.global_transform.origin = pointertargetpoint

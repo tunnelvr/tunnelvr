@@ -29,6 +29,7 @@ func _ready():
 var laserangleadjustmode = false
 var laserangleoriginal = 0
 var laserhandanglevector = Vector2(0,0)
+var prevlaserangleoffset = 0
 
 onready var idx = AudioServer.get_bus_index("Record")
 onready var effect = AudioServer.get_bus_effect(idx, 0)
@@ -144,9 +145,11 @@ func _physics_process(delta):
 		if handleft.get_node("TipTouchRay").is_colliding():
 			var laserhandanglevectornew = Vector2(handleft.global_transform.basis.x.dot(handright.global_transform.basis.y), handleft.global_transform.basis.y.dot(handright.global_transform.basis.y))
 			laserangleoffset = laserhandanglevector.angle_to(laserhandanglevectornew)
-			handright.rumble = 0.7
+		handright.rumble = min(1.0, abs(prevlaserangleoffset - laserangleoffset)*delta*290)
+		if handright.rumble < 0.1:
+			handright.rumble = 0
 		else:
-			handright.rumble = 0.0
+			prevlaserangleoffset = laserangleoffset
 		handright.get_node("LaserOrient").rotation.x = laserangleoriginal + laserangleoffset
 		
 	elif handleft.is_button_pressed(Buttons.VR_GRIP) or Input.is_action_pressed("lh_fly"):

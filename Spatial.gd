@@ -3,50 +3,40 @@ extends Spatial
 
 # Stuff to do:
 
-# * Laser 
-# * remove CSG top level meshes
-# * Move the Laser into the HandRight and make it go yellow on pointing accordingly
-#   -- use a short ray spike that intersects only with hands 
-# * Get the left hand gesture highlight when held in place for adjusting the laser angle
-# * CSG avatar head should be moved into its same meshes directory and committed
+# * Laser change colour when pointing onto something (according to what it points onto)
+# * pointer target and selected target from pointersystem into sketchsystem
+# * gui option to swap controllers left-right
 # * CSG avatar head to have headtorch light that goes on or off
-# * change colour of head and hands of each avatar
-# * change hue of hands (and head) to show up in avatar with another rotate spot on back
+# * simulate microphone with raycast to mouth area (tip goes black, flashing during recording, blue during play)
 # * replace otxcdIndex with map instead of array and use int from names to look up.  shorter names all beginning with "p"
-# * swap controllers around button
+# * import other floor XCs for drawing on and snipping out, putting into places.
+# * ability to adjust angle and brightness of headtorch in same way with raycast stub
+# * abolish the set_materialoverride use and remove those 3 line scripts
 
-# * spot laser on other avatar hand (or hand to hand) to make it rumble when you shake hands, or flash
+# * change colour of head and hands of each avatar
+
 # * avoid calling network peer when not connected to anything
 # * start the sending over of positions from the server as updates happen
-# * hands to rumble when touch things.
-# * avatars to have caving light
-# * avatars to change colour of palms and sides when buttons are pressed
-# * able to change angle of laser pointer with other hand manipulation (same with 
-# * should light up hotspot when hand is in posistion to activate the light or laser pointer
 # * laser/spot/laser shadow/laser-selectline all more global (shared selection, or not)
-# * make the laser spot update on physics process so it doesn't flicker
-# * make a doppleganger of the ARVR origin and controller and hands, for use with the networking
 # * begin with mapfinding system from downloaded png files that are snipped up and placed in relation to a cave model
+# *  lay out the bits of paper on a board and lets you put them on the survey
+# *  online copies of the survey scans
 
 # * simplify the double points we get in the slices (take the mid-point of them)
 # * clear up the laser pointer logic and materials
-# * shorten laser pointer to end on the node
 # * automatically make the xcplane big enough as you draw close to its edge
 # * shift pick connection to delete nodes up to next junction
-# * option to start recording of the person to a file, and then stop recording, then replay recording -- in anticipation of multiplayer
-# * xcdrawing plane texture should be a 1m checkerboard as a shader repeating
 # * scan through other drawings on back of hand
 # * check stationdrawnnode moves the ground up
 # * Need to ask to improve the documentation on https://docs.godotengine.org/en/latest/classes/class_meshinstance.html#class-meshinstance-method-set-surface-material
 # *   See also https://godotengine.org/qa/3488/how-to-generate-a-mesh-with-multiple-materials
 # *   And explain how meshes can have their own materials, that are copied into material/0, and the material reappears if material/0 set to null
 # * CSG mesh with multiple materials group should have material0, material1 etc
+# * Report bug check ray intersect plane is in the plane and report if not!
 
-# *  because distortions don't ruin the topology of the area and do a whole set at once, and lend self to subdividing edges if curvature too great
 # * should the XCdrawing be flat and lifted up for XC, rather than tipped back for floordrawing
 # * and loading (remembering the transforms) so it starts exactly where it left off
 # * change "OnePathNodes" to "floordrawingnode"
-# * the headtorch should have ability to rotate down or up
 # * redo shiftfloorfromdrawnstations with nodes in the area of some kind (decide what to do about the scale)
 # * make tubes automatically update on moves of nodes.  
 # * tie centreline nodes to the drawn floor same way other movements are?
@@ -55,13 +45,9 @@ extends Spatial
 # * xcdrawingplane background thing be scaled when copied
 # * xcdrawingplane background thing change colour on grip and hide
 # * think about the height plane
-# * drag and shift all nodes up or expand in an xcdrawing (part of group node moving with circular paint brushing pushing)
 # * Normal drawing to be XCdrawing, but horizontal and with a connections between XCdrawings
 # * third (middle) connection point on xcdrawing bends it into 2 planes
-# * select cursor should be present when connecting to other nodes, even when point node is hidden
-# * auto update the shells on path join or node moved
 # * auto shift drawing on load and station nodes exist
-# * abolish the set_materialoverride use and remove those 3 line scripts
 # * experiment with making an offset of the XC and a tube
 # * how to duplicate, move and shift an XCdrawing with gestures
 # * remove poolintarrays because of all by value
@@ -86,12 +72,8 @@ extends Spatial
 # * move textpanel out to top level with the GUI stuff
 # * triangulations to better reflect the normals given at the nodes
 # * floor and wall textures programmable
-# * shadow from the pulled body and head-torch required
-# * nodes have push-pull or cross-section plane
-# * Line sections and triangle areas can be split
 # * Boulders and gravel and particles
 # * set the floor shape size according to aspect ratio read from the bitmap 1.285239=(3091/2405.0)
-# * Report bug check ray intersect plane is in the plane and report if not!
 
 var arvr_openvr = null; 
 var arvr_quest = null; 
