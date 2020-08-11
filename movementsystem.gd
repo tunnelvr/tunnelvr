@@ -16,7 +16,8 @@ var mousecontrollervec = Vector3(0.2, -0.1, -0.5)
 var velocity = Vector3(0.0, 0.0, 0.0)
 var gravity = -30.0
 
-export var max_speed = 300.0
+export var walkspeed = 100.0
+export var flyspeed = 250.0
 export var drag_factor = 0.1
 
 enum Buttons { VR_TRIGGER = 15, VR_PAD=14, VR_BUTTON_BY=1, VR_GRIP=2 }
@@ -31,8 +32,7 @@ var laserangleoriginal = 0
 var laserhandanglevector = Vector2(0,0)
 var prevlaserangleoffset = 0
 
-onready var idx = AudioServer.get_bus_index("Record")
-onready var effect = AudioServer.get_bus_effect(idx, 0)
+onready var audiobusrecordeffect = AudioServer.get_bus_effect(AudioServer.get_bus_index("Record"), 0)
 
 func _on_button_pressed(p_button):
 	if p_button == Buttons.VR_PAD:
@@ -41,14 +41,14 @@ func _on_button_pressed(p_button):
 		if abs(up_down) < 0.5 and abs(left_right) > 0.1:
 			nextphysicsrotatestep += (1 if left_right > 0 else -1)*(22.5 if abs(left_right) > 0.8 else 90.0)
 
-	laserangleadjustmode = (p_button == Buttons.VR_GRIP) and handleft.get_node("TipTouchRay").is_colliding()
+	laserangleadjustmode = (p_button == Buttons.VR_GRIP) and handleft.get_node("TipTouchRay").is_colliding() and handleft.get_node("TipTouchRay").get_collider() == handright.get_node("HeelHotspot")
 	if laserangleadjustmode:
 		laserangleoriginal = handright.get_node("LaserOrient").rotation.x
 		laserhandanglevector = Vector2(handleft.global_transform.basis.x.dot(handright.global_transform.basis.y), handleft.global_transform.basis.y.dot(handright.global_transform.basis.y))
 		
 	if p_button == Buttons.VR_BUTTON_BY:
-		effect.set_recording_active(true)
-		print("Doing the recording ", idx, effect)
+		audiobusrecordeffect.set_recording_active(true)
+		print("Doing the recording ", audiobusrecordeffect)
 		
 func _on_button_release(p_button):
 	if laserangleadjustmode:
@@ -56,13 +56,18 @@ func _on_button_release(p_button):
 		handright.rumble = 0.0
 
 	if p_button == Buttons.VR_BUTTON_BY:
-		var recording = effect.get_recording()
+		var recording = audiobusrecordeffect.get_recording()
 		recording.save_to_wav("user://record3.wav")
-		effect.set_recording_active(false)
+		audiobusrecordeffect.set_recording_active(false)
 		#print("Saved WAV file to: %s\n(%s)" % ["user://record3.wav", ProjectSettings.globalize_path("user://record3.wav")])
-		print("end_recording ", idx, effect)
+		print("end_recording ", audiobusrecordeffect)
 		#handleft.get_node("AudioStreamPlayer3D").stream = recording
 		#handleft.get_node("AudioStreamPlayer3D").play()
+		print("recording length ", recording.get_data().size())
+		print("fastlz ", recording.get_data().compress(File.COMPRESSION_FASTLZ).size())
+		print("COMPRESSION_DEFLATE ", recording.get_data().compress(File.COMPRESSION_DEFLATE).size())
+		print("COMPRESSION_ZSTD ", recording.get_data().compress(File.COMPRESSION_ZSTD).size())
+		print("COMPRESSION_GZIP ", recording.get_data().compress(File.COMPRESSION_GZIP).size())
 		playernode.rpc("playvoicerecording", recording.get_data())
 
 func _input(event):
@@ -101,7 +106,7 @@ func _physics_process(delta):
 	collision_shape.transform.origin.y = (player_height / 2.0)
 	#print(get_viewport().get_mouse_position(), Input.get_mouse_mode())
 	handleft.visible = playernode.arvrinterface != null and handleft.get_is_active()
-	handleft.get_node("csghandleft").setpartcolor(2, Color("#FFFF00") if handleft.get_node("TipTouchRay").is_colliding() else Color("#999999"))
+	handleft.get_node("csghandleft").setpartcolor(2, Color("222277") if handleft.get_node("TipTouchRay").is_colliding() else Color("#FFFFFF"))
 
 	if nextphysicsrotatestep != 0:
 		var t1 = Transform()
@@ -142,7 +147,7 @@ func _physics_process(delta):
 		
 	if laserangleadjustmode and handleft.is_button_pressed(Buttons.VR_GRIP):
 		var laserangleoffset = 0
-		if handleft.get_node("TipTouchRay").is_colliding():
+		if handleft.get_node("TipTouchRay").is_colliding() and handleft.get_node("TipTouchRay").get_collider() == handright.get_node("HeelHotspot"):
 			var laserhandanglevectornew = Vector2(handleft.global_transform.basis.x.dot(handright.global_transform.basis.y), handleft.global_transform.basis.y.dot(handright.global_transform.basis.y))
 			laserangleoffset = laserhandanglevector.angle_to(laserhandanglevectornew)
 		handright.rumble = min(1.0, abs(prevlaserangleoffset - laserangleoffset)*delta*290)
@@ -158,7 +163,7 @@ func _physics_process(delta):
 			var flydir = handleft.global_transform.basis.z if handleft.get_is_active() else headcam.global_transform.basis.z
 			if forwards_backwards < -0.5:
 				flydir = -flydir
-			velocity = flydir.normalized() * -delta * max_speed * world_scale
+			velocity = flydir.normalized() * -delta * flyspeed * world_scale
 			velocity = kinematic_body.move_and_slide(velocity)
 			var movement = (kinematic_body.global_transform.origin - curr_transform.origin)
 			playernode.global_transform.origin += movement
@@ -187,7 +192,7 @@ func _physics_process(delta):
 		if (abs(forwards_backwards) > 0.1 and tail.is_colliding()):
 			var dir = camera_transform.basis.z
 			dir.y = 0.0					
-			velocity = dir.normalized() * -forwards_backwards * delta * max_speed * world_scale
+			velocity = dir.normalized() * -forwards_backwards * delta * walkspeed * world_scale
 			#velocity = velocity.linear_interpolate(dir, delta * 100.0)		
 		
 		# apply move and slide to our kinematic body

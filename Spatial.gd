@@ -3,19 +3,22 @@ extends Spatial
 
 # Stuff to do:
 
-
-# * work on apply one path
 # * XCdrawing to have dict of otIndex name values to look up of p-values
 # * xcdrawing.importdata
 
 # * then merge the centreline as just another XCdrawing with links and jolting positions
 # * click position of XC doesn't cause XCtube to redraw
+# * replace otxcdIndex with map instead of array and use int from names to look up.  shorter names all beginning with "p"
+
+# * keyboard control of mouseclicks (when not in mouse capture mode) to do the laser (or remove laser entirely for the clicking on windows)
+
+# * CSG avatar head to have headtorch light that goes on or off
+
+# * simulate microphone with raycast to mouth area (tip goes black, flashing during recording, blue during play)
+# * use chinhotspot to use as microphone (on grip) and then button to playback
 
 # * Laser change colour when pointing onto something (according to what it points onto)
 # * pointer target and selected target from pointersystem into sketchsystem
-# * CSG avatar head to have headtorch light that goes on or off
-# * simulate microphone with raycast to mouth area (tip goes black, flashing during recording, blue during play)
-# * replace otxcdIndex with map instead of array and use int from names to look up.  shorter names all beginning with "p"
 # * import other floor XCs for drawing on and snipping out, putting into places.
 # * ability to adjust angle and brightness of headtorch in same way with raycast stub
 # * abolish the set_materialoverride use and remove those 3 line scripts

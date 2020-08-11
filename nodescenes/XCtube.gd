@@ -161,11 +161,11 @@ func add_uvvertex(surfaceTool, xcnodes, poly, ila, i, floorsize, dfinv):
 	surfaceTool.add_uv(uvpt)
 	surfaceTool.add_vertex(pt)
 
-func maketubeshell(floordrawing):
+func maketubeshell(xcdrawings):
+	var floordrawing = xcdrawings.get_node("floordrawing")
 	var floorsize = floordrawing.get_node("XCdrawingplane/CollisionShape/MeshInstance").mesh.size
 	var dfinv = floordrawing.get_node("XCdrawingplane/CollisionShape/MeshInstance").global_transform.affine_inverse()
 	
-	var xcdrawings = get_node("../../XCdrawings")
 	var xcdrawing0 = xcdrawings.get_node(xcname0)
 	var xcdrawing1 = xcdrawings.get_node(xcname1)
 	var mtpa = maketubepolyassociation(xcdrawing0, xcdrawing1)
@@ -270,9 +270,9 @@ func slicetubetoxcdrawing(xcdrawing, xcdrawinglink0, xcdrawinglink1, lam):
 	xcdrawing.onepathpairs.append(0)
 	return true
 
-func updatetubeshell(floordrawing, makevisible):
+func updatetubeshell(xcdrawings, makevisible):
 	if makevisible:
-		var tubeshellmesh = maketubeshell(floordrawing)
+		var tubeshellmesh = maketubeshell(xcdrawings)
 		if tubeshellmesh != null:
 			$XCtubeshell/MeshInstance.mesh = tubeshellmesh
 			$XCtubeshell/MeshInstance.set_surface_material(0, materialrock)

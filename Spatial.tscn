@@ -1,4 +1,4 @@
-[gd_scene load_steps=44 format=2]
+[gd_scene load_steps=46 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://default_env.tres" type="Environment" id=2]
@@ -11,6 +11,7 @@
 [ext_resource path="res://sounds/switch7.wav" type="AudioStream" id=9]
 [ext_resource path="res://SketchSystem.gd" type="Script" id=10]
 [ext_resource path="res://text_panel_3d.tscn" type="PackedScene" id=11]
+[ext_resource path="res://guimeshes/headmesh.tscn" type="PackedScene" id=12]
 [ext_resource path="res://sounds/laser8.wav" type="AudioStream" id=13]
 [ext_resource path="res://gui_panel_3d.tscn" type="PackedScene" id=14]
 [ext_resource path="res://gui_panel_3d.gd" type="Script" id=15]
@@ -20,6 +21,10 @@
 [ext_resource path="res://guimaterials/laserselectline.material" type="Material" id=19]
 [ext_resource path="res://guimaterials/laserspot.material" type="Material" id=22]
 [ext_resource path="res://guimaterials/lasershadow.material" type="Material" id=23]
+
+[sub_resource type="CylinderShape" id=24]
+radius = 0.1
+height = 0.18
 
 [sub_resource type="AudioStreamMicrophone" id=1]
 
@@ -175,6 +180,8 @@ script = ExtResource( 18 )
 [node name="HeadCam" type="ARVRCamera" parent="Players/PlayerMe"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0 )
 
+[node name="csgheadmesh" parent="Players/PlayerMe/HeadCam" instance=ExtResource( 12 )]
+
 [node name="HeadtorchLight" type="SpotLight" parent="Players/PlayerMe/HeadCam"]
 transform = Transform( 1, 0, 0, 0, 0.939693, 0.34202, 0, -0.34202, 0.939693, 0, 0.24, 0 )
 visible = false
@@ -186,6 +193,15 @@ spot_range = 721.6
 spot_attenuation = 0.378929
 spot_angle = 28.9
 spot_angle_attenuation = 1.27456
+
+[node name="ChinHotspot" type="StaticBody" parent="Players/PlayerMe/HeadCam"]
+transform = Transform( -0.999123, -0.0418758, 0, 0.0271606, -0.648029, -0.761131, 0.031873, -0.760463, 0.648598, 0, -0.115856, 0.0245671 )
+collision_layer = 1024
+collision_mask = 0
+
+[node name="CollisionShape" type="CollisionShape" parent="Players/PlayerMe/HeadCam/ChinHotspot"]
+transform = Transform( 1, -1.86265e-09, 0, -1.86265e-09, 1, 0, -1.86265e-09, 2.98023e-08, 1, 0, 0, 0 )
+shape = SubResource( 24 )
 
 [node name="HandLeft" type="ARVRController" parent="Players/PlayerMe"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.2, 1.5, -0.5 )

@@ -47,7 +47,7 @@ func updateworkingshell(makevisible):
 	tubeshellsvisible = makevisible
 	for xctube in $XCtubes.get_children():
 		if (not get_node("XCdrawings").get_node(xctube.xcname0).floortype) and (not get_node("XCdrawings").get_node(xctube.xcname1).floortype):
-			xctube.updatetubeshell(floordrawing, makevisible)
+			xctube.updatetubeshell(get_node("XCdrawings"), makevisible)
 		else:
 			print("SSSkipping xctube to floor case")
 	

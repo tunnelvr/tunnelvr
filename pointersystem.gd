@@ -97,7 +97,7 @@ func setactivetargetwall(newactivetargetwall):
 		if not activetargetwall.floortype:
 			for xctube in activetargetwall.xctubesconn:
 				if (not sketchsystem.get_node("XCdrawings").get_node(xctube.xcname0).floortype) and (not sketchsystem.get_node("XCdrawings").get_node(xctube.xcname1).floortype):
-					xctube.updatetubeshell(sketchsystem.get_node("XCdrawings/floordrawing"), sketchsystem.tubeshellsvisible)
+					xctube.updatetubeshell(sketchsystem.get_node("XCdrawings"), sketchsystem.tubeshellsvisible)
 	
 	activetargetwall = newactivetargetwall
 	if activetargetwall != null:
@@ -366,12 +366,12 @@ func _on_button_pressed(p_button):
 				var xctube0 = sketchsystem.newXCtube(xcdrawing0, xcdrawing)
 				xctube0.xcdrawinglink = xcdrawinglink0
 				xctube0.updatetubelinkpaths(sketchsystem.get_node("XCdrawings"), sketchsystem)
-				xctube0.updatetubeshell(sketchsystem.get_node("XCdrawings/floordrawing"), sketchsystem.tubeshellsvisible)
+				xctube0.updatetubeshell(sketchsystem.get_node("XCdrawings"), sketchsystem.tubeshellsvisible)
 				
 				var xctube1 = sketchsystem.newXCtube(xcdrawing1, xcdrawing)
 				xctube1.xcdrawinglink = xcdrawinglink1
 				xctube1.updatetubelinkpaths(sketchsystem.get_node("XCdrawings"), sketchsystem)
-				xctube1.updatetubeshell(sketchsystem.get_node("XCdrawings/floordrawing"), sketchsystem.tubeshellsvisible)
+				xctube1.updatetubeshell(sketchsystem.get_node("XCdrawings"), sketchsystem.tubeshellsvisible)
 
 				pointertargettype = "none"
 				pointertarget = null
