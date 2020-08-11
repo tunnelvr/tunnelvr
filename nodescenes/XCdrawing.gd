@@ -3,7 +3,7 @@ extends Spatial
 const XCnode = preload("res://nodescenes/XCnode.tscn")
 
 
-# now to turn this into a dict lookup instead of an array
+# primary data
 var nodepoints = { }    # { nodename:Vector3 }
 var onepathpairs = [ ]  # [ Anodename0, Anodename1, Bnodename0, Bnodename1, ... ]
 var floortype = false

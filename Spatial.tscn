@@ -331,7 +331,7 @@ visible = false
 collision_layer = 18
 collision_mask = 0
 
-[node name="MeshInstance" type="MeshInstance" parent="drawnfloor"]
+[node name="thing,ghfg" type="MeshInstance" parent="drawnfloor"]
 mesh = SubResource( 22 )
 material/0 = null
 

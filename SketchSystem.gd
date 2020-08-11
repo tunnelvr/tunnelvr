@@ -46,10 +46,8 @@ func updateworkingshell(makevisible):
 	var floordrawing = get_node("XCdrawings/floordrawing")
 	tubeshellsvisible = makevisible
 	for xctube in $XCtubes.get_children():
-		if (not get_node("XCdrawings").get_node(xctube.xcname0).floortype) and (not get_node("XCdrawings").get_node(xctube.xcname1).floortype):
+		if not xctube.positioningtube:
 			xctube.updatetubeshell(get_node("XCdrawings"), makevisible)
-		else:
-			print("SSSkipping xctube to floor case")
 	
 
 # Quick saving and loading of shape.  It goes to 
@@ -143,9 +141,11 @@ func newXCtube(xcdrawing0, xcdrawing1):
 	var xctube = XCtube.instance()
 	xctube.xcname0 = xcdrawing0.get_name()
 	xctube.xcname1 = xcdrawing1.get_name()
+	xctube.positioningtube = xcdrawing0.floortype or xcdrawing1.floortype
 	xctube.set_name("XCtube_"+xctube.xcname0+"_"+xctube.xcname1)
 	xcdrawing0.xctubesconn.append(xctube)
 	xcdrawing1.xctubesconn.append(xctube)
+	assert (not $XCtubes.has_node(xctube.get_name()))
 	$XCtubes.add_child(xctube)
 	return xctube
 	

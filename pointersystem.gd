@@ -94,7 +94,7 @@ func setactivetargetwall(newactivetargetwall):
 			xcnode.get_node("CollisionShape/MeshInstance").set_surface_material(0, preload("res://guimaterials/XCnode_selected.material") if xcnode == selectedtarget else preload("res://guimaterials/XCnode.material"))
 		if not activetargetwall.floortype:
 			for xctube in activetargetwall.xctubesconn:
-				if (not sketchsystem.get_node("XCdrawings").get_node(xctube.xcname0).floortype) and (not sketchsystem.get_node("XCdrawings").get_node(xctube.xcname1).floortype):
+				if not xctube.positioningtube:
 					xctube.updatetubeshell(sketchsystem.get_node("XCdrawings"), sketchsystem.tubeshellsvisible)
 	
 	activetargetwall = newactivetargetwall

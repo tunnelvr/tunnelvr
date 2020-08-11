@@ -1,9 +1,12 @@
 extends Spatial
 
+# primary data
 var xcname0 : String 
 var xcname1 : String
+var xcdrawinglink = [ ]      # [ 0nodenamefrom, 0nodenameto, 1nodenamefrom, 1nodenameto, ... ]
 
-var xcdrawinglink = [ ]  # [ nodepoints_ifrom0, nodepoints_ito0, nodepoints_ifrom1, nodepoints_ito1, ... ]
+# derived data
+var positioningtube = false  # connecting to 
 
 const linewidth = 0.02
 
@@ -83,8 +86,7 @@ func shiftxcdrawingposition(xcdrawings, sketchsystem):
 		
 		
 func updatetubelinkpaths(xcdrawings, sketchsystem):
-	var bgroundanchortype = xcdrawings.get_node(xcname0).floortype or xcdrawings.get_node(xcname1).floortype
-	if bgroundanchortype:
+	if positioningtube:
 		shiftxcdrawingposition(xcdrawings, sketchsystem)
 	
 	var surfaceTool = SurfaceTool.new()
