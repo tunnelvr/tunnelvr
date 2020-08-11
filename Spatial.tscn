@@ -1,4 +1,4 @@
-[gd_scene load_steps=46 format=2]
+[gd_scene load_steps=41 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://default_env.tres" type="Environment" id=2]
@@ -80,30 +80,6 @@ flags_transparent = true
 flags_do_not_receive_shadows = true
 params_cull_mode = 2
 albedo_color = Color( 0.321569, 0.988235, 0.27451, 0.329412 )
-
-[sub_resource type="BoxShape" id=12]
-extents = Vector3( 0.1, 0.4, 0.1 )
-
-[sub_resource type="SpatialMaterial" id=13]
-albedo_color = Color( 0.380392, 0.94902, 0.431373, 1 )
-
-[sub_resource type="CylinderMesh" id=14]
-material = SubResource( 13 )
-top_radius = 0.1
-bottom_radius = 0.001
-height = 0.4
-radial_segments = 4
-rings = 1
-
-[sub_resource type="SpatialMaterial" id=15]
-albedo_color = Color( 0.968627, 0.054902, 0.054902, 1 )
-
-[sub_resource type="CylinderMesh" id=16]
-material = SubResource( 15 )
-top_radius = 0.001
-bottom_radius = 0.1
-height = 0.4
-radial_segments = 4
 
 [sub_resource type="Shader" id=17]
 code = "shader_type spatial;
@@ -332,26 +308,6 @@ material_override = SubResource( 11 )
 [node name="TextPanel" parent="SketchSystem/Centreline" instance=ExtResource( 11 )]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 1.91816, 0.304006, -4.61659 )
 visible = false
-
-[node name="NodeOrientationPreview" type="StaticBody" parent="SketchSystem"]
-transform = Transform( 0.403146, 0.915136, 0, -0.915136, 0.403146, 0, 0, 0, 1, 4.21804, 0.609281, 0 )
-visible = false
-collision_layer = 8
-collision_mask = 0
-
-[node name="CollisionShape" type="CollisionShape" parent="SketchSystem/NodeOrientationPreview"]
-shape = SubResource( 12 )
-
-[node name="MeshInstance" type="MeshInstance" parent="SketchSystem/NodeOrientationPreview/CollisionShape"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 0 )
-cast_shadow = 0
-mesh = SubResource( 14 )
-material/0 = null
-
-[node name="MeshInstance2" type="MeshInstance" parent="SketchSystem/NodeOrientationPreview/CollisionShape"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -2.38419e-07, -0.200001, 0 )
-mesh = SubResource( 16 )
-material/0 = null
 
 [node name="SoundPos1" type="AudioStreamPlayer3D" parent="SketchSystem"]
 stream = ExtResource( 9 )

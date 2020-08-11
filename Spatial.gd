@@ -3,8 +3,6 @@ extends Spatial
 
 # Stuff to do:
 
-# * abolish otIndex
-# * lose lose nodeorientationpreviewheldtransform
 
 # * compress and decompress the audio stream (LZstream) and make a godot proposal
 # * do advanced functions like slicetubetoxcdrawing only on the nodepoints array (though still need to implement plane flattening)

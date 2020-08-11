@@ -2,7 +2,6 @@ extends Node
 
 onready var sketchsystem = get_node("/root/Spatial/SketchSystem")
 onready var centrelinesystem = sketchsystem.get_node("Centreline")
-onready var nodeorientationpreview = sketchsystem.get_node("NodeOrientationPreview")
 
 onready var playernode = get_parent()
 onready var headcam = playernode.get_node('HeadCam')
@@ -44,7 +43,6 @@ var selectedtarget = null
 var selectedtargettype = "none"
 var selectedtargetwall = null
 var gripbuttonpressused = false
-var nodeorientationpreviewheldtransform = null
 var activetargetwall = null
 
 var xcdrawingactivematerial = preload("res://guimaterials/XCdrawing_active.material")
@@ -261,9 +259,6 @@ func _on_button_pressed(p_button):
 		elif pointertarget.has_method("jump_up"):
 			pointertarget.jump_up()
 	 
-		elif pointertarget == nodeorientationpreview:
-			nodeorientationpreviewheldtransform = get_parent().global_transform.inverse()
-
 		elif selectedtargettype == "StationNode" and pointertargettype == "floordrawing":
 			pointertarget = centrelinesystem.newdrawnstationnode()
 			setopnpos(pointertarget, pointertargetpoint)
@@ -467,10 +462,6 @@ func _on_button_release(p_button):
 		elif pointertargettype == "XCtube":
 			pointertargetwall.togglematerialcycle()
 		
-	elif p_button == Buttons.VR_TRIGGER and (nodeorientationpreviewheldtransform != null):
-		print("dosomethingwith nodeorientationpreview ", nodeorientationpreviewheldtransform)
-		nodeorientationpreviewheldtransform = null
-
 	# new drawing wall position made
 	elif p_button == Buttons.VR_TRIGGER and pointertargettype == "OnePathNode" and selectedtargettype == "OnePathNode" and pointertarget != selectedtarget:
 		print("makingxcplane")
@@ -487,16 +478,7 @@ func _on_button_release(p_button):
 func _physics_process(_delta):
 	if !is_inside_tree():
 		return
-	if nodeorientationpreviewheldtransform != null:
-		var oiv = Vector3(0,1,0)   # direction of orientation preview we are dragging from
-		var iv = get_parent().global_transform.basis.xform(nodeorientationpreviewheldtransform.basis.xform(oiv))
-		var iv0 = iv.cross(Vector3(0, 0, 1)).normalized()
-		if iv0.length_squared() == 0:
-			iv0 = iv.cross(Vector3(1, 0, 0))
-		var iv1 = iv0.cross(iv)
-		# here could add the 3D push pull motions too
-		nodeorientationpreview.global_transform = Transform(Basis(iv0, iv, iv1), sketchsystem.ot.nodepoints[selectedtarget.get_name()])
-	elif LaserRayCast.is_colliding():
+	if LaserRayCast.is_colliding():
 		onpointing(LaserRayCast.get_collider(), LaserRayCast.get_collision_point())
 	else:
 		onpointing(null, null)
