@@ -326,8 +326,8 @@ func _on_button_pressed(p_button):
 					drawingwallangle = Vector2(-vline.z, vline.x).angle()
 				xcdrawing.setxcpositionangle(drawingwallangle)
 				xcdrawing.setxcpositionorigin(pointertargetpoint)
-				sketchsystem.xcapplyonepath(xcdrawing.get_node("XCnodes").get_child(xcdrawingtocopynodelink), pointertarget)
-				sketchsystem.xcapplyonepath(xcdrawingtocopy.get_node("XCnodes").get_child(xcdrawingtocopynodelink), xcdrawing.get_node("XCnodes").get_child(xcdrawingtocopynodelink))
+				sketchsystem.xcapplyonepath(xcdrawing.get_node("XCnodes").get_node(xcdrawingtocopynodelink), pointertarget)
+				sketchsystem.xcapplyonepath(xcdrawingtocopy.get_node("XCnodes").get_node(xcdrawingtocopynodelink), xcdrawing.get_node("XCnodes").get_node(xcdrawingtocopynodelink))
 				setactivetargetwall(xcdrawing)
 			setselectedtarget(pointertarget)
 		
@@ -384,7 +384,7 @@ func _on_button_pressed(p_button):
 
 		# make new point onto wall, connected if necessary
 		elif pointertargettype == "XCdrawing" or pointertargettype == "floordrawing":
-			var newpointertarget = pointertargetwall.newxcnode(-1)
+			var newpointertarget = pointertargetwall.newxcnode()
 			newpointertarget.global_transform.origin = pointertargetpoint
 			pointertargetwall.copyxcntootnode(newpointertarget)
 			sketchsystem.get_node("SoundPos1").global_transform.origin = pointertargetpoint

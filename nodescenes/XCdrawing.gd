@@ -3,13 +3,14 @@ extends Spatial
 const XCnode = preload("res://nodescenes/XCnode.tscn")
 
 
-# primary data
-var nodepoints = [ ]    # list of Vector3
-var onepathpairs = [ ]  # sequence of pairs indexing the nodepoints
+# now to turn this into a dict lookup instead of an array
+var nodepoints = { }    # { nodename:Vector3 }
+var onepathpairs = [ ]  # [ Anodename0, Anodename1, Bnodename0, Bnodename1, ... ]
 var floortype = false
 
 # derived data
 var xctubesconn = [ ]   # references to xctubes that connect to here (could use their names instead)
+var maxnodepointnumber = 0
 
 const linewidth = 0.05
 
@@ -21,7 +22,7 @@ func setxcdrawingvisibility(makevisible):
 		$XCdrawingplane.visible = true
 		$XCdrawingplane/CollisionShape.disabled = false
 		var sca = 1.0
-		for nodepoint in nodepoints:
+		for nodepoint in nodepoints.values():
 			sca = max(sca, abs(nodepoint.x) + 1)
 			sca = max(sca, abs(nodepoint.y) + 1)
 		if sca > $XCdrawingplane.scale.x:
@@ -29,9 +30,9 @@ func setxcdrawingvisibility(makevisible):
 
 # these transforming operations work in sequence, each correcting the relative position change caused by the other
 func scalexcnodepointspointsx(sca):
-	for i in range(len(nodepoints)):
+	for i in nodepoints.keys():
 		nodepoints[i] = Vector3(nodepoints[i].x*sca, nodepoints[i].y, nodepoints[i].z)
-		copyotnodetoxcn($XCnodes.get_child(i))
+		copyotnodetoxcn($XCnodes.get_node(i))
 
 func setxcpositionangle(drawingwallangle):
 	global_transform = Transform(Basis().rotated(Vector3(0,-1,0), drawingwallangle), global_transform.origin)
@@ -51,7 +52,8 @@ func setasfloortype():
 
 func exportdata():
 	var nodepointsData = [ ]
-	for i in range(len(nodepoints)):
+	for i in nodepoints.keys():
+		nodepointsData.append(i)
 		nodepointsData.append(nodepoints[i].x)
 		nodepointsData.append(nodepoints[i].y)
 		nodepointsData.append(nodepoints[i].z)
@@ -74,23 +76,22 @@ func importdata(xcdrawingData):
 	global_transform.origin = Vector3(transpos[2], transpos[3], transpos[4])
 
 	var nodepointsData = xcdrawingData["nodepoints"]
-	for i in range(0, len(nodepointsData), 3):
-		nodepoints.append(Vector3(nodepointsData[i], nodepointsData[i+1], nodepointsData[i+2]))
 	
 	for xcn in $XCnodes.get_children():
 		xcn.free()
 	nodepoints.clear()
-	for i in range(len(nodepointsData)/3):
-		nodepoints.append(Vector3(nodepointsData[i*3], nodepointsData[i*3+1], nodepointsData[i*3+2]))
+	for i in range(len(nodepointsData)/4):
+		var k = nodepointsData[i*4]
+		nodepoints[k] = Vector3(nodepointsData[i*4+1], nodepointsData[i*4+2], nodepointsData[i*4+3])
 		var xcn = XCnode.instance()
-		xcn.otIndex = i
+		xcn.otIndex = k
 		$XCnodes.add_child(xcn)
-		xcn.set_name("XCnode"+String(xcn.otIndex))  # We could use to_int on this to abolish need for otIndex
-		xcn.translation = nodepoints[xcn.otIndex]
+		xcn.set_name(k)  # We could use to_int on this to abolish need for otIndex
+		xcn.translation = nodepoints[k]
 			
 	onepathpairs = xcdrawingData["onepathpairs"]
-	for i in range(len(onepathpairs)):
-		onepathpairs[i] = int(onepathpairs[i])    # parse_json brings all ints back as floats!
+	#for i in range(len(onepathpairs)):
+	#	onepathpairs[i] = int(onepathpairs[i])    # parse_json brings all ints back as floats!
 	xctubesconn.clear()
 	updatexcpaths()
 
@@ -98,46 +99,25 @@ func duplicatexcdrawing(sketchsystem):
 	var xcdrawing = sketchsystem.newXCuniquedrawing()
 	
 	xcdrawing.global_transform = global_transform
-	for i in range(len(nodepoints)):
-		var xcn = xcdrawing.newxcnode(-1)
+	for i in nodepoints.keys():
+		var xcn = xcdrawing.newxcnode(i)
 		xcdrawing.nodepoints[i] = nodepoints[i]
 		copyotnodetoxcn(xcn)
 	xcdrawing.onepathpairs = onepathpairs.duplicate()
 	xcdrawing.updatexcpaths()
 	return xcdrawing
 	
-func removeotnodepoint(i, brejoinlines):
-	var e = len(nodepoints) - 1
-	nodepoints[i] = nodepoints[e]
-	nodepoints.resize(e)
-	var rejoinnodes = [ ]
-	for j in range(len(onepathpairs) - 2, -1, -2):
-		if (onepathpairs[j] == i) or (onepathpairs[j+1] == i):
-			rejoinnodes.append(onepathpairs[j+1]  if onepathpairs[j] == i  else onepathpairs[j])
-			onepathpairs[j] = onepathpairs[-2]
-			onepathpairs[j+1] = onepathpairs[-1]
-			onepathpairs.resize(len(onepathpairs) - 2)
-		else:
-			if onepathpairs[j] == e:
-				onepathpairs[j] = i
-			if onepathpairs[j+1] == e:
-				onepathpairs[j+1] = i
-	print("brejoinlinesbrejoinlinesbrejoinlinesbrejoinlines ", brejoinlines, " ", rejoinnodes)
-	if brejoinlines and len(rejoinnodes) >= 2:
-		onepathpairs.append(i if rejoinnodes[0] == e else rejoinnodes[0])
-		onepathpairs.append(i if rejoinnodes[1] == e else rejoinnodes[1])
-	return i != e
 	
 func copyxcntootnode(xcn):
-	nodepoints[xcn.otIndex] = xcn.translation
-
+	nodepoints[xcn.get_name()] = xcn.translation  #nodepoints[xcn.otIndex] = xcn.translation
+	
 func copyotnodetoxcn(xcn):
-	xcn.translation = nodepoints[xcn.otIndex]
+	xcn.translation = nodepoints[xcn.get_name()]  #xcn.translation = nodepoints[xcn.otIndex]
 
 func xcotapplyonepath(i0, i1):
 	for j in range(len(onepathpairs)-2, -3, -2):
 		if j == -2:
-			print("addingonepath ", len(onepathpairs))
+			print("addingonepath ", len(onepathpairs), " ", i0, " ", i1)
 			onepathpairs.push_back(i0)
 			onepathpairs.push_back(i1)
 		elif (onepathpairs[j] == i0 and onepathpairs[j+1] == i1) or (onepathpairs[j] == i1 and onepathpairs[j+1] == i0):
@@ -147,24 +127,39 @@ func xcotapplyonepath(i0, i1):
 			print("deletedonepath ", j)
 			break
 
-func newxcnode(lotIndex):
+func newxcnode(lotIndex=null):
 	var xcn = XCnode.instance()
-	$XCnodes.add_child(xcn)
-	if lotIndex == -1:
-		nodepoints.push_back(Vector3())
-		xcn.otIndex = len(nodepoints) - 1
+	if lotIndex == null:
+		maxnodepointnumber += 1
+		xcn.set_name("p"+String(maxnodepointnumber))
 	else:
-		xcn.otIndex = lotIndex
-	xcn.set_name("XCnode"+String(xcn.otIndex))  # We could use to_int on this to abolish need for otIndex
+		xcn.set_name(lotIndex)
+		maxnodepointnumber = max(maxnodepointnumber, int(lotIndex))
+		
+	nodepoints[xcn.get_name()] = Vector3()
+	$XCnodes.add_child(xcn)
+	xcn.otIndex = xcn.get_name()
 	return xcn
 
+
+
 func removexcnode(xcn, brejoinlines, sketchsystem):
-	var xcnIndex = xcn.otIndex
-	if removeotnodepoint(xcnIndex, brejoinlines):
-		copyotnodetoxcn($XCnodes.get_child(xcnIndex))
-	$XCnodes.get_child($XCnodes.get_child_count()-1).free()
+	var xcnIndex = xcn.get_name()
+	nodepoints.erase(xcnIndex)
+	var rejoinnodes = [ ]
+	for j in range(len(onepathpairs) - 2, -1, -2):
+		if (onepathpairs[j] == xcnIndex) or (onepathpairs[j+1] == xcnIndex):
+			rejoinnodes.append(onepathpairs[j+1]  if onepathpairs[j] == xcnIndex  else onepathpairs[j])
+			onepathpairs[j] = onepathpairs[-2]
+			onepathpairs[j+1] = onepathpairs[-1]
+			onepathpairs.resize(len(onepathpairs) - 2)
+	print("brejoinlinesbrejoinlinesbrejoinlinesbrejoinlines ", brejoinlines, " ", rejoinnodes)
+	if brejoinlines and len(rejoinnodes) >= 2:
+		onepathpairs.append(rejoinnodes[0])
+		onepathpairs.append(rejoinnodes[1])
+	xcn.queue_free()
 	for xctube in xctubesconn:
-		xctube.removetubenodepoint(get_name(), xcnIndex, len(nodepoints))
+		xctube.removetubenodepoint(get_name(), xcnIndex)
 	updatexcpaths()
 	for xctube in xctubesconn:
 		xctube.updatetubelinkpaths(sketchsystem.get_node("XCdrawings"), sketchsystem)
@@ -206,9 +201,9 @@ func sd0(a, b):
 	return a[0] < b[0]
 
 func makexcdpolys():
-	var Lpathvectorseq = [ ] 
-	for _i in range(len(nodepoints)):
-		Lpathvectorseq.append([])  # [ (arg, pathindex) ]
+	var Lpathvectorseq = { } 
+	for i in nodepoints.keys():
+		Lpathvectorseq[i] = []  # [ (arg, pathindex) ]
 	var Npaths = len(onepathpairs)/2
 	var opvisits2 = [ ]
 	for i in range(Npaths):
@@ -221,7 +216,7 @@ func makexcdpolys():
 		opvisits2.append(0)
 		opvisits2.append(0)
 		
-	for pathvectorseq in Lpathvectorseq:
+	for pathvectorseq in Lpathvectorseq.values():
 		pathvectorseq.sort_custom(self, "sd0")
 		
 	var polys = [ ]
@@ -277,7 +272,7 @@ func makexcdworkingshell():
 			pv.append(Vector2(nodepoints[p].x, nodepoints[p].y))
 		var pi = Geometry.triangulate_polygon(pv)
 		for u in pi:
-			surfaceTool.add_vertex($XCnodes.get_child(poly[u]).global_transform.origin + global_transform.basis.z*0.002)
+			surfaceTool.add_vertex($XCnodes.get_node(poly[u]).global_transform.origin + global_transform.basis.z*0.002)
 	surfaceTool.generate_normals()
 	return surfaceTool.commit()
 

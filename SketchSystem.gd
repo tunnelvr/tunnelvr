@@ -118,11 +118,10 @@ func loadsketchsystem():
 		xctube.free()
 	for i in range(len(xctubesData)):
 		var xctubeData = xctubesData[i]
+		print(i, xctubeData)
 		var xctube = newXCtube(get_node("XCdrawings").get_node(xctubeData[0]), get_node("XCdrawings").get_node(xctubeData[1]))
 		
 		xctube.xcdrawinglink = xctubeData[2]
-		for j in range(len(xctube.xcdrawinglink)):
-			xctube.xcdrawinglink[j] = int(xctube.xcdrawinglink[j])
 		xctube.updatetubelinkpaths($XCdrawings, self)
 	
 	save_game.close()

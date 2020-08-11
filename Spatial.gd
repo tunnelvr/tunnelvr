@@ -5,6 +5,10 @@ extends Spatial
 
 # * XCdrawing to have dict of otIndex name values to look up of p-values
 # * xcdrawing.importdata
+# set_name("XCnode"
+
+# * compress and decompress the audio stream (LZstream) and make a godot proposal
+# * do advanced functions like slicetubetoxcdrawing only on the nodepoints array (though still need to implement plane flattening)
 
 # * then merge the centreline as just another XCdrawing with links and jolting positions
 # * click position of XC doesn't cause XCtube to redraw
@@ -14,7 +18,6 @@ extends Spatial
 
 # * CSG avatar head to have headtorch light that goes on or off
 
-# * simulate microphone with raycast to mouth area (tip goes black, flashing during recording, blue during play)
 # * use chinhotspot to use as microphone (on grip) and then button to playback
 
 # * Laser change colour when pointing onto something (according to what it points onto)
@@ -32,7 +35,7 @@ extends Spatial
 # *  lay out the bits of paper on a board and lets you put them on the survey
 # *  online copies of the survey scans
 
-# * simplify the double points we get in the slices (take the mid-point of them)
+# * simplify the double points we get in the slices (take the mid-point of them) or detect the coplanar points from coplanar corresponding input edges)
 # * clear up the laser pointer logic and materials
 # * automatically make the xcplane big enough as you draw close to its edge
 # * shift pick connection to delete nodes up to next junction
@@ -58,16 +61,11 @@ extends Spatial
 # * third (middle) connection point on xcdrawing bends it into 2 planes
 # * auto shift drawing on load and station nodes exist
 # * experiment with making an offset of the XC and a tube
-# * how to duplicate, move and shift an XCdrawing with gestures
-# * remove poolintarrays because of all by value
 # * interpolate the XC as we drag along the runs traced in the floor
 # * show cursor and XC plane in front of the shell if we want to 
-# * update shells incrementally per tube, not whole thing at once
-# * try some rock texture onto the shells (esp the ceilings)
 # * allocate junctions and curved XCs (or with a split panel at 0 and different angle)
 # * shell code should have rocky texture on ceilings
 
-# * tap right and up to grow XC drawing
 # * XC to record its UV and X-vector position on the sketch maybe
 # * Nodes have floor/wall/ceiling type or-ed so that when edges and faces get anded by their point members their category is set
 # * Colour floor/wall/ceiling faces accordingly

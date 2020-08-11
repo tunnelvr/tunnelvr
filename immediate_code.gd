@@ -15,7 +15,9 @@ func t(x=null):
 
 func _run():
 	var x = IP.get_local_addresses()
-	print("b" < "a")
-	print(int("hif0008ff")+2)
-	t("ff")
-	print()
+	var v = {"a":[1,3,4], "b":[98, 34, 1]}	
+	for s in v.values():
+		s.sort()
+	for s in v.values():
+		print(s)
+	

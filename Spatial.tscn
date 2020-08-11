@@ -216,6 +216,7 @@ cast_to = Vector3( 0, 0, -0.1 )
 collision_mask = 1024
 
 [node name="AudioStreamPlayer3D" type="AudioStreamPlayer3D" parent="Players/PlayerMe/HandLeft"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.024738, 0, -0.130972 )
 
 [node name="AudioStreamRecord" type="AudioStreamPlayer" parent="Players/PlayerMe/HandLeft"]
 stream = SubResource( 1 )

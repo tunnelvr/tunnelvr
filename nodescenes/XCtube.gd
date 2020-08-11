@@ -33,7 +33,7 @@ func xctubeapplyonepath(xcn0, xcn1):
 	print("xcapplyonepathxcapplyonepath-post", xcdrawinglink)
 	assert ((len(xcdrawinglink)%2) == 0)
 
-func removetubenodepoint(xcname, xcnIndex, xcnIndexE):
+func removetubenodepoint(xcname, xcnIndex):
 	# this function very closely bound with the tail copy onto deleted one method
 	assert ((xcname == xcname0) or (xcname == xcname1))
 	var m = 0 if xcname == xcname0 else 1
@@ -43,8 +43,6 @@ func removetubenodepoint(xcname, xcnIndex, xcnIndexE):
 			xcdrawinglink[j] = xcdrawinglink[-2]
 			xcdrawinglink[j+1] = xcdrawinglink[-1]
 			xcdrawinglink.resize(len(xcdrawinglink) - 2)
-		elif xcdrawinglink[j+m] == xcnIndexE:
-			xcdrawinglink[j+m] = xcnIndex
 	print("rrremoveotnodepoint-post ", xcname, " ", xcnIndex, xcdrawinglink)
 
 func shiftxcdrawingposition(xcdrawings, sketchsystem):
@@ -56,16 +54,16 @@ func shiftxcdrawingposition(xcdrawings, sketchsystem):
 		return
 	var bscalexcnodepointspointsx_called = false
 	var bsingledrag = len(xcdrawinglink) == 2
-	var xcn0 = xcdrawing0nodes.get_child(xcdrawinglink[-2 if bsingledrag else -4])
-	var opn0 = xcdrawing1nodes.get_child(xcdrawinglink[-1 if bsingledrag else -3])
+	var xcn0 = xcdrawing0nodes.get_node(xcdrawinglink[-2 if bsingledrag else -4])
+	var opn0 = xcdrawing1nodes.get_node(xcdrawinglink[-1 if bsingledrag else -3])
 	if bsingledrag:
 		var xcn0rel = xcn0.global_transform.origin - xcdrawing.global_transform.origin
 		var pt0 = opn0.global_transform.origin - Vector3(xcn0rel.x, 0, xcn0rel.z)
 		xcdrawing.setxcpositionorigin(pt0)
 
 	else:
-		var xcn1 = xcdrawing0nodes.get_child(xcdrawinglink[-2])
-		var opn1 = xcdrawing1nodes.get_child(xcdrawinglink[-1])  # OnePathNodes
+		var xcn1 = xcdrawing0nodes.get_node(xcdrawinglink[-2])
+		var opn1 = xcdrawing1nodes.get_node(xcdrawinglink[-1])  # OnePathNodes
 		var vx = opn1.global_transform.origin - opn0.global_transform.origin
 		var vxc = xcn1.global_transform.origin - xcn0.global_transform.origin
 		var vxlen = vx.length()
@@ -98,8 +96,8 @@ func updatetubelinkpaths(xcdrawings, sketchsystem):
 	for j in range(0, len(xcdrawinglink), 2):
 		#var p0 = xcdrawing0.nodepoints[xcdrawinglink[j]]
 		#var p1 = xcdrawing1.nodepoints[xcdrawinglink[j+1]]
-		var p0 = xcdrawing0nodes.get_child(xcdrawinglink[j]).global_transform.origin
-		var p1 = xcdrawing1nodes.get_child(xcdrawinglink[j+1]).global_transform.origin
+		var p0 = xcdrawing0nodes.get_node(xcdrawinglink[j]).global_transform.origin
+		var p1 = xcdrawing1nodes.get_node(xcdrawinglink[j+1]).global_transform.origin
 		print("jjjjuj", j, p0, p1)
 		var perp = linewidth*Vector2(-(p1.z - p0.z), p1.x - p0.x).normalized()
 		if perp == Vector2(0, 0):
@@ -155,7 +153,7 @@ func maketubepolyassociation(xcdrawing0, xcdrawing1):
 	return [poly0, poly1, ila]
 
 func add_uvvertex(surfaceTool, xcnodes, poly, ila, i, floorsize, dfinv):
-	var pt = xcnodes.get_child(poly[(ila+i)%len(poly)]).global_transform.origin
+	var pt = xcnodes.get_node(poly[(ila+i)%len(poly)]).global_transform.origin
 	var afloorpoint = dfinv.xform(pt)
 	var uvpt = Vector2(afloorpoint.x/floorsize.x + 0.5, afloorpoint.z/floorsize.y + 0.5)
 	surfaceTool.add_uv(uvpt)
@@ -229,6 +227,7 @@ func slicetubetoxcdrawing(xcdrawing, xcdrawinglink0, xcdrawinglink1, lam):
 	
 	var xcnodes0 = xcdrawing0.get_node("XCnodes")
 	var xcnodes1 = xcdrawing1.get_node("XCnodes")
+	var xcnfirst = null	
 	var xcnlast = null	
 	for i in range(len(ila)):
 		var ila0 = ila[i][0]
@@ -243,9 +242,9 @@ func slicetubetoxcdrawing(xcdrawing, xcdrawinglink0, xcdrawinglink1, lam):
 		var i0 = 0
 		var i1 = 0
 		while i0 < ila0N or i1 < ila1N:
-			var pt0 = xcnodes0.get_child(poly0[(ila0+i0)%len(poly0)]).global_transform.origin
-			var pt1 = xcnodes1.get_child(poly1[(ila1+i1)%len(poly1)]).global_transform.origin
-			var xcn = xcdrawing.newxcnode(-1)
+			var pt0 = xcnodes0.get_node(poly0[(ila0+i0)%len(poly0)]).global_transform.origin
+			var pt1 = xcnodes1.get_node(poly1[(ila1+i1)%len(poly1)]).global_transform.origin
+			var xcn = xcdrawing.newxcnode()
 			if i0 == 0 and i1 == 0:
 				xcdrawinglink0.append(poly0[ila0])
 				xcdrawinglink0.append(xcn.otIndex)
@@ -266,8 +265,10 @@ func slicetubetoxcdrawing(xcdrawing, xcdrawinglink0, xcdrawinglink1, lam):
 				xcdrawing.onepathpairs.append(xcnlast.otIndex)
 				xcdrawing.onepathpairs.append(xcn.otIndex)
 			xcnlast = xcn
+			if xcnfirst == null:
+				xcnfirst = xcn
 	xcdrawing.onepathpairs.append(xcnlast.otIndex)
-	xcdrawing.onepathpairs.append(0)
+	xcdrawing.onepathpairs.append(xcnfirst.otIndex)
 	return true
 
 func updatetubeshell(xcdrawings, makevisible):

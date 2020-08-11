@@ -1,6 +1,6 @@
 extends StaticBody
 
-var otIndex: int = 0
+var otIndex: String = "D"
 
 func _ready():
 	pass
