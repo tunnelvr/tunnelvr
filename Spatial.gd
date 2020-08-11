@@ -3,9 +3,8 @@ extends Spatial
 
 # Stuff to do:
 
-# * XCdrawing to have dict of otIndex name values to look up of p-values
-# * xcdrawing.importdata
-# set_name("XCnode"
+# * abolish otIndex
+# * lose lose nodeorientationpreviewheldtransform
 
 # * compress and decompress the audio stream (LZstream) and make a godot proposal
 # * do advanced functions like slicetubetoxcdrawing only on the nodepoints array (though still need to implement plane flattening)

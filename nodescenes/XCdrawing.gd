@@ -84,11 +84,11 @@ func importdata(xcdrawingData):
 		var k = nodepointsData[i*4]
 		nodepoints[k] = Vector3(nodepointsData[i*4+1], nodepointsData[i*4+2], nodepointsData[i*4+3])
 		var xcn = XCnode.instance()
-		xcn.otIndex = k
 		$XCnodes.add_child(xcn)
-		xcn.set_name(k)  # We could use to_int on this to abolish need for otIndex
+		xcn.set_name(k)
 		xcn.translation = nodepoints[k]
-			
+		maxnodepointnumber = max(maxnodepointnumber, int(k))
+					
 	onepathpairs = xcdrawingData["onepathpairs"]
 	#for i in range(len(onepathpairs)):
 	#	onepathpairs[i] = int(onepathpairs[i])    # parse_json brings all ints back as floats!
@@ -109,11 +109,11 @@ func duplicatexcdrawing(sketchsystem):
 	
 	
 func copyxcntootnode(xcn):
-	nodepoints[xcn.get_name()] = xcn.translation  #nodepoints[xcn.otIndex] = xcn.translation
+	nodepoints[xcn.get_name()] = xcn.translation
 	
 func copyotnodetoxcn(xcn):
-	xcn.translation = nodepoints[xcn.get_name()]  #xcn.translation = nodepoints[xcn.otIndex]
-
+	xcn.translation = nodepoints[xcn.get_name()]
+	
 func xcotapplyonepath(i0, i1):
 	for j in range(len(onepathpairs)-2, -3, -2):
 		if j == -2:
@@ -127,18 +127,18 @@ func xcotapplyonepath(i0, i1):
 			print("deletedonepath ", j)
 			break
 
-func newxcnode(lotIndex=null):
+func newxcnode(name=null):
 	var xcn = XCnode.instance()
-	if lotIndex == null:
+	if name == null:
 		maxnodepointnumber += 1
 		xcn.set_name("p"+String(maxnodepointnumber))
 	else:
-		xcn.set_name(lotIndex)
-		maxnodepointnumber = max(maxnodepointnumber, int(lotIndex))
+		xcn.set_name(name)
+		maxnodepointnumber = max(maxnodepointnumber, int(name))
 		
 	nodepoints[xcn.get_name()] = Vector3()
+	assert (not $XCnodes.has_node(xcn.get_name()))
 	$XCnodes.add_child(xcn)
-	xcn.otIndex = xcn.get_name()
 	return xcn
 
 

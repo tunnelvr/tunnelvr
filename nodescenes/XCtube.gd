@@ -22,14 +22,14 @@ func xctubeapplyonepath(xcn0, xcn1):
 	print("xcapplyonepathxcapplyonepath-pre", xcn0, xcn1, xcdrawinglink)
 	assert (xcn0.get_parent().get_parent().get_name() == xcname0 and xcn1.get_parent().get_parent().get_name() == xcname1)
 	for j in range(0, len(xcdrawinglink), 2):
-		if xcdrawinglink[j] == xcn0.otIndex and xcdrawinglink[j+1] == xcn1.otIndex:
+		if xcdrawinglink[j] == xcn0.get_name() and xcdrawinglink[j+1] == xcn1.get_name():
 			xcdrawinglink.remove(j+1)
 			xcdrawinglink.remove(j)
 			xcn0 = null
 			break
 	if xcn0 != null:
-		xcdrawinglink.append(xcn0.otIndex)
-		xcdrawinglink.append(xcn1.otIndex)
+		xcdrawinglink.append(xcn0.get_name())
+		xcdrawinglink.append(xcn1.get_name())
 	print("xcapplyonepathxcapplyonepath-post", xcdrawinglink)
 	assert ((len(xcdrawinglink)%2) == 0)
 
@@ -247,13 +247,13 @@ func slicetubetoxcdrawing(xcdrawing, xcdrawinglink0, xcdrawinglink1, lam):
 			var xcn = xcdrawing.newxcnode()
 			if i0 == 0 and i1 == 0:
 				xcdrawinglink0.append(poly0[ila0])
-				xcdrawinglink0.append(xcn.otIndex)
+				xcdrawinglink0.append(xcn.get_name())
 				xcdrawinglink1.append(poly1[ila1])
-				xcdrawinglink1.append(xcn.otIndex)
+				xcdrawinglink1.append(xcn.get_name())
 			
 			xcn.global_transform.origin = lerp(pt0, pt1, lam)
 			xcdrawing.copyxcntootnode(xcn)
-			xcdrawing.nodepoints[xcn.otIndex].z = 0  # flatten into the plane
+			xcdrawing.nodepoints[xcn.get_name()].z = 0  # flatten into the plane
 			xcdrawing.copyotnodetoxcn(xcn)
 			if acc < 0:
 				acc += ila1N
@@ -262,13 +262,13 @@ func slicetubetoxcdrawing(xcdrawing, xcdrawinglink0, xcdrawinglink1, lam):
 				acc -= ila0N
 				i1 += 1
 			if xcnlast != null:
-				xcdrawing.onepathpairs.append(xcnlast.otIndex)
-				xcdrawing.onepathpairs.append(xcn.otIndex)
+				xcdrawing.onepathpairs.append(xcnlast.get_name())
+				xcdrawing.onepathpairs.append(xcn.get_name())
 			xcnlast = xcn
 			if xcnfirst == null:
 				xcnfirst = xcn
-	xcdrawing.onepathpairs.append(xcnlast.otIndex)
-	xcdrawing.onepathpairs.append(xcnfirst.otIndex)
+	xcdrawing.onepathpairs.append(xcnlast.get_name())
+	xcdrawing.onepathpairs.append(xcnfirst.get_name())
 	return true
 
 func updatetubeshell(xcdrawings, makevisible):

@@ -309,11 +309,11 @@ func _on_button_pressed(p_button):
 			var btargetclear = true
 			for xctube in sketchsystem.get_node("XCtubes").get_children():
 				if xctube.xcname1 == "floordrawing":
-					if xctube.xcdrawinglink.slice(1, len(xctube.xcdrawinglink), 2).has(pointertarget.otIndex):
+					if xctube.xcdrawinglink.slice(1, len(xctube.xcdrawinglink), 2).has(pointertarget.get_name()):
 						btargetclear = false
 					for i in range(0, len(xctube.xcdrawinglink), 2):
-						#if xctube.xcdrawinglink.slice(1, len(xctube.xcdrawinglink), 2).has(selectedtarget.otIndex):
-						if xctube.xcdrawinglink[i+1] == selectedtarget.otIndex:
+						#if xctube.xcdrawinglink.slice(1, len(xctube.xcdrawinglink), 2).has(selectedtarget.get_name()):
+						if xctube.xcdrawinglink[i+1] == selectedtarget.get_name():
 							xcdrawingtocopy = sketchsystem.get_node("XCdrawings").get_node(xctube.xcname0)
 							xcdrawingtocopynodelink = xctube.xcdrawinglink[i]
 							break
@@ -495,7 +495,7 @@ func _physics_process(_delta):
 			iv0 = iv.cross(Vector3(1, 0, 0))
 		var iv1 = iv0.cross(iv)
 		# here could add the 3D push pull motions too
-		nodeorientationpreview.global_transform = Transform(Basis(iv0, iv, iv1), sketchsystem.ot.nodepoints[selectedtarget.otIndex])
+		nodeorientationpreview.global_transform = Transform(Basis(iv0, iv, iv1), sketchsystem.ot.nodepoints[selectedtarget.get_name()])
 	elif LaserRayCast.is_colliding():
 		onpointing(LaserRayCast.get_collider(), LaserRayCast.get_collision_point())
 	else:

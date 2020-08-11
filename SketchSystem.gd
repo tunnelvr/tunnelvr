@@ -17,7 +17,7 @@ func xcapplyonepath(xcn0, xcn1):
 	var xcdrawing1 = xcn1.get_parent().get_parent()
 					
 	if xcdrawing0 == xcdrawing1:
-		xcdrawing0.xcotapplyonepath(xcn0.otIndex, xcn1.otIndex)
+		xcdrawing0.xcotapplyonepath(xcn0.get_name(), xcn1.get_name())
 		xcdrawing0.updatexcpaths()
 		return
 		

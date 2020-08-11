@@ -32,14 +32,17 @@ transform = Transform( 0.9, 0, 0, 0, 1, 0, 0, 0, 0.98, 0, -0.051, 0.085 )
 mesh = SubResource( 3 )
 material = SubResource( 4 )
 
-[node name="headtorchcone" type="CSGCylinder" parent="."]
+[node name="headtorch" type="CSGCombiner" parent="skullcomponent"]
 transform = Transform( 1, 0, 0, 0, 0.34202, -0.939693, 0, 0.939693, 0.34202, 0, 0.24, 0 )
+
+[node name="headtorchcone" type="CSGCylinder" parent="skullcomponent/headtorch"]
+transform = Transform( 1.11111, 0, 0, 0, 1.01804, 0, 0, 0, 1.00241, 0, 0.02, 0 )
 radius = 0.03
 height = 0.051
 sides = 16
 cone = true
 
-[node name="inset" type="CSGCylinder" parent="headtorchcone"]
+[node name="inset" type="CSGCylinder" parent="skullcomponent/headtorch/headtorchcone"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.027, 0 )
 operation = 2
 radius = 0.025
