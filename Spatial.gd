@@ -4,8 +4,6 @@ extends Spatial
 # Stuff to do:
 
 
-# * compress and decompress the audio stream (LZstream) and make a godot proposal
-# * do advanced functions like slicetubetoxcdrawing only on the nodepoints array (though still need to implement plane flattening)
 
 # * then merge the centreline as just another XCdrawing with links and jolting positions
 # * click position of XC doesn't cause XCtube to redraw
@@ -16,6 +14,9 @@ extends Spatial
 # * CSG avatar head to have headtorch light that goes on or off
 
 # * use chinhotspot to use as microphone (on grip) and then button to playback
+
+# * compress and decompress the audio stream (LZstream) and make a godot proposal
+# * do advanced functions like slicetubetoxcdrawing only on the nodepoints array (though still need to implement plane flattening)
 
 # * Laser change colour when pointing onto something (according to what it points onto)
 # * pointer target and selected target from pointersystem into sketchsystem
