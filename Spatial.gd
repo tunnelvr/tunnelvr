@@ -3,9 +3,10 @@ extends Spatial
 
 # Stuff to do:
 
-# * XCtube should state if it is a positioning tube or not
 # * sort out transpos to handle the full data about the XC so floors are not special cases (which gives us the floor type problem)
-# * some XCtypes are little bits of paper we have made, before they become full floors
+# * Transform needs a serialize case
+
+# * some XCtypes are little bits of paper we have made, before they become full floors that can be moved by hand before they are expanded
 # * remove floordrawing as special case
 # * func xcapplyonepath(xcn0, xcn1): to do a sketchsystem as parameter
 

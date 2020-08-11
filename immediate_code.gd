@@ -15,9 +15,5 @@ func t(x=null):
 
 func _run():
 	var x = IP.get_local_addresses()
-	var v = {"a":[1,3,4], "b":[98, 34, 1]}	
-	for s in v.values():
-		s.sort()
-	for s in v.values():
-		print(s)
-	
+	var r = load("res://surveyscans/DukeStResurvey-drawnup-p3.jpg")
+	print(r)

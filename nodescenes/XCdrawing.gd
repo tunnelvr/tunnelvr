@@ -40,17 +40,21 @@ func setxcpositionangle(drawingwallangle):
 func setxcpositionorigin(pt0):
 	global_transform.origin = Vector3(pt0.x, 0, pt0.z)
 
-func setasfloortype():
+var defaultfloortexture = "res://surveyscans/DukeStResurvey-drawnup-p3.jpg"
+func setasfloortype(floortexture):
 	floortype = true
 	assert (get_name() == "floordrawing")
 	$XCdrawingplane.scale = Vector3(50, 50, 1)
 	$XCdrawingplane.collision_layer |= 2
 	$XCdrawingplane.visible = true
 	$XCdrawingplane/CollisionShape.disabled = false
-	$XCdrawingplane/CollisionShape/MeshInstance.material_override = load("res://surveyscans/scanimagefloor.material")
-	rotation_degrees = Vector3(-90, 0, 0)
+	var m = load("res://surveyscans/scanimagefloor.material").duplicate()
+	m.albedo_texture = load(floortexture) 
+	$XCdrawingplane/CollisionShape/MeshInstance.material_override = m
+	var t = $XCdrawingplane/CollisionShape/MeshInstance.material_override.albedo_texture
+	print(t.resource_path)
 
-func exportdata():
+func exportxcdata():
 	var nodepointsData = [ ]
 	for i in nodepoints.keys():
 		nodepointsData.append(i)
@@ -58,28 +62,23 @@ func exportdata():
 		nodepointsData.append(nodepoints[i].y)
 		nodepointsData.append(nodepoints[i].z)
 	var xvec = Vector2(global_transform.basis.x.x, global_transform.basis.x.z)
+	var m = $XCdrawingplane/CollisionShape/MeshInstance.material_override
 	return { "name":get_name(),
-			 "floortype":floortype,
-			 "transpos": [xvec.angle(), $XCdrawingplane.scale.x, global_transform.origin.x, global_transform.origin.y, global_transform.origin.z], 
+			 "drawingtype":"floortype" if floortype else "XCtype",
+			 "transformpos":var2str(global_transform),
+			 "shapeimage":[$XCdrawingplane.scale.x, $XCdrawingplane.scale.y, 
+						   m.albedo_texture.resource_path if m != null else ""],
 			 "nodepoints": nodepointsData, 
 			 "onepathpairs":onepathpairs 
 		   }
 
 func importdata(xcdrawingData):
-	floortype = xcdrawingData["floortype"]
-	var transpos = xcdrawingData["transpos"]
-	$XCdrawingplane.set_scale(Vector3(transpos[1], transpos[1], 1.0))
-	if floortype:
-		rotate_y(transpos[0])
-	else:
-		setxcpositionangle(transpos[0])
-	global_transform.origin = Vector3(transpos[2], transpos[3], transpos[4])
+	assert ($XCnodes.get_child_count() == 0 and len(nodepoints) == 0 and len(xctubesconn) == 0)
 
+	floortype = xcdrawingData["drawingtype"] == "floortype"
+	$XCdrawingplane.set_scale(Vector3(xcdrawingData["shapeimage"][0], xcdrawingData["shapeimage"][1], 1.0))
+	global_transform = str2var(xcdrawingData["transformpos"])
 	var nodepointsData = xcdrawingData["nodepoints"]
-	
-	for xcn in $XCnodes.get_children():
-		xcn.free()
-	nodepoints.clear()
 	for i in range(len(nodepointsData)/4):
 		var k = nodepointsData[i*4]
 		nodepoints[k] = Vector3(nodepointsData[i*4+1], nodepointsData[i*4+2], nodepointsData[i*4+3])
@@ -88,11 +87,7 @@ func importdata(xcdrawingData):
 		xcn.set_name(k)
 		xcn.translation = nodepoints[k]
 		maxnodepointnumber = max(maxnodepointnumber, int(k))
-					
 	onepathpairs = xcdrawingData["onepathpairs"]
-	#for i in range(len(onepathpairs)):
-	#	onepathpairs[i] = int(onepathpairs[i])    # parse_json brings all ints back as floats!
-	xctubesconn.clear()
 	updatexcpaths()
 
 func duplicatexcdrawing(sketchsystem):

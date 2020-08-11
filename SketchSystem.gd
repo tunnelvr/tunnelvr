@@ -6,7 +6,7 @@ const XCtube = preload("res://nodescenes/XCtube.tscn")
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	$XCdrawings/floordrawing.setasfloortype()
+	$XCdrawings/floordrawing.setasfloortype("res://surveyscans/DukeStResurvey-drawnup-p3.jpg")
 	$Centreline.floordrawing = $XCdrawings/floordrawing
 
 const linewidth = 0.05
@@ -55,11 +55,10 @@ func updateworkingshell(makevisible):
 func savesketchsystem():
 	var fname = "user://savegame.save"
 	var xcdrawingsData = [ ]
-	for i in range($XCdrawings.get_child_count()):
-		xcdrawingsData.append($XCdrawings.get_child(i).exportdata())
+	for xcdrawing in $XCdrawings.get_children():
+		xcdrawingsData.append(xcdrawing.exportxcdata())
 	var xctubesData = [ ]
-	for i in range($XCtubes.get_child_count()):
-		var xctube = $XCtubes.get_child(i)
+	for xctube in $XCtubes.get_children():
 		xctubesData.append([xctube.xcname0, xctube.xcname1, xctube.xcdrawinglink])
 	var drawnstationnodes = $Centreline/DrawnStationNodes.get_children()
 	var drawnstationnodesData = [ ]	
@@ -105,7 +104,7 @@ func loadsketchsystem():
 		xcdrawing.get_node("XCdrawingplane").visible = false
 		xcdrawing.get_node("XCdrawingplane/CollisionShape").disabled = true
 		if xcdrawing.floortype:
-			xcdrawing.setasfloortype()
+			xcdrawing.setasfloortype(xcdrawingData["shapeimage"][2])
 		get_node("XCdrawings").add_child(xcdrawing)
 
 	$Centreline.floordrawing = $XCdrawings/floordrawing
