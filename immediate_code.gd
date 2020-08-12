@@ -15,5 +15,7 @@ func t(x=null):
 
 func _run():
 	var x = IP.get_local_addresses()
-	var r = load("res://surveyscans/DukeStResurvey-drawnup-p3.jpg")
-	print(r)
+	#var r = load("res://surveyscans/DukeStResurvey-drawnup-p3.jpg")
+	#print(r)
+	var s = "sdfs.sdfs.ddd."
+	print(s.replace(".", ","))

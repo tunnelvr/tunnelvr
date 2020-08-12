@@ -57,10 +57,10 @@ depth = 0.0191772
 material = SubResource( 4 )
 
 [node name="csgnotch" type="CSGCylinder" parent="."]
-transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, 0.0380154, 0.05, 0.00628448 )
+transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, 0.0380154, 0.05, 0.0413307 )
 operation = 2
 radius = 0.00508166
-height = 0.03
+height = 0.0657727
 material = SubResource( 5 )
 
 [node name="csgpalm" type="CSGMesh" parent="."]

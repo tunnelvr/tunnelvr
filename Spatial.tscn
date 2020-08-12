@@ -292,7 +292,10 @@ transform = Transform( 1, 0, 0, 0, -1.62921e-07, 1, 0, -1, -1.62921e-07, 0, 0.5,
 
 [node name="XCtubes" type="Spatial" parent="SketchSystem"]
 
+[node name="BillboardLabel" parent="SketchSystem" instance=ExtResource( 11 )]
+
 [node name="Centreline" type="Spatial" parent="SketchSystem"]
+visible = false
 script = ExtResource( 17 )
 
 [node name="StationNodes" type="Spatial" parent="SketchSystem/Centreline"]

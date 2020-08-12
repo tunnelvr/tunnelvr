@@ -49,6 +49,10 @@ func _on_button_pressed(p_button):
 	if p_button == Buttons.VR_BUTTON_BY:
 		audiobusrecordeffect.set_recording_active(true)
 		print("Doing the recording ", audiobusrecordeffect)
+
+	if p_button == Buttons.VR_GRIP:
+		handleft.get_node("csghandleft").setpartcolor(4, "#00CC00")
+
 		
 func _on_button_release(p_button):
 	if laserangleadjustmode:
@@ -69,6 +73,10 @@ func _on_button_release(p_button):
 		print("COMPRESSION_ZSTD ", recording.get_data().compress(File.COMPRESSION_ZSTD).size())
 		print("COMPRESSION_GZIP ", recording.get_data().compress(File.COMPRESSION_GZIP).size())
 		playernode.rpc("playvoicerecording", recording.get_data())
+
+	if p_button == Buttons.VR_GRIP:
+		handleft.get_node("csghandleft").setpartcolor(4, "#FFFFFF")
+
 
 func _input(event):
 	if event is InputEventKey and event.pressed:

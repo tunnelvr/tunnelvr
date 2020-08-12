@@ -3,11 +3,19 @@ extends Spatial
 
 const XCdrawing = preload("res://nodescenes/XCdrawing.tscn")
 const XCtube = preload("res://nodescenes/XCtube.tscn")
+enum DRAWING_TYPE { DT_XCDRAWING = 0, DT_FLOORTEXTURE = 1, DT_CENTRELINE = 2 }
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	$XCdrawings/floordrawing.setasfloortype("res://surveyscans/DukeStResurvey-drawnup-p3.jpg")
 	$Centreline.floordrawing = $XCdrawings/floordrawing
+	var centrelinedrawing = newXCuniquedrawing("centreline")
+	var centrelinedatafile = File.new()
+	var fname = "res://surveyscans/dukest1resurvey2009.json"
+	centrelinedatafile.open(fname, File.READ)
+	var centrelinedata = parse_json(centrelinedatafile.get_line())
+	centrelinedrawing.importcentrelinedata(centrelinedata)
+	#var xsectgps = centrelinedata.xsectgps
 
 const linewidth = 0.05
 var tubeshellsvisible = false
@@ -23,24 +31,26 @@ func xcapplyonepath(xcn0, xcn1):
 		
 	var xctube = null
 	var xctubeRev = null
-	for lxctube in $XCtubes.get_children():
-		if lxctube.xcname0 == xcdrawing0.get_name() and lxctube.xcname1 == xcdrawing1.get_name():
+	for lxctube in xcdrawing0.xctubesconn:
+		assert (lxctube.xcname0 == xcdrawing0.get_name() or lxctube.xcname1 == xcdrawing0.get_name())
+		if lxctube.xcname1 == xcdrawing1.get_name():
 			xctube = lxctube
 			break
-		if lxctube.xcname0 == xcdrawing1.get_name() and lxctube.xcname1 == xcdrawing0.get_name():
+		if lxctube.xcname0 == xcdrawing1.get_name():
 			xctubeRev = lxctube
 			break
+
+	if xctube == null and xctubeRev == null:
+		if xcdrawing1.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE and xcdrawing0.drawingtype != DRAWING_TYPE.DT_CENTRELINE:
+			xctubeRev = newXCtube(xcdrawing1, xcdrawing0)
+		else:
+			xctube = newXCtube(xcdrawing0, xcdrawing1)
 	if xctube != null:
 		xctube.xctubeapplyonepath(xcn0, xcn1)
-	elif xctubeRev != null:
+	else:
 		xctubeRev.xctubeapplyonepath(xcn1, xcn0)
 		xctube = xctubeRev
-	else:
-		xctube = newXCtube(xcdrawing0, xcdrawing1)
-		xctube.xctubeapplyonepath(xcn0, xcn1)
-	var xcdrawings = xcn0.get_parent().get_parent().get_parent()
-	var sketchsystem = xcdrawings.get_parent()
-	xctube.updatetubelinkpaths(xcdrawings, sketchsystem)
+	xctube.updatetubelinkpaths(self)
 
 func updateworkingshell(makevisible):
 	var floordrawing = get_node("XCdrawings/floordrawing")
@@ -98,12 +108,12 @@ func loadsketchsystem():
 		xcdrawing.free()
 	for i in range(len(xcdrawingsData)):
 		var xcdrawingData = xcdrawingsData[i]
-		print("iiii", xcdrawingData)
+		#print("iiii", xcdrawingData)
 		var xcdrawing = newXCuniquedrawing(xcdrawingData["name"])
-		xcdrawing.importdata(xcdrawingData)
+		xcdrawing.importxcdata(xcdrawingData)
 		xcdrawing.get_node("XCdrawingplane").visible = false
 		xcdrawing.get_node("XCdrawingplane/CollisionShape").disabled = true
-		if xcdrawing.floortype:
+		if xcdrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
 			xcdrawing.setasfloortype(xcdrawingData["shapeimage"][2])
 		get_node("XCdrawings").add_child(xcdrawing)
 
@@ -119,7 +129,7 @@ func loadsketchsystem():
 		var xctube = newXCtube(get_node("XCdrawings").get_node(xctubeData[0]), get_node("XCdrawings").get_node(xctubeData[1]))
 		
 		xctube.xcdrawinglink = xctubeData[2]
-		xctube.updatetubelinkpaths($XCdrawings, self)
+		xctube.updatetubelinkpaths(self)
 	
 	save_game.close()
 		
@@ -137,10 +147,14 @@ func newXCuniquedrawing(sname=null):
 	return xcdrawing
 
 func newXCtube(xcdrawing0, xcdrawing1):
+	assert ((xcdrawing0.drawingtype == DRAWING_TYPE.DT_XCDRAWING and xcdrawing1.drawingtype == DRAWING_TYPE.DT_XCDRAWING) or
+			(xcdrawing0.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE and xcdrawing1.drawingtype == DRAWING_TYPE.DT_XCDRAWING) or
+			(xcdrawing0.drawingtype == DRAWING_TYPE.DT_CENTRELINE and xcdrawing1.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE))
+
 	var xctube = XCtube.instance()
 	xctube.xcname0 = xcdrawing0.get_name()
 	xctube.xcname1 = xcdrawing1.get_name()
-	xctube.positioningtube = xcdrawing0.floortype or xcdrawing1.floortype
+	xctube.positioningtube = xcdrawing0.drawingtype != DRAWING_TYPE.DT_XCDRAWING or xcdrawing1.drawingtype != DRAWING_TYPE.DT_XCDRAWING
 	xctube.set_name("XCtube_"+xctube.xcname0+"_"+xctube.xcname1)
 	xcdrawing0.xctubesconn.append(xctube)
 	xcdrawing1.xctubesconn.append(xctube)

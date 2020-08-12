@@ -9,12 +9,13 @@ var xcdrawinglink = [ ]      # [ 0nodenamefrom, 0nodenameto, 1nodenamefrom, 1nod
 var positioningtube = false  # connecting to 
 
 const linewidth = 0.02
+enum DRAWING_TYPE { DT_XCDRAWING = 0, DT_FLOORTEXTURE = 1, DT_CENTRELINE = 2 }
 
 const materialdirt = preload("res://lightweighttextures/simpledirt.material")
-const materialscanimage = preload("res://surveyscans/scanimagefloor.material")
+var materialscanimage = load("res://surveyscans/scanimagefloor.material")
 const materialrock = preload("res://lightweighttextures/partialrock.material")
 
-const materials = [ materialdirt, materialscanimage, materialrock ]
+var materials = [ materialdirt, materialscanimage, materialrock ]
 
 func togglematerialcycle():
 	var m = materials.find($XCtubeshell/MeshInstance.get_surface_material(0))
@@ -49,51 +50,52 @@ func removetubenodepoint(xcname, xcnIndex):
 	print("rrremoveotnodepoint-post ", xcname, " ", xcnIndex, xcdrawinglink)
 
 func shiftxcdrawingposition(xcdrawings, sketchsystem):
-	print("...shiftxcdrawingposition")
-	var xcdrawing = xcdrawings.get_node(xcname0)
-	var xcdrawing0nodes = xcdrawing.get_node("XCnodes")
-	var xcdrawing1nodes = sketchsystem.get_node("XCdrawings/floordrawing/XCnodes")
 	if len(xcdrawinglink) == 0:
 		return
+	print("...shiftxcdrawingposition")
+	var xcdrawingFloor = sketchsystem.get_node("XCdrawings").get_node(xcname0)
+	var xcdrawingXC = sketchsystem.get_node("XCdrawings").get_node(xcname1)
 	var bscalexcnodepointspointsx_called = false
 	var bsingledrag = len(xcdrawinglink) == 2
-	var xcn0 = xcdrawing0nodes.get_node(xcdrawinglink[-2 if bsingledrag else -4])
-	var opn0 = xcdrawing1nodes.get_node(xcdrawinglink[-1 if bsingledrag else -3])
+	var opn0 = xcdrawingFloor.get_node("XCnodes").get_node(xcdrawinglink[-2 if bsingledrag else -4])
+	var xcn0 = xcdrawingXC.get_node("XCnodes").get_node(xcdrawinglink[-1 if bsingledrag else -3])
 	if bsingledrag:
-		var xcn0rel = xcn0.global_transform.origin - xcdrawing.global_transform.origin
+		var xcn0rel = xcn0.global_transform.origin - xcdrawingXC.global_transform.origin
 		var pt0 = opn0.global_transform.origin - Vector3(xcn0rel.x, 0, xcn0rel.z)
-		xcdrawing.setxcpositionorigin(pt0)
+		xcdrawingXC.setxcpositionorigin(pt0)
 
 	else:
-		var xcn1 = xcdrawing0nodes.get_node(xcdrawinglink[-2])
-		var opn1 = xcdrawing1nodes.get_node(xcdrawinglink[-1])  # OnePathNodes
+		var opn1 = xcdrawingFloor.get_node("XCnodes").get_node(xcdrawinglink[-2])
+		var xcn1 = xcdrawingXC.get_node("XCnodes").get_node(xcdrawinglink[-1])
 		var vx = opn1.global_transform.origin - opn0.global_transform.origin
 		var vxc = xcn1.global_transform.origin - xcn0.global_transform.origin
 		var vxlen = vx.length()
 		var vxclen = vxc.length()
 		if vxlen != 0 and vxclen != 0:
-			xcdrawing.scalexcnodepointspointsx(vxlen/vxclen)
+			xcdrawingXC.scalexcnodepointspointsx(vxlen/vxclen)
 			bscalexcnodepointspointsx_called = true
-		xcdrawing.setxcpositionangle(Vector2(-vx.x, -vx.z).angle())
-		var xco = opn0.global_transform.origin - xcn0.global_transform.origin + xcdrawing.global_transform.origin
-		xcdrawing.setxcpositionorigin(xco)
+		xcdrawingXC.setxcpositionangle(Vector2(-vx.x, -vx.z).angle())
+		var xco = opn0.global_transform.origin - xcn0.global_transform.origin + xcdrawingXC.global_transform.origin
+		xcdrawingXC.setxcpositionorigin(xco)
 		
 	if bscalexcnodepointspointsx_called:
-		xcdrawing.updatexcpaths()
-	for xctube in xcdrawing.xctubesconn:
-		if xctube.xcname1 != "floordrawing":
-			xctube.updatetubelinkpaths(xcdrawings, sketchsystem)
+		xcdrawingXC.updatexcpaths()
+	for xctube in xcdrawingXC.xctubesconn:
+		if sketchsystem.get_node("XCdrawings").get_node(xctube.xcname0).drawingtype == DRAWING_TYPE.DT_XCDRAWING:
+			xctube.updatetubelinkpaths(sketchsystem)
 		
 		
-func updatetubelinkpaths(xcdrawings, sketchsystem):
+func updatetubelinkpaths(sketchsystem):
 	if positioningtube:
-		shiftxcdrawingposition(xcdrawings, sketchsystem)
+		shiftxcdrawingposition(sketchsystem.get_node("XCdrawings"), sketchsystem)
 	
 	var surfaceTool = SurfaceTool.new()
 	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
-	var xcdrawing0nodes = xcdrawings.get_node(xcname0).get_node("XCnodes")
-	var xcdrawing1nodes = xcdrawings.get_node(xcname1).get_node("XCnodes")
-	print("llll", xcdrawings, xcdrawing0nodes, xcdrawing1nodes, xcdrawinglink)
+	var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(xcname0)
+	var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(xcname1)
+	var xcdrawing0nodes = xcdrawing0.get_node("XCnodes")
+	var xcdrawing1nodes = xcdrawing1.get_node("XCnodes")
+	print("llll", xcdrawing0nodes, xcdrawing1nodes, xcdrawinglink)
 	assert ((len(xcdrawinglink)%2) == 0)
 	for j in range(0, len(xcdrawinglink), 2):
 		#var p0 = xcdrawing0.nodepoints[xcdrawinglink[j]]
@@ -101,19 +103,29 @@ func updatetubelinkpaths(xcdrawings, sketchsystem):
 		var p0 = xcdrawing0nodes.get_node(xcdrawinglink[j]).global_transform.origin
 		var p1 = xcdrawing1nodes.get_node(xcdrawinglink[j+1]).global_transform.origin
 		print("jjjjuj", j, p0, p1)
-		var perp = linewidth*Vector2(-(p1.z - p0.z), p1.x - p0.x).normalized()
-		if perp == Vector2(0, 0):
-			perp = Vector2(linewidth, 0)
-		var p0left = p0 - Vector3(perp.x, 0, perp.y)
-		var p0right = p0 + Vector3(perp.x, 0, perp.y)
-		var p1left = p1 - Vector3(perp.x, 0, perp.y)
-		var p1right = p1 + Vector3(perp.x, 0, perp.y)
+		var vec = p1 - p0
+		var veclen = max(0.01, vec.length())
+		var perp = Vector3(1, 0, 0)
+		if xcdrawing1.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
+			perp = vec.cross(xcdrawing1.global_transform.basis.y).normalized()
+			if perp == Vector3(0, 0, 0) or positioningtube:
+				perp = xcdrawing1.global_transform.basis.x
+		var arrowlen = min(0.4, veclen*0.5)
+		var p0left = p0 - linewidth*perp
+		var p0right = p0 + linewidth*perp
+		var p1left = p1 - linewidth*perp
+		var p1right = p1 + linewidth*perp
+		var pa = p1 - vec*(arrowlen/veclen)
+		var arrowfac = max(2*linewidth, arrowlen/2)
 		surfaceTool.add_vertex(p0left)
 		surfaceTool.add_vertex(p1left)
 		surfaceTool.add_vertex(p0right)
 		surfaceTool.add_vertex(p0right)
 		surfaceTool.add_vertex(p1left)
 		surfaceTool.add_vertex(p1right)
+		surfaceTool.add_vertex(p1)
+		surfaceTool.add_vertex(pa + arrowfac*perp)
+		surfaceTool.add_vertex(pa - arrowfac*perp)
 	surfaceTool.generate_normals()
 	$PathLines.mesh = surfaceTool.commit()
 	print("ususxxxxc ", len($PathLines.mesh.get_faces()), " ", len($PathLines.mesh.get_faces())) #surfaceTool.generate_normals()

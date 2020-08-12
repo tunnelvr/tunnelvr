@@ -6,7 +6,10 @@ const XCnode = preload("res://nodescenes/XCnode.tscn")
 # primary data
 var nodepoints = { }    # { nodename:Vector3 }
 var onepathpairs = [ ]  # [ Anodename0, Anodename1, Bnodename0, Bnodename1, ... ]
-var floortype = false
+
+enum DRAWING_TYPE { DT_XCDRAWING = 0, DT_FLOORTEXTURE = 1, DT_CENTRELINE = 2 }
+
+var drawingtype = DRAWING_TYPE.DT_XCDRAWING
 
 # derived data
 var xctubesconn = [ ]   # references to xctubes that connect to here (could use their names instead)
@@ -42,13 +45,14 @@ func setxcpositionorigin(pt0):
 
 var defaultfloortexture = "res://surveyscans/DukeStResurvey-drawnup-p3.jpg"
 func setasfloortype(floortexture):
-	floortype = true
+	drawingtype = DRAWING_TYPE.DT_FLOORTEXTURE
 	assert (get_name() == "floordrawing")
 	$XCdrawingplane.scale = Vector3(50, 50, 1)
 	$XCdrawingplane.collision_layer |= 2
 	$XCdrawingplane.visible = true
 	$XCdrawingplane/CollisionShape.disabled = false
-	var m = load("res://surveyscans/scanimagefloor.material").duplicate()
+	rotation_degrees = Vector3(-90, 0, 0)
+	var m = preload("res://surveyscans/scanimagefloor.material").duplicate()
 	m.albedo_texture = load(floortexture) 
 	$XCdrawingplane/CollisionShape/MeshInstance.material_override = m
 	var t = $XCdrawingplane/CollisionShape/MeshInstance.material_override.albedo_texture
@@ -64,7 +68,7 @@ func exportxcdata():
 	var xvec = Vector2(global_transform.basis.x.x, global_transform.basis.x.z)
 	var m = $XCdrawingplane/CollisionShape/MeshInstance.material_override
 	return { "name":get_name(),
-			 "drawingtype":"floortype" if floortype else "XCtype",
+			 "drawingtype":drawingtype,
 			 "transformpos":var2str(global_transform),
 			 "shapeimage":[$XCdrawingplane.scale.x, $XCdrawingplane.scale.y, 
 						   m.albedo_texture.resource_path if m != null else ""],
@@ -72,10 +76,9 @@ func exportxcdata():
 			 "onepathpairs":onepathpairs 
 		   }
 
-func importdata(xcdrawingData):
+func importxcdata(xcdrawingData):
 	assert ($XCnodes.get_child_count() == 0 and len(nodepoints) == 0 and len(xctubesconn) == 0)
-
-	floortype = xcdrawingData["drawingtype"] == "floortype"
+	drawingtype = int(xcdrawingData["drawingtype"])
 	$XCdrawingplane.set_scale(Vector3(xcdrawingData["shapeimage"][0], xcdrawingData["shapeimage"][1], 1.0))
 	global_transform = str2var(xcdrawingData["transformpos"])
 	var nodepointsData = xcdrawingData["nodepoints"]
@@ -88,6 +91,31 @@ func importdata(xcdrawingData):
 		xcn.translation = nodepoints[k]
 		maxnodepointnumber = max(maxnodepointnumber, int(k))
 	onepathpairs = xcdrawingData["onepathpairs"]
+	updatexcpaths()
+
+func importcentrelinedata(centrelinedata):
+	$XCdrawingplane.visible = false
+	$XCdrawingplane/CollisionShape.disabled = true
+	drawingtype = DRAWING_TYPE.DT_CENTRELINE
+	assert (get_name() == "centreline")
+	assert ($XCnodes.get_child_count() == 0 and len(nodepoints) == 0 and len(onepathpairs) == 0 and len(xctubesconn) == 0)
+	var stationpointscoords = centrelinedata.stationpointscoords
+	var stationpointsnames = centrelinedata.stationpointsnames
+	$XCdrawingplane.set_scale(Vector3(1,1,1))
+	global_transform = Transform()
+	for i in range(len(stationpointsnames)):
+		var k = stationpointsnames[i].replace(".", ",")
+		nodepoints[k] = Vector3(stationpointscoords[i*3], 8.1+stationpointscoords[i*3+2], -stationpointscoords[i*3+1])
+		var xcn = XCnode.instance()
+		$XCnodes.add_child(xcn)
+		xcn.set_name(k)
+		xcn.translation = nodepoints[k]
+		maxnodepointnumber = max(maxnodepointnumber, int(k))
+	var legsconnections = centrelinedata.legsconnections
+	var legsstyles = centrelinedata.legsstyles
+	for i in range(len(legsstyles)):
+		onepathpairs.append(stationpointsnames[legsconnections[i*2]].replace(".", ","))
+		onepathpairs.append(stationpointsnames[legsconnections[i*2+1]].replace(".", ","))
 	updatexcpaths()
 
 func duplicatexcdrawing(sketchsystem):
@@ -157,7 +185,7 @@ func removexcnode(xcn, brejoinlines, sketchsystem):
 		xctube.removetubenodepoint(get_name(), xcnIndex)
 	updatexcpaths()
 	for xctube in xctubesconn:
-		xctube.updatetubelinkpaths(sketchsystem.get_node("XCdrawings"), sketchsystem)
+		xctube.updatetubelinkpaths(sketchsystem)
 
 func movexcnode(xcn, pt, sketchsystem):
 	print("m,mmmmxmxmxm ", xcn.global_transform.origin, pt)
@@ -165,7 +193,7 @@ func movexcnode(xcn, pt, sketchsystem):
 	copyxcntootnode(xcn)
 	updatexcpaths()
 	for xctube in xctubesconn:
-		xctube.updatetubelinkpaths(sketchsystem.get_node("XCdrawings"), sketchsystem)
+		xctube.updatetubelinkpaths(sketchsystem)
 
 func updatexcpaths():
 	print("iupdatingxxccpaths ", len(onepathpairs))

@@ -3,16 +3,43 @@ extends Spatial
 
 # Stuff to do:
 
-# * sort out transpos to handle the full data about the XC so floors are not special cases (which gives us the floor type problem)
-# * Transform needs a serialize case
+
+
+# * get tubes in directional orientation for correcting them
+# * delete a tube that has no connections on it
+
+# * systematically do the updatetubelinkpaths and updatetubelinkpaths recursion properly 
+
+# * updatetubelinkpaths to carry the arrow correctly (eg vertically down in face for connection to floor or with centreline)
+# * remove the firs paramter of xctube.updatetubelinkpaths(get_node("XCdrawings"), self)
+
+# * shiftfloorfromdrawnstations in shiftxcdrawingposition
+
+# * Alter the OnePathNode system to make centreline nodes (with different meshes)
+
+# * Movement connection between floortype and centreline
+
+# * include a list of URLs for the drawings and bring them in as small bits of xccrossing bits of paper
+# *  option in the GUIpanel
+
+# * Bring in XCdrawings that are hooked to the centreline that will highlight when they get it
+# * these cross sections are tied to the centrelinenodes and not the floor, and are prepopulated with the cross sections dimensions and tubes
+# * Load and move the floor on load
+
+# * holding and moving and trimming small texture xcdrawings like puzzling places
+# * remove all previous centreline code
+# * ability to duplicate the floor with windows in it and move it up close to the centrelines
+# * mapping texture types in the zones of the cross sections (cross sections should be hexes) 
+
+# * experiment with junctions cross sections
+# * finally kinked xcs
+
+# * copy in more drawings as bits of paper size that can be picked up and looked at
+# * think on how to remap the controls somehow.  Maybe some twist menus
+# * add more keyboard controls
 
 # * some XCtypes are little bits of paper we have made, before they become full floors that can be moved by hand before they are expanded
-# * remove floordrawing as special case
-# * func xcapplyonepath(xcn0, xcn1): to do a sketchsystem as parameter
-
-# * then merge the centreline as just another XCdrawing with links and jolting positions
-# * click position of XC doesn't cause XCtube to redraw
-# * replace otxcdIndex with map instead of array and use int from names to look up.  shorter names all beginning with "p"
+# * func xcapplyonepath(xcn0, xcn1): to do the xcdrawing as parameter
 
 # * keyboard control of mouseclicks (when not in mouse capture mode) to do the laser (or remove laser entirely for the clicking on windows)
 
@@ -27,7 +54,6 @@ extends Spatial
 # * pointer target and selected target from pointersystem into sketchsystem
 # * import other floor XCs for drawing on and snipping out, putting into places.
 # * ability to adjust angle and brightness of headtorch in same way with raycast stub
-# * abolish the set_materialoverride use and remove those 3 line scripts
 
 # * change colour of head and hands of each avatar
 

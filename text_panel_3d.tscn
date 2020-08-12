@@ -1,18 +1,18 @@
 [gd_scene load_steps=4 format=2]
 
-[sub_resource type="QuadMesh" id=2]
+[sub_resource type="QuadMesh" id=1]
 size = Vector2( 3.6, 0.6 )
 
-[sub_resource type="ViewportTexture" id=3]
+[sub_resource type="ViewportTexture" id=2]
 viewport_path = NodePath("Viewport")
 
-[sub_resource type="SpatialMaterial" id=4]
+[sub_resource type="SpatialMaterial" id=3]
 resource_local_to_scene = true
 flags_unshaded = true
 flags_do_not_receive_shadows = true
 params_cull_mode = 2
 params_billboard_mode = 1
-albedo_texture = SubResource( 3 )
+albedo_texture = SubResource( 2 )
 
 [node name="TextPanel" type="Spatial"]
 
@@ -37,5 +37,5 @@ __meta__ = {
 
 [node name="Quad" type="MeshInstance" parent="."]
 cast_shadow = 0
-mesh = SubResource( 2 )
-material/0 = SubResource( 4 )
+mesh = SubResource( 1 )
+material/0 = SubResource( 3 )

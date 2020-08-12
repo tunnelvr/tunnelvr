@@ -9,7 +9,7 @@ onready var handleft = playernode.get_node("HandLeft")
 onready var handright = playernode.get_node("HandRight")
 onready var guipanel3d = playernode.get_node("GUIPanel3D")
 
-onready var Laser = handright.get_node("LaserOrient/Length/Laser") 
+onready var LaserLength = handright.get_node("LaserOrient/Length") 
 onready var LaserRayCast = handright.get_node("LaserOrient/RayCast") 
 onready var LaserSpot = handright.get_node("LaserOrient/LaserSpot") 
 onready var LaserShadow = handright.get_node("LaserShadow") 
@@ -18,6 +18,8 @@ onready var LaserSelectLine = handright.get_node("LaserSelectLine")
 var viewport_point = null
 
 enum Buttons { VR_TRIGGER = 15, VR_PAD=14, VR_BUTTON_BY=1, VR_GRIP=2 }
+enum DRAWING_TYPE { DT_XCDRAWING = 0, DT_FLOORTEXTURE = 1, DT_CENTRELINE = 2 }
+
 var distance = 50
 
 const XCdrawing = preload("res://nodescenes/XCdrawing.tscn")
@@ -72,7 +74,7 @@ func setpointertargetmaterial():
 		handright.get_node("csghandright").setpartcolor(2, "#FFFF60")
 	
 func setselectedtarget(newselectedtarget):
-	settextpanel(null, null)
+	setbillboardlabel(null, null)
 	if selectedtargettype == "OnePathNode" or selectedtargettype == "DrawnStationNode" or selectedtargettype == "StationNode":
 		selectedtarget.get_node("CollisionShape/MeshInstance").set_surface_material(0, null)
 	if selectedtargettype == "XCnode":
@@ -81,6 +83,8 @@ func setselectedtarget(newselectedtarget):
 	selectedtarget = newselectedtarget
 	selectedtargettype = targettype(newselectedtarget)
 	selectedtargetwall = targetwall(selectedtarget, selectedtargettype)
+	if selectedtargetwall != null and selectedtargetwall.drawingtype == DRAWING_TYPE.DT_CENTRELINE:
+		setbillboardlabel(selectedtarget.get_name(), selectedtarget.global_transform.origin)
 	if selectedtarget != pointertarget and (selectedtargettype == "OnePathNode" or selectedtargettype == "XCnode" or selectedtargettype == "DrawnStationNode" or selectedtargettype == "StationNode"):
 		selectedtarget.get_node("CollisionShape/MeshInstance").set_surface_material(0, selectedhighlightmaterial)
 	LaserSpot.material_override = preload("res://guimaterials/laserspot_selected.material") if selectedtarget != null else null
@@ -92,7 +96,7 @@ func setactivetargetwall(newactivetargetwall):
 		activetargetwall.get_node("PathLines").set_surface_material(0, preload("res://guimaterials/XCdrawingPathlines.material"))
 		for xcnode in activetargetwall.get_node("XCnodes").get_children():
 			xcnode.get_node("CollisionShape/MeshInstance").set_surface_material(0, preload("res://guimaterials/XCnode_selected.material") if xcnode == selectedtarget else preload("res://guimaterials/XCnode.material"))
-		if not activetargetwall.floortype:
+		if activetargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 			for xctube in activetargetwall.xctubesconn:
 				if not xctube.positioningtube:
 					xctube.updatetubeshell(sketchsystem.get_node("XCdrawings"), sketchsystem.tubeshellsvisible)
@@ -116,17 +120,20 @@ func settextpanel(ltext, pos):
 	else:
 		textpanel.visible = false
 
+func setbillboardlabel(ltext, pos):
+	var textpanel = sketchsystem.get_node("BillboardLabel")
+	if ltext != null:
+		textpanel.get_node("Viewport/Label").text = ltext
+		textpanel.global_transform.origin = pos + Vector3(0, 0.3, 0)
+		textpanel.visible = true
+	else:
+		textpanel.visible = false
+
+
 func _ready():
 	handright.connect("button_pressed", self, "_on_button_pressed")
 	handright.connect("button_release", self, "_on_button_release")
-	#Laser.translation.y = laser_y * ARVRworld_scale
-	
-	# init our state
 	print("in the pointer onready")
-	#Laser.mesh.size.z = distance
-	#Laser.translation.z = distance * -0.5
-	#LaserRayCast.translation.z = distance * 0.5
-	#LaserRayCast.cast_to.z = -distance
 
 func targettype(target):
 	if not is_instance_valid(target):
@@ -176,8 +183,6 @@ func onpointing(newpointertarget, newpointertargetpoint):
 		setpointertargetmaterial()
 		
 		if is_instance_valid(pointertarget):
-			#var selectedtargettype = selectedtarget.get_parent().get_name() if selectedtarget != null else null
-			#var pointertargettype = pointertarget.get_parent().get_name() if pointertarget.has_method("set_materialoverride") else pointertarget.get_name()
 			print("ppp  ", selectedtargettype, " ", pointertargettype)
 			if pointertargettype == "OnePathNode" or pointertargettype == "XCnode" or pointertargettype == "DrawnStationNode" or pointertargettype == "StationNode":
 				LaserSpot.visible = false
@@ -214,9 +219,9 @@ func onpointing(newpointertarget, newpointertargetpoint):
 
 	if pointertargetpoint != null:
 		LaserSpot.global_transform.origin = pointertargetpoint
-		LaserSpot.get_node("../Length").scale.z = -LaserSpot.translation.z
+		LaserLength.scale.z = -LaserSpot.translation.z
 	else:
-		LaserSpot.get_node("../Length").scale.z = -LaserRayCast.cast_to.z
+		LaserLength.scale.z = -LaserRayCast.cast_to.z
 		
 	if LaserSelectLine.visible:
 		if pointertarget != null and selectedtarget != null:
@@ -247,7 +252,8 @@ func _on_button_pressed(p_button):
 
 	if p_button == Buttons.VR_GRIP:
 		gripbuttonpressused = false
-			
+		handright.get_node("csghandright").setpartcolor(4, "#00CC00")
+				
 	if p_button == Buttons.VR_TRIGGER and is_instance_valid(pointertarget):
 		print("clclc ", pointertarget, "--", pointertarget.get_name(), "  filename:", pointertarget.get_filename(), " p:", pointertarget.get_parent())
 		if gripbuttonheld:
@@ -298,22 +304,22 @@ func _on_button_pressed(p_button):
 			sketchsystem.get_node("SoundPos2").play()
 
 		# duplication of XCdrawing (in special cases)
-		elif gripbuttonheld and selectedtargettype == "OnePathNode" and pointertargettype == "OnePathNode":
+		elif gripbuttonheld and selectedtargetwall != null and selectedtargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE and selectedtargettype == "OnePathNode" and pointertargettype == "OnePathNode":
 			var xcdrawingtocopy = null
 			var xcdrawingtocopynodelink = null
 			var btargetclear = true
-			for xctube in sketchsystem.get_node("XCtubes").get_children():
-				if xctube.xcname1 == "floordrawing":
-					if xctube.xcdrawinglink.slice(1, len(xctube.xcdrawinglink), 2).has(pointertarget.get_name()):
+			for xctube in selectedtargetwall.xctubesconn:
+				if sketchsystem.get_node("XCdrawings").get_node(xctube.xcname1).drawingtype == DRAWING_TYPE.DT_XCDRAWING:
+					if xctube.xcdrawinglink.slice(0, len(xctube.xcdrawinglink), 2).has(pointertarget.get_name()):
 						btargetclear = false
 					for i in range(0, len(xctube.xcdrawinglink), 2):
 						#if xctube.xcdrawinglink.slice(1, len(xctube.xcdrawinglink), 2).has(selectedtarget.get_name()):
-						if xctube.xcdrawinglink[i+1] == selectedtarget.get_name():
-							xcdrawingtocopy = sketchsystem.get_node("XCdrawings").get_node(xctube.xcname0)
-							xcdrawingtocopynodelink = xctube.xcdrawinglink[i]
+						if xctube.xcdrawinglink[i] == selectedtarget.get_name():
+							xcdrawingtocopy = sketchsystem.get_node("XCdrawings").get_node(xctube.xcname1)
+							xcdrawingtocopynodelink = xctube.xcdrawinglink[i+1]
 							break
 			if btargetclear and xcdrawingtocopy != null:
-				print("making new copiued drawing¬!!!!")
+				print("making new copied drawing¬!!!!")
 				var xcdrawing = xcdrawingtocopy.duplicatexcdrawing(sketchsystem)
 				var vline = pointertargetpoint - selectedtarget.global_transform.origin
 				var drawingwallangle = Vector2(vline.z, -vline.x).angle()
@@ -360,12 +366,12 @@ func _on_button_pressed(p_button):
 
 				var xctube0 = sketchsystem.newXCtube(xcdrawing0, xcdrawing)
 				xctube0.xcdrawinglink = xcdrawinglink0
-				xctube0.updatetubelinkpaths(sketchsystem.get_node("XCdrawings"), sketchsystem)
+				xctube0.updatetubelinkpaths(sketchsystem)
 				xctube0.updatetubeshell(sketchsystem.get_node("XCdrawings"), sketchsystem.tubeshellsvisible)
 				
 				var xctube1 = sketchsystem.newXCtube(xcdrawing1, xcdrawing)
 				xctube1.xcdrawinglink = xcdrawinglink1
-				xctube1.updatetubelinkpaths(sketchsystem.get_node("XCdrawings"), sketchsystem)
+				xctube1.updatetubelinkpaths(sketchsystem)
 				xctube1.updatetubeshell(sketchsystem.get_node("XCdrawings"), sketchsystem.tubeshellsvisible)
 
 				pointertargettype = "none"
@@ -416,9 +422,10 @@ func _on_button_pressed(p_button):
 			setselectedtarget(pointertarget)
 
 		elif pointertargettype == "XCnode":
-			pointertargetwall.setxcdrawingvisibility(true)
-			if pointertargetwall != activetargetwall:
-				setactivetargetwall(pointertargetwall)
+			if pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
+				pointertargetwall.setxcdrawingvisibility(true)
+				if pointertargetwall != activetargetwall:
+					setactivetargetwall(pointertargetwall)
 			setselectedtarget(pointertarget)
 
 				
@@ -443,8 +450,12 @@ func _on_button_pressed(p_button):
 			
 func _on_button_release(p_button):
 	# cancel selection by squeezing and then releasing grip without doing anything in between
-	if p_button == Buttons.VR_GRIP and not gripbuttonpressused:
-		if pointertargettype == "GUIPanel3D":
+	if p_button == Buttons.VR_GRIP:
+		handright.get_node("csghandright").setpartcolor(4, "#FFFFFF")
+		if gripbuttonpressused:
+			pass
+		
+		elif pointertargettype == "GUIPanel3D":
 			if guipanel3d.visible:
 				guipanel3d.togglevisibility(handright.get_node("LaserOrient").global_transform)
 
