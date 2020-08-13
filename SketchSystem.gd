@@ -8,7 +8,6 @@ enum DRAWING_TYPE { DT_XCDRAWING = 0, DT_FLOORTEXTURE = 1, DT_CENTRELINE = 2 }
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	$XCdrawings/floordrawing.setasfloortype("res://surveyscans/DukeStResurvey-drawnup-p3.jpg", true)
-	$Centreline.floordrawing = $XCdrawings/floordrawing
 	var centrelinedrawing = newXCuniquedrawing("centreline")
 	var centrelinedatafile = File.new()
 	var fname = "res://surveyscans/dukest1resurvey2009.json"
@@ -70,14 +69,8 @@ func savesketchsystem():
 	var xctubesData = [ ]
 	for xctube in $XCtubes.get_children():
 		xctubesData.append([xctube.xcname0, xctube.xcname1, xctube.xcdrawinglink])
-	var drawnstationnodes = $Centreline/DrawnStationNodes.get_children()
-	var drawnstationnodesData = [ ]	
-	for i in range(len(drawnstationnodes)):
-		var dsn = drawnstationnodes[i]
-		drawnstationnodesData.append([dsn.stationname, dsn.global_transform.origin.x, dsn.global_transform.origin.y, dsn.global_transform.origin.z])
 	var save_dict = { "xcdrawings":xcdrawingsData,
-					  "xctubes":xctubesData,
-					  "drawnstationnodes":drawnstationnodesData }
+					  "xctubes":xctubesData }
 	var save_game = File.new()
 	save_game.open(fname, File.WRITE)
 	save_game.store_line(to_json(save_dict))
@@ -90,20 +83,9 @@ func loadsketchsystem():
 	save_game.open(fname, File.READ)
 	var save_dict = parse_json(save_game.get_line())
 
-	var drawnstationnodesData = save_dict["drawnstationnodes"]
 	var xcdrawingsData = save_dict["xcdrawings"]
 	var xctubesData = save_dict["xctubes"]
 	
-	for drawnstationnode in $Centreline/DrawnStationNodes.get_children():
-		drawnstationnode.free()
-	for drawnstationnodeData in drawnstationnodesData:
-		var drawnstationnode = $Centreline.newdrawnstationnode()
-		drawnstationnode.stationname = drawnstationnodeData[0]
-		drawnstationnode.global_transform.origin = Vector3(drawnstationnodeData[1], drawnstationnodeData[2], drawnstationnodeData[3])
-
-	# then move the floor by the drawnstationnodes (it should be done auto when we make the nodes connected)
-	
-	# then do the xcdrawings
 	for xcdrawing in $XCdrawings.get_children():
 		xcdrawing.free()
 	for i in range(len(xcdrawingsData)):
@@ -117,7 +99,6 @@ func loadsketchsystem():
 			xcdrawing.setasfloortype(xcdrawingData["shapeimage"][2], false)
 		get_node("XCdrawings").add_child(xcdrawing)
 
-	$Centreline.floordrawing = $XCdrawings/floordrawing
 	# should move each into position by its connections
 
 	# then do the tubes

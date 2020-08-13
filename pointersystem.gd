@@ -264,16 +264,6 @@ func _on_button_pressed(p_button):
 
 		elif pointertarget.has_method("jump_up"):
 			pointertarget.jump_up()
-	 
-		elif selectedtargettype == "StationNode" and pointertargettype == "floordrawing":
-			pointertarget = centrelinesystem.newdrawnstationnode()
-			setopnpos(pointertarget, pointertargetpoint)
-			pointertarget.stationname = selectedtarget.stationname
-			setselectedtarget(null)
-
-		# grip click moves stationnode
-		elif gripbuttonheld and selectedtargettype == "DrawnStationNode" and pointertargettype == "floordrawing":
-			setopnpos(selectedtarget, pointertargetpoint)
 
 		# grip click moves node on floor
 		elif gripbuttonheld and selectedtargettype == "OnePathNode" and pointertargettype == "floordrawing":

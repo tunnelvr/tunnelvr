@@ -3,9 +3,14 @@ extends Spatial
 
 # Stuff to do:
 
+# * get rid of all centreline references
 
 # * shiftfloorfromdrawnstations in shiftxcdrawingposition
-# make absolute:		xcdrawingFloor.rotation.y += vxcang - vxang
+# * hexagonal crosssections	for xsectgp in xsectgps:
+#		var xsectindexes = xsectgp.xsectindexes
+#		var xsectrightvecs = xsectgp.xsectrightvecs
+#		var xsectlruds = xsectgp.xsectlruds
+
 
 # * delete a tube that has no connections on it
 # * Movement connection between floortype and centreline

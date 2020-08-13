@@ -55,7 +55,7 @@ func shiftxcdrawingposition(sketchsystem):
 	print("...shiftxcdrawingposition")
 	var xcdrawingFloor = sketchsystem.get_node("XCdrawings").get_node(xcname0)
 	var xcdrawingXC = sketchsystem.get_node("XCdrawings").get_node(xcname1)
-	assert (xcdrawingFloor.drawingtype == DRAWING_TYPE.DT_FLOOR and xcdrawingXC.drawingtype == DRAWING_TYPE.DT_XCDRAWING)
+	assert (xcdrawingFloor.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE and xcdrawingXC.drawingtype == DRAWING_TYPE.DT_XCDRAWING)
 	var bsingledrag = len(xcdrawinglink) == 2
 	var opn0 = xcdrawingFloor.get_node("XCnodes").get_node(xcdrawinglink[-2 if bsingledrag else -4])
 	var xcn0 = xcdrawingXC.get_node("XCnodes").get_node(xcdrawinglink[-1 if bsingledrag else -3])

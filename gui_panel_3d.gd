@@ -32,10 +32,6 @@ func _on_buttonupdateshell_toggled(button_pressed):
 	sketchsystem.updateworkingshell(button_pressed)
 	$Viewport/GUI/Panel/Label.text = "UpdateShell shown" if button_pressed else "Shell hidden"
 
-func _on_buttonshiftfloor_pressed():
-	sketchsystem.get_node("Centreline").shiftfloorfromdrawnstations()
-	$Viewport/GUI/Panel/Label.text = "Floor shifted"
-
 func _on_buttonswapcontrollers_pressed():
 	var cidl = get_node("/root/Spatial").playerMe.get_node("HandLeft").controller_id
 	var cidr = get_node("/root/Spatial").playerMe.get_node("HandRight").controller_id
@@ -47,7 +43,6 @@ func _ready():
 	$Viewport/GUI/Panel/ButtonLoad.connect("pressed", self, "_on_buttonload_pressed")
 	$Viewport/GUI/Panel/ButtonSave.connect("pressed", self, "_on_buttonsave_pressed")
 	$Viewport/GUI/Panel/ButtonShowXS.connect("toggled", self, "_on_buttonshowxs_toggled")
-	$Viewport/GUI/Panel/ButtonShiftFloor.connect("pressed", self, "_on_buttonshiftfloor_pressed")
 	$Viewport/GUI/Panel/ButtonHeadtorch.connect("toggled", self, "_on_buttonheadtorch_toggled")
 	$Viewport/GUI/Panel/ButtonDoppelganger.connect("toggled", self, "_on_buttondoppelganger_toggled")
 	$Viewport/GUI/Panel/ButtonUpdateShell.connect("toggled", self, "_on_buttonupdateshell_toggled")

@@ -134,5 +134,6 @@ func Loadcentrelinefile(fname):
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	Loadcentrelinefile("res://surveyscans/dukest1resurvey2009.json")
+	pass
+	#Loadcentrelinefile("res://surveyscans/dukest1resurvey2009.json")
 
