@@ -12,15 +12,12 @@ onready var world_scale = ARVRServer.world_scale
 
 var player_radius = 0.25
 var nextphysicsrotatestep = 0.0  # avoid flicker if done in _physics_process 
-var mousecontrollervec = Vector3(0.2, -0.1, -0.5)
 var velocity = Vector3(0.0, 0.0, 0.0)
 var gravity = -30.0
 
 export var walkspeed = 100.0
 export var flyspeed = 250.0
 export var drag_factor = 0.1
-
-enum Buttons { VR_TRIGGER = 15, VR_PAD=14, VR_BUTTON_BY=1, VR_GRIP=2 }
 
 func _ready():
 	handleft.connect("button_pressed", self, "_on_button_pressed")
@@ -35,22 +32,22 @@ var prevlaserangleoffset = 0
 onready var audiobusrecordeffect = AudioServer.get_bus_effect(AudioServer.get_bus_index("Record"), 0)
 
 func _on_button_pressed(p_button):
-	if p_button == Buttons.VR_PAD:
+	if p_button == BUTTONS.VR_PAD:
 		var left_right = handleft.get_joystick_axis(0)
 		var up_down = handleft.get_joystick_axis(1)
 		if abs(up_down) < 0.5 and abs(left_right) > 0.1:
 			nextphysicsrotatestep += (1 if left_right > 0 else -1)*(22.5 if abs(left_right) > 0.8 else 90.0)
 
-	laserangleadjustmode = (p_button == Buttons.VR_GRIP) and handleft.get_node("TipTouchRay").is_colliding() and handleft.get_node("TipTouchRay").get_collider() == handright.get_node("HeelHotspot")
+	laserangleadjustmode = (p_button == BUTTONS.VR_GRIP) and handleft.get_node("TipTouchRay").is_colliding() and handleft.get_node("TipTouchRay").get_collider() == handright.get_node("HeelHotspot")
 	if laserangleadjustmode:
 		laserangleoriginal = handright.get_node("LaserOrient").rotation.x
 		laserhandanglevector = Vector2(handleft.global_transform.basis.x.dot(handright.global_transform.basis.y), handleft.global_transform.basis.y.dot(handright.global_transform.basis.y))
 		
-	if p_button == Buttons.VR_BUTTON_BY:
+	if p_button == BUTTONS.VR_BUTTON_BY:
 		audiobusrecordeffect.set_recording_active(true)
 		print("Doing the recording ", audiobusrecordeffect)
 
-	if p_button == Buttons.VR_GRIP:
+	if p_button == BUTTONS.VR_GRIP:
 		handleft.get_node("csghandleft").setpartcolor(4, "#00CC00")
 
 		
@@ -59,7 +56,7 @@ func _on_button_release(p_button):
 		laserangleadjustmode = false
 		handright.rumble = 0.0
 
-	if p_button == Buttons.VR_BUTTON_BY:
+	if p_button == BUTTONS.VR_BUTTON_BY:
 		var recording = audiobusrecordeffect.get_recording()
 		recording.save_to_wav("user://record3.wav")
 		audiobusrecordeffect.set_recording_active(false)
@@ -74,7 +71,7 @@ func _on_button_release(p_button):
 		print("COMPRESSION_GZIP ", recording.get_data().compress(File.COMPRESSION_GZIP).size())
 		playernode.rpc("playvoicerecording", recording.get_data())
 
-	if p_button == Buttons.VR_GRIP:
+	if p_button == BUTTONS.VR_GRIP:
 		handleft.get_node("csghandleft").setpartcolor(4, "#FFFFFF")
 
 
@@ -98,13 +95,6 @@ func _input(event):
 			markernode.global_transform.origin = handright.global_transform.origin - 0.9*handright.global_transform.basis.z
 			markernode.linear_velocity = -5.1*handright.global_transform.basis.z
 			boulderclutter.add_child(markernode)
-
-	if event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
-		if playernode.arvrinterface == null or playernode.arvrinterface.get_tracking_status() == ARVRInterface.ARVR_NOT_TRACKING:
-			var rhvec = mousecontrollervec + Vector3(event.relative.x, event.relative.y, 0)*0.002
-			rhvec.x = clamp(rhvec.x, -0.4, 0.4)
-			rhvec.y = clamp(rhvec.y, -0.3, 0.6)
-			mousecontrollervec = rhvec.normalized()*0.8
 
 func _physics_process(delta):
 	# Adjust the height of our player according to our camera position
@@ -148,12 +138,8 @@ func _physics_process(delta):
 			headcam.look_at(headcam.global_transform.origin + vtarget, Vector3(0,1,0))
 			playernode.rotation_degrees.y += headcam.rotation_degrees.y
 			headcam.rotation_degrees.y = 0
-		var mvec = headcam.global_transform.basis.xform(mousecontrollervec)
-		handright.global_transform.origin = headcam.global_transform.origin + mvec
-		handright.look_at(handright.global_transform.origin + 1.0*mvec + 0.0*headcam.global_transform.basis.z, Vector3(0,1,0))
-		handright.global_transform.origin.y -= 0.3
 		
-	if laserangleadjustmode and handleft.is_button_pressed(Buttons.VR_GRIP):
+	if laserangleadjustmode and handleft.is_button_pressed(BUTTONS.VR_GRIP):
 		var laserangleoffset = 0
 		if handleft.get_node("TipTouchRay").is_colliding() and handleft.get_node("TipTouchRay").get_collider() == handright.get_node("HeelHotspot"):
 			var laserhandanglevectornew = Vector2(handleft.global_transform.basis.x.dot(handright.global_transform.basis.y), handleft.global_transform.basis.y.dot(handright.global_transform.basis.y))
@@ -165,8 +151,8 @@ func _physics_process(delta):
 			prevlaserangleoffset = laserangleoffset
 		handright.get_node("LaserOrient").rotation.x = laserangleoriginal + laserangleoffset
 		
-	elif handleft.is_button_pressed(Buttons.VR_GRIP) or Input.is_action_pressed("lh_fly"):
-		if handleft.is_button_pressed(Buttons.VR_TRIGGER) or Input.is_action_pressed("lh_forward") or Input.is_action_pressed("lh_backward"):
+	elif handleft.is_button_pressed(BUTTONS.VR_GRIP) or Input.is_action_pressed("lh_fly"):
+		if handleft.is_button_pressed(BUTTONS.VR_TRIGGER) or Input.is_action_pressed("lh_forward") or Input.is_action_pressed("lh_backward"):
 			var curr_transform = kinematic_body.global_transform
 			var flydir = handleft.global_transform.basis.z if handleft.get_is_active() else headcam.global_transform.basis.z
 			if forwards_backwards < -0.5:
@@ -223,7 +209,8 @@ func _physics_process(delta):
 		var dgt = Transform(Basis(-playernode.global_transform.basis.x, playernode.global_transform.basis.y, -playernode.global_transform.basis.z), 
 							Vector3(doppelganger.global_transform.origin.x, playernode.global_transform.origin.y, doppelganger.global_transform.origin.z))
 		doppelganger.setavatarposition(dgt, headcam.transform, handleft.transform if handleft.visible else null, handright.transform if handright.visible else null)
-	playernode.rpc_unreliable("setavatarposition", playernode.global_transform, headcam.transform, 
-												   handleft.transform if handleft.visible else null, 
-												   handright.transform if handright.visible else null)
+	if playernode.connectiontoserveractive:
+		playernode.rpc_unreliable("setavatarposition", playernode.global_transform, headcam.transform, 
+													   handleft.transform if handleft.visible else null, 
+													   handright.transform if handright.visible else null)
 	

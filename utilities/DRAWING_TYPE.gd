@@ -1,0 +1,4 @@
+class_name DRAWING_TYPE
+
+enum { DT_XCDRAWING = 0, DT_FLOORTEXTURE = 1, DT_CENTRELINE = 2 }
+

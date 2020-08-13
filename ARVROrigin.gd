@@ -6,6 +6,7 @@ onready var xcdrawing_material_albedoa = xcdrawing_material.albedo_color.a
 onready var xcdrawing_active_material_albedoa = xcdrawing_active_material.albedo_color.a
 onready var doppelganger = null # get_node("../Doppelganger")
 var arvrinterface = null
+var connectiontoserveractive = false
 
 func setheadtorchlight(torchon):
 	$HeadCam/HeadtorchLight.visible = torchon

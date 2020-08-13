@@ -9,7 +9,6 @@ var xcdrawinglink = [ ]      # [ 0nodenamefrom, 0nodenameto, 1nodenamefrom, 1nod
 var positioningtube = false  # connecting to 
 
 const linewidth = 0.02
-enum DRAWING_TYPE { DT_XCDRAWING = 0, DT_FLOORTEXTURE = 1, DT_CENTRELINE = 2 }
 
 const materialdirt = preload("res://lightweighttextures/simpledirt.material")
 var materialscanimage = load("res://surveyscans/scanimagefloor.material")

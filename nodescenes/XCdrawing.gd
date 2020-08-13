@@ -7,8 +7,6 @@ const XCnode = preload("res://nodescenes/XCnode.tscn")
 var nodepoints = { }    # { nodename:Vector3 }
 var onepathpairs = [ ]  # [ Anodename0, Anodename1, Bnodename0, Bnodename1, ... ]
 
-enum DRAWING_TYPE { DT_XCDRAWING = 0, DT_FLOORTEXTURE = 1, DT_CENTRELINE = 2 }
-
 var drawingtype = DRAWING_TYPE.DT_XCDRAWING
 
 # derived data

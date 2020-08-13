@@ -3,7 +3,6 @@ extends Spatial
 
 const XCdrawing = preload("res://nodescenes/XCdrawing.tscn")
 const XCtube = preload("res://nodescenes/XCtube.tscn")
-enum DRAWING_TYPE { DT_XCDRAWING = 0, DT_FLOORTEXTURE = 1, DT_CENTRELINE = 2 }
 
 # Called when the node enters the scene tree for the first time.
 func _ready():

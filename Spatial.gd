@@ -3,7 +3,14 @@ extends Spatial
 
 # Stuff to do:
 
+
+
 # * keyboard controls to do mouse buttons (and point and click when not captured)
+# * point and click under the mouse cursor when not captured! should be a laser beam out of the camera!
+#var dropPlane  = Plane(Vector3(0, 0, 1), z)
+#var position3D = dropPlane.intersects_ray(camera.project_ray_origin(position2D),
+#                             			  camera.project_ray_normal(position2D))
+# * show this on the remote computer (the status of the laser)
 
 # * copy in more drawings as bits of paper size that can be picked up and looked at
 # * think on how to remap the controls somehow.  Maybe some twist menus
@@ -11,6 +18,7 @@ extends Spatial
 # * some XCtypes are little bits of paper we have made, before they become full floors that can be moved by hand before they are expanded
 # * keyboard control of mouseclicks (when not in mouse capture mode) to do the laser (or remove laser entirely for the clicking on windows)
 
+# * CSG avatar head to have headtorch light that goes on or off and doesn't hit ceiling (gets moved down)
 
 # * bring in a tiny version of the floor drawing as a holdable object
 # * use cursor as tractor beam for those and the pick up and reorient
@@ -45,8 +53,7 @@ extends Spatial
 # * experiment with junctions cross sections
 # * finally kinked xcs
 
-
-# * CSG avatar head to have headtorch light that goes on or off
+# * systems into own file
 
 # * use chinhotspot to use as microphone (on grip) and then button to playback
 
@@ -169,12 +176,14 @@ func _player_connected(id):
 		playerOther.set_network_master(id)
 		playerOther.set_name(playerothername)
 		$Players.add_child(playerOther)
+	playerMe.connectiontoserveractive = true
 	
 func _player_disconnected(id):
 	print("_player_disconnected ", id)
 	var playerothername = "NetworkedPlayer"+String(id)
 	if $Players.has_node(playerothername):
 		$Players.get_node(playerothername).queue_free()
+	playerMe.connectiontoserveractive = false
 		
 func _connected_to_server():
 	print("_connected_to_server")
