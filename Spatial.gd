@@ -3,7 +3,17 @@ extends Spatial
 
 # Stuff to do:
 
-# * get rid of all centreline references
+# * keyboard controls to do mouse buttons (and point and click when not captured)
+
+# * copy in more drawings as bits of paper size that can be picked up and looked at
+# * think on how to remap the controls somehow.  Maybe some twist menus
+# * add more keyboard controls
+# * some XCtypes are little bits of paper we have made, before they become full floors that can be moved by hand before they are expanded
+# * keyboard control of mouseclicks (when not in mouse capture mode) to do the laser (or remove laser entirely for the clicking on windows)
+
+
+# * bring in a tiny version of the floor drawing as a holdable object
+# * use cursor as tractor beam for those and the pick up and reorient
 
 # * shiftfloorfromdrawnstations in shiftxcdrawingposition
 # * hexagonal crosssections	for xsectgp in xsectgps:
@@ -11,19 +21,14 @@ extends Spatial
 #		var xsectrightvecs = xsectgp.xsectrightvecs
 #		var xsectlruds = xsectgp.xsectlruds
 
-
 # * delete a tube that has no connections on it
 # * Movement connection between floortype and centreline
 # * cache value of sketchsystem.get_node("XCdrawings").get_node(xctube.xcname1).drawingtype
 # * removexcnode should actually cause a redraw (but not a move)
 # * ^^ should move redraws out of the system
-
 # * systematically do the updatetubelinkpaths and updatetubelinkpaths recursion properly 
 
-# * Get rid of the OnePathNode
 # * Alter the OnePathNode system to make centreline nodes (with different meshes)
-
-
 
 # * include a list of URLs for the drawings and bring them in as small bits of xccrossing bits of paper
 # *  option in the GUIpanel
@@ -40,14 +45,6 @@ extends Spatial
 # * experiment with junctions cross sections
 # * finally kinked xcs
 
-# * copy in more drawings as bits of paper size that can be picked up and looked at
-# * think on how to remap the controls somehow.  Maybe some twist menus
-# * add more keyboard controls
-
-# * some XCtypes are little bits of paper we have made, before they become full floors that can be moved by hand before they are expanded
-# * func xcapplyonepath(xcn0, xcn1): to do the xcdrawing as parameter
-
-# * keyboard control of mouseclicks (when not in mouse capture mode) to do the laser (or remove laser entirely for the clicking on windows)
 
 # * CSG avatar head to have headtorch light that goes on or off
 
@@ -82,40 +79,21 @@ extends Spatial
 # * CSG mesh with multiple materials group should have material0, material1 etc
 # * Report bug check ray intersect plane is in the plane and report if not!
 
-# * should the XCdrawing be flat and lifted up for XC, rather than tipped back for floordrawing
 # * and loading (remembering the transforms) so it starts exactly where it left off
 # * redo shiftfloorfromdrawnstations with nodes in the area of some kind (decide what to do about the scale)
-# * make tubes automatically update on moves of nodes.  
-# * tie centreline nodes to the drawn floor same way other movements are?
 # * grip click to hide a tube segment (how to bring back?)
-# * cycle through textures on a tube section (as well as hiding)
 # * xcdrawingplane background thing be scaled when copied
 # * xcdrawingplane background thing change colour on grip and hide
 # * think about the height plane
-# * Normal drawing to be XCdrawing, but horizontal and with a connections between XCdrawings
 # * third (middle) connection point on xcdrawing bends it into 2 planes
-# * auto shift drawing on load and station nodes exist
-# * experiment with making an offset of the XC and a tube
-# * interpolate the XC as we drag along the runs traced in the floor
-# * show cursor and XC plane in front of the shell if we want to 
-# * allocate junctions and curved XCs (or with a split panel at 0 and different angle)
-# * shell code should have rocky texture on ceilings
 
-# * XC to record its UV and X-vector position on the sketch maybe
-# * Nodes have floor/wall/ceiling type or-ed so that when edges and faces get anded by their point members their category is set
 # * Colour floor/wall/ceiling faces accordingly
-# * Interpolate cross sections that are joined along the plan2D contour and slinky tubes not straight pipes
-# * This means we have driving edges that run the interpolation over what gets interpolated
 # * Requires an undo of each of these settings
 # * capability of selecting faces and splitting with points
 # * Report bug that disable depth check puts transparent objects in front
 # * node flags of floor, wall, ceiling types so that edges and triangles inherit from this 
-# * Fall upward to ceiling when not on above the cave
-# * move textpanel out to top level with the GUI stuff
-# * triangulations to better reflect the normals given at the nodes
 # * floor and wall textures programmable
 # * Boulders and gravel and particles
-# * set the floor shape size according to aspect ratio read from the bitmap 1.285239=(3091/2405.0)
 
 var arvr_openvr = null; 
 var arvr_quest = null; 
