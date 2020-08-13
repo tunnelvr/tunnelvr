@@ -7,7 +7,7 @@ enum DRAWING_TYPE { DT_XCDRAWING = 0, DT_FLOORTEXTURE = 1, DT_CENTRELINE = 2 }
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	$XCdrawings/floordrawing.setasfloortype("res://surveyscans/DukeStResurvey-drawnup-p3.jpg")
+	$XCdrawings/floordrawing.setasfloortype("res://surveyscans/DukeStResurvey-drawnup-p3.jpg", true)
 	$Centreline.floordrawing = $XCdrawings/floordrawing
 	var centrelinedrawing = newXCuniquedrawing("centreline")
 	var centrelinedatafile = File.new()
@@ -114,7 +114,7 @@ func loadsketchsystem():
 		xcdrawing.get_node("XCdrawingplane").visible = false
 		xcdrawing.get_node("XCdrawingplane/CollisionShape").disabled = true
 		if xcdrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
-			xcdrawing.setasfloortype(xcdrawingData["shapeimage"][2])
+			xcdrawing.setasfloortype(xcdrawingData["shapeimage"][2], false)
 		get_node("XCdrawings").add_child(xcdrawing)
 
 	$Centreline.floordrawing = $XCdrawings/floordrawing

@@ -103,8 +103,10 @@ func shiftfloorfromdrawnstations(sketchsystem):
 		var xcn1 = xcdrawingFloor.get_node("XCnodes").get_node(xcdrawinglink[-1])
 		var vx = opn1.global_transform.origin - opn0.global_transform.origin
 		var vxc = xcn1.global_transform.origin - xcn0.global_transform.origin
+		var vxcl = xcn1.transform.origin - xcn0.transform.origin
 		var vxang = Vector2(-vx.x, -vx.z).angle()
 		var vxcang = Vector2(-vxc.x, -vxc.z).angle()
+		var vxclang = Vector2(-vxcl.x, vxcl.y).angle()
 
 		var vxlen = vx.length()
 		var vxclen = vxc.length()
@@ -112,7 +114,8 @@ func shiftfloorfromdrawnstations(sketchsystem):
 			var sca = vxlen/vxclen
 			xcdrawingFloor.get_node("XCdrawingplane").scale *= Vector3(sca, sca, 1)
 			xcdrawingFloor.scalexcnodepointspointsxy(sca, sca)
-		xcdrawingFloor.rotation.y += vxcang - vxang
+		#xcdrawingFloor.rotation.y += vxcang - vxang
+		xcdrawingFloor.rotation = Vector3(-deg2rad(90), vxclang - vxang, 0)  # should be in setxcpositionangle
 		var xco = opn0.global_transform.origin - xcn0.global_transform.origin + xcdrawingFloor.global_transform.origin
 		xcdrawingFloor.setxcpositionorigin(xco)
 		

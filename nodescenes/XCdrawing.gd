@@ -44,19 +44,21 @@ func setxcpositionorigin(pt0):
 	global_transform.origin = Vector3(pt0.x, 0, pt0.z)
 
 var defaultfloortexture = "res://surveyscans/DukeStResurvey-drawnup-p3.jpg"
-func setasfloortype(floortexture):
+func setasfloortype(floortexture, setdefaultscaleorient):
 	drawingtype = DRAWING_TYPE.DT_FLOORTEXTURE
 	assert (get_name() == "floordrawing")
-	$XCdrawingplane.scale = Vector3(50, 50, 1)
 	$XCdrawingplane.collision_layer |= 2
 	$XCdrawingplane.visible = true
 	$XCdrawingplane/CollisionShape.disabled = false
-	rotation_degrees = Vector3(-90, 0, 0)
 	var m = preload("res://surveyscans/scanimagefloor.material").duplicate()
 	m.albedo_texture = load(floortexture) 
 	$XCdrawingplane/CollisionShape/MeshInstance.material_override = m
-	var t = $XCdrawingplane/CollisionShape/MeshInstance.material_override.albedo_texture
-	print(t.resource_path)
+	if setdefaultscaleorient:
+		rotation_degrees = Vector3(-90, 0, 0)
+		$XCdrawingplane.scale = Vector3(50, 50*m.albedo_texture.get_height()/m.albedo_texture.get_width(), 1)
+	
+	#var t = $XCdrawingplane/CollisionShape/MeshInstance.material_override.albedo_texture
+	#print(t.resource_path)
 
 func exportxcdata():
 	var nodepointsData = [ ]

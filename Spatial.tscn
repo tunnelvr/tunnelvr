@@ -329,8 +329,7 @@ material/0 = ExtResource( 3 )
 [node name="BoulderClutter" type="Spatial" parent="."]
 
 [node name="drawnfloor" type="StaticBody" parent="."]
-transform = Transform( 100, 0, 0, 0, 1, 0, 0, 0, 100, 0, 0, 0 )
-visible = false
+transform = Transform( 100, 0, 0, 0, 1, 0, 0, 0, 100, 0, -0.5, 0 )
 collision_layer = 18
 collision_mask = 0
 

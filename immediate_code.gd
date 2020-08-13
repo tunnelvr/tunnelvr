@@ -15,7 +15,8 @@ func t(x=null):
 
 func _run():
 	var x = IP.get_local_addresses()
-	#var r = load("res://surveyscans/DukeStResurvey-drawnup-p3.jpg")
-	#print(r)
-	var s = "sdfs.sdfs.ddd."
-	print(s.replace(".", ","))
+	var defaultfloortexture = "res://surveyscans/DukeStResurvey-drawnup-p3.jpg"
+	var r = load(defaultfloortexture) 
+	print(r)
+	print(r.get_height())
+	print(r.get_width())
