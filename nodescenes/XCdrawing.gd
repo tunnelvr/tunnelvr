@@ -32,9 +32,9 @@ func setxcdrawingvisibility(makevisible):
 			$XCdrawingplane.set_scale(Vector3(sca, sca, 1.0))
 
 # these transforming operations work in sequence, each correcting the relative position change caused by the other
-func scalexcnodepointspointsx(sca):
+func scalexcnodepointspointsxy(scax, scay):
 	for i in nodepoints.keys():
-		nodepoints[i] = Vector3(nodepoints[i].x*sca, nodepoints[i].y, nodepoints[i].z)
+		nodepoints[i] = Vector3(nodepoints[i].x*scax, nodepoints[i].y*scay, nodepoints[i].z)
 		copyotnodetoxcn($XCnodes.get_node(i))
 
 func setxcpositionangle(drawingwallangle):
@@ -185,7 +185,8 @@ func removexcnode(xcn, brejoinlines, sketchsystem):
 		xctube.removetubenodepoint(get_name(), xcnIndex)
 	updatexcpaths()
 	for xctube in xctubesconn:
-		xctube.updatetubelinkpaths(sketchsystem)
+		if not xctube.positioningtube:
+			xctube.updatetubelinkpaths(sketchsystem)
 
 func movexcnode(xcn, pt, sketchsystem):
 	print("m,mmmmxmxmxm ", xcn.global_transform.origin, pt)

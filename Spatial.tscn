@@ -22,29 +22,29 @@
 [ext_resource path="res://guimaterials/laserspot.material" type="Material" id=22]
 [ext_resource path="res://guimaterials/lasershadow.material" type="Material" id=23]
 
-[sub_resource type="CylinderShape" id=24]
+[sub_resource type="CylinderShape" id=1]
 radius = 0.1
 height = 0.18
 
-[sub_resource type="AudioStreamMicrophone" id=1]
+[sub_resource type="AudioStreamMicrophone" id=2]
 
-[sub_resource type="CubeMesh" id=2]
+[sub_resource type="CubeMesh" id=3]
 resource_local_to_scene = true
 size = Vector3( 0.002, 0.002, 1 )
 
-[sub_resource type="SpatialMaterial" id=3]
+[sub_resource type="SpatialMaterial" id=4]
 flags_unshaded = true
 flags_do_not_receive_shadows = true
 albedo_color = Color( 0.945098, 0.133333, 0.133333, 1 )
 
-[sub_resource type="SphereMesh" id=4]
+[sub_resource type="SphereMesh" id=5]
 material = ExtResource( 22 )
 radius = 0.05
 height = 0.1
 radial_segments = 8
 rings = 4
 
-[sub_resource type="CylinderMesh" id=5]
+[sub_resource type="CylinderMesh" id=6]
 material = ExtResource( 16 )
 top_radius = 0.001
 bottom_radius = 0.02
@@ -52,7 +52,7 @@ height = 0.2
 radial_segments = 6
 rings = 1
 
-[sub_resource type="CylinderMesh" id=6]
+[sub_resource type="CylinderMesh" id=7]
 material = ExtResource( 23 )
 top_radius = 0.05
 bottom_radius = 0.05
@@ -60,28 +60,28 @@ height = 0.02
 radial_segments = 8
 rings = 1
 
-[sub_resource type="CubeMesh" id=7]
+[sub_resource type="CubeMesh" id=8]
 material = ExtResource( 19 )
 size = Vector3( 0.01, 0.01, 1 )
 
-[sub_resource type="BoxShape" id=8]
+[sub_resource type="BoxShape" id=9]
 extents = Vector3( 0.02, 0.07, 0.04 )
 
-[sub_resource type="CapsuleShape" id=9]
+[sub_resource type="CapsuleShape" id=10]
 radius = 0.3
 height = 1.2
 
-[sub_resource type="SpatialMaterial" id=10]
+[sub_resource type="SpatialMaterial" id=11]
 params_cull_mode = 2
 albedo_color = Color( 0.87451, 0.964706, 0.247059, 1 )
 
-[sub_resource type="SpatialMaterial" id=11]
+[sub_resource type="SpatialMaterial" id=12]
 flags_transparent = true
 flags_do_not_receive_shadows = true
 params_cull_mode = 2
 albedo_color = Color( 0.321569, 0.988235, 0.27451, 0.329412 )
 
-[sub_resource type="Shader" id=17]
+[sub_resource type="Shader" id=13]
 code = "shader_type spatial;
 render_mode blend_mix,depth_draw_opaque,cull_back,diffuse_burley,specular_schlick_ggx;
 uniform vec4 albedo : hint_color;
@@ -112,10 +112,10 @@ void fragment() {
 }
 "
 
-[sub_resource type="ProxyTexture" id=18]
+[sub_resource type="ProxyTexture" id=14]
 
-[sub_resource type="ShaderMaterial" id=19]
-shader = SubResource( 17 )
+[sub_resource type="ShaderMaterial" id=15]
+shader = SubResource( 13 )
 shader_param/albedo = Color( 0.435294, 0.215686, 0.141176, 0.454902 )
 shader_param/specular = 0.5
 shader_param/metallic = 0.48
@@ -123,24 +123,24 @@ shader_param/roughness = 0.71
 shader_param/point_size = 1.0
 shader_param/uv1_scale = Vector3( 3, 1, 1 )
 shader_param/uv1_offset = Vector3( 0, 0, 0 )
-shader_param/texture_albedo = SubResource( 18 )
+shader_param/texture_albedo = SubResource( 14 )
 
-[sub_resource type="PlaneMesh" id=20]
-material = SubResource( 19 )
+[sub_resource type="PlaneMesh" id=16]
+material = SubResource( 15 )
 size = Vector2( 4, 2 )
 
-[sub_resource type="SpatialMaterial" id=21]
+[sub_resource type="SpatialMaterial" id=17]
 params_cull_mode = 2
 albedo_color = Color( 0.992157, 0.992157, 0.666667, 1 )
 albedo_texture = ExtResource( 7 )
 
-[sub_resource type="PlaneMesh" id=22]
-material = SubResource( 21 )
+[sub_resource type="PlaneMesh" id=18]
+material = SubResource( 17 )
 size = Vector2( 1, 1.285 )
 subdivide_width = 4
 subdivide_depth = 4
 
-[sub_resource type="BoxShape" id=23]
+[sub_resource type="BoxShape" id=19]
 extents = Vector3( 0.5, 0.5, 0.643 )
 
 [node name="Spatial" type="Spatial"]
@@ -177,7 +177,7 @@ collision_mask = 0
 
 [node name="CollisionShape" type="CollisionShape" parent="Players/PlayerMe/HeadCam/ChinHotspot"]
 transform = Transform( 1, -1.86265e-09, 0, -1.86265e-09, 1, 0, -1.86265e-09, 2.98023e-08, 1, 0, 0, 0 )
-shape = SubResource( 24 )
+shape = SubResource( 1 )
 
 [node name="HandLeft" type="ARVRController" parent="Players/PlayerMe"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.2, 1.5, -0.5 )
@@ -195,7 +195,7 @@ collision_mask = 1024
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.024738, 0, -0.130972 )
 
 [node name="AudioStreamRecord" type="AudioStreamPlayer" parent="Players/PlayerMe/HandLeft"]
-stream = SubResource( 1 )
+stream = SubResource( 2 )
 autoplay = true
 bus = "Record"
 
@@ -214,8 +214,8 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 50, 0, 0, 0 )
 [node name="Laser" type="MeshInstance" parent="Players/PlayerMe/HandRight/LaserOrient/Length"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.43051e-06, -0.5 )
 cast_shadow = 0
-mesh = SubResource( 2 )
-material/0 = SubResource( 3 )
+mesh = SubResource( 3 )
+material/0 = SubResource( 4 )
 
 [node name="RayCast" type="RayCast" parent="Players/PlayerMe/HandRight/LaserOrient"]
 enabled = true
@@ -224,18 +224,18 @@ collision_mask = 56
 
 [node name="LaserSpot" type="MeshInstance" parent="Players/PlayerMe/HandRight/LaserOrient"]
 transform = Transform( 1, 0, 0, 0, 1, -5.96046e-08, 0, 5.96046e-08, 1, 0, 0, -1 )
-mesh = SubResource( 4 )
+mesh = SubResource( 5 )
 material/0 = null
 
 [node name="LaserSpike" type="MeshInstance" parent="Players/PlayerMe/HandRight/LaserOrient/LaserSpot"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0 )
-mesh = SubResource( 5 )
+mesh = SubResource( 6 )
 material/0 = null
 
 [node name="LaserShadow" type="MeshInstance" parent="Players/PlayerMe/HandRight"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.20281, 6.95405 )
 visible = false
-mesh = SubResource( 6 )
+mesh = SubResource( 7 )
 material/0 = null
 
 [node name="LaserSelectLine" type="Spatial" parent="Players/PlayerMe/HandRight"]
@@ -246,7 +246,7 @@ visible = false
 
 [node name="Mesh" type="MeshInstance" parent="Players/PlayerMe/HandRight/LaserSelectLine/Scale"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.5 )
-mesh = SubResource( 7 )
+mesh = SubResource( 8 )
 material/0 = null
 
 [node name="HeelHotspot" type="StaticBody" parent="Players/PlayerMe/HandRight"]
@@ -255,7 +255,7 @@ collision_mask = 0
 
 [node name="CollisionShape" type="CollisionShape" parent="Players/PlayerMe/HandRight/HeelHotspot"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0577492, 0, 0.0749998 )
-shape = SubResource( 8 )
+shape = SubResource( 9 )
 
 [node name="KinematicBody" type="KinematicBody" parent="Players/PlayerMe"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.24823, 6.41158 )
@@ -263,7 +263,7 @@ collision_mask = 38
 
 [node name="CollisionShape" type="CollisionShape" parent="Players/PlayerMe/KinematicBody"]
 transform = Transform( 1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0.9, 0 )
-shape = SubResource( 9 )
+shape = SubResource( 10 )
 
 [node name="Tail" type="RayCast" parent="Players/PlayerMe/KinematicBody"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0 )
@@ -301,10 +301,10 @@ script = ExtResource( 17 )
 [node name="StationNodes" type="Spatial" parent="SketchSystem/Centreline"]
 
 [node name="CentrelineLegs" type="MeshInstance" parent="SketchSystem/Centreline"]
-material_override = SubResource( 10 )
+material_override = SubResource( 11 )
 
 [node name="CentrelineCrossSections" type="MeshInstance" parent="SketchSystem/Centreline"]
-material_override = SubResource( 11 )
+material_override = SubResource( 12 )
 
 [node name="DrawnStationNodes" type="Spatial" parent="SketchSystem/Centreline"]
 
@@ -323,7 +323,7 @@ unit_db = 19.367
 [node name="LaserSquare" type="MeshInstance" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 2.42691, 1.24388, 1.94417 )
 material_override = ExtResource( 3 )
-mesh = SubResource( 20 )
+mesh = SubResource( 16 )
 material/0 = ExtResource( 3 )
 
 [node name="BoulderClutter" type="Spatial" parent="."]
@@ -335,12 +335,12 @@ collision_layer = 18
 collision_mask = 0
 
 [node name="thing,ghfg" type="MeshInstance" parent="drawnfloor"]
-mesh = SubResource( 22 )
+mesh = SubResource( 18 )
 material/0 = null
 
 [node name="CollisionShape" type="CollisionShape" parent="drawnfloor"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0 )
-shape = SubResource( 23 )
+shape = SubResource( 19 )
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = ExtResource( 2 )

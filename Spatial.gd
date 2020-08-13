@@ -4,20 +4,21 @@ extends Spatial
 # Stuff to do:
 
 
+# * shiftfloorfromdrawnstations in shiftxcdrawingposition
+# make absolute:		xcdrawingFloor.rotation.y += vxcang - vxang
 
-# * get tubes in directional orientation for correcting them
 # * delete a tube that has no connections on it
+# * Movement connection between floortype and centreline
+# * cache value of sketchsystem.get_node("XCdrawings").get_node(xctube.xcname1).drawingtype
+# * removexcnode should actually cause a redraw (but not a move)
+# * ^^ should move redraws out of the system
 
 # * systematically do the updatetubelinkpaths and updatetubelinkpaths recursion properly 
 
-# * updatetubelinkpaths to carry the arrow correctly (eg vertically down in face for connection to floor or with centreline)
-# * remove the firs paramter of xctube.updatetubelinkpaths(get_node("XCdrawings"), self)
-
-# * shiftfloorfromdrawnstations in shiftxcdrawingposition
-
+# * Get rid of the OnePathNode
 # * Alter the OnePathNode system to make centreline nodes (with different meshes)
 
-# * Movement connection between floortype and centreline
+
 
 # * include a list of URLs for the drawings and bring them in as small bits of xccrossing bits of paper
 # *  option in the GUIpanel

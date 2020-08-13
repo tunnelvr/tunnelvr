@@ -49,13 +49,13 @@ func removetubenodepoint(xcname, xcnIndex):
 			xcdrawinglink.resize(len(xcdrawinglink) - 2)
 	print("rrremoveotnodepoint-post ", xcname, " ", xcnIndex, xcdrawinglink)
 
-func shiftxcdrawingposition(xcdrawings, sketchsystem):
+func shiftxcdrawingposition(sketchsystem):
 	if len(xcdrawinglink) == 0:
 		return
 	print("...shiftxcdrawingposition")
 	var xcdrawingFloor = sketchsystem.get_node("XCdrawings").get_node(xcname0)
 	var xcdrawingXC = sketchsystem.get_node("XCdrawings").get_node(xcname1)
-	var bscalexcnodepointspointsx_called = false
+	assert (xcdrawingFloor.drawingtype == DRAWING_TYPE.DT_FLOOR and xcdrawingXC.drawingtype == DRAWING_TYPE.DT_XCDRAWING)
 	var bsingledrag = len(xcdrawinglink) == 2
 	var opn0 = xcdrawingFloor.get_node("XCnodes").get_node(xcdrawinglink[-2 if bsingledrag else -4])
 	var xcn0 = xcdrawingXC.get_node("XCnodes").get_node(xcdrawinglink[-1 if bsingledrag else -3])
@@ -72,23 +72,57 @@ func shiftxcdrawingposition(xcdrawings, sketchsystem):
 		var vxlen = vx.length()
 		var vxclen = vxc.length()
 		if vxlen != 0 and vxclen != 0:
-			xcdrawingXC.scalexcnodepointspointsx(vxlen/vxclen)
-			bscalexcnodepointspointsx_called = true
+			xcdrawingXC.scalexcnodepointspointsxy(vxlen/vxclen, 1)
 		xcdrawingXC.setxcpositionangle(Vector2(-vx.x, -vx.z).angle())
 		var xco = opn0.global_transform.origin - xcn0.global_transform.origin + xcdrawingXC.global_transform.origin
 		xcdrawingXC.setxcpositionorigin(xco)
-		
-	if bscalexcnodepointspointsx_called:
 		xcdrawingXC.updatexcpaths()
+		
 	for xctube in xcdrawingXC.xctubesconn:
 		if sketchsystem.get_node("XCdrawings").get_node(xctube.xcname0).drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 			xctube.updatetubelinkpaths(sketchsystem)
+
+
+func shiftfloorfromdrawnstations(sketchsystem):
+	if len(xcdrawinglink) == 0:
+		return
+	var xcdrawingCentreline = sketchsystem.get_node("XCdrawings").get_node(xcname0)
+	var xcdrawingFloor = sketchsystem.get_node("XCdrawings").get_node(xcname1)
+	assert (xcdrawingCentreline.drawingtype == DRAWING_TYPE.DT_CENTRELINE and xcdrawingFloor.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE)
+	print("...shiftdrawingfloorposition")
+	var bsingledrag = len(xcdrawinglink) == 2
+	var opn0 = xcdrawingCentreline.get_node("XCnodes").get_node(xcdrawinglink[-2 if bsingledrag else -4])
+	var xcn0 = xcdrawingFloor.get_node("XCnodes").get_node(xcdrawinglink[-1 if bsingledrag else -3])
+	if bsingledrag:
+		var xcn0rel = xcn0.global_transform.origin - xcdrawingFloor.global_transform.origin
+		var pt0 = opn0.global_transform.origin - Vector3(xcn0rel.x, 0, xcn0rel.z)
+		xcdrawingFloor.setxcpositionorigin(pt0)   # global_transform.origin = Vector3(pt0.x, 0, pt0.z)
+
+	else:
+		var opn1 = xcdrawingCentreline.get_node("XCnodes").get_node(xcdrawinglink[-2])
+		var xcn1 = xcdrawingFloor.get_node("XCnodes").get_node(xcdrawinglink[-1])
+		var vx = opn1.global_transform.origin - opn0.global_transform.origin
+		var vxc = xcn1.global_transform.origin - xcn0.global_transform.origin
+		var vxang = Vector2(-vx.x, -vx.z).angle()
+		var vxcang = Vector2(-vxc.x, -vxc.z).angle()
+
+		var vxlen = vx.length()
+		var vxclen = vxc.length()
+		if vxlen != 0 and vxclen != 0:
+			var sca = vxlen/vxclen
+			xcdrawingFloor.get_node("XCdrawingplane").scale *= Vector3(sca, sca, 1)
+			xcdrawingFloor.scalexcnodepointspointsxy(sca, sca)
+		xcdrawingFloor.rotation.y += vxcang - vxang
+		var xco = opn0.global_transform.origin - xcn0.global_transform.origin + xcdrawingFloor.global_transform.origin
+		xcdrawingFloor.setxcpositionorigin(xco)
 		
 		
 func updatetubelinkpaths(sketchsystem):
 	if positioningtube:
-		shiftxcdrawingposition(sketchsystem.get_node("XCdrawings"), sketchsystem)
-	
+		if sketchsystem.get_node("XCdrawings").get_node(xcname1).drawingtype == DRAWING_TYPE.DT_XCDRAWING:
+			shiftxcdrawingposition(sketchsystem)
+		elif sketchsystem.get_node("XCdrawings").get_node(xcname0).drawingtype == DRAWING_TYPE.DT_CENTRELINE:
+			shiftfloorfromdrawnstations(sketchsystem)	
 	var surfaceTool = SurfaceTool.new()
 	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(xcname0)
