@@ -40,7 +40,9 @@ func xcapplyonepath(xcn0, xcn1):
 			break
 
 	if xctube == null and xctubeRev == null:
-		if xcdrawing1.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE and xcdrawing0.drawingtype != DRAWING_TYPE.DT_CENTRELINE:
+		if xcdrawing0.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE and xcdrawing1.drawingtype == DRAWING_TYPE.DT_CENTRELINE:
+			xctubeRev = newXCtube(xcdrawing1, xcdrawing0)
+		elif xcdrawing0.drawingtype == DRAWING_TYPE.DT_XCDRAWING and xcdrawing1.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
 			xctubeRev = newXCtube(xcdrawing1, xcdrawing0)
 		else:
 			xctube = newXCtube(xcdrawing0, xcdrawing1)
