@@ -55,18 +55,16 @@ func setasfloortype(floortexture, setdefaultscaleorient):
 		rotation_degrees = Vector3(-90, 0, 0)
 		$XCdrawingplane.scale = Vector3(50, 50*m.albedo_texture.get_height()/m.albedo_texture.get_width(), 1)
 	
-func setaspapertype(papertexture):
+func setaspapertype(papertexture, paperwidth=0):
 	drawingtype = DRAWING_TYPE.DT_PAPERTEXTURE
 	$XCdrawingplane.collision_layer |= CollisionLayer.CL_Papersheet
 	$XCdrawingplane.visible = true
 	$XCdrawingplane/CollisionShape.disabled = false
 	var m = preload("res://surveyscans/scanimagefloor.material").duplicate()
-	m.albedo_texture = load(papertexture) 
+	m.albedo_texture = papertexture 
 	$XCdrawingplane/CollisionShape/MeshInstance.set_surface_material(0, m)
-	#$XCdrawingplane/CollisionShape/MeshInstance.material_override = m
-	rotation_degrees = Vector3(-60, 180, 0)
-	translation.y += 1.5
-	$XCdrawingplane.scale = Vector3(0.5, 0.5*m.albedo_texture.get_height()/m.albedo_texture.get_width(), 1)
+	if paperwidth != 0:
+		$XCdrawingplane.scale = Vector3(paperwidth/2, paperwidth/2*m.albedo_texture.get_height()/m.albedo_texture.get_width(), 1)
 
 func exportxcdata():
 	var nodepointsData = [ ]

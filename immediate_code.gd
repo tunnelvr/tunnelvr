@@ -21,7 +21,9 @@ func _on_request_completed(result, response_code, headers, body):
 	
 	
 func _run():
-	get_tree().add_child(h)
-	print(h)
+	#var i = load("user://northernimages/BoltonExtensionsResurvey-DrawnUpSketch-1.jpg")
+	var i = load("user://savegame.save")
+	print(i)
 	var x = IP.get_local_addresses()
-	h.request(url)
+	var y = "sdfsdf.jpg"
+	y.replace(".jpg", "")
