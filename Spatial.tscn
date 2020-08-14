@@ -1,4 +1,4 @@
-[gd_scene load_steps=38 format=2]
+[gd_scene load_steps=39 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://default_env.tres" type="Environment" id=2]
@@ -16,6 +16,7 @@
 [ext_resource path="res://gui_panel_3d.tscn" type="PackedScene" id=14]
 [ext_resource path="res://gui_panel_3d.gd" type="Script" id=15]
 [ext_resource path="res://guimaterials/laserspike.material" type="Material" id=16]
+[ext_resource path="res://ImageSystem.gd" type="Script" id=17]
 [ext_resource path="res://ARVROrigin.gd" type="Script" id=18]
 [ext_resource path="res://guimaterials/laserselectline.material" type="Material" id=19]
 [ext_resource path="res://guimaterials/laserspot.material" type="Material" id=22]
@@ -139,7 +140,7 @@ script = ExtResource( 1 )
 transform = Transform( -1, 0, -3.25841e-07, 0, 1, 0, 3.25841e-07, 0, -1, 0, 0, 0 )
 
 [node name="PlayerMe" type="ARVROrigin" parent="Players"]
-transform = Transform( -1, 0, 3.25841e-07, 0, 1, 0, -3.25841e-07, 0, -1, -2.08916e-06, 1.24823, 6.41158 )
+transform = Transform( -1, 0, 3.25841e-07, 0, 1, 0, -3.25841e-07, 0, -1, 0, 2, 6.412 )
 script = ExtResource( 18 )
 
 [node name="HeadCam" type="ARVRCamera" parent="Players/PlayerMe"]
@@ -178,7 +179,8 @@ transform = Transform( -1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0 )
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0261416, -0.00699997, -0.069097 )
 enabled = true
 cast_to = Vector3( 0, 0, -0.1 )
-collision_mask = 1024
+collision_mask = 3072
+collide_with_areas = true
 
 [node name="AudioStreamPlayer3D" type="AudioStreamPlayer3D" parent="Players/PlayerMe/HandLeft"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.024738, 0, -0.130972 )
@@ -238,16 +240,15 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.5 )
 mesh = SubResource( 8 )
 material/0 = null
 
-[node name="HeelHotspot" type="StaticBody" parent="Players/PlayerMe/HandRight"]
-collision_layer = 1024
-collision_mask = 0
+[node name="HeelHotspot" type="Area" parent="Players/PlayerMe/HandRight"]
+collision_layer = 3072
+collision_mask = 3072
 
 [node name="CollisionShape" type="CollisionShape" parent="Players/PlayerMe/HandRight/HeelHotspot"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0577492, 0, 0.0749998 )
 shape = SubResource( 9 )
 
 [node name="KinematicBody" type="KinematicBody" parent="Players/PlayerMe"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.24823, 6.41158 )
 collision_mask = 38
 
 [node name="CollisionShape" type="CollisionShape" parent="Players/PlayerMe/KinematicBody"]
@@ -282,6 +283,7 @@ transform = Transform( 1, 0, 0, 0, -1.62921e-07, 1, 0, -1, -1.62921e-07, 0, 0.5,
 [node name="XCtubes" type="Spatial" parent="SketchSystem"]
 
 [node name="BillboardLabel" parent="SketchSystem" instance=ExtResource( 11 )]
+visible = false
 
 [node name="SoundPos1" type="AudioStreamPlayer3D" parent="SketchSystem"]
 stream = ExtResource( 9 )
@@ -320,3 +322,10 @@ transform = Transform( -1, 2.66913e-07, -1.86895e-07, 0, 0.573576, 0.819152, 3.2
 light_energy = 0.6
 shadow_enabled = true
 shadow_color = Color( 0.388235, 0.0705882, 0.0705882, 1 )
+
+[node name="ImageSystem" type="Node" parent="."]
+script = ExtResource( 17 )
+
+[node name="HTTPRequest" type="HTTPRequest" parent="ImageSystem"]
+[connection signal="body_entered" from="Players/PlayerMe/HandRight/HeelHotspot" to="Players/PlayerMe/pointersystem" method="_on_HeelHotspot_body_entered"]
+[connection signal="body_exited" from="Players/PlayerMe/HandRight/HeelHotspot" to="Players/PlayerMe/pointersystem" method="_on_HeelHotspot_body_exited"]

@@ -15,12 +15,18 @@ _global_script_classes=[ {
 "path": "res://utilities/BUTTONS.gd"
 }, {
 "base": "Reference",
+"class": "CollisionLayer",
+"language": "GDScript",
+"path": "res://utilities/CollisionLayer.gd"
+}, {
+"base": "Reference",
 "class": "DRAWING_TYPE",
 "language": "GDScript",
 "path": "res://utilities/DRAWING_TYPE.gd"
 } ]
 _global_script_class_icons={
 "BUTTONS": "",
+"CollisionLayer": "",
 "DRAWING_TYPE": ""
 }
 
@@ -101,6 +107,7 @@ newboulder={
 3d_physics/layer_5="PointerFloor"
 3d_physics/layer_6="CaveWall"
 3d_physics/layer_11="PlayerHotspot"
+3d_physics/layer_12="Papersheet"
 
 [rendering]
 

@@ -43,6 +43,7 @@ var selectedtargettype = "none"
 var selectedtargetwall = null
 var gripbuttonpressused = false
 var activetargetwall = null
+var activetargetwallgrabbedtransform = null
 
 var xcdrawingactivematerial = preload("res://guimaterials/XCdrawing_active.material")
 var xcdrawingmaterial = preload("res://guimaterials/XCdrawing.material")
@@ -84,24 +85,31 @@ func setselectedtarget(newselectedtarget):
 	setpointertargetmaterial()
 
 func setactivetargetwall(newactivetargetwall):
-	if activetargetwall != null:
+	if activetargetwall != null and activetargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		activetargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").set_surface_material(0, preload("res://guimaterials/XCdrawing.material"))
 		activetargetwall.get_node("PathLines").set_surface_material(0, preload("res://guimaterials/XCdrawingPathlines.material"))
 		for xcnode in activetargetwall.get_node("XCnodes").get_children():
 			xcnode.get_node("CollisionShape/MeshInstance").set_surface_material(0, preload("res://guimaterials/XCnode_selected.material") if xcnode == selectedtarget else preload("res://guimaterials/XCnode.material"))
-		if activetargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
-			for xctube in activetargetwall.xctubesconn:
-				if not xctube.positioningtube:
-					xctube.updatetubeshell(sketchsystem.get_node("XCdrawings"), sketchsystem.tubeshellsvisible)
+		for xctube in activetargetwall.xctubesconn:
+			if not xctube.positioningtube:
+				xctube.updatetubeshell(sketchsystem.get_node("XCdrawings"), sketchsystem.tubeshellsvisible)
+	if activetargetwall != null and activetargetwall.drawingtype == DRAWING_TYPE.DT_PAPERTEXTURE:
+		activetargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").get_surface_material(0).albedo_color = Color("#FFFFFF")
 	
 	activetargetwall = newactivetargetwall
-	if activetargetwall != null:
+	
+	if activetargetwall != null and activetargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		activetargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").set_surface_material(0, preload("res://guimaterials/XCdrawing_active.material"))
 		activetargetwall.get_node("PathLines").set_surface_material(0, preload("res://guimaterials/XCdrawingPathlines_nodepthtest.material"))
 		for xcnode in activetargetwall.get_node("XCnodes").get_children():
 			if xcnode != selectedtarget:
 				xcnode.get_node("CollisionShape/MeshInstance").set_surface_material(0, preload("res://guimaterials/XCnode_nodepthtest.material"))
-	LaserRayCast.collision_mask = 8 + 16 + (32 if activetargetwall == null else 0)  # pointer, floor, cavewall(tube)=bit5
+		LaserRayCast.collision_mask = 8 + 16 
+	else:
+		LaserRayCast.collision_mask = 8 + 16 + 32
+	if activetargetwall != null and activetargetwall.drawingtype == DRAWING_TYPE.DT_PAPERTEXTURE:
+		activetargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").get_surface_material(0).albedo_color = Color("#FFEE99")
+
 
 
 func settextpanel(ltext, pos):
@@ -133,19 +141,21 @@ func targettype(target):
 		return "none"
 	var targetname = target.get_name()
 	if targetname == "GUIPanel3D":
-		return targetname
-	if targetname == "XCtubeshell":    # shell inside an XCtube
+		return "GUIPanel3D"
+	if targetname == "XCtubeshell":
 		return "XCtube"
 	var targetparent = target.get_parent()
-	var targetparentname = targetparent.get_name()
-	if targetname == "XCdrawingplane": # shell inside an XCdrawing
+	if targetname == "XCdrawingplane":
+		assert (targetparent.drawingtype != DRAWING_TYPE.DT_CENTRELINE)
+		if targetparent.drawingtype == DRAWING_TYPE.DT_PAPERTEXTURE:
+			return "Papersheet"
 		return "XCdrawing"
-	if targetparentname == "XCnodes":  # containers inside of a drawing
+	if targetparent.get_name() == "XCnodes":
 		return "XCnode"
 	return "unknown"
 		
 func targetwall(target, targettype):
-	if targettype == "XCdrawing":
+	if targettype == "XCdrawing" or targettype == "Papersheet":
 		return target.get_parent()
 	if targettype == "XCnode":
 		return target.get_parent().get_parent()
@@ -167,31 +177,28 @@ func onpointing(newpointertarget, newpointertargetpoint):
 		pointertargetwall = targetwall(pointertarget, pointertargettype)
 		setpointertargetmaterial()
 		
-		if is_instance_valid(pointertarget):
-			print("ppp  ", selectedtargettype, " ", pointertargettype)
-			if pointertargettype == "XCnode":
-				LaserSpot.visible = false
-				LaserShadow.visible = true
-			elif pointertarget == guipanel3d:
-				LaserSpot.visible = false
-				LaserShadow.visible = false
-			else:
-				LaserSpot.visible = true
-				LaserShadow.visible = (pointertargettype == "XCdrawing")
-				
-			# work out the logic for the LaserSelectLine here
-			if handright.is_button_pressed(BUTTONS.VR_GRIP):
-				pass # do this LaserSelectLine.visible = ((pointertargettype == "floordrawing") and ((selectedtargettype == "OnePathNode")))
-			elif pointertargettype == "XCdrawing":
-				LaserSelectLine.visible = ((selectedtargettype == "XCnode"))
-			elif pointertargettype == "XCnode":
-				LaserSelectLine.visible = ((selectedtargettype == "XCnode"))
-			else:
-				LaserSelectLine.visible = false
-			
+		print("ppp  ", selectedtargettype, " ", pointertargettype)
+		if pointertargettype == "XCnode":
+			LaserSpot.visible = false
+			LaserShadow.visible = true
+		elif pointertargettype == "GUIPanel3D" or pointertargettype == "Papersheet":
+			LaserSpot.visible = false
+			LaserShadow.visible = false
+		elif pointertargettype == "XCdrawing":
+			LaserSpot.visible = true
+			LaserShadow.visible = (pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING)
 		else:
 			LaserSpot.visible = false
 			LaserShadow.visible = false
+			
+		# work out the logic for the LaserSelectLine here
+		if handright.is_button_pressed(BUTTONS.VR_GRIP):
+			pass # do this LaserSelectLine.visible = ((pointertargettype == "floordrawing") and ((selectedtargettype == "OnePathNode")))
+		elif pointertargettype == "XCdrawing":
+			LaserSelectLine.visible = (selectedtargettype == "XCnode")
+		elif pointertargettype == "XCnode":
+			LaserSelectLine.visible = (selectedtargettype == "XCnode")
+		else:
 			LaserSelectLine.visible = false
 			
 	pointertargetpoint = newpointertargetpoint
@@ -220,7 +227,7 @@ func _on_button_pressed(p_button):
 	print("pppp ", pointertargetpoint, " ", [selectedtargettype, pointertargettype])
 	if p_button == BUTTONS.VR_BUTTON_BY:
 		buttonpressed_vrby(gripbuttonheld)
-	elif p_button == BUTTONS.VR_BUTTON_GRIP:
+	elif p_button == BUTTONS.VR_GRIP:
 		buttonpressed_vrgrip()
 	elif p_button == BUTTONS.VR_TRIGGER:
 		buttonpressed_vrtrigger(gripbuttonheld)
@@ -350,6 +357,11 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 	# grip condition is ignored (assumed off) her on
 	#elif gripbuttonheld:
 	#	pass
+	elif pointertargettype == "Papersheet":
+		setselectedtarget(null)
+		LaserSpot.global_transform.origin = pointertargetpoint
+		setactivetargetwall(pointertargetwall)
+		activetargetwallgrabbedtransform = LaserSpot.global_transform.affine_inverse() * pointertargetwall.global_transform
 
 	# make new point onto wall, connected if necessary
 	elif pointertargettype == "XCdrawing":
@@ -393,7 +405,7 @@ func buttonpressed_vrpad(gripbuttonheld, left_right, up_down):
 				
 
 func _on_button_release(p_button):
-	if p_button == BUTTONS.VR_BUTTON_GRIP:
+	if p_button == BUTTONS.VR_GRIP:
 		buttonreleased_vrgrip()
 	elif p_button == BUTTONS.VR_TRIGGER:
 		buttonreleased_vrtrigger()
@@ -422,6 +434,10 @@ func buttonreleased_vrgrip():
 		pointertargetwall.togglematerialcycle()
 		
 func buttonreleased_vrtrigger():
+	if activetargetwallgrabbedtransform != null:
+		setactivetargetwall(null)
+		activetargetwallgrabbedtransform = null
+	
 	if (pointertargettype == "XCnode" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE) and (selectedtargettype == "XCnode" and selectedtargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE) and pointertarget != selectedtarget:
 		print("makingxcplane")
 		var xcdrawing = sketchsystem.newXCuniquedrawing()
@@ -443,11 +459,13 @@ func _physics_process(_delta):
 		handright.look_at(handright.global_transform.origin + 1.0*mvec + 0.0*headcam.global_transform.basis.z, Vector3(0,1,0))
 		handright.global_transform.origin.y -= 0.3
 		
-	if LaserRayCast.is_colliding():
+	if activetargetwallgrabbedtransform != null:
+		pointertargetwall.global_transform = LaserSpot.global_transform * activetargetwallgrabbedtransform
+		#pointertargetwall.global_transform.origin = LaserSpot.global_transform.origin
+	elif LaserRayCast.is_colliding():
 		onpointing(LaserRayCast.get_collider(), LaserRayCast.get_collision_point())
 	else:
 		onpointing(null, null)
-	
 	
 
 var rightmousebuttonheld = false
@@ -483,3 +501,10 @@ func _input(event):
 				buttonpressed_vrtrigger(gripbuttonheld)
 			else:
 				buttonreleased_vrtrigger()
+
+
+func _on_HeelHotspot_body_entered(body):
+	print("_on_HeelHotspot_body_entered ", body)
+
+func _on_HeelHotspot_body_exited(body):
+	print("_on_HeelHotspot_body_exited ", body)

@@ -160,6 +160,7 @@ func _physics_process(delta):
 			velocity = flydir.normalized() * -delta * flyspeed * world_scale
 			velocity = kinematic_body.move_and_slide(velocity)
 			var movement = (kinematic_body.global_transform.origin - curr_transform.origin)
+			kinematic_body.global_transform.origin = curr_transform.origin
 			playernode.global_transform.origin += movement
 	
 	else:

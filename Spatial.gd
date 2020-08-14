@@ -4,6 +4,22 @@ extends Spatial
 # Stuff to do:
 
 
+# * pointertargettypes should be an enum for itself
+
+# * make a tractor beam interface for the bits of paper, allowing size changing and trimming
+# * save and load the paper positions
+# * paper movement and positions to go into the multiplayer stuff
+
+# * finish downloading .jpg files and link to GUI thing
+# * then we import all the bits of paper in an array button
+# * then we tractor-beam grab them and move them about
+# * then change size and trim
+# * put these outside the sketch-system, which itself can be shrunk down to make the whole cave small
+
+# * regexp option button to download all the files into the user directory.  
+# * also 
+
+# * VR leads@skydeas1  and @brainonsilicon in Leeds (can do a trip there)
 
 # * keyboard controls to do mouse buttons (and point and click when not captured)
 # * point and click under the mouse cursor when not captured! should be a laser beam out of the camera!
@@ -115,7 +131,9 @@ var networkID = 0
 
 onready var playerMe = $Players/PlayerMe
 
+	
 func _ready():
+	
 	if hostipnumber == "":
 		print("Initializing VR");
 		print("  Available Interfaces are %s: " % str(ARVRServer.get_interfaces()));
@@ -154,11 +172,13 @@ func _ready():
 	get_tree().connect("network_peer_disconnected", self, "_player_disconnected")
 	if hostipnumber == "":
 		networkedmultiplayerenet.create_server(hostportnumber, 5)
+		playerMe.connectiontoserveractive = true
 	else:
 		networkedmultiplayerenet.create_client(hostipnumber, hostportnumber)
 		get_tree().connect("connected_to_server", self, "_connected_to_server")
 		get_tree().connect("connection_failed", self, "_connection_failed")
 		get_tree().connect("server_disconnected", self, "_server_disconnected")
+		playerMe.connectiontoserveractive = false
 		playerMe.rotate_y(180)
 		playerMe.global_transform.origin += 3*Vector3(playerMe.get_node("HeadCam").global_transform.basis.z.x, 0, playerMe.get_node("HeadCam").global_transform.basis.z.z).normalized()
 	get_tree().set_network_peer(networkedmultiplayerenet)
@@ -176,21 +196,21 @@ func _player_connected(id):
 		playerOther.set_network_master(id)
 		playerOther.set_name(playerothername)
 		$Players.add_child(playerOther)
-	playerMe.connectiontoserveractive = true
 	
 func _player_disconnected(id):
 	print("_player_disconnected ", id)
 	var playerothername = "NetworkedPlayer"+String(id)
 	if $Players.has_node(playerothername):
 		$Players.get_node(playerothername).queue_free()
-	playerMe.connectiontoserveractive = false
 		
 func _connected_to_server():
 	print("_connected_to_server")
+	playerMe.connectiontoserveractive = true
 func _connection_failed():
 	print("_connection_failed")
 func _server_disconnected():
 	print("_server_disconnected")
+	playerMe.connectiontoserveractive = false
 	
 remotesync func ding(t, dd):
 	print("ding ding ding ", t)	
