@@ -9,6 +9,7 @@ onready var handleft = playernode.get_node("HandLeft")
 onready var handright = playernode.get_node("HandRight")
 onready var guipanel3d = playernode.get_node("GUIPanel3D")
 
+onready var LaserOrient = handright.get_node("LaserOrient") 
 onready var LaserLength = handright.get_node("LaserOrient/Length") 
 onready var LaserRayCast = handright.get_node("LaserOrient/RayCast") 
 onready var LaserSpot = handright.get_node("LaserOrient/LaserSpot") 
@@ -108,7 +109,7 @@ func setactivetargetwall(newactivetargetwall):
 	else:
 		LaserRayCast.collision_mask = 8 + 16 + 32
 	if activetargetwall != null and activetargetwall.drawingtype == DRAWING_TYPE.DT_PAPERTEXTURE:
-		activetargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").get_surface_material(0).albedo_color = Color("#FFEE99")
+		activetargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").get_surface_material(0).albedo_color = Color("#DDFFCC")
 
 
 
@@ -394,15 +395,26 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 
 				
 func buttonpressed_vrpad(gripbuttonheld, left_right, up_down):
-	if abs(up_down) < 0.5 and abs(left_right) > 0.1 and is_instance_valid(pointertarget):
-		var dy = (1 if left_right > 0 else -1)*(1.0 if abs(left_right) < 0.8 else 0.1)
-
-		if pointertargettype == "XCdrawing":
+	if pointertargettype == "XCdrawing":
+		if abs(up_down) < 0.5 and abs(left_right) > 0.1:
+			var dy = (1 if left_right > 0 else -1)*(1.0 if abs(left_right) < 0.8 else 0.1)
 			pointertargetwall.get_node("XCdrawingplane").scale.x = max(1, pointertargetwall.get_node("XCdrawingplane").scale.x + dy)
 			pointertargetwall.get_node("XCdrawingplane").scale.y = max(1, pointertargetwall.get_node("XCdrawingplane").scale.y + dy)
 			xcdrawinghighlightmaterial.uv1_scale = pointertargetwall.get_node("XCdrawingplane").get_scale()
 			xcdrawinghighlightmaterial.uv1_offset = -xcdrawinghighlightmaterial.uv1_scale/2
 				
+	if pointertargettype == "Papersheet":
+		if abs(up_down) > 0.5:
+			print(LaserLength.global_transform.basis.z)
+			var dd = (1 if up_down > 0 else -1)*(0.2 if LaserLength.scale.z < 1.5 else 1.0)
+			if LaserLength.scale.z + dd > 0.1:
+				pointertargetwall.global_transform.origin += -dd*LaserOrient.global_transform.basis.z
+		elif abs(left_right) > 0.1:
+			var fs = (0.5 if abs(left_right) < 0.8 else 0.9)
+			if left_right > 0:
+				fs = 1/fs
+			pointertargetwall.get_node("XCdrawingplane").scale.x *= fs
+			pointertargetwall.get_node("XCdrawingplane").scale.y *= fs
 
 func _on_button_release(p_button):
 	if p_button == BUTTONS.VR_GRIP:
@@ -461,7 +473,6 @@ func _physics_process(_delta):
 		
 	if activetargetwallgrabbedtransform != null:
 		pointertargetwall.global_transform = LaserSpot.global_transform * activetargetwallgrabbedtransform
-		#pointertargetwall.global_transform.origin = LaserSpot.global_transform.origin
 	elif LaserRayCast.is_colliding():
 		onpointing(LaserRayCast.get_collider(), LaserRayCast.get_collision_point())
 	else:
