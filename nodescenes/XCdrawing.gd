@@ -55,16 +55,14 @@ func setasfloortype(floortexture, setdefaultscaleorient):
 		rotation_degrees = Vector3(-90, 0, 0)
 		$XCdrawingplane.scale = Vector3(50, 50*m.albedo_texture.get_height()/m.albedo_texture.get_width(), 1)
 	
-func setaspapertype(papertexture, paperwidth=0):
+func setaspapertype():
 	drawingtype = DRAWING_TYPE.DT_PAPERTEXTURE
 	$XCdrawingplane.collision_layer |= CollisionLayer.CL_Papersheet
 	$XCdrawingplane.visible = true
 	$XCdrawingplane/CollisionShape.disabled = false
 	var m = preload("res://surveyscans/scanimagefloor.material").duplicate()
-	m.albedo_texture = papertexture 
+	m.albedo_texture = ImageTexture.new() 
 	$XCdrawingplane/CollisionShape/MeshInstance.set_surface_material(0, m)
-	if paperwidth != 0:
-		$XCdrawingplane.scale = Vector3(paperwidth/2, paperwidth/2*m.albedo_texture.get_height()/m.albedo_texture.get_width(), 1)
 
 func exportxcdata():
 	var nodepointsData = [ ]
@@ -205,7 +203,9 @@ func movexcnode(xcn, pt, sketchsystem):
 		xctube.updatetubelinkpaths(sketchsystem)
 
 func updatexcpaths():
-	print("iupdatingxxccpaths ", len(onepathpairs))
+	if drawingtype == DRAWING_TYPE.DT_PAPERTEXTURE:
+		return
+	print("iupdatingxxccpaths ", len(onepathpairs), "  ", drawingtype)
 	var prevsurfacematerial = $PathLines.get_surface_material(0)
 	var surfaceTool = SurfaceTool.new()
 	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)

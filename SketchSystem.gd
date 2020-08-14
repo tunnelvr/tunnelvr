@@ -98,7 +98,9 @@ func loadsketchsystem():
 		xcdrawing.get_node("XCdrawingplane/CollisionShape").disabled = true
 		if xcdrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
 			xcdrawing.setasfloortype(xcdrawingData["shapeimage"][2], false)
-		get_node("XCdrawings").add_child(xcdrawing)
+		elif xcdrawing.drawingtype == DRAWING_TYPE.DT_PAPERTEXTURE:
+			xcdrawing.setaspapertype()
+			get_node("/root/Spatial/ImageSystem").fetchpaperdrawing(xcdrawing)
 
 	# should move each into position by its connections
 

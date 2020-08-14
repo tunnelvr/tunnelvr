@@ -58,18 +58,19 @@ func _on_button_release(p_button):
 
 	if p_button == BUTTONS.VR_BUTTON_BY:
 		var recording = audiobusrecordeffect.get_recording()
-		recording.save_to_wav("user://record3.wav")
-		audiobusrecordeffect.set_recording_active(false)
-		#print("Saved WAV file to: %s\n(%s)" % ["user://record3.wav", ProjectSettings.globalize_path("user://record3.wav")])
-		print("end_recording ", audiobusrecordeffect)
-		#handleft.get_node("AudioStreamPlayer3D").stream = recording
-		#handleft.get_node("AudioStreamPlayer3D").play()
-		print("recording length ", recording.get_data().size())
-		print("fastlz ", recording.get_data().compress(File.COMPRESSION_FASTLZ).size())
-		print("COMPRESSION_DEFLATE ", recording.get_data().compress(File.COMPRESSION_DEFLATE).size())
-		print("COMPRESSION_ZSTD ", recording.get_data().compress(File.COMPRESSION_ZSTD).size())
-		print("COMPRESSION_GZIP ", recording.get_data().compress(File.COMPRESSION_GZIP).size())
-		playernode.rpc("playvoicerecording", recording.get_data())
+		if recording != null:
+			recording.save_to_wav("user://record3.wav")
+			audiobusrecordeffect.set_recording_active(false)
+			#print("Saved WAV file to: %s\n(%s)" % ["user://record3.wav", ProjectSettings.globalize_path("user://record3.wav")])
+			print("end_recording ", audiobusrecordeffect)
+			#handleft.get_node("AudioStreamPlayer3D").stream = recording
+			#handleft.get_node("AudioStreamPlayer3D").play()
+			print("recording length ", recording.get_data().size())
+			print("fastlz ", recording.get_data().compress(File.COMPRESSION_FASTLZ).size())
+			print("COMPRESSION_DEFLATE ", recording.get_data().compress(File.COMPRESSION_DEFLATE).size())
+			print("COMPRESSION_ZSTD ", recording.get_data().compress(File.COMPRESSION_ZSTD).size())
+			print("COMPRESSION_GZIP ", recording.get_data().compress(File.COMPRESSION_GZIP).size())
+			playernode.rpc("playvoicerecording", recording.get_data())
 
 	if p_button == BUTTONS.VR_GRIP:
 		handleft.get_node("csghandleft").setpartcolor(4, "#FFFFFF")

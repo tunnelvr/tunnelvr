@@ -1,7 +1,6 @@
 extends Node
 
 onready var sketchsystem = get_node("/root/Spatial/SketchSystem")
-onready var centrelinesystem = sketchsystem.get_node("Centreline")
 
 onready var playernode = get_parent()
 onready var headcam = playernode.get_node('HeadCam')

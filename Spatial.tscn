@@ -293,6 +293,9 @@ unit_db = 9.032
 stream = ExtResource( 13 )
 unit_db = 19.367
 
+[node name="ImageSystem" type="Node" parent="."]
+script = ExtResource( 17 )
+
 [node name="LaserSquare" type="MeshInstance" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 2.42691, 1.24388, 1.94417 )
 material_override = ExtResource( 3 )
@@ -322,10 +325,5 @@ transform = Transform( -1, 2.66913e-07, -1.86895e-07, 0, 0.573576, 0.819152, 3.2
 light_energy = 0.6
 shadow_enabled = true
 shadow_color = Color( 0.388235, 0.0705882, 0.0705882, 1 )
-
-[node name="ImageSystem" type="Node" parent="."]
-script = ExtResource( 17 )
-
-[node name="HTTPRequest" type="HTTPRequest" parent="ImageSystem"]
 [connection signal="body_entered" from="Players/PlayerMe/HandRight/HeelHotspot" to="Players/PlayerMe/pointersystem" method="_on_HeelHotspot_body_entered"]
 [connection signal="body_exited" from="Players/PlayerMe/HandRight/HeelHotspot" to="Players/PlayerMe/pointersystem" method="_on_HeelHotspot_body_exited"]

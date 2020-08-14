@@ -86,13 +86,13 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ButtonShiftFloor" type="Button" parent="Viewport/GUI/Panel"]
+[node name="ButtonFetchImages" type="Button" parent="Viewport/GUI/Panel"]
 margin_left = 14.9266
 margin_top = 147.461
 margin_right = 154.926
 margin_bottom = 175.461
 rect_pivot_offset = Vector2( 111.073, 28.0005 )
-text = "ShiftFloor"
+text = "FetchImages"
 __meta__ = {
 "_edit_use_anchors_": false
 }

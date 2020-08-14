@@ -5,19 +5,23 @@ extends Spatial
 
 
 # * pointertargettypes should be an enum for itself
+# * LaserRayCast.collision_mask should use an enum
 
-# * make a tractor beam interface for the bits of paper, allowing size changing and trimming
-# * save and load the paper positions
-# * paper movement and positions to go into the multiplayer stuff
+# * load papers button on the UI
+
+# * save and load the paper positions (fetching the images)
+# * paper movement and positions to be transmitted into the multiplayer stuff (as an update transmission of the position and scale of an XC)
 
 # * finish downloading .jpg files and link to GUI thing
 # * then we import all the bits of paper in an array button
 # * then we tractor-beam grab them and move them about
-# * then change size and trim
+# * paper highlighting and trim notes
 # * put these outside the sketch-system, which itself can be shrunk down to make the whole cave small
 
+# * moving floor up and down (also transmitted)
+# *  XCpositions and new ones going through rsync?  
+
 # * regexp option button to download all the files into the user directory.  
-# * also 
 
 # * VR leads@skydeas1  and @brainonsilicon in Leeds (can do a trip there)
 
