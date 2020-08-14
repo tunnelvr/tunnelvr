@@ -41,6 +41,9 @@ func setxcpositionangle(drawingwallangle):
 func setxcpositionorigin(pt0):
 	global_transform.origin = Vector3(pt0.x, 0, pt0.z)
 
+remote func setxcdrawingposition(lglobal_transform):
+	global_transform = lglobal_transform
+
 var defaultfloortexture = "res://surveyscans/DukeStResurvey-drawnup-p3.jpg"
 func setasfloortype(floortexture, setdefaultscaleorient):
 	drawingtype = DRAWING_TYPE.DT_FLOORTEXTURE
