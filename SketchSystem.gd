@@ -54,8 +54,7 @@ func updateworkingshell(makevisible):
 
 # Quick saving and loading of shape.  It goes to 
 # C:\Users\ViveOne\AppData\Roaming\Godot\app_userdata\digtunnel
-func savesketchsystem():
-	var fname = "user://savegame.save"
+func sketchsystemtodict():
 	var xcdrawingsData = [ ]
 	for xcdrawing in $XCdrawings.get_children():
 		xcdrawingsData.append(xcdrawing.exportxcdata())
@@ -64,6 +63,11 @@ func savesketchsystem():
 		xctubesData.append([xctube.xcname0, xctube.xcname1, xctube.xcdrawinglink])
 	var save_dict = { "xcdrawings":xcdrawingsData,
 					  "xctubes":xctubesData }
+	return save_dict
+	
+func savesketchsystem():
+	var save_dict = sketchsystemtodict()
+	var fname = "user://savegame.save"
 	var save_game = File.new()
 	save_game.open(fname, File.WRITE)
 	save_game.store_line(to_json(save_dict))
@@ -104,13 +108,8 @@ func loaddefaultsketchsystem():
 	#var xsectgps = centrelinedata.xsectgps
 	print("default lllloaded")
 
-func loadsketchsystem():
+remotesync func sketchsystemfromdict(save_dict):
 	clearsketchsystem()
-	var fname = "user://savegame.save"
-	var save_game = File.new()
-	save_game.open(fname, File.READ)
-	var save_dict = parse_json(save_game.get_line())
-
 	var xcdrawingsData = save_dict["xcdrawings"]
 	var xctubesData = save_dict["xctubes"]
 	
@@ -125,7 +124,6 @@ func loadsketchsystem():
 			xcdrawing.get_node("XCdrawingplane").visible = false
 			xcdrawing.get_node("XCdrawingplane/CollisionShape").disabled = true
 			
-	# then do the tubes
 	for i in range(len(xctubesData)):
 		var xctubeData = xctubesData[i]
 		print(i, xctubeData)
@@ -133,9 +131,16 @@ func loadsketchsystem():
 		xctube.xcdrawinglink = xctubeData[2]
 		xctube.updatetubelinkpaths(self)
 	
-	save_game.close()
-		
 	print("lllloaded")
+
+func loadsketchsystem():
+	var fname = "user://savegame.save"
+	var save_game = File.new()
+	save_game.open(fname, File.READ)
+	var save_dict = parse_json(save_game.get_line())
+	save_game.close()
+	rpc("sketchsystemfromdict", save_dict)
+
 		
 func newXCuniquedrawing(drawingtype, sname=null):
 	if sname == null:

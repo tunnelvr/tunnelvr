@@ -7,8 +7,6 @@ extends Spatial
 
 # * duplicate floor trimming out and place at different Z-levels
 
-# * darken frame overlay on the area to get the borders better
-
 # * Transmit create xcdrawing across to client
 
 # * doppelganger and avatar should have laser cursor

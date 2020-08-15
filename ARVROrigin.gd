@@ -39,7 +39,7 @@ func _ready():
 func _physics_process(_delta):
 	pass
 
-remote func setavatarposition(playertransform, headcamtransform, handlefttransform, handrighttransform):
+remote func setavatarposition(playertransform, headcamtransform, handlefttransform, handrighttransform, laserrotation, laserlength, laserspot):
 	print("ppt nope not master ", playertransform.origin.x, " ", headcamtransform.origin.x)
 	#global_transform = playertransform
 	#$HeadCam.transform = headcamtransform
