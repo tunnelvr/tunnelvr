@@ -15,6 +15,8 @@ func setheadtorchlight(torchon):
 	# translucent walls reflect too much when torchlight is on
 	xcdrawing_material.albedo_color.a = 0.1 if torchon else xcdrawing_material_albedoa
 	xcdrawing_active_material.albedo_color.a = 0.1 if torchon else xcdrawing_active_material_albedoa
+	get_node("/root/Spatial/SketchSystem").get_node("SoundPos1").global_transform.origin = $HeadCam.global_transform.origin + $HeadCam.global_transform.basis.y * 0.2
+	get_node("/root/Spatial/SketchSystem").get_node("SoundPos1").play()
 
 func setdoppelganger(doppelgangeron):
 	if doppelgangeron:

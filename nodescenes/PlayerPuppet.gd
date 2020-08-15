@@ -1,6 +1,6 @@
 extends Spatial
 
-remote func setavatarposition(playertransform, headcamtransform, handlefttransform, handrighttransform):
+remote func setavatarposition(playertransform, headcamtransform, handlefttransform, handrighttransform, laserrotation, laserlength, laserspot):
 	global_transform = playertransform
 	$HeadCam.transform = headcamtransform
 	$HandLeft.visible = (handlefttransform != null)
@@ -9,6 +9,10 @@ remote func setavatarposition(playertransform, headcamtransform, handlefttransfo
 	$HandRight.visible = (handrighttransform != null)
 	if $HandRight.visible:
 		$HandRight.transform = handrighttransform
+		$HandRight/LaserOrient.rotation.x = laserrotation
+		$HandRight/LaserOrient/Length.scale.z = laserlength
+		$HandRight/LaserOrient/LaserSpot.translation.z = -laserlength
+		$HandRight/LaserOrient/LaserSpot.visible = laserspot
 
 remotesync func playvoicerecording(wavrecording):
 	print("playing recording ", wavrecording.size()) 

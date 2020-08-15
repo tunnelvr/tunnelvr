@@ -4,17 +4,12 @@ extends Spatial
 # Stuff to do:
 
 # * papertype should not be environment collision (just pointer collisions)
-# * make floor type also use these images
-
-# * special case not by "floordrawing" but by named default pre-stored image
-
-# * click when selecting nodes too
 
 # * duplicate floor trimming out and place at different Z-levels
+
 # * darken frame overlay on the area to get the borders better
 
 # * Transmit create xcdrawing across to client
-# * put fname background image as a member of XCclass (also would be name of centreline file)
 
 # * doppelganger and avatar should have laser cursor
 

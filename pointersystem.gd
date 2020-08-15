@@ -383,6 +383,8 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 	elif selectedtargettype == "XCnode" and pointertargettype == "XCnode":
 		if not ((selectedtargetwall.drawingtype == DRAWING_TYPE.DT_CENTRELINE and selectedtargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING) or (selectedtargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING and selectedtargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE)):
 			sketchsystem.xcapplyonepath(selectedtarget, pointertarget)
+			sketchsystem.get_node("SoundPos1").global_transform.origin = pointertargetpoint
+			sketchsystem.get_node("SoundPos1").play()
 			setselectedtarget(pointertarget)
 											
 	elif pointertargettype == "XCnode":
@@ -473,6 +475,7 @@ func _physics_process(_delta):
 	if activetargetwallgrabbedtransform != null:
 		pointertargetwall.global_transform = LaserSpot.global_transform * activetargetwallgrabbedtransform
 		pointertargetwall.rpc_unreliable("setxcdrawingposition", pointertargetwall.global_transform)
+		
 	elif LaserRayCast.is_colliding():
 		onpointing(LaserRayCast.get_collider(), LaserRayCast.get_collision_point())
 	else:
