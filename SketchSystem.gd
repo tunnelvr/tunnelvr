@@ -6,8 +6,11 @@ const XCtube = preload("res://nodescenes/XCtube.tscn")
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	$XCdrawings/floordrawing.setasfloortype("res://surveyscans/DukeStResurvey-drawnup-p3.jpg", true)
-	var centrelinedrawing = newXCuniquedrawing("centreline")
+	var floordrawing = newXCuniquedrawing(DRAWING_TYPE.DT_FLOORTEXTURE, "floordrawing")
+	#$XCdrawings/floordrawing.setasfloortype("res://surveyscans/DukeStResurvey-drawnup-p3.jpg", true)
+	get_node("/root/Spatial/ImageSystem").fetchpaperdrawing(floordrawing)
+
+	var centrelinedrawing = newXCuniquedrawing(DRAWING_TYPE.DT_CENTRELINE, "centreline")
 	var centrelinedatafile = File.new()
 	var fname = "res://surveyscans/dukest1resurvey2009.json"
 	centrelinedatafile.open(fname, File.READ)
@@ -92,7 +95,7 @@ func loadsketchsystem():
 	for i in range(len(xcdrawingsData)):
 		var xcdrawingData = xcdrawingsData[i]
 		#print("iiii", xcdrawingData)
-		var xcdrawing = newXCuniquedrawing(xcdrawingData["name"])
+		var xcdrawing = newXCuniquedrawing(xcdrawingData.drawingtype, xcdrawingData["name"])
 		xcdrawing.importxcdata(xcdrawingData)
 		xcdrawing.get_node("XCdrawingplane").visible = false
 		xcdrawing.get_node("XCdrawingplane/CollisionShape").disabled = true
@@ -119,15 +122,39 @@ func loadsketchsystem():
 		
 	print("lllloaded")
 		
-func newXCuniquedrawing(sname=null):
+func newXCuniquedrawing(drawingtype, sname=null):
 	if sname == null:
 		var largestxcdrawingnumber = 0
 		for xcdrawing in get_node("XCdrawings").get_children():
 			largestxcdrawingnumber = max(largestxcdrawingnumber, int(xcdrawing.get_name()))
 		sname = "s%d" % (largestxcdrawingnumber+1)
 	var xcdrawing = XCdrawing.instance()
+	xcdrawing.drawingtype = drawingtype
 	xcdrawing.set_name(sname)
 	get_node("XCdrawings").add_child(xcdrawing)
+
+	if xcdrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
+		xcdrawing.get_node("XCdrawingplane").collision_layer |= CollisionLayer.CL_Environment
+		xcdrawing.get_node("XCdrawingplane").visible = true
+		xcdrawing.get_node("XCdrawingplane/CollisionShape").disabled = false
+		var m = preload("res://surveyscans/scanimagefloor.material").duplicate()
+		m.albedo_texture = ImageTexture.new() 
+		xcdrawing.get_node("XCdrawingplane/CollisionShape/MeshInstance").set_surface_material(0, m)
+		xcdrawing.get_node("XCdrawingplane/CollisionShape/MeshInstance").material_override = m
+		print(xcdrawing.get_node("XCdrawingplane/CollisionShape/MeshInstance").material_override)
+		print(xcdrawing.get_node("XCdrawingplane/CollisionShape/MeshInstance").get_surface_material(0))
+		# the material_override should not be necessary
+		xcdrawing.rotation_degrees = Vector3(-90, 0, 0)
+		xcdrawing.get_node("XCdrawingplane").scale = Vector3(50, 50, 1)
+		
+	elif xcdrawing.drawingtype == DRAWING_TYPE.DT_PAPERTEXTURE:
+		xcdrawing.get_node("XCdrawingplane").collision_layer |= CollisionLayer.CL_Environment
+		xcdrawing.get_node("XCdrawingplane").visible = true
+		xcdrawing.get_node("XCdrawingplane/CollisionShape").disabled = false
+		var m = preload("res://surveyscans/scanimagefloor.material").duplicate()
+		m.albedo_texture = ImageTexture.new() 
+		xcdrawing.get_node("XCdrawingplane/CollisionShape/MeshInstance").set_surface_material(0, m)
+
 	return xcdrawing
 
 func newXCtube(xcdrawing0, xcdrawing1):

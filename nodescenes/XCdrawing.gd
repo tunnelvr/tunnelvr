@@ -128,7 +128,7 @@ func importcentrelinedata(centrelinedata):
 	updatexcpaths()
 
 func duplicatexcdrawing(sketchsystem):
-	var xcdrawing = sketchsystem.newXCuniquedrawing()
+	var xcdrawing = sketchsystem.newXCuniquedrawing(DRAWING_TYPE.DT_XCDRAWING)
 	
 	xcdrawing.global_transform = global_transform
 	for i in nodepoints.keys():

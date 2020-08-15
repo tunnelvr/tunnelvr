@@ -20,9 +20,8 @@ func _on_buttonfetchimages_pressed():
 	$Viewport/GUI/Panel/Label.text = "Papers fetching"
 
 func _on_buttonshowxs_toggled(button_pressed):
-	sketchsystem.get_node("Centreline/CentrelineCrossSections").visible = button_pressed
-	$Viewport/GUI/Panel/Label.text = "XS shown" if button_pressed else "XS hidden"
-
+	$Viewport/GUI/Panel/Label.text = "Not used"
+	
 func _on_buttonheadtorch_toggled(button_pressed):
 	get_parent().setheadtorchlight(button_pressed)
 	$Viewport/GUI/Panel/Label.text = "Headtorch on" if button_pressed else "Headtorch off"
@@ -31,9 +30,9 @@ func _on_buttondoppelganger_toggled(button_pressed):
 	get_parent().setdoppelganger(button_pressed)
 	$Viewport/GUI/Panel/Label.text = "Doppelganger on" if button_pressed else "Doppelganger off"
 
-
 func _on_buttonupdateshell_toggled(button_pressed):
-	$Viewport/GUI/Panel/Label.text = "Not used"
+	sketchsystem.updateworkingshell(button_pressed)
+	$Viewport/GUI/Panel/Label.text = "shell made" if button_pressed else "shell hidden"
 
 func _on_buttonswapcontrollers_pressed():
 	var cidl = get_node("/root/Spatial").playerMe.get_node("HandLeft").controller_id

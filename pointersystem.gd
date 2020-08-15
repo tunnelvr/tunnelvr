@@ -327,7 +327,7 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 			var vang = lerp_angle(va0c.angle(), va1c.angle(), lam)				
 			var vwallmid = lerp(xcdrawing0.global_transform.origin, xcdrawing1.global_transform.origin, lam)
 			
-			var xcdrawing = sketchsystem.newXCuniquedrawing()
+			var xcdrawing = sketchsystem.newXCuniquedrawing(DRAWING_TYPE.DT_XCDRAWING)
 			xcdrawing.setxcpositionangle(vang)
 			xcdrawing.setxcpositionorigin(vwallmid)
 			var xcdrawinglink0 = [ ]
@@ -451,7 +451,7 @@ func buttonreleased_vrtrigger():
 	
 	if (pointertargettype == "XCnode" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE) and (selectedtargettype == "XCnode" and selectedtargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE) and pointertarget != selectedtarget:
 		print("makingxcplane")
-		var xcdrawing = sketchsystem.newXCuniquedrawing()
+		var xcdrawing = sketchsystem.newXCuniquedrawing(DRAWING_TYPE.DT_XCDRAWING)
 		var vx = pointertarget.global_transform.origin - selectedtarget.global_transform.origin
 		xcdrawing.setxcpositionangle(Vector2(vx.x, vx.z).angle())
 		var vwallmid = (pointertarget.global_transform.origin + selectedtarget.global_transform.origin)/2

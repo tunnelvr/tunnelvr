@@ -3,20 +3,26 @@ extends Spatial
 
 # Stuff to do:
 
+# * research and install the thing suggested by Patrick.  Sign up to it
+
+# * material_override issues
+
+# * setasfloortype setaspapertype
+# * make floor type also use these images
+
+# * Transmit create xcdrawing across to client
+# * put fname background image as a member of XCclass (also would be name of centreline file)
+
+# * all XCdrawing repositions should communicate.  
+# * also communicate node positions and updates (just as a batch on redraw) 
+# * formalize the exact order of updates of positions of things so we don't get race conditions
+# * Connecting to server should simply cause an rpc of the json saved file to save and load
+# * transmit rpc_reliable when trigger released
 
 # * pointertargettypes should be an enum for itself
 # * LaserRayCast.collision_mask should use an enum
 
-# * load papers button on the UI
 
-# * save and load the paper positions (fetching the images)
-# * paper movement and positions to be transmitted into the multiplayer stuff (as an update transmission of the position and scale of an XC)
-
-# * finish downloading .jpg files and link to GUI thing
-# * then we import all the bits of paper in an array button
-# * then we tractor-beam grab them and move them about
-# * paper highlighting and trim notes
-# * put these outside the sketch-system, which itself can be shrunk down to make the whole cave small
 
 # * moving floor up and down (also transmitted)
 # *  XCpositions and new ones going through rsync?  

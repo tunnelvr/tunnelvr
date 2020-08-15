@@ -43,7 +43,6 @@ var imglist = ["BoltonExtensionsResurvey-DrawnUpSketch-1.jpg",
 			   "DukeStParallelSidePassage-DrawnUp1.jpg",
 			   "DukeStParallelSidePassage-DrawnUp2.jpg"
 			]
-
 	
 func _ready():
 	connect("loadpaperimage_signal", self, "loadpaperimage")
@@ -52,17 +51,27 @@ signal loadpaperimage_signal(paperdrawing)
 
 var paperwidth = 0.4
 
-
-func loadpaperimage(paperdrawing):
-	var fname = paperdrawing.get_name().replace("paper_", "")+".jpg"
+func loadpaperimage(paperdrawing, timer=null):
+	if timer != null:
+		timer.queue_free()
 	var img = Image.new()
-	img.load(imgdir+fname)
-	var papertexture = paperdrawing.get_node("XCdrawingplane/CollisionShape/MeshInstance").get_surface_material(0).albedo_texture
+	if paperdrawing.get_name() == "floordrawing":
+		var fname = imglist[2]
+		img.load(imgdir+fname)
+		#var x = load("res://surveyscans/DukeStResurvey-drawnup-p3.jpg")
+		#print(x.get_data(), x)
+		#img.copy_from(x.get_data())
+	else:
+		var fname = paperdrawing.get_name().replace("paper_", "")+".jpg"
+		img.load(imgdir+fname)
+	print(img)
+	var papertexture = ImageTexture.new()
 	papertexture.create_from_image(img)
-	if paperdrawing.get_node("XCdrawingplane/CollisionShape").disabled:
-		paperdrawing.get_node("XCdrawingplane").visible = true
-		paperdrawing.get_node("XCdrawingplane/CollisionShape").disabled = false
-		paperdrawing.get_node("XCdrawingplane").scale = Vector3(paperwidth/2, paperwidth/2*papertexture.get_height()/papertexture.get_width(), 1)
+	paperdrawing.get_node("XCdrawingplane/CollisionShape/MeshInstance").get_surface_material(0).albedo_texture = papertexture
+	paperdrawing.get_node("XCdrawingplane").visible = true
+	paperdrawing.get_node("XCdrawingplane/CollisionShape").disabled = false
+	print(papertexture.get_height(), papertexture.get_width())
+	paperdrawing.get_node("XCdrawingplane").scale.y = paperdrawing.get_node("XCdrawingplane").scale.x*papertexture.get_height()/papertexture.get_width()
 	nextrequest()
 
 var fimgtosave = ""
@@ -78,15 +87,22 @@ func nextrequest():
 		Directory.new().make_dir(imgdir)
 	if len(paperdrawinglist) > 0:
 		var paperdrawing = paperdrawinglist.pop_front()
-		var fname = paperdrawing.get_name().replace("paper_", "")+".jpg"
-		if File.new().file_exists(imgdir+fname):
-			emit_signal("loadpaperimage_signal", paperdrawing)
+		if paperdrawing.get_name() == "floordrawing":
+			loadpaperimage(paperdrawing)  # ready not called yet so no signal connection
 		else:
-			var httprequest = HTTPRequest.new()
-			add_child(httprequest)
-			httprequest.connect("request_completed", self, "_http_request_completed", [httprequest, paperdrawing])
-			httprequest.download_file = imgdir+fname
-			httprequest.request(urldir+fname)
+			var fname = paperdrawing.get_name().replace("paper_", "")+".jpg"
+			if File.new().file_exists(imgdir+fname):
+				var timer = Timer.new()
+				timer.connect("timeout", self, "loadpaperimage", [paperdrawing, timer])
+				add_child(timer)
+				timer.set_wait_time(0.1)
+				timer.start()
+			else:
+				var httprequest = HTTPRequest.new()
+				add_child(httprequest)
+				httprequest.connect("request_completed", self, "_http_request_completed", [httprequest, paperdrawing])
+				httprequest.download_file = imgdir+fname
+				httprequest.request(urldir+fname)
 	else:
 		requestcount -= 1
 	
@@ -105,12 +121,12 @@ func fetchimportpapers():
 		
 		var fname = imglist[i]
 		var sname = "paper_"+fname.replace(".jpg", "")
-		var paperdrawing = get_node("/root/Spatial/SketchSystem").newXCuniquedrawing(sname)
-		paperdrawing.setaspapertype()
-		paperdrawing.get_node("XCdrawingplane").visible = false
-		paperdrawing.get_node("XCdrawingplane/CollisionShape").disabled = true  # signal to update the width
+		var paperdrawing = get_node("/root/Spatial/SketchSystem").newXCuniquedrawing(DRAWING_TYPE.DT_PAPERTEXTURE, sname)
 		paperdrawing.global_transform = papertrans
+		paperdrawing.get_node("XCdrawingplane").scale = Vector3(paperwidth/2, paperwidth/2, 1)
 		paperdrawinglist.append(paperdrawing)
+
+	paperdrawinglist.append(get_node("/root/Spatial/SketchSystem/XCdrawings/floordrawing"))
 		
 	requestcount += 1
 	nextrequest()
