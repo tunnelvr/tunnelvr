@@ -210,7 +210,7 @@ func add_uvvertex(surfaceTool, xcnodes, poly, ila, i, floorsize, dfinv):
 	surfaceTool.add_vertex(pt)
 
 func maketubeshell(xcdrawings):
-	var floordrawing = xcdrawings.get_node("floordrawing")
+	var floordrawing = xcdrawings.get_parent().getactivefloordrawing()
 	var floorsize = floordrawing.get_node("XCdrawingplane/CollisionShape/MeshInstance").mesh.size
 	var dfinv = floordrawing.get_node("XCdrawingplane/CollisionShape/MeshInstance").global_transform.affine_inverse()
 	

@@ -11,7 +11,6 @@ func _ready():
 const linewidth = 0.05
 var tubeshellsvisible = false
 
-
 func xcapplyonepath(xcn0, xcn1):
 	var xcdrawing0 = xcn0.get_parent().get_parent()
 	var xcdrawing1 = xcn1.get_parent().get_parent()
@@ -47,7 +46,6 @@ func xcapplyonepath(xcn0, xcn1):
 	xctube.updatetubelinkpaths(self)
 
 func updateworkingshell(makevisible):
-	var floordrawing = get_node("XCdrawings/floordrawing")
 	tubeshellsvisible = makevisible
 	for xctube in $XCtubes.get_children():
 		if not xctube.positioningtube:
@@ -86,10 +84,14 @@ func clearsketchsystem():
 		xctube.free()
 
 
+func getactivefloordrawing():
+	var floordrawing = $XCdrawings.get_child(0)  # only one here for now
+	assert (floordrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE)
+	return floordrawing
 
 func loaddefaultsketchsystem():
-	clearsketchsystem()   
-	var floordrawing = newXCuniquedrawing(DRAWING_TYPE.DT_FLOORTEXTURE, "floordrawing")
+	#clearsketchsystem()   # relies on Spatial.playerMe, which has not been initialized
+	var floordrawing = newXCuniquedrawing(DRAWING_TYPE.DT_FLOORTEXTURE, "paper_DukeStResurvey-drawnup-p3")
 	#$XCdrawings/floordrawing.setasfloortype("res://surveyscans/DukeStResurvey-drawnup-p3.jpg", true)
 	get_node("/root/Spatial/ImageSystem").fetchpaperdrawing(floordrawing)
 

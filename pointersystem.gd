@@ -193,7 +193,7 @@ func onpointing(newpointertarget, newpointertargetpoint):
 			
 		# work out the logic for the LaserSelectLine here
 		if handright.is_button_pressed(BUTTONS.VR_GRIP):
-			pass # do this LaserSelectLine.visible = ((pointertargettype == "floordrawing") and ((selectedtargettype == "OnePathNode")))
+			pass
 		elif pointertargettype == "XCdrawing":
 			LaserSelectLine.visible = (selectedtargettype == "XCnode")
 		elif pointertargettype == "XCnode":
@@ -220,7 +220,7 @@ func onpointing(newpointertarget, newpointertargetpoint):
 			LaserSelectLine.visible = false
 		
 	if LaserShadow.visible and pointertargetpoint != null:
-		LaserShadow.global_transform = Transform(Basis(), Vector3(pointertargetpoint.x, sketchsystem.get_node("XCdrawings/floordrawing").global_transform.origin.y, pointertargetpoint.z))
+		LaserShadow.global_transform = Transform(Basis(), Vector3(pointertargetpoint.x, sketchsystem.getactivefloordrawing().global_transform.origin.y, pointertargetpoint.z))
 
 func _on_button_pressed(p_button):
 	var gripbuttonheld = handright.is_button_pressed(BUTTONS.VR_GRIP)

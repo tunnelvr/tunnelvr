@@ -55,9 +55,8 @@ func loadpaperimage(paperdrawing, timer=null):
 	if timer != null:
 		timer.queue_free()
 	var img = Image.new()
-	if paperdrawing.get_name() == "floordrawing":
-		#var fname = imglist[2]
-		#img.load(imgdir+fname)
+
+	if paperdrawing.get_name() == "floordrawing" or paperdrawing.get_name() == "paper_DukeStResurvey-drawnup-p3":
 		var x = load("res://surveyscans/DukeStResurvey-drawnup-p3.jpg")
 		print(x.get_data(), x)
 		img.copy_from(x.get_data())
@@ -67,13 +66,18 @@ func loadpaperimage(paperdrawing, timer=null):
 	var papertexture = ImageTexture.new()
 	papertexture.create_from_image(img)
 	paperdrawing.get_node("XCdrawingplane/CollisionShape/MeshInstance").get_surface_material(0).albedo_texture = papertexture
-	paperdrawing.get_node("XCdrawingplane").scale.y = paperdrawing.get_node("XCdrawingplane").scale.x*papertexture.get_height()/papertexture.get_width()
+	if papertexture.get_width() != 0:
+		paperdrawing.get_node("XCdrawingplane").scale.y = paperdrawing.get_node("XCdrawingplane").scale.x*papertexture.get_height()/papertexture.get_width()
+	else:
+		print(paperdrawing.get_name(), "   has zero width ")
 	nextrequest()
 
 var fimgtosave = ""
 func _http_request_completed(result, response_code, headers, body, httprequest, paperdrawing):
 	httprequest.queue_free()
 	requestcount -= 1
+	if response_code != 200:
+		print("http response code bad ", response_code, " for ", paperdrawing.get_name())
 	emit_signal("loadpaperimage_signal", paperdrawing)
 
 var paperdrawinglist = [ ]
@@ -83,7 +87,7 @@ func nextrequest():
 		Directory.new().make_dir(imgdir)
 	if len(paperdrawinglist) > 0:
 		var paperdrawing = paperdrawinglist.pop_front()
-		if paperdrawing.get_name() == "floordrawing":
+		if paperdrawing.get_name() == "floordrawing" or paperdrawing.get_name() == "paper_DukeStResurvey-drawnup-p3":
 			loadpaperimage(paperdrawing)  # ready not called yet so no signal connection
 		else:
 			var fname = paperdrawing.get_name().replace("paper_", "")+".jpg"
@@ -121,8 +125,6 @@ func fetchimportpapers():
 		paperdrawing.global_transform = papertrans
 		paperdrawing.get_node("XCdrawingplane").scale = Vector3(paperwidth/2, paperwidth/2, 1)
 		paperdrawinglist.append(paperdrawing)
-
-	paperdrawinglist.append(get_node("/root/Spatial/SketchSystem/XCdrawings/floordrawing"))
 		
 	requestcount += 1
 	nextrequest()

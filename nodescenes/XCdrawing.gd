@@ -43,8 +43,6 @@ func setxcpositionorigin(pt0):
 remote func setxcdrawingposition(lglobal_transform):
 	global_transform = lglobal_transform
 
-var defaultfloortexture = "res://surveyscans/DukeStResurvey-drawnup-p3.jpg"
-
 func exportxcdata():
 	var nodepointsData = [ ]
 	for i in nodepoints.keys():
@@ -54,11 +52,10 @@ func exportxcdata():
 		nodepointsData.append(nodepoints[i].z)
 	var xvec = Vector2(global_transform.basis.x.x, global_transform.basis.x.z)
 	var m = $XCdrawingplane/CollisionShape/MeshInstance.material_override
-	return { "name":get_name(),
+	return { "name":get_name(),  # defines the image
 			 "drawingtype":drawingtype,
 			 "transformpos":var2str(global_transform),
-			 "shapeimage":[$XCdrawingplane.scale.x, $XCdrawingplane.scale.y, 
-						   m.albedo_texture.resource_path if m != null else ""],
+			 "shapeimage":[$XCdrawingplane.scale.x, $XCdrawingplane.scale.y],
 			 "nodepoints": nodepointsData, 
 			 "onepathpairs":onepathpairs 
 		   }
