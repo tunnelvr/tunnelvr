@@ -6,20 +6,11 @@ const XCtube = preload("res://nodescenes/XCtube.tscn")
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	var floordrawing = newXCuniquedrawing(DRAWING_TYPE.DT_FLOORTEXTURE, "floordrawing")
-	#$XCdrawings/floordrawing.setasfloortype("res://surveyscans/DukeStResurvey-drawnup-p3.jpg", true)
-	get_node("/root/Spatial/ImageSystem").fetchpaperdrawing(floordrawing)
-
-	var centrelinedrawing = newXCuniquedrawing(DRAWING_TYPE.DT_CENTRELINE, "centreline")
-	var centrelinedatafile = File.new()
-	var fname = "res://surveyscans/dukest1resurvey2009.json"
-	centrelinedatafile.open(fname, File.READ)
-	var centrelinedata = parse_json(centrelinedatafile.get_line())
-	centrelinedrawing.importcentrelinedata(centrelinedata)
-	#var xsectgps = centrelinedata.xsectgps
-
+	loaddefaultsketchsystem()
+	
 const linewidth = 0.05
 var tubeshellsvisible = false
+
 
 func xcapplyonepath(xcn0, xcn1):
 	var xcdrawing0 = xcn0.get_parent().get_parent()
@@ -81,7 +72,38 @@ func savesketchsystem():
 	save_game.close()
 	print("sssssaved")
 
+func clearsketchsystem():
+	var pointersystem = get_node("/root/Spatial").playerMe.get_node("pointersystem")
+	pointersystem.setselectedtarget(null)  # clear all the objects before they are freed
+	pointersystem.pointertarget = null
+	pointersystem.pointertargettype = "none"
+	pointersystem.pointertargetwall = null
+	pointersystem.activetargetwall = null
+	pointersystem.activetargetwallgrabbedtransform = null
+	for xcdrawing in $XCdrawings.get_children():
+		xcdrawing.free()
+	for xctube in $XCtubes.get_children():
+		xctube.free()
+
+
+
+func loaddefaultsketchsystem():
+	clearsketchsystem()   
+	var floordrawing = newXCuniquedrawing(DRAWING_TYPE.DT_FLOORTEXTURE, "floordrawing")
+	#$XCdrawings/floordrawing.setasfloortype("res://surveyscans/DukeStResurvey-drawnup-p3.jpg", true)
+	get_node("/root/Spatial/ImageSystem").fetchpaperdrawing(floordrawing)
+
+	var centrelinedrawing = newXCuniquedrawing(DRAWING_TYPE.DT_CENTRELINE, "centreline")
+	var centrelinedatafile = File.new()
+	var fname = "res://surveyscans/dukest1resurvey2009.json"
+	centrelinedatafile.open(fname, File.READ)
+	var centrelinedata = parse_json(centrelinedatafile.get_line())
+	centrelinedrawing.importcentrelinedata(centrelinedata)
+	#var xsectgps = centrelinedata.xsectgps
+	print("default lllloaded")
+
 func loadsketchsystem():
+	clearsketchsystem()
 	var fname = "user://savegame.save"
 	var save_game = File.new()
 	save_game.open(fname, File.READ)
@@ -90,31 +112,22 @@ func loadsketchsystem():
 	var xcdrawingsData = save_dict["xcdrawings"]
 	var xctubesData = save_dict["xctubes"]
 	
-	for xcdrawing in $XCdrawings.get_children():
-		xcdrawing.free()
 	for i in range(len(xcdrawingsData)):
 		var xcdrawingData = xcdrawingsData[i]
 		#print("iiii", xcdrawingData)
 		var xcdrawing = newXCuniquedrawing(xcdrawingData.drawingtype, xcdrawingData["name"])
 		xcdrawing.importxcdata(xcdrawingData)
-		xcdrawing.get_node("XCdrawingplane").visible = false
-		xcdrawing.get_node("XCdrawingplane/CollisionShape").disabled = true
-		if xcdrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
-			xcdrawing.setasfloortype(xcdrawingData["shapeimage"][2], false)
-		elif xcdrawing.drawingtype == DRAWING_TYPE.DT_PAPERTEXTURE:
-			xcdrawing.setaspapertype()
+		if xcdrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE or xcdrawing.drawingtype == DRAWING_TYPE.DT_PAPERTEXTURE:
 			get_node("/root/Spatial/ImageSystem").fetchpaperdrawing(xcdrawing)
-
-	# should move each into position by its connections
-
+		else:
+			xcdrawing.get_node("XCdrawingplane").visible = false
+			xcdrawing.get_node("XCdrawingplane/CollisionShape").disabled = true
+			
 	# then do the tubes
-	for xctube in $XCtubes.get_children():
-		xctube.free()
 	for i in range(len(xctubesData)):
 		var xctubeData = xctubesData[i]
 		print(i, xctubeData)
 		var xctube = newXCtube(get_node("XCdrawings").get_node(xctubeData[0]), get_node("XCdrawings").get_node(xctubeData[1]))
-		
 		xctube.xcdrawinglink = xctubeData[2]
 		xctube.updatetubelinkpaths(self)
 	
@@ -140,10 +153,6 @@ func newXCuniquedrawing(drawingtype, sname=null):
 		var m = preload("res://surveyscans/scanimagefloor.material").duplicate()
 		m.albedo_texture = ImageTexture.new() 
 		xcdrawing.get_node("XCdrawingplane/CollisionShape/MeshInstance").set_surface_material(0, m)
-		xcdrawing.get_node("XCdrawingplane/CollisionShape/MeshInstance").material_override = m
-		print(xcdrawing.get_node("XCdrawingplane/CollisionShape/MeshInstance").material_override)
-		print(xcdrawing.get_node("XCdrawingplane/CollisionShape/MeshInstance").get_surface_material(0))
-		# the material_override should not be necessary
 		xcdrawing.rotation_degrees = Vector3(-90, 0, 0)
 		xcdrawing.get_node("XCdrawingplane").scale = Vector3(50, 50, 1)
 		

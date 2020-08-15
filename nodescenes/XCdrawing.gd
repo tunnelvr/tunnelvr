@@ -2,7 +2,6 @@ extends Spatial
 
 const XCnode = preload("res://nodescenes/XCnode.tscn")
 
-
 # primary data
 var nodepoints = { }    # { nodename:Vector3 }
 var onepathpairs = [ ]  # [ Anodename0, Anodename1, Bnodename0, Bnodename1, ... ]
@@ -45,27 +44,6 @@ remote func setxcdrawingposition(lglobal_transform):
 	global_transform = lglobal_transform
 
 var defaultfloortexture = "res://surveyscans/DukeStResurvey-drawnup-p3.jpg"
-func setasfloortype(floortexture, setdefaultscaleorient):
-	drawingtype = DRAWING_TYPE.DT_FLOORTEXTURE
-	assert (get_name() == "floordrawing")
-	$XCdrawingplane.collision_layer |= CollisionLayer.CL_Environment
-	$XCdrawingplane.visible = true
-	$XCdrawingplane/CollisionShape.disabled = false
-	var m = preload("res://surveyscans/scanimagefloor.material").duplicate()
-	m.albedo_texture = load(floortexture) 
-	$XCdrawingplane/CollisionShape/MeshInstance.material_override = m
-	if setdefaultscaleorient:
-		rotation_degrees = Vector3(-90, 0, 0)
-		$XCdrawingplane.scale = Vector3(50, 50*m.albedo_texture.get_height()/m.albedo_texture.get_width(), 1)
-	
-func setaspapertype():
-	drawingtype = DRAWING_TYPE.DT_PAPERTEXTURE
-	$XCdrawingplane.collision_layer |= CollisionLayer.CL_Papersheet
-	$XCdrawingplane.visible = true
-	$XCdrawingplane/CollisionShape.disabled = false
-	var m = preload("res://surveyscans/scanimagefloor.material").duplicate()
-	m.albedo_texture = ImageTexture.new() 
-	$XCdrawingplane/CollisionShape/MeshInstance.set_surface_material(0, m)
 
 func exportxcdata():
 	var nodepointsData = [ ]

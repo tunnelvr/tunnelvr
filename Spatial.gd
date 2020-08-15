@@ -3,15 +3,20 @@ extends Spatial
 
 # Stuff to do:
 
-# * research and install the thing suggested by Patrick.  Sign up to it
-
-# * material_override issues
-
-# * setasfloortype setaspapertype
+# * papertype should not be environment collision (just pointer collisions)
 # * make floor type also use these images
+
+# * special case not by "floordrawing" but by named default pre-stored image
+
+# * click when selecting nodes too
+
+# * duplicate floor trimming out and place at different Z-levels
+# * darken frame overlay on the area to get the borders better
 
 # * Transmit create xcdrawing across to client
 # * put fname background image as a member of XCclass (also would be name of centreline file)
+
+# * doppelganger and avatar should have laser cursor
 
 # * all XCdrawing repositions should communicate.  
 # * also communicate node positions and updates (just as a batch on redraw) 
@@ -197,6 +202,8 @@ func _ready():
 	rpc("ding", 999, networkID)
 	playerMe.set_network_master(networkID)
 	
+# May need to use Windows Defender Firewall -> Inboard rules -> New Rule and ports
+# Also there's another setting change to allow pings
 func _player_connected(id):
 	print("_player_connected ", id)
 	playerMe.set_name("NetworkedPlayer"+String(networkID))

@@ -56,21 +56,17 @@ func loadpaperimage(paperdrawing, timer=null):
 		timer.queue_free()
 	var img = Image.new()
 	if paperdrawing.get_name() == "floordrawing":
-		var fname = imglist[2]
-		img.load(imgdir+fname)
-		#var x = load("res://surveyscans/DukeStResurvey-drawnup-p3.jpg")
-		#print(x.get_data(), x)
-		#img.copy_from(x.get_data())
+		#var fname = imglist[2]
+		#img.load(imgdir+fname)
+		var x = load("res://surveyscans/DukeStResurvey-drawnup-p3.jpg")
+		print(x.get_data(), x)
+		img.copy_from(x.get_data())
 	else:
 		var fname = paperdrawing.get_name().replace("paper_", "")+".jpg"
 		img.load(imgdir+fname)
-	print(img)
 	var papertexture = ImageTexture.new()
 	papertexture.create_from_image(img)
 	paperdrawing.get_node("XCdrawingplane/CollisionShape/MeshInstance").get_surface_material(0).albedo_texture = papertexture
-	paperdrawing.get_node("XCdrawingplane").visible = true
-	paperdrawing.get_node("XCdrawingplane/CollisionShape").disabled = false
-	print(papertexture.get_height(), papertexture.get_width())
 	paperdrawing.get_node("XCdrawingplane").scale.y = paperdrawing.get_node("XCdrawingplane").scale.x*papertexture.get_height()/papertexture.get_width()
 	nextrequest()
 

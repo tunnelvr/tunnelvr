@@ -36,7 +36,7 @@ var mousecontrollervec = Vector3(0.2, -0.1, -0.5)
 
 var pointertarget = null
 var pointertargettype = "none"
-var pointertargetwall = "none"
+var pointertargetwall = null
 var pointertargetpoint = Vector3(0, 0, 0)
 var selectedtarget = null
 var selectedtargettype = "none"
@@ -52,7 +52,7 @@ var xcdrawinghighlightmaterial = preload("res://guimaterials/XCdrawing_highlight
 func clearpointertargetmaterial():
 	if pointertargettype == "XCnode":
 		pointertarget.get_node("CollisionShape/MeshInstance").set_surface_material(0, selectedhighlightmaterial if pointertarget == selectedtarget else (preload("res://guimaterials/XCnode_nodepthtest.material") if pointertargetwall == activetargetwall else preload("res://guimaterials/XCnode.material")))
-	if pointertargettype == "XCdrawing" or pointertargettype == "XCnode":
+	if (pointertargettype == "XCdrawing" or pointertargettype == "XCnode") and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		if pointertargetwall == activetargetwall:
 			xcdrawingactivematerial.uv1_scale = pointertargetwall.get_node("XCdrawingplane").get_scale()
 			xcdrawingactivematerial.uv1_offset = -xcdrawingactivematerial.uv1_scale/2
@@ -63,7 +63,7 @@ func setpointertargetmaterial():
 	if pointertargettype == "XCnode":
 		pointertarget.get_node("CollisionShape/MeshInstance").set_surface_material(0, selectedpointerhighlightmaterial if pointertarget == selectedtarget else pointinghighlightmaterial)
 		handright.get_node("csghandright").setpartcolor(2, "#FFFF60")
-	if pointertargettype == "XCdrawing" or pointertargettype == "XCnode":
+	if (pointertargettype == "XCdrawing" or pointertargettype == "XCnode") and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		xcdrawinghighlightmaterial.uv1_scale = pointertargetwall.get_node("XCdrawingplane").get_scale()
 		xcdrawinghighlightmaterial.uv1_offset = -xcdrawinghighlightmaterial.uv1_scale/2
 		pointertargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").set_surface_material(0, xcdrawinghighlightmaterial)
@@ -168,7 +168,7 @@ func setopnpos(opn, p):
 		
 func onpointing(newpointertarget, newpointertargetpoint):
 	if newpointertarget != pointertarget:
-		if is_instance_valid(pointertarget) and pointertarget == guipanel3d:
+		if pointertarget == guipanel3d:
 			guipanel3d.guipanelreleasemouse()
 		
 		clearpointertargetmaterial()
