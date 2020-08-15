@@ -3,19 +3,20 @@ extends Spatial
 
 # Stuff to do:
 
+# * Transmit create xcdrawing across to client
+
 # * papertype should not be environment collision (just pointer collisions)
 
 # * duplicate floor trimming out and place at different Z-levels
 
-# * Transmit create xcdrawing across to client
-
-# * doppelganger and avatar should have laser cursor
-
 # * all XCdrawing repositions should communicate.  
-# * also communicate node positions and updates (just as a batch on redraw) 
+
+# * also communicate node positions and updates (just as a batch on redraw)
+
 # * formalize the exact order of updates of positions of things so we don't get race conditions
-# * Connecting to server should simply cause an rpc of the json saved file to save and load
-# * transmit rpc_reliable when trigger released
+
+# * transmit rpc_reliable when trigger released on the positioning of a papersheet
+
 
 # * pointertargettypes should be an enum for itself
 # * LaserRayCast.collision_mask should use an enum
@@ -206,6 +207,8 @@ func _player_connected(id):
 		playerOther.set_network_master(id)
 		playerOther.set_name(playerothername)
 		$Players.add_child(playerOther)
+	if networkID == 1:
+		$SketchSystem.rpc_id(id, "sketchsystemfromdict", $SketchSystem.sketchsystemtodict())
 	
 func _player_disconnected(id):
 	print("_player_disconnected ", id)
@@ -216,6 +219,8 @@ func _player_disconnected(id):
 func _connected_to_server():
 	print("_connected_to_server")
 	playerMe.connectiontoserveractive = true
+	
+	
 func _connection_failed():
 	print("_connection_failed")
 func _server_disconnected():

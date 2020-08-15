@@ -87,7 +87,6 @@ func clearsketchsystem():
 	for xctube in $XCtubes.get_children():
 		xctube.free()
 
-
 func getactivefloordrawing():
 	var floordrawing = $XCdrawings.get_child(0)  # only one here for now
 	assert (floordrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE)
@@ -107,6 +106,14 @@ func loaddefaultsketchsystem():
 	centrelinedrawing.importcentrelinedata(centrelinedata)
 	#var xsectgps = centrelinedata.xsectgps
 	print("default lllloaded")
+
+remote func xcdrawingfromdict(xcdrawingData):
+	var xcdrawing = $XCdrawings.get_node(xcdrawingData["name"])
+	if xcdrawing == null:
+		xcdrawing = newXCuniquedrawing(xcdrawingData.drawingtype, xcdrawingData["name"])
+	xcdrawing.importxcdata(xcdrawingData)
+	if xcdrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE or xcdrawing.drawingtype == DRAWING_TYPE.DT_PAPERTEXTURE:
+		get_node("/root/Spatial/ImageSystem").fetchpaperdrawing(xcdrawing)
 
 remotesync func sketchsystemfromdict(save_dict):
 	clearsketchsystem()
@@ -141,13 +148,14 @@ func loadsketchsystem():
 	save_game.close()
 	rpc("sketchsystemfromdict", save_dict)
 
-		
-func newXCuniquedrawing(drawingtype, sname=null):
-	if sname == null:
-		var largestxcdrawingnumber = 0
-		for xcdrawing in get_node("XCdrawings").get_children():
-			largestxcdrawingnumber = max(largestxcdrawingnumber, int(xcdrawing.get_name()))
-		sname = "s%d" % (largestxcdrawingnumber+1)
+func uniqueXCname():
+	var largestxcdrawingnumber = 0
+	for xcdrawing in get_node("XCdrawings").get_children():
+		largestxcdrawingnumber = max(largestxcdrawingnumber, int(xcdrawing.get_name()))
+	var sname = "s%d" % (largestxcdrawingnumber+1)
+	return sname
+	
+func newXCuniquedrawing(drawingtype, sname):
 	var xcdrawing = XCdrawing.instance()
 	xcdrawing.drawingtype = drawingtype
 	xcdrawing.set_name(sname)
