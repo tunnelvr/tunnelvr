@@ -3,25 +3,43 @@ extends Spatial
 
 # Stuff to do:
 
-# * Transmit create xcdrawing across to client
+
+# * make second player the right way round
+# * still getting the connection to ground wrong way round sometimes
+
+# * now need to do the xctube transfer (not updating position)  
+# sketchsystem.rpc("xcdrawingfromdict", xcdrawing.exportxcrpcdata())
+# * check not repositioning every time we make a node on the floor 
+# * keep a derived list of nodes for which there are connections to tubes
+
+# * don't select when connecting to old
+# * VR player appears reversed, should set player position on load (at doppelganger position)
+
+# * inline copyxcntootnode and copyotnodetoxcn
+
+# * updatetubelinkpaths
+
+# * removetubenodepoint detects nodepoints need updating
+
+# * break up and inline xcapplyonepath
+
+# * is the zerotier network bas or the laptop slow?
+
+# * perform the fancy 3-way tube connection feature
+# * bring loose papers to me.  Superimpose one paper on another to make a frame
 
 # * papertype should not be environment collision (just pointer collisions)
 
 # * duplicate floor trimming out and place at different Z-levels
-
+#			sketchsystem.rpc("xcdrawingfromdict", xcdrawing.exportxcrpcdata())
 # * all XCdrawing repositions should communicate.  
-
-# * also communicate node positions and updates (just as a batch on redraw)
-
+#			sketchsystem.rpc("xcdrawingfromdata", xcdrawing.exportxcrpcdata())
 # * formalize the exact order of updates of positions of things so we don't get race conditions
 
 # * transmit rpc_reliable when trigger released on the positioning of a papersheet
 
-
 # * pointertargettypes should be an enum for itself
 # * LaserRayCast.collision_mask should use an enum
-
-
 
 # * moving floor up and down (also transmitted)
 # *  XCpositions and new ones going through rsync?  
@@ -59,6 +77,7 @@ extends Spatial
 # * cache value of sketchsystem.get_node("XCdrawings").get_node(xctube.xcname1).drawingtype
 # * removexcnode should actually cause a redraw (but not a move)
 # * ^^ should move redraws out of the system
+
 # * systematically do the updatetubelinkpaths and updatetubelinkpaths recursion properly 
 
 # * Alter the OnePathNode system to make centreline nodes (with different meshes)
@@ -188,12 +207,11 @@ func _ready():
 		get_tree().connect("connection_failed", self, "_connection_failed")
 		get_tree().connect("server_disconnected", self, "_server_disconnected")
 		playerMe.connectiontoserveractive = false
-		playerMe.rotate_y(180)
+		#playerMe.rotate_y(180)  
 		playerMe.global_transform.origin += 3*Vector3(playerMe.get_node("HeadCam").global_transform.basis.z.x, 0, playerMe.get_node("HeadCam").global_transform.basis.z.z).normalized()
 	get_tree().set_network_peer(networkedmultiplayerenet)
 	networkID = get_tree().get_network_unique_id()
 	print("nnet-id ", networkID)
-	rpc("ding", 999, networkID)
 	playerMe.set_network_master(networkID)
 	
 # May need to use Windows Defender Firewall -> Inboard rules -> New Rule and ports

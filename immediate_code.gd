@@ -21,9 +21,10 @@ func _on_request_completed(result, response_code, headers, body):
 	
 	
 func _run():
-	#var i = load("user://northernimages/BoltonExtensionsResurvey-DrawnUpSketch-1.jpg")
-	var i = load("user://savegame.save")
-	print(i)
 	var x = IP.get_local_addresses()
-	var y = "sdfsdf.jpg"
-	y.replace(".jpg", "")
+	print(x)
+	var c = { "a":Vector3(9,10,11)}
+	print(to_json(c))
+	print(c.has("a"))
+	var b = Vector3(20,21,22)
+

@@ -11,7 +11,7 @@ func _ready():
 const linewidth = 0.05
 var tubeshellsvisible = false
 
-func xcapplyonepath(xcn0, xcn1):
+func xcapplyonepath(xcn0, xcn1): 
 	var xcdrawing0 = xcn0.get_parent().get_parent()
 	var xcdrawing1 = xcn1.get_parent().get_parent()
 					
@@ -43,6 +43,28 @@ func xcapplyonepath(xcn0, xcn1):
 	else:
 		xctubeRev.xctubeapplyonepath(xcn1, xcn0)
 		xctube = xctubeRev
+		
+	if xctube.positioningtube:
+		xctube.positionfromtubelinkpaths(self)
+		rpc("xcdrawingfromdata", xcdrawing1.exportxcrpcdata())
+	xctube.updatetubelinkpaths(self)
+	rpc("xctubefromdata", xctube.exportxctrpcdata())
+
+remote func xctubefromdata(xctdata):
+	# exportxctrpcdata():  return [ get_name(), xcname0, xcname1, xcdrawinglink ]
+	var xcdrawing0 = get_node("XCdrawings").get_node(xctdata[1])
+	var xctube = null
+	for lxctube in xcdrawing0.xctubesconn:
+		if lxctube.xcname1 == xctdata[2]:
+			assert (lxctube.xcname0 == xctdata[1])
+			xctube = lxctube
+			break
+		assert (lxctube.xcname0 != xctdata[2])
+	if xctube == null:
+		assert ($XCtubes.get_node(xctdata[0]) == null)
+		xctube = newXCtube(xcdrawing0, get_node("XCdrawings").get_node(xctdata[2]))
+	assert (xctube.get_name() == xctdata[0])
+	xctube.xcdrawinglink = xctdata[3]
 	xctube.updatetubelinkpaths(self)
 
 func updateworkingshell(makevisible):
@@ -107,11 +129,11 @@ func loaddefaultsketchsystem():
 	#var xsectgps = centrelinedata.xsectgps
 	print("default lllloaded")
 
-remote func xcdrawingfromdict(xcdrawingData):
-	var xcdrawing = $XCdrawings.get_node(xcdrawingData["name"])
+remote func xcdrawingfromdata(xcdata):
+	var xcdrawing = $XCdrawings.get_node(xcdata[0])
 	if xcdrawing == null:
-		xcdrawing = newXCuniquedrawing(xcdrawingData.drawingtype, xcdrawingData["name"])
-	xcdrawing.importxcdata(xcdrawingData)
+		xcdrawing = newXCuniquedrawing(xcdata[1], xcdata[0])
+	xcdrawing.mergexcrpcdata(xcdata)
 	if xcdrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE or xcdrawing.drawingtype == DRAWING_TYPE.DT_PAPERTEXTURE:
 		get_node("/root/Spatial/ImageSystem").fetchpaperdrawing(xcdrawing)
 

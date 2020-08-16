@@ -36,17 +36,28 @@ func xctubeapplyonepath(xcn0, xcn1):
 	print("xcapplyonepathxcapplyonepath-post", xcdrawinglink)
 	assert ((len(xcdrawinglink)%2) == 0)
 
-func removetubenodepoint(xcname, xcnIndex):
-	# this function very closely bound with the tail copy onto deleted one method
+func removetubenodepoint(xcname, nodename):
 	assert ((xcname == xcname0) or (xcname == xcname1))
 	var m = 0 if xcname == xcname0 else 1
-	print("rrremoveotnodepoint-pre ", xcname, " ", xcnIndex, xcdrawinglink)
+	var nodelinkedto = false
 	for j in range(len(xcdrawinglink) - 2, -1, -2):
-		if xcdrawinglink[j+m] == xcnIndex:
+		if xcdrawinglink[j+m] == nodename:
 			xcdrawinglink[j] = xcdrawinglink[-2]
 			xcdrawinglink[j+1] = xcdrawinglink[-1]
 			xcdrawinglink.resize(len(xcdrawinglink) - 2)
-	print("rrremoveotnodepoint-post ", xcname, " ", xcnIndex, xcdrawinglink)
+			nodelinkedto = true
+	return nodelinkedto
+
+func checknodelinkedto(xcname, nodename):
+	assert ((xcname == xcname0) or (xcname == xcname1))
+	var m = 0 if xcname == xcname0 else 1
+	for j in range(len(xcdrawinglink) - 2, -1, -2):
+		if xcdrawinglink[j+m] == nodename:
+			return true
+	return false
+
+func exportxctrpcdata():
+	return [ get_name(), xcname0, xcname1, xcdrawinglink ]
 
 func shiftxcdrawingposition(sketchsystem):
 	if len(xcdrawinglink) == 0:
@@ -77,10 +88,11 @@ func shiftxcdrawingposition(sketchsystem):
 		xcdrawingXC.setxcpositionorigin(xco)
 		xcdrawingXC.updatexcpaths()
 		
+	sketchsystem.rpc("xcdrawingfromdata", xcdrawingXC.exportxcrpcdata())
 	for xctube in xcdrawingXC.xctubesconn:
-		if sketchsystem.get_node("XCdrawings").get_node(xctube.xcname0).drawingtype == DRAWING_TYPE.DT_XCDRAWING:
+		if sketchsystem.get_node("XCdrawings").get_node(xctube.xcname0).drawingtype == DRAWING_TYPE.DT_XCDRAWING:  # not other floor types pointing in
 			xctube.updatetubelinkpaths(sketchsystem)
-
+			sketchsystem.rpc("xctubefromdata", xctube.exportxctrpcdata())
 
 func shiftfloorfromdrawnstations(sketchsystem):
 	if len(xcdrawinglink) == 0:
@@ -118,13 +130,15 @@ func shiftfloorfromdrawnstations(sketchsystem):
 		var xco = opn0.global_transform.origin - xcn0.global_transform.origin + xcdrawingFloor.global_transform.origin
 		xcdrawingFloor.setxcpositionorigin(xco)
 		
-		
-func updatetubelinkpaths(sketchsystem):
+
+func positionfromtubelinkpaths(sketchsystem):
 	if positioningtube:
 		if sketchsystem.get_node("XCdrawings").get_node(xcname1).drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 			shiftxcdrawingposition(sketchsystem)
 		elif sketchsystem.get_node("XCdrawings").get_node(xcname0).drawingtype == DRAWING_TYPE.DT_CENTRELINE:
 			shiftfloorfromdrawnstations(sketchsystem)	
+		
+func updatetubelinkpaths(sketchsystem):
 	var surfaceTool = SurfaceTool.new()
 	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(xcname0)

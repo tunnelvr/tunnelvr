@@ -302,7 +302,7 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 				drawingwallangle = Vector2(-vline.z, vline.x).angle()
 			xcdrawing.setxcpositionangle(drawingwallangle)
 			xcdrawing.setxcpositionorigin(pointertargetpoint)
-			sketchsystem.rpc("xcdrawingfromdict", xcdrawing.exportxcdata())
+			sketchsystem.rpc("xcdrawingfromdata", xcdrawing.exportxcrpcdata())
 			sketchsystem.xcapplyonepath(xcdrawing.get_node("XCnodes").get_node(xcdrawingtocopynodelink), pointertarget)
 			sketchsystem.xcapplyonepath(xcdrawingtocopy.get_node("XCnodes").get_node(xcdrawingtocopynodelink), xcdrawing.get_node("XCnodes").get_node(xcdrawingtocopynodelink))
 			setactivetargetwall(xcdrawing)
@@ -335,6 +335,7 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 			var xcdrawinglink1 = [ ]
 			pointertargetwall.slicetubetoxcdrawing(xcdrawing, xcdrawinglink0, xcdrawinglink1, lam)
 			xcdrawing.updatexcpaths()
+			sketchsystem.rpc("xcdrawingfromdata", xcdrawing.exportxcrpcdata())
 			setactivetargetwall(xcdrawing)
 			setselectedtarget(null)
 			xcdrawing0.xctubesconn.remove(xcdrawing0.xctubesconn.find(pointertargetwall))
@@ -343,14 +344,14 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 			var xctube0 = sketchsystem.newXCtube(xcdrawing0, xcdrawing)
 			xctube0.xcdrawinglink = xcdrawinglink0
 			xctube0.updatetubelinkpaths(sketchsystem)
+			sketchsystem.rpc("xctubefromdata", xctube0.exportxctrpcdata())
 			xctube0.updatetubeshell(sketchsystem.get_node("XCdrawings"), sketchsystem.tubeshellsvisible)
 			
 			var xctube1 = sketchsystem.newXCtube(xcdrawing1, xcdrawing)
 			xctube1.xcdrawinglink = xcdrawinglink1
 			xctube1.updatetubelinkpaths(sketchsystem)
+			sketchsystem.rpc("xctubefromdata", xctube0.exportxctrpcdata())
 			xctube1.updatetubeshell(sketchsystem.get_node("XCdrawings"), sketchsystem.tubeshellsvisible)
-
-			sketchsystem.rpc("xcdrawingfromdict", xcdrawing.exportxcdata())
 
 			pointertargettype = "none"
 			pointertarget = null
@@ -376,19 +377,23 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 		if selectedtargettype == "XCnode":
 			if selectedtargetwall == pointertargetwall:
 				sketchsystem.xcapplyonepath(selectedtarget, newpointertarget)
+		sketchsystem.rpc("xcdrawingfromdata", pointertargetwall.exportxcrpcdata())
 		setselectedtarget(newpointertarget)
-								
+	
+									
 	# reselection clears selection
 	elif selectedtargettype == "XCnode" and pointertarget == selectedtarget:
 		setselectedtarget(null)
 
 	# connecting lines between xctype nodes
 	elif selectedtargettype == "XCnode" and pointertargettype == "XCnode":
-		if not ((selectedtargetwall.drawingtype == DRAWING_TYPE.DT_CENTRELINE and selectedtargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING) or (selectedtargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING and selectedtargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE)):
+		if not ((selectedtargetwall.drawingtype == DRAWING_TYPE.DT_CENTRELINE and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING) or (selectedtargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING and pointertargetwall.drawingtype == DRAWING_TYPE.DT_CENTRELINE)):
 			sketchsystem.xcapplyonepath(selectedtarget, pointertarget)
+			if selectedtargetwall == pointertargetwall:
+				sketchsystem.rpc("xcdrawingfromdata", selectedtargetwall.exportxcrpcdata())
 			sketchsystem.get_node("SoundPos1").global_transform.origin = pointertargetpoint
 			sketchsystem.get_node("SoundPos1").play()
-			setselectedtarget(pointertarget)
+			setselectedtarget(null)  # setselectedtarget(pointertarget)
 											
 	elif pointertargettype == "XCnode":
 		if pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
@@ -438,7 +443,7 @@ func buttonreleased_vrgrip():
 	elif pointertargettype == "XCdrawing" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		clearpointertargetmaterial()
 		pointertargetwall.setxcdrawingvisibility(false)
-		sketchsystem.rpc("xcdrawingfromdict", pointertargetwall.exportxcdata())
+		sketchsystem.rpc("xcdrawingfromdata", pointertargetwall.exportxcrpcdata())
 		setactivetargetwall(null)
 		pointertarget = null
 		pointertargettype = "none"
@@ -464,7 +469,7 @@ func buttonreleased_vrtrigger():
 		xcdrawing.setxcpositionorigin(vwallmid)
 		setselectedtarget(null)
 		setactivetargetwall(xcdrawing)
-		sketchsystem.rpc("xcdrawingfromdict", xcdrawing.exportxcdata())
+		sketchsystem.rpc("xcdrawingfromdata", xcdrawing.exportxcrpcdata())
 						
 func _physics_process(_delta):
 	if !is_inside_tree():
@@ -480,7 +485,7 @@ func _physics_process(_delta):
 		pointertargetwall.global_transform = LaserSpot.global_transform * activetargetwallgrabbedtransform
 		pointertargetwall.rpc_unreliable("setxcdrawingposition", pointertargetwall.global_transform)
 		
-	elif LaserRayCast.is_colliding():
+	elif LaserRayCast.is_colliding() and not LaserRayCast.get_collider().is_queued_for_deletion():
 		onpointing(LaserRayCast.get_collider(), LaserRayCast.get_collision_point())
 	else:
 		onpointing(null, null)
@@ -496,13 +501,12 @@ func _input(event):
 			mousecontrollervec = rhvec.normalized()*0.8
 			
 	elif event is InputEventMouseButton:
-		var gripbuttonheld = false
 		if event.button_index == BUTTON_RIGHT:
 			rightmousebuttonheld = event.pressed
 		
 		if event.button_index == BUTTON_LEFT:
 			if event.pressed:
-				buttonpressed_vrtrigger(gripbuttonheld)
+				buttonpressed_vrtrigger(rightmousebuttonheld)
 			else:
 				buttonreleased_vrtrigger()
 		if event.button_index == BUTTON_RIGHT:

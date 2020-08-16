@@ -50,8 +50,6 @@ func exportxcdata():
 		nodepointsData.append(nodepoints[i].x)
 		nodepointsData.append(nodepoints[i].y)
 		nodepointsData.append(nodepoints[i].z)
-	var xvec = Vector2(global_transform.basis.x.x, global_transform.basis.x.z)
-	var m = $XCdrawingplane/CollisionShape/MeshInstance.material_override
 	return { "name":get_name(),  # defines the image
 			 "drawingtype":drawingtype,
 			 "transformpos":var2str(global_transform),
@@ -60,6 +58,30 @@ func exportxcdata():
 			 "onepathpairs":onepathpairs 
 		   }
 
+func exportxcrpcdata():
+	return [ get_name(), drawingtype, global_transform, maxnodepointnumber, 
+			 $XCdrawingplane.scale.x, $XCdrawingplane.scale.y,
+			 nodepoints, onepathpairs ]
+
+func mergexcrpcdata(xcdata):
+	assert ((get_name() == xcdata[0]) and (drawingtype == xcdata[1]))
+	global_transform = xcdata[2]
+	maxnodepointnumber = xcdata[3]
+	$XCdrawingplane.scale = Vector3(xcdata[4], xcdata[5], 1.0)
+	nodepoints = xcdata[6]
+	onepathpairs = xcdata[7]
+	for xcn in $XCnodes.get_children():
+		if not nodepoints.has(xcn.get_name()):
+			xcn.queue_free()
+	for k in nodepoints:
+		var xcn = $XCnodes.get_node(k)
+		if xcn == null:
+			xcn = XCnode.instance()
+			xcn.set_name(k)
+			$XCnodes.add_child(xcn)
+		xcn.translation = nodepoints[k]
+	updatexcpaths()
+	
 func importxcdata(xcdrawingData):
 	assert ($XCnodes.get_child_count() == 0 and len(nodepoints) == 0 and len(xctubesconn) == 0)
 	drawingtype = int(xcdrawingData["drawingtype"])
@@ -103,7 +125,7 @@ func importcentrelinedata(centrelinedata):
 	updatexcpaths()
 
 func duplicatexcdrawing(sketchsystem):
-	var xcdrawing = sketchsystem.newXCuniquedrawing(DRAWING_TYPE.DT_XCDRAWING)
+	var xcdrawing = sketchsystem.newXCuniquedrawing(DRAWING_TYPE.DT_XCDRAWING, sketchsystem.uniqueXCname())
 	
 	xcdrawing.global_transform = global_transform
 	for i in nodepoints.keys():
@@ -113,7 +135,6 @@ func duplicatexcdrawing(sketchsystem):
 	xcdrawing.onepathpairs = onepathpairs.duplicate()
 	xcdrawing.updatexcpaths()
 	return xcdrawing
-	
 	
 func copyxcntootnode(xcn):
 	nodepoints[xcn.get_name()] = xcn.translation
@@ -151,12 +172,12 @@ func newxcnode(name=null):
 
 
 func removexcnode(xcn, brejoinlines, sketchsystem):
-	var xcnIndex = xcn.get_name()
-	nodepoints.erase(xcnIndex)
+	var nodename = xcn.get_name()
+	nodepoints.erase(nodename)
 	var rejoinnodes = [ ]
 	for j in range(len(onepathpairs) - 2, -1, -2):
-		if (onepathpairs[j] == xcnIndex) or (onepathpairs[j+1] == xcnIndex):
-			rejoinnodes.append(onepathpairs[j+1]  if onepathpairs[j] == xcnIndex  else onepathpairs[j])
+		if (onepathpairs[j] == nodename) or (onepathpairs[j+1] == nodename):
+			rejoinnodes.append(onepathpairs[j+1]  if onepathpairs[j] == nodename  else onepathpairs[j])
 			onepathpairs[j] = onepathpairs[-2]
 			onepathpairs[j+1] = onepathpairs[-1]
 			onepathpairs.resize(len(onepathpairs) - 2)
@@ -165,20 +186,36 @@ func removexcnode(xcn, brejoinlines, sketchsystem):
 		onepathpairs.append(rejoinnodes[0])
 		onepathpairs.append(rejoinnodes[1])
 	xcn.queue_free()
+	var	xctubesconnupdated = [ ]
 	for xctube in xctubesconn:
-		xctube.removetubenodepoint(get_name(), xcnIndex)
-	updatexcpaths()
-	for xctube in xctubesconn:
-		if not xctube.positioningtube:
-			xctube.updatetubelinkpaths(sketchsystem)
+		if xctube.removetubenodepoint(get_name(), nodename):  # might extend to a batch operation when sequence of points deleted at once (though sequence terminates at one of these junctions anyway)
+			xctubesconnupdated.append(xctube)
+	updatelinksandtubesafterchange(xctubesconnupdated, sketchsystem)
 
 func movexcnode(xcn, pt, sketchsystem):
 	print("m,mmmmxmxmxm ", xcn.global_transform.origin, pt)
 	xcn.global_transform.origin = pt
 	copyxcntootnode(xcn)
-	updatexcpaths()
+	var	xctubesconnupdated = [ ]
 	for xctube in xctubesconn:
+		if xctube.checknodelinkedto(get_name(), xcn.get_name()):
+			xctubesconnupdated.append(xctube)
+	updatelinksandtubesafterchange(xctubesconnupdated, sketchsystem)
+
+func updatelinksandtubesafterchange(xctubesconnupdated, sketchsystem):
+	updatexcpaths()
+	var	xcdrawingnamesmoved = [ get_name() ]
+	for xctube in xctubesconnupdated:
+		if xctube.positioningtube:
+			xctube.positionfromtubelinkpaths(sketchsystem)
+			if not xcdrawingnamesmoved.has(xctube.xcname1):
+				xcdrawingnamesmoved.append(xctube.xcname1)
+		
+	for xcdrawingname in xcdrawingnamesmoved:
+		sketchsystem.rpc("xcdrawingfromdata", sketchsystem.get_node("XCdrawings").get_node(xcdrawingname).exportxcrpcdata())
+	for xctube in xctubesconnupdated:
 		xctube.updatetubelinkpaths(sketchsystem)
+		sketchsystem.rpc("xctubefromdata", xctube.exportxctrpcdata())
 
 func updatexcpaths():
 	if drawingtype == DRAWING_TYPE.DT_PAPERTEXTURE:
