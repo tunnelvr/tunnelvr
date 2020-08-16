@@ -4,22 +4,11 @@ extends Spatial
 # Stuff to do:
 
 
-# * make second player the right way round
-# * still getting the connection to ground wrong way round sometimes
+# * still getting the connection to ground transform wrong way round sometimes
 
-# * now need to do the xctube transfer (not updating position)  
-# sketchsystem.rpc("xcdrawingfromdict", xcdrawing.exportxcrpcdata())
-# * check not repositioning every time we make a node on the floor 
-# * keep a derived list of nodes for which there are connections to tubes
-
-# * don't select when connecting to old
-# * VR player appears reversed, should set player position on load (at doppelganger position)
+# * transfer across visibilities of XCsections, and tubeshell mode
 
 # * inline copyxcntootnode and copyotnodetoxcn
-
-# * updatetubelinkpaths
-
-# * removetubenodepoint detects nodepoints need updating
 
 # * break up and inline xcapplyonepath
 
