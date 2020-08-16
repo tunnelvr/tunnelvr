@@ -3,8 +3,12 @@ extends Spatial
 
 # Stuff to do:
 
+# * pointertargettypes should be an enum for itself
+# * LaserRayCast.collision_mask should use an enum
 
 # * still getting the connection to ground transform wrong way round sometimes
+
+# * need to have a file value on XCnode instead of the name to say the paper image because you could have two with same image
 
 # * transfer across visibilities of XCsections, and tubeshell mode
 
@@ -12,12 +16,12 @@ extends Spatial
 
 # * break up and inline xcapplyonepath
 
-# * is the zerotier network bas or the laptop slow?
-
 # * perform the fancy 3-way tube connection feature
+
 # * bring loose papers to me.  Superimpose one paper on another to make a frame
 
 # * papertype should not be environment collision (just pointer collisions)
+
 
 # * duplicate floor trimming out and place at different Z-levels
 #			sketchsystem.rpc("xcdrawingfromdict", xcdrawing.exportxcrpcdata())
@@ -27,8 +31,6 @@ extends Spatial
 
 # * transmit rpc_reliable when trigger released on the positioning of a papersheet
 
-# * pointertargettypes should be an enum for itself
-# * LaserRayCast.collision_mask should use an enum
 
 # * moving floor up and down (also transmitted)
 # *  XCpositions and new ones going through rsync?  
