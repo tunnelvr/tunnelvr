@@ -3,10 +3,12 @@ extends Spatial
 const XCnode = preload("res://nodescenes/XCnode.tscn")
 
 # primary data
+var xcname = ""         # must match what is in the godot and used for the names in xctube
+var xcresource = ""     # source file
 var nodepoints = { }    # { nodename:Vector3 }
 var onepathpairs = [ ]  # [ Anodename0, Anodename1, Bnodename0, Bnodename1, ... ]
-
 var drawingtype = DRAWING_TYPE.DT_XCDRAWING
+
 
 # derived data
 var xctubesconn = [ ]   # references to xctubes that connect to here (could use their names instead)
@@ -103,26 +105,40 @@ func importxcdata(xcdrawingData):
 	updatexcpaths()
 	setxcdrawingvisibility(xcdrawingData["visible"])
 
+
 func importcentrelinedata(centrelinedata):
 	$XCdrawingplane.visible = false
 	$XCdrawingplane/CollisionShape.disabled = true
 	drawingtype = DRAWING_TYPE.DT_CENTRELINE
 	assert (get_name() == "centreline")
 	assert ($XCnodes.get_child_count() == 0 and len(nodepoints) == 0 and len(onepathpairs) == 0 and len(xctubesconn) == 0)
+
 	var stationpointscoords = centrelinedata.stationpointscoords
 	var stationpointsnames = centrelinedata.stationpointsnames
+	var legsconnections = centrelinedata.legsconnections
+	var legsstyles = centrelinedata.legsstyles
+	
+	# find centre (should use an AABB function if exists)
+	var bb = [ stationpointscoords[0], stationpointscoords[1], stationpointscoords[2], 
+			   stationpointscoords[0], stationpointscoords[1], stationpointscoords[2] ]
+	for i in range(len(stationpointsnames)):
+		for j in range(3):
+			bb[j] = min(bb[j], stationpointscoords[i*3+j])
+			bb[j+3] = max(bb[j+3], stationpointscoords[i*3+j])
+	print("svx bounding box", bb)		
 	$XCdrawingplane.set_scale(Vector3(1,1,1))
 	global_transform = Transform()
 	for i in range(len(stationpointsnames)):
 		var k = stationpointsnames[i].replace(".", ",")
-		nodepoints[k] = Vector3(stationpointscoords[i*3], 8.1+stationpointscoords[i*3+2], -stationpointscoords[i*3+1])
+		#nodepoints[k] = Vector3(stationpointscoords[i*3], 8.1+stationpointscoords[i*3+2], -stationpointscoords[i*3+1])
+		nodepoints[k] = Vector3(stationpointscoords[i*3] - (bb[0]+bb[3])/2, 
+								stationpointscoords[i*3+2] - bb[2] + 1, 
+								-(stationpointscoords[i*3+1] - (bb[1]+bb[4])/2))
 		var xcn = XCnode.instance()
 		$XCnodes.add_child(xcn)
 		xcn.set_name(k)
 		xcn.translation = nodepoints[k]
 		maxnodepointnumber = max(maxnodepointnumber, int(k))
-	var legsconnections = centrelinedata.legsconnections
-	var legsstyles = centrelinedata.legsstyles
 	for i in range(len(legsstyles)):
 		onepathpairs.append(stationpointsnames[legsconnections[i*2]].replace(".", ","))
 		onepathpairs.append(stationpointsnames[legsconnections[i*2+1]].replace(".", ","))

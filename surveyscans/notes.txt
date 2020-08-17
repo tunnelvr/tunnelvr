@@ -1,0 +1,11 @@
+Tunnel poster at:  http://cave-registry.org.uk/svn/NorthernEngland/ThreeCountiesArea/posters/irebyriftdouk3.png
+
+Survex data at: http://cave-registry.org.uk/svn/NorthernEngland/ThreeCountiesArea/survexdata/Ireby/
+
+After installing Survex, run using:
+"C:\Program Files (x86)\Survex\aven.exe" Ireby\Ireby2\Ireby2.svx
+
+Then we can 
+python parse3ddmp.py Ireby\Ireby2\Ireby2.3d -j Ireby\Ireby2.json
+
+Then we need to run that notebook thing to get the json into the right format

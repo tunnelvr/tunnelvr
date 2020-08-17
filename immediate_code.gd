@@ -24,9 +24,11 @@ func gg(x):
 	assert (x)
 	print("ggg")	
 	return 55
+
 func _run():
 	var x = IP.get_local_addresses()
 	print(x)
 	print([gg(0)])
+	print(sign(0.001))	
 	
 

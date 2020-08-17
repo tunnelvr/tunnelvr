@@ -80,12 +80,15 @@ func shiftxcdrawingposition(sketchsystem):
 		var opn1 = xcdrawingFloor.get_node("XCnodes").get_node(xcdrawinglink[-2])
 		var xcn1 = xcdrawingXC.get_node("XCnodes").get_node(xcdrawinglink[-1])
 		var vx = opn1.global_transform.origin - opn0.global_transform.origin
+		var vx2 = Vector2(vx.x, vx.z)
+		xcdrawingXC.setxcpositionangle((-vx2).angle())
 		var vxc = xcn1.global_transform.origin - xcn0.global_transform.origin
-		var vxlen = vx.length()
-		var vxclen = vxc.length()
-		if vxlen != 0 and vxclen != 0:
-			xcdrawingXC.scalexcnodepointspointsxy(vxlen/vxclen, 1)
-		xcdrawingXC.setxcpositionangle(Vector2(-vx.x, -vx.z).angle())
+		var vxc2 = Vector2(vxc.x, vxc.z)
+		var vx2len = vx2.length()
+		var vxc2len = vxc2.length()
+		var vdot = vx2.dot(vxc2) # should be colinear
+		if vdot != 0:
+			xcdrawingXC.scalexcnodepointspointsxy(vx2len/vxc2len*(sign(vdot)), 1)
 		var xco = opn0.global_transform.origin - xcn0.global_transform.origin + xcdrawingXC.global_transform.origin
 		xcdrawingXC.setxcpositionorigin(xco)
 		xcdrawingXC.updatexcpaths()

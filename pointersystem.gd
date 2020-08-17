@@ -112,16 +112,6 @@ func setactivetargetwall(newactivetargetwall):
 		activetargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").get_surface_material(0).albedo_color = Color("#DDFFCC")
 
 
-
-func settextpanel(ltext, pos):
-	var textpanel = sketchsystem.get_node("Centreline/TextPanel")
-	if ltext != null:
-		textpanel.get_node("Viewport/Label").text = ltext
-		textpanel.global_transform.origin = pos + Vector3(0, 0.3, 0)
-		textpanel.visible = true
-	else:
-		textpanel.visible = false
-
 func setbillboardlabel(ltext, pos):
 	var textpanel = sketchsystem.get_node("BillboardLabel")
 	if ltext != null:
