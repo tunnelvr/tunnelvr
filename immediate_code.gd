@@ -19,12 +19,14 @@ func _on_request_completed(result, response_code, headers, body):
 	#var r = JSON.parse(body.get_string_from_utf8())
 	print(body)
 	
-	
+func gg(x):
+	print(x)
+	assert (x)
+	print("ggg")	
+	return 55
 func _run():
 	var x = IP.get_local_addresses()
 	print(x)
-	var c = { "a":Vector3(9,10,11)}
-	print(to_json(c))
-	print(c.has("a"))
-	var b = Vector3(20,21,22)
+	print([gg(0)])
+	
 

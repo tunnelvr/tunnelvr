@@ -67,12 +67,14 @@ remote func xctubefromdata(xctdata):
 	xctube.xcdrawinglink = xctdata[3]
 	xctube.updatetubelinkpaths(self)
 
-func updateworkingshell(makevisible):
+remotesync func updateworkingshell(makevisible):
 	tubeshellsvisible = makevisible
 	for xctube in $XCtubes.get_children():
 		if not xctube.positioningtube:
-			xctube.updatetubeshell(get_node("XCdrawings"), makevisible)
-	
+			xctube.updatetubeshell($XCdrawings, makevisible)
+	for xcdrawing in $XCdrawings.get_children():
+		if xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
+			xcdrawing.updatexctubeshell(makevisible)
 
 # Quick saving and loading of shape.  It goes to 
 # C:\Users\ViveOne\AppData\Roaming\Godot\app_userdata\digtunnel

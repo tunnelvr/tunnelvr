@@ -30,7 +30,7 @@ func _on_buttondoppelganger_toggled(button_pressed):
 	$Viewport/GUI/Panel/Label.text = "Doppelganger on" if button_pressed else "Doppelganger off"
 
 func _on_buttonupdateshell_toggled(button_pressed):
-	sketchsystem.updateworkingshell(button_pressed)
+	sketchsystem.rpc("updateworkingshell", button_pressed)
 	$Viewport/GUI/Panel/Label.text = "shell made" if button_pressed else "shell hidden"
 
 func _on_buttonswapcontrollers_pressed():
@@ -118,5 +118,9 @@ func guipanelreleasemouse():
 		viewport_mousedown = false
 		
 func _input(event):
-	if event is InputEventKey and event.pressed and event.scancode == KEY_L:
-		sketchsystem.loadsketchsystem()
+	if event is InputEventKey and event.pressed:
+		if event.scancode == KEY_L:
+			sketchsystem.loadsketchsystem()
+		elif event.scancode == KEY_T:
+			sketchsystem.updateworkingshell(true)
+

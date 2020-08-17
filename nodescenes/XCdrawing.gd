@@ -14,19 +14,20 @@ var maxnodepointnumber = 0
 
 const linewidth = 0.05
 
-func setxcdrawingvisibility(makevisible):
+remotesync func setxcdrawingvisibility(makevisible):
 	if not makevisible:
 		$XCdrawingplane.visible = false
 		$XCdrawingplane/CollisionShape.disabled = true
 	elif makevisible != $XCdrawingplane.visible:
 		$XCdrawingplane.visible = true
 		$XCdrawingplane/CollisionShape.disabled = false
-		var sca = 1.0
-		for nodepoint in nodepoints.values():
-			sca = max(sca, abs(nodepoint.x) + 1)
-			sca = max(sca, abs(nodepoint.y) + 1)
-		if sca > $XCdrawingplane.scale.x:
-			$XCdrawingplane.set_scale(Vector3(sca, sca, 1.0))
+		if drawingtype == DRAWING_TYPE.DT_XCDRAWING:
+			var sca = 1.0
+			for nodepoint in nodepoints.values():
+				sca = max(sca, abs(nodepoint.x) + 1)
+				sca = max(sca, abs(nodepoint.y) + 1)
+			if sca > $XCdrawingplane.scale.x:
+				$XCdrawingplane.set_scale(Vector3(sca, sca, 1.0))
 
 # these transforming operations work in sequence, each correcting the relative position change caused by the other
 func scalexcnodepointspointsxy(scax, scay):
@@ -55,13 +56,14 @@ func exportxcdata():
 			 "transformpos":var2str(global_transform),
 			 "shapeimage":[$XCdrawingplane.scale.x, $XCdrawingplane.scale.y],
 			 "nodepoints": nodepointsData, 
-			 "onepathpairs":onepathpairs 
+			 "onepathpairs":onepathpairs,
+			 "visible":$XCdrawingplane.visible 
 		   }
 
 func exportxcrpcdata():
 	return [ get_name(), drawingtype, global_transform, maxnodepointnumber, 
 			 $XCdrawingplane.scale.x, $XCdrawingplane.scale.y,
-			 nodepoints, onepathpairs ]
+			 nodepoints, onepathpairs, $XCdrawingplane.visible ]
 
 func mergexcrpcdata(xcdata):
 	assert ((get_name() == xcdata[0]) and (drawingtype == xcdata[1]))
@@ -81,7 +83,8 @@ func mergexcrpcdata(xcdata):
 			$XCnodes.add_child(xcn)
 		xcn.translation = nodepoints[k]
 	updatexcpaths()
-	
+	setxcdrawingvisibility(xcdata[8])
+		
 func importxcdata(xcdrawingData):
 	assert ($XCnodes.get_child_count() == 0 and len(nodepoints) == 0 and len(xctubesconn) == 0)
 	drawingtype = int(xcdrawingData["drawingtype"])
@@ -98,6 +101,7 @@ func importxcdata(xcdrawingData):
 		maxnodepointnumber = max(maxnodepointnumber, int(k))
 	onepathpairs = xcdrawingData["onepathpairs"]
 	updatexcpaths()
+	setxcdrawingvisibility(xcdrawingData["visible"])
 
 func importcentrelinedata(centrelinedata):
 	$XCdrawingplane.visible = false
@@ -221,7 +225,7 @@ func updatexcpaths():
 	if drawingtype == DRAWING_TYPE.DT_PAPERTEXTURE:
 		return
 	print("iupdatingxxccpaths ", len(onepathpairs), "  ", drawingtype)
-	var prevsurfacematerial = $PathLines.get_surface_material(0)
+	var prevsurfacematerial = $PathLines.get_surface_material(0) if $PathLines.get_surface_material_count() != 0 else null
 	var surfaceTool = SurfaceTool.new()
 	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
 	for j in range(0, len(onepathpairs), 2):
@@ -241,13 +245,12 @@ func updatexcpaths():
 	surfaceTool.generate_normals()
 	$PathLines.mesh = surfaceTool.commit()
 	print("usus ", len($PathLines.mesh.get_faces()), " ", len($PathLines.mesh.get_faces())) #surfaceTool.generate_normals()
-	#updateworkingshell()
 	$PathLines.set_surface_material(0, prevsurfacematerial if prevsurfacematerial != null else load("res://guimaterials/XCdrawingPathlines.material"))
 
 func sd0(a, b):
 	return a[0] < b[0]
 
-func makexcdpolys():
+func makexcdpolys(discardsinglenodepaths):
 	var Lpathvectorseq = { } 
 	for i in nodepoints.keys():
 		Lpathvectorseq[i] = []  # [ (arg, pathindex) ]
@@ -267,11 +270,12 @@ func makexcdpolys():
 		pathvectorseq.sort_custom(self, "sd0")
 		
 	var polys = [ ]
+	var outerpoly = null
+	assert (len(opvisits2) == len(onepathpairs))
 	for i in range(len(opvisits2)):
 		if opvisits2[i] != 0:
 			continue
-		# warning-ignore:integer_division
-		var ne = (i/2)
+		var ne = int(i/2)
 		var np = onepathpairs[ne*2 + (0 if ((i%2)==0) else 1)]
 		var poly = [ ]
 		var Nsinglenodes = 0
@@ -300,14 +304,42 @@ func makexcdpolys():
 		var angBack = Vector2(ptblBack.x-ptbl.x, ptblBack.y-ptbl.y).angle()
 		
 		# add in the trailing two settings into the poly array
-		poly.append(1000+Nsinglenodes)
-		poly.append(angBack < angFore)
-		polys.append(poly)
-
+		if Nsinglenodes == 0 or not discardsinglenodepaths:
+			if not (angBack < angFore):
+				if outerpoly != null:
+					print(" *** extra outer poly ", outerpoly, poly)
+					polys.append(outerpoly) 
+				outerpoly = poly
+			else:
+				polys.append(poly)
+	polys.append(outerpoly)
 	return polys
 
+func makexctubeshell():
+	return null
+	
+func updatexctubeshell(makevisible):
+	if makevisible:
+		var xctubeshellmesh = makexctubeshell()
+		if xctubeshellmesh != null:
+			if $XCtubeshell == null:
+				add_child(preload("res://nodescenes/XCtubeshell.tscn").instance())
+			$XCtubeshell/MeshInstance.mesh = xctubeshellmesh
+			var materialdirt = preload("res://lightweighttextures/simpledirt.material")
+			for i in range($XCtubeshell/MeshInstance.get_surface_material_count()):
+				$XCtubeshell/MeshInstance.set_surface_material(i, materialdirt)
+			$XCtubeshell/CollisionShape.shape.set_faces(xctubeshellmesh.get_faces())
+			$XCtubeshell.visible = true
+			$XCtubeshell/CollisionShape.disabled = false
+		else:
+			if $XCtubeshell != null:
+				$XCtubeshell.queue_free()
+	elif $XCtubeshell != null:
+		$XCtubeshell.visible = false
+		$XCtubeshell/CollisionShape.disabled = true
+		
 func makexcdworkingshell():
-	var polys = makexcdpolys()  # arrays of indexes to nodes ending with [Nsinglenodes, orientation]
+	var polys = makexcdpolys(true)  # arrays of indexes to nodes ending with [Nsinglenodes, orientation]
 	var surfaceTool = SurfaceTool.new()
 	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
 	for poly in polys:

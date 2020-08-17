@@ -3,20 +3,45 @@ extends Spatial
 
 # Stuff to do:
 
+# * get this tube orientation stuff sorted out
+
+# * makexctubeshell  updatexctubeshell
+# func updatexctubeshell(makevisible):
+
+# * xctubesconn and xctubesconnpositioning
+# func updatetubeshell(xcdrawings, makevisible):
+#	if makevisible:
+#		var tubeshellmesh = maketubeshell(xcdrawings)
+
+# * godot docs.  assert returns null from the function it's in when you ignore it
+
+# * perform the fancy 3-way tube connection feature
+
+# * could have makexcdpolys cached
+
+# * check out HDR example https://godotengine.org/asset-library/asset/110
+
+# * the allocation of shades on tubes at first needs to modulo the number of shades
+
+# * make a recording of the side of the projection, keep track of the tubesconn remaining, and on the last one fill in the faces that were not accounted for by the smaller extensions in comparison to the full one
+
 # * pointertargettypes should be an enum for itself
 # * LaserRayCast.collision_mask should use an enum
 
 # * still getting the connection to ground transform wrong way round sometimes
 
+# * vertical arrows just a little bit twisted so not in line with the polygon mesh
+
 # * need to have a file value on XCnode instead of the name to say the paper image because you could have two with same image
 
-# * transfer across visibilities of XCsections, and tubeshell mode
+# * sort out the textures of the XCs so they are large enough there.  
+# * XCs are going to be translated upwards (and the points back down by offset) so we can have them up by the centrelines
+# * XCs positioned by centreline, proportion along and angles relative -- always on a segment and length
+# *   Like the position of the trimmed horizontal drawing altitude relative to the centreline station 
 
 # * inline copyxcntootnode and copyotnodetoxcn
 
 # * break up and inline xcapplyonepath
-
-# * perform the fancy 3-way tube connection feature
 
 # * bring loose papers to me.  Superimpose one paper on another to make a frame
 
@@ -121,6 +146,8 @@ extends Spatial
 # * CSG mesh with multiple materials group should have material0, material1 etc
 # * Report bug check ray intersect plane is in the plane and report if not!
 
+# * quest hand tracking https://github.com/GodotVR/godot_oculus_mobile#features
+
 # * and loading (remembering the transforms) so it starts exactly where it left off
 # * redo shiftfloorfromdrawnstations with nodes in the area of some kind (decide what to do about the scale)
 # * grip click to hide a tube segment (how to bring back?)
@@ -149,41 +176,54 @@ var ovr_performance = null
 var networkID = 0
 
 onready var playerMe = $Players/PlayerMe
-
+var VRstatus = "none"
 	
 func _ready():
 	
 	if hostipnumber == "":
 		print("Initializing VR");
-		print("  Available Interfaces are %s: " % str(ARVRServer.get_interfaces()));
-		arvr_openvr = ARVRServer.find_interface("OpenVR")
-		arvr_quest = null # ARVRServer.find_interface("OVRMobile");
+		var available_interfaces = ARVRServer.get_interfaces();
+		print("  Available Interfaces are %s: " % str(available_interfaces));
+		var arvr_openvr = ARVRServer.find_interface("OpenVR")
+		var arvr_quest = ARVRServer.find_interface("OVRMobile")
+		var arvr_oculus = ARVRServer.find_interface("Oculus")
+		
+		if arvr_quest:
+			print("found quest, initializing")
+			ovr_init_config = preload("res://addons/godot_ovrmobile/OvrInitConfig.gdns").new()
+			ovr_performance = preload("res://addons/godot_ovrmobile/OvrPerformance.gdns").new()
+			perform_runtime_config = false
+			ovr_init_config.set_render_target_size_multiplier(1)
+			if arvr_quest.initialize():
+				get_viewport().arvr = true;
+				Engine.target_fps = 72;
+				VRstatus = "quest"
+				print("  Success initializing Quest Interface.");
 
-	if arvr_quest:
-		print("found quest, NOT initializing")
-		#ovr_init_config = preload("res://addons/godot_ovrmobile/OvrInitConfig.gdns").new()
-		#ovr_performance = preload("res://addons/godot_ovrmobile/OvrPerformance.gdns").new()
-		#perform_runtime_config = false
-		#ovr_init_config.set_render_target_size_multiplier(1)
-		#if arvr_quest.initialize():
-		#	get_viewport().arvr = true;
-		#	Engine.target_fps = 72;
-		#	print("  Success initializing Quest Interface.");
-	
-	elif arvr_openvr:
-		print("found openvr, initializing")
-		if arvr_openvr.initialize():
-			var viewport = get_viewport()
-			viewport.arvr = true
-			print("tttt", viewport.hdr, " ", viewport.keep_3d_linear)
-			#viewport.hdr = false
-			viewport.keep_3d_linear = true
-			Engine.target_fps = 90
-			OS.vsync_enabled = false;
-			print("  Success initializing OpenVR Interface.");
-			playerMe.arvrinterface = arvr_openvr
+		elif arvr_oculus:
+			print("  Found Oculus Interface.");
+			if arvr_oculus.initialize():
+				get_viewport().arvr = true;
+				Engine.target_fps = 80 # TODO: this is headset dependent (RiftS == 80)=> figure out how to get this info at runtime
+				OS.vsync_enabled = false;
+				VRstatus = "oculus"
+				print("  Success initializing Oculus Interface.");
 
-	else:
+		elif arvr_openvr:
+			print("found openvr, initializing")
+			if arvr_openvr.initialize():
+				var viewport = get_viewport()
+				viewport.arvr = true
+				print("tttt", viewport.hdr, " ", viewport.keep_3d_linear)
+				#viewport.hdr = false
+				viewport.keep_3d_linear = true
+				Engine.target_fps = 90
+				OS.vsync_enabled = false;
+				VRstatus = "vive"
+				print("  Success initializing OpenVR Interface.");
+				playerMe.arvrinterface = arvr_openvr
+
+	if VRstatus == "none":
 		print("*** VR not working")
 
 	var networkedmultiplayerenet = NetworkedMultiplayerENet.new()

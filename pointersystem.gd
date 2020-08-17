@@ -93,6 +93,7 @@ func setactivetargetwall(newactivetargetwall):
 		for xctube in activetargetwall.xctubesconn:
 			if not xctube.positioningtube:
 				xctube.updatetubeshell(sketchsystem.get_node("XCdrawings"), sketchsystem.tubeshellsvisible)
+		activetargetwall.updatexctubeshell(sketchsystem.tubeshellsvisible)
 	if activetargetwall != null and activetargetwall.drawingtype == DRAWING_TYPE.DT_PAPERTEXTURE:
 		activetargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").get_surface_material(0).albedo_color = Color("#FEF4D5")
 	
@@ -205,6 +206,7 @@ func onpointing(newpointertarget, newpointertargetpoint):
 	if is_instance_valid(pointertarget) and pointertarget == guipanel3d:
 		guipanel3d.guipanelsendmousemotion(pointertargetpoint, handright.global_transform, handright.is_button_pressed(BUTTONS.VR_TRIGGER))
 
+
 	if pointertargetpoint != null:
 		LaserSpot.global_transform.origin = pointertargetpoint
 		LaserLength.scale.z = -LaserSpot.translation.z
@@ -274,6 +276,8 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 		pointertarget = null
 		pointertargettype = "none"
 		pointertargetwall = null
+		LaserSpot.visible = false
+		LaserShadow.visible = false
 		recselectedtargetwall.removexcnode(recselectedtarget, false, sketchsystem)
 		sketchsystem.get_node("SoundPos2").global_transform.origin = pointertargetpoint
 		sketchsystem.get_node("SoundPos2").play()
@@ -353,10 +357,14 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 			sketchsystem.rpc("xctubefromdata", xctube0.exportxctrpcdata())
 			xctube1.updatetubeshell(sketchsystem.get_node("XCdrawings"), sketchsystem.tubeshellsvisible)
 
+			xcdrawing.updatexctubeshell(sketchsystem.tubeshellsvisible)  # not strictly necessary as there won't be any shells in a sliced tube xc
+
 			pointertargettype = "none"
 			pointertarget = null
 			pointertargetwall.queue_free()
 			pointertargetwall = null
+			LaserSpot.visible = false
+			LaserShadow.visible = false
 			
 	# grip condition is ignored (assumed off) her on
 	#elif gripbuttonheld:
@@ -397,7 +405,7 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 											
 	elif pointertargettype == "XCnode":
 		if pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
-			pointertargetwall.setxcdrawingvisibility(true)
+			pointertargetwall.rpc("setxcdrawingvisibility", true)
 			if pointertargetwall != activetargetwall:
 				setactivetargetwall(pointertargetwall)
 		setselectedtarget(pointertarget)
@@ -442,12 +450,14 @@ func buttonreleased_vrgrip():
 
 	elif pointertargettype == "XCdrawing" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		clearpointertargetmaterial()
-		pointertargetwall.setxcdrawingvisibility(false)
+		pointertargetwall.rpc("setxcdrawingvisibility", false)
 		sketchsystem.rpc("xcdrawingfromdata", pointertargetwall.exportxcrpcdata())
 		setactivetargetwall(null)
 		pointertarget = null
 		pointertargettype = "none"
 		pointertargetwall = null
+		LaserSpot.visible = false
+		LaserShadow.visible = false
 
 	elif selectedtargettype == "XCnode":
 		setselectedtarget(null)

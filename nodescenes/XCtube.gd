@@ -6,7 +6,9 @@ var xcname1 : String
 var xcdrawinglink = [ ]      # [ 0nodenamefrom, 0nodenameto, 1nodenamefrom, 1nodenameto, ... ]
 
 # derived data
-var positioningtube = false  # connecting to 
+var positioningtube = false
+var pickedpolyindex0 = -1
+var pickedpolyindex1 = -1
 
 const linewidth = 0.02
 
@@ -180,30 +182,50 @@ func updatetubelinkpaths(sketchsystem):
 	$PathLines.mesh = surfaceTool.commit()
 	print("ususxxxxc ", len($PathLines.mesh.get_faces()), " ", len($PathLines.mesh.get_faces())) #surfaceTool.generate_normals()
 
+func pickpolysindex(polys, meetnodenames):
+	for i in range(len(polys)):
+		var meetsallnodes = true
+		for meetnodename in meetnodenames:
+			if not polys[i].has(meetnodename):
+				meetsallnodes = false
+				break
+		if meetsallnodes:
+			return i
+	return -1
+
 func fa(a, b):
 	return a[0] < b[0] or (a[0] == b[0] and a[1] < b[1])
 
 func maketubepolyassociation(xcdrawing0, xcdrawing1):
-	var polys0 = xcdrawing0.makexcdpolys()  # arrays of indexes to nodes ending with [Nsinglenodes, orientation]
-	var polys1 = xcdrawing1.makexcdpolys()  # arrays of indexes to nodes ending with [Nsinglenodes, orientation]
+	assert ((xcdrawing0.get_name() == xcname0) and (xcdrawing1.get_name() == xcname1))
+	var polys0 = xcdrawing0.makexcdpolys(true)
+	var polys1 = xcdrawing1.makexcdpolys(true)
+	pickedpolyindex0 = pickpolysindex(polys0, xcdrawinglink.slice(0, len(xcdrawinglink), 2))
+	pickedpolyindex1 = pickpolysindex(polys1, xcdrawinglink.slice(1, len(xcdrawinglink), 2))
 	
-	# for now just the single good polygon
-	var poly0 = null
-	for poly in polys0:
-		if poly[-2] == 1000 and poly[-1]:
-			poly0 = poly.slice(0, len(poly)-3)
-	var poly1 = null
-	for poly in polys1:
-		if poly[-2] == 1000 and poly[-1]:
-			poly1 = poly.slice(0, len(poly)-3)
-	print("opopolys", poly0, poly1)
-	if poly0 == null or poly1 == null:
+	if pickedpolyindex0 == -1 or pickedpolyindex1 == -1:
 		print("no connecting poly available", polys0, polys1)
 		return [[], [], []]
-		
-	if xcdrawing0.global_transform.basis.z.dot(xcdrawing1.global_transform.basis.z) < 0:
+
+	var tubevec = xcdrawing1.global_transform.origin - xcdrawing0.global_transform.origin
+	var tubevecdot0 = xcdrawing0.global_transform.basis.z.dot(tubevec)
+	var tubevecdot1 = xcdrawing1.global_transform.basis.z.dot(tubevec)
+	var polyinvert0 = (tubevecdot0 <= 0) == (pickedpolyindex0 != len(polys0) - 1)
+	var polyinvert1 = (tubevecdot1 <= 0) == (pickedpolyindex1 != len(polys1) - 1)
+	var tubenormdot = xcdrawing0.global_transform.basis.z.dot(xcdrawing1.global_transform.basis.z)
+	#if not ((tubenormdot < 0) != (polyinvert0 != polyinvert1)):
+	#	print("invert problem?")
+	var poly0 = polys0[pickedpolyindex0].duplicate()
+	var poly1 = polys1[pickedpolyindex1].duplicate()
+	if polyinvert0:
+		poly0.invert()
+	if polyinvert1:
 		poly1.invert()
-		print("reversssing poly1", xcdrawing0.global_transform.basis.z, xcdrawing1.global_transform.basis.z, poly1)
+	print("opopolys", poly0, poly1)
+	
+	#if xcdrawing0.global_transform.basis.z.dot(xcdrawing1.global_transform.basis.z) < 0:
+	#	poly1.invert()
+	#	print("reversssing poly1", xcdrawing0.global_transform.basis.z, xcdrawing1.global_transform.basis.z, poly1)
 		
 	# get all the connections in here between the polygons but in the right order
 	var ila = [ ]  # [ [ il0, il1 ] ]
@@ -340,10 +362,10 @@ func updatetubeshell(xcdrawings, makevisible):
 		var tubeshellmesh = maketubeshell(xcdrawings)
 		if tubeshellmesh != null:
 			$XCtubeshell/MeshInstance.mesh = tubeshellmesh
-			$XCtubeshell/MeshInstance.set_surface_material(0, materialrock)
-			$XCtubeshell/MeshInstance.set_surface_material(1, materialdirt)
-				#$XCtubeshell/MeshInstance.material_override = preload("res://surveyscans/simplerocktexture.material")   # this can cause crashes
-			#$XCtubeshell/MeshInstance.material_override = preload("res://lightweighttextures/simpledirt.material")
+			for i in range($XCtubeshell/MeshInstance.get_surface_material_count()):
+				$XCtubeshell/MeshInstance.set_surface_material(i, materials[i%len(materials)])
+			#$XCtubeshell/MeshInstance.set_surface_material(0, materialrock)
+			#$XCtubeshell/MeshInstance.set_surface_material(1, materialdirt)
 			$XCtubeshell/CollisionShape.shape.set_faces(tubeshellmesh.get_faces())
 			$XCtubeshell.visible = true
 			$XCtubeshell/CollisionShape.disabled = false
