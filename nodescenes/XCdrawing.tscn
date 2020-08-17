@@ -30,3 +30,4 @@ material/0 = null
 [node name="XCnodes" type="Spatial" parent="."]
 
 [node name="PathLines" type="MeshInstance" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.002, 0 )

@@ -316,42 +316,49 @@ func makexcdpolys(discardsinglenodepaths):
 	return polys
 
 func makexctubeshell():
-	return null
+	var polys = makexcdpolys(true)
+	if len(polys) == 2:
+		return null
+		
+	var arraymesh = ArrayMesh.new()
+	var surfaceTool = SurfaceTool.new()
+	var materialdirt = preload("res://lightweighttextures/simpledirt.material")
+	surfaceTool.set_material(materialdirt)
+	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for j in range(1, len(polys)-2):
+		var poly = polys[j]
+		var pv = PoolVector2Array()
+		for i in range(len(poly)):
+			var p = poly[i]
+			pv.append(Vector2(nodepoints[p].x, nodepoints[p].y))
+		var pi = Geometry.triangulate_polygon(pv)
+		for u in pi:
+			#surfaceTool.add_vertex($XCnodes.get_node(poly[u]).global_transform.origin)
+			surfaceTool.add_vertex($XCnodes.get_node(poly[u]).transform.origin)
+		surfaceTool.generate_normals()
+		surfaceTool.commit(arraymesh)
+	return arraymesh
 	
 func updatexctubeshell(makevisible):
 	if makevisible:
 		var xctubeshellmesh = makexctubeshell()
 		if xctubeshellmesh != null:
-			if $XCtubeshell == null:
-				add_child(preload("res://nodescenes/XCtubeshell.tscn").instance())
-			$XCtubeshell/MeshInstance.mesh = xctubeshellmesh
+			if $XCflatshell == null:
+				var xcflatshell = preload("res://nodescenes/XCtubeshell.tscn").instance()
+				xcflatshell.set_name("XCflatshell")
+				add_child(xcflatshell)
+			$XCflatshell/MeshInstance.mesh = xctubeshellmesh
 			var materialdirt = preload("res://lightweighttextures/simpledirt.material")
-			for i in range($XCtubeshell/MeshInstance.get_surface_material_count()):
-				$XCtubeshell/MeshInstance.set_surface_material(i, materialdirt)
-			$XCtubeshell/CollisionShape.shape.set_faces(xctubeshellmesh.get_faces())
-			$XCtubeshell.visible = true
-			$XCtubeshell/CollisionShape.disabled = false
+			for i in range($XCflatshell/MeshInstance.get_surface_material_count()):
+				$XCflatshell/MeshInstance.set_surface_material(i, materialdirt)
+			$XCflatshell/CollisionShape.shape.set_faces(xctubeshellmesh.get_faces())
+			$XCflatshell.visible = true
+			$XCflatshell/CollisionShape.disabled = false
 		else:
-			if $XCtubeshell != null:
-				$XCtubeshell.queue_free()
-	elif $XCtubeshell != null:
-		$XCtubeshell.visible = false
-		$XCtubeshell/CollisionShape.disabled = true
+			if $XCflatshell != null:
+				$XCflatshell.queue_free()
+	elif $XCflatshell != null:
+		$XCflatshell.visible = false
+		$XCflatshell/CollisionShape.disabled = true
 		
-func makexcdworkingshell():
-	var polys = makexcdpolys(true)  # arrays of indexes to nodes ending with [Nsinglenodes, orientation]
-	var surfaceTool = SurfaceTool.new()
-	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
-	for poly in polys:
-		if len(poly) <= 4 or poly[-2] != 1000 or poly[-1] == false:
-			continue
-		var pv = PoolVector2Array()
-		for i in range(len(poly)-2):
-			var p = poly[i]
-			pv.append(Vector2(nodepoints[p].x, nodepoints[p].y))
-		var pi = Geometry.triangulate_polygon(pv)
-		for u in pi:
-			surfaceTool.add_vertex($XCnodes.get_node(poly[u]).global_transform.origin + global_transform.basis.z*0.002)
-	surfaceTool.generate_normals()
-	return surfaceTool.commit()
 

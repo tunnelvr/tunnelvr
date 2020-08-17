@@ -145,6 +145,8 @@ func targettype(target):
 		return "GUIPanel3D"
 	if targetname == "XCtubeshell":
 		return "XCtube"
+	if targetname == "XCflatshell":
+		return "XCflatshell"
 	var targetparent = target.get_parent()
 	if targetname == "XCdrawingplane":
 		assert (targetparent.drawingtype != DRAWING_TYPE.DT_CENTRELINE)
