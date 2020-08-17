@@ -315,17 +315,42 @@ func makexcdpolys(discardsinglenodepaths):
 	polys.append(outerpoly)
 	return polys
 
-func makexctubeshell():
+func makexctubeshell(xcdrawings):
 	var polys = makexcdpolys(true)
 	if len(polys) == 2:
 		return null
-		
+	var forepolyindexes = [ ]
+	var backpolyindexes = [ ]
+	for xctube in xctubesconn:
+		if not xctube.positioningtube:
+			var polyindex = xctube.pickedpolyindex0 if xctube.xcname0 == get_name() else xctube.pickedpolyindex1
+			if polyindex != -1:
+				var xcdrawingOther = xcdrawings.get_node(xctube.xcname1 if xctube.xcname0 == get_name() else xctube.xcname0)
+				var ftubevec = xcdrawingOther.global_transform.origin - global_transform.origin
+				if 	global_transform.basis.z.dot(ftubevec) > 0:
+					forepolyindexes.append(polyindex)
+				else:
+					backpolyindexes.append(polyindex)
+	
+	var polypartial = null
+	if forepolyindexes == [ len(polys)-1 ]:
+		polypartial = backpolyindexes
+	elif backpolyindexes == [ len(polys)-1 ]:
+		polypartial = forepolyindexes
+	else:
+		return null
+	
+	var polyindexes = [ ]
+	for i in range(len(polys)-1):
+		if not polypartial.has(i):
+			polyindexes.append(i)
+	
 	var arraymesh = ArrayMesh.new()
 	var surfaceTool = SurfaceTool.new()
 	var materialdirt = preload("res://lightweighttextures/simpledirt.material")
 	surfaceTool.set_material(materialdirt)
 	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
-	for j in range(1, len(polys)-2):
+	for j in polyindexes:
 		var poly = polys[j]
 		var pv = PoolVector2Array()
 		for i in range(len(poly)):
@@ -339,9 +364,9 @@ func makexctubeshell():
 		surfaceTool.commit(arraymesh)
 	return arraymesh
 	
-func updatexctubeshell(makevisible):
+func updatexctubeshell(xcdrawings, makevisible):
 	if makevisible:
-		var xctubeshellmesh = makexctubeshell()
+		var xctubeshellmesh = makexctubeshell(xcdrawings)
 		if xctubeshellmesh != null:
 			if $XCflatshell == null:
 				var xcflatshell = preload("res://nodescenes/XCtubeshell.tscn").instance()

@@ -74,7 +74,7 @@ remotesync func updateworkingshell(makevisible):
 			xctube.updatetubeshell($XCdrawings, makevisible)
 	for xcdrawing in $XCdrawings.get_children():
 		if xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
-			xcdrawing.updatexctubeshell(makevisible)
+			xcdrawing.updatexctubeshell($XCdrawings, makevisible)
 
 # Quick saving and loading of shape.  It goes to 
 # C:\Users\ViveOne\AppData\Roaming\Godot\app_userdata\digtunnel

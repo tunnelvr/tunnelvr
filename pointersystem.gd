@@ -93,7 +93,7 @@ func setactivetargetwall(newactivetargetwall):
 		for xctube in activetargetwall.xctubesconn:
 			if not xctube.positioningtube:
 				xctube.updatetubeshell(sketchsystem.get_node("XCdrawings"), sketchsystem.tubeshellsvisible)
-		activetargetwall.updatexctubeshell(sketchsystem.tubeshellsvisible)
+		activetargetwall.updatexctubeshell(sketchsystem.get_node("XCdrawings"), sketchsystem.tubeshellsvisible)
 	if activetargetwall != null and activetargetwall.drawingtype == DRAWING_TYPE.DT_PAPERTEXTURE:
 		activetargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").get_surface_material(0).albedo_color = Color("#FEF4D5")
 	
@@ -359,7 +359,7 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 			sketchsystem.rpc("xctubefromdata", xctube0.exportxctrpcdata())
 			xctube1.updatetubeshell(sketchsystem.get_node("XCdrawings"), sketchsystem.tubeshellsvisible)
 
-			xcdrawing.updatexctubeshell(sketchsystem.tubeshellsvisible)  # not strictly necessary as there won't be any shells in a sliced tube xc
+			xcdrawing.updatexctubeshell(sketchsystem.get_node("XCdrawings"), sketchsystem.tubeshellsvisible)  # not strictly necessary as there won't be any shells in a sliced tube xc
 
 			pointertargettype = "none"
 			pointertarget = null

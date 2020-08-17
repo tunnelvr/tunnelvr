@@ -3,7 +3,17 @@ extends Spatial
 
 # Stuff to do:
 
-# * get this tube orientation stuff sorted out
+
+# * 3-way tube connection feature working
+# *  check obtuse works
+# *  single cut through face means its filled
+
+# * Hit the README file with instructions
+
+# * give it a default cave in position in the resources
+
+# * pointertargettypes should be an enum for itself
+# * LaserRayCast.collision_mask should use an enum
 
 # * makexctubeshell  updatexctubeshell
 # func updatexctubeshell(makevisible):
@@ -15,8 +25,6 @@ extends Spatial
 
 # * godot docs.  assert returns null from the function it's in when you ignore it
 
-# * perform the fancy 3-way tube connection feature
-
 # * could have makexcdpolys cached
 
 # * check out HDR example https://godotengine.org/asset-library/asset/110
@@ -25,8 +33,8 @@ extends Spatial
 
 # * make a recording of the side of the projection, keep track of the tubesconn remaining, and on the last one fill in the faces that were not accounted for by the smaller extensions in comparison to the full one
 
-# * pointertargettypes should be an enum for itself
-# * LaserRayCast.collision_mask should use an enum
+# * get this tube orientation stuff sorted out
+
 
 # * still getting the connection to ground transform wrong way round sometimes
 
