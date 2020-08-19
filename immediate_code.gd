@@ -27,8 +27,7 @@ func gg(x):
 
 func _run():
 	var x = IP.get_local_addresses()
-	print(x)
-	print([gg(0)])
-	print(sign(0.001))	
+	print("ii"+String(9))
+	
 	
 

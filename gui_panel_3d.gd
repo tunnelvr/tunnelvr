@@ -121,6 +121,9 @@ func _input(event):
 	if event is InputEventKey and event.pressed:
 		if event.scancode == KEY_L:
 			sketchsystem.loadsketchsystem()
+		if event.scancode == KEY_S:
+			sketchsystem.savesketchsystem()
 		elif event.scancode == KEY_T:
-			sketchsystem.updateworkingshell(true)
+			$Viewport/GUI/Panel/ButtonUpdateShell.pressed = not $Viewport/GUI/Panel/ButtonUpdateShell.pressed
+			_on_buttonupdateshell_toggled($Viewport/GUI/Panel/ButtonUpdateShell.pressed)
 

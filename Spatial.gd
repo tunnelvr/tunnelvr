@@ -3,8 +3,24 @@ extends Spatial
 
 # Stuff to do:
 
+# * Do the README file with instructions
 
-# * Hit the README file with instructions
+# * put xcresource (and xcname) into mergexcrpcdata
+
+# * grip on papersheet rotates around the point of contact
+
+# * give centreline a different colour (maybe nodes with a different shape)
+
+# * selection node should be a mask on top of the node rather than a change in its material (so we can make it sticky)
+
+# * cannot illegally delete centreline nodes
+
+# * Copy of the centreline mesh but in a small area on the back of your hand, like a 3D map.
+# * Or toss it out there on the ground to work out your plan
+
+# * some way to see the names of things in the distance
+
+# * perfect overhead light so things project down to the correct place
 
 # * put name of image into XCdrawing (incl paper type)
 
@@ -28,11 +44,6 @@ extends Spatial
 
 # * check out HDR example https://godotengine.org/asset-library/asset/110
 
-# * the allocation of shades on tubes at first needs to modulo the number of shades
-
-
-# * vertical arrows just a little bit twisted so not in line with the polygon mesh
-
 # * need to have a file value on XCnode instead of the name to say the paper image because you could have two with same image
 
 # * sort out the textures of the XCs so they are large enough there.  
@@ -48,6 +59,7 @@ extends Spatial
 
 # * papertype should not be environment collision (just pointer collisions)
 
+# * load in all the cross-sections as hexagons we can make -- as tubes to start off
 
 # * duplicate floor trimming out and place at different Z-levels
 #			sketchsystem.rpc("xcdrawingfromdict", xcdrawing.exportxcrpcdata())
@@ -57,6 +69,7 @@ extends Spatial
 
 # * transmit rpc_reliable when trigger released on the positioning of a papersheet
 
+# * 
 
 # * moving floor up and down (also transmitted)
 # *  XCpositions and new ones going through rsync?  

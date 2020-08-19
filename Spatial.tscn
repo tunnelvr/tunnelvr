@@ -144,6 +144,7 @@ script = ExtResource( 18 )
 
 [node name="HeadCam" type="ARVRCamera" parent="Players/PlayerMe"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0 )
+far = 321.0
 
 [node name="csgheadmesh" parent="Players/PlayerMe/HeadCam" instance=ExtResource( 12 )]
 
@@ -301,7 +302,7 @@ material/0 = ExtResource( 3 )
 [node name="BoulderClutter" type="Spatial" parent="."]
 
 [node name="drawnfloor" type="StaticBody" parent="."]
-transform = Transform( 100, 0, 0, 0, 1, 0, 0, 0, 100, 0, -0.5, 0 )
+transform = Transform( 200, 0, 0, 0, 1, 0, 0, 0, 200, 0, -0.5, 0 )
 collision_layer = 18
 collision_mask = 0
 

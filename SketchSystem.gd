@@ -124,11 +124,13 @@ func loaddefaultsketchsystem():
 
 	var centrelinedrawing = newXCuniquedrawing(DRAWING_TYPE.DT_CENTRELINE, "centreline")
 	var centrelinedatafile = File.new()
-	centrelinedrawing.xcresource = "res://surveyscans/dukest1resurvey2009.json"
-	#centrelinedrawing.xcresource = "res://surveyscans/Ireby/Ireby2/Ireby2.json"
+	#centrelinedrawing.xcresource = "res://surveyscans/dukest1resurvey2009.json"
+	centrelinedrawing.xcresource = "res://surveyscans/Ireby/Ireby2/Ireby2.json"
 	centrelinedatafile.open(centrelinedrawing.xcresource, File.READ)
 	var centrelinedata = parse_json(centrelinedatafile.get_line())
-	centrelinedrawing.importcentrelinedata(centrelinedata)
+	centrelinedrawing.importcentrelinedata(centrelinedata, self)
+	
+	
 	#var xsectgps = centrelinedata.xsectgps
 	print("default lllloaded")
 
@@ -149,6 +151,8 @@ remotesync func sketchsystemfromdict(save_dict):
 		var xcdrawingData = xcdrawingsData[i]
 		#print("iiii", xcdrawingData)
 		var xcdrawing = newXCuniquedrawing(xcdrawingData.drawingtype, xcdrawingData["name"])
+		print (xcdrawing.get_name(), " ", xcdrawingData["name"])
+		assert (xcdrawing.get_name() == xcdrawingData["name"])
 		xcdrawing.importxcdata(xcdrawingData)
 		if xcdrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE or xcdrawing.drawingtype == DRAWING_TYPE.DT_PAPERTEXTURE:
 			get_node("/root/Spatial/ImageSystem").fetchpaperdrawing(xcdrawing)

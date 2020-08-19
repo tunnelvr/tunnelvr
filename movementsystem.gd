@@ -15,7 +15,7 @@ var nextphysicsrotatestep = 0.0  # avoid flicker if done in _physics_process
 var velocity = Vector3(0.0, 0.0, 0.0)
 var gravity = -30.0
 
-export var walkspeed = 100.0
+export var walkspeed = 180.0
 export var flyspeed = 250.0
 export var drag_factor = 0.1
 
@@ -159,6 +159,8 @@ func _physics_process(delta):
 			if forwards_backwards < -0.5:
 				flydir = -flydir
 			velocity = flydir.normalized() * -delta * flyspeed * world_scale
+			if handleft.is_button_pressed(BUTTONS.VR_PAD):
+				velocity *= 3.0
 			velocity = kinematic_body.move_and_slide(velocity)
 			var movement = (kinematic_body.global_transform.origin - curr_transform.origin)
 			kinematic_body.global_transform.origin = curr_transform.origin
