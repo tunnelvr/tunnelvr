@@ -44,6 +44,9 @@ var selectedtargetwall = null
 var gripbuttonpressused = false
 var activetargetwall = null
 var activetargetwallgrabbedtransform = null
+var activetargetwallgrabbedpoint = null
+var activetargetwallgrabbedpointoffset = null
+var activetargetwallgrabbedlocalpoint = null
 
 var xcdrawingactivematerial = preload("res://guimaterials/XCdrawing_active.material")
 var xcdrawingmaterial = preload("res://guimaterials/XCdrawing.material")
@@ -365,8 +368,16 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 		setselectedtarget(null)
 		LaserSpot.global_transform.origin = pointertargetpoint
 		setactivetargetwall(pointertargetwall)
-		activetargetwallgrabbedtransform = LaserSpot.global_transform.affine_inverse() * pointertargetwall.global_transform
-
+		if gripbuttonheld:
+			activetargetwallgrabbedtransform = LaserSpot.global_transform.affine_inverse() * pointertargetwall.global_transform
+			activetargetwallgrabbedpoint = LaserSpot.global_transform.origin
+			activetargetwallgrabbedlocalpoint = pointertargetwall.global_transform.affine_inverse() * LaserSpot.global_transform.origin
+			activetargetwallgrabbedpointoffset = LaserSpot.global_transform.origin - pointertargetwall.global_transform.origin
+		else:
+			activetargetwallgrabbedtransform = LaserSpot.global_transform.affine_inverse() * pointertargetwall.global_transform
+			activetargetwallgrabbedpoint = null
+			
+		
 	# make new point onto wall, connected if necessary
 	elif pointertargettype == "XCdrawing":
 		var newpointertarget = pointertargetwall.newxcnode()
@@ -484,7 +495,16 @@ func _physics_process(_delta):
 		handright.global_transform.origin.y -= 0.3
 		
 	if activetargetwallgrabbedtransform != null:
-		pointertargetwall.global_transform = LaserSpot.global_transform * activetargetwallgrabbedtransform
+		if activetargetwallgrabbedpoint != null:
+			#activetargetwallgrabbedtransform = LaserSpot.global_transform.affine_inverse() * pointertargetwall.global_transform
+			#activetargetwallgrabbedlocalpoint = pointertargetwall.global_transform.affine_inverse() * LaserSpot.global_transform.origin
+			#activetargetwallgrabbedpoint = LaserSpot.global_transform.origin
+			#activetargetwallgrabbedpointoffset = LaserSpot.global_transform.origin - pointertargetwall.global_transform.origin
+			pointertargetwall.global_transform = LaserSpot.global_transform * activetargetwallgrabbedtransform
+			pointertargetwall.global_transform.origin += activetargetwallgrabbedpoint - pointertargetwall.global_transform * activetargetwallgrabbedlocalpoint
+			#pointertargetwall.global_transform.origin = activetargetwallgrabbedpoint - activetargetwallgrabbedpointoffset + (pointertargetwall.global_transform.basis * activetargetwallgrabbedtransform.origin)
+		else:
+			pointertargetwall.global_transform = LaserSpot.global_transform * activetargetwallgrabbedtransform
 		pointertargetwall.rpc_unreliable("setxcdrawingposition", pointertargetwall.global_transform)
 		
 	elif LaserRayCast.is_colliding() and not LaserRayCast.get_collider().is_queued_for_deletion():

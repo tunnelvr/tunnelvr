@@ -7,9 +7,7 @@ extends Spatial
 
 # * put xcresource (and xcname) into mergexcrpcdata
 
-# * grip on papersheet rotates around the point of contact
-
-# * give centreline a different colour (maybe nodes with a different shape)
+# * apply this tech to a vertical marker in an XC wall for positioning it, or cutting new one
 
 # * selection node should be a mask on top of the node rather than a change in its material (so we can make it sticky)
 
