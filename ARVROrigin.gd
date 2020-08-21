@@ -42,15 +42,11 @@ func _ready():
 func _physics_process(_delta):
 	pass
 
-remote func setavatarposition(playertransform, headcamtransform, handlefttransform, handrighttransform, laserrotation, laserlength, laserspot):
-	print("ppt nope not master ", playertransform.origin.x, " ", headcamtransform.origin.x)
-	#global_transform = playertransform
-	#$HeadCam.transform = headcamtransform
-	#$HandLeft.transform = handlefttransform
-	#$HandRight.transform = handrighttransform
+remote func setavatarposition(positiondict):
+	print("ppt nope not master ", positiondict)
 
-puppet func bouncedoppelgangerposition(bouncebackID, playertransform, headcamtransform, handlefttransform, handrighttransform, laserrotation, laserlength, laserspot):
-	rpc_unreliable_id(bouncebackID, "setdoppelgangerposition", playertransform, headcamtransform, handlefttransform, handrighttransform, laserrotation, laserlength, laserspot)
+puppet func bouncedoppelgangerposition(bouncebackID, positiondict):
+	rpc_unreliable_id(bouncebackID, "setdoppelgangerposition", positiondict)
 
 remotesync func playvoicerecording(wavrecording):
 	print("playing recording ", wavrecording.size()) 
@@ -62,3 +58,12 @@ remotesync func playvoicerecording(wavrecording):
 	$HandLeft/AudioStreamPlayer3D.stream = stream
 	$HandLeft/AudioStreamPlayer3D.play()
 
+func playerpositiondict():
+	return { "playertransform":global_transform, 
+			 "headcamtransform":$HeadCam.transform, 
+			 "handlefttransform":$HandLeft.transform if $HandLeft.visible else null, 
+			 "handrighttransform":$HandRight.transform if $HandRight.visible else null, 
+			 "laserrotation":$HandRight/LaserOrient.rotation.x, 
+			 "laserlength":$HandRight/LaserOrient/Length.scale.z, 
+			 "laserspot":$HandRight/LaserOrient/LaserSpot.visible 
+			}

@@ -13,6 +13,8 @@ extends Spatial
 
 # * cannot illegally delete centreline nodes
 
+# * hold back laggy motions by 500ms and animate between the positions
+
 # * Copy of the centreline mesh but in a small area on the back of your hand, like a 3D map.
 # * Or toss it out there on the ground to work out your plan
 
@@ -257,6 +259,14 @@ func _ready():
 	print("nnet-id ", networkID)
 	playerMe.set_network_master(networkID)
 	playerMe.networkID = networkID
+
+func nextplayernetworkidinringskippingdoppelganger(deletedid):
+	for i in range($Players.get_child_count()):
+		var nextringplayer = $Players.get_child((playerMe.get_index()+1)%$Players.get_child_count())
+		if deletedid == 0 or nextringplayer.networkID != deletedid:
+			if nextringplayer.networkID != 0:
+				return nextringplayer.networkID
+	return 0
 	
 # May need to use Windows Defender Firewall -> Inboard rules -> New Rule and ports
 # Also there's another setting change to allow pings
@@ -272,10 +282,7 @@ func _player_connected(id):
 		$Players.add_child(playerOther)
 	if networkID == 1:
 		$SketchSystem.rpc_id(id, "sketchsystemfromdict", $SketchSystem.sketchsystemtodict())
-	
-	var playercpos = playerMe.get_index()
-	playerMe.bouncetestnetworkID = $Players.get_child((playercpos+1)%$Players.get_child_count()).networkID if $Players.get_child_count() >= 2 else 0
-	assert (playerMe.networkID != playerMe.bouncetestnetworkID)	
+	playerMe.bouncetestnetworkID = nextplayernetworkidinringskippingdoppelganger(0)
 	
 func _player_disconnected(id):
 	print("_player_disconnected ", id)
@@ -284,8 +291,7 @@ func _player_disconnected(id):
 	if $Players.has_node(playerothername):
 		$Players.get_node(playerothername).queue_free()
 	print("Number of players after queuefree ", $Players.get_child_count())
-	playerMe.bouncetestnetworkID = $Players.get_child((playerMe.get_index()+1)%$Players.get_child_count()).networkID if $Players.get_child_count() >= 2 else 0
-
+	playerMe.bouncetestnetworkID = nextplayernetworkidinringskippingdoppelganger(id)
 		
 func _connected_to_server():
 	print("_connected_to_server")

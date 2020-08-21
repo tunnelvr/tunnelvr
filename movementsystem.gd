@@ -210,18 +210,15 @@ func _physics_process(delta):
 
 	var doppelganger = playernode.doppelganger
 	if is_inside_tree() and is_instance_valid(doppelganger):
-		var dgt = Transform(Basis(-playernode.global_transform.basis.x, playernode.global_transform.basis.y, -playernode.global_transform.basis.z), 
-							Vector3(doppelganger.global_transform.origin.x, playernode.global_transform.origin.y, doppelganger.global_transform.origin.z))
+		var positiondict = playernode.playerpositiondict()
+		positiondict["playertransform"] = Transform(Basis(-positiondict["playertransform"].basis.x, positiondict["playertransform"].basis.y, -positiondict["playertransform"].basis.z), 
+													Vector3(doppelganger.global_transform.origin.x, positiondict["playertransform"].origin.y, doppelganger.global_transform.origin.z))
 		if playernode.bouncetestnetworkID != 0:
-			playernode.rpc_unreliable_id(playernode.bouncetestnetworkID, "bouncedoppelgangerposition", playernode.networkID, dgt, headcam.transform, handleft.transform if handleft.visible else null, handright.transform if handright.visible else null, handright.get_node("LaserOrient").rotation.x, handright.get_node("LaserOrient/Length").scale.z, handright.get_node("LaserOrient/LaserSpot").visible)
+			playernode.rpc_unreliable_id(playernode.bouncetestnetworkID, "bouncedoppelgangerposition", playernode.networkID, positiondict)
 		else:
-			doppelganger.setavatarposition(dgt, headcam.transform, handleft.transform if handleft.visible else null, handright.transform if handright.visible else null, handright.get_node("LaserOrient").rotation.x, handright.get_node("LaserOrient/Length").scale.z, handright.get_node("LaserOrient/LaserSpot").visible)
+			doppelganger.setavatarposition(positiondict)
 
 	if playernode.connectiontoserveractive:
-		
-		playernode.rpc_unreliable("setavatarposition", playernode.global_transform, headcam.transform, 
-													   handleft.transform if handleft.visible else null, 
-													   handright.transform if handright.visible else null, 
-													   handright.get_node("LaserOrient").rotation.x, handright.get_node("LaserOrient/Length").scale.z, handright.get_node("LaserOrient/LaserSpot").visible)
+		playernode.rpc_unreliable("setavatarposition", playernode.playerpositiondict())
 	
 
