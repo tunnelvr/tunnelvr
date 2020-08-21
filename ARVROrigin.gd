@@ -7,6 +7,9 @@ onready var xcdrawing_active_material_albedoa = xcdrawing_active_material.albedo
 onready var doppelganger = null # get_node("../Doppelganger")
 var arvrinterface = null
 var connectiontoserveractive = false
+var networkID = 0
+var bouncetestnetworkID = 0
+
 
 func setheadtorchlight(torchon):
 	$HeadCam/HeadtorchLight.visible = torchon
@@ -45,6 +48,9 @@ remote func setavatarposition(playertransform, headcamtransform, handlefttransfo
 	#$HeadCam.transform = headcamtransform
 	#$HandLeft.transform = handlefttransform
 	#$HandRight.transform = handrighttransform
+
+puppet func bouncedoppelgangerposition(bouncebackID, playertransform, headcamtransform, handlefttransform, handrighttransform, laserrotation, laserlength, laserspot):
+	rpc_unreliable_id(bouncebackID, "setdoppelgangerposition", playertransform, headcamtransform, handlefttransform, handrighttransform, laserrotation, laserlength, laserspot)
 
 remotesync func playvoicerecording(wavrecording):
 	print("playing recording ", wavrecording.size()) 

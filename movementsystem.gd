@@ -212,10 +212,16 @@ func _physics_process(delta):
 	if is_inside_tree() and is_instance_valid(doppelganger):
 		var dgt = Transform(Basis(-playernode.global_transform.basis.x, playernode.global_transform.basis.y, -playernode.global_transform.basis.z), 
 							Vector3(doppelganger.global_transform.origin.x, playernode.global_transform.origin.y, doppelganger.global_transform.origin.z))
-		doppelganger.setavatarposition(dgt, headcam.transform, handleft.transform if handleft.visible else null, handright.transform if handright.visible else null, handright.get_node("LaserOrient").rotation.x, handright.get_node("LaserOrient/Length").scale.z, handright.get_node("LaserOrient/LaserSpot").visible)
+		if playernode.bouncetestnetworkID != 0:
+			playernode.rpc_unreliable_id(playernode.bouncetestnetworkID, "bouncedoppelgangerposition", playernode.networkID, dgt, headcam.transform, handleft.transform if handleft.visible else null, handright.transform if handright.visible else null, handright.get_node("LaserOrient").rotation.x, handright.get_node("LaserOrient/Length").scale.z, handright.get_node("LaserOrient/LaserSpot").visible)
+		else:
+			doppelganger.setavatarposition(dgt, headcam.transform, handleft.transform if handleft.visible else null, handright.transform if handright.visible else null, handright.get_node("LaserOrient").rotation.x, handright.get_node("LaserOrient/Length").scale.z, handright.get_node("LaserOrient/LaserSpot").visible)
+
 	if playernode.connectiontoserveractive:
+		
 		playernode.rpc_unreliable("setavatarposition", playernode.global_transform, headcam.transform, 
 													   handleft.transform if handleft.visible else null, 
 													   handright.transform if handright.visible else null, 
 													   handright.get_node("LaserOrient").rotation.x, handright.get_node("LaserOrient/Length").scale.z, handright.get_node("LaserOrient/LaserSpot").visible)
 	
+

@@ -256,6 +256,7 @@ func _ready():
 	networkID = get_tree().get_network_unique_id()
 	print("nnet-id ", networkID)
 	playerMe.set_network_master(networkID)
+	playerMe.networkID = networkID
 	
 # May need to use Windows Defender Firewall -> Inboard rules -> New Rule and ports
 # Also there's another setting change to allow pings
@@ -267,15 +268,24 @@ func _player_connected(id):
 		var playerOther = preload("res://nodescenes/PlayerPuppet.tscn").instance()
 		playerOther.set_network_master(id)
 		playerOther.set_name(playerothername)
+		playerOther.networkID = id
 		$Players.add_child(playerOther)
 	if networkID == 1:
 		$SketchSystem.rpc_id(id, "sketchsystemfromdict", $SketchSystem.sketchsystemtodict())
 	
+	var playercpos = playerMe.get_index()
+	playerMe.bouncetestnetworkID = $Players.get_child((playercpos+1)%$Players.get_child_count()).networkID if $Players.get_child_count() >= 2 else 0
+	assert (playerMe.networkID != playerMe.bouncetestnetworkID)	
+	
 func _player_disconnected(id):
 	print("_player_disconnected ", id)
 	var playerothername = "NetworkedPlayer"+String(id)
+	print("Number of players before queuefree ", $Players.get_child_count())
 	if $Players.has_node(playerothername):
 		$Players.get_node(playerothername).queue_free()
+	print("Number of players after queuefree ", $Players.get_child_count())
+	playerMe.bouncetestnetworkID = $Players.get_child((playerMe.get_index()+1)%$Players.get_child_count()).networkID if $Players.get_child_count() >= 2 else 0
+
 		
 func _connected_to_server():
 	print("_connected_to_server")

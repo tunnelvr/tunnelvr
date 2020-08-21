@@ -1,5 +1,7 @@
 extends Spatial
 
+var networkID = 0
+
 remote func setavatarposition(playertransform, headcamtransform, handlefttransform, handrighttransform, laserrotation, laserlength, laserspot):
 	global_transform = playertransform
 	$HeadCam.transform = headcamtransform
@@ -13,6 +15,14 @@ remote func setavatarposition(playertransform, headcamtransform, handlefttransfo
 		$HandRight/LaserOrient/Length.scale.z = laserlength
 		$HandRight/LaserOrient/LaserSpot.translation.z = -laserlength
 		$HandRight/LaserOrient/LaserSpot.visible = laserspot
+
+puppet func bouncedoppelgangerposition(bouncebackID, playertransform, headcamtransform, handlefttransform, handrighttransform, laserrotation, laserlength, laserspot):
+	get_parent().get_parent().playerMe.rpc_unreliable_id(bouncebackID, "setdoppelgangerposition", playertransform, headcamtransform, handlefttransform, handrighttransform, laserrotation, laserlength, laserspot)
+
+puppet func setdoppelgangerposition(playertransform, headcamtransform, handlefttransform, handrighttransform, laserrotation, laserlength, laserspot):
+	var doppelganger = get_parent().get_parent().playerMe.doppelganger
+	if is_instance_valid(doppelganger):
+		doppelganger.setavatarposition(playertransform, headcamtransform, handlefttransform, handrighttransform, laserrotation, laserlength, laserspot)
 
 remotesync func playvoicerecording(wavrecording):
 	print("playing recording ", wavrecording.size()) 
