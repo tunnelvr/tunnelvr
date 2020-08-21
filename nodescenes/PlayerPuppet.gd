@@ -19,7 +19,7 @@ remote func setavatarposition(positiondict):
 puppet func bouncedoppelgangerposition(bouncebackID, positiondict):
 	get_parent().get_parent().playerMe.rpc_unreliable_id(bouncebackID, "setdoppelgangerposition", positiondict)
 
-puppet func setdoppelgangerposition(playertransform, positiondict):
+puppet func setdoppelgangerposition(positiondict):
 	var doppelganger = get_parent().get_parent().playerMe.doppelganger
 	if is_instance_valid(doppelganger):
 		doppelganger.setavatarposition(positiondict)

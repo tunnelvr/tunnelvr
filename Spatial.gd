@@ -5,6 +5,8 @@ extends Spatial
 
 # * Do the README file with instructions
 
+# * move the csg headtorch out of headpick
+
 # * put xcresource (and xcname) into mergexcrpcdata
 
 # * apply this tech to a vertical marker in an XC wall for positioning it, or cutting new one
