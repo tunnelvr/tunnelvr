@@ -150,14 +150,12 @@ func updatetubelinkpaths(sketchsystem):
 	var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(xcname1)
 	var xcdrawing0nodes = xcdrawing0.get_node("XCnodes")
 	var xcdrawing1nodes = xcdrawing1.get_node("XCnodes")
-	print("llll", xcdrawing0nodes, xcdrawing1nodes, xcdrawinglink)
 	assert ((len(xcdrawinglink)%2) == 0)
 	for j in range(0, len(xcdrawinglink), 2):
 		#var p0 = xcdrawing0.nodepoints[xcdrawinglink[j]]
 		#var p1 = xcdrawing1.nodepoints[xcdrawinglink[j+1]]
 		var p0 = xcdrawing0nodes.get_node(xcdrawinglink[j]).global_transform.origin
 		var p1 = xcdrawing1nodes.get_node(xcdrawinglink[j+1]).global_transform.origin
-		print("jjjjuj", j, p0, p1)
 		var vec = p1 - p0
 		var veclen = max(0.01, vec.length())
 		var perp = Vector3(1, 0, 0)
@@ -183,7 +181,7 @@ func updatetubelinkpaths(sketchsystem):
 		surfaceTool.add_vertex(pa - arrowfac*perp)
 	surfaceTool.generate_normals()
 	$PathLines.mesh = surfaceTool.commit()
-	print("ususxxxxc ", len($PathLines.mesh.get_faces()), " ", len($PathLines.mesh.get_faces())) #surfaceTool.generate_normals()
+	#print("ususxxxxc ", len($PathLines.mesh.get_faces()), " ", len($PathLines.mesh.get_faces())) #surfaceTool.generate_normals()
 
 func pickpolysindex(polys, meetnodenames):
 	for i in range(len(polys)):

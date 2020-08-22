@@ -5,13 +5,14 @@ extends Spatial
 
 # * Do the README file with instructions
 
-# * move the csg headtorch out of headpick
+# * selection node should be a mask on top of the node rather than a change in its material (so we can make it sticky)
+# * apply this tech to a vertical marker in an XC wall for positioning it, or cutting new one
+# * perfect overhead light so things project down to the correct place
 
 # * put xcresource (and xcname) into mergexcrpcdata
 
-# * apply this tech to a vertical marker in an XC wall for positioning it, or cutting new one
+# * finish redoing the Websockets to sensorcity.io and prove we can control LED lights from it
 
-# * selection node should be a mask on top of the node rather than a change in its material (so we can make it sticky)
 
 # * cannot illegally delete centreline nodes
 
@@ -22,7 +23,6 @@ extends Spatial
 
 # * some way to see the names of things in the distance
 
-# * perfect overhead light so things project down to the correct place
 
 # * put name of image into XCdrawing (incl paper type)
 
@@ -182,6 +182,7 @@ extends Spatial
 
 var arvr_openvr = null; 
 var arvr_quest = null; 
+var arvr_oculus = null; 
 
 export var hostipnumber: String = ""
 export var hostportnumber: int = 8002
@@ -200,9 +201,9 @@ func _ready():
 		print("Initializing VR");
 		var available_interfaces = ARVRServer.get_interfaces();
 		print("  Available Interfaces are %s: " % str(available_interfaces));
-		var arvr_openvr = ARVRServer.find_interface("OpenVR")
-		var arvr_quest = ARVRServer.find_interface("OVRMobile")
-		var arvr_oculus = ARVRServer.find_interface("Oculus")
+		arvr_openvr = ARVRServer.find_interface("OpenVR")
+		arvr_quest = ARVRServer.find_interface("OVRMobile")
+		arvr_oculus = ARVRServer.find_interface("Oculus")
 		
 		if arvr_quest:
 			print("found quest, initializing")

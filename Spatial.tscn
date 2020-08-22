@@ -1,4 +1,4 @@
-[gd_scene load_steps=38 format=2]
+[gd_scene load_steps=39 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://default_env.tres" type="Environment" id=2]
@@ -7,6 +7,7 @@
 [ext_resource path="res://pointersystem.gd" type="Script" id=5]
 [ext_resource path="res://guimeshes/handrightmesh.tscn" type="PackedScene" id=6]
 [ext_resource path="res://surveyscans/DukeStResurvey-drawnup-p3.jpg" type="Texture" id=7]
+[ext_resource path="res://WebsocketSystem.gd" type="Script" id=8]
 [ext_resource path="res://sounds/switch7.wav" type="AudioStream" id=9]
 [ext_resource path="res://SketchSystem.gd" type="Script" id=10]
 [ext_resource path="res://text_panel_3d.tscn" type="PackedScene" id=11]
@@ -307,6 +308,7 @@ collision_layer = 18
 collision_mask = 0
 
 [node name="thing,ghfg" type="MeshInstance" parent="drawnfloor"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.123422, -0.143924, -0.0669777 )
 mesh = SubResource( 16 )
 material/0 = null
 
@@ -322,5 +324,8 @@ transform = Transform( -1, 2.66913e-07, -1.86895e-07, 0, 0.573576, 0.819152, 3.2
 light_energy = 0.6
 shadow_enabled = true
 shadow_color = Color( 0.388235, 0.0705882, 0.0705882, 1 )
+
+[node name="WebsocketSystem" type="Node" parent="."]
+script = ExtResource( 8 )
 [connection signal="body_entered" from="Players/PlayerMe/HandRight/HeelHotspot" to="Players/PlayerMe/pointersystem" method="_on_HeelHotspot_body_entered"]
 [connection signal="body_exited" from="Players/PlayerMe/HandRight/HeelHotspot" to="Players/PlayerMe/pointersystem" method="_on_HeelHotspot_body_exited"]
