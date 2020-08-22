@@ -18,8 +18,9 @@ func _on_buttonfetchimages_pressed():
 	get_node("/root/Spatial/ImageSystem").fetchimportpapers()
 	$Viewport/GUI/Panel/Label.text = "Papers fetching"
 
-func _on_buttonshowxs_toggled(button_pressed):
-	$Viewport/GUI/Panel/Label.text = "Not used"
+func _on_buttonminimap_toggled(button_pressed):
+	get_parent().setminimap(button_pressed)
+	$Viewport/GUI/Panel/Label.text = "MiniMap on" if button_pressed else "MiniMap off"
 	
 func _on_buttonheadtorch_toggled(button_pressed):
 	get_parent().setheadtorchlight(button_pressed)
@@ -43,7 +44,7 @@ func _on_buttonswapcontrollers_pressed():
 func _ready():
 	$Viewport/GUI/Panel/ButtonLoad.connect("pressed", self, "_on_buttonload_pressed")
 	$Viewport/GUI/Panel/ButtonSave.connect("pressed", self, "_on_buttonsave_pressed")
-	$Viewport/GUI/Panel/ButtonShowXS.connect("toggled", self, "_on_buttonshowxs_toggled")
+	$Viewport/GUI/Panel/ButtonMiniMap.connect("toggled", self, "_on_buttonminimap_toggled")
 	$Viewport/GUI/Panel/ButtonFetchImages.connect("pressed", self, "_on_buttonfetchimages_pressed")
 	$Viewport/GUI/Panel/ButtonHeadtorch.connect("toggled", self, "_on_buttonheadtorch_toggled")
 	$Viewport/GUI/Panel/ButtonDoppelganger.connect("toggled", self, "_on_buttondoppelganger_toggled")

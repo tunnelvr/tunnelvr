@@ -124,8 +124,8 @@ func loaddefaultsketchsystem():
 
 	var centrelinedrawing = newXCuniquedrawing(DRAWING_TYPE.DT_CENTRELINE, "centreline")
 	var centrelinedatafile = File.new()
-	centrelinedrawing.xcresource = "res://surveyscans/dukest1resurvey2009.json"
-	#centrelinedrawing.xcresource = "res://surveyscans/Ireby/Ireby2/Ireby2.json"
+	#centrelinedrawing.xcresource = "res://surveyscans/dukest1resurvey2009.json"
+	centrelinedrawing.xcresource = "res://surveyscans/Ireby/Ireby2/Ireby2.json"
 	centrelinedatafile.open(centrelinedrawing.xcresource, File.READ)
 	var centrelinedata = parse_json(centrelinedatafile.get_line())
 	centrelinedrawing.importcentrelinedata(centrelinedata, self)

@@ -111,7 +111,7 @@ func importcentrelinedata(centrelinedata, sketchsystem):
 	$XCdrawingplane.visible = false
 	$XCdrawingplane/CollisionShape.disabled = true
 	drawingtype = DRAWING_TYPE.DT_CENTRELINE
-	assert (get_name() == "centreline")
+	#assert (get_name() == "centreline")
 	assert ($XCnodes.get_child_count() == 0 and len(nodepoints) == 0 and len(onepathpairs) == 0 and len(xctubesconn) == 0)
 
 	var stationpointscoords = centrelinedata.stationpointscoords
@@ -232,8 +232,6 @@ func newxcnode(name=null):
 	$XCnodes.add_child(xcn)
 	return xcn
 
-
-
 func removexcnode(xcn, brejoinlines, sketchsystem):
 	var nodename = xcn.get_name()
 	nodepoints.erase(nodename)
@@ -280,25 +278,27 @@ func updatelinksandtubesafterchange(xctubesconnupdated, sketchsystem):
 		xctube.updatetubelinkpaths(sketchsystem)
 		sketchsystem.rpc("xctubefromdata", xctube.exportxctrpcdata())
 
-func updatexcpaths():
-	if drawingtype == DRAWING_TYPE.DT_PAPERTEXTURE:
+func updatexcpaths(llinewidth=0):
+	var xcembeddedtype = (llinewidth==0)
+	if drawingtype == DRAWING_TYPE.DT_PAPERTEXTURE and llinewidth == 0:
 		return
 	if len(onepathpairs) == 0:
 		$PathLines.mesh = null
 		return
 		
-	#print("iupdatingxxccpaths ", len(onepathpairs), "  ", drawingtype)
-	var llinewidth = linewidth*0.7 if drawingtype == DRAWING_TYPE.DT_CENTRELINE else linewidth
+	if llinewidth == 0:
+		llinewidth = linewidth*0.7 if drawingtype == DRAWING_TYPE.DT_CENTRELINE else linewidth
 	var surfaceTool = SurfaceTool.new()
 	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
 	for j in range(0, len(onepathpairs), 2):
 		var p0 = nodepoints[onepathpairs[j]]
 		var p1 = nodepoints[onepathpairs[j+1]]
-		var perp = llinewidth*Vector2(-(p1.y - p0.y), p1.x - p0.x).normalized()
-		var p0left = p0 - Vector3(perp.x, perp.y, 0)
-		var p0right = p0 + Vector3(perp.x, perp.y, 0)
-		var p1left = p1 - Vector3(perp.x, perp.y, 0)
-		var p1right = p1 + Vector3(perp.x, perp.y, 0)
+		var perp = Vector3(-(p1.y - p0.y), p1.x - p0.x, 0) if xcembeddedtype else Vector3(-(p1.z - p0.z), 0, p1.x - p0.x)
+		var fperp = llinewidth*perp.normalized()
+		var p0left = p0 - fperp
+		var p0right = p0 + fperp
+		var p1left = p1 - fperp
+		var p1right = p1 + fperp
 		surfaceTool.add_vertex(p0left)
 		surfaceTool.add_vertex(p1left)
 		surfaceTool.add_vertex(p0right)

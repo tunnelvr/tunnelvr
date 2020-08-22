@@ -17,8 +17,7 @@ extends Spatial
 
 # * hold back laggy motions by 500ms and animate between the positions
 
-# * some way to see the names of things in the distance
-
+# * some way to see the names of things in the distanc
 
 # * put name of image into XCdrawing (incl paper type)
 
