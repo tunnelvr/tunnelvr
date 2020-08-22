@@ -129,8 +129,9 @@ func loaddefaultsketchsystem():
 	centrelinedatafile.open(centrelinedrawing.xcresource, File.READ)
 	var centrelinedata = parse_json(centrelinedatafile.get_line())
 	centrelinedrawing.importcentrelinedata(centrelinedata, self)
-	
-	
+	var m = centrelinedrawing.get_node("PathLines").mesh
+	get_node("/root/Spatial/LaserSquare/Spatial/MeshInstance").mesh = m
+	print(get_node("/root/Spatial/LaserSquare/Spatial/MeshInstance").mesh)
 	#var xsectgps = centrelinedata.xsectgps
 	print("default lllloaded")
 
@@ -162,7 +163,7 @@ remotesync func sketchsystemfromdict(save_dict):
 			
 	for i in range(len(xctubesData)):
 		var xctubeData = xctubesData[i]
-		print(i, xctubeData)
+		#print(i, xctubeData)
 		var xctube = newXCtube(get_node("XCdrawings").get_node(xctubeData[0]), get_node("XCdrawings").get_node(xctubeData[1]))
 		xctube.xcdrawinglink = xctubeData[2]
 		xctube.updatetubelinkpaths(self)

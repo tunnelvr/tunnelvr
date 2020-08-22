@@ -307,7 +307,7 @@ func updatexcpaths():
 		surfaceTool.add_vertex(p1right)
 	surfaceTool.generate_normals()
 	$PathLines.mesh = surfaceTool.commit()
-	print("usus ", len($PathLines.mesh.get_faces()), " ", len($PathLines.mesh.get_faces())) #surfaceTool.generate_normals()
+	#print("usus ", len($PathLines.mesh.get_faces()), " ", len($PathLines.mesh.get_faces())) #surfaceTool.generate_normals()
 	$PathLines.set_surface_material(0, load("res://guimaterials/XCdrawingCentrelines.material") if drawingtype == DRAWING_TYPE.DT_CENTRELINE else load("res://guimaterials/XCdrawingPathlines.material"))
 
 func sd0(a, b):

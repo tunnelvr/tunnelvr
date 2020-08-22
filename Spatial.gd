@@ -5,21 +5,17 @@ extends Spatial
 
 # * Do the README file with instructions
 
+# * Build the cave in a 1:100 scale, like the doppelganger, on a plate that we can spin and move up and down
+
 # * selection node should be a mask on top of the node rather than a change in its material (so we can make it sticky)
 # * apply this tech to a vertical marker in an XC wall for positioning it, or cutting new one
 # * perfect overhead light so things project down to the correct place
 
 # * put xcresource (and xcname) into mergexcrpcdata
 
-# * finish redoing the Websockets to sensorcity.io and prove we can control LED lights from it
-
-
 # * cannot illegally delete centreline nodes
 
 # * hold back laggy motions by 500ms and animate between the positions
-
-# * Copy of the centreline mesh but in a small area on the back of your hand, like a 3D map.
-# * Or toss it out there on the ground to work out your plan
 
 # * some way to see the names of things in the distance
 

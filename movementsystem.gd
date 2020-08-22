@@ -105,7 +105,9 @@ func _physics_process(delta):
 	collision_shape.transform.origin.y = (player_height / 2.0)
 	#print(get_viewport().get_mouse_position(), Input.get_mouse_mode())
 	handleft.visible = playernode.arvrinterface != null and handleft.get_is_active()
-	handleft.get_node("csghandleft").setpartcolor(2, Color("222277") if handleft.get_node("TipTouchRay").is_colliding() else Color("#FFFFFF"))
+	if handleft.get_node("TipTouchRay").is_colliding() != handright.get_node("LaserOrient/MeshDial").visible:
+		handright.get_node("LaserOrient/MeshDial").visible = handleft.get_node("TipTouchRay").is_colliding()
+		handleft.get_node("csghandleft").setpartcolor(2, Color("222277") if handleft.get_node("TipTouchRay").is_colliding() else Color("#FFFFFF"))
 
 	if nextphysicsrotatestep != 0:
 		var t1 = Transform()
