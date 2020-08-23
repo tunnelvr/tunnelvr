@@ -6,9 +6,10 @@ extends Spatial
 
 # * Do the README file with instructions
 
-# * have a blue colour of rock for watery floor
 
 # * exportxctrpcdata to be primary tube 
+
+# * grip deselect tube
 
 # * An active target tube has a sector highlighted, which we can cycle through (as a material number)
 # * should correspond to the join we have  
