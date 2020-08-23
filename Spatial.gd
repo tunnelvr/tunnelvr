@@ -3,9 +3,51 @@ extends Spatial
 
 # Stuff to do:
 
+
 # * Do the README file with instructions
 
-# * Build the cave in a 1:100 scale, like the doppelganger, on a plate that we can spin and move up and down
+# * have a blue colour of rock for watery floor
+
+# * exportxctrpcdata to be primary tube 
+
+# * An active target tube has a sector highlighted, which we can cycle through (as a material number)
+# * should correspond to the join we have  
+# * setactivetargettube.
+# * can set the type of the material (including invisible and no collision, so open on side)
+# * a gripclick inserts a new XC in the tube that we can orient and move
+
+# * loading second round of images does not make new nodes (or controls the names properly) 
+
+# * Position of the doppelganger other player is queued in its own object by the rpc and only updated on the physics process
+# * must find an answer to the var materialscanimage = load("res://surveyscans/scanimagefloor.material")
+
+# * updatetubeshell to know the material colours from xcsectormaterials
+
+# * On the Occulus joystick, a move to the right is equivalent to a click when above 0.9 (but would need to be debounced)
+
+# * may hide/delete all the nodes of an XC not on a selected tube.
+# * so the way to find an XC is to click on the tube
+
+# * and XC is visible (or its nodes are) if there is no tube 
+
+
+# * A selected tube makes the XCnodes bigger?
+# * or we can equivalently cycle through the nodes with right and left VR_Pad
+
+# * Use CollisionLayer class
+
+# * select tube selects the end xcshapes (makes visible)
+# *    see xcsectormaterials vs togglematerialcycle
+
+# * tube material must be remembered (and one of the materials is blank)
+# * active tube selection
+
+# * grip on XCshape then click gets into rotate mode like with papersheets (but preserving upwardness)
+
+# * what's the black papersheet?
+
+# * possibly lose the connecting xcdrawings to floor feature 
+# * just have trimmed sheets that can become floors (or xcs)
 
 # * selection node should be a mask on top of the node rather than a change in its material (so we can make it sticky)
 # * apply this tech to a vertical marker in an XC wall for positioning it, or cutting new one
@@ -13,11 +55,10 @@ extends Spatial
 
 # * put xcresource (and xcname) into mergexcrpcdata
 
-# * cannot illegally delete centreline nodes
-
 # * hold back laggy motions by 500ms and animate between the positions
+# * (simulate this with dodgy doppelganger.  Local game timestamp is OS.get_ticks_usec()
 
-# * some way to see the names of things in the distanc
+# * some way to see the names of things in the distance
 
 # * put name of image into XCdrawing (incl paper type)
 
@@ -191,7 +232,6 @@ onready var playerMe = $Players/PlayerMe
 var VRstatus = "none"
 	
 func _ready():
-	
 	if hostipnumber == "":
 		print("Initializing VR");
 		var available_interfaces = ARVRServer.get_interfaces();
@@ -257,6 +297,10 @@ func _ready():
 	print("nnet-id ", networkID)
 	playerMe.set_network_master(networkID)
 	playerMe.networkID = networkID
+
+	playerMe.get_node("GUIPanel3D/Viewport/GUI/Panel/ButtonUpdateShell").pressed = true
+	playerMe.get_node("GUIPanel3D")._on_buttonupdateshell_toggled(true)
+
 
 func nextplayernetworkidinringskippingdoppelganger(deletedid):
 	for i in range($Players.get_child_count()):

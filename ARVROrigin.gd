@@ -88,5 +88,6 @@ func playerpositiondict():
 			 "handrighttransform":$HandRight.transform if $HandRight.visible else null, 
 			 "laserrotation":$HandRight/LaserOrient.rotation.x, 
 			 "laserlength":$HandRight/LaserOrient/Length.scale.z, 
-			 "laserspot":$HandRight/LaserOrient/LaserSpot.visible 
+			 "laserspot":$HandRight/LaserOrient/LaserSpot.visible, 
+			 "timestamp":OS.get_ticks_usec() 
 			}

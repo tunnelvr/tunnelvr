@@ -4,13 +4,22 @@ extends Spatial
 const XCdrawing = preload("res://nodescenes/XCdrawing.tscn")
 const XCtube = preload("res://nodescenes/XCtube.tscn")
 
-# Called when the node enters the scene tree for the first time.
-func _ready():
-	loaddefaultsketchsystem()
-	
+const materialdirt = preload("res://lightweighttextures/simpledirt.material")
+const materialrock = preload("res://lightweighttextures/partialrock.material")
+const materialrockwater = preload("res://lightweighttextures/partialrock_water.material")
+var materialscanimage = load("res://surveyscans/scanimagefloor.material")
+var materials = [ materialdirt, materialrock, materialrockwater, materialscanimage ]
+const materialhighlight = preload("res://lightweighttextures/simpledirt_highlight.material")
+
 const linewidth = 0.05
 var tubeshellsvisible = false
 
+func _ready():
+	var floordrawing = newXCuniquedrawing(DRAWING_TYPE.DT_FLOORTEXTURE, "paper_DukeStResurvey-drawnup-p3")
+	get_node("/root/Spatial/ImageSystem").fetchpaperdrawing(floordrawing)
+	#loadcentrelinefile("res://surveyscans/dukest1resurvey2009.json")
+	#loadcentrelinefile("res://surveyscans/Ireby/Ireby2/Ireby2.json")
+	
 func xcapplyonepath(xcn0, xcn1): 
 	var xcdrawing0 = xcn0.get_parent().get_parent()
 	var xcdrawing1 = xcn1.get_parent().get_parent()
@@ -65,6 +74,8 @@ remote func xctubefromdata(xctdata):
 		xctube = newXCtube(xcdrawing0, get_node("XCdrawings").get_node(xctdata[2]))
 	assert (xctube.get_name() == xctdata[0])
 	xctube.xcdrawinglink = xctdata[3]
+	if len(xctdata) >= 5:
+		xctube.xcsectormaterials = xctdata[4]
 	xctube.updatetubelinkpaths(self)
 
 remotesync func updateworkingshell(makevisible):
@@ -84,7 +95,7 @@ func sketchsystemtodict():
 		xcdrawingsData.append(xcdrawing.exportxcdata())
 	var xctubesData = [ ]
 	for xctube in $XCtubes.get_children():
-		xctubesData.append([xctube.xcname0, xctube.xcname1, xctube.xcdrawinglink])
+		xctubesData.append([xctube.xcname0, xctube.xcname1, xctube.xcdrawinglink, xctube.xcsectormaterials])
 	var save_dict = { "xcdrawings":xcdrawingsData,
 					  "xctubes":xctubesData }
 	return save_dict
@@ -116,16 +127,12 @@ func getactivefloordrawing():
 	assert (floordrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE)
 	return floordrawing
 
-func loaddefaultsketchsystem():
-	#clearsketchsystem()   # relies on Spatial.playerMe, which has not been initialized
-	var floordrawing = newXCuniquedrawing(DRAWING_TYPE.DT_FLOORTEXTURE, "paper_DukeStResurvey-drawnup-p3")
-	#$XCdrawings/floordrawing.setasfloortype("res://surveyscans/DukeStResurvey-drawnup-p3.jpg", true)
-	get_node("/root/Spatial/ImageSystem").fetchpaperdrawing(floordrawing)
-
+func loadcentrelinefile(centrelinefile):
 	var centrelinedrawing = newXCuniquedrawing(DRAWING_TYPE.DT_CENTRELINE, "centreline")
 	var centrelinedatafile = File.new()
-	#centrelinedrawing.xcresource = "res://surveyscans/dukest1resurvey2009.json"
-	centrelinedrawing.xcresource = "res://surveyscans/Ireby/Ireby2/Ireby2.json"
+
+	centrelinedrawing.xcresource = centrelinefile
+
 	centrelinedatafile.open(centrelinedrawing.xcresource, File.READ)
 	var centrelinedata = parse_json(centrelinedatafile.get_line())
 	centrelinedrawing.importcentrelinedata(centrelinedata, self)
@@ -166,6 +173,8 @@ remotesync func sketchsystemfromdict(save_dict):
 		#print(i, xctubeData)
 		var xctube = newXCtube(get_node("XCdrawings").get_node(xctubeData[0]), get_node("XCdrawings").get_node(xctubeData[1]))
 		xctube.xcdrawinglink = xctubeData[2]
+		if len(xctubeData) >= 4:
+			xctube.xcsectormaterials = xctubeData[3]
 		xctube.updatetubelinkpaths(self)
 	
 	print("lllloaded")

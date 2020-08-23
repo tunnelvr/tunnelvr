@@ -42,11 +42,15 @@ var selectedtarget = null
 var selectedtargettype = "none"
 var selectedtargetwall = null
 var gripbuttonpressused = false
+
 var activetargetwall = null
 var activetargetwallgrabbedtransform = null
 var activetargetwallgrabbedpoint = null
 var activetargetwallgrabbedpointoffset = null
 var activetargetwallgrabbedlocalpoint = null
+
+var activetargettube = null
+var activetargettubesector = 0
 
 var xcdrawingactivematerial = preload("res://guimaterials/XCdrawing_active.material")
 var xcdrawingmaterial = preload("res://guimaterials/XCdrawing.material")
@@ -108,12 +112,27 @@ func setactivetargetwall(newactivetargetwall):
 		for xcnode in activetargetwall.get_node("XCnodes").get_children():
 			if xcnode != selectedtarget:
 				xcnode.get_node("CollisionShape/MeshInstance").set_surface_material(0, preload("res://guimaterials/XCnode_nodepthtest.material"))
-		LaserRayCast.collision_mask = 8 + 16 
+		LaserRayCast.collision_mask = CollisionLayer.CL_Pointer | CollisionLayer.CL_PointerFloor 
 	else:
-		LaserRayCast.collision_mask = 8 + 16 + 32
+		LaserRayCast.collision_mask = CollisionLayer.CL_Pointer | CollisionLayer.CL_PointerFloor | CollisionLayer.CL_CaveWall
 	if activetargetwall != null and activetargetwall.drawingtype == DRAWING_TYPE.DT_PAPERTEXTURE:
 		activetargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").get_surface_material(0).albedo_color = Color("#DDFFCC")
 
+func setactivetargettubesector(newactivetargettubesector):
+	if activetargettubesector != -1 and activetargettube != null:
+		activetargettube.get_node("XCtubeshell/MeshInstance").set_surface_material(activetargettubesector, sketchsystem.materials[activetargettube.xcsectormaterials[activetargettubesector]])
+	activetargettubesector = newactivetargettubesector
+	if activetargettubesector != -1:
+		activetargettube.get_node("XCtubeshell/MeshInstance").set_surface_material(activetargettubesector, sketchsystem.materialhighlight)
+
+func setactivetargettube(newactivetargettube):
+	setactivetargetwall(null)
+	if activetargettube != null:
+		setactivetargettubesector(-1)
+	activetargettube = newactivetargettube
+	activetargettubesector = -1
+	if activetargettube != null:
+		setactivetargettubesector(0)
 
 func setbillboardlabel(ltext, pos):
 	var textpanel = sketchsystem.get_node("BillboardLabel")
@@ -183,6 +202,9 @@ func onpointing(newpointertarget, newpointertargetpoint):
 		elif pointertargettype == "XCdrawing":
 			LaserSpot.visible = true
 			LaserShadow.visible = (pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING)
+		elif pointertargettype == "XCtube":
+			LaserSpot.visible = true
+			LaserShadow.visible = false
 		else:
 			LaserSpot.visible = false
 			LaserShadow.visible = false
@@ -264,7 +286,7 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 		selectedtargetwall.movexcnode(selectedtarget, pointertargetpoint, sketchsystem)
 
 	# reselection when selected on grip deletes the node		
-	elif gripbuttonheld and selectedtargettype == "XCnode" and pointertarget == selectedtarget:
+	elif gripbuttonheld and selectedtargettype == "XCnode" and pointertarget == selectedtarget and (selectedtargetwall.drawingtype != DRAWING_TYPE.DT_CENTRELINE):
 		var recselectedtarget = selectedtarget
 		var recselectedtargetwall = selectedtargetwall
 		setselectedtarget(null)
@@ -361,9 +383,9 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 			LaserSpot.visible = false
 			LaserShadow.visible = false
 			
-	# grip condition is ignored (assumed off) her on
-	#elif gripbuttonheld:
-	#	pass
+	elif pointertargettype == "XCtube":
+		setactivetargettube(pointertargetwall)
+
 	elif pointertargettype == "Papersheet":
 		setselectedtarget(null)
 		LaserSpot.global_transform.origin = pointertargetpoint
@@ -377,6 +399,16 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 			activetargetwallgrabbedtransform = LaserSpot.global_transform.affine_inverse() * pointertargetwall.global_transform
 			activetargetwallgrabbedpoint = null
 			
+	# grab and rotate XCdrawing in place (if empty)
+	elif pointertargettype == "XCdrawing" and gripbuttonheld and selectedtargettype == "none" and len(pointertargetwall.nodepoints) == 0:
+		activetargetwallgrabbedtransform = LaserSpot.global_transform.affine_inverse() * pointertargetwall.global_transform
+		activetargetwallgrabbedpoint = LaserSpot.global_transform.origin
+		activetargetwallgrabbedlocalpoint = pointertargetwall.global_transform.affine_inverse() * LaserSpot.global_transform.origin
+		activetargetwallgrabbedpointoffset = LaserSpot.global_transform.origin - pointertargetwall.global_transform.origin
+
+	# grip condition is ignored (assumed off) her on
+	#elif gripbuttonheld:
+	#	pass
 		
 	# make new point onto wall, connected if necessary
 	elif pointertargettype == "XCdrawing":
@@ -415,7 +447,7 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 
 				
 func buttonpressed_vrpad(gripbuttonheld, left_right, up_down):
-	if pointertargettype == "XCdrawing":
+	if pointertargettype == "XCdrawing" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		if abs(up_down) < 0.5 and abs(left_right) > 0.1:
 			var dy = (1 if left_right > 0 else -1)*(1.0 if abs(left_right) < 0.8 else 0.1)
 			pointertargetwall.get_node("XCdrawingplane").scale.x = max(1, pointertargetwall.get_node("XCdrawingplane").scale.x + dy)
@@ -423,7 +455,7 @@ func buttonpressed_vrpad(gripbuttonheld, left_right, up_down):
 			xcdrawinghighlightmaterial.uv1_scale = pointertargetwall.get_node("XCdrawingplane").get_scale()
 			xcdrawinghighlightmaterial.uv1_offset = -xcdrawinghighlightmaterial.uv1_scale/2
 				
-	if pointertargettype == "Papersheet":
+	elif pointertargettype == "Papersheet":
 		if abs(up_down) > 0.5:
 			print(LaserLength.global_transform.basis.z)
 			var dd = (1 if up_down > 0 else -1)*(0.2 if LaserLength.scale.z < 1.5 else 1.0)
@@ -436,6 +468,13 @@ func buttonpressed_vrpad(gripbuttonheld, left_right, up_down):
 			pointertargetwall.get_node("XCdrawingplane").scale.x *= fs
 			pointertargetwall.get_node("XCdrawingplane").scale.y *= fs
 
+	elif pointertargettype == "XCtube" and activetargettube != null and pointertargetwall == activetargettube:
+		if abs(left_right) > 0.65:
+			var nsectors = activetargettube.get_node("XCtubeshell/MeshInstance").get_surface_material_count()
+			setactivetargettubesector((activetargettubesector + (1 if left_right > 0 else nsectors-1))%nsectors)
+		elif abs(up_down) > 0.70:
+			activetargettube.xcsectormaterials[activetargettubesector] = (activetargettube.xcsectormaterials[activetargettubesector] + (1 if up_down > 0 else len(sketchsystem.materials) - 1))%len(sketchsystem.materials)
+
 func _on_button_release(p_button):
 	if p_button == BUTTONS.VR_GRIP:
 		buttonreleased_vrgrip()
@@ -444,8 +483,9 @@ func _on_button_release(p_button):
 
 func buttonreleased_vrgrip():
 	handright.get_node("csghandright").setpartcolor(4, "#FFFFFF")
+
 	if gripbuttonpressused:
-		pass
+		pass  # the trigger was pulled during the grip operation
 	
 	elif pointertargettype == "GUIPanel3D":
 		if guipanel3d.visible:
@@ -466,7 +506,7 @@ func buttonreleased_vrgrip():
 		setselectedtarget(null)
 		
 	elif pointertargettype == "XCtube":
-		pointertargetwall.togglematerialcycle()
+		pointertargetwall.togglematerialcycle(sketchsystem)
 		
 func buttonreleased_vrtrigger():
 	if activetargetwallgrabbedtransform != null:
