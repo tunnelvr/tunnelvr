@@ -1,4 +1,4 @@
-[gd_scene load_steps=51 format=2]
+[gd_scene load_steps=50 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://default_env.tres" type="Environment" id=2]
@@ -140,10 +140,6 @@ shader_param/texture_albedo = SubResource( 16 )
 [sub_resource type="PlaneMesh" id=18]
 material = SubResource( 17 )
 size = Vector2( 4, 2 )
-
-[sub_resource type="SpatialMaterial" id=19]
-params_cull_mode = 2
-albedo_color = Color( 0.976471, 0.0235294, 0.0235294, 1 )
 
 [sub_resource type="SpatialMaterial" id=20]
 params_cull_mode = 2
@@ -359,12 +355,6 @@ transform = Transform( 1, 0, 0, 0, 0.697453, 0.716631, 0, -0.716631, 0.697453, 2
 material_override = ExtResource( 3 )
 mesh = SubResource( 18 )
 material/0 = ExtResource( 3 )
-
-[node name="Spatial" type="Spatial" parent="LaserSquare"]
-transform = Transform( 0.01, 0, 0, 0, 0.01, 0, 0, 0, 0.01, 0, 2, 0 )
-
-[node name="MeshInstance" type="MeshInstance" parent="LaserSquare/Spatial"]
-material_override = SubResource( 19 )
 
 [node name="BoulderClutter" type="Spatial" parent="."]
 

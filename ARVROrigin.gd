@@ -5,7 +5,6 @@ var xcdrawing_active_material = preload("res://guimaterials/XCdrawing_active.mat
 onready var xcdrawing_material_albedoa = xcdrawing_material.albedo_color.a
 onready var xcdrawing_active_material_albedoa = xcdrawing_active_material.albedo_color.a
 var doppelganger = null 
-var minimap = null 
 
 var arvrinterface = null
 var connectiontoserveractive = false
@@ -33,29 +32,7 @@ func setdoppelganger(doppelgangeron):
 		
 	elif not doppelgangeron and doppelganger != null:
 		doppelganger.queue_free()
-		doppelganger = null
-
-func setminimap(minimapon):
-	if minimapon:
-		if minimap == null:
-			var sketchsystem = get_node("/root/Spatial/SketchSystem")
-			var centrelinedrawing = null
-			for xcdrawing in sketchsystem.get_node("XCdrawings").get_children():
-				if xcdrawing.drawingtype == DRAWING_TYPE.DT_CENTRELINE:
-					centrelinedrawing = xcdrawing
-			if centrelinedrawing != null:
-				minimap = sketchsystem.newXCuniquedrawing(DRAWING_TYPE.DT_PAPERTEXTURE, "minimap")
-				minimap.nodepoints = centrelinedrawing.nodepoints
-				minimap.onepathpairs = centrelinedrawing.onepathpairs
-				minimap.scale = Vector3(0.01, 0.01, 0.01)
-				minimap.updatexcpaths(1.0)
-		minimap.visible = true
-		minimap.global_transform.origin = Vector3($HeadCam.global_transform.origin.x, global_transform.origin.y, $HeadCam.global_transform.origin.z) - 3*Vector3($HeadCam.global_transform.basis.z.x, 0, $HeadCam.global_transform.basis.z.z).normalized()
-		
-	elif not minimapon and minimap != null:
-		minimap.queue_free()
-		minimap = null
-	
+		doppelganger = null	
 
 func _ready():
 	$HandRight/csghandright.setpartcolor(1, "#FFFFFF")

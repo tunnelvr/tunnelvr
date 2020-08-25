@@ -139,8 +139,6 @@ func loadcentrelinefile(centrelinefile):
 	var centrelinedata = parse_json(centrelinedatafile.get_line())
 	centrelinedrawing.importcentrelinedata(centrelinedata, self)
 	var m = centrelinedrawing.get_node("PathLines").mesh
-	get_node("/root/Spatial/LaserSquare/Spatial/MeshInstance").mesh = m
-	print(get_node("/root/Spatial/LaserSquare/Spatial/MeshInstance").mesh)
 	#var xsectgps = centrelinedata.xsectgps
 	print("default lllloaded")
 

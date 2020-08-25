@@ -19,8 +19,8 @@ func _on_buttonfetchimages_pressed():
 	$Viewport/GUI/Panel/Label.text = "Papers fetching"
 
 func _on_buttonminimap_toggled(button_pressed):
-	get_parent().setminimap(button_pressed)
-	$Viewport/GUI/Panel/Label.text = "MiniMap on" if button_pressed else "MiniMap off"
+	#get_parent().setminimap(button_pressed)
+	$Viewport/GUI/Panel/Label.text = "MiniMap obsolete"
 	
 func _on_buttonheadtorch_toggled(button_pressed):
 	get_parent().setheadtorchlight(button_pressed)
