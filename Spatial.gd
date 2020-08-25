@@ -4,14 +4,26 @@ extends Spatial
 # Stuff to do:
 
 
-# * Check README online and add networking instructions
+# * add networking instructions to README
+
+# * overhead view to use remote transform on the camera cone (make out of box and cone) -- scale up and down with the zoom
+
+# * PlanView into own scene
+# * PlanView into PlayerMe
+# * colours of materials to highlight (or set part of cave)
+
 
 # * active XCdrawing should make PathLines no depth test
+
+
+# * camera to be a huge cone in the picture
+
+# Put LaserShadow under a node or set_as_toplevel to remove the transform from it
 
 # * use joypos instead of left_right stuff
 
 # * active node to be an overlay
-# * is there a node that is in real space and not relative space transform?
+# * is there a node that is in real space and not relative space transform (for laser shadow)
 
 # * Make directory of environments and move them in there using git move
 

@@ -1,4 +1,4 @@
-[gd_scene load_steps=50 format=2]
+[gd_scene load_steps=58 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/default_env.tres" type="Environment" id=2]
@@ -20,6 +20,7 @@
 [ext_resource path="res://ARVROrigin.gd" type="Script" id=18]
 [ext_resource path="res://guimaterials/laserselectline.material" type="Material" id=19]
 [ext_resource path="res://environments/overheadview_env.tres" type="Environment" id=20]
+[ext_resource path="res://guimaterials/laser.material" type="Material" id=21]
 [ext_resource path="res://guimaterials/laserspot.material" type="Material" id=22]
 [ext_resource path="res://guimaterials/lasershadow.material" type="Material" id=23]
 
@@ -178,6 +179,51 @@ roughness = 0.51
 [sub_resource type="BoxShape" id=27]
 extents = Vector3( 0.8, 0.5, 0.01 )
 
+[sub_resource type="SpatialMaterial" id=30]
+albedo_color = Color( 0.0313726, 0.113725, 0.992157, 1 )
+emission_enabled = true
+emission = Color( 0.0117647, 0.105882, 0.713726, 1 )
+emission_energy = 1.0
+emission_operator = 0
+emission_on_uv2 = false
+
+[sub_resource type="CubeMesh" id=31]
+material = SubResource( 30 )
+size = Vector3( 1, 0.3, 1 )
+
+[sub_resource type="SpatialMaterial" id=32]
+albedo_color = Color( 0.980392, 0.988235, 0.027451, 1 )
+emission_enabled = true
+emission = Color( 0.984314, 0.988235, 0.113725, 1 )
+emission_energy = 0.41
+emission_operator = 0
+emission_on_uv2 = false
+
+[sub_resource type="CylinderMesh" id=33]
+material = SubResource( 32 )
+top_radius = 0.4
+bottom_radius = 0.4
+height = 0.2
+radial_segments = 8
+rings = 1
+
+[sub_resource type="SpatialMaterial" id=34]
+albedo_color = Color( 0.329412, 0.0313726, 0.0313726, 1 )
+metallic = 0.75
+roughness = 0.3
+
+[sub_resource type="CylinderMesh" id=35]
+material = SubResource( 34 )
+top_radius = 1.8
+bottom_radius = 0.001
+height = 0.6
+radial_segments = 8
+rings = 1
+
+[sub_resource type="CubeMesh" id=36]
+material = ExtResource( 21 )
+size = Vector3( 0.02, 1, 0.02 )
+
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
 
@@ -260,7 +306,7 @@ cast_to = Vector3( 0, 0, -50 )
 collision_mask = 56
 
 [node name="LaserSpot" type="MeshInstance" parent="Players/PlayerMe/HandRight/LaserOrient"]
-transform = Transform( 1, 0, 0, 0, 1, -5.96046e-08, 0, 5.96046e-08, 1, 0, 0, -1 )
+transform = Transform( 1, 0, 0, 0, 1, -8.9407e-08, 0, 8.9407e-08, 1, -0.721119, 1.90355, -5.47553 )
 mesh = SubResource( 5 )
 material/0 = null
 
@@ -386,9 +432,9 @@ shadow_color = Color( 0.388235, 0.0705882, 0.0705882, 1 )
 script = ExtResource( 8 )
 
 [node name="OverheadView" type="Spatial" parent="."]
-transform = Transform( 1, 0, 0, 0, 0.829915, 0.55789, 0, -0.55789, 0.829915, -0.521121, 0.974229, -12.0698 )
 
 [node name="PlanView" type="StaticBody" parent="OverheadView"]
+transform = Transform( 1, 0, 0, 0, 0.819152, 0.573577, 0, -0.573577, 0.819152, -3.5665, 0.449535, -13.3568 )
 collision_layer = 8
 
 [node name="MeshInstance" type="MeshInstance" parent="OverheadView/PlanView"]
@@ -410,10 +456,47 @@ size = Vector2( 800, 800 )
 render_target_v_flip = true
 
 [node name="Camera" type="Camera" parent="OverheadView/PlanView/Viewport"]
-transform = Transform( 1, 0, 0, 0, -1.62921e-07, 1, 0, -1, -1.62921e-07, 10, 30, 0 )
+transform = Transform( 1, 0, 0, 0, -1.62921e-07, 1, 0, -1, -1.62921e-07, -1, 50, -12 )
 environment = ExtResource( 20 )
 projection = 1
 fov = 87.5304
 size = 70.0
+
+[node name="RemoteTransform" type="RemoteTransform" parent="OverheadView/PlanView/Viewport/Camera"]
+transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, 0, 0, 0 )
+remote_path = NodePath("../../../../RealPlanCamera")
+update_scale = false
+
+[node name="RealPlanCamera" type="Spatial" parent="OverheadView"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 10, -12 )
+__meta__ = {
+"_editor_description_": ""
+}
+
+[node name="RealCameraBox" type="MeshInstance" parent="OverheadView/RealPlanCamera"]
+transform = Transform( 70, 0, 0, 0, 1, 0, 0, 0, 70, 0, 0.6, 0 )
+cast_shadow = 0
+mesh = SubResource( 31 )
+material/0 = null
+
+[node name="RealCameraLens" type="MeshInstance" parent="OverheadView/RealPlanCamera/RealCameraBox"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.132259, 0 )
+cast_shadow = 0
+mesh = SubResource( 33 )
+material/0 = null
+
+[node name="LaserScope" type="MeshInstance" parent="OverheadView/RealPlanCamera"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 0 )
+cast_shadow = 0
+mesh = SubResource( 35 )
+material/0 = null
+
+[node name="Length" type="Spatial" parent="OverheadView/RealPlanCamera/LaserScope"]
+transform = Transform( 1, 0, 0, 0, 60, 0, 0, 0, 1, 0, 0, 0 )
+
+[node name="LaserVertical" type="MeshInstance" parent="OverheadView/RealPlanCamera/LaserScope/Length"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0 )
+mesh = SubResource( 36 )
+material/0 = null
 [connection signal="body_entered" from="Players/PlayerMe/HandRight/HeelHotspot" to="Players/PlayerMe/pointersystem" method="_on_HeelHotspot_body_entered"]
 [connection signal="body_exited" from="Players/PlayerMe/HandRight/HeelHotspot" to="Players/PlayerMe/pointersystem" method="_on_HeelHotspot_body_exited"]

@@ -561,11 +561,30 @@ func _physics_process(_delta):
 	else:
 		onpointing(null, null)
 	
-	if pointertargettype == "PlanView" and not handright.is_button_pressed(BUTTONS.VR_GRIP):
+	if pointertargettype == "PlanView":
 		var joypos = Vector2(handright.get_joystick_axis(0) if handright.get_is_active() else 0.0, handright.get_joystick_axis(1) if handright.get_is_active() else 0.0)
-		if joypos.length() > 0.1:
-			var plancamera = get_node("/root/Spatial/OverheadView/PlanView/Viewport/Camera")
+		var plancamera = get_node("/root/Spatial/OverheadView/PlanView/Viewport/Camera")
+		if joypos.length() > 0.1 and not handright.is_button_pressed(BUTTONS.VR_GRIP):
 			plancamera.translation += Vector3(joypos.x, 0, -joypos.y)*plancamera.size/2*_delta
+		var collider_transform = get_node("/root/Spatial/OverheadView/PlanView").global_transform
+		if collider_transform.xform_inv(handright.global_transform.origin).z > 0:
+			var shape_size = get_node("/root/Spatial/OverheadView/PlanView/CollisionShape").shape.extents * 2
+			var collider_scale = collider_transform.basis.get_scale()
+			var local_point = collider_transform.xform_inv(pointertargetpoint)
+			local_point /= (collider_scale * collider_scale)
+			local_point /= shape_size
+			local_point += Vector3(0.5, -0.5, 0) # X is about 0 to 1, Y is about 0 to -1.
+			var viewport_point = Vector2(local_point.x, -local_point.y) * get_node("/root/Spatial/OverheadView/PlanView/Viewport").size
+			var laspt = plancamera.project_position(viewport_point, 0)
+			get_node("/root/Spatial/OverheadView/RealPlanCamera/LaserScope").global_transform.origin = laspt
+			#print("pp ", laspt)
+			
+	# Find the viewport position by scaling the relative position by the viewport size. Discard Z.
+
+			get_node("/root/Spatial/OverheadView/RealPlanCamera/LaserScope").visible = true
+	else:
+		get_node("/root/Spatial/OverheadView/RealPlanCamera/LaserScope").visible = false
+
 
 var rightmousebuttonheld = false
 func _input(event):
