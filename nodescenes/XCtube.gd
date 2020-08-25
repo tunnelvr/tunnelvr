@@ -15,11 +15,6 @@ var pickedpolyindex1 = -1
 
 const linewidth = 0.02
 
-func togglematerialcycle(sketchsystem):
-	var m = sketchsystem.materials.find($XCtubeshell/MeshInstance.get_surface_material(0))
-	for i in range($XCtubeshell/MeshInstance.get_surface_material_count()):
-		$XCtubeshell/MeshInstance.set_surface_material(i, sketchsystem.materials[(i+1+m)%len(sketchsystem.materials)])
-
 func xctubeapplyonepath(xcn0, xcn1):
 	print("xcapplyonepathxcapplyonepath-pre", xcn0, xcn1, xcdrawinglink)
 	assert (xcn0.get_parent().get_parent().get_name() == xcname0 and xcn1.get_parent().get_parent().get_name() == xcname1)

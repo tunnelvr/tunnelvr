@@ -18,7 +18,8 @@ func _ready():
 	var floordrawing = newXCuniquedrawing(DRAWING_TYPE.DT_FLOORTEXTURE, "paper_DukeStResurvey-drawnup-p3")
 	get_node("/root/Spatial/ImageSystem").fetchpaperdrawing(floordrawing)
 	#loadcentrelinefile("res://surveyscans/dukest1resurvey2009.json")
-	#loadcentrelinefile("res://surveyscans/Ireby/Ireby2/Ireby2.json")
+	#loadcentrelinefile("res://surveyscans/dukest1resurvey2009json.res")
+	loadcentrelinefile("res://surveyscans/Ireby/Ireby2/Ireby2.json")
 	
 func xcapplyonepath(xcn0, xcn1): 
 	var xcdrawing0 = xcn0.get_parent().get_parent()
@@ -128,6 +129,7 @@ func getactivefloordrawing():
 	return floordrawing
 
 func loadcentrelinefile(centrelinefile):
+	print("  want to open file ", centrelinefile)
 	var centrelinedrawing = newXCuniquedrawing(DRAWING_TYPE.DT_CENTRELINE, "centreline")
 	var centrelinedatafile = File.new()
 

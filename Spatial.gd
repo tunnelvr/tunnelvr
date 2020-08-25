@@ -4,20 +4,43 @@ extends Spatial
 # Stuff to do:
 
 
-# * Do the README file with instructions
+# * Check README online and add networking instructions
+
+# * active XCdrawing should make PathLines no depth test
+
+# * use joypos instead of left_right stuff
+
+# * active node to be an overlay
+# * is there a node that is in real space and not relative space transform?
+
+# * Make directory of environments and move them in there using git move
+
+# * Make a frame and set of UI controls and dragging possible on the window onto the world
+
+# * Attach drawings onto centreline nodes.  Move them about in space there
+
+# * Turn on and off the tubes and make the nodes bigger to grab them
 
 
-# * exportxctrpcdata to be primary tube 
 
-# * grip deselect tube
+# * Label nodes on paper to connect to the centreline nodes
+# * Allow drawing nodes on the paper (so we can make cut outs and labels)
 
-# * An active target tube has a sector highlighted, which we can cycle through (as a material number)
-# * should correspond to the join we have  
-# * setactivetargettube.
-# * can set the type of the material (including invisible and no collision, so open on side)
-# * a gripclick inserts a new XC in the tube that we can orient and move
+# * Camera from above on the whole picture that can scroll around, like a portal
+
+# * pathlines in selected XCdrawing to have no depthtest
+
+# * ConcaveCollision shape always gives a mesh error -- report
 
 # * loading second round of images does not make new nodes (or controls the names properly) 
+
+# * exportxctrpcdata to be primary tube record
+
+# * a gripclick inserts a new XC in the tube that we can orient and move
+
+# * should correspond to the join we have  
+# * can set the type of the material (including invisible and no collision, so open on side)
+
 
 # * Position of the doppelganger other player is queued in its own object by the rpc and only updated on the physics process
 # * must find an answer to the var materialscanimage = load("res://surveyscans/scanimagefloor.material")
@@ -29,16 +52,10 @@ extends Spatial
 # * may hide/delete all the nodes of an XC not on a selected tube.
 # * so the way to find an XC is to click on the tube
 
-# * and XC is visible (or its nodes are) if there is no tube 
-
-
 # * A selected tube makes the XCnodes bigger?
 # * or we can equivalently cycle through the nodes with right and left VR_Pad
 
-# * Use CollisionLayer class
-
-# * select tube selects the end xcshapes (makes visible)
-# *    see xcsectormaterials vs togglematerialcycle
+# * and XC is visible (or its nodes are) if there is no tube 
 
 # * tube material must be remembered (and one of the materials is blank)
 # * active tube selection
@@ -108,7 +125,26 @@ extends Spatial
 
 # * transmit rpc_reliable when trigger released on the positioning of a papersheet
 
-# * 
+# * A bit more quest work
+#  -- print out left hand transforms and find what's crashing it
+#  -- GUIPanel that prints all the gestures and button states
+#  -- find list of canned gestures for the buttons used
+#  -- disable pad for motions in left hand.  Find what it is to fly
+#  -- start making a signal list for the different commands
+#  -- what's wrong with the laser spot in the quest
+#  -- what is the networking situation
+#  -- To rotate hands round to match controllers pointing in -Z thumb +Y, left hand needs rotation (0,-90,90) and right hand needs (0,90,90) 
+#  --   Thumb to index finger is Input.is_joy_button_pressed=JOY_OCULUS_AX=7
+#  --   Thumb to middle finger is Input.is_joy_button_pressed=JOY_OCULUS_BY=1
+#  --   Thumb to ring finger is Input.is_joy_button_pressed=JOY_VR_GRIP=2
+#  --   Thumb to pinky is Input.is_joy_button_pressed=JOY_VR_TRIGGER=15
+#  --   Unreliably can get 2 or 3 at once.  Touchpad activates briefly, but is usually -1, 1 or 0 when idle
+#  --   Fist with thumb sliding from top down along fingers, Input.get_joy_axis(1) -1 -> +1  (axis 0 is not worked out)
+# https://developer.oculus.com/learn/hands-design-interactions/
+# https://developer.oculus.com/learn/hands-design-ui/
+# https://learn.unity.com/tutorial/unit-5-hand-presence-and-interaction?uv=2018.4&courseId=5d955b5dedbc2a319caab9a0#5d96924dedbc2a6236bc1191
+# https://www.youtube.com/watch?v=gpQePH-Ffbw
+
 
 # * moving floor up and down (also transmitted)
 # *  XCpositions and new ones going through rsync?  
@@ -227,6 +263,7 @@ export var hostportnumber: int = 8002
 var perform_runtime_config = true
 var ovr_init_config = null
 var ovr_performance = null
+var ovr_hand_tracking = null
 var networkID = 0
 
 onready var playerMe = $Players/PlayerMe
@@ -243,8 +280,9 @@ func _ready():
 		
 		if arvr_quest:
 			print("found quest, initializing")
-			ovr_init_config = preload("res://addons/godot_ovrmobile/OvrInitConfig.gdns").new()
-			ovr_performance = preload("res://addons/godot_ovrmobile/OvrPerformance.gdns").new()
+			ovr_init_config = load("res://addons/godot_ovrmobile/OvrInitConfig.gdns").new()
+			ovr_performance = load("res://addons/godot_ovrmobile/OvrPerformance.gdns").new()
+			ovr_hand_tracking = load("res://addons/godot_ovrmobile/OvrHandTracking.gdns").new();
 			perform_runtime_config = false
 			ovr_init_config.set_render_target_size_multiplier(1)
 			if arvr_quest.initialize():
@@ -284,7 +322,7 @@ func _ready():
 	get_tree().connect("network_peer_disconnected", self, "_player_disconnected")
 	if hostipnumber == "":
 		networkedmultiplayerenet.create_server(hostportnumber, 5)
-		playerMe.connectiontoserveractive = true
+		playerMe.connectiontoserveractive = (not arvr_quest)
 	else:
 		networkedmultiplayerenet.create_client(hostipnumber, hostportnumber)
 		get_tree().connect("connected_to_server", self, "_connected_to_server")
@@ -338,7 +376,7 @@ func _player_disconnected(id):
 		
 func _connected_to_server():
 	print("_connected_to_server")
-	playerMe.connectiontoserveractive = true
+	playerMe.connectiontoserveractive = true 
 	
 	
 func _connection_failed():

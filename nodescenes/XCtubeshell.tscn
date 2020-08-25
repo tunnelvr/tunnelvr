@@ -1,8 +1,6 @@
-[gd_scene load_steps=3 format=2]
+[gd_scene load_steps=2 format=2]
 
-[sub_resource type="ArrayMesh" id=1]
-
-[sub_resource type="ConcavePolygonShape" id=2]
+[sub_resource type="ConcavePolygonShape" id=1]
 resource_local_to_scene = true
 
 [node name="XCtubeshell" type="StaticBody"]
@@ -12,8 +10,7 @@ collision_mask = 0
 
 [node name="MeshInstance" type="MeshInstance" parent="."]
 layers = 18
-mesh = SubResource( 1 )
 
 [node name="CollisionShape" type="CollisionShape" parent="."]
-shape = SubResource( 2 )
+shape = SubResource( 1 )
 disabled = true

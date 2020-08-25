@@ -20,6 +20,7 @@ export var flyspeed = 250.0
 export var drag_factor = 0.1
 
 func _ready():
+	print("not connecting the handleft controlss**************")
 	handleft.connect("button_pressed", self, "_on_button_pressed")
 	handleft.connect("button_release", self, "_on_button_release")
 	print("ARVRinterfaces ", ARVRServer.get_interfaces())
@@ -121,7 +122,9 @@ func _physics_process(delta):
 		
 	var left_right = handleft.get_joystick_axis(0) if handleft.get_is_active() else 0.0
 	var forwards_backwards = handleft.get_joystick_axis(1) if handleft.get_is_active() else 0.0
-
+	#left_right = 0   # disable when running quest
+	#forwards_backwards = 0
+	
 	var lhkeyvec = Vector2(0, 0)
 	if Input.is_action_pressed("lh_forward"):
 		lhkeyvec.y += 1

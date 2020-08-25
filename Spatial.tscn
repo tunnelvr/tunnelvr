@@ -1,4 +1,4 @@
-[gd_scene load_steps=44 format=2]
+[gd_scene load_steps=51 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://default_env.tres" type="Environment" id=2]
@@ -19,6 +19,7 @@
 [ext_resource path="res://ImageSystem.gd" type="Script" id=17]
 [ext_resource path="res://ARVROrigin.gd" type="Script" id=18]
 [ext_resource path="res://guimaterials/laserselectline.material" type="Material" id=19]
+[ext_resource path="res://overheadview_env.tres" type="Environment" id=20]
 [ext_resource path="res://guimaterials/laserspot.material" type="Material" id=22]
 [ext_resource path="res://guimaterials/lasershadow.material" type="Material" id=23]
 
@@ -52,28 +53,28 @@ height = 0.2
 radial_segments = 6
 rings = 1
 
-[sub_resource type="CylinderMesh" id=19]
+[sub_resource type="CylinderMesh" id=7]
 top_radius = 0.03
 bottom_radius = 0.03
 height = 0.02
 radial_segments = 30
 rings = 1
 
-[sub_resource type="SpatialMaterial" id=20]
+[sub_resource type="SpatialMaterial" id=8]
 albedo_color = Color( 0.172549, 0.168627, 0.168627, 1 )
 
-[sub_resource type="SpatialMaterial" id=21]
+[sub_resource type="SpatialMaterial" id=9]
 albedo_color = Color( 0.968627, 0.0156863, 0.0156863, 1 )
 
-[sub_resource type="CylinderMesh" id=22]
-material = SubResource( 21 )
+[sub_resource type="CylinderMesh" id=10]
+material = SubResource( 9 )
 top_radius = 0.002
 bottom_radius = 0.002
 height = 0.068
 radial_segments = 6
 rings = 1
 
-[sub_resource type="CylinderMesh" id=7]
+[sub_resource type="CylinderMesh" id=11]
 material = ExtResource( 23 )
 top_radius = 0.05
 bottom_radius = 0.05
@@ -81,18 +82,18 @@ height = 0.02
 radial_segments = 8
 rings = 1
 
-[sub_resource type="CubeMesh" id=8]
+[sub_resource type="CubeMesh" id=12]
 material = ExtResource( 19 )
 size = Vector3( 0.01, 0.01, 1 )
 
-[sub_resource type="BoxShape" id=9]
+[sub_resource type="BoxShape" id=13]
 extents = Vector3( 0.02, 0.07, 0.04 )
 
-[sub_resource type="CapsuleShape" id=10]
+[sub_resource type="CapsuleShape" id=14]
 radius = 0.3
 height = 1.2
 
-[sub_resource type="Shader" id=11]
+[sub_resource type="Shader" id=15]
 code = "shader_type spatial;
 render_mode blend_mix,depth_draw_opaque,cull_back,diffuse_burley,specular_schlick_ggx;
 uniform vec4 albedo : hint_color;
@@ -123,10 +124,10 @@ void fragment() {
 }
 "
 
-[sub_resource type="ProxyTexture" id=12]
+[sub_resource type="ProxyTexture" id=16]
 
-[sub_resource type="ShaderMaterial" id=13]
-shader = SubResource( 11 )
+[sub_resource type="ShaderMaterial" id=17]
+shader = SubResource( 15 )
 shader_param/albedo = Color( 0.435294, 0.215686, 0.141176, 0.454902 )
 shader_param/specular = 0.5
 shader_param/metallic = 0.48
@@ -134,29 +135,52 @@ shader_param/roughness = 0.71
 shader_param/point_size = 1.0
 shader_param/uv1_scale = Vector3( 3, 1, 1 )
 shader_param/uv1_offset = Vector3( 0, 0, 0 )
-shader_param/texture_albedo = SubResource( 12 )
+shader_param/texture_albedo = SubResource( 16 )
 
-[sub_resource type="PlaneMesh" id=14]
-material = SubResource( 13 )
+[sub_resource type="PlaneMesh" id=18]
+material = SubResource( 17 )
 size = Vector2( 4, 2 )
 
-[sub_resource type="SpatialMaterial" id=15]
+[sub_resource type="SpatialMaterial" id=19]
 params_cull_mode = 2
 albedo_color = Color( 0.976471, 0.0235294, 0.0235294, 1 )
 
-[sub_resource type="SpatialMaterial" id=16]
+[sub_resource type="SpatialMaterial" id=20]
 params_cull_mode = 2
 albedo_color = Color( 0.992157, 0.992157, 0.666667, 1 )
 albedo_texture = ExtResource( 7 )
 
-[sub_resource type="PlaneMesh" id=17]
-material = SubResource( 16 )
+[sub_resource type="PlaneMesh" id=21]
+material = SubResource( 20 )
 size = Vector2( 1, 1.285 )
 subdivide_width = 4
 subdivide_depth = 4
 
-[sub_resource type="BoxShape" id=18]
+[sub_resource type="BoxShape" id=22]
 extents = Vector3( 0.5, 0.5, 0.643 )
+
+[sub_resource type="QuadMesh" id=23]
+size = Vector2( 1.6, 1 )
+
+[sub_resource type="ViewportTexture" id=24]
+viewport_path = NodePath("OverheadView/PlanView/Viewport")
+
+[sub_resource type="SpatialMaterial" id=25]
+resource_local_to_scene = true
+flags_unshaded = true
+flags_albedo_tex_force_srgb = true
+albedo_texture = SubResource( 24 )
+
+[sub_resource type="CubeMesh" id=26]
+size = Vector3( 1.7, 1.1, 0.1 )
+
+[sub_resource type="SpatialMaterial" id=27]
+albedo_color = Color( 0.0431373, 0.0470588, 0.0627451, 1 )
+metallic = 0.45
+roughness = 0.51
+
+[sub_resource type="BoxShape" id=28]
+extents = Vector3( 0.8, 0.5, 0.01 )
 
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
@@ -252,18 +276,18 @@ material/0 = null
 [node name="MeshDial" type="MeshInstance" parent="Players/PlayerMe/HandRight/LaserOrient"]
 transform = Transform( -1.62921e-07, -1, 0, 0.707107, -1.15202e-07, -0.707107, 0.707107, -1.15202e-07, 0.707107, -0.057, 0, 0 )
 visible = false
-mesh = SubResource( 19 )
-material/0 = SubResource( 20 )
+mesh = SubResource( 7 )
+material/0 = SubResource( 8 )
 
 [node name="MeshDialArrow" type="MeshInstance" parent="Players/PlayerMe/HandRight/LaserOrient/MeshDial"]
 transform = Transform( -1.62921e-07, -0.707107, 0.707107, -1, 1.15202e-07, -1.15202e-07, 4.50002e-15, -0.707107, -0.707107, 0, 0.01, 0 )
-mesh = SubResource( 22 )
+mesh = SubResource( 10 )
 material/0 = null
 
 [node name="LaserShadow" type="MeshInstance" parent="Players/PlayerMe/HandRight"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.20281, 6.95405 )
 visible = false
-mesh = SubResource( 7 )
+mesh = SubResource( 11 )
 material/0 = null
 
 [node name="LaserSelectLine" type="Spatial" parent="Players/PlayerMe/HandRight"]
@@ -274,7 +298,7 @@ visible = false
 
 [node name="Mesh" type="MeshInstance" parent="Players/PlayerMe/HandRight/LaserSelectLine/Scale"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.5 )
-mesh = SubResource( 8 )
+mesh = SubResource( 12 )
 material/0 = null
 
 [node name="HeelHotspot" type="Area" parent="Players/PlayerMe/HandRight"]
@@ -283,14 +307,14 @@ collision_mask = 3072
 
 [node name="CollisionShape" type="CollisionShape" parent="Players/PlayerMe/HandRight/HeelHotspot"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0577492, 0, 0.0655208 )
-shape = SubResource( 9 )
+shape = SubResource( 13 )
 
 [node name="KinematicBody" type="KinematicBody" parent="Players/PlayerMe"]
 collision_mask = 38
 
 [node name="CollisionShape" type="CollisionShape" parent="Players/PlayerMe/KinematicBody"]
 transform = Transform( 1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0.9, 0 )
-shape = SubResource( 10 )
+shape = SubResource( 14 )
 
 [node name="Tail" type="RayCast" parent="Players/PlayerMe/KinematicBody"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0 )
@@ -331,16 +355,16 @@ unit_db = 19.367
 script = ExtResource( 17 )
 
 [node name="LaserSquare" type="MeshInstance" parent="."]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 2.42691, 1.24388, 1.94417 )
+transform = Transform( 1, 0, 0, 0, 0.697453, 0.716631, 0, -0.716631, 0.697453, 2.42691, 1.24388, 1.94417 )
 material_override = ExtResource( 3 )
-mesh = SubResource( 14 )
+mesh = SubResource( 18 )
 material/0 = ExtResource( 3 )
 
 [node name="Spatial" type="Spatial" parent="LaserSquare"]
 transform = Transform( 0.01, 0, 0, 0, 0.01, 0, 0, 0, 0.01, 0, 2, 0 )
 
 [node name="MeshInstance" type="MeshInstance" parent="LaserSquare/Spatial"]
-material_override = SubResource( 15 )
+material_override = SubResource( 19 )
 
 [node name="BoulderClutter" type="Spatial" parent="."]
 
@@ -352,12 +376,12 @@ collision_mask = 0
 
 [node name="thing,ghfg" type="MeshInstance" parent="drawnfloor"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.123422, -0.143924, -0.0669777 )
-mesh = SubResource( 17 )
+mesh = SubResource( 21 )
 material/0 = null
 
 [node name="CollisionShape" type="CollisionShape" parent="drawnfloor"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0 )
-shape = SubResource( 18 )
+shape = SubResource( 22 )
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = ExtResource( 2 )
@@ -370,5 +394,36 @@ shadow_color = Color( 0.388235, 0.0705882, 0.0705882, 1 )
 
 [node name="WebsocketSystem" type="Node" parent="."]
 script = ExtResource( 8 )
+
+[node name="OverheadView" type="Spatial" parent="."]
+transform = Transform( 1, 0, 0, 0, 0.829915, 0.55789, 0, -0.55789, 0.829915, -0.521121, 0.974229, -12.0698 )
+
+[node name="PlanView" type="StaticBody" parent="OverheadView"]
+collision_layer = 8
+
+[node name="MeshInstance" type="MeshInstance" parent="OverheadView/PlanView"]
+transform = Transform( 1, 0, 0, 0, 1, -2.98023e-08, 0, 2.98023e-08, 1, 0, 0, 0 )
+mesh = SubResource( 23 )
+material/0 = SubResource( 25 )
+
+[node name="MeshInstance" type="MeshInstance" parent="OverheadView/PlanView/MeshInstance"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.055 )
+mesh = SubResource( 26 )
+material/0 = SubResource( 27 )
+
+[node name="CollisionShape" type="CollisionShape" parent="OverheadView/PlanView"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.01 )
+shape = SubResource( 28 )
+
+[node name="Viewport" type="Viewport" parent="OverheadView/PlanView"]
+size = Vector2( 800, 800 )
+render_target_v_flip = true
+
+[node name="Camera" type="Camera" parent="OverheadView/PlanView/Viewport"]
+transform = Transform( 1, 0, 0, 0, -1.62921e-07, 1, 0, -1, -1.62921e-07, 10, 30, 0 )
+environment = ExtResource( 20 )
+projection = 1
+fov = 87.5304
+size = 70.0
 [connection signal="body_entered" from="Players/PlayerMe/HandRight/HeelHotspot" to="Players/PlayerMe/pointersystem" method="_on_HeelHotspot_body_entered"]
 [connection signal="body_exited" from="Players/PlayerMe/HandRight/HeelHotspot" to="Players/PlayerMe/pointersystem" method="_on_HeelHotspot_body_exited"]

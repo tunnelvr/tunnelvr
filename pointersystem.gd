@@ -155,6 +155,8 @@ func targettype(target):
 	var targetname = target.get_name()
 	if targetname == "GUIPanel3D":
 		return "GUIPanel3D"
+	if targetname == "PlanView":
+		return "PlanView"
 	if targetname == "XCtubeshell":
 		return "XCtube"
 	if targetname == "XCflatshell":
@@ -473,8 +475,15 @@ func buttonpressed_vrpad(gripbuttonheld, left_right, up_down):
 			var nsectors = activetargettube.get_node("XCtubeshell/MeshInstance").get_surface_material_count()
 			setactivetargettubesector((activetargettubesector + (1 if left_right > 0 else nsectors-1))%nsectors)
 		elif abs(up_down) > 0.70:
-			activetargettube.xcsectormaterials[activetargettubesector] = (activetargettube.xcsectormaterials[activetargettubesector] + (1 if up_down > 0 else len(sketchsystem.materials) - 1))%len(sketchsystem.materials)
+			activetargettube.xcsectormaterials[activetargettubesector] = int(activetargettube.xcsectormaterials[activetargettubesector] + (1 if up_down > 0 else len(sketchsystem.materials) - 1))%len(sketchsystem.materials)
 
+	elif pointertargettype == "PlanView":
+		var plancamera = get_node("/root/Spatial/OverheadView/PlanView/Viewport/Camera")
+		if abs(left_right) > 0.65:
+			plancamera.size *= (1.5 if left_right < 0 else 0.6667)
+		if abs(left_right) < 0.2 and abs(up_down) < 0.2:
+			plancamera.translation = Vector3(0, plancamera.translation.y, 0)
+			
 func _on_button_release(p_button):
 	if p_button == BUTTONS.VR_GRIP:
 		buttonreleased_vrgrip()
@@ -506,7 +515,7 @@ func buttonreleased_vrgrip():
 		setselectedtarget(null)
 		
 	elif pointertargettype == "XCtube":
-		pointertargetwall.togglematerialcycle(sketchsystem)
+		setactivetargettube(null)
 		
 func buttonreleased_vrtrigger():
 	if activetargetwallgrabbedtransform != null:
@@ -552,6 +561,11 @@ func _physics_process(_delta):
 	else:
 		onpointing(null, null)
 	
+	if pointertargettype == "PlanView" and not handright.is_button_pressed(BUTTONS.VR_GRIP):
+		var joypos = Vector2(handright.get_joystick_axis(0) if handright.get_is_active() else 0.0, handright.get_joystick_axis(1) if handright.get_is_active() else 0.0)
+		if joypos.length() > 0.1:
+			var plancamera = get_node("/root/Spatial/OverheadView/PlanView/Viewport/Camera")
+			plancamera.translation += Vector3(joypos.x, 0, -joypos.y)*plancamera.size/2*_delta
 
 var rightmousebuttonheld = false
 func _input(event):
