@@ -482,7 +482,7 @@ func buttonpressed_vrpad(gripbuttonheld, left_right, up_down):
 		if abs(left_right) > 0.65:
 			plancamera.size *= (1.5 if left_right < 0 else 0.6667)
 		if abs(left_right) < 0.2 and abs(up_down) < 0.2:
-			plancamera.translation = Vector3(0, plancamera.translation.y, 0)
+			plancamera.translation = Vector3(headcam.global_transform.origin.x, plancamera.translation.y, headcam.global_transform.origin.z)
 			
 func _on_button_release(p_button):
 	if p_button == BUTTONS.VR_GRIP:

@@ -1,7 +1,7 @@
 [gd_scene load_steps=50 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
-[ext_resource path="res://default_env.tres" type="Environment" id=2]
+[ext_resource path="res://environments/default_env.tres" type="Environment" id=2]
 [ext_resource path="res://lightweighttextures/watersurface.material" type="Material" id=3]
 [ext_resource path="res://movementsystem.gd" type="Script" id=4]
 [ext_resource path="res://pointersystem.gd" type="Script" id=5]
@@ -19,7 +19,7 @@
 [ext_resource path="res://ImageSystem.gd" type="Script" id=17]
 [ext_resource path="res://ARVROrigin.gd" type="Script" id=18]
 [ext_resource path="res://guimaterials/laserselectline.material" type="Material" id=19]
-[ext_resource path="res://overheadview_env.tres" type="Environment" id=20]
+[ext_resource path="res://environments/overheadview_env.tres" type="Environment" id=20]
 [ext_resource path="res://guimaterials/laserspot.material" type="Material" id=22]
 [ext_resource path="res://guimaterials/lasershadow.material" type="Material" id=23]
 
@@ -141,41 +141,41 @@ shader_param/texture_albedo = SubResource( 16 )
 material = SubResource( 17 )
 size = Vector2( 4, 2 )
 
-[sub_resource type="SpatialMaterial" id=20]
+[sub_resource type="SpatialMaterial" id=19]
 params_cull_mode = 2
 albedo_color = Color( 0.992157, 0.992157, 0.666667, 1 )
 albedo_texture = ExtResource( 7 )
 
-[sub_resource type="PlaneMesh" id=21]
-material = SubResource( 20 )
+[sub_resource type="PlaneMesh" id=20]
+material = SubResource( 19 )
 size = Vector2( 1, 1.285 )
 subdivide_width = 4
 subdivide_depth = 4
 
-[sub_resource type="BoxShape" id=22]
+[sub_resource type="BoxShape" id=21]
 extents = Vector3( 0.5, 0.5, 0.643 )
 
-[sub_resource type="QuadMesh" id=23]
+[sub_resource type="QuadMesh" id=22]
 size = Vector2( 1.6, 1 )
 
-[sub_resource type="ViewportTexture" id=24]
+[sub_resource type="ViewportTexture" id=23]
 viewport_path = NodePath("OverheadView/PlanView/Viewport")
 
-[sub_resource type="SpatialMaterial" id=25]
+[sub_resource type="SpatialMaterial" id=24]
 resource_local_to_scene = true
 flags_unshaded = true
 flags_albedo_tex_force_srgb = true
-albedo_texture = SubResource( 24 )
+albedo_texture = SubResource( 23 )
 
-[sub_resource type="CubeMesh" id=26]
+[sub_resource type="CubeMesh" id=25]
 size = Vector3( 1.7, 1.1, 0.1 )
 
-[sub_resource type="SpatialMaterial" id=27]
-albedo_color = Color( 0.0431373, 0.0470588, 0.0627451, 1 )
+[sub_resource type="SpatialMaterial" id=26]
+albedo_color = Color( 0.0117647, 0.0745098, 0.996078, 1 )
 metallic = 0.45
 roughness = 0.51
 
-[sub_resource type="BoxShape" id=28]
+[sub_resource type="BoxShape" id=27]
 extents = Vector3( 0.8, 0.5, 0.01 )
 
 [node name="Spatial" type="Spatial"]
@@ -366,12 +366,12 @@ collision_mask = 0
 
 [node name="thing,ghfg" type="MeshInstance" parent="drawnfloor"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.123422, -0.143924, -0.0669777 )
-mesh = SubResource( 21 )
+mesh = SubResource( 20 )
 material/0 = null
 
 [node name="CollisionShape" type="CollisionShape" parent="drawnfloor"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0 )
-shape = SubResource( 22 )
+shape = SubResource( 21 )
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = ExtResource( 2 )
@@ -393,17 +393,17 @@ collision_layer = 8
 
 [node name="MeshInstance" type="MeshInstance" parent="OverheadView/PlanView"]
 transform = Transform( 1, 0, 0, 0, 1, -2.98023e-08, 0, 2.98023e-08, 1, 0, 0, 0 )
-mesh = SubResource( 23 )
-material/0 = SubResource( 25 )
+mesh = SubResource( 22 )
+material/0 = SubResource( 24 )
 
 [node name="MeshInstance" type="MeshInstance" parent="OverheadView/PlanView/MeshInstance"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.055 )
-mesh = SubResource( 26 )
-material/0 = SubResource( 27 )
+mesh = SubResource( 25 )
+material/0 = SubResource( 26 )
 
 [node name="CollisionShape" type="CollisionShape" parent="OverheadView/PlanView"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.01 )
-shape = SubResource( 28 )
+shape = SubResource( 27 )
 
 [node name="Viewport" type="Viewport" parent="OverheadView/PlanView"]
 size = Vector2( 800, 800 )

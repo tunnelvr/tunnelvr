@@ -164,12 +164,16 @@ func importcentrelinedata(centrelinedata, sketchsystem):
 			if sketchsystem.get_node("XCdrawings").has_node(sname):
 				continue
 			var hexnodepoints = { }
-			hexnodepoints["hl"] = Vector3(-xsectlruds[i*4], 0, 0)
-			hexnodepoints["hr"] = Vector3(xsectlruds[i*4+1], 0, 0)
-			hexnodepoints["hu"] = Vector3(-xsectlruds[i*4]/2, xsectlruds[i*4+2], 0)
-			hexnodepoints["hv"] = Vector3(+xsectlruds[i*4+1]/2, xsectlruds[i*4+2], 0)
-			hexnodepoints["hd"] = Vector3(-xsectlruds[i*4]/2, -xsectlruds[i*4+3], 0)
-			hexnodepoints["he"] = Vector3(+xsectlruds[i*4+1]/2, -xsectlruds[i*4+3], 0)
+			var xl = max(0.1, xsectlruds[i*4+0])
+			var xr = max(0.1, xsectlruds[i*4+1])
+			var xu = max(0.1, xsectlruds[i*4+2])
+			var xd = max(0.1, xsectlruds[i*4+3])
+			hexnodepoints["hl"] = Vector3(-xl, 0, 0)
+			hexnodepoints["hr"] = Vector3(xr, 0, 0)
+			hexnodepoints["hu"] = Vector3(-xl/2, xu, 0)
+			hexnodepoints["hv"] = Vector3(+xr/2, xu, 0)
+			hexnodepoints["hd"] = Vector3(-xl/2, -xd, 0)
+			hexnodepoints["he"] = Vector3(+xr/2, -xd, 0)
 
 			var p = stationpoints[xsectindexes[i]]
 			var ang = Vector2(xsectrightvecs[i*2], -xsectrightvecs[i*2+1]).angle()

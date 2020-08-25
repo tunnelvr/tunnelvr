@@ -13,7 +13,7 @@ var bouncetestnetworkID = 0
 
 func setheadtorchlight(torchon):
 	$HeadCam/HeadtorchLight.visible = torchon
-	get_node("/root/Spatial/WorldEnvironment").environment = preload("res://vr_underground.tres") if torchon else preload("res://default_env.tres")
+	get_node("/root/Spatial/WorldEnvironment").environment = preload("res://environments/underground_env.tres") if torchon else preload("res://environments/default_env.tres")
 	get_node("/root/Spatial/WorldEnvironment/DirectionalLight").visible = not torchon
 	# translucent walls reflect too much when torchlight is on
 	xcdrawing_material.albedo_color.a = 0.1 if torchon else xcdrawing_material_albedoa
