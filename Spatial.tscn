@@ -23,7 +23,7 @@
 [ext_resource path="res://guimaterials/laser.material" type="Material" id=21]
 [ext_resource path="res://guimaterials/laserspot.material" type="Material" id=22]
 [ext_resource path="res://guimaterials/lasershadow.material" type="Material" id=23]
-[ext_resource path="res://PlanViewSystem.gd" type="Script" id=24]
+[ext_resource path="res://systems/PlanViewSystem.gd" type="Script" id=24]
 [ext_resource path="res://nodescenes/XCnode_centreline.tscn" type="PackedScene" id=25]
 
 [sub_resource type="CylinderShape" id=1]
@@ -170,18 +170,24 @@ flags_unshaded = true
 flags_albedo_tex_force_srgb = true
 albedo_texture = SubResource( 23 )
 
-[sub_resource type="CubeMesh" id=25]
-size = Vector3( 1.7, 1.1, 0.1 )
-
-[sub_resource type="SpatialMaterial" id=26]
-albedo_color = Color( 0.0117647, 0.0745098, 0.996078, 1 )
+[sub_resource type="SpatialMaterial" id=35]
+albedo_color = Color( 0.87451, 0.886275, 0.956863, 1 )
 metallic = 0.45
 roughness = 0.51
+emission_enabled = true
+emission = Color( 0.996078, 0, 0, 1 )
+emission_energy = 1.34
+emission_operator = 0
+emission_on_uv2 = false
+
+[sub_resource type="CubeMesh" id=25]
+material = SubResource( 35 )
+size = Vector3( 1.7, 1.1, 0.1 )
 
 [sub_resource type="BoxShape" id=27]
 extents = Vector3( 0.8, 0.5, 0.01 )
 
-[sub_resource type="SpatialMaterial" id=30]
+[sub_resource type="SpatialMaterial" id=28]
 albedo_color = Color( 0.0313726, 0.113725, 0.992157, 1 )
 emission_enabled = true
 emission = Color( 0.0117647, 0.105882, 0.713726, 1 )
@@ -189,11 +195,11 @@ emission_energy = 1.0
 emission_operator = 0
 emission_on_uv2 = false
 
-[sub_resource type="CubeMesh" id=31]
-material = SubResource( 30 )
+[sub_resource type="CubeMesh" id=29]
+material = SubResource( 28 )
 size = Vector3( 1, 0.3, 1 )
 
-[sub_resource type="SpatialMaterial" id=32]
+[sub_resource type="SpatialMaterial" id=30]
 albedo_color = Color( 0.980392, 0.988235, 0.027451, 1 )
 emission_enabled = true
 emission = Color( 0.984314, 0.988235, 0.113725, 1 )
@@ -201,28 +207,28 @@ emission_energy = 0.41
 emission_operator = 0
 emission_on_uv2 = false
 
-[sub_resource type="CylinderMesh" id=33]
-material = SubResource( 32 )
+[sub_resource type="CylinderMesh" id=31]
+material = SubResource( 30 )
 top_radius = 0.4
 bottom_radius = 0.4
 height = 0.2
 radial_segments = 8
 rings = 1
 
-[sub_resource type="SpatialMaterial" id=34]
+[sub_resource type="SpatialMaterial" id=32]
 albedo_color = Color( 0.329412, 0.0313726, 0.0313726, 1 )
 metallic = 0.75
 roughness = 0.3
 
-[sub_resource type="CylinderMesh" id=35]
-material = SubResource( 34 )
+[sub_resource type="CylinderMesh" id=33]
+material = SubResource( 32 )
 top_radius = 1.8
 bottom_radius = 0.001
 height = 0.6
 radial_segments = 8
 rings = 1
 
-[sub_resource type="CubeMesh" id=36]
+[sub_resource type="CubeMesh" id=34]
 material = ExtResource( 21 )
 size = Vector3( 0.02, 1, 0.02 )
 
@@ -440,15 +446,15 @@ script = ExtResource( 24 )
 transform = Transform( 1, 0, 0, 0, 0.819152, 0.573577, 0, -0.573577, 0.819152, -3.5665, 0.449535, -13.3568 )
 collision_layer = 8
 
-[node name="MeshInstance" type="MeshInstance" parent="PlanViewSystem/PlanView"]
+[node name="ProjectionScreen" type="MeshInstance" parent="PlanViewSystem/PlanView"]
 transform = Transform( 1, 0, 0, 0, 1, -2.98023e-08, 0, 2.98023e-08, 1, 0, 0, 0 )
 mesh = SubResource( 22 )
 material/0 = SubResource( 24 )
 
-[node name="MeshInstance" type="MeshInstance" parent="PlanViewSystem/PlanView/MeshInstance"]
+[node name="ImageFrame" type="MeshInstance" parent="PlanViewSystem/PlanView/ProjectionScreen"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.055 )
 mesh = SubResource( 25 )
-material/0 = SubResource( 26 )
+material/0 = null
 
 [node name="CollisionShape" type="CollisionShape" parent="PlanViewSystem/PlanView"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.01 )
@@ -479,19 +485,19 @@ __meta__ = {
 [node name="RealCameraBox" type="MeshInstance" parent="PlanViewSystem/RealPlanCamera"]
 transform = Transform( 70, 0, 0, 0, 1, 0, 0, 0, 70, 0, 0.6, 0 )
 cast_shadow = 0
-mesh = SubResource( 31 )
+mesh = SubResource( 29 )
 material/0 = null
 
 [node name="RealCameraLens" type="MeshInstance" parent="PlanViewSystem/RealPlanCamera/RealCameraBox"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.132259, 0 )
 cast_shadow = 0
-mesh = SubResource( 33 )
+mesh = SubResource( 31 )
 material/0 = null
 
 [node name="LaserScope" type="MeshInstance" parent="PlanViewSystem/RealPlanCamera"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 0 )
 cast_shadow = 0
-mesh = SubResource( 35 )
+mesh = SubResource( 33 )
 material/0 = null
 
 [node name="Length" type="Spatial" parent="PlanViewSystem/RealPlanCamera/LaserScope"]
@@ -499,12 +505,22 @@ transform = Transform( 1, 0, 0, 0, 60, 0, 0, 0, 1, 0, 0, 0 )
 
 [node name="LaserVertical" type="MeshInstance" parent="PlanViewSystem/RealPlanCamera/LaserScope/Length"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0 )
-mesh = SubResource( 36 )
+mesh = SubResource( 34 )
 material/0 = null
 
 [node name="RayCast" type="RayCast" parent="PlanViewSystem/RealPlanCamera/LaserScope"]
 cast_to = Vector3( 0, -50, 0 )
 collision_mask = 56
+
+[node name="LaserSpot" type="MeshInstance" parent="PlanViewSystem/RealPlanCamera/LaserScope"]
+transform = Transform( 1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, 0.478879, -49.3258, -0.0697994 )
+mesh = SubResource( 5 )
+material/0 = null
+
+[node name="LaserSpike" type="MeshInstance" parent="PlanViewSystem/RealPlanCamera/LaserScope/LaserSpot"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0 )
+mesh = SubResource( 6 )
+material/0 = null
 
 [node name="XCnode" parent="PlanViewSystem" instance=ExtResource( 25 )]
 [connection signal="body_entered" from="Players/PlayerMe/HandRight/HeelHotspot" to="Players/PlayerMe/pointersystem" method="_on_HeelHotspot_body_entered"]

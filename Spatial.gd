@@ -6,13 +6,18 @@ extends Spatial
 
 # * add networking instructions to README
 
-# * PlanViewSystem to use own code and map clicks through the pointer system
+
+# * PlanViewSystem VR_BY button to toggle activeness
 # * PlanViewSystem into own scene created and destroyed
 # * PlanViewSystem into PlayerMe
 # * PlanViewSystem to make centreline nodes really big so we can pick them out and highlight them
 # * experiment with billboard mode on a circular object
 
+# * LaserShadow out in global space under a node
+
 # * LaserScope to be an argument of laser pointer
+# * How is the laser scope the a square and it works
+
 
 # * highlight nodes under pointer system so it's global and simplifies colouring code
 # 
