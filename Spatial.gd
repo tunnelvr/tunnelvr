@@ -6,17 +6,21 @@ extends Spatial
 
 # * add networking instructions to README
 
-# * overhead view to use remote transform on the camera cone (make out of box and cone) -- scale up and down with the zoom
+# * PlanViewSystem to use own code and map clicks through the pointer system
+# * PlanViewSystem into own scene created and destroyed
+# * PlanViewSystem into PlayerMe
+# * PlanViewSystem to make centreline nodes really big so we can pick them out and highlight them
+# * experiment with billboard mode on a circular object
 
-# * PlanView into own scene
-# * PlanView into PlayerMe
+# * LaserScope to be an argument of laser pointer
+
+# * highlight nodes under pointer system so it's global and simplifies colouring code
+# 
+
+# * Pass in shader_params on the tube rock material (maybe outline too)
 # * colours of materials to highlight (or set part of cave)
 
-
-# * active XCdrawing should make PathLines no depth test
-
-
-# * camera to be a huge cone in the picture
+# * Make as if it's selected in the main node point thing (with a new ray cast)
 
 # Put LaserShadow under a node or set_as_toplevel to remove the transform from it
 

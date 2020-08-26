@@ -1,6 +1,7 @@
 extends Node
 
 onready var sketchsystem = get_node("/root/Spatial/SketchSystem")
+onready var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
 
 onready var playernode = get_parent()
 onready var headcam = playernode.get_node('HeadCam')
@@ -478,12 +479,13 @@ func buttonpressed_vrpad(gripbuttonheld, left_right, up_down):
 			activetargettube.xcsectormaterials[activetargettubesector] = int(activetargettube.xcsectormaterials[activetargettubesector] + (1 if up_down > 0 else len(sketchsystem.materials) - 1))%len(sketchsystem.materials)
 
 	elif pointertargettype == "PlanView":
-		var plancamera = get_node("/root/Spatial/OverheadView/PlanView/Viewport/Camera")
+		var plancamera = planviewsystem.get_node("PlanView/Viewport/Camera")
 		if abs(left_right) > 0.65:
 			plancamera.size *= (1.5 if left_right < 0 else 0.6667)
+			planviewsystem.get_node("RealPlanCamera/RealCameraBox").scale = Vector3(plancamera.size, 1, plancamera.size)
 		if abs(left_right) < 0.2 and abs(up_down) < 0.2:
 			plancamera.translation = Vector3(headcam.global_transform.origin.x, plancamera.translation.y, headcam.global_transform.origin.z)
-			
+		
 func _on_button_release(p_button):
 	if p_button == BUTTONS.VR_GRIP:
 		buttonreleased_vrgrip()
@@ -556,34 +558,40 @@ func _physics_process(_delta):
 			pointertargetwall.global_transform = LaserSpot.global_transform * activetargetwallgrabbedtransform
 		pointertargetwall.rpc_unreliable("setxcdrawingposition", pointertargetwall.global_transform)
 		
-	elif LaserRayCast.is_colliding() and not LaserRayCast.get_collider().is_queued_for_deletion():
-		onpointing(LaserRayCast.get_collider(), LaserRayCast.get_collision_point())
-	else:
-		onpointing(null, null)
-	
-	if pointertargettype == "PlanView":
+	var raycastcollisiontarget = null
+	var raycastcollisionpoint = null
+	if LaserRayCast.is_colliding() and not LaserRayCast.get_collider().is_queued_for_deletion():
+		raycastcollisiontarget = LaserRayCast.get_collider()
+		raycastcollisionpoint = LaserRayCast.get_collision_point()
+
+	if raycastcollisiontarget != null and raycastcollisiontarget.get_name() == "PlanView":
 		var joypos = Vector2(handright.get_joystick_axis(0) if handright.get_is_active() else 0.0, handright.get_joystick_axis(1) if handright.get_is_active() else 0.0)
-		var plancamera = get_node("/root/Spatial/OverheadView/PlanView/Viewport/Camera")
+		var plancamera = planviewsystem.get_node("PlanView/Viewport/Camera")
 		if joypos.length() > 0.1 and not handright.is_button_pressed(BUTTONS.VR_GRIP):
 			plancamera.translation += Vector3(joypos.x, 0, -joypos.y)*plancamera.size/2*_delta
-		var collider_transform = get_node("/root/Spatial/OverheadView/PlanView").global_transform
+		var collider_transform = planviewsystem.get_node("PlanView").global_transform
 		if collider_transform.xform_inv(handright.global_transform.origin).z > 0:
-			var shape_size = get_node("/root/Spatial/OverheadView/PlanView/CollisionShape").shape.extents * 2
+			var shape_size = planviewsystem.get_node("PlanView/CollisionShape").shape.extents * 2
 			var collider_scale = collider_transform.basis.get_scale()
-			var local_point = collider_transform.xform_inv(pointertargetpoint)
+			var local_point = collider_transform.xform_inv(raycastcollisionpoint)
 			local_point /= (collider_scale * collider_scale)
 			local_point /= shape_size
 			local_point += Vector3(0.5, -0.5, 0) # X is about 0 to 1, Y is about 0 to -1.
-			var viewport_point = Vector2(local_point.x, -local_point.y) * get_node("/root/Spatial/OverheadView/PlanView/Viewport").size
+			var viewport_point = Vector2(local_point.x, -local_point.y) * planviewsystem.get_node("PlanView/Viewport").size
 			var laspt = plancamera.project_position(viewport_point, 0)
-			get_node("/root/Spatial/OverheadView/RealPlanCamera/LaserScope").global_transform.origin = laspt
+			planviewsystem.get_node("RealPlanCamera/LaserScope").global_transform.origin = laspt
 			#print("pp ", laspt)
 			
-	# Find the viewport position by scaling the relative position by the viewport size. Discard Z.
-
-			get_node("/root/Spatial/OverheadView/RealPlanCamera/LaserScope").visible = true
+			planviewsystem.get_node("RealPlanCamera/LaserScope").visible = true
+			planviewsystem.get_node("RealPlanCamera/LaserScope/RayCast").force_raycast_update()
+			raycastcollisiontarget = planviewsystem.get_node("RealPlanCamera/LaserScope/RayCast").get_collider()
+			raycastcollisionpoint = planviewsystem.get_node("RealPlanCamera/LaserScope/RayCast").get_collision_point()
+			
 	else:
-		get_node("/root/Spatial/OverheadView/RealPlanCamera/LaserScope").visible = false
+		planviewsystem.get_node("RealPlanCamera/LaserScope").visible = false
+
+
+	onpointing(raycastcollisiontarget, raycastcollisionpoint)
 
 
 var rightmousebuttonheld = false
@@ -610,7 +618,6 @@ func _input(event):
 			else:
 				buttonreleased_vrgrip()
 
-
 	elif event is InputEventMouseButton and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
 		var gripbuttonheld = false
 		if event.button_index == BUTTON_LEFT:
@@ -618,7 +625,6 @@ func _input(event):
 				buttonpressed_vrtrigger(gripbuttonheld)
 			else:
 				buttonreleased_vrtrigger()
-
 
 func _on_HeelHotspot_body_entered(body):
 	print("_on_HeelHotspot_body_entered ", body)

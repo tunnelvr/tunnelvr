@@ -1,4 +1,4 @@
-[gd_scene load_steps=58 format=2]
+[gd_scene load_steps=60 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/default_env.tres" type="Environment" id=2]
@@ -23,6 +23,8 @@
 [ext_resource path="res://guimaterials/laser.material" type="Material" id=21]
 [ext_resource path="res://guimaterials/laserspot.material" type="Material" id=22]
 [ext_resource path="res://guimaterials/lasershadow.material" type="Material" id=23]
+[ext_resource path="res://PlanViewSystem.gd" type="Script" id=24]
+[ext_resource path="res://nodescenes/XCnode_centreline.tscn" type="PackedScene" id=25]
 
 [sub_resource type="CylinderShape" id=1]
 radius = 0.1
@@ -160,7 +162,7 @@ extents = Vector3( 0.5, 0.5, 0.643 )
 size = Vector2( 1.6, 1 )
 
 [sub_resource type="ViewportTexture" id=23]
-viewport_path = NodePath("OverheadView/PlanView/Viewport")
+viewport_path = NodePath("PlanViewSystem/PlanView/Viewport")
 
 [sub_resource type="SpatialMaterial" id=24]
 resource_local_to_scene = true
@@ -431,72 +433,79 @@ shadow_color = Color( 0.388235, 0.0705882, 0.0705882, 1 )
 [node name="WebsocketSystem" type="Node" parent="."]
 script = ExtResource( 8 )
 
-[node name="OverheadView" type="Spatial" parent="."]
+[node name="PlanViewSystem" type="Spatial" parent="."]
+script = ExtResource( 24 )
 
-[node name="PlanView" type="StaticBody" parent="OverheadView"]
+[node name="PlanView" type="StaticBody" parent="PlanViewSystem"]
 transform = Transform( 1, 0, 0, 0, 0.819152, 0.573577, 0, -0.573577, 0.819152, -3.5665, 0.449535, -13.3568 )
 collision_layer = 8
 
-[node name="MeshInstance" type="MeshInstance" parent="OverheadView/PlanView"]
+[node name="MeshInstance" type="MeshInstance" parent="PlanViewSystem/PlanView"]
 transform = Transform( 1, 0, 0, 0, 1, -2.98023e-08, 0, 2.98023e-08, 1, 0, 0, 0 )
 mesh = SubResource( 22 )
 material/0 = SubResource( 24 )
 
-[node name="MeshInstance" type="MeshInstance" parent="OverheadView/PlanView/MeshInstance"]
+[node name="MeshInstance" type="MeshInstance" parent="PlanViewSystem/PlanView/MeshInstance"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.055 )
 mesh = SubResource( 25 )
 material/0 = SubResource( 26 )
 
-[node name="CollisionShape" type="CollisionShape" parent="OverheadView/PlanView"]
+[node name="CollisionShape" type="CollisionShape" parent="PlanViewSystem/PlanView"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.01 )
 shape = SubResource( 27 )
 
-[node name="Viewport" type="Viewport" parent="OverheadView/PlanView"]
+[node name="Viewport" type="Viewport" parent="PlanViewSystem/PlanView"]
 size = Vector2( 800, 800 )
 render_target_v_flip = true
 
-[node name="Camera" type="Camera" parent="OverheadView/PlanView/Viewport"]
+[node name="Camera" type="Camera" parent="PlanViewSystem/PlanView/Viewport"]
 transform = Transform( 1, 0, 0, 0, -1.62921e-07, 1, 0, -1, -1.62921e-07, -1, 50, -12 )
 environment = ExtResource( 20 )
 projection = 1
 fov = 87.5304
 size = 70.0
 
-[node name="RemoteTransform" type="RemoteTransform" parent="OverheadView/PlanView/Viewport/Camera"]
+[node name="RemoteTransform" type="RemoteTransform" parent="PlanViewSystem/PlanView/Viewport/Camera"]
 transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, 0, 0, 0 )
 remote_path = NodePath("../../../../RealPlanCamera")
 update_scale = false
 
-[node name="RealPlanCamera" type="Spatial" parent="OverheadView"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 10, -12 )
+[node name="RealPlanCamera" type="Spatial" parent="PlanViewSystem"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 50, -12 )
 __meta__ = {
 "_editor_description_": ""
 }
 
-[node name="RealCameraBox" type="MeshInstance" parent="OverheadView/RealPlanCamera"]
+[node name="RealCameraBox" type="MeshInstance" parent="PlanViewSystem/RealPlanCamera"]
 transform = Transform( 70, 0, 0, 0, 1, 0, 0, 0, 70, 0, 0.6, 0 )
 cast_shadow = 0
 mesh = SubResource( 31 )
 material/0 = null
 
-[node name="RealCameraLens" type="MeshInstance" parent="OverheadView/RealPlanCamera/RealCameraBox"]
+[node name="RealCameraLens" type="MeshInstance" parent="PlanViewSystem/RealPlanCamera/RealCameraBox"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.132259, 0 )
 cast_shadow = 0
 mesh = SubResource( 33 )
 material/0 = null
 
-[node name="LaserScope" type="MeshInstance" parent="OverheadView/RealPlanCamera"]
+[node name="LaserScope" type="MeshInstance" parent="PlanViewSystem/RealPlanCamera"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 0 )
 cast_shadow = 0
 mesh = SubResource( 35 )
 material/0 = null
 
-[node name="Length" type="Spatial" parent="OverheadView/RealPlanCamera/LaserScope"]
+[node name="Length" type="Spatial" parent="PlanViewSystem/RealPlanCamera/LaserScope"]
 transform = Transform( 1, 0, 0, 0, 60, 0, 0, 0, 1, 0, 0, 0 )
 
-[node name="LaserVertical" type="MeshInstance" parent="OverheadView/RealPlanCamera/LaserScope/Length"]
+[node name="LaserVertical" type="MeshInstance" parent="PlanViewSystem/RealPlanCamera/LaserScope/Length"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0 )
 mesh = SubResource( 36 )
 material/0 = null
+
+[node name="RayCast" type="RayCast" parent="PlanViewSystem/RealPlanCamera/LaserScope"]
+cast_to = Vector3( 0, -50, 0 )
+collision_mask = 56
+
+[node name="XCnode" parent="PlanViewSystem" instance=ExtResource( 25 )]
 [connection signal="body_entered" from="Players/PlayerMe/HandRight/HeelHotspot" to="Players/PlayerMe/pointersystem" method="_on_HeelHotspot_body_entered"]
 [connection signal="body_exited" from="Players/PlayerMe/HandRight/HeelHotspot" to="Players/PlayerMe/pointersystem" method="_on_HeelHotspot_body_exited"]
