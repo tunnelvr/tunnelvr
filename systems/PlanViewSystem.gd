@@ -53,3 +53,7 @@ func processplanviewpointing(raycastcollisionpoint):
 	
 	planviewsystem.get_node("RealPlanCamera/LaserScope").visible = true
 	planviewsystem.get_node("RealPlanCamera/LaserScope/RayCast").force_raycast_update()
+
+func updatecentrelinesizes():
+	for xcdrawing in get_tree().get_nodes_in_group("gpcentrelinegeo"):
+		print(xcdrawing.get_name())

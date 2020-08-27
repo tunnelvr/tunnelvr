@@ -459,3 +459,13 @@ func updatexctubeshell(xcdrawings, makevisible):
 		$XCflatshell/CollisionShape.disabled = true
 		
 
+func xcdfullsetvisibilitycollision(bvisible):
+	visible = bvisible
+	if visible:
+		$XCdrawingplane/CollisionShape.disabled = true
+		if has_node("XCflatshell"):
+			$XCflatshell/CollisionShape.disabled = true
+	else:
+		$XCdrawingplane/CollisionShape.disabled = not $XCdrawingplane.visible
+		if has_node("XCflatshell"):
+			$XCflatshell/CollisionShape.disabled = not $XCflatshell.visible

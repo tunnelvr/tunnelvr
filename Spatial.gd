@@ -7,12 +7,17 @@ extends Spatial
 # * add networking instructions to README
 # * then networking to the Quest(!)
 
+# * check the updatecentrelinesizes will work in this overhead view big enough to see them
+# * bigger nodes as well
+# * also can we have a viewport on every single centreline node???
+
 # * MaterialSystem should be singleton autoload
 # * MaterialSystem to get all the other materials for lines and nodes
 
-# * Centreline into its own place in SketchSystem
 # * Floor drawings into its own place in sketch system
 # * Giant Centrelines option + hide tubes and XCdrawings to connect nodes on Floor drawings
+
+
 # * special materials are the sketch image and invisible
 # * we can toggle culling to the materials to see inside 
 # * LaserShadow out in global space under a node

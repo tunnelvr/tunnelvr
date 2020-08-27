@@ -6,13 +6,14 @@ const XCtube = preload("res://nodescenes/XCtube.tscn")
 
 const linewidth = 0.05
 var tubeshellsvisible = false
+var centrelineonlymode = false
 
 func _ready():
 	var floordrawing = newXCuniquedrawing(DRAWING_TYPE.DT_FLOORTEXTURE, "paper_DukeStResurvey-drawnup-p3")
 	get_node("/root/Spatial/ImageSystem").fetchpaperdrawing(floordrawing)
 	#loadcentrelinefile("res://surveyscans/dukest1resurvey2009.json")
-	#loadcentrelinefile("res://surveyscans/dukest1resurvey2009json.res")
-	loadcentrelinefile("res://surveyscans/Ireby/Ireby2/Ireby2.json")
+	loadcentrelinefile("res://surveyscans/dukest1resurvey2009json.res")
+	#loadcentrelinefile("res://surveyscans/Ireby/Ireby2/Ireby2.json")
 	
 func xcapplyonepath(xcn0, xcn1): 
 	var xcdrawing0 = xcn0.get_parent().get_parent()
@@ -81,6 +82,11 @@ remotesync func updateworkingshell(makevisible):
 		if xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 			xcdrawing.updatexctubeshell($XCdrawings, makevisible)
 
+remotesync func changecentrelineonlymode(lcentrelineonlymode):
+	centrelineonlymode = lcentrelineonlymode
+	get_tree().call_group("gpnoncentrelinegeo", "xcdfullsetvisibilitycollision", not centrelineonlymode)
+	get_node("/root/Spatial/PlanViewSystem").updatecentrelinesizes()
+
 # Quick saving and loading of shape.  It goes to 
 # C:\Users\ViveOne\AppData\Roaming\Godot\app_userdata\digtunnel
 func sketchsystemtodict():
@@ -132,6 +138,7 @@ func loadcentrelinefile(centrelinefile):
 	var centrelinedata = parse_json(centrelinedatafile.get_line())
 	centrelinedrawing.importcentrelinedata(centrelinedata, self)
 	#var xsectgps = centrelinedata.xsectgps
+	$BillboardLabel.makenodelabelstask(centrelinedrawing)
 	print("default lllloaded")
 
 remote func xcdrawingfromdata(xcdata):
@@ -191,7 +198,11 @@ func newXCuniquedrawing(drawingtype, sname):
 	xcdrawing.drawingtype = drawingtype
 	xcdrawing.set_name(sname)
 	get_node("XCdrawings").add_child(xcdrawing)
-
+	if drawingtype == DRAWING_TYPE.DT_XCDRAWING:
+		xcdrawing.add_to_group("gpnoncentrelinegeo")
+	elif drawingtype == DRAWING_TYPE.DT_CENTRELINE:
+		xcdrawing.add_to_group("gpcentrelinegeo")
+	
 	if xcdrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
 		xcdrawing.get_node("XCdrawingplane").collision_layer |= CollisionLayer.CL_Environment
 		xcdrawing.get_node("XCdrawingplane").visible = true
@@ -226,5 +237,6 @@ func newXCtube(xcdrawing0, xcdrawing1):
 	xcdrawing1.xctubesconn.append(xctube)
 	assert (not $XCtubes.has_node(xctube.get_name()))
 	$XCtubes.add_child(xctube)
+	xctube.add_to_group("gpnoncentrelinegeo")
 	return xctube
 	

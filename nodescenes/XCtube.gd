@@ -394,3 +394,12 @@ func updatetubeshell(xcdrawings, makevisible):
 	else:
 		$XCtubeshell.visible = false
 		$XCtubeshell/CollisionShape.disabled = true
+
+
+func xcdfullsetvisibilitycollision(bvisible):
+	visible = bvisible
+	if visible:
+		$XCtubeshell/CollisionShape.disabled = not $XCtubeshell.visible
+	else:
+		$XCtubeshell/CollisionShape.disabled = true
+
