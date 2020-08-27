@@ -15,6 +15,9 @@ var pickedpolyindex1 = -1
 
 const linewidth = 0.02
 
+func _ready():
+	$XCtubeshell/CollisionShape.shape = ConcavePolygonShape.new()
+
 func xctubeapplyonepath(xcn0, xcn1):
 	print("xcapplyonepathxcapplyonepath-pre", xcn0, xcn1, xcdrawinglink)
 	assert (xcn0.get_parent().get_parent().get_name() == xcname0 and xcn1.get_parent().get_parent().get_name() == xcname1)
@@ -289,7 +292,7 @@ func maketubeshell(xcdrawings):
 			ila1N += len(poly1)
 		#print("  iiilla ", [ila0, ila0N, ila1, ila1N])
 		var surfaceTool = SurfaceTool.new()
-		surfaceTool.set_material(Material.new())
+		#surfaceTool.set_material(Material.new())
 		surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
 
 		var acc = -ila0N/2.0  if ila0N>=ila1N  else  ila1N/2

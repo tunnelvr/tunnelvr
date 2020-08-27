@@ -1,7 +1,4 @@
-[gd_scene load_steps=2 format=2]
-
-[sub_resource type="ConcavePolygonShape" id=1]
-resource_local_to_scene = true
+[gd_scene format=2]
 
 [node name="XCtubeshell" type="StaticBody"]
 visible = false
@@ -12,5 +9,4 @@ collision_mask = 0
 layers = 18
 
 [node name="CollisionShape" type="CollisionShape" parent="."]
-shape = SubResource( 1 )
 disabled = true

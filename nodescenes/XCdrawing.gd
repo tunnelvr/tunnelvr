@@ -311,13 +311,14 @@ func updatexcpaths(llinewidth=0):
 		surfaceTool.add_vertex(p1left)
 		surfaceTool.add_vertex(p1right)
 	surfaceTool.generate_normals()
-	var mustsetmaterial = ($PathLines.mesh == null)
-	var m = $PathLines.get_surface_material(0)
-	$PathLines.mesh = surfaceTool.commit()
-	$PathLines.set_surface_material(0, m)
-	if mustsetmaterial:
-		m = load("res://guimaterials/XCdrawingCentrelines.material") if drawingtype == DRAWING_TYPE.DT_CENTRELINE else load("res://guimaterials/XCdrawingPathlines.material")
-	$PathLines.set_surface_material(0, m)
+	var newmesh = surfaceTool.commit()
+	if $PathLines.mesh == null:
+		$PathLines.mesh = newmesh
+		$PathLines.set_surface_material(0, load("res://guimaterials/XCdrawingCentrelines.material") if drawingtype == DRAWING_TYPE.DT_CENTRELINE else load("res://guimaterials/XCdrawingPathlines.material"))
+	else:
+		var m = $PathLines.get_surface_material(0)
+		$PathLines.mesh = newmesh
+		$PathLines.set_surface_material(0, m)
 	
 func sd0(a, b):
 	return a[0] < b[0]
@@ -419,7 +420,7 @@ func makexctubeshell(xcdrawings):
 	
 	var arraymesh = ArrayMesh.new()
 	var surfaceTool = SurfaceTool.new()
-	surfaceTool.set_material(Material.new())
+	#surfaceTool.set_material(Material.new())
 	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
 	for j in polyindexes:
 		var poly = polys[j]

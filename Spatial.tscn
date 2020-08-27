@@ -518,6 +518,7 @@ script = ExtResource( 10 )
 [node name="XCtubes" type="Spatial" parent="SketchSystem"]
 
 [node name="BillboardLabel" parent="SketchSystem" instance=ExtResource( 11 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.57555, 0 )
 
 [node name="SoundPos1" type="AudioStreamPlayer3D" parent="SketchSystem"]
 stream = ExtResource( 9 )
@@ -634,61 +635,63 @@ material/0 = null
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 8.84611, 2.20853, 0 )
 script = ExtResource( 36 )
 
-[node name="simpledirt" type="MeshInstance" parent="MaterialSystem"]
+[node name="tubematerials" type="Spatial" parent="MaterialSystem"]
+
+[node name="simpledirt" type="MeshInstance" parent="MaterialSystem/tubematerials"]
 mesh = SubResource( 28 )
 material/0 = ExtResource( 35 )
 
-[node name="highlight" type="MeshInstance" parent="MaterialSystem/simpledirt"]
+[node name="highlight" type="MeshInstance" parent="MaterialSystem/tubematerials/simpledirt"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.02206 )
 mesh = SubResource( 29 )
 material/0 = ExtResource( 27 )
 
-[node name="partialrock" type="MeshInstance" parent="MaterialSystem"]
+[node name="partialrock" type="MeshInstance" parent="MaterialSystem/tubematerials"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 2.05663, 0, 0 )
 mesh = SubResource( 30 )
 material/0 = ExtResource( 28 )
 
-[node name="highlight" type="MeshInstance" parent="MaterialSystem/partialrock"]
+[node name="highlight" type="MeshInstance" parent="MaterialSystem/tubematerials/partialrock"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.08184 )
 mesh = SubResource( 31 )
 material/0 = SubResource( 32 )
 
-[node name="rockwater" type="MeshInstance" parent="MaterialSystem"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 4.21638, -0.00722444, -0.0259316 )
+[node name="rockwater" type="MeshInstance" parent="MaterialSystem/tubematerials"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 4.21638, -0.00722432, -0.0259316 )
 mesh = SubResource( 33 )
 material/0 = SubResource( 34 )
 
-[node name="highlight" type="MeshInstance" parent="MaterialSystem/rockwater"]
+[node name="highlight" type="MeshInstance" parent="MaterialSystem/tubematerials/rockwater"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0123711, 0.00378895, -2.07264 )
 mesh = SubResource( 33 )
 material/0 = SubResource( 35 )
 
-[node name="pebbles" type="MeshInstance" parent="MaterialSystem"]
+[node name="pebbles" type="MeshInstance" parent="MaterialSystem/tubematerials"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 6.40124, 0, 0 )
 mesh = SubResource( 36 )
 material/0 = SubResource( 37 )
 
-[node name="highlight" type="MeshInstance" parent="MaterialSystem/pebbles"]
+[node name="highlight" type="MeshInstance" parent="MaterialSystem/tubematerials/pebbles"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.09424 )
 mesh = SubResource( 38 )
 material/0 = SubResource( 39 )
 
-[node name="mediumrock" type="MeshInstance" parent="MaterialSystem"]
+[node name="mediumrock" type="MeshInstance" parent="MaterialSystem/tubematerials"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 8.56555, 0, 0 )
 mesh = SubResource( 40 )
 material/0 = SubResource( 41 )
 
-[node name="highlight" type="MeshInstance" parent="MaterialSystem/mediumrock"]
+[node name="highlight" type="MeshInstance" parent="MaterialSystem/tubematerials/mediumrock"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.14453 )
 mesh = SubResource( 40 )
 material/0 = SubResource( 42 )
 
-[node name="bluewater" type="MeshInstance" parent="MaterialSystem"]
+[node name="bluewater" type="MeshInstance" parent="MaterialSystem/tubematerials"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 10.6566, 0, -0.0338948 )
 mesh = SubResource( 43 )
 material/0 = SubResource( 44 )
 
-[node name="highlight" type="MeshInstance" parent="MaterialSystem/bluewater"]
+[node name="highlight" type="MeshInstance" parent="MaterialSystem/tubematerials/bluewater"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.09902 )
 mesh = SubResource( 43 )
 material/0 = SubResource( 45 )

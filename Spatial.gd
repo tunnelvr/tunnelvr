@@ -5,16 +5,11 @@ extends Spatial
 
 
 # * add networking instructions to README
-# * check if networking still works to Becka's computer
 # * then networking to the Quest(!)
 
-# is set_material(Material.new()) necessary?
+# * MaterialSystem should be singleton autoload
+# * MaterialSystem to get all the other materials for lines and nodes
 
-# * $XCflatshell into one of the adjacent tubes?
-
-# * Use materialsystem to label the tube sectors (and look them up)
-
-# * Use Remote transform to move GUIPanel3D out of PlayerMe
 # * Centreline into its own place in SketchSystem
 # * Floor drawings into its own place in sketch system
 # * Giant Centrelines option + hide tubes and XCdrawings to connect nodes on Floor drawings
@@ -22,7 +17,7 @@ extends Spatial
 # * we can toggle culling to the materials to see inside 
 # * LaserShadow out in global space under a node
 
-# * Move materials into tree
+# * Use Remote transform to move GUIPanel3D out of PlayerMe
 
 # * highlight nodes under pointer system so it's global and simplifies colouring code
 

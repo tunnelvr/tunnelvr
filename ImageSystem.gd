@@ -31,7 +31,7 @@ func D_on_request_completed(result, response_code, headers, body):
 	var g = regex.search_all(b)
 	var a = g[0]
 	for x in g:
-		print(x.strings)
+		print(a, x.strings)
 	
 var imgdir = "user://northernimages/"
 #var dirimg = Directory.new()
