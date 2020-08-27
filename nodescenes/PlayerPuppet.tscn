@@ -7,7 +7,7 @@
 [ext_resource path="res://guimaterials/laserspot.material" type="Material" id=5]
 [ext_resource path="res://guimeshes/headtorchmesh.tscn" type="PackedScene" id=6]
 
-[sub_resource type="Animation" id=3]
+[sub_resource type="Animation" id=1]
 resource_name = "spinlight"
 tracks/0/type = "value"
 tracks/0/path = NodePath("headtorch:rotation_degrees")
@@ -44,10 +44,10 @@ tracks/2/keys = {
 "values": [ Vector3( 0, 0.24, 0 ), Vector3( 0, 0.24, 0.9 ), Vector3( 0, 0.24, 0 ) ]
 }
 
-[sub_resource type="CubeMesh" id=1]
+[sub_resource type="CubeMesh" id=2]
 size = Vector3( 0.002, 0.002, 1 )
 
-[sub_resource type="SphereMesh" id=2]
+[sub_resource type="SphereMesh" id=3]
 radius = 0.05
 height = 0.1
 radial_segments = 8
@@ -66,7 +66,7 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.691634, 0 )
 transform = Transform( 1, 0, 0, 0, 0.939693, 0.34202, 0, -0.34202, 0.939693, 0, 0.24, 0 )
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="HeadCam"]
-anims/spinlight = SubResource( 3 )
+anims/spinlight = SubResource( 1 )
 
 [node name="Tween" type="Tween" parent="HeadCam"]
 
@@ -92,10 +92,10 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 50, 0, 0, 0 )
 [node name="Laser" type="MeshInstance" parent="HandRight/LaserOrient/Length"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.5 )
 cast_shadow = 0
-mesh = SubResource( 1 )
+mesh = SubResource( 2 )
 material/0 = ExtResource( 4 )
 
 [node name="LaserSpot" type="MeshInstance" parent="HandRight/LaserOrient"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1 )
-mesh = SubResource( 2 )
+mesh = SubResource( 3 )
 material/0 = ExtResource( 5 )

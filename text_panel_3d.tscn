@@ -36,6 +36,7 @@ __meta__ = {
 }
 
 [node name="Quad" type="MeshInstance" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0958104, 0.0712628, 0.0628567 )
 cast_shadow = 0
 mesh = SubResource( 1 )
 material/0 = SubResource( 3 )

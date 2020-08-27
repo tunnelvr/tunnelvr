@@ -72,7 +72,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ButtonMiniMap" type="Button" parent="Viewport/GUI/Panel"]
+[node name="ButtonPlanView" type="Button" parent="Viewport/GUI/Panel"]
 margin_left = 15.3899
 margin_top = 113.177
 margin_right = 155.39
@@ -80,7 +80,7 @@ margin_bottom = 141.177
 rect_pivot_offset = Vector2( 138.61, -8.13628 )
 hint_tooltip = "test tooltip"
 toggle_mode = true
-text = "Mini Map"
+text = "Plan View"
 __meta__ = {
 "_edit_use_anchors_": false
 }

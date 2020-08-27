@@ -5,51 +5,39 @@ extends Spatial
 
 
 # * add networking instructions to README
+# * check if networking still works to Becka's computer
+# * then networking to the Quest(!)
 
+# is set_material(Material.new()) necessary?
 
-# * PlanViewSystem VR_BY button to toggle activeness
-# * PlanViewSystem into own scene created and destroyed
-# * PlanViewSystem into PlayerMe
-# * PlanViewSystem to make centreline nodes really big so we can pick them out and highlight them
-# * experiment with billboard mode on a circular object
+# * $XCflatshell into one of the adjacent tubes?
 
+# * Use materialsystem to label the tube sectors (and look them up)
+
+# * Use Remote transform to move GUIPanel3D out of PlayerMe
+# * Centreline into its own place in SketchSystem
+# * Floor drawings into its own place in sketch system
+# * Giant Centrelines option + hide tubes and XCdrawings to connect nodes on Floor drawings
+# * special materials are the sketch image and invisible
+# * we can toggle culling to the materials to see inside 
 # * LaserShadow out in global space under a node
 
-# * LaserScope to be an argument of laser pointer
-# * How is the laser scope the a square and it works
-
+# * Move materials into tree
 
 # * highlight nodes under pointer system so it's global and simplifies colouring code
-# 
 
 # * Pass in shader_params on the tube rock material (maybe outline too)
 # * colours of materials to highlight (or set part of cave)
 
 # * Make as if it's selected in the main node point thing (with a new ray cast)
 
-# Put LaserShadow under a node or set_as_toplevel to remove the transform from it
-
 # * use joypos instead of left_right stuff
-
 # * active node to be an overlay
-# * is there a node that is in real space and not relative space transform (for laser shadow)
-
-# * Make directory of environments and move them in there using git move
-
-# * Make a frame and set of UI controls and dragging possible on the window onto the world
 
 # * Attach drawings onto centreline nodes.  Move them about in space there
 
-# * Turn on and off the tubes and make the nodes bigger to grab them
-
-
-
 # * Label nodes on paper to connect to the centreline nodes
 # * Allow drawing nodes on the paper (so we can make cut outs and labels)
-
-# * Camera from above on the whole picture that can scroll around, like a portal
-
-# * pathlines in selected XCdrawing to have no depthtest
 
 # * ConcaveCollision shape always gives a mesh error -- report
 
@@ -60,8 +48,10 @@ extends Spatial
 # * a gripclick inserts a new XC in the tube that we can orient and move
 
 # * should correspond to the join we have  
-# * can set the type of the material (including invisible and no collision, so open on side)
 
+# * XCdrawings only visible when tube is selected (could save a lot of memory)
+
+# * can set the type of the material (including invisible and no collision, so open on side)
 
 # * Position of the doppelganger other player is queued in its own object by the rpc and only updated on the physics process
 # * must find an answer to the var materialscanimage = load("res://surveyscans/scanimagefloor.material")

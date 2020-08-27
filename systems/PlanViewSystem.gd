@@ -1,13 +1,28 @@
 extends Spatial
 
-var planviewactive = true
+var planviewactive = false
+var drawingtype = DRAWING_TYPE.DT_PLANVIEW
 
 func _ready():
-	pass # Replace with function body.
+	$RealPlanCamera.set_as_toplevel(true)
 
 func toggleplanviewactive():
 	planviewactive = not planviewactive
 	$PlanView/ProjectionScreen/ImageFrame.mesh.surface_get_material(0).emission_enabled = planviewactive
+
+func setplanviewvisible(planviewvisible, guidpaneltransform, guidpanelsize):
+	if planviewvisible:
+		var paneltrans = $PlanView.global_transform
+		paneltrans.origin = guidpaneltransform.origin + guidpaneltransform.basis.y*(guidpanelsize.y/2) + Vector3(0,$PlanView/ProjectionScreen/ImageFrame.mesh.size.y/2,0)
+		var eyepos = get_node("/root/Spatial").playerMe.get_node("HeadCam").global_transform.origin
+		paneltrans = paneltrans.looking_at(eyepos + 2*(paneltrans.origin-eyepos), Vector3(0, 1, 0))
+		$PlanView.global_transform = paneltrans
+		visible = true
+		$PlanView/CollisionShape.disabled = false
+	else:
+		visible = false	
+		$PlanView/CollisionShape.disabled = true
+
 	
 func processplanviewsliding(handright, _delta):
 	var planviewsystem = self

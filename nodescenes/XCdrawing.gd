@@ -9,6 +9,7 @@ var xcresource = ""     # source file
 var nodepoints = { }    # { nodename:Vector3 }
 var onepathpairs = [ ]  # [ Anodename0, Anodename1, Bnodename0, Bnodename1, ... ]
 var drawingtype = DRAWING_TYPE.DT_XCDRAWING
+var xcflatshellmaterial = 0
 
 
 # derived data
@@ -418,8 +419,7 @@ func makexctubeshell(xcdrawings):
 	
 	var arraymesh = ArrayMesh.new()
 	var surfaceTool = SurfaceTool.new()
-	var materialdirt = preload("res://lightweighttextures/simpledirt.material")
-	surfaceTool.set_material(materialdirt)
+	surfaceTool.set_material(Material.new())
 	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
 	for j in polyindexes:
 		var poly = polys[j]
@@ -444,9 +444,9 @@ func updatexctubeshell(xcdrawings, makevisible):
 				xcflatshell.set_name("XCflatshell")
 				add_child(xcflatshell)
 			$XCflatshell/MeshInstance.mesh = xctubeshellmesh
-			var materialdirt = preload("res://lightweighttextures/simpledirt.material")
+			var flatshellmaterial = get_node("/root/Spatial/MaterialSystem").tubematerialfromnumber(xcflatshellmaterial, false)
 			for i in range($XCflatshell/MeshInstance.get_surface_material_count()):
-				$XCflatshell/MeshInstance.set_surface_material(i, materialdirt)
+				$XCflatshell/MeshInstance.set_surface_material(i, flatshellmaterial)
 			$XCflatshell/CollisionShape.shape.set_faces(xctubeshellmesh.get_faces())
 			$XCflatshell.visible = true
 			$XCflatshell/CollisionShape.disabled = false

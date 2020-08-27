@@ -1,4 +1,4 @@
-[gd_scene load_steps=60 format=2]
+[gd_scene load_steps=90 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/default_env.tres" type="Environment" id=2]
@@ -25,6 +25,18 @@
 [ext_resource path="res://guimaterials/lasershadow.material" type="Material" id=23]
 [ext_resource path="res://systems/PlanViewSystem.gd" type="Script" id=24]
 [ext_resource path="res://nodescenes/XCnode_centreline.tscn" type="PackedScene" id=25]
+[ext_resource path="res://lightweighttextures/rock_albedo.jpg" type="Texture" id=26]
+[ext_resource path="res://lightweighttextures/simpledirt_highlight.material" type="Material" id=27]
+[ext_resource path="res://lightweighttextures/partialrock.material" type="Material" id=28]
+[ext_resource path="res://lightweighttextures/seamlesspebbles1.jpg" type="Texture" id=29]
+[ext_resource path="res://lightweighttextures/water 0342normal.jpg" type="Texture" id=30]
+[ext_resource path="res://lightweighttextures/water-0342.jpg" type="Texture" id=31]
+[ext_resource path="res://lightweighttextures/mediumrock.jpg" type="Texture" id=32]
+[ext_resource path="res://lightweighttextures/Water 0400normal.jpg" type="Texture" id=33]
+[ext_resource path="res://lightweighttextures/Water-0400.jpg" type="Texture" id=34]
+[ext_resource path="res://lightweighttextures/simpledirt.material" type="Material" id=35]
+[ext_resource path="res://systems/MaterialSystem.gd" type="Script" id=36]
+[ext_resource path="res://lightweighttextures/yellowchecker.png" type="Texture" id=37]
 
 [sub_resource type="CylinderShape" id=1]
 radius = 0.1
@@ -96,7 +108,193 @@ extents = Vector3( 0.02, 0.07, 0.04 )
 radius = 0.3
 height = 1.2
 
-[sub_resource type="Shader" id=15]
+[sub_resource type="QuadMesh" id=15]
+size = Vector2( 1.6, 1 )
+
+[sub_resource type="ViewportTexture" id=16]
+viewport_path = NodePath("PlanViewSystem/PlanView/Viewport")
+
+[sub_resource type="SpatialMaterial" id=17]
+resource_local_to_scene = true
+flags_unshaded = true
+flags_albedo_tex_force_srgb = true
+albedo_texture = SubResource( 16 )
+
+[sub_resource type="SpatialMaterial" id=18]
+albedo_color = Color( 0.87451, 0.886275, 0.956863, 1 )
+metallic = 0.45
+roughness = 0.51
+emission_enabled = true
+emission = Color( 0.996078, 0, 0, 1 )
+emission_energy = 1.34
+emission_operator = 0
+emission_on_uv2 = false
+
+[sub_resource type="CubeMesh" id=19]
+material = SubResource( 18 )
+size = Vector3( 1.7, 1.1, 0.1 )
+
+[sub_resource type="BoxShape" id=20]
+extents = Vector3( 0.8, 0.5, 0.01 )
+
+[sub_resource type="SpatialMaterial" id=21]
+albedo_color = Color( 0.0313726, 0.113725, 0.992157, 1 )
+emission_enabled = true
+emission = Color( 0.0117647, 0.105882, 0.713726, 1 )
+emission_energy = 1.0
+emission_operator = 0
+emission_on_uv2 = false
+
+[sub_resource type="CubeMesh" id=22]
+material = SubResource( 21 )
+size = Vector3( 1, 0.3, 1 )
+
+[sub_resource type="SpatialMaterial" id=23]
+albedo_color = Color( 0.980392, 0.988235, 0.027451, 1 )
+emission_enabled = true
+emission = Color( 0.984314, 0.988235, 0.113725, 1 )
+emission_energy = 0.41
+emission_operator = 0
+emission_on_uv2 = false
+
+[sub_resource type="CylinderMesh" id=24]
+material = SubResource( 23 )
+top_radius = 0.4
+bottom_radius = 0.4
+height = 0.2
+radial_segments = 8
+rings = 1
+
+[sub_resource type="SpatialMaterial" id=25]
+albedo_color = Color( 0.329412, 0.0313726, 0.0313726, 1 )
+metallic = 0.75
+roughness = 0.3
+
+[sub_resource type="CylinderMesh" id=26]
+material = SubResource( 25 )
+top_radius = 1.8
+bottom_radius = 0.001
+height = 0.6
+radial_segments = 8
+rings = 1
+
+[sub_resource type="CubeMesh" id=27]
+material = ExtResource( 21 )
+size = Vector3( 0.02, 1, 0.02 )
+
+[sub_resource type="PlaneMesh" id=28]
+
+[sub_resource type="PlaneMesh" id=29]
+
+[sub_resource type="PlaneMesh" id=30]
+
+[sub_resource type="PlaneMesh" id=31]
+
+[sub_resource type="SpatialMaterial" id=32]
+params_cull_mode = 2
+albedo_texture = ExtResource( 26 )
+emission_enabled = true
+emission = Color( 0, 0, 0, 1 )
+emission_energy = 0.31
+emission_operator = 0
+emission_on_uv2 = false
+emission_texture = ExtResource( 37 )
+uv1_scale = Vector3( 0.2, 0.2, 0.2 )
+uv1_triplanar = true
+
+[sub_resource type="PlaneMesh" id=33]
+
+[sub_resource type="SpatialMaterial" id=34]
+params_cull_mode = 2
+albedo_texture = ExtResource( 34 )
+normal_enabled = true
+normal_scale = 2.04
+normal_texture = ExtResource( 33 )
+uv1_triplanar = true
+
+[sub_resource type="SpatialMaterial" id=35]
+params_cull_mode = 2
+albedo_texture = ExtResource( 34 )
+emission_enabled = true
+emission = Color( 0, 0, 0, 1 )
+emission_energy = 0.31
+emission_operator = 0
+emission_on_uv2 = false
+emission_texture = ExtResource( 37 )
+normal_enabled = true
+normal_scale = 2.04
+normal_texture = ExtResource( 33 )
+uv1_triplanar = true
+
+[sub_resource type="PlaneMesh" id=36]
+
+[sub_resource type="SpatialMaterial" id=37]
+params_cull_mode = 2
+albedo_texture = ExtResource( 29 )
+uv1_scale = Vector3( 0.2, 0.2, 0.2 )
+uv1_triplanar = true
+
+[sub_resource type="PlaneMesh" id=38]
+
+[sub_resource type="SpatialMaterial" id=39]
+params_cull_mode = 2
+albedo_texture = ExtResource( 29 )
+emission_enabled = true
+emission = Color( 0, 0, 0, 1 )
+emission_energy = 0.5
+emission_operator = 0
+emission_on_uv2 = true
+emission_texture = ExtResource( 37 )
+uv1_scale = Vector3( 0.2, 0.2, 0.2 )
+uv1_triplanar = true
+uv2_scale = Vector3( 0.5, 0.5, 0.5 )
+uv2_triplanar = true
+
+[sub_resource type="PlaneMesh" id=40]
+
+[sub_resource type="SpatialMaterial" id=41]
+params_cull_mode = 2
+albedo_texture = ExtResource( 32 )
+metallic = 0.37
+roughness = 0.59
+uv1_triplanar = true
+
+[sub_resource type="SpatialMaterial" id=42]
+params_cull_mode = 2
+albedo_texture = ExtResource( 32 )
+emission_enabled = true
+emission = Color( 0, 0, 0, 1 )
+emission_energy = 0.52
+emission_operator = 0
+emission_on_uv2 = false
+emission_texture = ExtResource( 37 )
+uv1_triplanar = true
+
+[sub_resource type="PlaneMesh" id=43]
+
+[sub_resource type="SpatialMaterial" id=44]
+params_cull_mode = 2
+albedo_texture = ExtResource( 31 )
+normal_enabled = true
+normal_scale = 2.03
+normal_texture = ExtResource( 30 )
+uv1_triplanar = true
+
+[sub_resource type="SpatialMaterial" id=45]
+params_cull_mode = 2
+albedo_texture = ExtResource( 31 )
+emission_enabled = true
+emission = Color( 0, 0, 0, 1 )
+emission_energy = 0.31
+emission_operator = 0
+emission_on_uv2 = false
+emission_texture = ExtResource( 37 )
+normal_enabled = true
+normal_scale = 2.03
+normal_texture = ExtResource( 30 )
+uv1_triplanar = true
+
+[sub_resource type="Shader" id=46]
 code = "shader_type spatial;
 render_mode blend_mix,depth_draw_opaque,cull_back,diffuse_burley,specular_schlick_ggx;
 uniform vec4 albedo : hint_color;
@@ -127,10 +325,10 @@ void fragment() {
 }
 "
 
-[sub_resource type="ProxyTexture" id=16]
+[sub_resource type="ProxyTexture" id=47]
 
-[sub_resource type="ShaderMaterial" id=17]
-shader = SubResource( 15 )
+[sub_resource type="ShaderMaterial" id=48]
+shader = SubResource( 46 )
 shader_param/albedo = Color( 0.435294, 0.215686, 0.141176, 0.454902 )
 shader_param/specular = 0.5
 shader_param/metallic = 0.48
@@ -138,99 +336,25 @@ shader_param/roughness = 0.71
 shader_param/point_size = 1.0
 shader_param/uv1_scale = Vector3( 3, 1, 1 )
 shader_param/uv1_offset = Vector3( 0, 0, 0 )
-shader_param/texture_albedo = SubResource( 16 )
+shader_param/texture_albedo = SubResource( 47 )
 
-[sub_resource type="PlaneMesh" id=18]
-material = SubResource( 17 )
+[sub_resource type="PlaneMesh" id=49]
+material = SubResource( 48 )
 size = Vector2( 4, 2 )
 
-[sub_resource type="SpatialMaterial" id=19]
+[sub_resource type="SpatialMaterial" id=50]
 params_cull_mode = 2
 albedo_color = Color( 0.992157, 0.992157, 0.666667, 1 )
 albedo_texture = ExtResource( 7 )
 
-[sub_resource type="PlaneMesh" id=20]
-material = SubResource( 19 )
+[sub_resource type="PlaneMesh" id=51]
+material = SubResource( 50 )
 size = Vector2( 1, 1.285 )
 subdivide_width = 4
 subdivide_depth = 4
 
-[sub_resource type="BoxShape" id=21]
+[sub_resource type="BoxShape" id=52]
 extents = Vector3( 0.5, 0.5, 0.643 )
-
-[sub_resource type="QuadMesh" id=22]
-size = Vector2( 1.6, 1 )
-
-[sub_resource type="ViewportTexture" id=23]
-viewport_path = NodePath("PlanViewSystem/PlanView/Viewport")
-
-[sub_resource type="SpatialMaterial" id=24]
-resource_local_to_scene = true
-flags_unshaded = true
-flags_albedo_tex_force_srgb = true
-albedo_texture = SubResource( 23 )
-
-[sub_resource type="SpatialMaterial" id=35]
-albedo_color = Color( 0.87451, 0.886275, 0.956863, 1 )
-metallic = 0.45
-roughness = 0.51
-emission_enabled = true
-emission = Color( 0.996078, 0, 0, 1 )
-emission_energy = 1.34
-emission_operator = 0
-emission_on_uv2 = false
-
-[sub_resource type="CubeMesh" id=25]
-material = SubResource( 35 )
-size = Vector3( 1.7, 1.1, 0.1 )
-
-[sub_resource type="BoxShape" id=27]
-extents = Vector3( 0.8, 0.5, 0.01 )
-
-[sub_resource type="SpatialMaterial" id=28]
-albedo_color = Color( 0.0313726, 0.113725, 0.992157, 1 )
-emission_enabled = true
-emission = Color( 0.0117647, 0.105882, 0.713726, 1 )
-emission_energy = 1.0
-emission_operator = 0
-emission_on_uv2 = false
-
-[sub_resource type="CubeMesh" id=29]
-material = SubResource( 28 )
-size = Vector3( 1, 0.3, 1 )
-
-[sub_resource type="SpatialMaterial" id=30]
-albedo_color = Color( 0.980392, 0.988235, 0.027451, 1 )
-emission_enabled = true
-emission = Color( 0.984314, 0.988235, 0.113725, 1 )
-emission_energy = 0.41
-emission_operator = 0
-emission_on_uv2 = false
-
-[sub_resource type="CylinderMesh" id=31]
-material = SubResource( 30 )
-top_radius = 0.4
-bottom_radius = 0.4
-height = 0.2
-radial_segments = 8
-rings = 1
-
-[sub_resource type="SpatialMaterial" id=32]
-albedo_color = Color( 0.329412, 0.0313726, 0.0313726, 1 )
-metallic = 0.75
-roughness = 0.3
-
-[sub_resource type="CylinderMesh" id=33]
-material = SubResource( 32 )
-top_radius = 1.8
-bottom_radius = 0.001
-height = 0.6
-radial_segments = 8
-rings = 1
-
-[sub_resource type="CubeMesh" id=34]
-material = ExtResource( 21 )
-size = Vector3( 0.02, 1, 0.02 )
 
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
@@ -383,6 +507,9 @@ transform = Transform( 0.512717, 0, -0.858558, 0, 1, 0, 0.858558, 0, 0.512717, 2
 visible = false
 script = ExtResource( 15 )
 
+[node name="PlanViewSystem" type="RemoteTransform" parent="Players/PlayerMe"]
+remote_path = NodePath("../../../PlanViewSystem")
+
 [node name="SketchSystem" type="Spatial" parent="."]
 script = ExtResource( 10 )
 
@@ -391,7 +518,6 @@ script = ExtResource( 10 )
 [node name="XCtubes" type="Spatial" parent="SketchSystem"]
 
 [node name="BillboardLabel" parent="SketchSystem" instance=ExtResource( 11 )]
-visible = false
 
 [node name="SoundPos1" type="AudioStreamPlayer3D" parent="SketchSystem"]
 stream = ExtResource( 9 )
@@ -403,29 +529,6 @@ unit_db = 19.367
 
 [node name="ImageSystem" type="Node" parent="."]
 script = ExtResource( 17 )
-
-[node name="LaserSquare" type="MeshInstance" parent="."]
-transform = Transform( 1, 0, 0, 0, 0.697453, 0.716631, 0, -0.716631, 0.697453, 2.42691, 1.24388, 1.94417 )
-material_override = ExtResource( 3 )
-mesh = SubResource( 18 )
-material/0 = ExtResource( 3 )
-
-[node name="BoulderClutter" type="Spatial" parent="."]
-
-[node name="drawnfloor" type="StaticBody" parent="."]
-transform = Transform( 200, 0, 0, 0, 1, 0, 0, 0, 200, 0, -0.5, 0 )
-visible = false
-collision_layer = 18
-collision_mask = 0
-
-[node name="thing,ghfg" type="MeshInstance" parent="drawnfloor"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.123422, -0.143924, -0.0669777 )
-mesh = SubResource( 20 )
-material/0 = null
-
-[node name="CollisionShape" type="CollisionShape" parent="drawnfloor"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0 )
-shape = SubResource( 21 )
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = ExtResource( 2 )
@@ -440,6 +543,8 @@ shadow_color = Color( 0.388235, 0.0705882, 0.0705882, 1 )
 script = ExtResource( 8 )
 
 [node name="PlanViewSystem" type="Spatial" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -2.08929e-06, 2, -6.412 )
+visible = false
 script = ExtResource( 24 )
 
 [node name="PlanView" type="StaticBody" parent="PlanViewSystem"]
@@ -448,17 +553,18 @@ collision_layer = 8
 
 [node name="ProjectionScreen" type="MeshInstance" parent="PlanViewSystem/PlanView"]
 transform = Transform( 1, 0, 0, 0, 1, -2.98023e-08, 0, 2.98023e-08, 1, 0, 0, 0 )
-mesh = SubResource( 22 )
-material/0 = SubResource( 24 )
+mesh = SubResource( 15 )
+material/0 = SubResource( 17 )
 
 [node name="ImageFrame" type="MeshInstance" parent="PlanViewSystem/PlanView/ProjectionScreen"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.055 )
-mesh = SubResource( 25 )
+mesh = SubResource( 19 )
 material/0 = null
 
 [node name="CollisionShape" type="CollisionShape" parent="PlanViewSystem/PlanView"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.01 )
-shape = SubResource( 27 )
+shape = SubResource( 20 )
+disabled = true
 
 [node name="Viewport" type="Viewport" parent="PlanViewSystem/PlanView"]
 size = Vector2( 800, 800 )
@@ -477,7 +583,7 @@ remote_path = NodePath("../../../../RealPlanCamera")
 update_scale = false
 
 [node name="RealPlanCamera" type="Spatial" parent="PlanViewSystem"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 50, -12 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.999998, 48, -5.588 )
 __meta__ = {
 "_editor_description_": ""
 }
@@ -485,19 +591,19 @@ __meta__ = {
 [node name="RealCameraBox" type="MeshInstance" parent="PlanViewSystem/RealPlanCamera"]
 transform = Transform( 70, 0, 0, 0, 1, 0, 0, 0, 70, 0, 0.6, 0 )
 cast_shadow = 0
-mesh = SubResource( 29 )
+mesh = SubResource( 22 )
 material/0 = null
 
 [node name="RealCameraLens" type="MeshInstance" parent="PlanViewSystem/RealPlanCamera/RealCameraBox"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.132259, 0 )
 cast_shadow = 0
-mesh = SubResource( 31 )
+mesh = SubResource( 24 )
 material/0 = null
 
 [node name="LaserScope" type="MeshInstance" parent="PlanViewSystem/RealPlanCamera"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 0 )
 cast_shadow = 0
-mesh = SubResource( 33 )
+mesh = SubResource( 26 )
 material/0 = null
 
 [node name="Length" type="Spatial" parent="PlanViewSystem/RealPlanCamera/LaserScope"]
@@ -505,7 +611,7 @@ transform = Transform( 1, 0, 0, 0, 60, 0, 0, 0, 1, 0, 0, 0 )
 
 [node name="LaserVertical" type="MeshInstance" parent="PlanViewSystem/RealPlanCamera/LaserScope/Length"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0 )
-mesh = SubResource( 34 )
+mesh = SubResource( 27 )
 material/0 = null
 
 [node name="RayCast" type="RayCast" parent="PlanViewSystem/RealPlanCamera/LaserScope"]
@@ -523,5 +629,91 @@ mesh = SubResource( 6 )
 material/0 = null
 
 [node name="XCnode" parent="PlanViewSystem" instance=ExtResource( 25 )]
+
+[node name="MaterialSystem" type="Spatial" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 8.84611, 2.20853, 0 )
+script = ExtResource( 36 )
+
+[node name="simpledirt" type="MeshInstance" parent="MaterialSystem"]
+mesh = SubResource( 28 )
+material/0 = ExtResource( 35 )
+
+[node name="highlight" type="MeshInstance" parent="MaterialSystem/simpledirt"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.02206 )
+mesh = SubResource( 29 )
+material/0 = ExtResource( 27 )
+
+[node name="partialrock" type="MeshInstance" parent="MaterialSystem"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 2.05663, 0, 0 )
+mesh = SubResource( 30 )
+material/0 = ExtResource( 28 )
+
+[node name="highlight" type="MeshInstance" parent="MaterialSystem/partialrock"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.08184 )
+mesh = SubResource( 31 )
+material/0 = SubResource( 32 )
+
+[node name="rockwater" type="MeshInstance" parent="MaterialSystem"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 4.21638, -0.00722444, -0.0259316 )
+mesh = SubResource( 33 )
+material/0 = SubResource( 34 )
+
+[node name="highlight" type="MeshInstance" parent="MaterialSystem/rockwater"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0123711, 0.00378895, -2.07264 )
+mesh = SubResource( 33 )
+material/0 = SubResource( 35 )
+
+[node name="pebbles" type="MeshInstance" parent="MaterialSystem"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 6.40124, 0, 0 )
+mesh = SubResource( 36 )
+material/0 = SubResource( 37 )
+
+[node name="highlight" type="MeshInstance" parent="MaterialSystem/pebbles"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.09424 )
+mesh = SubResource( 38 )
+material/0 = SubResource( 39 )
+
+[node name="mediumrock" type="MeshInstance" parent="MaterialSystem"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 8.56555, 0, 0 )
+mesh = SubResource( 40 )
+material/0 = SubResource( 41 )
+
+[node name="highlight" type="MeshInstance" parent="MaterialSystem/mediumrock"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.14453 )
+mesh = SubResource( 40 )
+material/0 = SubResource( 42 )
+
+[node name="bluewater" type="MeshInstance" parent="MaterialSystem"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 10.6566, 0, -0.0338948 )
+mesh = SubResource( 43 )
+material/0 = SubResource( 44 )
+
+[node name="highlight" type="MeshInstance" parent="MaterialSystem/bluewater"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.09902 )
+mesh = SubResource( 43 )
+material/0 = SubResource( 45 )
+
+[node name="LaserSquare" type="MeshInstance" parent="."]
+transform = Transform( 1, 0, 0, 0, 0.697453, 0.716631, 0, -0.716631, 0.697453, 2.42691, 1.16181, 1.94417 )
+material_override = ExtResource( 3 )
+mesh = SubResource( 49 )
+material/0 = ExtResource( 3 )
+
+[node name="drawnfloor" type="StaticBody" parent="."]
+transform = Transform( 200, 0, 0, 0, 1, 0, 0, 0, 200, 0, -0.5, 0 )
+visible = false
+collision_layer = 18
+collision_mask = 0
+
+[node name="thing,ghfg" type="MeshInstance" parent="drawnfloor"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.123422, -0.143924, -0.0669777 )
+mesh = SubResource( 51 )
+material/0 = null
+
+[node name="CollisionShape" type="CollisionShape" parent="drawnfloor"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0 )
+shape = SubResource( 52 )
+
+[node name="BoulderClutter" type="Spatial" parent="."]
 [connection signal="body_entered" from="Players/PlayerMe/HandRight/HeelHotspot" to="Players/PlayerMe/pointersystem" method="_on_HeelHotspot_body_entered"]
 [connection signal="body_exited" from="Players/PlayerMe/HandRight/HeelHotspot" to="Players/PlayerMe/pointersystem" method="_on_HeelHotspot_body_exited"]

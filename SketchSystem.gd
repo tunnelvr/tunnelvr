@@ -4,13 +4,6 @@ extends Spatial
 const XCdrawing = preload("res://nodescenes/XCdrawing.tscn")
 const XCtube = preload("res://nodescenes/XCtube.tscn")
 
-const materialdirt = preload("res://lightweighttextures/simpledirt.material")
-const materialrock = preload("res://lightweighttextures/partialrock.material")
-const materialrockwater = preload("res://lightweighttextures/partialrock_water.material")
-var materialscanimage = load("res://surveyscans/scanimagefloor.material")
-var materials = [ materialdirt, materialrock, materialrockwater, materialscanimage ]
-const materialhighlight = preload("res://lightweighttextures/simpledirt_highlight.material")
-
 const linewidth = 0.05
 var tubeshellsvisible = false
 
@@ -138,7 +131,6 @@ func loadcentrelinefile(centrelinefile):
 	centrelinedatafile.open(centrelinedrawing.xcresource, File.READ)
 	var centrelinedata = parse_json(centrelinedatafile.get_line())
 	centrelinedrawing.importcentrelinedata(centrelinedata, self)
-	var m = centrelinedrawing.get_node("PathLines").mesh
 	#var xsectgps = centrelinedata.xsectgps
 	print("default lllloaded")
 

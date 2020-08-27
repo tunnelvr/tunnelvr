@@ -289,7 +289,7 @@ func maketubeshell(xcdrawings):
 			ila1N += len(poly1)
 		#print("  iiilla ", [ila0, ila0N, ila1, ila1N])
 		var surfaceTool = SurfaceTool.new()
-		surfaceTool.set_material(sketchsystem.materialdirt if i != 0 else sketchsystem.materialscanimage)
+		surfaceTool.set_material(Material.new())
 		surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
 
 		var acc = -ila0N/2.0  if ila0N>=ila1N  else  ila1N/2
@@ -381,8 +381,7 @@ func updatetubeshell(xcdrawings, makevisible):
 			$XCtubeshell/MeshInstance.mesh = tubeshellmesh
 			assert ($XCtubeshell/MeshInstance.get_surface_material_count() == len(xcsectormaterials))
 			for i in range($XCtubeshell/MeshInstance.get_surface_material_count()):
-				$XCtubeshell/MeshInstance.set_surface_material(i, xcdrawings.get_parent().materials[xcsectormaterials[i]])
-
+				$XCtubeshell/MeshInstance.set_surface_material(i, get_node("/root/Spatial/MaterialSystem").tubematerialfromnumber(xcsectormaterials[i], false))
 			$XCtubeshell/CollisionShape.shape.set_faces(tubeshellmesh.get_faces())
 			$XCtubeshell.visible = true
 			$XCtubeshell/CollisionShape.disabled = false

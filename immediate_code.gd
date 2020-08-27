@@ -29,7 +29,8 @@ func _run():
 	var x = IP.get_local_addresses()
 	var a = [8,65,3,5,6]
 	a.resize(3)
-	print(a)
+	var h = load("nodescenes/XCtubeshell.tscn").instance()
+	print(h)
 	
 	
 
