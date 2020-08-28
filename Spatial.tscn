@@ -1,4 +1,4 @@
-[gd_scene load_steps=90 format=2]
+[gd_scene load_steps=97 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/default_env.tres" type="Environment" id=2]
@@ -10,7 +10,6 @@
 [ext_resource path="res://WebsocketSystem.gd" type="Script" id=8]
 [ext_resource path="res://sounds/switch7.wav" type="AudioStream" id=9]
 [ext_resource path="res://SketchSystem.gd" type="Script" id=10]
-[ext_resource path="res://text_panel_3d.tscn" type="PackedScene" id=11]
 [ext_resource path="res://guimeshes/headmesh.tscn" type="PackedScene" id=12]
 [ext_resource path="res://sounds/laser8.wav" type="AudioStream" id=13]
 [ext_resource path="res://gui_panel_3d.tscn" type="PackedScene" id=14]
@@ -37,6 +36,9 @@
 [ext_resource path="res://lightweighttextures/simpledirt.material" type="Material" id=35]
 [ext_resource path="res://systems/MaterialSystem.gd" type="Script" id=36]
 [ext_resource path="res://lightweighttextures/yellowchecker.png" type="Texture" id=37]
+[ext_resource path="res://fonts/LabelGenerator.gd" type="Script" id=38]
+[ext_resource path="res://fonts/Fira_Mono/FiraMono-Regular.ttf" type="DynamicFontData" id=39]
+[ext_resource path="res://fonts/Fira_Mono/FiraMono-Bold.ttf" type="DynamicFontData" id=40]
 
 [sub_resource type="CylinderShape" id=1]
 radius = 0.1
@@ -356,6 +358,26 @@ subdivide_depth = 4
 [sub_resource type="BoxShape" id=52]
 extents = Vector3( 0.5, 0.5, 0.643 )
 
+[sub_resource type="DynamicFont" id=53]
+font_data = ExtResource( 40 )
+
+[sub_resource type="DynamicFont" id=54]
+font_data = ExtResource( 39 )
+
+[sub_resource type="PlaneMesh" id=55]
+size = Vector2( 2, 0.1 )
+
+[sub_resource type="ViewportTexture" id=56]
+viewport_path = NodePath("LabelGenerator/Viewport")
+
+[sub_resource type="SpatialMaterial" id=57]
+resource_local_to_scene = true
+flags_unshaded = true
+flags_no_depth_test = true
+flags_do_not_receive_shadows = true
+params_cull_mode = 2
+albedo_texture = SubResource( 56 )
+
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
 
@@ -392,6 +414,9 @@ collision_mask = 0
 [node name="CollisionShape" type="CollisionShape" parent="Players/PlayerMe/HeadCam/ChinHotspot"]
 transform = Transform( 1, -1.86265e-09, 0, -1.86265e-09, 1, 0, -1.86265e-09, 2.98023e-08, 1, 0, 0, 0 )
 shape = SubResource( 1 )
+
+[node name="LabelGenerator" type="RemoteTransform" parent="Players/PlayerMe/HeadCam"]
+remote_path = NodePath("../../../../LabelGenerator")
 
 [node name="HandLeft" type="ARVRController" parent="Players/PlayerMe"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.2, 1.5, -0.5 )
@@ -517,9 +542,6 @@ script = ExtResource( 10 )
 
 [node name="XCtubes" type="Spatial" parent="SketchSystem"]
 
-[node name="BillboardLabel" parent="SketchSystem" instance=ExtResource( 11 )]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.57555, 0 )
-
 [node name="SoundPos1" type="AudioStreamPlayer3D" parent="SketchSystem"]
 stream = ExtResource( 9 )
 unit_db = 9.032
@@ -539,9 +561,6 @@ transform = Transform( -1, 2.66913e-07, -1.86895e-07, 0, 0.573576, 0.819152, 3.2
 light_energy = 0.6
 shadow_enabled = true
 shadow_color = Color( 0.388235, 0.0705882, 0.0705882, 1 )
-
-[node name="WebsocketSystem" type="Node" parent="."]
-script = ExtResource( 8 )
 
 [node name="PlanViewSystem" type="Spatial" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -2.08929e-06, 2, -6.412 )
@@ -718,5 +737,38 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0 )
 shape = SubResource( 52 )
 
 [node name="BoulderClutter" type="Spatial" parent="."]
+
+[node name="LabelGenerator" type="Spatial" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -2.08929e-06, 3.6, -6.412 )
+script = ExtResource( 38 )
+
+[node name="Viewport" type="Viewport" parent="LabelGenerator"]
+size = Vector2( 200, 20 )
+hdr = false
+usage = 0
+render_target_v_flip = true
+
+[node name="RichTextLabel" type="RichTextLabel" parent="LabelGenerator/Viewport"]
+margin_right = 430.0
+margin_bottom = 46.0
+size_flags_stretch_ratio = 0.0
+custom_fonts/mono_font = SubResource( 53 )
+custom_fonts/normal_font = SubResource( 54 )
+bbcode_enabled = true
+bbcode_text = "testing"
+text = "testing"
+scroll_active = false
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ViewportForceRender" type="MeshInstance" parent="LabelGenerator"]
+transform = Transform( 1, 0, 0, 0, 0.655202, -0.755453, 0, 0.755453, 0.655202, 0, -3.44091, -4.59181 )
+visible = false
+mesh = SubResource( 55 )
+material/0 = SubResource( 57 )
+
+[node name="WebsocketSystem" type="Node" parent="."]
+script = ExtResource( 8 )
 [connection signal="body_entered" from="Players/PlayerMe/HandRight/HeelHotspot" to="Players/PlayerMe/pointersystem" method="_on_HeelHotspot_body_entered"]
 [connection signal="body_exited" from="Players/PlayerMe/HandRight/HeelHotspot" to="Players/PlayerMe/pointersystem" method="_on_HeelHotspot_body_exited"]

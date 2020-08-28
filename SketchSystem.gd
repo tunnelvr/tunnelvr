@@ -138,7 +138,7 @@ func loadcentrelinefile(centrelinefile):
 	var centrelinedata = parse_json(centrelinedatafile.get_line())
 	centrelinedrawing.importcentrelinedata(centrelinedata, self)
 	#var xsectgps = centrelinedata.xsectgps
-	$BillboardLabel.makenodelabelstask(centrelinedrawing)
+	get_node("/root/Spatial/LabelGenerator").makenodelabelstask(centrelinedrawing)
 	print("default lllloaded")
 
 remote func xcdrawingfromdata(xcdata):
