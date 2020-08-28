@@ -415,7 +415,7 @@ collision_mask = 0
 transform = Transform( 1, -1.86265e-09, 0, -1.86265e-09, 1, 0, -1.86265e-09, 2.98023e-08, 1, 0, 0, 0 )
 shape = SubResource( 1 )
 
-[node name="LabelGenerator" type="RemoteTransform" parent="Players/PlayerMe/HeadCam"]
+[node name="toLabelGenerator" type="RemoteTransform" parent="Players/PlayerMe/HeadCam"]
 remote_path = NodePath("../../../../LabelGenerator")
 
 [node name="HandLeft" type="ARVRController" parent="Players/PlayerMe"]
@@ -532,7 +532,7 @@ transform = Transform( 0.512717, 0, -0.858558, 0, 1, 0, 0.858558, 0, 0.512717, 2
 visible = false
 script = ExtResource( 15 )
 
-[node name="PlanViewSystem" type="RemoteTransform" parent="Players/PlayerMe"]
+[node name="toPlanViewSystem" type="RemoteTransform" parent="Players/PlayerMe"]
 remote_path = NodePath("../../../PlanViewSystem")
 
 [node name="SketchSystem" type="Spatial" parent="."]
@@ -553,15 +553,6 @@ unit_db = 19.367
 [node name="ImageSystem" type="Node" parent="."]
 script = ExtResource( 17 )
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
-environment = ExtResource( 2 )
-
-[node name="DirectionalLight" type="DirectionalLight" parent="WorldEnvironment"]
-transform = Transform( -1, 2.66913e-07, -1.86895e-07, 0, 0.573576, 0.819152, 3.25841e-07, 0.819152, -0.573576, 0, 50, 0 )
-light_energy = 0.6
-shadow_enabled = true
-shadow_color = Color( 0.388235, 0.0705882, 0.0705882, 1 )
-
 [node name="PlanViewSystem" type="Spatial" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -2.08929e-06, 2, -6.412 )
 visible = false
@@ -570,6 +561,22 @@ script = ExtResource( 24 )
 [node name="PlanView" type="StaticBody" parent="PlanViewSystem"]
 transform = Transform( 1, 0, 0, 0, 0.819152, 0.573577, 0, -0.573577, 0.819152, -3.5665, 0.449535, -13.3568 )
 collision_layer = 8
+
+[node name="Viewport" type="Viewport" parent="PlanViewSystem/PlanView"]
+size = Vector2( 800, 800 )
+render_target_v_flip = true
+
+[node name="Camera" type="Camera" parent="PlanViewSystem/PlanView/Viewport"]
+transform = Transform( 1, 0, 0, 0, -1.62921e-07, 1, 0, -1, -1.62921e-07, -1, 50, -12 )
+environment = ExtResource( 20 )
+projection = 1
+fov = 87.5304
+size = 70.0
+
+[node name="toRealPlanCamera" type="RemoteTransform" parent="PlanViewSystem/PlanView/Viewport/Camera"]
+transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, 0, 0, 0 )
+remote_path = NodePath("../../../../RealPlanCamera")
+update_scale = false
 
 [node name="ProjectionScreen" type="MeshInstance" parent="PlanViewSystem/PlanView"]
 transform = Transform( 1, 0, 0, 0, 1, -2.98023e-08, 0, 2.98023e-08, 1, 0, 0, 0 )
@@ -585,22 +592,6 @@ material/0 = null
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.01 )
 shape = SubResource( 20 )
 disabled = true
-
-[node name="Viewport" type="Viewport" parent="PlanViewSystem/PlanView"]
-size = Vector2( 800, 800 )
-render_target_v_flip = true
-
-[node name="Camera" type="Camera" parent="PlanViewSystem/PlanView/Viewport"]
-transform = Transform( 1, 0, 0, 0, -1.62921e-07, 1, 0, -1, -1.62921e-07, -1, 50, -12 )
-environment = ExtResource( 20 )
-projection = 1
-fov = 87.5304
-size = 70.0
-
-[node name="RemoteTransform" type="RemoteTransform" parent="PlanViewSystem/PlanView/Viewport/Camera"]
-transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, 0, 0, 0 )
-remote_path = NodePath("../../../../RealPlanCamera")
-update_scale = false
 
 [node name="RealPlanCamera" type="Spatial" parent="PlanViewSystem"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.999998, 48, -5.588 )
@@ -770,5 +761,14 @@ material/0 = SubResource( 57 )
 
 [node name="WebsocketSystem" type="Node" parent="."]
 script = ExtResource( 8 )
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = ExtResource( 2 )
+
+[node name="DirectionalLight" type="DirectionalLight" parent="WorldEnvironment"]
+transform = Transform( -1, 2.66913e-07, -1.86895e-07, 0, 0.573576, 0.819152, 3.25841e-07, 0.819152, -0.573576, 0, 50, 0 )
+light_energy = 0.6
+shadow_enabled = true
+shadow_color = Color( 0.388235, 0.0705882, 0.0705882, 1 )
 [connection signal="body_entered" from="Players/PlayerMe/HandRight/HeelHotspot" to="Players/PlayerMe/pointersystem" method="_on_HeelHotspot_body_entered"]
 [connection signal="body_exited" from="Players/PlayerMe/HandRight/HeelHotspot" to="Players/PlayerMe/pointersystem" method="_on_HeelHotspot_body_exited"]

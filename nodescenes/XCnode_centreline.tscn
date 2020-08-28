@@ -28,13 +28,13 @@ uniform vec3 uv1_scale;
 uniform vec3 uv1_offset;
 uniform vec3 uv2_scale;
 uniform vec3 uv2_offset;
-uniform float x_offset;
+uniform vec3 vertex_offset;
+uniform float vertex_scale;
 
 void vertex() {
 	UV=UV*uv1_scale.xy+uv1_offset.xy;
 	MODELVIEW_MATRIX = INV_CAMERA_MATRIX * mat4(CAMERA_MATRIX[0],CAMERA_MATRIX[1],CAMERA_MATRIX[2],WORLD_MATRIX[3]);
-	VERTEX.x = VERTEX.x + x_offset;
-	VERTEX.y = VERTEX.y + 0.3;
+	VERTEX = (VERTEX + vertex_offset)*vertex_scale;
 }
 
 
@@ -62,7 +62,8 @@ shader_param/uv1_scale = Vector3( 1, 1, 1 )
 shader_param/uv1_offset = Vector3( 0, 0, 0 )
 shader_param/uv2_scale = Vector3( 1, 1, 1 )
 shader_param/uv2_offset = Vector3( 0, 0, 0 )
-shader_param/x_offset = 1.9
+shader_param/vertex_offset = Vector3( 1.8, 0.3, 0 )
+shader_param/vertex_scale = 1.0
 shader_param/texture_albedo = ExtResource( 1 )
 
 [node name="XCnode" type="StaticBody"]
@@ -78,7 +79,6 @@ mesh = SubResource( 3 )
 material/0 = null
 
 [node name="Quad" type="MeshInstance" parent="."]
-visible = false
 cast_shadow = 0
 mesh = SubResource( 4 )
 material/0 = SubResource( 6 )

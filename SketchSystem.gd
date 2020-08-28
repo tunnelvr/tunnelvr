@@ -1,4 +1,3 @@
-tool
 extends Spatial
 
 const XCdrawing = preload("res://nodescenes/XCdrawing.tscn")
@@ -110,6 +109,7 @@ func savesketchsystem():
 	print("sssssaved")
 
 func clearsketchsystem():
+	get_node("/root/Spatial/LabelGenerator").clearlabellingprocess()
 	var pointersystem = get_node("/root/Spatial").playerMe.get_node("pointersystem")
 	pointersystem.setselectedtarget(null)  # clear all the objects before they are freed
 	pointersystem.pointertarget = null
@@ -148,7 +148,9 @@ remote func xcdrawingfromdata(xcdata):
 	xcdrawing.mergexcrpcdata(xcdata)
 	if xcdrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE or xcdrawing.drawingtype == DRAWING_TYPE.DT_PAPERTEXTURE:
 		get_node("/root/Spatial/ImageSystem").fetchpaperdrawing(xcdrawing)
-
+	if xcdrawing.drawingtype == DRAWING_TYPE.DT_CENTRELINE:
+		get_node("/root/Spatial/LabelGenerator").makenodelabelstask(xcdrawing)
+	
 remotesync func sketchsystemfromdict(save_dict):
 	clearsketchsystem()
 	var xcdrawingsData = save_dict["xcdrawings"]
@@ -166,7 +168,9 @@ remotesync func sketchsystemfromdict(save_dict):
 		else:
 			xcdrawing.get_node("XCdrawingplane").visible = false
 			xcdrawing.get_node("XCdrawingplane/CollisionShape").disabled = true
-			
+		if xcdrawing.drawingtype == DRAWING_TYPE.DT_CENTRELINE:
+			get_node("/root/Spatial/LabelGenerator").makenodelabelstask(xcdrawing)
+
 	for i in range(len(xctubesData)):
 		var xctubeData = xctubesData[i]
 		#print(i, xctubeData)
@@ -200,8 +204,10 @@ func newXCuniquedrawing(drawingtype, sname):
 	get_node("XCdrawings").add_child(xcdrawing)
 	if drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		xcdrawing.add_to_group("gpnoncentrelinegeo")
+		xcdrawing.linewidth = 0.05
 	elif drawingtype == DRAWING_TYPE.DT_CENTRELINE:
 		xcdrawing.add_to_group("gpcentrelinegeo")
+		xcdrawing.linewidth = 0.035
 	
 	if xcdrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
 		xcdrawing.get_node("XCdrawingplane").collision_layer |= CollisionLayer.CL_Environment

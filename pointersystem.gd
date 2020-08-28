@@ -77,15 +77,12 @@ func setpointertargetmaterial():
 		handright.get_node("csghandright").setpartcolor(2, "#FFFF60")
 	
 func setselectedtarget(newselectedtarget):
-	setbillboardlabel(null, null)
 	if selectedtargettype == "XCnode":
 		selectedtarget.get_node("CollisionShape/MeshInstance").set_surface_material(0, preload("res://guimaterials/XCnode_nodepthtest.material") if selectedtargetwall == activetargetwall else preload("res://guimaterials/XCnode.material"))
 		
 	selectedtarget = newselectedtarget
 	selectedtargettype = targettype(newselectedtarget)
 	selectedtargetwall = targetwall(selectedtarget, selectedtargettype)
-	if selectedtargetwall != null and selectedtargetwall.drawingtype == DRAWING_TYPE.DT_CENTRELINE:
-		setbillboardlabel(selectedtarget.get_name(), selectedtarget.global_transform.origin)
 	if selectedtarget != pointertarget and selectedtargettype == "XCnode":
 		selectedtarget.get_node("CollisionShape/MeshInstance").set_surface_material(0, selectedhighlightmaterial)
 	activelaserroot.get_node("LaserSpot").material_override = preload("res://guimaterials/laserspot_selected.material") if selectedtarget != null else null
@@ -133,16 +130,6 @@ func setactivetargettube(newactivetargettube):
 	activetargettubesector = -1
 	if activetargettube != null:
 		setactivetargettubesector(0)
-
-func setbillboardlabel(ltext, pos):
-	var textpanel = sketchsystem.get_node("BillboardLabel")
-	if ltext != null:
-		textpanel.get_node("Viewport/Label").text = ltext
-		textpanel.global_transform.origin = pos + Vector3(0, 0.3, 0)
-		textpanel.visible = true
-	else:
-		textpanel.visible = false
-
 
 func _ready():
 	handright.connect("button_pressed", self, "_on_button_pressed")
@@ -488,12 +475,10 @@ func buttonpressed_vrpad(gripbuttonheld, left_right, up_down):
 			
 	#elif pointertargettype == "PlanView":
 	elif pointerplanviewtarget != null and not pointerplanviewtarget.planviewactive:
-		var plancamera = pointerplanviewtarget.get_node("PlanView/Viewport/Camera")
 		if abs(left_right) > 0.65:
-			plancamera.size *= (1.5 if left_right < 0 else 0.6667)
-			pointerplanviewtarget.get_node("RealPlanCamera/RealCameraBox").scale = Vector3(plancamera.size, 1, plancamera.size)
-		if abs(left_right) < 0.2 and abs(up_down) < 0.2:
-			plancamera.translation = Vector3(headcam.global_transform.origin.x, plancamera.translation.y, headcam.global_transform.origin.z)
+			pointerplanviewtarget.camerascalechange(1.5 if left_right < 0 else 0.6667)
+		elif abs(left_right) < 0.2 and abs(up_down) < 0.2:
+			pointerplanviewtarget.cameraresetcentre(headcam)
 		
 func _on_button_release(p_button):
 	if p_button == BUTTONS.VR_GRIP:

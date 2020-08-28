@@ -16,7 +16,7 @@ var xcflatshellmaterial = 0
 var xctubesconn = [ ]   # references to xctubes that connect to here (could use their names instead)
 var maxnodepointnumber = 0
 
-const linewidth = 0.05
+var linewidth = 0.05
 
 remotesync func setxcdrawingvisibility(makevisible):
 	if not makevisible:
@@ -283,23 +283,20 @@ func updatelinksandtubesafterchange(xctubesconnupdated, sketchsystem):
 		xctube.updatetubelinkpaths(sketchsystem)
 		sketchsystem.rpc("xctubefromdata", xctube.exportxctrpcdata())
 
-func updatexcpaths(llinewidth=0):
-	var xcembeddedtype = (llinewidth==0)
-	if drawingtype == DRAWING_TYPE.DT_PAPERTEXTURE and llinewidth == 0:
+func updatexcpaths():
+	if drawingtype == DRAWING_TYPE.DT_PAPERTEXTURE:
 		return
 	if len(onepathpairs) == 0:
 		$PathLines.mesh = null
 		return
 		
-	if llinewidth == 0:
-		llinewidth = linewidth*0.7 if drawingtype == DRAWING_TYPE.DT_CENTRELINE else linewidth
 	var surfaceTool = SurfaceTool.new()
 	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
 	for j in range(0, len(onepathpairs), 2):
 		var p0 = nodepoints[onepathpairs[j]]
 		var p1 = nodepoints[onepathpairs[j+1]]
-		var perp = Vector3(-(p1.y - p0.y), p1.x - p0.x, 0) if xcembeddedtype else Vector3(-(p1.z - p0.z), 0, p1.x - p0.x)
-		var fperp = llinewidth*perp.normalized()
+		var perp = Vector3(-(p1.y - p0.y), p1.x - p0.x, 0) if drawingtype != DRAWING_TYPE.DT_CENTRELINE else Vector3(-(p1.z - p0.z), 0, p1.x - p0.x)
+		var fperp = linewidth*perp.normalized()
 		var p0left = p0 - fperp
 		var p0right = p0 + fperp
 		var p1left = p1 - fperp
@@ -443,6 +440,7 @@ func updatexctubeshell(xcdrawings, makevisible):
 			if not has_node("XCflatshell"):
 				var xcflatshell = preload("res://nodescenes/XCtubeshell.tscn").instance()
 				xcflatshell.set_name("XCflatshell")
+				xcflatshell.get_node("CollisionShape").shape = ConcavePolygonShape.new()
 				add_child(xcflatshell)
 			$XCflatshell/MeshInstance.mesh = xctubeshellmesh
 			var flatshellmaterial = get_node("/root/Spatial/MaterialSystem").tubematerialfromnumber(xcflatshellmaterial, false)
