@@ -20,7 +20,6 @@ export var flyspeed = 250.0
 export var drag_factor = 0.1
 
 func _ready():
-	print("not connecting the handleft controlss**************")
 	handleft.connect("button_pressed", self, "_on_button_pressed")
 	handleft.connect("button_release", self, "_on_button_release")
 	print("ARVRinterfaces ", ARVRServer.get_interfaces())
@@ -105,10 +104,17 @@ func _physics_process(delta):
 	collision_shape.shape.height = player_height - (player_radius * 2.0)
 	collision_shape.transform.origin.y = (player_height / 2.0)
 	#print(get_viewport().get_mouse_position(), Input.get_mouse_mode())
-	handleft.visible = playernode.arvrinterface != null and handleft.get_is_active()
-	if handleft.get_node("TipTouchRay").is_colliding() != handright.get_node("LaserOrient/MeshDial").visible:
-		handright.get_node("LaserOrient/MeshDial").visible = handleft.get_node("TipTouchRay").is_colliding()
-		handleft.get_node("csghandleft").setpartcolor(2, Color("222277") if handleft.get_node("TipTouchRay").is_colliding() else Color("#FFFFFF"))
+	var left_right = handleft.get_joystick_axis(0) if handleft.get_is_active() else 0.0
+	var forwards_backwards = handleft.get_joystick_axis(1) if handleft.get_is_active() else 0.0
+	if playernode.VRstatus == "quest":
+		left_right = 0
+		forwards_backwards = 0
+		handleft.visible = true
+	else:
+		handleft.visible = playernode.arvrinterface != null and handleft.get_is_active()
+		if handleft.get_node("TipTouchRay").is_colliding() != handright.get_node("LaserOrient/MeshDial").visible:
+			handright.get_node("LaserOrient/MeshDial").visible = handleft.get_node("TipTouchRay").is_colliding()
+			handleft.get_node("csghandleft").setpartcolor(2, Color("222277") if handleft.get_node("TipTouchRay").is_colliding() else Color("#FFFFFF"))
 
 	if nextphysicsrotatestep != 0:
 		var t1 = Transform()
@@ -119,11 +125,6 @@ func _physics_process(delta):
 		rot = rot.rotated(Vector3(0.0, -1, 0.0), deg2rad(nextphysicsrotatestep))
 		playernode.transform *= t2 * rot * t1
 		nextphysicsrotatestep = 0.0
-		
-	var left_right = handleft.get_joystick_axis(0) if handleft.get_is_active() else 0.0
-	var forwards_backwards = handleft.get_joystick_axis(1) if handleft.get_is_active() else 0.0
-	#left_right = 0   # disable when running quest
-	#forwards_backwards = 0
 	
 	var lhkeyvec = Vector2(0, 0)
 	if Input.is_action_pressed("lh_forward"):

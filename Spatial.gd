@@ -7,13 +7,39 @@ extends Spatial
 # * add networking instructions to README
 # * then networking to the Quest(!)
 
-# * Floor drawings into its own place in sketch system
+# * Take a papersheet (same as floor sheet), done with thickness.
+# * Put this papersheet under my feet and make it real big.  Ability to lift it up.  
+# * Then connect centreline node to it, and a second one.  Now it can only be horizontal, but move up and down.
+# * Possibly ability to trim this sheet down with a closed contour in it
+
+# * Make a blank XCdrawing in a tube and be able to move it around.  
+# * This then locks and slices the tube.  (keep tube directions same and maintain the sector values)
+# * Make a consistent bit of cave in Ireby2
+
+# * Finally abolish the floorsheet.  Have a very large grassy plane underneath it all 
 
 
-# * Put this into the materials system?  
-# * hide unwanted labels (or all the centrelines)
 
-# * Find a way to make the papersheet toast things and lift them up?
+# * exportxcdata and exportcxcdata should be merged and use the same dict.
+# * exportxctrpcdata to be primary tube record
+# * xcdrawing should have file name of image (separate from the system name)
+# * nodes should have label name separate from system name
+
+# * floor sheet and paper sheet to be the same thing.  
+# * papersheet under your feet and made big, so it can then be aligned with centrelines
+# * trimming of papersheet view?
+
+# * a gripclick inserts a new XC in the tube that we can orient and move before applying the slice
+#   -- this can be done from the plan view too, 
+#   -- plot with front-culling so as to see inside the shapes, and plot with image textures on
+
+# * loading second round of images does not make new nodes (or controls the names properly) 
+
+# * Centrelines and centreline labels off (unless we want them)
+
+# * centreline xcdrawing as extended class?
+
+# * use joypos instead of left_right stuff
 
 # * special materials are the sketch image and invisible
 # * we can toggle culling to the materials to see inside 
@@ -23,26 +49,7 @@ extends Spatial
 
 # * highlight nodes under pointer system so it's global and simplifies colouring code
 
-# * Pass in shader_params on the tube rock material (maybe outline too)
-# * colours of materials to highlight (or set part of cave)
-
-# * Make as if it's selected in the main node point thing (with a new ray cast)
-
-# * use joypos instead of left_right stuff
 # * active node to be an overlay
-
-# * Attach drawings onto centreline nodes.  Move them about in space there
-
-# * Label nodes on paper to connect to the centreline nodes
-# * Allow drawing nodes on the paper (so we can make cut outs and labels)
-
-# * ConcaveCollision shape always gives a mesh error -- report
-
-# * loading second round of images does not make new nodes (or controls the names properly) 
-
-# * exportxctrpcdata to be primary tube record
-
-# * a gripclick inserts a new XC in the tube that we can orient and move
 
 # * should correspond to the join we have  
 
@@ -62,11 +69,6 @@ extends Spatial
 
 # * A selected tube makes the XCnodes bigger?
 # * or we can equivalently cycle through the nodes with right and left VR_Pad
-
-# * and XC is visible (or its nodes are) if there is no tube 
-
-# * tube material must be remembered (and one of the materials is blank)
-# * active tube selection
 
 # * grip on XCshape then click gets into rotate mode like with papersheets (but preserving upwardness)
 
@@ -324,6 +326,9 @@ func _ready():
 
 	if VRstatus == "none":
 		print("*** VR not working")
+	playerMe.VRstatus = VRstatus
+	if VRstatus == "quest":
+		playerMe.initquesthandtrackingnow(ovr_hand_tracking)
 
 	var networkedmultiplayerenet = NetworkedMultiplayerENet.new()
 	get_tree().connect("network_peer_connected", self, "_player_connected")

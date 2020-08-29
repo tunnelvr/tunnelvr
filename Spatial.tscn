@@ -536,6 +536,7 @@ script = ExtResource( 15 )
 remote_path = NodePath("../../../PlanViewSystem")
 
 [node name="SketchSystem" type="Spatial" parent="."]
+visible = false
 script = ExtResource( 10 )
 
 [node name="XCdrawings" type="Spatial" parent="SketchSystem"]
