@@ -55,21 +55,20 @@ func xcapplyonepath(xcn0, xcn1):
 
 remote func xctubefromdata(xctdata):
 	# exportxctrpcdata():  return [ get_name(), xcname0, xcname1, xcdrawinglink ]
-	var xcdrawing0 = get_node("XCdrawings").get_node(xctdata[1])
+	var xcdrawing0 = get_node("XCdrawings").get_node(xctdata["xcname0"])
 	var xctube = null
 	for lxctube in xcdrawing0.xctubesconn:
-		if lxctube.xcname1 == xctdata[2]:
-			assert (lxctube.xcname0 == xctdata[1])
+		if lxctube.xcname1 == xctdata["xcname1"]:
+			assert (lxctube.xcname0 == xctdata["xcname0"])
 			xctube = lxctube
 			break
-		assert (lxctube.xcname0 != xctdata[2])
+		assert (lxctube.xcname0 != xctdata["xcname1"])
 	if xctube == null:
-		assert ($XCtubes.get_node(xctdata[0]) == null)
-		xctube = newXCtube(xcdrawing0, get_node("XCdrawings").get_node(xctdata[2]))
-	assert (xctube.get_name() == xctdata[0])
-	xctube.xcdrawinglink = xctdata[3]
-	if len(xctdata) >= 5:
-		xctube.xcsectormaterials = xctdata[4]
+		assert ($XCtubes.get_node(xctdata["name"]) == null)
+		xctube = newXCtube(xcdrawing0, get_node("XCdrawings").get_node(xctdata["xcname1"]))
+	assert (xctube.get_name() == xctdata["name"])
+	xctube.xcdrawinglink = xctdata["xcdrawinglink"]
+	xctube.xcsectormaterials = xctdata["xcsectormaterials"]
 	xctube.updatetubelinkpaths(self)
 
 remotesync func updateworkingshell(makevisible):
@@ -91,10 +90,10 @@ remotesync func changecentrelineonlymode(lcentrelineonlymode):
 func sketchsystemtodict():
 	var xcdrawingsData = [ ]
 	for xcdrawing in $XCdrawings.get_children():
-		xcdrawingsData.append(xcdrawing.exportxcrpcdata(true))
+		xcdrawingsData.append(xcdrawing.exportxcrpcdata())
 	var xctubesData = [ ]
 	for xctube in $XCtubes.get_children():
-		xctubesData.append([xctube.xcname0, xctube.xcname1, xctube.xcdrawinglink, xctube.xcsectormaterials])
+		xctubesData.append(xctube.exportxctrpcdata())
 	var save_dict = { "xcdrawings":xcdrawingsData,
 					  "xctubes":xctubesData }
 	return save_dict
@@ -104,7 +103,8 @@ func savesketchsystem():
 	var fname = "user://savegame.save"
 	var save_game = File.new()
 	save_game.open(fname, File.WRITE)
-	save_game.store_line(to_json(save_dict))
+	#save_game.store_line(to_json(save_dict))
+	save_game.store_var(save_dict)
 	save_game.close()
 	print("sssssaved")
 
@@ -160,7 +160,7 @@ remotesync func sketchsystemfromdict(save_dict):
 		var xcdrawingData = xcdrawingsData[i]
 		#print("iiii", xcdrawingData)
 		var xcdrawing = newXCuniquedrawing(xcdrawingData.drawingtype, xcdrawingData["name"])
-		xcdrawing.mergexcrpcdata(xcdrawingData, true)
+		xcdrawing.mergexcrpcdata(xcdrawingData)
 		if xcdrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE or xcdrawing.drawingtype == DRAWING_TYPE.DT_PAPERTEXTURE:
 			get_node("/root/Spatial/ImageSystem").fetchpaperdrawing(xcdrawing)
 		else:
@@ -170,21 +170,15 @@ remotesync func sketchsystemfromdict(save_dict):
 			get_node("/root/Spatial/LabelGenerator").makenodelabelstask(xcdrawing)
 
 	for i in range(len(xctubesData)):
-		var xctubeData = xctubesData[i]
-		#print(i, xctubeData)
-		var xctube = newXCtube(get_node("XCdrawings").get_node(xctubeData[0]), get_node("XCdrawings").get_node(xctubeData[1]))
-		xctube.xcdrawinglink = xctubeData[2]
-		if len(xctubeData) >= 4:
-			xctube.xcsectormaterials = xctubeData[3]
-		xctube.updatetubelinkpaths(self)
-	
+		var xctube = xctubefromdata(xctubesData[i])
 	print("lllloaded")
 
 func loadsketchsystem():
 	var fname = "user://savegame.save"
 	var save_game = File.new()
 	save_game.open(fname, File.READ)
-	var save_dict = parse_json(save_game.get_line())
+	#var save_dict = parse_json(save_game.get_line())
+	var save_dict = save_game.get_var()
 	save_game.close()
 	rpc("sketchsystemfromdict", save_dict)
 

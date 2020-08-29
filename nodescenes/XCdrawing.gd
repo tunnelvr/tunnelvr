@@ -48,38 +48,22 @@ func setxcpositionorigin(pt0):
 remote func setxcdrawingposition(lglobal_transform):
 	global_transform = lglobal_transform
 
-func exportxcrpcdata(jsonenabled=false):
-	var nodepointsData = nodepoints
-	if jsonenabled:
-		nodepointsData = [ ]
-		for i in nodepoints.keys():
-			nodepointsData.append(i)
-			nodepointsData.append(nodepoints[i].x)
-			nodepointsData.append(nodepoints[i].y)
-			nodepointsData.append(nodepoints[i].z)
+func exportxcrpcdata():
 	return { "name":get_name(), 
 			 "xcresource":xcresource,
 			 "drawingtype":drawingtype,
-			 "transformpos":var2str(global_transform) if jsonenabled else global_transform,
+			 "transformpos":global_transform,
 			 "shapeimage":[$XCdrawingplane.scale.x, $XCdrawingplane.scale.y],
-			 "nodepoints": nodepointsData, 
+			 "nodepoints": nodepoints, 
 			 "onepathpairs":onepathpairs,
 			 "maxnodepointnumber":maxnodepointnumber,
 			 "visible":$XCdrawingplane.visible 
 		   }
 
-func mergexcrpcdata(xcdata, jsonenabled=false):
+func mergexcrpcdata(xcdata):
 	assert ((get_name() == xcdata["name"]) and (drawingtype == xcdata["drawingtype"]))
-	if jsonenabled:
-		global_transform = str2var(xcdata["transformpos"])
-		assert (len(nodepoints) == 0)
-		var nodepointsData = xcdata["nodepoints"]
-		for i in range(len(nodepointsData)/4):
-			var k = nodepointsData[i*4]
-			nodepoints[k] = Vector3(nodepointsData[i*4+1], nodepointsData[i*4+2], nodepointsData[i*4+3])
-	else:
-		global_transform = xcdata["transformpos"]
-		nodepoints = xcdata["nodepoints"]
+	global_transform = xcdata["transformpos"]
+	nodepoints = xcdata["nodepoints"]
 	maxnodepointnumber = xcdata["maxnodepointnumber"]
 	onepathpairs = xcdata["onepathpairs"]
 	$XCdrawingplane.set_scale(Vector3(xcdata["shapeimage"][0], xcdata["shapeimage"][1], 1.0))

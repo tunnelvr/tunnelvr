@@ -53,8 +53,13 @@ func checknodelinkedto(xcname, nodename):
 			return true
 	return false
 
-func exportxctrpcdata():
-	return [ get_name(), xcname0, xcname1, xcdrawinglink, xcsectormaterials ]
+func exportxctrpcdata():   # read by xctubefromdata()
+	return { "name":get_name(), 
+			 "xcname0":xcname0, 
+			 "xcname1":xcname1, 
+			 "xcdrawinglink":xcdrawinglink, 
+			 "xcsectormaterials":xcsectormaterials 
+		   }
 
 func shiftxcdrawingposition(sketchsystem):
 	if len(xcdrawinglink) == 0:

@@ -3,8 +3,18 @@ extends Spatial
 
 # Stuff to do:
 
-# exportxcdata exportxcrpcdata
-# mergexcrpcdata  importxcdata
+# sketchsystemfromdict
+# * handle the xcdrawingfromdata issue and loading in centrelines.
+# * get all the loads and saving of components going through same functions
+# * sketchsystemfromdict  xctubefromdata  exportxctrpcdata
+# * abolish the json file format use
+
+# xctubefromdata <- exportxctrpcdata
+
+
+
+# * process engines doing the downloads of images and updating of the tubes?
+
 
 # * add networking instructions to README
 # * then networking to the Quest(!)  -- this is plausible now
