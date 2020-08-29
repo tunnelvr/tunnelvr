@@ -91,7 +91,7 @@ remotesync func changecentrelineonlymode(lcentrelineonlymode):
 func sketchsystemtodict():
 	var xcdrawingsData = [ ]
 	for xcdrawing in $XCdrawings.get_children():
-		xcdrawingsData.append(xcdrawing.exportxcdata())
+		xcdrawingsData.append(xcdrawing.exportxcrpcdata(true))
 	var xctubesData = [ ]
 	for xctube in $XCtubes.get_children():
 		xctubesData.append([xctube.xcname0, xctube.xcname1, xctube.xcdrawinglink, xctube.xcsectormaterials])
@@ -142,9 +142,9 @@ func loadcentrelinefile(centrelinefile):
 	print("default lllloaded")
 
 remote func xcdrawingfromdata(xcdata):
-	var xcdrawing = $XCdrawings.get_node(xcdata[0])
+	var xcdrawing = $XCdrawings.get_node(xcdata["name"])
 	if xcdrawing == null:
-		xcdrawing = newXCuniquedrawing(xcdata[1], xcdata[0])
+		xcdrawing = newXCuniquedrawing(xcdata["drawingtype"], xcdata["name"])
 	xcdrawing.mergexcrpcdata(xcdata)
 	if xcdrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE or xcdrawing.drawingtype == DRAWING_TYPE.DT_PAPERTEXTURE:
 		get_node("/root/Spatial/ImageSystem").fetchpaperdrawing(xcdrawing)
@@ -160,9 +160,7 @@ remotesync func sketchsystemfromdict(save_dict):
 		var xcdrawingData = xcdrawingsData[i]
 		#print("iiii", xcdrawingData)
 		var xcdrawing = newXCuniquedrawing(xcdrawingData.drawingtype, xcdrawingData["name"])
-		print (xcdrawing.get_name(), " ", xcdrawingData["name"])
-		assert (xcdrawing.get_name() == xcdrawingData["name"])
-		xcdrawing.importxcdata(xcdrawingData)
+		xcdrawing.mergexcrpcdata(xcdrawingData, true)
 		if xcdrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE or xcdrawing.drawingtype == DRAWING_TYPE.DT_PAPERTEXTURE:
 			get_node("/root/Spatial/ImageSystem").fetchpaperdrawing(xcdrawing)
 		else:

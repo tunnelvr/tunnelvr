@@ -3,9 +3,11 @@ extends Spatial
 
 # Stuff to do:
 
+# exportxcdata exportxcrpcdata
+# mergexcrpcdata  importxcdata
 
 # * add networking instructions to README
-# * then networking to the Quest(!)
+# * then networking to the Quest(!)  -- this is plausible now
 
 # * Take a papersheet (same as floor sheet), done with thickness.
 # * Put this papersheet under my feet and make it real big.  Ability to lift it up.  
@@ -18,6 +20,8 @@ extends Spatial
 
 # * Finally abolish the floorsheet.  Have a very large grassy plane underneath it all 
 
+# * Quest -- try attaching things to the fingers for steering by relative motions.  
+# *  -- you are directing a cursor out there.
 
 
 # * exportxcdata and exportcxcdata should be merged and use the same dict.

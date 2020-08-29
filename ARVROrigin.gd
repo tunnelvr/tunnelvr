@@ -132,7 +132,7 @@ func _process(delta_t):
 		if (t > 1.0):
 			t = 0.0;
 			print("Left Pinches: %.3f %.3f %.3f %.3f; Right Pinches %.3f %.3f %.3f %.3f" %
-				 [$HandLeft.get_joystick_axis(0), $HandLeft.get_joystick_axis(1), $HandLeft.get_joystick_axis(2), $HandLeft.get_joystick_axis(3),
-				  $HandRight.get_joystick_axis(0), $HandRight.get_joystick_axis(1), $HandRight.get_joystick_axis(2), $HandRight.get_joystick_axis(3)]);
+				 [$HandLeft.get_joystick_axis(0)+1, $HandLeft.get_joystick_axis(1)+1, $HandLeft.get_joystick_axis(2)+1, $HandLeft.get_joystick_axis(3)+1,
+				  $HandRight.get_joystick_axis(0)+1, $HandRight.get_joystick_axis(1)+1, $HandRight.get_joystick_axis(2)+1, $HandRight.get_joystick_axis(3)+1]);
 
 

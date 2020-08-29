@@ -48,34 +48,41 @@ func setxcpositionorigin(pt0):
 remote func setxcdrawingposition(lglobal_transform):
 	global_transform = lglobal_transform
 
-func exportxcdata():
-	var nodepointsData = [ ]
-	for i in nodepoints.keys():
-		nodepointsData.append(i)
-		nodepointsData.append(nodepoints[i].x)
-		nodepointsData.append(nodepoints[i].y)
-		nodepointsData.append(nodepoints[i].z)
-	return { "name":get_name(),  # defines the image
+func exportxcrpcdata(jsonenabled=false):
+	var nodepointsData = nodepoints
+	if jsonenabled:
+		nodepointsData = [ ]
+		for i in nodepoints.keys():
+			nodepointsData.append(i)
+			nodepointsData.append(nodepoints[i].x)
+			nodepointsData.append(nodepoints[i].y)
+			nodepointsData.append(nodepoints[i].z)
+	return { "name":get_name(), 
+			 "xcresource":xcresource,
 			 "drawingtype":drawingtype,
-			 "transformpos":var2str(global_transform),
+			 "transformpos":var2str(global_transform) if jsonenabled else global_transform,
 			 "shapeimage":[$XCdrawingplane.scale.x, $XCdrawingplane.scale.y],
 			 "nodepoints": nodepointsData, 
 			 "onepathpairs":onepathpairs,
+			 "maxnodepointnumber":maxnodepointnumber,
 			 "visible":$XCdrawingplane.visible 
 		   }
 
-func exportxcrpcdata():
-	return [ get_name(), drawingtype, global_transform, maxnodepointnumber, 
-			 $XCdrawingplane.scale.x, $XCdrawingplane.scale.y,
-			 nodepoints, onepathpairs, $XCdrawingplane.visible ]
-
-func mergexcrpcdata(xcdata):
-	assert ((get_name() == xcdata[0]) and (drawingtype == xcdata[1]))
-	global_transform = xcdata[2]
-	maxnodepointnumber = xcdata[3]
-	$XCdrawingplane.scale = Vector3(xcdata[4], xcdata[5], 1.0)
-	nodepoints = xcdata[6]
-	onepathpairs = xcdata[7]
+func mergexcrpcdata(xcdata, jsonenabled=false):
+	assert ((get_name() == xcdata["name"]) and (drawingtype == xcdata["drawingtype"]))
+	if jsonenabled:
+		global_transform = str2var(xcdata["transformpos"])
+		assert (len(nodepoints) == 0)
+		var nodepointsData = xcdata["nodepoints"]
+		for i in range(len(nodepointsData)/4):
+			var k = nodepointsData[i*4]
+			nodepoints[k] = Vector3(nodepointsData[i*4+1], nodepointsData[i*4+2], nodepointsData[i*4+3])
+	else:
+		global_transform = xcdata["transformpos"]
+		nodepoints = xcdata["nodepoints"]
+	maxnodepointnumber = xcdata["maxnodepointnumber"]
+	onepathpairs = xcdata["onepathpairs"]
+	$XCdrawingplane.set_scale(Vector3(xcdata["shapeimage"][0], xcdata["shapeimage"][1], 1.0))
 	for xcn in $XCnodes.get_children():
 		if not nodepoints.has(xcn.get_name()):
 			xcn.queue_free()
@@ -87,26 +94,8 @@ func mergexcrpcdata(xcdata):
 			$XCnodes.add_child(xcn)
 		xcn.translation = nodepoints[k]
 	updatexcpaths()
-	setxcdrawingvisibility(xcdata[8])
+	setxcdrawingvisibility(xcdata["visible"])
 		
-func importxcdata(xcdrawingData):
-	assert ($XCnodes.get_child_count() == 0 and len(nodepoints) == 0 and len(xctubesconn) == 0)
-	drawingtype = int(xcdrawingData["drawingtype"])
-	$XCdrawingplane.set_scale(Vector3(xcdrawingData["shapeimage"][0], xcdrawingData["shapeimage"][1], 1.0))
-	global_transform = str2var(xcdrawingData["transformpos"])
-	var nodepointsData = xcdrawingData["nodepoints"]
-	for i in range(len(nodepointsData)/4):
-		var k = nodepointsData[i*4]
-		nodepoints[k] = Vector3(nodepointsData[i*4+1], nodepointsData[i*4+2], nodepointsData[i*4+3])
-		var xcn = XCnode_centreline.instance() if drawingtype == DRAWING_TYPE.DT_CENTRELINE else XCnode.instance()
-		$XCnodes.add_child(xcn)
-		xcn.set_name(k)
-		xcn.translation = nodepoints[k]
-		maxnodepointnumber = max(maxnodepointnumber, int(k))
-	onepathpairs = xcdrawingData["onepathpairs"]
-	updatexcpaths()
-	setxcdrawingvisibility(xcdrawingData["visible"])
-
 
 func importcentrelinedata(centrelinedata, sketchsystem):
 	$XCdrawingplane.visible = false
@@ -180,10 +169,12 @@ func importcentrelinedata(centrelinedata, sketchsystem):
 			var ang = Vector2(xsectrightvecs[i*2], -xsectrightvecs[i*2+1]).angle()
 			var xcdrawingSect1 = sketchsystem.newXCuniquedrawing(DRAWING_TYPE.DT_XCDRAWING, sname)
 			assert (xcdrawingSect1.get_name() == sname)
-			var xcdata = [ 	xcdrawingSect1.get_name(), DRAWING_TYPE.DT_XCDRAWING, 
-							Transform(Basis().rotated(Vector3(0,-1,0), ang), p), 0, 
-							max(xsectlruds[i*4], xsectlruds[i*4+1])+1, max(xsectlruds[i*4+2], xsectlruds[i*4+3])+1, 
-							hexnodepoints, hexonepathpairs.duplicate(), false ]
+			var xcdata = { "name":xcdrawingSect1.get_name(), "xcresource":"station_"+sname, "drawingtype":DRAWING_TYPE.DT_XCDRAWING, 
+						   "transformpos":Transform(Basis().rotated(Vector3(0,-1,0), ang), p), "maxnodepointnumber":0, 
+						   "shapeimage":[max(xsectlruds[i*4], xsectlruds[i*4+1])+1, max(xsectlruds[i*4+2], xsectlruds[i*4+3])+1], 
+						   "nodepoints":hexnodepoints, "onepathpairs":hexonepathpairs.duplicate(), "visible":false 
+						 }
+
 			xcdrawingSect1.mergexcrpcdata(xcdata)
 			if xcdrawingSect != null:
 				var xctube = sketchsystem.newXCtube(xcdrawingSect, xcdrawingSect1)

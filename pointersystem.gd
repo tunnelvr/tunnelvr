@@ -552,6 +552,8 @@ func _physics_process(_delta):
 			activetargetwallgrabbed.global_transform = activelaserroot.get_node("LaserSpot").global_transform * activetargetwallgrabbedtransform
 		activetargetwallgrabbed.rpc_unreliable("setxcdrawingposition", activetargetwallgrabbed.global_transform)
 		
+	elif playernode.VRstatus == "quest":
+		pass # disabling the pointer in case it causes those nan() exceptions
 	else:
 		var firstlasertarget = LaserOrient.get_node("RayCast").get_collider() if LaserOrient.get_node("RayCast").is_colliding() and not LaserOrient.get_node("RayCast").get_collider().is_queued_for_deletion() else null
 		pointerplanviewtarget = planviewsystem if firstlasertarget != null and firstlasertarget.get_name() == "PlanView" and planviewsystem.checkplanviewinfront(handright) else null

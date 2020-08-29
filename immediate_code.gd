@@ -27,10 +27,8 @@ func gg(x):
 
 func _run():
 	var x = IP.get_local_addresses()
-	var a = [8,65,3,5,6]
-	a.resize(3)
-	var h = load("nodescenes/XCtubeshell.tscn").instance()
-	print(h)
+	var b = Transform()
+	print(";", var2str(b), ";")
 	
 	
 
