@@ -4,7 +4,89 @@ extends Spatial
 # Stuff to do:
 
 
-# * Hit the README file with instructions
+# * add networking instructions to README
+# * then networking to the Quest(!)
+
+# * Take a papersheet (same as floor sheet), done with thickness.
+# * Put this papersheet under my feet and make it real big.  Ability to lift it up.  
+# * Then connect centreline node to it, and a second one.  Now it can only be horizontal, but move up and down.
+# * Possibly ability to trim this sheet down with a closed contour in it
+
+# * Make a blank XCdrawing in a tube and be able to move it around.  
+# * This then locks and slices the tube.  (keep tube directions same and maintain the sector values)
+# * Make a consistent bit of cave in Ireby2
+
+# * Finally abolish the floorsheet.  Have a very large grassy plane underneath it all 
+
+
+
+# * exportxcdata and exportcxcdata should be merged and use the same dict.
+# * exportxctrpcdata to be primary tube record
+# * xcdrawing should have file name of image (separate from the system name)
+# * nodes should have label name separate from system name
+
+# * floor sheet and paper sheet to be the same thing.  
+# * papersheet under your feet and made big, so it can then be aligned with centrelines
+# * trimming of papersheet view?
+
+# * a gripclick inserts a new XC in the tube that we can orient and move before applying the slice
+#   -- this can be done from the plan view too, 
+#   -- plot with front-culling so as to see inside the shapes, and plot with image textures on
+
+# * loading second round of images does not make new nodes (or controls the names properly) 
+
+# * Centrelines and centreline labels off (unless we want them)
+
+# * centreline xcdrawing as extended class?
+
+# * use joypos instead of left_right stuff
+
+# * special materials are the sketch image and invisible
+# * we can toggle culling to the materials to see inside 
+# * LaserShadow out in global space under a node
+
+# * Use Remote transform to move GUIPanel3D out of PlayerMe
+
+# * highlight nodes under pointer system so it's global and simplifies colouring code
+
+# * active node to be an overlay
+
+# * should correspond to the join we have  
+
+# * XCdrawings only visible when tube is selected (could save a lot of memory)
+
+# * can set the type of the material (including invisible and no collision, so open on side)
+
+# * Position of the doppelganger other player is queued in its own object by the rpc and only updated on the physics process
+# * must find an answer to the var materialscanimage = load("res://surveyscans/scanimagefloor.material")
+
+# * updatetubeshell to know the material colours from xcsectormaterials
+
+# * On the Occulus joystick, a move to the right is equivalent to a click when above 0.9 (but would need to be debounced)
+
+# * may hide/delete all the nodes of an XC not on a selected tube.
+# * so the way to find an XC is to click on the tube
+
+# * A selected tube makes the XCnodes bigger?
+# * or we can equivalently cycle through the nodes with right and left VR_Pad
+
+# * grip on XCshape then click gets into rotate mode like with papersheets (but preserving upwardness)
+
+# * what's the black papersheet?
+
+# * possibly lose the connecting xcdrawings to floor feature 
+# * just have trimmed sheets that can become floors (or xcs)
+
+# * selection node should be a mask on top of the node rather than a change in its material (so we can make it sticky)
+# * apply this tech to a vertical marker in an XC wall for positioning it, or cutting new one
+# * perfect overhead light so things project down to the correct place
+
+# * put xcresource (and xcname) into mergexcrpcdata
+
+# * hold back laggy motions by 500ms and animate between the positions
+# * (simulate this with dodgy doppelganger.  Local game timestamp is OS.get_ticks_usec()
+
+# * some way to see the names of things in the distance
 
 # * put name of image into XCdrawing (incl paper type)
 
@@ -28,11 +110,6 @@ extends Spatial
 
 # * check out HDR example https://godotengine.org/asset-library/asset/110
 
-# * the allocation of shades on tubes at first needs to modulo the number of shades
-
-
-# * vertical arrows just a little bit twisted so not in line with the polygon mesh
-
 # * need to have a file value on XCnode instead of the name to say the paper image because you could have two with same image
 
 # * sort out the textures of the XCs so they are large enough there.  
@@ -48,6 +125,7 @@ extends Spatial
 
 # * papertype should not be environment collision (just pointer collisions)
 
+# * load in all the cross-sections as hexagons we can make -- as tubes to start off
 
 # * duplicate floor trimming out and place at different Z-levels
 #			sketchsystem.rpc("xcdrawingfromdict", xcdrawing.exportxcrpcdata())
@@ -56,6 +134,26 @@ extends Spatial
 # * formalize the exact order of updates of positions of things so we don't get race conditions
 
 # * transmit rpc_reliable when trigger released on the positioning of a papersheet
+
+# * A bit more quest work
+#  -- print out left hand transforms and find what's crashing it
+#  -- GUIPanel that prints all the gestures and button states
+#  -- find list of canned gestures for the buttons used
+#  -- disable pad for motions in left hand.  Find what it is to fly
+#  -- start making a signal list for the different commands
+#  -- what's wrong with the laser spot in the quest
+#  -- what is the networking situation
+#  -- To rotate hands round to match controllers pointing in -Z thumb +Y, left hand needs rotation (0,-90,90) and right hand needs (0,90,90) 
+#  --   Thumb to index finger is Input.is_joy_button_pressed=JOY_OCULUS_AX=7
+#  --   Thumb to middle finger is Input.is_joy_button_pressed=JOY_OCULUS_BY=1
+#  --   Thumb to ring finger is Input.is_joy_button_pressed=JOY_VR_GRIP=2
+#  --   Thumb to pinky is Input.is_joy_button_pressed=JOY_VR_TRIGGER=15
+#  --   Unreliably can get 2 or 3 at once.  Touchpad activates briefly, but is usually -1, 1 or 0 when idle
+#  --   Fist with thumb sliding from top down along fingers, Input.get_joy_axis(1) -1 -> +1  (axis 0 is not worked out)
+# https://developer.oculus.com/learn/hands-design-interactions/
+# https://developer.oculus.com/learn/hands-design-ui/
+# https://learn.unity.com/tutorial/unit-5-hand-presence-and-interaction?uv=2018.4&courseId=5d955b5dedbc2a319caab9a0#5d96924dedbc2a6236bc1191
+# https://www.youtube.com/watch?v=gpQePH-Ffbw
 
 
 # * moving floor up and down (also transmitted)
@@ -167,6 +265,7 @@ extends Spatial
 
 var arvr_openvr = null; 
 var arvr_quest = null; 
+var arvr_oculus = null; 
 
 export var hostipnumber: String = ""
 export var hostportnumber: int = 8002
@@ -174,25 +273,26 @@ export var hostportnumber: int = 8002
 var perform_runtime_config = true
 var ovr_init_config = null
 var ovr_performance = null
+var ovr_hand_tracking = null
 var networkID = 0
 
 onready var playerMe = $Players/PlayerMe
 var VRstatus = "none"
 	
 func _ready():
-	
 	if hostipnumber == "":
 		print("Initializing VR");
 		var available_interfaces = ARVRServer.get_interfaces();
 		print("  Available Interfaces are %s: " % str(available_interfaces));
-		var arvr_openvr = ARVRServer.find_interface("OpenVR")
-		var arvr_quest = ARVRServer.find_interface("OVRMobile")
-		var arvr_oculus = ARVRServer.find_interface("Oculus")
+		arvr_openvr = ARVRServer.find_interface("OpenVR")
+		arvr_quest = ARVRServer.find_interface("OVRMobile")
+		arvr_oculus = ARVRServer.find_interface("Oculus")
 		
 		if arvr_quest:
 			print("found quest, initializing")
-			ovr_init_config = preload("res://addons/godot_ovrmobile/OvrInitConfig.gdns").new()
-			ovr_performance = preload("res://addons/godot_ovrmobile/OvrPerformance.gdns").new()
+			ovr_init_config = load("res://addons/godot_ovrmobile/OvrInitConfig.gdns").new()
+			ovr_performance = load("res://addons/godot_ovrmobile/OvrPerformance.gdns").new()
+			ovr_hand_tracking = load("res://addons/godot_ovrmobile/OvrHandTracking.gdns").new();
 			perform_runtime_config = false
 			ovr_init_config.set_render_target_size_multiplier(1)
 			if arvr_quest.initialize():
@@ -226,13 +326,16 @@ func _ready():
 
 	if VRstatus == "none":
 		print("*** VR not working")
+	playerMe.VRstatus = VRstatus
+	if VRstatus == "quest":
+		playerMe.initquesthandtrackingnow(ovr_hand_tracking)
 
 	var networkedmultiplayerenet = NetworkedMultiplayerENet.new()
 	get_tree().connect("network_peer_connected", self, "_player_connected")
 	get_tree().connect("network_peer_disconnected", self, "_player_disconnected")
 	if hostipnumber == "":
 		networkedmultiplayerenet.create_server(hostportnumber, 5)
-		playerMe.connectiontoserveractive = true
+		playerMe.connectiontoserveractive = (not arvr_quest)
 	else:
 		networkedmultiplayerenet.create_client(hostipnumber, hostportnumber)
 		get_tree().connect("connected_to_server", self, "_connected_to_server")
@@ -245,6 +348,19 @@ func _ready():
 	networkID = get_tree().get_network_unique_id()
 	print("nnet-id ", networkID)
 	playerMe.set_network_master(networkID)
+	playerMe.networkID = networkID
+
+	playerMe.get_node("GUIPanel3D/Viewport/GUI/Panel/ButtonUpdateShell").pressed = true
+	playerMe.get_node("GUIPanel3D")._on_buttonupdateshell_toggled(true)
+
+
+func nextplayernetworkidinringskippingdoppelganger(deletedid):
+	for i in range($Players.get_child_count()):
+		var nextringplayer = $Players.get_child((playerMe.get_index()+1)%$Players.get_child_count())
+		if deletedid == 0 or nextringplayer.networkID != deletedid:
+			if nextringplayer.networkID != 0:
+				return nextringplayer.networkID
+	return 0
 	
 # May need to use Windows Defender Firewall -> Inboard rules -> New Rule and ports
 # Also there's another setting change to allow pings
@@ -256,19 +372,24 @@ func _player_connected(id):
 		var playerOther = preload("res://nodescenes/PlayerPuppet.tscn").instance()
 		playerOther.set_network_master(id)
 		playerOther.set_name(playerothername)
+		playerOther.networkID = id
 		$Players.add_child(playerOther)
 	if networkID == 1:
 		$SketchSystem.rpc_id(id, "sketchsystemfromdict", $SketchSystem.sketchsystemtodict())
+	playerMe.bouncetestnetworkID = nextplayernetworkidinringskippingdoppelganger(0)
 	
 func _player_disconnected(id):
 	print("_player_disconnected ", id)
 	var playerothername = "NetworkedPlayer"+String(id)
+	print("Number of players before queuefree ", $Players.get_child_count())
 	if $Players.has_node(playerothername):
 		$Players.get_node(playerothername).queue_free()
+	print("Number of players after queuefree ", $Players.get_child_count())
+	playerMe.bouncetestnetworkID = nextplayernetworkidinringskippingdoppelganger(id)
 		
 func _connected_to_server():
 	print("_connected_to_server")
-	playerMe.connectiontoserveractive = true
+	playerMe.connectiontoserveractive = true 
 	
 	
 func _connection_failed():

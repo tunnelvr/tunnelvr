@@ -1,6 +1,8 @@
 extends Node
 
 onready var sketchsystem = get_node("/root/Spatial/SketchSystem")
+onready var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
+onready var materialsystem = get_node("/root/Spatial/MaterialSystem")
 
 onready var playernode = get_parent()
 onready var headcam = playernode.get_node('HeadCam')
@@ -9,9 +11,6 @@ onready var handright = playernode.get_node("HandRight")
 onready var guipanel3d = playernode.get_node("GUIPanel3D")
 
 onready var LaserOrient = handright.get_node("LaserOrient") 
-onready var LaserLength = handright.get_node("LaserOrient/Length") 
-onready var LaserRayCast = handright.get_node("LaserOrient/RayCast") 
-onready var LaserSpot = handright.get_node("LaserOrient/LaserSpot") 
 onready var LaserShadow = handright.get_node("LaserShadow") 
 onready var LaserSelectLine = handright.get_node("LaserSelectLine") 
 
@@ -29,11 +28,11 @@ var selectedpointerhighlightmaterial = preload("res://guimaterials/XCnode_select
 var laserspothighlightmaterial = preload("res://guimaterials/laserspot_selected.material"); 
 
 
-#var laser_y = -0.05
-
 onready var ARVRworld_scale = ARVRServer.world_scale
 var mousecontrollervec = Vector3(0.2, -0.1, -0.5)
 
+onready var activelaserroot = handright.get_node("LaserOrient")
+var pointerplanviewtarget = null
 var pointertarget = null
 var pointertargettype = "none"
 var pointertargetwall = null
@@ -42,8 +41,16 @@ var selectedtarget = null
 var selectedtargettype = "none"
 var selectedtargetwall = null
 var gripbuttonpressused = false
+
 var activetargetwall = null
+var activetargetwallgrabbed = null   # could return to being pointertargetwall as we don't update when in grabbed mode
 var activetargetwallgrabbedtransform = null
+var activetargetwallgrabbedpoint = null
+var activetargetwallgrabbedpointoffset = null
+var activetargetwallgrabbedlocalpoint = null
+
+var activetargettube = null
+var activetargettubesector = 0
 
 var xcdrawingactivematerial = preload("res://guimaterials/XCdrawing_active.material")
 var xcdrawingmaterial = preload("res://guimaterials/XCdrawing.material")
@@ -70,18 +77,15 @@ func setpointertargetmaterial():
 		handright.get_node("csghandright").setpartcolor(2, "#FFFF60")
 	
 func setselectedtarget(newselectedtarget):
-	setbillboardlabel(null, null)
 	if selectedtargettype == "XCnode":
 		selectedtarget.get_node("CollisionShape/MeshInstance").set_surface_material(0, preload("res://guimaterials/XCnode_nodepthtest.material") if selectedtargetwall == activetargetwall else preload("res://guimaterials/XCnode.material"))
 		
 	selectedtarget = newselectedtarget
 	selectedtargettype = targettype(newselectedtarget)
 	selectedtargetwall = targetwall(selectedtarget, selectedtargettype)
-	if selectedtargetwall != null and selectedtargetwall.drawingtype == DRAWING_TYPE.DT_CENTRELINE:
-		setbillboardlabel(selectedtarget.get_name(), selectedtarget.global_transform.origin)
 	if selectedtarget != pointertarget and selectedtargettype == "XCnode":
 		selectedtarget.get_node("CollisionShape/MeshInstance").set_surface_material(0, selectedhighlightmaterial)
-	LaserSpot.material_override = preload("res://guimaterials/laserspot_selected.material") if selectedtarget != null else null
+	activelaserroot.get_node("LaserSpot").material_override = preload("res://guimaterials/laserspot_selected.material") if selectedtarget != null else null
 	setpointertargetmaterial()
 
 func setactivetargetwall(newactivetargetwall):
@@ -105,22 +109,27 @@ func setactivetargetwall(newactivetargetwall):
 		for xcnode in activetargetwall.get_node("XCnodes").get_children():
 			if xcnode != selectedtarget:
 				xcnode.get_node("CollisionShape/MeshInstance").set_surface_material(0, preload("res://guimaterials/XCnode_nodepthtest.material"))
-		LaserRayCast.collision_mask = 8 + 16 
+		LaserOrient.get_node("RayCast").collision_mask = CollisionLayer.CL_Pointer | CollisionLayer.CL_PointerFloor 
 	else:
-		LaserRayCast.collision_mask = 8 + 16 + 32
+		LaserOrient.get_node("RayCast").collision_mask = CollisionLayer.CL_Pointer | CollisionLayer.CL_PointerFloor | CollisionLayer.CL_CaveWall
 	if activetargetwall != null and activetargetwall.drawingtype == DRAWING_TYPE.DT_PAPERTEXTURE:
 		activetargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").get_surface_material(0).albedo_color = Color("#DDFFCC")
 
+func setactivetargettubesector(newactivetargettubesector):
+	if activetargettubesector != -1 and activetargettube != null:
+		activetargettube.get_node("XCtubeshell/MeshInstance").set_surface_material(activetargettubesector, materialsystem.tubematerialfromnumber(activetargettube.xcsectormaterials[activetargettubesector], false))
+	activetargettubesector = newactivetargettubesector
+	if activetargettubesector != -1:
+		activetargettube.get_node("XCtubeshell/MeshInstance").set_surface_material(activetargettubesector, materialsystem.tubematerialfromnumber(activetargettube.xcsectormaterials[activetargettubesector], true))
 
-func setbillboardlabel(ltext, pos):
-	var textpanel = sketchsystem.get_node("BillboardLabel")
-	if ltext != null:
-		textpanel.get_node("Viewport/Label").text = ltext
-		textpanel.global_transform.origin = pos + Vector3(0, 0.3, 0)
-		textpanel.visible = true
-	else:
-		textpanel.visible = false
-
+func setactivetargettube(newactivetargettube):
+	setactivetargetwall(null)
+	if activetargettube != null:
+		setactivetargettubesector(-1)
+	activetargettube = newactivetargettube
+	activetargettubesector = -1
+	if activetargettube != null:
+		setactivetargettubesector(0)
 
 func _ready():
 	handright.connect("button_pressed", self, "_on_button_pressed")
@@ -133,6 +142,8 @@ func targettype(target):
 	var targetname = target.get_name()
 	if targetname == "GUIPanel3D":
 		return "GUIPanel3D"
+	if targetname == "PlanView":
+		return "PlanView"
 	if targetname == "XCtubeshell":
 		return "XCtube"
 	if targetname == "XCflatshell":
@@ -154,12 +165,16 @@ func targetwall(target, targettype):
 		return target.get_parent().get_parent()
 	if targettype == "XCtube":
 		return target.get_parent()
+	if targettype == "PlanView":
+		return target.get_parent()
 	return null
 	
 func setopnpos(opn, p):
 	opn.global_transform.origin = p
 		
-func onpointing(newpointertarget, newpointertargetpoint):
+func onpointing(laserroot):
+	var newpointertarget = laserroot.get_node("RayCast").get_collider() if laserroot.get_node("RayCast").is_colliding() and not laserroot.get_node("RayCast").get_collider().is_queued_for_deletion() else null
+	var newpointertargetpoint = laserroot.get_node("RayCast").get_collision_point() if newpointertarget != null else null
 	if newpointertarget != pointertarget:
 		if pointertarget == guipanel3d:
 			guipanel3d.guipanelreleasemouse()
@@ -172,16 +187,19 @@ func onpointing(newpointertarget, newpointertargetpoint):
 		
 		print("ppp  ", selectedtargettype, " ", pointertargettype)
 		if pointertargettype == "XCnode":
-			LaserSpot.visible = false
+			laserroot.get_node("LaserSpot").visible = false
 			LaserShadow.visible = true
 		elif pointertargettype == "GUIPanel3D" or pointertargettype == "Papersheet":
-			LaserSpot.visible = false
+			laserroot.get_node("LaserSpot").visible = false
 			LaserShadow.visible = false
 		elif pointertargettype == "XCdrawing":
-			LaserSpot.visible = true
+			laserroot.get_node("LaserSpot").visible = true
 			LaserShadow.visible = (pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING)
+		elif pointertargettype == "XCtube":
+			laserroot.get_node("LaserSpot").visible = true
+			LaserShadow.visible = false
 		else:
-			LaserSpot.visible = false
+			laserroot.get_node("LaserSpot").visible = false
 			LaserShadow.visible = false
 			
 		# work out the logic for the LaserSelectLine here
@@ -198,18 +216,17 @@ func onpointing(newpointertarget, newpointertargetpoint):
 	if is_instance_valid(pointertarget) and pointertarget == guipanel3d:
 		guipanel3d.guipanelsendmousemotion(pointertargetpoint, handright.global_transform, handright.is_button_pressed(BUTTONS.VR_TRIGGER))
 
-
 	if pointertargetpoint != null:
-		LaserSpot.global_transform.origin = pointertargetpoint
-		LaserLength.scale.z = -LaserSpot.translation.z
+		laserroot.get_node("LaserSpot").global_transform.origin = pointertargetpoint
+		laserroot.get_node("Length").scale.z = -laserroot.get_node("LaserSpot").translation.z
 	else:
-		LaserLength.scale.z = -LaserRayCast.cast_to.z
+		laserroot.get_node("Length").scale.z = -laserroot.get_node("RayCast").cast_to.z
 		
 	if LaserSelectLine.visible:
 		if pointertarget != null and selectedtarget != null:
 			LaserSelectLine.global_transform.origin = pointertargetpoint
 			LaserSelectLine.get_node("Scale").scale.z = LaserSelectLine.global_transform.origin.distance_to(selectedtarget.global_transform.origin)
-			LaserSelectLine.global_transform = LaserSpot.global_transform.looking_at(selectedtarget.global_transform.origin, Vector3(0,1,0))
+			LaserSelectLine.global_transform = laserroot.get_node("LaserSpot").global_transform.looking_at(selectedtarget.global_transform.origin, Vector3(0,1,0))
 		else:
 			LaserSelectLine.visible = false
 		
@@ -234,7 +251,9 @@ func buttonpressed_vrby(gripbuttonheld):
 	var ccaxvec = headcam.global_transform.basis.x.dot(handright.global_transform.basis.z)
 	var pswitchpos = headcam.global_transform.origin + headcam.global_transform.basis.x*0.15 + headcam.global_transform.basis.y*0.1
 	var pswitchdist = handright.global_transform.origin.distance_to(pswitchpos)
-	if ccaxvec > 0.85 and pswitchdist < 0.1:
+	if pointerplanviewtarget != null:
+		pointerplanviewtarget.toggleplanviewactive()
+	elif ccaxvec > 0.85 and pswitchdist < 0.1:
 		guipanel3d.clickbuttonheadtorch()
 	else:
 		guipanel3d.togglevisibility(handright.get_node("LaserOrient").global_transform)
@@ -261,14 +280,14 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 		selectedtargetwall.movexcnode(selectedtarget, pointertargetpoint, sketchsystem)
 
 	# reselection when selected on grip deletes the node		
-	elif gripbuttonheld and selectedtargettype == "XCnode" and pointertarget == selectedtarget:
+	elif gripbuttonheld and selectedtargettype == "XCnode" and pointertarget == selectedtarget and (selectedtargetwall.drawingtype != DRAWING_TYPE.DT_CENTRELINE):
 		var recselectedtarget = selectedtarget
 		var recselectedtargetwall = selectedtargetwall
 		setselectedtarget(null)
 		pointertarget = null
 		pointertargettype = "none"
 		pointertargetwall = null
-		LaserSpot.visible = false
+		activelaserroot.get_node("LaserSpot").visible = false
 		LaserShadow.visible = false
 		recselectedtargetwall.removexcnode(recselectedtarget, false, sketchsystem)
 		sketchsystem.get_node("SoundPos2").global_transform.origin = pointertargetpoint
@@ -355,18 +374,40 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 			pointertarget = null
 			pointertargetwall.queue_free()
 			pointertargetwall = null
-			LaserSpot.visible = false
+			activelaserroot.get_node("LaserSpot").visible = false
 			LaserShadow.visible = false
 			
+	elif pointertargettype == "XCtube":
+		setactivetargettube(pointertargetwall)
+
+	elif pointertargettype == "Papersheet" or pointertargettype == "PlanView":
+		setselectedtarget(null)
+		var alaserspot = activelaserroot.get_node("LaserSpot")
+		alaserspot.global_transform.origin = pointertargetpoint
+		setactivetargetwall(pointertargetwall)
+		activetargetwallgrabbed = activetargetwall if pointertargettype == "Papersheet" else activetargetwall.get_node("PlanView")
+		if gripbuttonheld:
+			activetargetwallgrabbedtransform = alaserspot.global_transform.affine_inverse() * activetargetwallgrabbed.global_transform
+			activetargetwallgrabbedpoint = alaserspot.global_transform.origin
+			activetargetwallgrabbedlocalpoint = activetargetwallgrabbed.global_transform.affine_inverse() * alaserspot.global_transform.origin
+			activetargetwallgrabbedpointoffset = alaserspot.global_transform.origin - activetargetwallgrabbed.global_transform.origin
+		else:
+			activetargetwallgrabbedtransform = alaserspot.global_transform.affine_inverse() * activetargetwallgrabbed.global_transform
+			activetargetwallgrabbedpoint = null
+			
+	# grab and rotate XCdrawing in place (if empty)
+	elif pointertargettype == "XCdrawing" and gripbuttonheld and selectedtargettype == "none" and len(pointertargetwall.nodepoints) == 0:
+		var alaserspot = activelaserroot.get_node("LaserSpot")
+		activetargetwallgrabbed = pointertargetwall
+		activetargetwallgrabbedtransform = alaserspot.global_transform.affine_inverse() * pointertargetwall.global_transform
+		activetargetwallgrabbedpoint = alaserspot.global_transform.origin
+		activetargetwallgrabbedlocalpoint = pointertargetwall.global_transform.affine_inverse() * alaserspot.global_transform.origin
+		activetargetwallgrabbedpointoffset = alaserspot.global_transform.origin - pointertargetwall.global_transform.origin
+
 	# grip condition is ignored (assumed off) her on
 	#elif gripbuttonheld:
 	#	pass
-	elif pointertargettype == "Papersheet":
-		setselectedtarget(null)
-		LaserSpot.global_transform.origin = pointertargetpoint
-		setactivetargetwall(pointertargetwall)
-		activetargetwallgrabbedtransform = LaserSpot.global_transform.affine_inverse() * pointertargetwall.global_transform
-
+		
 	# make new point onto wall, connected if necessary
 	elif pointertargettype == "XCdrawing":
 		var newpointertarget = pointertargetwall.newxcnode()
@@ -404,7 +445,7 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 
 				
 func buttonpressed_vrpad(gripbuttonheld, left_right, up_down):
-	if pointertargettype == "XCdrawing":
+	if pointertargettype == "XCdrawing" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		if abs(up_down) < 0.5 and abs(left_right) > 0.1:
 			var dy = (1 if left_right > 0 else -1)*(1.0 if abs(left_right) < 0.8 else 0.1)
 			pointertargetwall.get_node("XCdrawingplane").scale.x = max(1, pointertargetwall.get_node("XCdrawingplane").scale.x + dy)
@@ -412,11 +453,10 @@ func buttonpressed_vrpad(gripbuttonheld, left_right, up_down):
 			xcdrawinghighlightmaterial.uv1_scale = pointertargetwall.get_node("XCdrawingplane").get_scale()
 			xcdrawinghighlightmaterial.uv1_offset = -xcdrawinghighlightmaterial.uv1_scale/2
 				
-	if pointertargettype == "Papersheet":
+	elif pointertargettype == "Papersheet":
 		if abs(up_down) > 0.5:
-			print(LaserLength.global_transform.basis.z)
-			var dd = (1 if up_down > 0 else -1)*(0.2 if LaserLength.scale.z < 1.5 else 1.0)
-			if LaserLength.scale.z + dd > 0.1:
+			var dd = (1 if up_down > 0 else -1)*(0.2 if activelaserroot.get_node("Length").scale.z < 1.5 else 1.0)
+			if activelaserroot.get_node("Length").scale.z + dd > 0.1:
 				pointertargetwall.global_transform.origin += -dd*LaserOrient.global_transform.basis.z
 		elif abs(left_right) > 0.1:
 			var fs = (0.5 if abs(left_right) < 0.8 else 0.9)
@@ -425,6 +465,21 @@ func buttonpressed_vrpad(gripbuttonheld, left_right, up_down):
 			pointertargetwall.get_node("XCdrawingplane").scale.x *= fs
 			pointertargetwall.get_node("XCdrawingplane").scale.y *= fs
 
+	elif pointertargettype == "XCtube" and activetargettube != null and pointertargetwall == activetargettube:
+		if abs(left_right) > 0.65:
+			var nsectors = activetargettube.get_node("XCtubeshell/MeshInstance").get_surface_material_count()
+			setactivetargettubesector((activetargettubesector + (1 if left_right > 0 else nsectors-1))%nsectors)
+		elif abs(up_down) > 0.70:
+			activetargettube.xcsectormaterials[activetargettubesector] = int(activetargettube.xcsectormaterials[activetargettubesector] + (1 if up_down > 0 else materialsystem.get_child_count() - 1))%materialsystem.get_child_count()
+			setactivetargettubesector(activetargettubesector)
+			
+	#elif pointertargettype == "PlanView":
+	elif pointerplanviewtarget != null and not pointerplanviewtarget.planviewactive:
+		if abs(left_right) > 0.65:
+			pointerplanviewtarget.camerascalechange(1.5 if left_right < 0 else 0.6667)
+		elif abs(left_right) < 0.2 and abs(up_down) < 0.2:
+			pointerplanviewtarget.cameraresetcentre(headcam)
+		
 func _on_button_release(p_button):
 	if p_button == BUTTONS.VR_GRIP:
 		buttonreleased_vrgrip()
@@ -433,8 +488,9 @@ func _on_button_release(p_button):
 
 func buttonreleased_vrgrip():
 	handright.get_node("csghandright").setpartcolor(4, "#FFFFFF")
+
 	if gripbuttonpressused:
-		pass
+		pass  # the trigger was pulled during the grip operation
 	
 	elif pointertargettype == "GUIPanel3D":
 		if guipanel3d.visible:
@@ -448,14 +504,14 @@ func buttonreleased_vrgrip():
 		pointertarget = null
 		pointertargettype = "none"
 		pointertargetwall = null
-		LaserSpot.visible = false
+		activelaserroot.get_node("LaserSpot").visible = false
 		LaserShadow.visible = false
 
 	elif selectedtargettype == "XCnode":
 		setselectedtarget(null)
 		
 	elif pointertargettype == "XCtube":
-		pointertargetwall.togglematerialcycle()
+		setactivetargettube(null)
 		
 func buttonreleased_vrtrigger():
 	if activetargetwallgrabbedtransform != null:
@@ -484,14 +540,33 @@ func _physics_process(_delta):
 		handright.global_transform.origin.y -= 0.3
 		
 	if activetargetwallgrabbedtransform != null:
-		pointertargetwall.global_transform = LaserSpot.global_transform * activetargetwallgrabbedtransform
-		pointertargetwall.rpc_unreliable("setxcdrawingposition", pointertargetwall.global_transform)
+		if activetargetwallgrabbedpoint != null:
+			#activetargetwallgrabbedtransform = LaserSpot.global_transform.affine_inverse() * pointertargetwall.global_transform
+			#activetargetwallgrabbedlocalpoint = pointertargetwall.global_transform.affine_inverse() * LaserSpot.global_transform.origin
+			#activetargetwallgrabbedpoint = LaserSpot.global_transform.origin
+			#activetargetwallgrabbedpointoffset = LaserSpot.global_transform.origin - pointertargetwall.global_transform.origin
+			activetargetwallgrabbed.global_transform = activelaserroot.get_node("LaserSpot").global_transform * activetargetwallgrabbedtransform
+			activetargetwallgrabbed.global_transform.origin += activetargetwallgrabbedpoint - activetargetwallgrabbed.global_transform * activetargetwallgrabbedlocalpoint
+			#pointertargetwall.global_transform.origin = activetargetwallgrabbedpoint - activetargetwallgrabbedpointoffset + (pointertargetwall.global_transform.basis * activetargetwallgrabbedtransform.origin)
+		else:
+			activetargetwallgrabbed.global_transform = activelaserroot.get_node("LaserSpot").global_transform * activetargetwallgrabbedtransform
+		activetargetwallgrabbed.rpc_unreliable("setxcdrawingposition", activetargetwallgrabbed.global_transform)
 		
-	elif LaserRayCast.is_colliding() and not LaserRayCast.get_collider().is_queued_for_deletion():
-		onpointing(LaserRayCast.get_collider(), LaserRayCast.get_collision_point())
 	else:
-		onpointing(null, null)
-	
+		var firstlasertarget = LaserOrient.get_node("RayCast").get_collider() if LaserOrient.get_node("RayCast").is_colliding() and not LaserOrient.get_node("RayCast").get_collider().is_queued_for_deletion() else null
+		pointerplanviewtarget = planviewsystem if firstlasertarget != null and firstlasertarget.get_name() == "PlanView" and planviewsystem.checkplanviewinfront(handright) else null
+		if pointerplanviewtarget != null and pointerplanviewtarget.planviewactive:
+			pointerplanviewtarget.processplanviewpointing(LaserOrient.get_node("RayCast").get_collision_point())
+			activelaserroot = planviewsystem.get_node("RealPlanCamera/LaserScope")
+			LaserOrient.get_node("LaserSpot").visible = false
+		else:
+			if pointerplanviewtarget != null:
+				pointerplanviewtarget.processplanviewsliding(handright, _delta)
+			planviewsystem.get_node("RealPlanCamera/LaserScope").visible = false
+			activelaserroot = LaserOrient
+			
+		onpointing(activelaserroot)
+
 
 var rightmousebuttonheld = false
 func _input(event):
@@ -517,7 +592,6 @@ func _input(event):
 			else:
 				buttonreleased_vrgrip()
 
-
 	elif event is InputEventMouseButton and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
 		var gripbuttonheld = false
 		if event.button_index == BUTTON_LEFT:
@@ -525,7 +599,6 @@ func _input(event):
 				buttonpressed_vrtrigger(gripbuttonheld)
 			else:
 				buttonreleased_vrtrigger()
-
 
 func _on_HeelHotspot_body_entered(body):
 	print("_on_HeelHotspot_body_entered ", body)

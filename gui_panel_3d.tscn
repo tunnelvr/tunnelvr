@@ -72,7 +72,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ButtonShowXS" type="Button" parent="Viewport/GUI/Panel"]
+[node name="ButtonPlanView" type="Button" parent="Viewport/GUI/Panel"]
 margin_left = 15.3899
 margin_top = 113.177
 margin_right = 155.39
@@ -80,8 +80,7 @@ margin_bottom = 141.177
 rect_pivot_offset = Vector2( 138.61, -8.13628 )
 hint_tooltip = "test tooltip"
 toggle_mode = true
-pressed = true
-text = "Show XS"
+text = "Plan View"
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -136,6 +135,19 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="ButtonOnlyCentrelines" type="Button" parent="Viewport/GUI/Panel"]
+margin_left = 160.4
+margin_top = 113.684
+margin_right = 300.4
+margin_bottom = 141.684
+rect_pivot_offset = Vector2( 138.61, -8.13628 )
+hint_tooltip = "test tooltip"
+toggle_mode = true
+text = "Only Centrelines"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [node name="ButtonSwapControllers" type="Button" parent="Viewport/GUI/Panel"]
 margin_left = 160.4
 margin_top = 77.6836
@@ -149,10 +161,10 @@ __meta__ = {
 }
 
 [node name="ColorRect" type="ColorRect" parent="Viewport/GUI/Panel"]
-margin_left = 296.873
-margin_top = 131.008
-margin_right = 360.873
-margin_bottom = 195.008
+margin_left = 216.873
+margin_top = 203.008
+margin_right = 280.873
+margin_bottom = 267.008
 color = Color( 1, 0, 0, 1 )
 
 [node name="TextureRect" type="TextureRect" parent="Viewport/GUI/Panel"]
@@ -160,10 +172,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-margin_left = 111.0
-margin_top = -4.0
-margin_right = 169.0
-margin_bottom = 54.0
+margin_left = 29.0
+margin_top = 65.0
+margin_right = 87.0
+margin_bottom = 123.0
 texture = ExtResource( 2 )
 expand = true
 __meta__ = {
@@ -171,10 +183,10 @@ __meta__ = {
 }
 
 [node name="OptionButton" type="OptionButton" parent="Viewport/GUI/Panel"]
-margin_left = 282.58
-margin_top = 204.256
-margin_right = 364.58
-margin_bottom = 258.256
+margin_left = 286.58
+margin_top = 211.256
+margin_right = 368.58
+margin_bottom = 265.256
 text = "Item 0"
 items = [ "Item 0", null, false, 0, null, "Item 1", null, false, 1, null, "Item 2", null, false, 2, null ]
 selected = 0

@@ -1,18 +1,28 @@
 extends Spatial
 
-remote func setavatarposition(playertransform, headcamtransform, handlefttransform, handrighttransform, laserrotation, laserlength, laserspot):
-	global_transform = playertransform
-	$HeadCam.transform = headcamtransform
-	$HandLeft.visible = (handlefttransform != null)
+var networkID = 0
+
+remote func setavatarposition(positiondict):
+	global_transform = positiondict["playertransform"]
+	$HeadCam.transform = positiondict["headcamtransform"]
+	$HandLeft.visible = (positiondict["handlefttransform"] != null)
 	if $HandLeft.visible:
-		$HandLeft.transform = handlefttransform
-	$HandRight.visible = (handrighttransform != null)
+		$HandLeft.transform = positiondict["handlefttransform"]
+	$HandRight.visible = (positiondict["handrighttransform"] != null)
 	if $HandRight.visible:
-		$HandRight.transform = handrighttransform
-		$HandRight/LaserOrient.rotation.x = laserrotation
-		$HandRight/LaserOrient/Length.scale.z = laserlength
-		$HandRight/LaserOrient/LaserSpot.translation.z = -laserlength
-		$HandRight/LaserOrient/LaserSpot.visible = laserspot
+		$HandRight.transform = positiondict["handrighttransform"]
+		$HandRight/LaserOrient.rotation.x = positiondict["laserrotation"]
+		$HandRight/LaserOrient/Length.scale.z = positiondict["laserlength"]
+		$HandRight/LaserOrient/LaserSpot.translation.z = -positiondict["laserlength"]
+		$HandRight/LaserOrient/LaserSpot.visible = positiondict["laserspot"]
+
+puppet func bouncedoppelgangerposition(bouncebackID, positiondict):
+	get_parent().get_parent().playerMe.rpc_unreliable_id(bouncebackID, "setdoppelgangerposition", positiondict)
+
+puppet func setdoppelgangerposition(positiondict):
+	var doppelganger = get_parent().get_parent().playerMe.doppelganger
+	if is_instance_valid(doppelganger):
+		doppelganger.setavatarposition(positiondict)
 
 remotesync func playvoicerecording(wavrecording):
 	print("playing recording ", wavrecording.size()) 

@@ -1,6 +1,7 @@
 extends Spatial
 
 const XCnode = preload("res://nodescenes/XCnode.tscn")
+const XCnode_centreline = preload("res://nodescenes/XCnode_centreline.tscn")
 
 # primary data
 var xcname = ""         # must match what is in the godot and used for the names in xctube
@@ -8,13 +9,14 @@ var xcresource = ""     # source file
 var nodepoints = { }    # { nodename:Vector3 }
 var onepathpairs = [ ]  # [ Anodename0, Anodename1, Bnodename0, Bnodename1, ... ]
 var drawingtype = DRAWING_TYPE.DT_XCDRAWING
+var xcflatshellmaterial = 0
 
 
 # derived data
 var xctubesconn = [ ]   # references to xctubes that connect to here (could use their names instead)
 var maxnodepointnumber = 0
 
-const linewidth = 0.05
+var linewidth = 0.05
 
 remotesync func setxcdrawingvisibility(makevisible):
 	if not makevisible:
@@ -78,9 +80,9 @@ func mergexcrpcdata(xcdata):
 		if not nodepoints.has(xcn.get_name()):
 			xcn.queue_free()
 	for k in nodepoints:
-		var xcn = $XCnodes.get_node(k)
+		var xcn = $XCnodes.get_node(k) if $XCnodes.has_node(k) else null
 		if xcn == null:
-			xcn = XCnode.instance()
+			xcn = XCnode_centreline.instance() if drawingtype == DRAWING_TYPE.DT_CENTRELINE else XCnode.instance()
 			xcn.set_name(k)
 			$XCnodes.add_child(xcn)
 		xcn.translation = nodepoints[k]
@@ -96,7 +98,7 @@ func importxcdata(xcdrawingData):
 	for i in range(len(nodepointsData)/4):
 		var k = nodepointsData[i*4]
 		nodepoints[k] = Vector3(nodepointsData[i*4+1], nodepointsData[i*4+2], nodepointsData[i*4+3])
-		var xcn = XCnode.instance()
+		var xcn = XCnode_centreline.instance() if drawingtype == DRAWING_TYPE.DT_CENTRELINE else XCnode.instance()
 		$XCnodes.add_child(xcn)
 		xcn.set_name(k)
 		xcn.translation = nodepoints[k]
@@ -106,11 +108,11 @@ func importxcdata(xcdrawingData):
 	setxcdrawingvisibility(xcdrawingData["visible"])
 
 
-func importcentrelinedata(centrelinedata):
+func importcentrelinedata(centrelinedata, sketchsystem):
 	$XCdrawingplane.visible = false
 	$XCdrawingplane/CollisionShape.disabled = true
 	drawingtype = DRAWING_TYPE.DT_CENTRELINE
-	assert (get_name() == "centreline")
+	#assert (get_name() == "centreline")
 	assert ($XCnodes.get_child_count() == 0 and len(nodepoints) == 0 and len(onepathpairs) == 0 and len(xctubesconn) == 0)
 
 	var stationpointscoords = centrelinedata.stationpointscoords
@@ -128,21 +130,67 @@ func importcentrelinedata(centrelinedata):
 	print("svx bounding box", bb)		
 	$XCdrawingplane.set_scale(Vector3(1,1,1))
 	global_transform = Transform()
+	var stationpoints = [ ]
 	for i in range(len(stationpointsnames)):
-		var k = stationpointsnames[i].replace(".", ",")
+		var stationpointname = stationpointsnames[i].replace(".", ",")   # dots not allowed in node name, but commas are
+		stationpointsnames[i] = stationpointname
 		#nodepoints[k] = Vector3(stationpointscoords[i*3], 8.1+stationpointscoords[i*3+2], -stationpointscoords[i*3+1])
-		nodepoints[k] = Vector3(stationpointscoords[i*3] - (bb[0]+bb[3])/2, 
-								stationpointscoords[i*3+2] - bb[2] + 1, 
-								-(stationpointscoords[i*3+1] - (bb[1]+bb[4])/2))
-		var xcn = XCnode.instance()
+		var stationpoint = Vector3(stationpointscoords[i*3] - (bb[0]+bb[3])/2, 
+								   stationpointscoords[i*3+2] - bb[2] + 1, 
+								   -(stationpointscoords[i*3+1] - (bb[1]+bb[4])/2))
+		nodepoints[stationpointname] = stationpoint
+		stationpoints.append(stationpoint)
+		var xcn = XCnode_centreline.instance()
 		$XCnodes.add_child(xcn)
-		xcn.set_name(k)
-		xcn.translation = nodepoints[k]
-		maxnodepointnumber = max(maxnodepointnumber, int(k))
+		xcn.set_name(stationpointname)
+		xcn.translation = nodepoints[stationpointname]
+		maxnodepointnumber = max(maxnodepointnumber, int(stationpointname))
 	for i in range(len(legsstyles)):
-		onepathpairs.append(stationpointsnames[legsconnections[i*2]].replace(".", ","))
-		onepathpairs.append(stationpointsnames[legsconnections[i*2+1]].replace(".", ","))
+		onepathpairs.append(stationpointsnames[legsconnections[i*2]])
+		onepathpairs.append(stationpointsnames[legsconnections[i*2+1]])
 	updatexcpaths()
+
+	# now make the cross sections
+	var xsectgps = centrelinedata.xsectgps
+	var hexonepathpairs = [ "hl","hu", "hu","hv", "hv","hr", "hr","he", "he","hd", "hd","hl"]
+	for j in range(len(xsectgps)):
+		var xsectgp = xsectgps[j]
+		var xsectindexes = xsectgp.xsectindexes
+		var xsectrightvecs = xsectgp.xsectrightvecs
+		var xsectlruds = xsectgp.xsectlruds
+
+		var xcdrawingSect = null
+		for i in range(len(xsectindexes)):
+			var sname = stationpointsnames[xsectindexes[i]]+"s"+String(j)
+			if sketchsystem.get_node("XCdrawings").has_node(sname):
+				continue
+			var hexnodepoints = { }
+			var xl = max(0.1, xsectlruds[i*4+0])
+			var xr = max(0.1, xsectlruds[i*4+1])
+			var xu = max(0.1, xsectlruds[i*4+2])
+			var xd = max(0.1, xsectlruds[i*4+3])
+			hexnodepoints["hl"] = Vector3(-xl, 0, 0)
+			hexnodepoints["hr"] = Vector3(xr, 0, 0)
+			hexnodepoints["hu"] = Vector3(-xl/2, xu, 0)
+			hexnodepoints["hv"] = Vector3(+xr/2, xu, 0)
+			hexnodepoints["hd"] = Vector3(-xl/2, -xd, 0)
+			hexnodepoints["he"] = Vector3(+xr/2, -xd, 0)
+
+			var p = stationpoints[xsectindexes[i]]
+			var ang = Vector2(xsectrightvecs[i*2], -xsectrightvecs[i*2+1]).angle()
+			var xcdrawingSect1 = sketchsystem.newXCuniquedrawing(DRAWING_TYPE.DT_XCDRAWING, sname)
+			assert (xcdrawingSect1.get_name() == sname)
+			var xcdata = [ 	xcdrawingSect1.get_name(), DRAWING_TYPE.DT_XCDRAWING, 
+							Transform(Basis().rotated(Vector3(0,-1,0), ang), p), 0, 
+							max(xsectlruds[i*4], xsectlruds[i*4+1])+1, max(xsectlruds[i*4+2], xsectlruds[i*4+3])+1, 
+							hexnodepoints, hexonepathpairs.duplicate(), false ]
+			xcdrawingSect1.mergexcrpcdata(xcdata)
+			if xcdrawingSect != null:
+				var xctube = sketchsystem.newXCtube(xcdrawingSect, xcdrawingSect1)
+				xctube.xcdrawinglink = ["hl", "hl", "hr", "hr"].duplicate()
+				xctube.updatetubelinkpaths(sketchsystem)
+			xcdrawingSect = xcdrawingSect1
+
 
 func duplicatexcdrawing(sketchsystem):
 	var xcdrawing = sketchsystem.newXCuniquedrawing(DRAWING_TYPE.DT_XCDRAWING, sketchsystem.uniqueXCname())
@@ -188,8 +236,6 @@ func newxcnode(name=null):
 	assert (not $XCnodes.has_node(xcn.get_name()))
 	$XCnodes.add_child(xcn)
 	return xcn
-
-
 
 func removexcnode(xcn, brejoinlines, sketchsystem):
 	var nodename = xcn.get_name()
@@ -240,18 +286,21 @@ func updatelinksandtubesafterchange(xctubesconnupdated, sketchsystem):
 func updatexcpaths():
 	if drawingtype == DRAWING_TYPE.DT_PAPERTEXTURE:
 		return
-	print("iupdatingxxccpaths ", len(onepathpairs), "  ", drawingtype)
-	var prevsurfacematerial = $PathLines.get_surface_material(0) if $PathLines.get_surface_material_count() != 0 else null
+	if len(onepathpairs) == 0:
+		$PathLines.mesh = null
+		return
+		
 	var surfaceTool = SurfaceTool.new()
 	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
 	for j in range(0, len(onepathpairs), 2):
 		var p0 = nodepoints[onepathpairs[j]]
 		var p1 = nodepoints[onepathpairs[j+1]]
-		var perp = linewidth*Vector2(-(p1.y - p0.y), p1.x - p0.x).normalized()
-		var p0left = p0 - Vector3(perp.x, perp.y, 0)
-		var p0right = p0 + Vector3(perp.x, perp.y, 0)
-		var p1left = p1 - Vector3(perp.x, perp.y, 0)
-		var p1right = p1 + Vector3(perp.x, perp.y, 0)
+		var perp = Vector3(-(p1.y - p0.y), p1.x - p0.x, 0) if drawingtype != DRAWING_TYPE.DT_CENTRELINE else Vector3(-(p1.z - p0.z), 0, p1.x - p0.x)
+		var fperp = linewidth*perp.normalized()
+		var p0left = p0 - fperp
+		var p0right = p0 + fperp
+		var p1left = p1 - fperp
+		var p1right = p1 + fperp
 		surfaceTool.add_vertex(p0left)
 		surfaceTool.add_vertex(p1left)
 		surfaceTool.add_vertex(p0right)
@@ -259,10 +308,15 @@ func updatexcpaths():
 		surfaceTool.add_vertex(p1left)
 		surfaceTool.add_vertex(p1right)
 	surfaceTool.generate_normals()
-	$PathLines.mesh = surfaceTool.commit()
-	print("usus ", len($PathLines.mesh.get_faces()), " ", len($PathLines.mesh.get_faces())) #surfaceTool.generate_normals()
-	$PathLines.set_surface_material(0, prevsurfacematerial if prevsurfacematerial != null else load("res://guimaterials/XCdrawingPathlines.material"))
-
+	var newmesh = surfaceTool.commit()
+	if $PathLines.mesh == null:
+		$PathLines.mesh = newmesh
+		$PathLines.set_surface_material(0, load("res://guimaterials/XCdrawingCentrelines.material") if drawingtype == DRAWING_TYPE.DT_CENTRELINE else load("res://guimaterials/XCdrawingPathlines.material"))
+	else:
+		var m = $PathLines.get_surface_material(0)
+		$PathLines.mesh = newmesh
+		$PathLines.set_surface_material(0, m)
+	
 func sd0(a, b):
 	return a[0] < b[0]
 
@@ -328,7 +382,7 @@ func makexcdpolys(discardsinglenodepaths):
 				outerpoly = poly
 			else:
 				polys.append(poly)
-	polys.append(outerpoly)
+	polys.append(outerpoly if outerpoly != null else [])
 	return polys
 
 func makexctubeshell(xcdrawings):
@@ -363,8 +417,7 @@ func makexctubeshell(xcdrawings):
 	
 	var arraymesh = ArrayMesh.new()
 	var surfaceTool = SurfaceTool.new()
-	var materialdirt = preload("res://lightweighttextures/simpledirt.material")
-	surfaceTool.set_material(materialdirt)
+	#surfaceTool.set_material(Material.new())
 	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
 	for j in polyindexes:
 		var poly = polys[j]
@@ -384,22 +437,33 @@ func updatexctubeshell(xcdrawings, makevisible):
 	if makevisible:
 		var xctubeshellmesh = makexctubeshell(xcdrawings)
 		if xctubeshellmesh != null:
-			if $XCflatshell == null:
+			if not has_node("XCflatshell"):
 				var xcflatshell = preload("res://nodescenes/XCtubeshell.tscn").instance()
 				xcflatshell.set_name("XCflatshell")
+				xcflatshell.get_node("CollisionShape").shape = ConcavePolygonShape.new()
 				add_child(xcflatshell)
 			$XCflatshell/MeshInstance.mesh = xctubeshellmesh
-			var materialdirt = preload("res://lightweighttextures/simpledirt.material")
+			var flatshellmaterial = get_node("/root/Spatial/MaterialSystem").tubematerialfromnumber(xcflatshellmaterial, false)
 			for i in range($XCflatshell/MeshInstance.get_surface_material_count()):
-				$XCflatshell/MeshInstance.set_surface_material(i, materialdirt)
+				$XCflatshell/MeshInstance.set_surface_material(i, flatshellmaterial)
 			$XCflatshell/CollisionShape.shape.set_faces(xctubeshellmesh.get_faces())
 			$XCflatshell.visible = true
 			$XCflatshell/CollisionShape.disabled = false
 		else:
-			if $XCflatshell != null:
+			if has_node("XCflatshell"):
 				$XCflatshell.queue_free()
-	elif $XCflatshell != null:
+	elif has_node("XCflatshell"):
 		$XCflatshell.visible = false
 		$XCflatshell/CollisionShape.disabled = true
 		
 
+func xcdfullsetvisibilitycollision(bvisible):
+	visible = bvisible
+	if visible:
+		$XCdrawingplane/CollisionShape.disabled = true
+		if has_node("XCflatshell"):
+			$XCflatshell/CollisionShape.disabled = true
+	else:
+		$XCdrawingplane/CollisionShape.disabled = not $XCdrawingplane.visible
+		if has_node("XCflatshell"):
+			$XCflatshell/CollisionShape.disabled = not $XCflatshell.visible

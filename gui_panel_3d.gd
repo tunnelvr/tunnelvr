@@ -18,8 +18,9 @@ func _on_buttonfetchimages_pressed():
 	get_node("/root/Spatial/ImageSystem").fetchimportpapers()
 	$Viewport/GUI/Panel/Label.text = "Papers fetching"
 
-func _on_buttonshowxs_toggled(button_pressed):
-	$Viewport/GUI/Panel/Label.text = "Not used"
+func _on_buttonplanview_toggled(button_pressed):
+	get_node("/root/Spatial/PlanViewSystem").setplanviewvisible(button_pressed, global_transform, $Quad.mesh.size)
+	$Viewport/GUI/Panel/Label.text = "Planview on" if button_pressed else "Planview off"
 	
 func _on_buttonheadtorch_toggled(button_pressed):
 	get_parent().setheadtorchlight(button_pressed)
@@ -33,6 +34,10 @@ func _on_buttonupdateshell_toggled(button_pressed):
 	sketchsystem.rpc("updateworkingshell", button_pressed)
 	$Viewport/GUI/Panel/Label.text = "shell made" if button_pressed else "shell hidden"
 
+func _on_buttononlycentrelines_toggled(button_pressed):
+	sketchsystem.rpc("changecentrelineonlymode", button_pressed)
+	$Viewport/GUI/Panel/Label.text = "centrelines only" if button_pressed else "normal view"
+
 func _on_buttonswapcontrollers_pressed():
 	var cidl = get_node("/root/Spatial").playerMe.get_node("HandLeft").controller_id
 	var cidr = get_node("/root/Spatial").playerMe.get_node("HandRight").controller_id
@@ -43,12 +48,13 @@ func _on_buttonswapcontrollers_pressed():
 func _ready():
 	$Viewport/GUI/Panel/ButtonLoad.connect("pressed", self, "_on_buttonload_pressed")
 	$Viewport/GUI/Panel/ButtonSave.connect("pressed", self, "_on_buttonsave_pressed")
-	$Viewport/GUI/Panel/ButtonShowXS.connect("toggled", self, "_on_buttonshowxs_toggled")
+	$Viewport/GUI/Panel/ButtonPlanView.connect("toggled", self, "_on_buttonplanview_toggled")
 	$Viewport/GUI/Panel/ButtonFetchImages.connect("pressed", self, "_on_buttonfetchimages_pressed")
 	$Viewport/GUI/Panel/ButtonHeadtorch.connect("toggled", self, "_on_buttonheadtorch_toggled")
 	$Viewport/GUI/Panel/ButtonDoppelganger.connect("toggled", self, "_on_buttondoppelganger_toggled")
 	$Viewport/GUI/Panel/ButtonUpdateShell.connect("toggled", self, "_on_buttonupdateshell_toggled")
 	$Viewport/GUI/Panel/ButtonSwapControllers.connect("pressed", self, "_on_buttonswapcontrollers_pressed")
+	$Viewport/GUI/Panel/ButtonOnlyCentrelines.connect("toggled", self, "_on_buttononlycentrelines_toggled")
 	
 func clickbuttonheadtorch():
 	$Viewport/GUI/Panel/ButtonHeadtorch.pressed = not $Viewport/GUI/Panel/ButtonHeadtorch.pressed
@@ -121,6 +127,13 @@ func _input(event):
 	if event is InputEventKey and event.pressed:
 		if event.scancode == KEY_L:
 			sketchsystem.loadsketchsystem()
+		#elif event.scancode == KEY_S:
+		#	sketchsystem.savesketchsystem()
 		elif event.scancode == KEY_T:
-			sketchsystem.updateworkingshell(true)
+			$Viewport/GUI/Panel/ButtonUpdateShell.pressed = not $Viewport/GUI/Panel/ButtonUpdateShell.pressed
+			_on_buttonupdateshell_toggled($Viewport/GUI/Panel/ButtonUpdateShell.pressed)
+		elif event.scancode == KEY_D:
+			$Viewport/GUI/Panel/ButtonDoppelganger.pressed = not $Viewport/GUI/Panel/ButtonDoppelganger.pressed
+			_on_buttondoppelganger_toggled($Viewport/GUI/Panel/ButtonDoppelganger.pressed)	
+
 

@@ -1,15 +1,53 @@
-[gd_scene load_steps=8 format=2]
+[gd_scene load_steps=10 format=2]
 
 [ext_resource path="res://nodescenes/PlayerPuppet.gd" type="Script" id=1]
 [ext_resource path="res://guimeshes/handrightmesh.tscn" type="PackedScene" id=2]
 [ext_resource path="res://guimeshes/headmesh.tscn" type="PackedScene" id=3]
 [ext_resource path="res://guimaterials/laser.material" type="Material" id=4]
 [ext_resource path="res://guimaterials/laserspot.material" type="Material" id=5]
+[ext_resource path="res://guimeshes/headtorchmesh.tscn" type="PackedScene" id=6]
 
-[sub_resource type="CubeMesh" id=1]
+[sub_resource type="Animation" id=1]
+resource_name = "spinlight"
+tracks/0/type = "value"
+tracks/0/path = NodePath("headtorch:rotation_degrees")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = false
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.5, 1 ),
+"transitions": PoolRealArray( 1, 1, 0.31864 ),
+"update": 0,
+"values": [ Vector3( -20, 0, 0 ), Vector3( -20, 90, 0 ), Vector3( -20, 0, 0 ) ]
+}
+tracks/1/type = "bezier"
+tracks/1/path = NodePath("headtorch:scale:z")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"points": PoolRealArray( 1, -0.25, 0, 0.25, 0, 2.24101, -0.434711, 0.0314479, 0.239939, -9.39369e-05, 1, -0.25, 0, 0.25, 0 ),
+"times": PoolRealArray( 0, 0.7, 1 )
+}
+tracks/2/type = "value"
+tracks/2/path = NodePath("headtorch:translation")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"times": PoolRealArray( 0, 0.4, 1 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 0,
+"values": [ Vector3( 0, 0.24, 0 ), Vector3( 0, 0.24, 0.9 ), Vector3( 0, 0.24, 0 ) ]
+}
+
+[sub_resource type="CubeMesh" id=2]
 size = Vector3( 0.002, 0.002, 1 )
 
-[sub_resource type="SphereMesh" id=2]
+[sub_resource type="SphereMesh" id=3]
 radius = 0.05
 height = 0.1
 radial_segments = 8
@@ -23,6 +61,14 @@ script = ExtResource( 1 )
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.691634, 0 )
 
 [node name="csgheadmesh" parent="HeadCam" instance=ExtResource( 3 )]
+
+[node name="headtorch" parent="HeadCam" instance=ExtResource( 6 )]
+transform = Transform( 1, 0, 0, 0, 0.939693, 0.34202, 0, -0.34202, 0.939693, 0, 0.24, 0 )
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="HeadCam"]
+anims/spinlight = SubResource( 1 )
+
+[node name="Tween" type="Tween" parent="HeadCam"]
 
 [node name="HandLeft" type="Spatial" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.149729, 0.251003, 0 )
@@ -46,10 +92,10 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 50, 0, 0, 0 )
 [node name="Laser" type="MeshInstance" parent="HandRight/LaserOrient/Length"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.5 )
 cast_shadow = 0
-mesh = SubResource( 1 )
+mesh = SubResource( 2 )
 material/0 = ExtResource( 4 )
 
 [node name="LaserSpot" type="MeshInstance" parent="HandRight/LaserOrient"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1 )
-mesh = SubResource( 2 )
+mesh = SubResource( 3 )
 material/0 = ExtResource( 5 )

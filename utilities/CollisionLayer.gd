@@ -9,9 +9,6 @@ enum {
 	CL_PointerFloor	=0x0010, 
 	CL_CaveWall		=0x0020, 
 	
-	
-	
-	
 	CL_PlayerHotspot=0x0400,
 	CL_Papersheet	=0x0800
 }

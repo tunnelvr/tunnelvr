@@ -15,7 +15,7 @@ var nextphysicsrotatestep = 0.0  # avoid flicker if done in _physics_process
 var velocity = Vector3(0.0, 0.0, 0.0)
 var gravity = -30.0
 
-export var walkspeed = 100.0
+export var walkspeed = 180.0
 export var flyspeed = 250.0
 export var drag_factor = 0.1
 
@@ -104,8 +104,17 @@ func _physics_process(delta):
 	collision_shape.shape.height = player_height - (player_radius * 2.0)
 	collision_shape.transform.origin.y = (player_height / 2.0)
 	#print(get_viewport().get_mouse_position(), Input.get_mouse_mode())
-	handleft.visible = playernode.arvrinterface != null and handleft.get_is_active()
-	handleft.get_node("csghandleft").setpartcolor(2, Color("222277") if handleft.get_node("TipTouchRay").is_colliding() else Color("#FFFFFF"))
+	var left_right = handleft.get_joystick_axis(0) if handleft.get_is_active() else 0.0
+	var forwards_backwards = handleft.get_joystick_axis(1) if handleft.get_is_active() else 0.0
+	if playernode.VRstatus == "quest":
+		left_right = 0
+		forwards_backwards = 0
+		handleft.visible = true
+	else:
+		handleft.visible = playernode.arvrinterface != null and handleft.get_is_active()
+		if handleft.get_node("TipTouchRay").is_colliding() != handright.get_node("LaserOrient/MeshDial").visible:
+			handright.get_node("LaserOrient/MeshDial").visible = handleft.get_node("TipTouchRay").is_colliding()
+			handleft.get_node("csghandleft").setpartcolor(2, Color("222277") if handleft.get_node("TipTouchRay").is_colliding() else Color("#FFFFFF"))
 
 	if nextphysicsrotatestep != 0:
 		var t1 = Transform()
@@ -116,10 +125,7 @@ func _physics_process(delta):
 		rot = rot.rotated(Vector3(0.0, -1, 0.0), deg2rad(nextphysicsrotatestep))
 		playernode.transform *= t2 * rot * t1
 		nextphysicsrotatestep = 0.0
-		
-	var left_right = handleft.get_joystick_axis(0) if handleft.get_is_active() else 0.0
-	var forwards_backwards = handleft.get_joystick_axis(1) if handleft.get_is_active() else 0.0
-
+	
 	var lhkeyvec = Vector2(0, 0)
 	if Input.is_action_pressed("lh_forward"):
 		lhkeyvec.y += 1
@@ -159,6 +165,8 @@ func _physics_process(delta):
 			if forwards_backwards < -0.5:
 				flydir = -flydir
 			velocity = flydir.normalized() * -delta * flyspeed * world_scale
+			if handleft.is_button_pressed(BUTTONS.VR_PAD):
+				velocity *= 3.0
 			velocity = kinematic_body.move_and_slide(velocity)
 			var movement = (kinematic_body.global_transform.origin - curr_transform.origin)
 			kinematic_body.global_transform.origin = curr_transform.origin
@@ -208,12 +216,15 @@ func _physics_process(delta):
 
 	var doppelganger = playernode.doppelganger
 	if is_inside_tree() and is_instance_valid(doppelganger):
-		var dgt = Transform(Basis(-playernode.global_transform.basis.x, playernode.global_transform.basis.y, -playernode.global_transform.basis.z), 
-							Vector3(doppelganger.global_transform.origin.x, playernode.global_transform.origin.y, doppelganger.global_transform.origin.z))
-		doppelganger.setavatarposition(dgt, headcam.transform, handleft.transform if handleft.visible else null, handright.transform if handright.visible else null, handright.get_node("LaserOrient").rotation.x, handright.get_node("LaserOrient/Length").scale.z, handright.get_node("LaserOrient/LaserSpot").visible)
+		var positiondict = playernode.playerpositiondict()
+		positiondict["playertransform"] = Transform(Basis(-positiondict["playertransform"].basis.x, positiondict["playertransform"].basis.y, -positiondict["playertransform"].basis.z), 
+													Vector3(doppelganger.global_transform.origin.x, positiondict["playertransform"].origin.y, doppelganger.global_transform.origin.z))
+		if playernode.bouncetestnetworkID != 0:
+			playernode.rpc_unreliable_id(playernode.bouncetestnetworkID, "bouncedoppelgangerposition", playernode.networkID, positiondict)
+		else:
+			doppelganger.setavatarposition(positiondict)
+
 	if playernode.connectiontoserveractive:
-		playernode.rpc_unreliable("setavatarposition", playernode.global_transform, headcam.transform, 
-													   handleft.transform if handleft.visible else null, 
-													   handright.transform if handright.visible else null, 
-													   handright.get_node("LaserOrient").rotation.x, handright.get_node("LaserOrient/Length").scale.z, handright.get_node("LaserOrient/LaserSpot").visible)
+		playernode.rpc_unreliable("setavatarposition", playernode.playerpositiondict())
 	
+
