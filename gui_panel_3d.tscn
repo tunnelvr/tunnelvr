@@ -96,6 +96,17 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="ButtonToggleFloorType" type="Button" parent="Viewport/GUI/Panel"]
+margin_left = 159.927
+margin_top = 147.461
+margin_right = 299.926
+margin_bottom = 175.461
+rect_pivot_offset = Vector2( 111.073, 28.0005 )
+text = "ToggleFloorType"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [node name="ButtonHeadtorch" type="Button" parent="Viewport/GUI/Panel"]
 margin_left = 15.3899
 margin_top = 181.177
@@ -136,10 +147,10 @@ __meta__ = {
 }
 
 [node name="ButtonOnlyCentrelines" type="Button" parent="Viewport/GUI/Panel"]
-margin_left = 160.4
-margin_top = 113.684
-margin_right = 300.4
-margin_bottom = 141.684
+margin_left = 159.4
+margin_top = 111.684
+margin_right = 299.4
+margin_bottom = 139.684
 rect_pivot_offset = Vector2( 138.61, -8.13628 )
 hint_tooltip = "test tooltip"
 toggle_mode = true

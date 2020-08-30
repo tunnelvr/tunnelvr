@@ -114,6 +114,20 @@ func setactivetargetwall(newactivetargetwall):
 	if activetargetwall != null and activetargetwall.drawingtype == DRAWING_TYPE.DT_PAPERTEXTURE:
 		activetargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").get_surface_material(0).albedo_color = Color("#DDFFCC")
 
+func togglefloortype():
+	if activetargetwall == null:
+		return "None selected"
+	if activetargetwall.drawingtype == DRAWING_TYPE.DT_PAPERTEXTURE:
+		activetargetwall.rotation_degrees.x = -90
+		activetargetwall.rotation_degrees.z = 0
+		activetargetwall.drawingtype = DRAWING_TYPE.DT_FLOORTEXTURE
+		return "to Floor"
+	if activetargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
+		activetargetwall.drawingtype = DRAWING_TYPE.DT_PAPERTEXTURE
+		return "to Paper"
+		
+	return "Wrong type"
+
 func setactivetargettubesector(advancesector):
 	if advancesector != 0:
 		activetargettube.get_node("XCtubeshell/MeshInstance").set_surface_material(activetargettube.activesector, materialsystem.tubematerialfromnumber(activetargettube.xcsectormaterials[activetargettube.activesector], false))
@@ -527,7 +541,7 @@ func buttonreleased_vrgrip():
 		
 func buttonreleased_vrtrigger():
 	if activetargetwallgrabbedtransform != null:
-		setactivetargetwall(null)
+		#setactivetargetwall(null)
 		activetargetwallgrabbedtransform = null
 	
 	if (pointertargettype == "XCnode" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE) and (selectedtargettype == "XCnode" and selectedtargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE) and pointertarget != selectedtarget:

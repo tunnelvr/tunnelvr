@@ -1,4 +1,4 @@
-[gd_scene load_steps=97 format=2]
+[gd_scene load_steps=96 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/default_env.tres" type="Environment" id=2]
@@ -23,7 +23,6 @@
 [ext_resource path="res://guimaterials/laserspot.material" type="Material" id=22]
 [ext_resource path="res://guimaterials/lasershadow.material" type="Material" id=23]
 [ext_resource path="res://systems/PlanViewSystem.gd" type="Script" id=24]
-[ext_resource path="res://nodescenes/XCnode_centreline.tscn" type="PackedScene" id=25]
 [ext_resource path="res://lightweighttextures/rock_albedo.jpg" type="Texture" id=26]
 [ext_resource path="res://lightweighttextures/simpledirt_highlight.material" type="Material" id=27]
 [ext_resource path="res://lightweighttextures/partialrock.material" type="Material" id=28]
@@ -637,8 +636,6 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0 )
 mesh = SubResource( 6 )
 material/0 = null
 
-[node name="XCnode" parent="PlanViewSystem" instance=ExtResource( 25 )]
-
 [node name="underfloor" type="StaticBody" parent="."]
 transform = Transform( 200, 0, 0, 0, 1, 0, 0, 0, 200, 0, -10, 0 )
 collision_layer = 18
@@ -743,7 +740,6 @@ __meta__ = {
 
 [node name="ViewportForceRender" type="MeshInstance" parent="LabelGenerator"]
 transform = Transform( 1, 0, 0, 0, 0.655202, -0.755453, 0, 0.755453, 0.655202, 0, -3.44091, -4.59181 )
-visible = false
 mesh = SubResource( 55 )
 material/0 = SubResource( 57 )
 

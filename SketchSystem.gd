@@ -129,6 +129,7 @@ func getactivefloordrawing():
 	assert (floordrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE)
 	return floordrawing
 
+
 func loadcentrelinefile(centrelinefile):
 	print("  want to open file ", centrelinefile)
 	var centrelinedrawing = newXCuniquedrawing(DRAWING_TYPE.DT_CENTRELINE, "centreline")
@@ -146,7 +147,11 @@ func loadcentrelinefile(centrelinefile):
 remote func xcdrawingfromdata(xcdata):
 	var xcdrawing = $XCdrawings.get_node(xcdata["name"])
 	if xcdrawing == null:
-		xcdrawing = newXCuniquedrawing(xcdata["drawingtype"], xcdata["name"])
+		if xcdata["drawingtype"] == DRAWING_TYPE.DT_FLOORTEXTURE or xcdata["drawingtype"].drawingtype == DRAWING_TYPE.DT_PAPERTEXTURE:
+			xcdrawing = newXCuniquedrawingPaper(xcdata["xcresource"], xcdata["drawingtype"])
+			assert (xcdrawing["name"] == xcdrawing.get_name())
+		else:
+			xcdrawing = newXCuniquedrawing(xcdata["drawingtype"], xcdata["name"])
 	xcdrawing.mergexcrpcdata(xcdata)
 	if xcdrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE or xcdrawing.drawingtype == DRAWING_TYPE.DT_PAPERTEXTURE:
 		get_node("/root/Spatial/ImageSystem").fetchpaperdrawing(xcdrawing)
@@ -161,15 +166,20 @@ remotesync func sketchsystemfromdict(save_dict):
 	for i in range(len(xcdrawingsData)):
 		var xcdrawingData = xcdrawingsData[i]
 		#print("iiii", xcdrawingData)
-		var xcdrawing = newXCuniquedrawing(xcdrawingData.drawingtype, xcdrawingData["name"])
-		xcdrawing.mergexcrpcdata(xcdrawingData)
-		if xcdrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE or xcdrawing.drawingtype == DRAWING_TYPE.DT_PAPERTEXTURE:
+		var xcdrawing = null
+		if xcdrawingData["drawingtype"] == DRAWING_TYPE.DT_FLOORTEXTURE or xcdrawingData["drawingtype"] == DRAWING_TYPE.DT_PAPERTEXTURE:
+			xcdrawing = newXCuniquedrawingPaper(xcdrawingData["xcresource"], xcdrawingData["drawingtype"])
+			xcdrawing.mergexcrpcdata(xcdrawingData)
 			get_node("/root/Spatial/ImageSystem").fetchpaperdrawing(xcdrawing)
 		else:
+			xcdrawing = newXCuniquedrawing(xcdrawingData["drawingtype"], xcdrawingData["name"])
+			xcdrawing.xcresource = xcdrawingData["xcresource"]
 			xcdrawing.get_node("XCdrawingplane").visible = false
 			xcdrawing.get_node("XCdrawingplane/CollisionShape").disabled = true
-		if xcdrawing.drawingtype == DRAWING_TYPE.DT_CENTRELINE:
-			get_node("/root/Spatial/LabelGenerator").makenodelabelstask(xcdrawing)
+			xcdrawing.mergexcrpcdata(xcdrawingData)
+			if xcdrawing.drawingtype == DRAWING_TYPE.DT_CENTRELINE:
+				get_node("/root/Spatial/LabelGenerator").makenodelabelstask(xcdrawing)
+		assert (xcdrawing.get_name() == xcdrawingData["name"])
 
 	for i in range(len(xctubesData)):
 		var xctube = xctubefromdata(xctubesData[i])
@@ -203,6 +213,8 @@ func newXCuniquedrawing(drawingtype, sname):
 	elif drawingtype == DRAWING_TYPE.DT_CENTRELINE:
 		xcdrawing.add_to_group("gpcentrelinegeo")
 		xcdrawing.linewidth = 0.035
+	else:
+		assert (false)
 	return xcdrawing
 	
 

@@ -18,6 +18,10 @@ func _on_buttonfetchimages_pressed():
 	get_node("/root/Spatial/ImageSystem").fetchimportpapers()
 	$Viewport/GUI/Panel/Label.text = "Papers fetching"
 
+func _on_buttontogglefloortype_pressed():
+	var msg = get_node("/root/Spatial").playerMe.get_node("pointersystem").togglefloortype()
+	$Viewport/GUI/Panel/Label.text = ":"+msg
+
 func _on_buttonplanview_toggled(button_pressed):
 	get_node("/root/Spatial/PlanViewSystem").setplanviewvisible(button_pressed, global_transform, $Quad.mesh.size)
 	$Viewport/GUI/Panel/Label.text = "Planview on" if button_pressed else "Planview off"
@@ -55,6 +59,8 @@ func _ready():
 	$Viewport/GUI/Panel/ButtonUpdateShell.connect("toggled", self, "_on_buttonupdateshell_toggled")
 	$Viewport/GUI/Panel/ButtonSwapControllers.connect("pressed", self, "_on_buttonswapcontrollers_pressed")
 	$Viewport/GUI/Panel/ButtonOnlyCentrelines.connect("toggled", self, "_on_buttononlycentrelines_toggled")
+	$Viewport/GUI/Panel/ButtonToggleFloorType.connect("pressed", self, "_on_buttontogglefloortype_pressed")
+	
 	
 func clickbuttonheadtorch():
 	$Viewport/GUI/Panel/ButtonHeadtorch.pressed = not $Viewport/GUI/Panel/ButtonHeadtorch.pressed
