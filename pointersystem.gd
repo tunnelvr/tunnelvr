@@ -50,7 +50,6 @@ var activetargetwallgrabbedpointoffset = null
 var activetargetwallgrabbedlocalpoint = null
 
 var activetargettube = null
-var activetargettubesector = 0
 
 var xcdrawingactivematerial = preload("res://guimaterials/XCdrawing_active.material")
 var xcdrawingmaterial = preload("res://guimaterials/XCdrawing.material")
@@ -115,19 +114,19 @@ func setactivetargetwall(newactivetargetwall):
 	if activetargetwall != null and activetargetwall.drawingtype == DRAWING_TYPE.DT_PAPERTEXTURE:
 		activetargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").get_surface_material(0).albedo_color = Color("#DDFFCC")
 
-func setactivetargettubesector(newactivetargettubesector):
-	if activetargettubesector != -1 and activetargettube != null:
-		activetargettube.get_node("XCtubeshell/MeshInstance").set_surface_material(activetargettubesector, materialsystem.tubematerialfromnumber(activetargettube.xcsectormaterials[activetargettubesector], false))
-	activetargettubesector = newactivetargettubesector
-	if activetargettubesector != -1:
-		activetargettube.get_node("XCtubeshell/MeshInstance").set_surface_material(activetargettubesector, materialsystem.tubematerialfromnumber(activetargettube.xcsectormaterials[activetargettubesector], true))
+func setactivetargettubesector(advancesector):
+	if advancesector != 0:
+		activetargettube.get_node("XCtubeshell/MeshInstance").set_surface_material(activetargettube.activesector, materialsystem.tubematerialfromnumber(activetargettube.xcsectormaterials[activetargettube.activesector], false))
+	if advancesector != -2:
+		var nsectors = activetargettube.get_node("XCtubeshell/MeshInstance").get_surface_material_count()
+		activetargettube.activesector = (activetargettube.activesector + advancesector + nsectors)%nsectors
+		activetargettube.get_node("XCtubeshell/MeshInstance").set_surface_material(activetargettube.activesector, materialsystem.tubematerialfromnumber(activetargettube.xcsectormaterials[activetargettube.activesector], true))
 
 func setactivetargettube(newactivetargettube):
 	setactivetargetwall(null)
 	if activetargettube != null:
-		setactivetargettubesector(-1)
+		setactivetargettubesector(-2)
 	activetargettube = newactivetargettube
-	activetargettubesector = -1
 	if activetargettube != null:
 		setactivetargettubesector(0)
 
@@ -214,7 +213,7 @@ func onpointing(laserroot):
 			
 	pointertargetpoint = newpointertargetpoint
 	if is_instance_valid(pointertarget) and pointertarget == guipanel3d:
-		guipanel3d.guipanelsendmousemotion(pointertargetpoint, handright.global_transform, handright.is_button_pressed(BUTTONS.VR_TRIGGER))
+		guipanel3d.guipanelsendmousemotion(pointertargetpoint, handright.global_transform, handright.is_button_pressed(BUTTONS.VR_TRIGGER) or Input.is_mouse_button_pressed(BUTTON_LEFT))
 
 	if pointertargetpoint != null:
 		laserroot.get_node("LaserSpot").global_transform.origin = pointertargetpoint
@@ -243,8 +242,7 @@ func _on_button_pressed(p_button):
 	elif p_button == BUTTONS.VR_TRIGGER:
 		buttonpressed_vrtrigger(gripbuttonheld)
 	elif p_button == BUTTONS.VR_PAD:
-		buttonpressed_vrpad(gripbuttonheld, handright.get_joystick_axis(0), handright.get_joystick_axis(1))
-		
+		buttonpressed_vrpad(gripbuttonheld, Vector2(handright.get_joystick_axis(0), handright.get_joystick_axis(1)))
 	
 func buttonpressed_vrby(gripbuttonheld):
 	var cameracontrollervec = handright.global_transform.origin - headcam.global_transform.origin
@@ -378,7 +376,19 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 			LaserShadow.visible = false
 			
 	elif pointertargettype == "XCtube":
-		setactivetargettube(pointertargetwall)
+		if activetargettube == pointertargetwall:
+			if gripbuttonheld:
+				activetargettube.xcsectormaterials[activetargettube.activesector] = int(activetargettube.xcsectormaterials[activetargettube.activesector] + 1)%materialsystem.tubematerialcount()
+				setactivetargettubesector(0)
+			else:
+				setactivetargettubesector(+1)
+		else:
+			if activetargettube != null:
+				setactivetargettubesector(-2)
+			activetargettube = pointertargetwall
+			setactivetargettubesector(0)
+
+
 
 	elif pointertargettype == "Papersheet" or pointertargettype == "PlanView":
 		setselectedtarget(null)
@@ -444,40 +454,40 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 		setselectedtarget(pointertarget)
 
 				
-func buttonpressed_vrpad(gripbuttonheld, left_right, up_down):
+func buttonpressed_vrpad(gripbuttonheld, joypos):
 	if pointertargettype == "XCdrawing" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
-		if abs(up_down) < 0.5 and abs(left_right) > 0.1:
-			var dy = (1 if left_right > 0 else -1)*(1.0 if abs(left_right) < 0.8 else 0.1)
+		if abs(joypos.y) < 0.5 and abs(joypos.x) > 0.1:
+			var dy = (1 if joypos.x > 0 else -1)*(1.0 if abs(joypos.x) < 0.8 else 0.1)
 			pointertargetwall.get_node("XCdrawingplane").scale.x = max(1, pointertargetwall.get_node("XCdrawingplane").scale.x + dy)
 			pointertargetwall.get_node("XCdrawingplane").scale.y = max(1, pointertargetwall.get_node("XCdrawingplane").scale.y + dy)
 			xcdrawinghighlightmaterial.uv1_scale = pointertargetwall.get_node("XCdrawingplane").get_scale()
 			xcdrawinghighlightmaterial.uv1_offset = -xcdrawinghighlightmaterial.uv1_scale/2
 				
 	elif pointertargettype == "Papersheet":
-		if abs(up_down) > 0.5:
-			var dd = (1 if up_down > 0 else -1)*(0.2 if activelaserroot.get_node("Length").scale.z < 1.5 else 1.0)
+		if abs(joypos.y) > 0.5:
+			var dd = (1 if joypos.x > 0 else -1)*(0.2 if activelaserroot.get_node("Length").scale.z < 1.5 else 1.0)
 			if activelaserroot.get_node("Length").scale.z + dd > 0.1:
 				pointertargetwall.global_transform.origin += -dd*LaserOrient.global_transform.basis.z
-		elif abs(left_right) > 0.1:
-			var fs = (0.5 if abs(left_right) < 0.8 else 0.9)
-			if left_right > 0:
+		elif abs(joypos.x) > 0.1:
+			var fs = (0.5 if abs(joypos.x) < 0.8 else 0.9)
+			if joypos.x > 0:
 				fs = 1/fs
 			pointertargetwall.get_node("XCdrawingplane").scale.x *= fs
 			pointertargetwall.get_node("XCdrawingplane").scale.y *= fs
 
 	elif pointertargettype == "XCtube" and activetargettube != null and pointertargetwall == activetargettube:
-		if abs(left_right) > 0.65:
+		if abs(joypos.x) > 0.65:
 			var nsectors = activetargettube.get_node("XCtubeshell/MeshInstance").get_surface_material_count()
-			setactivetargettubesector((activetargettubesector + (1 if left_right > 0 else nsectors-1))%nsectors)
-		elif abs(up_down) > 0.70:
-			activetargettube.xcsectormaterials[activetargettubesector] = int(activetargettube.xcsectormaterials[activetargettubesector] + (1 if up_down > 0 else materialsystem.get_child_count() - 1))%materialsystem.get_child_count()
-			setactivetargettubesector(activetargettubesector)
+			setactivetargettubesector(1 if joypos.x > 0 else -1)
+		elif abs(joypos.y) > 0.65:
+			activetargettube.xcsectormaterials[activetargettube.activesector] = int(activetargettube.xcsectormaterials[activetargettube.activesector] + (1 if joypos.y > 0 else materialsystem.tubematerialcount() - 1))%materialsystem.tubematerialcount()
+			setactivetargettubesector(0)
 			
 	#elif pointertargettype == "PlanView":
 	elif pointerplanviewtarget != null and not pointerplanviewtarget.planviewactive:
-		if abs(left_right) > 0.65:
-			pointerplanviewtarget.camerascalechange(1.5 if left_right < 0 else 0.6667)
-		elif abs(left_right) < 0.2 and abs(up_down) < 0.2:
+		if abs(joypos.x) > 0.65:
+			pointerplanviewtarget.camerascalechange(1.5 if joypos.x < 0 else 0.6667)
+		elif abs(joypos.x) < 0.2 and abs(joypos.y) < 0.2:
 			pointerplanviewtarget.cameraresetcentre(headcam)
 		
 func _on_button_release(p_button):
@@ -511,7 +521,9 @@ func buttonreleased_vrgrip():
 		setselectedtarget(null)
 		
 	elif pointertargettype == "XCtube":
-		setactivetargettube(null)
+		if activetargettube != null:
+			setactivetargettubesector(-2)
+			activetargettube = null
 		
 func buttonreleased_vrtrigger():
 	if activetargetwallgrabbedtransform != null:
@@ -601,6 +613,10 @@ func _input(event):
 				buttonpressed_vrtrigger(gripbuttonheld)
 			else:
 				buttonreleased_vrtrigger()
+				
+	elif event is InputEventKey and event.pressed and event.scancode == KEY_M:
+		buttonpressed_vrby(false)	
+	
 
 func _on_HeelHotspot_body_entered(body):
 	print("_on_HeelHotspot_body_entered ", body)

@@ -43,8 +43,8 @@ func setxcpositionangle(drawingwallangle):
 	global_transform = Transform(Basis().rotated(Vector3(0,-1,0), drawingwallangle), global_transform.origin)
 
 func setxcpositionorigin(pt0):
-	global_transform.origin = Vector3(pt0.x, 0, pt0.z)
-
+	global_transform.origin = pt0
+	
 remote func setxcdrawingposition(lglobal_transform):
 	global_transform = lglobal_transform
 

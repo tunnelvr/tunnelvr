@@ -13,6 +13,7 @@ var positioningtube = false
 var pickedpolyindex0 = -1
 var pickedpolyindex1 = -1
 
+var activesector = 0
 const linewidth = 0.02
 
 func _ready():
@@ -73,8 +74,8 @@ func shiftxcdrawingposition(sketchsystem):
 	var xcn0 = xcdrawingXC.get_node("XCnodes").get_node(xcdrawinglink[-1 if bsingledrag else -3])
 	if bsingledrag:
 		var xcn0rel = xcn0.global_transform.origin - xcdrawingXC.global_transform.origin
-		var pt0 = opn0.global_transform.origin - Vector3(xcn0rel.x, 0, xcn0rel.z)
-		xcdrawingXC.setxcpositionorigin(pt0)
+		var pt0 = opn0.global_transform.origin - xcn0rel
+		xcdrawingXC.setxcpositionorigin(Vector3(pt0.x, xcdrawingXC.global_transform.origin.y, pt0.z))
 
 	else:
 		var opn1 = xcdrawingFloor.get_node("XCnodes").get_node(xcdrawinglink[-2])
@@ -90,7 +91,7 @@ func shiftxcdrawingposition(sketchsystem):
 		if vdot != 0:
 			xcdrawingXC.scalexcnodepointspointsxy(vx2len/vxc2len*(sign(vdot)), 1)
 		var xco = opn0.global_transform.origin - xcn0.global_transform.origin + xcdrawingXC.global_transform.origin
-		xcdrawingXC.setxcpositionorigin(xco)
+		xcdrawingXC.setxcpositionorigin(Vector3(xco.x, xcdrawingXC.global_transform.origin.y, xco.z))
 		xcdrawingXC.updatexcpaths()
 		
 	sketchsystem.rpc("xcdrawingfromdata", xcdrawingXC.exportxcrpcdata())

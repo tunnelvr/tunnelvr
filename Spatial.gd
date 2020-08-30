@@ -3,26 +3,26 @@ extends Spatial
 
 # Stuff to do:
 
-# sketchsystemfromdict
-# * handle the xcdrawingfromdata issue and loading in centrelines.
-# * get all the loads and saving of components going through same functions
-# * sketchsystemfromdict  xctubefromdata  exportxctrpcdata
-# * abolish the json file format use
 
-# xctubefromdata <- exportxctrpcdata
+# * remove reliance on rpc sync
 
+# duplicating xc drawing should not update y
 
+# * process engines doing the downloads of images
+# * process engine updating of the tubes
 
-# * process engines doing the downloads of images and updating of the tubes?
-
-
-# * add networking instructions to README
-# * then networking to the Quest(!)  -- this is plausible now
 
 # * Take a papersheet (same as floor sheet), done with thickness.
 # * Put this papersheet under my feet and make it real big.  Ability to lift it up.  
 # * Then connect centreline node to it, and a second one.  Now it can only be horizontal, but move up and down.
 # * Possibly ability to trim this sheet down with a closed contour in it
+
+
+
+
+# * add networking instructions to README
+# * then networking to the Quest(!)  -- this is plausible now
+
 
 # * Make a blank XCdrawing in a tube and be able to move it around.  
 # * This then locks and slices the tube.  (keep tube directions same and maintain the sector values)
