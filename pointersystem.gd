@@ -542,44 +542,37 @@ func buttonreleased_vrtrigger():
 		sketchsystem.rpc("xcdrawingfromdata", xcdrawing.exportxcrpcdata())
 						
 func _physics_process(_delta):
-	if !is_inside_tree():
-		return
-
 	if playernode.arvrinterface == null:
 		var mvec = headcam.global_transform.basis.xform(mousecontrollervec)
 		handright.global_transform.origin = headcam.global_transform.origin + mvec
 		handright.look_at(handright.global_transform.origin + 1.0*mvec + 0.0*headcam.global_transform.basis.z, Vector3(0,1,0))
 		handright.global_transform.origin.y -= 0.3
 		
+	if playernode.VRstatus != "quest":
+		var firstlasertarget = LaserOrient.get_node("RayCast").get_collider() if LaserOrient.get_node("RayCast").is_colliding() and not LaserOrient.get_node("RayCast").get_collider().is_queued_for_deletion() else null
+		pointerplanviewtarget = planviewsystem if firstlasertarget != null and firstlasertarget.get_name() == "PlanView" and planviewsystem.checkplanviewinfront(handright) else null
+		if pointerplanviewtarget != null:
+			pointerplanviewtarget.processplanviewsliding(handright, _delta)
+		if pointerplanviewtarget != null and pointerplanviewtarget.planviewactive:
+			var planviewcontactpoint = LaserOrient.get_node("RayCast").get_collision_point()
+			LaserOrient.get_node("LaserSpot").global_transform.origin = planviewcontactpoint
+			LaserOrient.get_node("Length").scale.z = -LaserOrient.get_node("LaserSpot").translation.z
+			LaserOrient.get_node("LaserSpot").visible = false
+			pointerplanviewtarget.processplanviewpointing(planviewcontactpoint)
+			activelaserroot = planviewsystem.get_node("RealPlanCamera/LaserScope/LaserOrient")
+			activelaserroot.get_node("LaserSpot").global_transform.basis = LaserOrient.global_transform.basis
+		else:
+			planviewsystem.get_node("RealPlanCamera/LaserScope").visible = false
+			activelaserroot = LaserOrient
+		onpointing(activelaserroot)
+		
 	if activetargetwallgrabbedtransform != null:
 		if activetargetwallgrabbedpoint != null:
-			#activetargetwallgrabbedtransform = LaserSpot.global_transform.affine_inverse() * pointertargetwall.global_transform
-			#activetargetwallgrabbedlocalpoint = pointertargetwall.global_transform.affine_inverse() * LaserSpot.global_transform.origin
-			#activetargetwallgrabbedpoint = LaserSpot.global_transform.origin
-			#activetargetwallgrabbedpointoffset = LaserSpot.global_transform.origin - pointertargetwall.global_transform.origin
 			activetargetwallgrabbed.global_transform = activelaserroot.get_node("LaserSpot").global_transform * activetargetwallgrabbedtransform
 			activetargetwallgrabbed.global_transform.origin += activetargetwallgrabbedpoint - activetargetwallgrabbed.global_transform * activetargetwallgrabbedlocalpoint
-			#pointertargetwall.global_transform.origin = activetargetwallgrabbedpoint - activetargetwallgrabbedpointoffset + (pointertargetwall.global_transform.basis * activetargetwallgrabbedtransform.origin)
 		else:
 			activetargetwallgrabbed.global_transform = activelaserroot.get_node("LaserSpot").global_transform * activetargetwallgrabbedtransform
 		activetargetwallgrabbed.rpc_unreliable("setxcdrawingposition", activetargetwallgrabbed.global_transform)
-		
-	elif playernode.VRstatus == "quest":
-		pass # disabling the pointer in case it causes those nan() exceptions
-	else:
-		var firstlasertarget = LaserOrient.get_node("RayCast").get_collider() if LaserOrient.get_node("RayCast").is_colliding() and not LaserOrient.get_node("RayCast").get_collider().is_queued_for_deletion() else null
-		pointerplanviewtarget = planviewsystem if firstlasertarget != null and firstlasertarget.get_name() == "PlanView" and planviewsystem.checkplanviewinfront(handright) else null
-		if pointerplanviewtarget != null and pointerplanviewtarget.planviewactive:
-			pointerplanviewtarget.processplanviewpointing(LaserOrient.get_node("RayCast").get_collision_point())
-			activelaserroot = planviewsystem.get_node("RealPlanCamera/LaserScope")
-			LaserOrient.get_node("LaserSpot").visible = false
-		else:
-			if pointerplanviewtarget != null:
-				pointerplanviewtarget.processplanviewsliding(handright, _delta)
-			planviewsystem.get_node("RealPlanCamera/LaserScope").visible = false
-			activelaserroot = LaserOrient
-			
-		onpointing(activelaserroot)
 
 
 var rightmousebuttonheld = false

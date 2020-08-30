@@ -3,26 +3,25 @@ extends Spatial
 
 # Stuff to do:
 
-# * xcdrawingfromdata
-# * remove reliance on rpc sync
-
-# duplicating xc drawing should not update y (maybe do as a export and import)
-
-# * process engines doing the downloads of images
-# * process engine updating of the tubes
-
+# * shorten the secondary array
+# * transmit rotation through this object
 
 # * Take a papersheet (same as floor sheet), done with thickness.
 # * Put this papersheet under my feet and make it real big.  Ability to lift it up.  
 # * Then connect centreline node to it, and a second one.  Now it can only be horizontal, but move up and down.
 # * Possibly ability to trim this sheet down with a closed contour in it
 
+# * selected XCdrawing would have a handle for moving through the planview
 
+# * xcdrawingfromdata
+# * remove reliance on rpc sync
 
+# duplicating xc drawing should not update y (maybe do as a export and import)
+
+# * process engine updating of the tubes
 
 # * add networking instructions to README
 # * then networking to the Quest(!)  -- this is plausible now
-
 
 # * Make a blank XCdrawing in a tube and be able to move it around.  
 # * This then locks and slices the tube.  (keep tube directions same and maintain the sector values)

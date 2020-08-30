@@ -182,7 +182,19 @@ rings = 1
 
 [sub_resource type="CubeMesh" id=27]
 material = ExtResource( 21 )
-size = Vector3( 0.02, 1, 0.02 )
+size = Vector3( 0.02, 0.02, 1 )
+
+[sub_resource type="BoxShape" id=52]
+
+[sub_resource type="SpatialMaterial" id=50]
+params_cull_mode = 2
+albedo_texture = ExtResource( 7 )
+uv1_scale = Vector3( 20, 20, 1 )
+
+[sub_resource type="PlaneMesh" id=51]
+material = SubResource( 50 )
+subdivide_width = 4
+subdivide_depth = 4
 
 [sub_resource type="PlaneMesh" id=28]
 
@@ -296,6 +308,26 @@ normal_scale = 2.03
 normal_texture = ExtResource( 30 )
 uv1_triplanar = true
 
+[sub_resource type="DynamicFont" id=53]
+font_data = ExtResource( 40 )
+
+[sub_resource type="DynamicFont" id=54]
+font_data = ExtResource( 39 )
+
+[sub_resource type="PlaneMesh" id=55]
+size = Vector2( 2, 0.1 )
+
+[sub_resource type="ViewportTexture" id=56]
+viewport_path = NodePath("LabelGenerator/Viewport")
+
+[sub_resource type="SpatialMaterial" id=57]
+resource_local_to_scene = true
+flags_unshaded = true
+flags_no_depth_test = true
+flags_do_not_receive_shadows = true
+params_cull_mode = 2
+albedo_texture = SubResource( 56 )
+
 [sub_resource type="Shader" id=46]
 code = "shader_type spatial;
 render_mode blend_mix,depth_draw_opaque,cull_back,diffuse_burley,specular_schlick_ggx;
@@ -343,38 +375,6 @@ shader_param/texture_albedo = SubResource( 47 )
 [sub_resource type="PlaneMesh" id=49]
 material = SubResource( 48 )
 size = Vector2( 4, 2 )
-
-[sub_resource type="BoxShape" id=52]
-
-[sub_resource type="SpatialMaterial" id=50]
-params_cull_mode = 2
-albedo_texture = ExtResource( 7 )
-uv1_scale = Vector3( 20, 20, 1 )
-
-[sub_resource type="PlaneMesh" id=51]
-material = SubResource( 50 )
-subdivide_width = 4
-subdivide_depth = 4
-
-[sub_resource type="DynamicFont" id=53]
-font_data = ExtResource( 40 )
-
-[sub_resource type="DynamicFont" id=54]
-font_data = ExtResource( 39 )
-
-[sub_resource type="PlaneMesh" id=55]
-size = Vector2( 2, 0.1 )
-
-[sub_resource type="ViewportTexture" id=56]
-viewport_path = NodePath("LabelGenerator/Viewport")
-
-[sub_resource type="SpatialMaterial" id=57]
-resource_local_to_scene = true
-flags_unshaded = true
-flags_no_depth_test = true
-flags_do_not_receive_shadows = true
-params_cull_mode = 2
-albedo_texture = SubResource( 56 )
 
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
@@ -548,9 +548,6 @@ unit_db = 9.032
 stream = ExtResource( 13 )
 unit_db = 19.367
 
-[node name="ImageSystem" type="Node" parent="."]
-script = ExtResource( 17 )
-
 [node name="PlanViewSystem" type="Spatial" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -2.08929e-06, 2, -6.412 )
 visible = false
@@ -615,29 +612,45 @@ cast_shadow = 0
 mesh = SubResource( 26 )
 material/0 = null
 
-[node name="Length" type="Spatial" parent="PlanViewSystem/RealPlanCamera/LaserScope"]
-transform = Transform( 1, 0, 0, 0, 60, 0, 0, 0, 1, 0, 0, 0 )
+[node name="LaserOrient" type="Spatial" parent="PlanViewSystem/RealPlanCamera/LaserScope"]
+transform = Transform( 1, 0, 0, 0, -1.62921e-07, 1, 0, -1, -1.62921e-07, 0, 0, 0 )
 
-[node name="LaserVertical" type="MeshInstance" parent="PlanViewSystem/RealPlanCamera/LaserScope/Length"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0 )
+[node name="Length" type="Spatial" parent="PlanViewSystem/RealPlanCamera/LaserScope/LaserOrient"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 60, 0, 0, 0 )
+
+[node name="LaserVertical" type="MeshInstance" parent="PlanViewSystem/RealPlanCamera/LaserScope/LaserOrient/Length"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.5 )
 mesh = SubResource( 27 )
 material/0 = null
 
-[node name="RayCast" type="RayCast" parent="PlanViewSystem/RealPlanCamera/LaserScope"]
-cast_to = Vector3( 0, -50, 0 )
+[node name="RayCast" type="RayCast" parent="PlanViewSystem/RealPlanCamera/LaserScope/LaserOrient"]
+cast_to = Vector3( 0, 0, -50 )
 collision_mask = 56
 
-[node name="LaserSpot" type="MeshInstance" parent="PlanViewSystem/RealPlanCamera/LaserScope"]
+[node name="LaserSpot" type="MeshInstance" parent="PlanViewSystem/RealPlanCamera/LaserScope/LaserOrient"]
 transform = Transform( 1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, 0.478879, -49.3258, -0.0697994 )
 mesh = SubResource( 5 )
 material/0 = null
 
-[node name="LaserSpike" type="MeshInstance" parent="PlanViewSystem/RealPlanCamera/LaserScope/LaserSpot"]
+[node name="LaserSpike" type="MeshInstance" parent="PlanViewSystem/RealPlanCamera/LaserScope/LaserOrient/LaserSpot"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0 )
 mesh = SubResource( 6 )
 material/0 = null
 
 [node name="XCnode" parent="PlanViewSystem" instance=ExtResource( 25 )]
+
+[node name="underfloor" type="StaticBody" parent="."]
+transform = Transform( 200, 0, 0, 0, 1, 0, 0, 0, 200, 0, -10, 0 )
+collision_layer = 18
+collision_mask = 0
+
+[node name="CollisionShape" type="CollisionShape" parent="underfloor"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0 )
+shape = SubResource( 52 )
+
+[node name="Mesh" type="MeshInstance" parent="underfloor"]
+mesh = SubResource( 51 )
+material/0 = null
 
 [node name="MaterialSystem" type="Spatial" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 8.84611, 2.20853, 0 )
@@ -704,27 +717,6 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.09902 )
 mesh = SubResource( 43 )
 material/0 = SubResource( 45 )
 
-[node name="WaterExperiment" type="MeshInstance" parent="."]
-transform = Transform( 1, 0, 0, 0, 0.697453, 0.716631, 0, -0.716631, 0.697453, 2.42691, 1.16181, 1.94417 )
-material_override = ExtResource( 3 )
-mesh = SubResource( 49 )
-material/0 = ExtResource( 3 )
-
-[node name="underfloor" type="StaticBody" parent="."]
-transform = Transform( 200, 0, 0, 0, 1, 0, 0, 0, 200, 0, -10, 0 )
-collision_layer = 18
-collision_mask = 0
-
-[node name="CollisionShape" type="CollisionShape" parent="underfloor"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0 )
-shape = SubResource( 52 )
-
-[node name="Mesh" type="MeshInstance" parent="underfloor"]
-mesh = SubResource( 51 )
-material/0 = null
-
-[node name="BoulderClutter" type="Spatial" parent="."]
-
 [node name="LabelGenerator" type="Spatial" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -2.08929e-06, 3.6, -6.412 )
 script = ExtResource( 38 )
@@ -755,8 +747,19 @@ visible = false
 mesh = SubResource( 55 )
 material/0 = SubResource( 57 )
 
+[node name="ImageSystem" type="Node" parent="."]
+script = ExtResource( 17 )
+
 [node name="WebsocketSystem" type="Node" parent="."]
 script = ExtResource( 8 )
+
+[node name="BoulderClutter" type="Spatial" parent="."]
+
+[node name="WaterMaterialExpt" type="MeshInstance" parent="."]
+transform = Transform( 1, 0, 0, 0, 0.697453, 0.716631, 0, -0.716631, 0.697453, 2.42691, 1.16181, 1.94417 )
+material_override = ExtResource( 3 )
+mesh = SubResource( 49 )
+material/0 = ExtResource( 3 )
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = ExtResource( 2 )
