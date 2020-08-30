@@ -27,8 +27,10 @@ func gg(x):
 
 func _run():
 	var x = IP.get_local_addresses()
-	var b = Transform()
-	print(";", var2str(b), ";")
+	var k = "://jssss/affff_g"
+	print(k.get_extension() == "")
+	print(k.get_basename())
+	print(k.substr(k.find_last("/")+1))
+	k = "abcdefghijklm"
+	print(k.substr(0,4), " ", k.substr(len(k)-4))
 	
-	
-

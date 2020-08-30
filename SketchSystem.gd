@@ -6,10 +6,12 @@ const XCtube = preload("res://nodescenes/XCtube.tscn")
 const linewidth = 0.05
 var tubeshellsvisible = false
 var centrelineonlymode = false
+const defaultfloordrawing = "http://cave-registry.org.uk/svn/NorthernEngland/ThreeCountiesArea/rawscans/Ireby/DukeStResurvey-drawnup-p3.jpg"
 
 func _ready():
-	var floordrawing = newXCuniquedrawing(DRAWING_TYPE.DT_FLOORTEXTURE, "paper_DukeStResurvey-drawnup-p3")
+	var floordrawing = newXCuniquedrawingPaper(defaultfloordrawing, DRAWING_TYPE.DT_FLOORTEXTURE)
 	get_node("/root/Spatial/ImageSystem").fetchpaperdrawing(floordrawing)
+
 	#loadcentrelinefile("res://surveyscans/dukest1resurvey2009.json")
 	loadcentrelinefile("res://surveyscans/dukest1resurvey2009json.res")
 	#loadcentrelinefile("res://surveyscans/Ireby/Ireby2/Ireby2.json")
@@ -194,30 +196,40 @@ func newXCuniquedrawing(drawingtype, sname):
 	xcdrawing.drawingtype = drawingtype
 	xcdrawing.set_name(sname)
 	get_node("XCdrawings").add_child(xcdrawing)
+	assert (sname == xcdrawing.get_name())
 	if drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		xcdrawing.add_to_group("gpnoncentrelinegeo")
 		xcdrawing.linewidth = 0.05
 	elif drawingtype == DRAWING_TYPE.DT_CENTRELINE:
 		xcdrawing.add_to_group("gpcentrelinegeo")
 		xcdrawing.linewidth = 0.035
+	return xcdrawing
 	
+
+func newXCuniquedrawingPaper(xcresource, drawingtype):
+	var fname = get_node("/root/Spatial/ImageSystem").getshortimagename(xcresource, false)
+	var sname = fname+","
+	for i in range($XCdrawings.get_child_count()+1):
+		sname = fname+","+String(i)
+		if not $XCdrawings.has_node(sname):
+			break
+			
+	var xcdrawing = XCdrawing.instance()
+	xcdrawing.drawingtype = drawingtype
+	xcdrawing.xcresource = xcresource
+	xcdrawing.set_name(sname)
+	$XCdrawings.add_child(xcdrawing)
+	assert (sname == xcdrawing.get_name())
+	
+	xcdrawing.get_node("XCdrawingplane").collision_layer |= CollisionLayer.CL_Environment
+	xcdrawing.get_node("XCdrawingplane").visible = true
+	xcdrawing.get_node("XCdrawingplane/CollisionShape").disabled = false
+	var m = preload("res://surveyscans/scanimagefloor.material").duplicate()
+	m.albedo_texture = ImageTexture.new() 
+	xcdrawing.get_node("XCdrawingplane/CollisionShape/MeshInstance").set_surface_material(0, m)
 	if xcdrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
-		xcdrawing.get_node("XCdrawingplane").collision_layer |= CollisionLayer.CL_Environment
-		xcdrawing.get_node("XCdrawingplane").visible = true
-		xcdrawing.get_node("XCdrawingplane/CollisionShape").disabled = false
-		var m = preload("res://surveyscans/scanimagefloor.material").duplicate()
-		m.albedo_texture = ImageTexture.new() 
-		xcdrawing.get_node("XCdrawingplane/CollisionShape/MeshInstance").set_surface_material(0, m)
 		xcdrawing.rotation_degrees = Vector3(-90, 0, 0)
 		xcdrawing.get_node("XCdrawingplane").scale = Vector3(50, 50, 1)
-		
-	elif xcdrawing.drawingtype == DRAWING_TYPE.DT_PAPERTEXTURE:
-		xcdrawing.get_node("XCdrawingplane").collision_layer |= CollisionLayer.CL_Environment
-		xcdrawing.get_node("XCdrawingplane").visible = true
-		xcdrawing.get_node("XCdrawingplane/CollisionShape").disabled = false
-		var m = preload("res://surveyscans/scanimagefloor.material").duplicate()
-		m.albedo_texture = ImageTexture.new() 
-		xcdrawing.get_node("XCdrawingplane/CollisionShape/MeshInstance").set_surface_material(0, m)
 
 	return xcdrawing
 

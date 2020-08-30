@@ -33,6 +33,8 @@ func D_on_request_completed(result, response_code, headers, body):
 	for x in g:
 		print(a, x.strings)
 	
+
+	
 var imgdir = "user://northernimages/"
 #var dirimg = Directory.new()
 var urldir = "http://cave-registry.org.uk/svn/NorthernEngland/ThreeCountiesArea/rawscans/Ireby/"
@@ -43,68 +45,78 @@ var imglist = ["BoltonExtensionsResurvey-DrawnUpSketch-1.jpg",
 			   "DukeStParallelSidePassage-DrawnUp1.jpg",
 			   "DukeStParallelSidePassage-DrawnUp2.jpg"
 			]
-	
-func _ready():
-	connect("loadpaperimage_signal", self, "loadpaperimage")
-	
-signal loadpaperimage_signal(paperdrawing)
-
 var paperwidth = 0.4
 
-func loadpaperimage(paperdrawing, timer=null):
-	if timer != null:
-		timer.queue_free()
-	var img = Image.new()
 
-	if paperdrawing.get_name() == "floordrawing" or paperdrawing.get_name() == "paper_DukeStResurvey-drawnup-p3":
-		var x = load("res://surveyscans/DukeStResurvey-drawnup-p3.jpg")
-		print(x.get_data(), x)
-		img.copy_from(x.get_data())
+func getshortimagename(xcresource, withextension):
+	var fname = xcresource.substr(xcresource.find_last("/")+1)
+	var ext = xcresource.get_extension()
+	if ext != null:  
+		ext = "."+ext
+	fname = fname.get_basename()
+	fname = fname.replace(".", "").replace("@", "").replace("%", "")
+	var md5name = xcresource.md5_text().substr(0, 6)
+	if len(fname) > 8:
+		fname = fname.substr(0,4)+md5name+fname.substr(len(fname)-4)
 	else:
-		var fname = paperdrawing.get_name().replace("paper_", "")+".jpg"
-		img.load(imgdir+fname)
-	var papertexture = ImageTexture.new()
-	papertexture.create_from_image(img)
-	paperdrawing.get_node("XCdrawingplane/CollisionShape/MeshInstance").get_surface_material(0).albedo_texture = papertexture
-	if papertexture.get_width() != 0:
-		paperdrawing.get_node("XCdrawingplane").scale.y = paperdrawing.get_node("XCdrawingplane").scale.x*papertexture.get_height()/papertexture.get_width()
-	else:
-		print(paperdrawing.get_name(), "   has zero width ")
-	nextrequest()
+		fname = fname+md5name
+	return fname+ext if withextension else fname
 
-var fimgtosave = ""
-func _http_request_completed(result, response_code, headers, body, httprequest, paperdrawing):
-	httprequest.queue_free()
-	requestcount -= 1
-	if response_code != 200:
-		print("http response code bad ", response_code, " for ", paperdrawing.get_name())
-	emit_signal("loadpaperimage_signal", paperdrawing)
 
 var paperdrawinglist = [ ]
-var requestcount = 0
-func nextrequest():
-	if not Directory.new().dir_exists(imgdir):
-		Directory.new().make_dir(imgdir)
-	if len(paperdrawinglist) > 0:
-		var paperdrawing = paperdrawinglist.pop_front()
-		if paperdrawing.get_name() == "floordrawing" or paperdrawing.get_name() == "paper_DukeStResurvey-drawnup-p3":
-			loadpaperimage(paperdrawing)  # ready not called yet so no signal connection
-		else:
-			var fname = paperdrawing.get_name().replace("paper_", "")+".jpg"
-			if File.new().file_exists(imgdir+fname):
-				var timer = Timer.new()
-				timer.connect("timeout", self, "loadpaperimage", [paperdrawing, timer])
-				add_child(timer)
-				timer.set_wait_time(0.1)
-				timer.start()
-			else:
-				var httprequest = HTTPRequest.new()
-				add_child(httprequest)
-				httprequest.connect("request_completed", self, "_http_request_completed", [httprequest, paperdrawing])
-				httprequest.download_file = imgdir+fname
-				httprequest.request(urldir+fname)
+
+var imagefetchingcountdowntimer = 0.0
+var imagefetchingcountdowntime = 0.15
+var fetcheddrawing = null
+var httprequest = null
+var httprequestduration = 0.0
+var fetcheddrawingfile = null
+
+func _http_request_completed(result, response_code, headers, body, lhttprequest, paperdrawing):
+	assert (lhttprequest == httprequest)
+	lhttprequest.queue_free()
+	if response_code == 200:
+		fetcheddrawing = paperdrawing
 	else:
-		requestcount -= 1
+		print("http response code bad ", response_code, " for ", paperdrawing.get_name())
+	httprequest = null
+	
+func _process(delta):
+	if imagefetchingcountdowntimer > 0.0:
+		imagefetchingcountdowntimer -= delta
+	elif fetcheddrawing != null:
+		var img = Image.new()
+		img.load(fetcheddrawingfile)
+		var papertexture = ImageTexture.new()
+		papertexture.create_from_image(img)
+		fetcheddrawing.get_node("XCdrawingplane/CollisionShape/MeshInstance").get_surface_material(0).albedo_texture = papertexture
+		if papertexture.get_width() != 0:
+			fetcheddrawing.get_node("XCdrawingplane").scale.y = fetcheddrawing.get_node("XCdrawingplane").scale.x*papertexture.get_height()/papertexture.get_width()
+		else:
+			print(fetcheddrawing.get_name(), "   has zero width ")
+		fetcheddrawing = null
+	elif httprequest != null:
+		httprequestduration += delta
+	elif len(paperdrawinglist) > 0:
+		var paperdrawing = paperdrawinglist.pop_front()
+		fetcheddrawingfile = imgdir+getshortimagename(paperdrawing.xcresource, true)
+		if not File.new().file_exists(fetcheddrawingfile):
+			if not Directory.new().dir_exists(imgdir):
+				Directory.new().make_dir(imgdir)
+			httprequest = HTTPRequest.new()
+			add_child(httprequest)
+			httprequest.connect("request_completed", self, "_http_request_completed", [httprequest, paperdrawing])
+			httprequest.download_file = fetcheddrawingfile
+			httprequest.request(paperdrawing.xcresource)
+			httprequestduration = 0.0
+		else:
+			fetcheddrawing = paperdrawing
+	else:
+		set_process(false)
+
+func fetchpaperdrawing(paperdrawing):
+	paperdrawinglist.append(paperdrawing)
+	set_process(true)
 	
 func fetchimportpapers():
 	var player = get_node("/root/Spatial").playerMe
@@ -118,23 +130,14 @@ func fetchimportpapers():
 									+ papertransorg.basis.x*((i%5)-2)*(paperwidth + 0.05) 
 									+ papertransorg.basis.z*(i%2)*(paperwidth*0.2) 
 									+ Vector3(0, int(i/5+1)*(paperwidth*0.6+0.05), 0))
-		
-		var fname = imglist[i]
-		var sname = "paper_"+fname.replace(".jpg", "")
-		var paperdrawing = get_node("/root/Spatial/SketchSystem").newXCuniquedrawing(DRAWING_TYPE.DT_PAPERTEXTURE, sname)
+
+		var paperdrawing = get_node("/root/Spatial/SketchSystem").newXCuniquedrawingPaper(urldir+imglist[i], DRAWING_TYPE.DT_PAPERTEXTURE)
 		paperdrawing.global_transform = papertrans
 		paperdrawing.get_node("XCdrawingplane").scale = Vector3(paperwidth/2, paperwidth/2, 1)
 		paperdrawinglist.append(paperdrawing)
 		get_node("/root/Spatial/SketchSystem").rpc("xcdrawingfromdata", paperdrawing.exportxcrpcdata())
+		fetchpaperdrawing(paperdrawing)
 
-	requestcount += 1
-	nextrequest()
-
-func fetchpaperdrawing(paperdrawing):
-	paperdrawinglist.append(paperdrawing)
-	if requestcount == 0:
-		requestcount += 1
-		nextrequest()
 
 
 func _input(event):

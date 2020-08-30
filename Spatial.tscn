@@ -6,7 +6,7 @@
 [ext_resource path="res://movementsystem.gd" type="Script" id=4]
 [ext_resource path="res://pointersystem.gd" type="Script" id=5]
 [ext_resource path="res://guimeshes/handrightmesh.tscn" type="PackedScene" id=6]
-[ext_resource path="res://surveyscans/DukeStResurvey-drawnup-p3.jpg" type="Texture" id=7]
+[ext_resource path="res://lightweighttextures/Ground030_2K_Color_small.jpg" type="Texture" id=7]
 [ext_resource path="res://WebsocketSystem.gd" type="Script" id=8]
 [ext_resource path="res://sounds/switch7.wav" type="AudioStream" id=9]
 [ext_resource path="res://SketchSystem.gd" type="Script" id=10]
@@ -344,19 +344,17 @@ shader_param/texture_albedo = SubResource( 47 )
 material = SubResource( 48 )
 size = Vector2( 4, 2 )
 
+[sub_resource type="BoxShape" id=52]
+
 [sub_resource type="SpatialMaterial" id=50]
 params_cull_mode = 2
-albedo_color = Color( 0.992157, 0.992157, 0.666667, 1 )
 albedo_texture = ExtResource( 7 )
+uv1_scale = Vector3( 20, 20, 1 )
 
 [sub_resource type="PlaneMesh" id=51]
 material = SubResource( 50 )
-size = Vector2( 1, 1.285 )
 subdivide_width = 4
 subdivide_depth = 4
-
-[sub_resource type="BoxShape" id=52]
-extents = Vector3( 0.5, 0.5, 0.643 )
 
 [sub_resource type="DynamicFont" id=53]
 font_data = ExtResource( 40 )
@@ -706,26 +704,24 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.09902 )
 mesh = SubResource( 43 )
 material/0 = SubResource( 45 )
 
-[node name="LaserSquare" type="MeshInstance" parent="."]
+[node name="WaterExperiment" type="MeshInstance" parent="."]
 transform = Transform( 1, 0, 0, 0, 0.697453, 0.716631, 0, -0.716631, 0.697453, 2.42691, 1.16181, 1.94417 )
 material_override = ExtResource( 3 )
 mesh = SubResource( 49 )
 material/0 = ExtResource( 3 )
 
-[node name="drawnfloor" type="StaticBody" parent="."]
-transform = Transform( 200, 0, 0, 0, 1, 0, 0, 0, 200, 0, -0.5, 0 )
-visible = false
+[node name="underfloor" type="StaticBody" parent="."]
+transform = Transform( 200, 0, 0, 0, 1, 0, 0, 0, 200, 0, -10, 0 )
 collision_layer = 18
 collision_mask = 0
 
-[node name="thing,ghfg" type="MeshInstance" parent="drawnfloor"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.123422, -0.143924, -0.0669777 )
-mesh = SubResource( 51 )
-material/0 = null
-
-[node name="CollisionShape" type="CollisionShape" parent="drawnfloor"]
+[node name="CollisionShape" type="CollisionShape" parent="underfloor"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0 )
 shape = SubResource( 52 )
+
+[node name="Mesh" type="MeshInstance" parent="underfloor"]
+mesh = SubResource( 51 )
+material/0 = null
 
 [node name="BoulderClutter" type="Spatial" parent="."]
 

@@ -3,10 +3,10 @@ extends Spatial
 
 # Stuff to do:
 
-
+# * xcdrawingfromdata
 # * remove reliance on rpc sync
 
-# duplicating xc drawing should not update y
+# duplicating xc drawing should not update y (maybe do as a export and import)
 
 # * process engines doing the downloads of images
 # * process engine updating of the tubes
