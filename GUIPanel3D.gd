@@ -27,11 +27,11 @@ func _on_buttonplanview_toggled(button_pressed):
 	$Viewport/GUI/Panel/Label.text = "Planview on" if button_pressed else "Planview off"
 	
 func _on_buttonheadtorch_toggled(button_pressed):
-	get_parent().setheadtorchlight(button_pressed)
+	get_node("/root/Spatial").playerMe.setheadtorchlight(button_pressed)
 	$Viewport/GUI/Panel/Label.text = "Headtorch on" if button_pressed else "Headtorch off"
 
 func _on_buttondoppelganger_toggled(button_pressed):
-	get_parent().setdoppelganger(button_pressed)
+	get_node("/root/Spatial").playerMe.setdoppelganger(button_pressed)
 	$Viewport/GUI/Panel/Label.text = "Doppelganger on" if button_pressed else "Doppelganger off"
 
 func _on_buttonupdateshell_toggled(button_pressed):

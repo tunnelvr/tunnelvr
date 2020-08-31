@@ -8,7 +8,7 @@ onready var playernode = get_parent()
 onready var headcam = playernode.get_node('HeadCam')
 onready var handleft = playernode.get_node("HandLeft")
 onready var handright = playernode.get_node("HandRight")
-onready var guipanel3d = playernode.get_node("GUIPanel3D")
+onready var guipanel3d = get_node("/root/Spatial/GuiSystem/GUIPanel3D")
 
 onready var LaserOrient = handright.get_node("LaserOrient") 
 onready var LaserShadow = handright.get_node("LaserShadow") 

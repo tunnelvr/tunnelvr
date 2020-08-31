@@ -4,13 +4,16 @@ extends Spatial
 
 # * loading files puts all the xcsections in the right place (and fills in the tubes if they should)
 
+# * use joypos instead of left_right stuff
+
 # * deal with positioning papersheet underlay
 # * deal with connecting to the papersheet (bigger connectivities needed)
 # * deal with seeing the paper drawing when you are inside 
 # * active floor papersheet which we used for drawn texture (maybe on the ceiling)
 
+# * Top down laser not long enough
+
 # * check at loading gets the new paper bits in the right place
-# * use joypos instead of left_right stuff
 
 # * if tubeshells is on then they must get made!
 # * save and load puts saves my standing position
@@ -212,8 +215,8 @@ func _ready():
 	playerMe.set_network_master(networkID)
 	playerMe.networkID = networkID
 
-	playerMe.get_node("GUIPanel3D/Viewport/GUI/Panel/ButtonUpdateShell").pressed = true
-	playerMe.get_node("GUIPanel3D")._on_buttonupdateshell_toggled(true)
+	$GuiSystem/GUIPanel3D/Viewport/GUI/Panel/ButtonUpdateShell.pressed = true
+	$GuiSystem/GUIPanel3D._on_buttonupdateshell_toggled(true)
 
 
 func nextplayernetworkidinringskippingdoppelganger(deletedid):
