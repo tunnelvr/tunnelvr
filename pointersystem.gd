@@ -575,8 +575,43 @@ func buttonreleased_vrgrip():
 					setactivetargetwall(xcdrawing)
 					setselectedtarget(null)
 				
-			elif pointertarget.get_name() == "DoSlice":
-				print("Not implemented")
+			elif pointertarget.get_name() == "DoSlice" and is_instance_valid(activetargettube) and len(gripmenu.gripmenupointertargetwall.nodepoints) == 0:
+				var xcdrawing = gripmenu.gripmenupointertargetwall
+				var vang = Vector2(xcdrawing.global_transform.basis.x.x, xcdrawing.global_transform.basis.x.z).angle()
+				xcdrawing.setxcpositionangle(vang)
+				var xcdrawinglink0 = [ ]
+				var xcdrawinglink1 = [ ]
+				activetargettube.slicetubetoxcdrawing(xcdrawing, xcdrawinglink0, xcdrawinglink1)
+				xcdrawing.updatexcpaths()
+				sketchsystem.rpc("xcdrawingfromdata", xcdrawing.exportxcrpcdata())
+				setactivetargetwall(xcdrawing)
+				setselectedtarget(null)
+				var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(activetargettube.xcname0)
+				var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(activetargettube.xcname1)
+				xcdrawing0.xctubesconn.remove(xcdrawing0.xctubesconn.find(pointertargetwall))
+				xcdrawing1.xctubesconn.remove(xcdrawing1.xctubesconn.find(pointertargetwall))
+
+				var xctube0 = sketchsystem.newXCtube(xcdrawing0, xcdrawing)
+				xctube0.xcdrawinglink = xcdrawinglink0
+				xctube0.updatetubelinkpaths(sketchsystem)
+				sketchsystem.rpc("xctubefromdata", xctube0.exportxctrpcdata())
+				xctube0.updatetubeshell(sketchsystem.get_node("XCdrawings"), sketchsystem.tubeshellsvisible)
+			
+				var xctube1 = sketchsystem.newXCtube(xcdrawing, xcdrawing1)
+				xctube1.xcdrawinglink = xcdrawinglink1
+				xctube1.updatetubelinkpaths(sketchsystem)
+				sketchsystem.rpc("xctubefromdata", xctube0.exportxctrpcdata())
+				xctube1.updatetubeshell(sketchsystem.get_node("XCdrawings"), sketchsystem.tubeshellsvisible)
+
+				xcdrawing.updatexctubeshell(sketchsystem.get_node("XCdrawings"), sketchsystem.tubeshellsvisible)  # not strictly necessary as there won't be any shells in a sliced tube xc
+
+				pointertargettype = "none"
+				pointertarget = null
+				activetargettube.queue_free()
+				activetargettube = null
+				activelaserroot.get_node("LaserSpot").visible = false
+				LaserShadow.visible = false
+
 		
 	elif pointertargettype == "GUIPanel3D":
 		if guipanel3d.visible:

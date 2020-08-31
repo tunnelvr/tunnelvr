@@ -324,7 +324,7 @@ func maketubeshell(xcdrawings):
 	return arraymesh
 	#return surfaceTool.commit()
 
-func slicetubetoxcdrawing(xcdrawing, xcdrawinglink0, xcdrawinglink1, lam):
+func slicetubetoxcdrawing(xcdrawing, xcdrawinglink0, xcdrawinglink1):
 	var xcdrawings = get_node("../../XCdrawings")
 	var xcdrawing0 = xcdrawings.get_node(xcname0)
 	var xcdrawing1 = xcdrawings.get_node(xcname1)
@@ -357,11 +357,15 @@ func slicetubetoxcdrawing(xcdrawing, xcdrawinglink0, xcdrawinglink1, lam):
 			if i0 == 0 and i1 == 0:
 				xcdrawinglink0.append(poly0[ila0])
 				xcdrawinglink0.append(xcn.get_name())
-				xcdrawinglink1.append(poly1[ila1])
 				xcdrawinglink1.append(xcn.get_name())
+				xcdrawinglink1.append(poly1[ila1])
 			
+			# 0 = xcdrawing.global_transform.basis.z.dot(pt0 + lam*(pt1 - pt0) - xcdrawing.global_transform.origin)
+			# lam*xcdrawing.global_transform.basis.z.dot(pt0 - pt1) = xcdrawing.global_transform.basis.z.dot(pt0 - xcdrawing.global_transform.origin)
+			var lam = xcdrawing.global_transform.basis.z.dot(pt0 - xcdrawing.global_transform.origin)/xcdrawing.global_transform.basis.z.dot(pt0 - pt1)
 			xcn.global_transform.origin = lerp(pt0, pt1, lam)
 			xcdrawing.copyxcntootnode(xcn)
+			print(xcn.get_name(), " ", xcdrawing.nodepoints[xcn.get_name()].z)  # flatten into the plane
 			xcdrawing.nodepoints[xcn.get_name()].z = 0  # flatten into the plane
 			xcdrawing.copyotnodetoxcn(xcn)
 			

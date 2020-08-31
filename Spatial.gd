@@ -4,15 +4,38 @@ extends Spatial
 
 # * loading files puts all the xcsections in the right place (and fills in the tubes if they should)
 
+# * use joypos instead of left_right stuff
+
+# * NewSlice should be between me and the targetted XCsection
+# * NewSlice should only happen with a selected tube
+# * New slice should only allow moving (no drawing) (drag up move closer) within the tube
+
+# * Do Slice should preserve the material sectors
+
+# * Remove all the old slicing and XC dublication code
+
+# * How is it going to work from planview?
+# * a gripclick inserts a new XC in the tube that we can orient and move before applying the slice
+#   -- this can be done from the plan view too, 
+#   -- plot with front-culling so as to see inside the shapes, and plot with image textures on
+
+# * Make a blank XCdrawing in a selected tube and be able to move it around in the vertical plane.  
+# * This then locks and slices the tube.  (keep tube directions same and maintain the sector values)
+
+# * if tubeshells is on then they must get made!
+# * save and load puts saves my standing position
+
+# * abolish duplicating xc drawing mode
+# * process engine updating of the tubes
+
+# * XC in mode where it cannot take new nodes, only as continuation
+# * and automatically deletes connective bits
+
+# * tube has easy clicky ways to add in connecting lines between them (advancing the selected node after starting at a join)
+
 # * confusion between papersheet and floordrawing being XCtype
 
-#["DelXC"])
-#["toSolid" if gripmenupointertargetwall.get_node("XCdrawingplane/CollisionShape").disabled else "toGas", "toFloor", "toBig"])
-#["SelectXC", "ghost", "FloorTex"])
-
 # * getactivefloordrawing is duff.  we should record floor we are working with relative to an object, by connection
-
-# * use joypos instead of left_right stuff
 
 # * deal with positioning papersheet underlay
 # * deal with connecting to the papersheet (bigger connectivities needed)
@@ -21,18 +44,6 @@ extends Spatial
 
 # * check at loading gets the new paper bits in the right place
 
-# * if tubeshells is on then they must get made!
-# * save and load puts saves my standing position
-
-# * abolish duplicating xc drawing mode
-# * process engine updating of the tubes
-
-# * a gripclick inserts a new XC in the tube that we can orient and move before applying the slice
-#   -- this can be done from the plan view too, 
-#   -- plot with front-culling so as to see inside the shapes, and plot with image textures on
-
-# * Make a blank XCdrawing in a selected tube and be able to move it around in the vertical plane.  
-# * This then locks and slices the tube.  (keep tube directions same and maintain the sector values)
 # * Make a consistent bit of cave in Ireby2
 
 # * A selected tube makes the XCnodes bigger?
@@ -61,8 +72,6 @@ extends Spatial
 # * special materials are the sketch image and invisible
 # * we can toggle culling to the materials to see inside (means we get everything oriented right) 
 # * LaserShadow out in global space under a node
-
-# * Use Remote transform to move GUIPanel3D out of PlayerMe
 
 # * highlight nodes under pointer system so it's global and simplifies colouring code (active node to be an overlay)
 

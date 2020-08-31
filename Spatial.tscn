@@ -1101,7 +1101,7 @@ mesh = SubResource( 6 )
 material/0 = null
 
 [node name="MaterialSystem" type="Spatial" parent="."]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 8.84611, 2.20853, 0 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 8.84611, 2.20853, 23.9465 )
 script = ExtResource( 36 )
 
 [node name="tubematerials" type="Spatial" parent="MaterialSystem"]
@@ -1217,6 +1217,7 @@ material/0 = null
 
 [node name="WaterMaterialExpt" type="MeshInstance" parent="."]
 transform = Transform( 1, 0, 0, 0, 0.697453, 0.716631, 0, -0.716631, 0.697453, 2.42691, 1.16181, 1.94417 )
+visible = false
 material_override = ExtResource( 3 )
 mesh = SubResource( 49 )
 material/0 = ExtResource( 3 )
