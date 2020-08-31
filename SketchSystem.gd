@@ -13,8 +13,8 @@ func _ready():
 	get_node("/root/Spatial/ImageSystem").fetchpaperdrawing(floordrawing)
 
 	#loadcentrelinefile("res://surveyscans/dukest1resurvey2009.json")
-	loadcentrelinefile("res://surveyscans/dukest1resurvey2009json.res")
-	#loadcentrelinefile("res://surveyscans/Ireby/Ireby2/Ireby2.json")
+	#loadcentrelinefile("res://surveyscans/dukest1resurvey2009json.res")
+	loadcentrelinefile("res://surveyscans/Ireby/Ireby2/Ireby2.json")
 	
 func xcapplyonepath(xcn0, xcn1): 
 	var xcdrawing0 = xcn0.get_parent().get_parent()
@@ -126,7 +126,7 @@ func clearsketchsystem():
 
 func getactivefloordrawing():
 	var floordrawing = $XCdrawings.get_child(0)  # only one here for now
-	assert (floordrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE)
+	#assert (floordrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE)
 	return floordrawing
 
 
@@ -233,7 +233,8 @@ func newXCuniquedrawingPaper(xcresource, drawingtype):
 	$XCdrawings.add_child(xcdrawing)
 	assert (sname == xcdrawing.get_name())
 	
-	xcdrawing.get_node("XCdrawingplane").collision_layer |= CollisionLayer.CL_Environment
+	xcdrawing.get_node("XCdrawingplane").collision_layer = CollisionLayer.CL_Environment | CollisionLayer.CL_PointerFloor if xcdrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE else CollisionLayer.CL_Pointer
+
 	xcdrawing.get_node("XCdrawingplane").visible = true
 	xcdrawing.get_node("XCdrawingplane/CollisionShape").disabled = false
 	var m = preload("res://surveyscans/scanimagefloor.material").duplicate()

@@ -19,8 +19,7 @@ func _on_buttonfetchimages_pressed():
 	$Viewport/GUI/Panel/Label.text = "Papers fetching"
 
 func _on_buttontogglefloortype_pressed():
-	var msg = get_node("/root/Spatial").playerMe.get_node("pointersystem").togglefloortype()
-	$Viewport/GUI/Panel/Label.text = ":"+msg
+	$Viewport/GUI/Panel/Label.text = "does not exist"
 
 func _on_buttonplanview_toggled(button_pressed):
 	get_node("/root/Spatial/PlanViewSystem").setplanviewvisible(button_pressed, global_transform, $Quad.mesh.size)
@@ -66,8 +65,8 @@ func clickbuttonheadtorch():
 	$Viewport/GUI/Panel/ButtonHeadtorch.pressed = not $Viewport/GUI/Panel/ButtonHeadtorch.pressed
 	_on_buttonheadtorch_toggled($Viewport/GUI/Panel/ButtonHeadtorch.pressed)
 
-func togglevisibility(controller_global_transform):
-	if not visible:
+func toggleguipanelvisibility(controller_global_transform):
+	if not visible and controller_global_transform != null:
 		var paneltrans = global_transform
 		var controllertrans = controller_global_transform
 		paneltrans.origin = controllertrans.origin - 0.8*ARVRworld_scale*(controllertrans.basis.z)

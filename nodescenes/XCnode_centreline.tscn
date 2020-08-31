@@ -79,6 +79,7 @@ mesh = SubResource( 3 )
 material/0 = null
 
 [node name="Quad" type="MeshInstance" parent="."]
+visible = false
 cast_shadow = 0
 mesh = SubResource( 4 )
 material/0 = SubResource( 6 )

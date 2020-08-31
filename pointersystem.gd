@@ -3,6 +3,7 @@ extends Node
 onready var sketchsystem = get_node("/root/Spatial/SketchSystem")
 onready var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
 onready var materialsystem = get_node("/root/Spatial/MaterialSystem")
+onready var gripmenu = get_node("/root/Spatial/GuiSystem/GripMenu")
 
 onready var playernode = get_parent()
 onready var headcam = playernode.get_node('HeadCam')
@@ -63,6 +64,9 @@ func clearpointertargetmaterial():
 			xcdrawingactivematerial.uv1_scale = pointertargetwall.get_node("XCdrawingplane").get_scale()
 			xcdrawingactivematerial.uv1_offset = -xcdrawingactivematerial.uv1_scale/2
 		pointertargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").set_surface_material(0, xcdrawingactivematerial if pointertargetwall == activetargetwall else xcdrawingmaterial)
+	if pointertargettype == "GripMenuItem":
+		pointertarget.get_node("MeshInstance").get_surface_material(0).albedo_color = Color("#E8D619")
+
 	handright.get_node("csghandright").setpartcolor(2, "#FFFFFF")
 			
 func setpointertargetmaterial():
@@ -74,6 +78,8 @@ func setpointertargetmaterial():
 		xcdrawinghighlightmaterial.uv1_offset = -xcdrawinghighlightmaterial.uv1_scale/2
 		pointertargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").set_surface_material(0, xcdrawinghighlightmaterial)
 		handright.get_node("csghandright").setpartcolor(2, "#FFFF60")
+	if pointertargettype == "GripMenuItem":
+		pointertarget.get_node("MeshInstance").get_surface_material(0).albedo_color = Color("#FFCCCC")
 	
 func setselectedtarget(newselectedtarget):
 	if selectedtargettype == "XCnode":
@@ -113,20 +119,6 @@ func setactivetargetwall(newactivetargetwall):
 		LaserOrient.get_node("RayCast").collision_mask = CollisionLayer.CL_Pointer | CollisionLayer.CL_PointerFloor | CollisionLayer.CL_CaveWall
 	if activetargetwall != null and activetargetwall.drawingtype == DRAWING_TYPE.DT_PAPERTEXTURE:
 		activetargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").get_surface_material(0).albedo_color = Color("#DDFFCC")
-
-func togglefloortype():
-	if activetargetwall == null:
-		return "None selected"
-	if activetargetwall.drawingtype == DRAWING_TYPE.DT_PAPERTEXTURE:
-		activetargetwall.rotation_degrees.x = -90
-		activetargetwall.rotation_degrees.z = 0
-		activetargetwall.drawingtype = DRAWING_TYPE.DT_FLOORTEXTURE
-		return "to Floor"
-	if activetargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
-		activetargetwall.drawingtype = DRAWING_TYPE.DT_PAPERTEXTURE
-		return "to Paper"
-		
-	return "Wrong type"
 
 func setactivetargettubesector(advancesector):
 	if advancesector != 0:
@@ -169,6 +161,8 @@ func targettype(target):
 		return "XCdrawing"
 	if targetparent.get_name() == "XCnodes":
 		return "XCnode"
+	if targetparent.get_name() == "GripMenu":
+		return "GripMenuItem"
 	return "unknown"
 		
 func targetwall(target, targettype):
@@ -268,15 +262,17 @@ func buttonpressed_vrby(gripbuttonheld):
 	elif ccaxvec > 0.85 and pswitchdist < 0.1:
 		guipanel3d.clickbuttonheadtorch()
 	else:
-		guipanel3d.togglevisibility(handright.get_node("LaserOrient").global_transform)
+		guipanel3d.toggleguipanelvisibility(handright.get_node("LaserOrient").global_transform)
 
 func buttonpressed_vrgrip():
 	gripbuttonpressused = false
 	handright.get_node("csghandright").setpartcolor(4, "#00CC00")
-				
+	gripmenu.gripmenuon(handright.get_node("LaserOrient").global_transform, pointertargetwall, pointertargettype, activetargettube)
+	
 func buttonpressed_vrtrigger(gripbuttonheld):
 	if gripbuttonheld:
 		gripbuttonpressused = true
+		gripmenu.disableallgripmenus()
 					
 	if not is_instance_valid(pointertarget):
 		pass
@@ -512,13 +508,79 @@ func _on_button_release(p_button):
 
 func buttonreleased_vrgrip():
 	handright.get_node("csghandright").setpartcolor(4, "#FFFFFF")
-
+	
 	if gripbuttonpressused:
 		pass  # the trigger was pulled during the grip operation
 	
+	elif pointertargettype == "GripMenuItem":
+		if is_instance_valid(gripmenu.gripmenupointertargetwall):
+			print("executing ", pointertarget.get_name(), " on ", gripmenu.gripmenupointertargetwall.get_name())
+			if pointertarget.get_name() == "Up5":
+				gripmenu.gripmenupointertargetwall.global_transform.origin.y += 5
+				playernode.global_transform.origin.y = max(playernode.global_transform.origin.y, gripmenu.gripmenupointertargetwall.global_transform.origin.y)
+			elif pointertarget.get_name() == "Down5":
+				gripmenu.gripmenupointertargetwall.global_transform.origin.y -= 5
+			elif pointertarget.get_name() == "toPaper":
+				gripmenu.gripmenupointertargetwall.drawingtype = DRAWING_TYPE.DT_PAPERTEXTURE
+				gripmenu.gripmenupointertargetwall.get_node("XCdrawingplane").collision_layer = CollisionLayer.CL_Pointer
+
+			elif pointertarget.get_name() == "toFloor" or pointertarget.get_name() == "toBig":
+				if pointertarget.get_name() == "toBig":
+					var fs = max(1.1, 50/gripmenu.gripmenupointertargetwall.get_node("XCdrawingplane").scale.x)
+					gripmenu.gripmenupointertargetwall.get_node("XCdrawingplane").scale.x *= fs
+					gripmenu.gripmenupointertargetwall.get_node("XCdrawingplane").scale.y *= fs
+				gripmenu.gripmenupointertargetwall.rotation_degrees.x = -90
+				gripmenu.gripmenupointertargetwall.rotation_degrees.z = 0
+				gripmenu.gripmenupointertargetwall.drawingtype = DRAWING_TYPE.DT_FLOORTEXTURE
+				gripmenu.gripmenupointertargetwall.get_node("XCdrawingplane").collision_layer = CollisionLayer.CL_Environment | CollisionLayer.CL_PointerFloor
+		
+			elif pointertarget.get_name() == "SelectXC":
+				var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(gripmenu.gripmenupointertargetwall.xcname0)
+				var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(gripmenu.gripmenupointertargetwall.xcname1)
+				if xcdrawing0.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
+					xcdrawing0.rpc("setxcdrawingvisibility", true)
+					xcdrawing1.rpc("setxcdrawingvisibility", true)
+					if xcdrawing0 != activetargetwall:
+						setactivetargetwall(xcdrawing0)
+					elif xcdrawing1 != activetargetwall:
+						setactivetargetwall(xcdrawing1)
+
+			elif pointertarget.get_name() == "DelXC":
+				print("Not implemented")
+
+			elif pointertarget.get_name() == "NewSlice" and is_instance_valid(activetargettube):
+				var xcdrawing = sketchsystem.newXCuniquedrawing(DRAWING_TYPE.DT_XCDRAWING, sketchsystem.uniqueXCname())
+				var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(activetargettube.xcname0)
+				var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(activetargettube.xcname1)
+				
+				var sliceinitpoint = lerp(gripmenu.gripmenupointertargetwall.global_transform.origin, playernode.get_node("HeadCam").global_transform.origin, 0.5)
+				var v0c = pointertargetpoint - xcdrawing0.global_transform.origin
+				var v1c = pointertargetpoint - xcdrawing1.global_transform.origin
+				v0c.y = 0
+				v1c.y = 0
+				var h0c = abs(xcdrawing0.global_transform.basis.z.dot(v0c))
+				var h1c = abs(xcdrawing1.global_transform.basis.z.dot(v1c))
+				var lam = h0c/(h0c+h1c)
+				print(" dd ", v0c, h0c, v1c, h1c, "  ", lam)
+				if 0.05 < lam and lam < 0.95:
+					var va0c = Vector2(xcdrawing0.global_transform.basis.x.x, xcdrawing0.global_transform.basis.x.z)
+					var va1c = Vector2(xcdrawing1.global_transform.basis.x.x, xcdrawing1.global_transform.basis.x.z)
+					if va1c.dot(va0c) < 0:
+						va1c = -va1c
+					var vang = lerp_angle(va0c.angle(), va1c.angle(), 0.5)
+					var vwallmid = lerp(xcdrawing0.global_transform.origin, xcdrawing1.global_transform.origin, 0.5)
+					xcdrawing.setxcpositionangle(vang)
+					xcdrawing.setxcpositionorigin(vwallmid)
+					sketchsystem.rpc("xcdrawingfromdata", xcdrawing.exportxcrpcdata())
+					setactivetargetwall(xcdrawing)
+					setselectedtarget(null)
+				
+			elif pointertarget.get_name() == "DoSlice":
+				print("Not implemented")
+		
 	elif pointertargettype == "GUIPanel3D":
 		if guipanel3d.visible:
-			guipanel3d.togglevisibility(handright.get_node("LaserOrient").global_transform)
+			guipanel3d.toggleguipanelvisibility(null)
 
 	elif pointertargettype == "XCdrawing" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		clearpointertargetmaterial()
@@ -538,6 +600,9 @@ func buttonreleased_vrgrip():
 		if activetargettube != null:
 			setactivetargettubesector(-2)
 			activetargettube = null
+
+	gripmenu.disableallgripmenus()
+
 		
 func buttonreleased_vrtrigger():
 	if activetargetwallgrabbedtransform != null:

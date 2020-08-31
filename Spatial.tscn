@@ -1,4 +1,4 @@
-[gd_scene load_steps=100 format=2]
+[gd_scene load_steps=117 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/default_env.tres" type="Environment" id=2]
@@ -14,6 +14,7 @@
 [ext_resource path="res://guimeshes/headmesh.tscn" type="PackedScene" id=12]
 [ext_resource path="res://sounds/laser8.wav" type="AudioStream" id=13]
 [ext_resource path="res://GUIPanel3D.gd" type="Script" id=14]
+[ext_resource path="res://GripMenu.gd" type="Script" id=15]
 [ext_resource path="res://guimaterials/laserspike.material" type="Material" id=16]
 [ext_resource path="res://ImageSystem.gd" type="Script" id=17]
 [ext_resource path="res://ARVROrigin.gd" type="Script" id=18]
@@ -23,6 +24,7 @@
 [ext_resource path="res://guimaterials/laserspot.material" type="Material" id=22]
 [ext_resource path="res://guimaterials/lasershadow.material" type="Material" id=23]
 [ext_resource path="res://systems/PlanViewSystem.gd" type="Script" id=24]
+[ext_resource path="res://guimaterials/grip_commands.png" type="Texture" id=25]
 [ext_resource path="res://lightweighttextures/rock_albedo.jpg" type="Texture" id=26]
 [ext_resource path="res://lightweighttextures/simpledirt_highlight.material" type="Material" id=27]
 [ext_resource path="res://lightweighttextures/partialrock.material" type="Material" id=28]
@@ -123,6 +125,89 @@ resource_local_to_scene = true
 flags_unshaded = true
 flags_albedo_tex_force_srgb = true
 albedo_texture = SubResource( 60 )
+
+[sub_resource type="QuadMesh" id=62]
+
+[sub_resource type="SpatialMaterial" id=67]
+albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
+albedo_texture = ExtResource( 25 )
+uv1_scale = Vector3( 1, 0.05, 1 )
+uv1_offset = Vector3( -0.3, 0.003, 0 )
+
+[sub_resource type="BoxShape" id=64]
+extents = Vector3( 0.5, 0.5, 0.02 )
+
+[sub_resource type="SpatialMaterial" id=65]
+albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
+albedo_texture = ExtResource( 25 )
+uv1_scale = Vector3( 1, 0.05, 1 )
+uv1_offset = Vector3( -0.3, 0.053, 0 )
+
+[sub_resource type="SpatialMaterial" id=66]
+albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
+albedo_texture = ExtResource( 25 )
+uv1_scale = Vector3( 1, 0.05, 1 )
+uv1_offset = Vector3( -0.2, 0.103, 0 )
+
+[sub_resource type="SpatialMaterial" id=63]
+albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
+albedo_texture = ExtResource( 25 )
+uv1_scale = Vector3( 1, 0.05, 1 )
+uv1_offset = Vector3( -0.2, 0.353, 0 )
+
+[sub_resource type="SpatialMaterial" id=68]
+albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
+albedo_texture = ExtResource( 25 )
+uv1_scale = Vector3( 1, 0.05, 1 )
+uv1_offset = Vector3( -0.2, 0.403, 0 )
+
+[sub_resource type="SpatialMaterial" id=69]
+albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
+albedo_texture = ExtResource( 25 )
+uv1_scale = Vector3( 1, 0.05, 1 )
+uv1_offset = Vector3( -0.2, 0.453, 0 )
+
+[sub_resource type="SpatialMaterial" id=70]
+albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
+albedo_texture = ExtResource( 25 )
+uv1_scale = Vector3( 1, 0.05, 1 )
+uv1_offset = Vector3( -0.2, 0.503, 0 )
+
+[sub_resource type="SpatialMaterial" id=71]
+albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
+albedo_texture = ExtResource( 25 )
+uv1_scale = Vector3( 1, 0.05, 1 )
+uv1_offset = Vector3( -0.2, 0.603, 0 )
+
+[sub_resource type="SpatialMaterial" id=72]
+albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
+albedo_texture = ExtResource( 25 )
+uv1_scale = Vector3( 1, 0.05, 1 )
+uv1_offset = Vector3( -0.2, 0.553, 0 )
+
+[sub_resource type="SpatialMaterial" id=73]
+albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
+albedo_texture = ExtResource( 25 )
+uv1_scale = Vector3( 1, 0.05, 1 )
+uv1_offset = Vector3( -0.2, 0.153, 0 )
+
+[sub_resource type="SpatialMaterial" id=74]
+albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
+albedo_texture = ExtResource( 25 )
+uv1_scale = Vector3( 1, 0.05, 1 )
+uv1_offset = Vector3( -0.2, 0.203, 0 )
+
+[sub_resource type="SpatialMaterial" id=75]
+albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
+albedo_texture = ExtResource( 25 )
+uv1_scale = Vector3( 1, 0.05, 1 )
+uv1_offset = Vector3( -0.2, 0.253, 0 )
+
+[sub_resource type="SpatialMaterial" id=76]
+albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
+albedo_texture = ExtResource( 25 )
+uv1_scale = Vector3( 1, 0.05, 1 )
+uv1_offset = Vector3( -0.2, 0.303, 0 )
 
 [sub_resource type="QuadMesh" id=15]
 size = Vector2( 1.6, 1 )
@@ -746,6 +831,171 @@ cast_shadow = 0
 mesh = SubResource( 59 )
 material/0 = SubResource( 61 )
 
+[node name="GripMenu" type="Spatial" parent="GuiSystem"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.61731 )
+script = ExtResource( 15 )
+
+[node name="Up5" type="StaticBody" parent="GuiSystem/GripMenu"]
+transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, -0.25, -0.2, 0 )
+collision_layer = 8
+collision_mask = 0
+
+[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/Up5"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0 )
+mesh = SubResource( 62 )
+material/0 = SubResource( 67 )
+
+[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/Up5"]
+shape = SubResource( 64 )
+
+[node name="Down5" type="StaticBody" parent="GuiSystem/GripMenu"]
+transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, 0, -0.2, 0 )
+collision_layer = 8
+collision_mask = 0
+
+[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/Down5"]
+mesh = SubResource( 62 )
+material/0 = SubResource( 65 )
+
+[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/Down5"]
+shape = SubResource( 64 )
+
+[node name="toPaper" type="StaticBody" parent="GuiSystem/GripMenu"]
+transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, 0.25, -0.2, 0 )
+collision_layer = 8
+collision_mask = 0
+
+[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/toPaper"]
+mesh = SubResource( 62 )
+material/0 = SubResource( 66 )
+
+[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/toPaper"]
+shape = SubResource( 64 )
+
+[node name="NewSlice" type="StaticBody" parent="GuiSystem/GripMenu"]
+transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, -0.25, -0.2, 0 )
+collision_layer = 8
+collision_mask = 0
+
+[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/NewSlice"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0 )
+mesh = SubResource( 62 )
+material/0 = SubResource( 63 )
+
+[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/NewSlice"]
+shape = SubResource( 64 )
+
+[node name="DoSlice" type="StaticBody" parent="GuiSystem/GripMenu"]
+transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, 0, -0.2, 0 )
+collision_layer = 8
+collision_mask = 0
+
+[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/DoSlice"]
+mesh = SubResource( 62 )
+material/0 = SubResource( 68 )
+
+[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/DoSlice"]
+shape = SubResource( 64 )
+
+[node name="DelXC" type="StaticBody" parent="GuiSystem/GripMenu"]
+transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, 0.25, -0.2, 0 )
+collision_layer = 8
+collision_mask = 0
+
+[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/DelXC"]
+mesh = SubResource( 62 )
+material/0 = SubResource( 69 )
+
+[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/DelXC"]
+shape = SubResource( 64 )
+
+[node name="SelectXC" type="StaticBody" parent="GuiSystem/GripMenu"]
+transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, -0.25, -0.2, 0 )
+collision_layer = 8
+collision_mask = 0
+
+[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/SelectXC"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0 )
+mesh = SubResource( 62 )
+material/0 = SubResource( 70 )
+
+[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/SelectXC"]
+shape = SubResource( 64 )
+
+[node name="ghost" type="StaticBody" parent="GuiSystem/GripMenu"]
+transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, 0, -0.2, 0 )
+collision_layer = 8
+collision_mask = 0
+
+[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/ghost"]
+mesh = SubResource( 62 )
+material/0 = SubResource( 71 )
+
+[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/ghost"]
+shape = SubResource( 64 )
+
+[node name="FloorTex" type="StaticBody" parent="GuiSystem/GripMenu"]
+transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, 0.25, -0.2, 0 )
+collision_layer = 8
+collision_mask = 0
+
+[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/FloorTex"]
+mesh = SubResource( 62 )
+material/0 = SubResource( 72 )
+
+[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/FloorTex"]
+shape = SubResource( 64 )
+
+[node name="toSolid" type="StaticBody" parent="GuiSystem/GripMenu"]
+transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, -0.25, -0.2, 0 )
+collision_layer = 8
+collision_mask = 0
+
+[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/toSolid"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0 )
+mesh = SubResource( 62 )
+material/0 = SubResource( 73 )
+
+[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/toSolid"]
+shape = SubResource( 64 )
+
+[node name="toGas" type="StaticBody" parent="GuiSystem/GripMenu"]
+transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, -0.25, -0.2, 0 )
+collision_layer = 8
+collision_mask = 0
+
+[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/toGas"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0 )
+mesh = SubResource( 62 )
+material/0 = SubResource( 74 )
+
+[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/toGas"]
+shape = SubResource( 64 )
+
+[node name="toFloor" type="StaticBody" parent="GuiSystem/GripMenu"]
+transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, 0, -0.2, 0 )
+collision_layer = 8
+collision_mask = 0
+
+[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/toFloor"]
+mesh = SubResource( 62 )
+material/0 = SubResource( 75 )
+
+[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/toFloor"]
+shape = SubResource( 64 )
+
+[node name="toBig" type="StaticBody" parent="GuiSystem/GripMenu"]
+transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, 0.25, -0.2, 0 )
+collision_layer = 8
+collision_mask = 0
+
+[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/toBig"]
+mesh = SubResource( 62 )
+material/0 = SubResource( 76 )
+
+[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/toBig"]
+shape = SubResource( 64 )
+
 [node name="SketchSystem" type="Spatial" parent="."]
 script = ExtResource( 10 )
 
@@ -837,7 +1087,7 @@ mesh = SubResource( 27 )
 material/0 = null
 
 [node name="RayCast" type="RayCast" parent="PlanViewSystem/RealPlanCamera/LaserScope/LaserOrient"]
-cast_to = Vector3( 0, 0, -50 )
+cast_to = Vector3( 0, 0, -150 )
 collision_mask = 56
 
 [node name="LaserSpot" type="MeshInstance" parent="PlanViewSystem/RealPlanCamera/LaserScope/LaserOrient"]
