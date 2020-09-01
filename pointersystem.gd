@@ -5,10 +5,10 @@ onready var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
 onready var materialsystem = get_node("/root/Spatial/MaterialSystem")
 onready var gripmenu = get_node("/root/Spatial/GuiSystem/GripMenu")
 
-onready var playernode = get_parent()
-onready var headcam = playernode.get_node('HeadCam')
-onready var handleft = playernode.get_node("HandLeft")
-onready var handright = playernode.get_node("HandRight")
+onready var playerMe = get_parent()
+onready var headcam = playerMe.get_node('HeadCam')
+onready var handleft = playerMe.get_node("HandLeft")
+onready var handright = playerMe.get_node("HandRight")
 onready var guipanel3d = get_node("/root/Spatial/GuiSystem/GUIPanel3D")
 
 onready var LaserOrient = handright.get_node("LaserOrient") 
@@ -517,7 +517,7 @@ func buttonreleased_vrgrip():
 			print("executing ", pointertarget.get_name(), " on ", gripmenu.gripmenupointertargetwall.get_name())
 			if pointertarget.get_name() == "Up5":
 				gripmenu.gripmenupointertargetwall.global_transform.origin.y += 5
-				playernode.global_transform.origin.y = max(playernode.global_transform.origin.y, gripmenu.gripmenupointertargetwall.global_transform.origin.y)
+				playerMe.global_transform.origin.y = max(playerMe.global_transform.origin.y, gripmenu.gripmenupointertargetwall.global_transform.origin.y)
 			elif pointertarget.get_name() == "Down5":
 				gripmenu.gripmenupointertargetwall.global_transform.origin.y -= 5
 			elif pointertarget.get_name() == "toPaper":
@@ -553,7 +553,7 @@ func buttonreleased_vrgrip():
 				var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(activetargettube.xcname0)
 				var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(activetargettube.xcname1)
 				
-				var sliceinitpoint = lerp(gripmenu.gripmenupointertargetwall.global_transform.origin, playernode.get_node("HeadCam").global_transform.origin, 0.5)
+				var sliceinitpoint = lerp(gripmenu.gripmenupointertargetwall.global_transform.origin, playerMe.get_node("HeadCam").global_transform.origin, 0.5)
 				var v0c = pointertargetpoint - xcdrawing0.global_transform.origin
 				var v1c = pointertargetpoint - xcdrawing1.global_transform.origin
 				v0c.y = 0
@@ -656,13 +656,13 @@ func buttonreleased_vrtrigger():
 		sketchsystem.rpc("xcdrawingfromdata", xcdrawing.exportxcrpcdata())
 						
 func _physics_process(_delta):
-	if playernode.arvrinterface == null:
+	if playerMe.arvrinterface == null:
 		var mvec = headcam.global_transform.basis.xform(mousecontrollervec)
 		handright.global_transform.origin = headcam.global_transform.origin + mvec
 		handright.look_at(handright.global_transform.origin + 1.0*mvec + 0.0*headcam.global_transform.basis.z, Vector3(0,1,0))
 		handright.global_transform.origin.y -= 0.3
 		
-	if playernode.VRstatus != "quest":
+	if playerMe.VRstatus != "quest":
 		var firstlasertarget = LaserOrient.get_node("RayCast").get_collider() if LaserOrient.get_node("RayCast").is_colliding() and not LaserOrient.get_node("RayCast").get_collider().is_queued_for_deletion() else null
 		pointerplanviewtarget = planviewsystem if firstlasertarget != null and firstlasertarget.get_name() == "PlanView" and planviewsystem.checkplanviewinfront(handright) else null
 		if pointerplanviewtarget != null:
@@ -692,7 +692,7 @@ func _physics_process(_delta):
 var rightmousebuttonheld = false
 func _input(event):
 	if event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
-		if playernode.arvrinterface == null or playernode.arvrinterface.get_tracking_status() == ARVRInterface.ARVR_NOT_TRACKING:
+		if playerMe.arvrinterface == null or playerMe.arvrinterface.get_tracking_status() == ARVRInterface.ARVR_NOT_TRACKING:
 			var rhvec = mousecontrollervec + Vector3(event.relative.x, -event.relative.y, 0)*0.002
 			rhvec.x = clamp(rhvec.x, -0.4, 0.4)
 			rhvec.y = clamp(rhvec.y, -0.3, 0.6)

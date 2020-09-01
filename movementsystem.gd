@@ -1,13 +1,13 @@
 extends Node
 
-onready var playernode = get_parent()
-onready var headcam = playernode.get_node('HeadCam')
-onready var handleft = playernode.get_node("HandLeft")
-onready var handright = playernode.get_node("HandRight")
+onready var playerMe = get_parent()
+onready var headcam = playerMe.get_node('HeadCam')
+onready var handleft = playerMe.get_node("HandLeft")
+onready var handright = playerMe.get_node("HandRight")
 
-onready var kinematic_body: KinematicBody = playernode.get_node("KinematicBody")
-onready var collision_shape: CollisionShape = playernode.get_node("KinematicBody/CollisionShape")
-onready var tail : RayCast = playernode.get_node("KinematicBody/Tail")
+onready var kinematic_body: KinematicBody = playerMe.get_node("KinematicBody")
+onready var collision_shape: CollisionShape = playerMe.get_node("KinematicBody/CollisionShape")
+onready var tail : RayCast = playerMe.get_node("KinematicBody/Tail")
 onready var world_scale = ARVRServer.world_scale
 
 var player_radius = 0.25
@@ -70,7 +70,7 @@ func _on_button_release(p_button):
 			print("COMPRESSION_DEFLATE ", recording.get_data().compress(File.COMPRESSION_DEFLATE).size())
 			print("COMPRESSION_ZSTD ", recording.get_data().compress(File.COMPRESSION_ZSTD).size())
 			print("COMPRESSION_GZIP ", recording.get_data().compress(File.COMPRESSION_GZIP).size())
-			playernode.rpc("playvoicerecording", recording.get_data())
+			playerMe.rpc("playvoicerecording", recording.get_data())
 
 	if p_button == BUTTONS.VR_GRIP:
 		handleft.get_node("csghandleft").setpartcolor(4, "#FFFFFF")
@@ -106,12 +106,12 @@ func _physics_process(delta):
 	#print(get_viewport().get_mouse_position(), Input.get_mouse_mode())
 	var left_right = handleft.get_joystick_axis(0) if handleft.get_is_active() else 0.0
 	var forwards_backwards = handleft.get_joystick_axis(1) if handleft.get_is_active() else 0.0
-	if playernode.VRstatus == "quest":
+	if playerMe.VRstatus == "quest":
 		left_right = 0
 		forwards_backwards = 0
 		handleft.visible = true
 	else:
-		handleft.visible = playernode.arvrinterface != null and handleft.get_is_active()
+		handleft.visible = playerMe.arvrinterface != null and handleft.get_is_active()
 		if handleft.get_node("TipTouchRay").is_colliding() != handright.get_node("LaserOrient/MeshDial").visible:
 			handright.get_node("LaserOrient/MeshDial").visible = handleft.get_node("TipTouchRay").is_colliding()
 			handleft.get_node("csghandleft").setpartcolor(2, Color("222277") if handleft.get_node("TipTouchRay").is_colliding() else Color("#FFFFFF"))
@@ -123,7 +123,7 @@ func _physics_process(delta):
 		t1.origin = -headcam.transform.origin
 		t2.origin = headcam.transform.origin
 		rot = rot.rotated(Vector3(0.0, -1, 0.0), deg2rad(nextphysicsrotatestep))
-		playernode.transform *= t2 * rot * t1
+		playerMe.transform *= t2 * rot * t1
 		nextphysicsrotatestep = 0.0
 	
 	var lhkeyvec = Vector2(0, 0)
@@ -139,11 +139,11 @@ func _physics_process(delta):
 		forwards_backwards += 0.6*lhkeyvec.y*60*delta
 		left_right += -0.6*lhkeyvec.x*60*delta
 		
-	if playernode.arvrinterface == null:
+	if playerMe.arvrinterface == null:
 		if Input.is_action_pressed("lh_shift") and lhkeyvec != Vector2(0,0):
 			var vtarget = -headcam.global_transform.basis.z*20 + headcam.global_transform.basis.x*lhkeyvec.x*15*delta + Vector3(0, lhkeyvec.y, 0)*15*delta
 			headcam.look_at(headcam.global_transform.origin + vtarget, Vector3(0,1,0))
-			playernode.rotation_degrees.y += headcam.rotation_degrees.y
+			playerMe.rotation_degrees.y += headcam.rotation_degrees.y
 			headcam.rotation_degrees.y = 0
 		
 	if laserangleadjustmode and handleft.is_button_pressed(BUTTONS.VR_GRIP):
@@ -170,13 +170,13 @@ func _physics_process(delta):
 			velocity = kinematic_body.move_and_slide(velocity)
 			var movement = (kinematic_body.global_transform.origin - curr_transform.origin)
 			kinematic_body.global_transform.origin = curr_transform.origin
-			playernode.global_transform.origin += movement
+			playerMe.global_transform.origin += movement
 	
 	else:
 		var curr_transform = kinematic_body.global_transform
 		var camera_transform = headcam.global_transform
 		curr_transform.origin = camera_transform.origin
-		curr_transform.origin.y = playernode.global_transform.origin.y
+		curr_transform.origin.y = playerMe.global_transform.origin.y
 		
 		# now we move it slightly back
 		var forward_dir = -camera_transform.basis.z
@@ -209,22 +209,22 @@ func _physics_process(delta):
 		
 		# now use our new position to move our origin point
 		var movement = (kinematic_body.global_transform.origin - curr_transform.origin)
-		playernode.global_transform.origin += movement
+		playerMe.global_transform.origin += movement
 		
 		# Return this back to where it was so we can use its collision shape for other things too
 		kinematic_body.global_transform.origin = curr_transform.origin
 
-	var doppelganger = playernode.doppelganger
+	var doppelganger = playerMe.doppelganger
 	if is_inside_tree() and is_instance_valid(doppelganger):
-		var positiondict = playernode.playerpositiondict()
+		var positiondict = playerMe.playerpositiondict()
 		positiondict["playertransform"] = Transform(Basis(-positiondict["playertransform"].basis.x, positiondict["playertransform"].basis.y, -positiondict["playertransform"].basis.z), 
 													Vector3(doppelganger.global_transform.origin.x, positiondict["playertransform"].origin.y, doppelganger.global_transform.origin.z))
-		if playernode.bouncetestnetworkID != 0:
-			playernode.rpc_unreliable_id(playernode.bouncetestnetworkID, "bouncedoppelgangerposition", playernode.networkID, positiondict)
+		if playerMe.bouncetestnetworkID != 0:
+			playerMe.rpc_unreliable_id(playerMe.bouncetestnetworkID, "bouncedoppelgangerposition", playerMe.networkID, positiondict)
 		else:
 			doppelganger.setavatarposition(positiondict)
 
-	if playernode.connectiontoserveractive:
-		playernode.rpc_unreliable("setavatarposition", playernode.playerpositiondict())
+	if playerMe.connectiontoserveractive:
+		playerMe.rpc_unreliable("setavatarposition", playerMe.playerpositiondict())
 	
 
