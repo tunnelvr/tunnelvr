@@ -5,6 +5,8 @@ extends Spatial
 
 # should give the other player a position near to me:  $SketchSystem.rpc_id(id, "sketchsystemfromdict", $SketchSystem.sketchsystemtodict())
 		
+# * LabelGenerator should sort by distance proximity of headcam first.  Make the default label width smaller and make unique before setting its width
+		
 # * needs to be locked down when in this moving tube mode (or kill off this slice if you drop it)		
 # * NewSlice should only happen with a selected tube
 # * New slice should only allow moving (no drawing) (drag up move closer) within the tube

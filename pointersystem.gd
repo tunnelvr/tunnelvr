@@ -440,10 +440,11 @@ func buttonreleased_vrgrip():
 		if is_instance_valid(gripmenu.gripmenupointertargetwall):
 			print("executing ", pointertarget.get_name(), " on ", gripmenu.gripmenupointertargetwall.get_name())
 			if pointertarget.get_name() == "Up5":
-				gripmenu.gripmenupointertargetwall.global_transform.origin.y += 5
+				gripmenu.gripmenupointertargetwall.global_transform.origin.y += 1
 				playerMe.global_transform.origin.y = max(playerMe.global_transform.origin.y, gripmenu.gripmenupointertargetwall.global_transform.origin.y)
 			elif pointertarget.get_name() == "Down5":
-				gripmenu.gripmenupointertargetwall.global_transform.origin.y -= 5
+				gripmenu.gripmenupointertargetwall.global_transform.origin.y -= 1
+				gripmenu.gripmenupointertargetwall.global_transform.origin.y = max(gripmenu.gripmenupointertargetwall.global_transform.origin.y, get_node("/root/Spatial/underfloor").global_transform.origin.y + 0.5)
 			elif pointertarget.get_name() == "toPaper":
 				gripmenu.gripmenupointertargetwall.drawingtype = DRAWING_TYPE.DT_PAPERTEXTURE
 				gripmenu.gripmenupointertargetwall.get_node("XCdrawingplane").collision_layer = CollisionLayer.CL_Pointer
@@ -455,6 +456,8 @@ func buttonreleased_vrgrip():
 					gripmenu.gripmenupointertargetwall.get_node("XCdrawingplane").scale.y *= fs
 				gripmenu.gripmenupointertargetwall.rotation_degrees.x = -90
 				gripmenu.gripmenupointertargetwall.rotation_degrees.z = 0
+				playerMe.global_transform.origin.y += 1
+				gripmenu.gripmenupointertargetwall.global_transform.origin.y = playerMe.global_transform.origin.y
 				gripmenu.gripmenupointertargetwall.drawingtype = DRAWING_TYPE.DT_FLOORTEXTURE
 				gripmenu.gripmenupointertargetwall.get_node("XCdrawingplane").collision_layer = CollisionLayer.CL_Environment | CollisionLayer.CL_PointerFloor
 		

@@ -3,13 +3,25 @@ extends Node
 	
 var imgdir = "user://northernimages/"
 var urldir = "http://cave-registry.org.uk/svn/NorthernEngland/ThreeCountiesArea/rawscans/Ireby/"
-var imglist = ["BoltonExtensionsResurvey-DrawnUpSketch-1.jpg", 
-			   "DukeStResurvey-drawnup-p1.jpg", 
-			   "DukeStResurvey-drawnup-p2.jpg", 
-			   "DukeStResurvey-drawnup-p3.jpg", 
-			   "DukeStParallelSidePassage-DrawnUp1.jpg",
-			   "DukeStParallelSidePassage-DrawnUp2.jpg"
-			]
+var imglistD = [ "BoltonExtensionsResurvey-DrawnUpSketch-1.jpg", 
+				"DukeStResurvey-drawnup-p1.jpg", 
+				"DukeStResurvey-drawnup-p2.jpg", 
+				"DukeStResurvey-drawnup-p3.jpg", 
+				"DukeStParallelSidePassage-DrawnUp1.jpg",
+				"DukeStParallelSidePassage-DrawnUp2.jpg"
+			   ]
+				
+var imglist = [ "DukeSt2sanddig.jpg",
+				"Canal2-drawnup.jpg",
+				"dukest2tocanal-drawnup.jpg",
+				"WhirlpoolCrawl-drawnup-p1.jpg",
+				"escalatorclimb-drawnup-1.jpg",
+				"DukeSt2inletsump.jpg",
+				"IrebyII.jpg",
+				"DukeSt2-TidyUp-P3.jpg",
+				"jupiter2irebyone_5.jpg",
+				"jupiter2irebyone_4.jpg"
+			  ]
 var paperwidth = 0.4
 
 func getshortimagename(xcresource, withextension):

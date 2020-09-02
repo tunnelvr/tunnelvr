@@ -13,6 +13,7 @@ material = SubResource( 2 )
 size = Vector3( 0.2, 0.2, 0.2 )
 
 [sub_resource type="QuadMesh" id=4]
+resource_local_to_scene = true
 size = Vector2( 3.8, 0.6 )
 
 [sub_resource type="Shader" id=5]
