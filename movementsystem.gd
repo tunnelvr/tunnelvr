@@ -33,10 +33,9 @@ onready var audiobusrecordeffect = AudioServer.get_bus_effect(AudioServer.get_bu
 
 func _on_button_pressed(p_button):
 	if p_button == BUTTONS.VR_PAD:
-		var left_right = handleft.get_joystick_axis(0)
-		var up_down = handleft.get_joystick_axis(1)
-		if abs(up_down) < 0.5 and abs(left_right) > 0.1:
-			nextphysicsrotatestep += (1 if left_right > 0 else -1)*(22.5 if abs(left_right) > 0.8 else 90.0)
+		var joypos = Vector2(handleft.get_joystick_axis(0), handleft.get_joystick_axis(1))
+		if abs(joypos.y) < 0.5 and abs(joypos.x) > 0.1:
+			nextphysicsrotatestep += (1 if joypos.x > 0 else -1)*(22.5 if abs(joypos.x) > 0.8 else 90.0)
 
 	laserangleadjustmode = (p_button == BUTTONS.VR_GRIP) and handleft.get_node("TipTouchRay").is_colliding() and handleft.get_node("TipTouchRay").get_collider() == handright.get_node("HeelHotspot")
 	if laserangleadjustmode:
@@ -104,11 +103,9 @@ func _physics_process(delta):
 	collision_shape.shape.height = player_height - (player_radius * 2.0)
 	collision_shape.transform.origin.y = (player_height / 2.0)
 	#print(get_viewport().get_mouse_position(), Input.get_mouse_mode())
-	var left_right = handleft.get_joystick_axis(0) if handleft.get_is_active() else 0.0
-	var forwards_backwards = handleft.get_joystick_axis(1) if handleft.get_is_active() else 0.0
+	var joypos = Vector2(handleft.get_joystick_axis(0), handleft.get_joystick_axis(1)) if handleft.get_is_active() else Vector2(0.0, 0.0)
 	if playerMe.VRstatus == "quest":
-		left_right = 0
-		forwards_backwards = 0
+		joypos = Vector2(0.0, 0.0)
 		handleft.visible = true
 	else:
 		handleft.visible = playerMe.arvrinterface != null and handleft.get_is_active()
@@ -132,12 +129,11 @@ func _physics_process(delta):
 	if Input.is_action_pressed("lh_backward"):
 		lhkeyvec.y += -1
 	if Input.is_action_pressed("lh_left"):
-		lhkeyvec.x += 1
-	if Input.is_action_pressed("lh_right"):
 		lhkeyvec.x += -1
+	if Input.is_action_pressed("lh_right"):
+		lhkeyvec.x += 1
 	if not Input.is_action_pressed("lh_shift"):
-		forwards_backwards += 0.6*lhkeyvec.y*60*delta
-		left_right += -0.6*lhkeyvec.x*60*delta
+		joypos += 0.6*60*delta*lhkeyvec
 		
 	if playerMe.arvrinterface == null:
 		if Input.is_action_pressed("lh_shift") and lhkeyvec != Vector2(0,0):
@@ -162,7 +158,7 @@ func _physics_process(delta):
 		if handleft.is_button_pressed(BUTTONS.VR_TRIGGER) or Input.is_action_pressed("lh_forward") or Input.is_action_pressed("lh_backward"):
 			var curr_transform = kinematic_body.global_transform
 			var flydir = handleft.global_transform.basis.z if handleft.get_is_active() else headcam.global_transform.basis.z
-			if forwards_backwards < -0.5:
+			if joypos.y < -0.5:
 				flydir = -flydir
 			velocity = flydir.normalized() * -delta * flyspeed * world_scale
 			if handleft.is_button_pressed(BUTTONS.VR_PAD):
@@ -193,10 +189,10 @@ func _physics_process(delta):
 		# Apply our drag
 		velocity *= (1.0 - drag_factor)
 		
-		if (abs(forwards_backwards) > 0.1 and tail.is_colliding()):
+		if (abs(joypos.y) > 0.1 and tail.is_colliding()):
 			var dir = camera_transform.basis.z
 			dir.y = 0.0					
-			velocity = dir.normalized() * -forwards_backwards * delta * walkspeed * world_scale
+			velocity = dir.normalized() * (-joypos.y * delta * walkspeed * world_scale)
 			#velocity = velocity.linear_interpolate(dir, delta * 100.0)		
 		
 		# apply move and slide to our kinematic body

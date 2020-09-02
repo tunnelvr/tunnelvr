@@ -6,6 +6,7 @@ const XCtube = preload("res://nodescenes/XCtube.tscn")
 const linewidth = 0.05
 var tubeshellsvisible = false
 var centrelineonlymode = false
+var centrelinevisible = false
 const defaultfloordrawing = "http://cave-registry.org.uk/svn/NorthernEngland/ThreeCountiesArea/rawscans/Ireby/DukeStResurvey-drawnup-p3.jpg"
 
 func _ready():
@@ -13,8 +14,8 @@ func _ready():
 	get_node("/root/Spatial/ImageSystem").fetchpaperdrawing(floordrawing)
 
 	#loadcentrelinefile("res://surveyscans/dukest1resurvey2009.json")
-	#loadcentrelinefile("res://surveyscans/dukest1resurvey2009json.res")
-	loadcentrelinefile("res://surveyscans/Ireby/Ireby2/Ireby2.json")
+	loadcentrelinefile("res://surveyscans/dukest1resurvey2009json.res")
+	#loadcentrelinefile("res://surveyscans/Ireby/Ireby2/Ireby2.json")
 	
 func xcapplyonepath(xcn0, xcn1): 
 	var xcdrawing0 = xcn0.get_parent().get_parent()
@@ -82,10 +83,15 @@ remotesync func updateworkingshell(makevisible):
 		if xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 			xcdrawing.updatexctubeshell($XCdrawings, makevisible)
 
-remotesync func changecentrelineonlymode(lcentrelineonlymode):
+func changecentrelineonlymode(lcentrelineonlymode):
 	centrelineonlymode = lcentrelineonlymode
 	get_tree().call_group("gpnoncentrelinegeo", "xcdfullsetvisibilitycollision", not centrelineonlymode)
 	get_node("/root/Spatial/PlanViewSystem").updatecentrelinesizes()
+
+func changecentrevisiblemode(lcentrelinevisible):
+	centrelinevisible = lcentrelinevisible
+	for centrelinexcdrawing in get_tree().get_nodes_in_group("gpcentrelinegeo"):
+		get_node("/root/Spatial/LabelGenerator").makenodelabelstask(centrelinexcdrawing, false, centrelinevisible)
 
 # Quick saving and loading of shape.  It goes to 
 # C:\Users\ViveOne\AppData\Roaming\Godot\app_userdata\digtunnel
@@ -96,33 +102,20 @@ func sketchsystemtodict():
 	var xctubesData = [ ]
 	for xctube in $XCtubes.get_children():
 		xctubesData.append(xctube.exportxctrpcdata())
-	var save_dict = { "xcdrawings":xcdrawingsData,
-					  "xctubes":xctubesData }
-	return save_dict
+	var sketchdatadict = { "xcdrawings":xcdrawingsData,
+						   "xctubes":xctubesData,
+						   "tubeshellsvisible":tubeshellsvisible }
+	return sketchdatadict
 	
 func savesketchsystem():
-	var save_dict = sketchsystemtodict()
+	var sketchdatadict = sketchsystemtodict()
 	var fname = "user://savegame.save"
-	var save_game = File.new()
-	save_game.open(fname, File.WRITE)
-	#save_game.store_line(to_json(save_dict))
-	save_game.store_var(save_dict)
-	save_game.close()
+	var sketchdatafile = File.new()
+	sketchdatafile.open(fname, File.WRITE)
+	sketchdatafile.store_var(sketchdatadict)
+	sketchdatafile.close()
 	print("sssssaved")
 
-func clearsketchsystem():
-	get_node("/root/Spatial/LabelGenerator").clearlabellingprocess()
-	var pointersystem = get_node("/root/Spatial").playerMe.get_node("pointersystem")
-	pointersystem.setselectedtarget(null)  # clear all the objects before they are freed
-	pointersystem.pointertarget = null
-	pointersystem.pointertargettype = "none"
-	pointersystem.pointertargetwall = null
-	pointersystem.activetargetwall = null
-	pointersystem.activetargetwallgrabbedtransform = null
-	for xcdrawing in $XCdrawings.get_children():
-		xcdrawing.free()
-	for xctube in $XCtubes.get_children():
-		xctube.free()
 
 func getactivefloordrawing():
 	var floordrawing = $XCdrawings.get_child(0)  # only one here for now
@@ -141,7 +134,7 @@ func loadcentrelinefile(centrelinefile):
 	var centrelinedata = parse_json(centrelinedatafile.get_line())
 	centrelinedrawing.importcentrelinedata(centrelinedata, self)
 	#var xsectgps = centrelinedata.xsectgps
-	get_node("/root/Spatial/LabelGenerator").makenodelabelstask(centrelinedrawing)
+	get_node("/root/Spatial/LabelGenerator").makenodelabelstask(centrelinedrawing, true, centrelinevisible)
 	print("default lllloaded")
 
 remote func xcdrawingfromdata(xcdata):
@@ -156,16 +149,29 @@ remote func xcdrawingfromdata(xcdata):
 	if xcdrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE or xcdrawing.drawingtype == DRAWING_TYPE.DT_PAPERTEXTURE:
 		get_node("/root/Spatial/ImageSystem").fetchpaperdrawing(xcdrawing)
 	if xcdrawing.drawingtype == DRAWING_TYPE.DT_CENTRELINE:
-		get_node("/root/Spatial/LabelGenerator").makenodelabelstask(xcdrawing)
+		assert (false)   # shouldn't happen, not to be updated!
+		get_node("/root/Spatial/LabelGenerator").makenodelabelstask(xcdrawing, true, centrelinevisible)
 	
-remotesync func sketchsystemfromdict(save_dict):
-	clearsketchsystem()
-	var xcdrawingsData = save_dict["xcdrawings"]
-	var xctubesData = save_dict["xctubes"]
+remote func sketchsystemfromdict(sketchdatadict):
+	get_node("/root/Spatial").clearallprocessactivityforreload()
+	var xcdrawings_old = $XCdrawings
+	xcdrawings_old.set_name("XCdrawings_old")
+	for x in xcdrawings_old.get_children():
+		x.queue_free()   # because it's not transitive (should file a ticket)
+	xcdrawings_old.queue_free()
+	var xcdrawings_new = Spatial.new()
+	xcdrawings_new.set_name("XCdrawings")
+	add_child(xcdrawings_new)
+	var xctubes_old = $XCtubes
+	xctubes_old.set_name("XCtubes_old")
+	for x in xctubes_old.get_children():
+		x.queue_free()
+	xctubes_old.queue_free()
+	var xctubes_new = Spatial.new()
+	xctubes_new.set_name("XCtubes")
+	add_child(xctubes_new)
 	
-	for i in range(len(xcdrawingsData)):
-		var xcdrawingData = xcdrawingsData[i]
-		#print("iiii", xcdrawingData)
+	for xcdrawingData in sketchdatadict["xcdrawings"]:
 		var xcdrawing = null
 		if xcdrawingData["drawingtype"] == DRAWING_TYPE.DT_FLOORTEXTURE or xcdrawingData["drawingtype"] == DRAWING_TYPE.DT_PAPERTEXTURE:
 			xcdrawing = newXCuniquedrawingPaper(xcdrawingData["xcresource"], xcdrawingData["drawingtype"])
@@ -178,21 +184,22 @@ remotesync func sketchsystemfromdict(save_dict):
 			xcdrawing.get_node("XCdrawingplane/CollisionShape").disabled = true
 			xcdrawing.mergexcrpcdata(xcdrawingData)
 			if xcdrawing.drawingtype == DRAWING_TYPE.DT_CENTRELINE:
-				get_node("/root/Spatial/LabelGenerator").makenodelabelstask(xcdrawing)
+				get_node("/root/Spatial/LabelGenerator").makenodelabelstask(xcdrawing, true, centrelinevisible)
 		assert (xcdrawing.get_name() == xcdrawingData["name"])
 
-	for i in range(len(xctubesData)):
-		var xctube = xctubefromdata(xctubesData[i])
+	for xctdata in sketchdatadict["xctubes"]:
+		var xctube = xctubefromdata(xctdata)
+	updateworkingshell(sketchdatadict.get("tubeshellsvisible", tubeshellsvisible))
 	print("lllloaded")
 
-func loadsketchsystem():
-	var fname = "user://savegame.save"
-	var save_game = File.new()
-	save_game.open(fname, File.READ)
-	#var save_dict = parse_json(save_game.get_line())
-	var save_dict = save_game.get_var()
-	save_game.close()
-	rpc("sketchsystemfromdict", save_dict)
+func loadsketchsystem(fname):
+	var sketchdatafile = File.new()
+	sketchdatafile.open(fname, File.READ)
+	var sketchdatadict = sketchdatafile.get_var()
+	sketchdatafile.close()
+	if get_node("/root/Spatial").playerMe.connectiontoserveractive:
+		rpc("sketchsystemfromdict", sketchdatadict)
+	sketchsystemfromdict(sketchdatadict)
 
 func uniqueXCname():
 	var largestxcdrawingnumber = 0

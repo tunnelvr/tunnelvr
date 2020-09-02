@@ -6,18 +6,22 @@ var workingxcnode = null
 
 const textlabelcountdowntime = 0.2
 var textlabelcountdowntimer = 0.0
+var centrelinevisible = false
 
-func makenodelabelstask(centrelinedrawing):
-	remainingxcnodes += centrelinedrawing.get_node("XCnodes").get_children()
-	$ViewportForceRender.visible = true
-	set_process(true)
-
-func clearlabellingprocess():
-	set_process(false)
-	workingxcnode = null
-	remainingxcnodes.clear()
+func makenodelabelstask(centrelinedrawing, addtolabelgeneratingtask, lcentrelinevisible):
+	centrelinevisible = lcentrelinevisible
+	for xcn in centrelinedrawing.get_node("XCnodes").get_children():
+		xcn.get_node("Quad").visible = centrelinevisible
+		if addtolabelgeneratingtask:
+			remainingxcnodes.append(xcn)
+	centrelinedrawing.get_node("PathLines").visible = centrelinevisible
+	$ViewportForceRender.visible = centrelinevisible
+	set_process(centrelinevisible)
 
 func _process(delta):
+	if not centrelinevisible:
+		set_process(false)
+		return
 	if workingxcnode == null:
 		if len(remainingxcnodes) == 0:
 			set_process(false)

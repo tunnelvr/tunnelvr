@@ -2,17 +2,17 @@ extends Spatial
 
 # Stuff to do:
 
-# * loading files puts all the xcsections in the right place (and fills in the tubes if they should)
 
-# * use joypos instead of left_right stuff
-
-# * NewSlice should be between me and the targetted XCsection
+# should give the other player a position near to me:  $SketchSystem.rpc_id(id, "sketchsystemfromdict", $SketchSystem.sketchsystemtodict())
+		
+# * needs to be locked down when in this moving tube mode (or kill off this slice if you drop it)		
 # * NewSlice should only happen with a selected tube
 # * New slice should only allow moving (no drawing) (drag up move closer) within the tube
 
 # * Do Slice should preserve the material sectors
-
 # * Remove all the old slicing and XC dublication code
+
+# * copy tubeshellsvisible down to the GUID on startup of GUID
 
 # * How is it going to work from planview?
 # * a gripclick inserts a new XC in the tube that we can orient and move before applying the slice
@@ -22,7 +22,6 @@ extends Spatial
 # * Make a blank XCdrawing in a selected tube and be able to move it around in the vertical plane.  
 # * This then locks and slices the tube.  (keep tube directions same and maintain the sector values)
 
-# * if tubeshells is on then they must get made!
 # * save and load puts saves my standing position
 
 # * abolish duplicating xc drawing mode
@@ -283,5 +282,21 @@ func _process(_delta):
 		ovr_performance.set_clock_levels(1, 1)
 		ovr_performance.set_extra_latency_mode(1)
 		perform_runtime_config = true
+		set_process(false)
+
+func clearallprocessactivityforreload():
+	$LabelGenerator.workingxcnode = null
+	$LabelGenerator.remainingxcnodes.clear()
+	$ImageSystem.fetcheddrawing = null
+	$ImageSystem.paperdrawinglist.clear()
+
+	var pointersystem = playerMe.get_node("pointersystem")
+	pointersystem.setselectedtarget(null)  # clear all the objects before they are freed
+	#pointersystem.clearpointertargetmaterial()
+	pointersystem.pointertarget = null
+	pointersystem.pointertargettype = "none"
+	pointersystem.pointertargetwall = null
+	pointersystem.activetargetwall = null
+	pointersystem.activetargetwallgrabbedtransform = null
 
 

@@ -180,7 +180,14 @@ func setopnpos(opn, p):
 	opn.global_transform.origin = p
 		
 func onpointing(laserroot):
-	var newpointertarget = laserroot.get_node("RayCast").get_collider() if laserroot.get_node("RayCast").is_colliding() and not laserroot.get_node("RayCast").get_collider().is_queued_for_deletion() else null
+	var newpointertarget = laserroot.get_node("RayCast").get_collider()
+	if newpointertarget != null:
+		if newpointertarget.is_queued_for_deletion():
+			newpointertarget = null
+		elif newpointertarget.get_parent().is_queued_for_deletion():
+			newpointertarget = null
+		elif newpointertarget.get_parent().get_parent().is_queued_for_deletion():
+			newpointertarget = null
 	var newpointertargetpoint = laserroot.get_node("RayCast").get_collision_point() if newpointertarget != null else null
 	if newpointertarget != pointertarget:
 		if pointertarget == guipanel3d:
@@ -300,90 +307,7 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 		recselectedtargetwall.removexcnode(recselectedtarget, false, sketchsystem)
 		sketchsystem.get_node("SoundPos2").global_transform.origin = pointertargetpoint
 		sketchsystem.get_node("SoundPos2").play()
-
-	# duplication of XCdrawing (in special cases)
-	elif gripbuttonheld and selectedtargetwall != null and selectedtargettype == "XCnode" and selectedtargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE and pointertargettype == "XCnode" and selectedtargetwall == pointertargetwall:
-		var xcdrawingtocopy = null
-		var xcdrawingtocopynodelink = null
-		var btargetclear = true
-		for xctube in selectedtargetwall.xctubesconn:
-			if sketchsystem.get_node("XCdrawings").get_node(xctube.xcname1).drawingtype == DRAWING_TYPE.DT_XCDRAWING:
-				if xctube.xcdrawinglink.slice(0, len(xctube.xcdrawinglink), 2).has(pointertarget.get_name()):
-					btargetclear = false
-				for i in range(0, len(xctube.xcdrawinglink), 2):
-					#if xctube.xcdrawinglink.slice(1, len(xctube.xcdrawinglink), 2).has(selectedtarget.get_name()):
-					if xctube.xcdrawinglink[i] == selectedtarget.get_name():
-						xcdrawingtocopy = sketchsystem.get_node("XCdrawings").get_node(xctube.xcname1)
-						xcdrawingtocopynodelink = xctube.xcdrawinglink[i+1]
-						break
-		if btargetclear and xcdrawingtocopy != null:
-			print("making new copied drawing¬!!!!")
-			var xcdrawing = xcdrawingtocopy.duplicatexcdrawing(sketchsystem)
-			var vline = pointertargetpoint - selectedtarget.global_transform.origin
-			var drawingwallangle = Vector2(vline.z, -vline.x).angle()
-			if vline.dot(xcdrawing.global_transform.basis.z) < 0:
-				drawingwallangle = Vector2(-vline.z, vline.x).angle()
-			xcdrawing.setxcpositionangle(drawingwallangle)
-			xcdrawing.setxcpositionorigin(pointertargetpoint)
-			sketchsystem.rpc("xcdrawingfromdata", xcdrawing.exportxcrpcdata())
-			sketchsystem.xcapplyonepath(xcdrawing.get_node("XCnodes").get_node(xcdrawingtocopynodelink), pointertarget)
-			sketchsystem.xcapplyonepath(xcdrawingtocopy.get_node("XCnodes").get_node(xcdrawingtocopynodelink), xcdrawing.get_node("XCnodes").get_node(xcdrawingtocopynodelink))
-			setactivetargetwall(xcdrawing)
-		setselectedtarget(pointertarget)
 	
-	# new XCintersecting in tube case
-	elif gripbuttonheld and selectedtargettype == "XCnode" and pointertargettype == "XCtube" and (selectedtargetwall.get_name() == pointertargetwall.xcname0 or selectedtargetwall.get_name() == pointertargetwall.xcname1):
-		var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(pointertargetwall.xcname0)
-		var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(pointertargetwall.xcname1)
-		var v0c = pointertargetpoint - xcdrawing0.global_transform.origin
-		var v1c = pointertargetpoint - xcdrawing1.global_transform.origin
-		v0c.y = 0
-		v1c.y = 0
-		var h0c = abs(xcdrawing0.global_transform.basis.z.dot(v0c))
-		var h1c = abs(xcdrawing1.global_transform.basis.z.dot(v1c))
-		var lam = h0c/(h0c+h1c)
-		print(" dd ", v0c, h0c, v1c, h1c, "  ", lam)
-		if 0.1 < lam and lam < 0.9:
-			var va0c = Vector2(xcdrawing0.global_transform.basis.x.x, xcdrawing0.global_transform.basis.x.z)
-			var va1c = Vector2(xcdrawing1.global_transform.basis.x.x, xcdrawing1.global_transform.basis.x.z)
-			if va1c.dot(va0c) < 0:
-				va1c = -va1c
-			var vang = lerp_angle(va0c.angle(), va1c.angle(), lam)				
-			var vwallmid = lerp(xcdrawing0.global_transform.origin, xcdrawing1.global_transform.origin, lam)
-			
-			var xcdrawing = sketchsystem.newXCuniquedrawing(DRAWING_TYPE.DT_XCDRAWING, sketchsystem.uniqueXCname())
-			xcdrawing.setxcpositionangle(vang)
-			xcdrawing.setxcpositionorigin(vwallmid)
-			var xcdrawinglink0 = [ ]
-			var xcdrawinglink1 = [ ]
-			pointertargetwall.slicetubetoxcdrawing(xcdrawing, xcdrawinglink0, xcdrawinglink1, lam)
-			xcdrawing.updatexcpaths()
-			sketchsystem.rpc("xcdrawingfromdata", xcdrawing.exportxcrpcdata())
-			setactivetargetwall(xcdrawing)
-			setselectedtarget(null)
-			xcdrawing0.xctubesconn.remove(xcdrawing0.xctubesconn.find(pointertargetwall))
-			xcdrawing1.xctubesconn.remove(xcdrawing1.xctubesconn.find(pointertargetwall))
-
-			var xctube0 = sketchsystem.newXCtube(xcdrawing0, xcdrawing)
-			xctube0.xcdrawinglink = xcdrawinglink0
-			xctube0.updatetubelinkpaths(sketchsystem)
-			sketchsystem.rpc("xctubefromdata", xctube0.exportxctrpcdata())
-			xctube0.updatetubeshell(sketchsystem.get_node("XCdrawings"), sketchsystem.tubeshellsvisible)
-			
-			var xctube1 = sketchsystem.newXCtube(xcdrawing1, xcdrawing)
-			xctube1.xcdrawinglink = xcdrawinglink1
-			xctube1.updatetubelinkpaths(sketchsystem)
-			sketchsystem.rpc("xctubefromdata", xctube0.exportxctrpcdata())
-			xctube1.updatetubeshell(sketchsystem.get_node("XCdrawings"), sketchsystem.tubeshellsvisible)
-
-			xcdrawing.updatexctubeshell(sketchsystem.get_node("XCdrawings"), sketchsystem.tubeshellsvisible)  # not strictly necessary as there won't be any shells in a sliced tube xc
-
-			pointertargettype = "none"
-			pointertarget = null
-			pointertargetwall.queue_free()
-			pointertargetwall = null
-			activelaserroot.get_node("LaserSpot").visible = false
-			LaserShadow.visible = false
 			
 	elif pointertargettype == "XCtube":
 		if activetargettube == pointertargetwall:
@@ -554,8 +478,8 @@ func buttonreleased_vrgrip():
 				var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(activetargettube.xcname1)
 				
 				var sliceinitpoint = lerp(gripmenu.gripmenupointertargetwall.global_transform.origin, playerMe.get_node("HeadCam").global_transform.origin, 0.5)
-				var v0c = pointertargetpoint - xcdrawing0.global_transform.origin
-				var v1c = pointertargetpoint - xcdrawing1.global_transform.origin
+				var v0c = sliceinitpoint - xcdrawing0.global_transform.origin
+				var v1c = sliceinitpoint - xcdrawing1.global_transform.origin
 				v0c.y = 0
 				v1c.y = 0
 				var h0c = abs(xcdrawing0.global_transform.basis.z.dot(v0c))
@@ -567,8 +491,8 @@ func buttonreleased_vrgrip():
 					var va1c = Vector2(xcdrawing1.global_transform.basis.x.x, xcdrawing1.global_transform.basis.x.z)
 					if va1c.dot(va0c) < 0:
 						va1c = -va1c
-					var vang = lerp_angle(va0c.angle(), va1c.angle(), 0.5)
-					var vwallmid = lerp(xcdrawing0.global_transform.origin, xcdrawing1.global_transform.origin, 0.5)
+					var vang = lerp_angle(va0c.angle(), va1c.angle(), lam)
+					var vwallmid = lerp(xcdrawing0.global_transform.origin, xcdrawing1.global_transform.origin, lam)
 					xcdrawing.setxcpositionangle(vang)
 					xcdrawing.setxcpositionorigin(vwallmid)
 					sketchsystem.rpc("xcdrawingfromdata", xcdrawing.exportxcrpcdata())
@@ -588,8 +512,8 @@ func buttonreleased_vrgrip():
 				setselectedtarget(null)
 				var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(activetargettube.xcname0)
 				var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(activetargettube.xcname1)
-				xcdrawing0.xctubesconn.remove(xcdrawing0.xctubesconn.find(pointertargetwall))
-				xcdrawing1.xctubesconn.remove(xcdrawing1.xctubesconn.find(pointertargetwall))
+				xcdrawing0.xctubesconn.remove(xcdrawing0.xctubesconn.find(activetargettube))
+				xcdrawing1.xctubesconn.remove(xcdrawing1.xctubesconn.find(activetargettube))
 
 				var xctube0 = sketchsystem.newXCtube(xcdrawing0, xcdrawing)
 				xctube0.xcdrawinglink = xcdrawinglink0
@@ -607,7 +531,7 @@ func buttonreleased_vrgrip():
 
 				pointertargettype = "none"
 				pointertarget = null
-				activetargettube.queue_free()
+				activetargettube.queue_free()  # must remove from xctubesconn
 				activetargettube = null
 				activelaserroot.get_node("LaserSpot").visible = false
 				LaserShadow.visible = false

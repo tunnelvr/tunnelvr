@@ -5,9 +5,10 @@ onready var ARVRworld_scale = ARVRServer.world_scale
 var viewport_point := Vector2(0, 0)
 var viewport_mousedown := false
 onready var sketchsystem = get_node("/root/Spatial/SketchSystem")
+var savegamefile = "user://savegame.save"
 
 func _on_buttonload_pressed():
-	sketchsystem.loadsketchsystem()
+	sketchsystem.loadsketchsystem(savegamefile)
 	$Viewport/GUI/Panel/Label.text = "Sketch Loaded"
 	
 func _on_buttonsave_pressed():
@@ -17,9 +18,6 @@ func _on_buttonsave_pressed():
 func _on_buttonfetchimages_pressed():
 	get_node("/root/Spatial/ImageSystem").fetchimportpapers()
 	$Viewport/GUI/Panel/Label.text = "Papers fetching"
-
-func _on_buttontogglefloortype_pressed():
-	$Viewport/GUI/Panel/Label.text = "does not exist"
 
 func _on_buttonplanview_toggled(button_pressed):
 	get_node("/root/Spatial/PlanViewSystem").setplanviewvisible(button_pressed, global_transform, $Quad.mesh.size)
@@ -37,9 +35,16 @@ func _on_buttonupdateshell_toggled(button_pressed):
 	sketchsystem.rpc("updateworkingshell", button_pressed)
 	$Viewport/GUI/Panel/Label.text = "shell made" if button_pressed else "shell hidden"
 
-func _on_buttononlycentrelines_toggled(button_pressed):
-	sketchsystem.rpc("changecentrelineonlymode", button_pressed)
+remote func _on_buttononlycentrelines_toggled(button_pressed):
+	sketchsystem.changecentrelineonlymode(button_pressed)
 	$Viewport/GUI/Panel/Label.text = "centrelines only" if button_pressed else "normal view"
+	if get_node("/root/Spatial").playerMe.connectiontoserveractive:
+		rpc("_on_buttononlycentrelines_toggled", button_pressed)   # yoke the GUIs
+
+func _on_buttontogglecentreline_toggled(button_pressed):
+	sketchsystem.changecentrevisiblemode(button_pressed)
+	$Viewport/GUI/Panel/Label.text = "Centrelines on" if button_pressed else "Centreline hidden"
+
 
 func _on_buttonswapcontrollers_pressed():
 	var cidl = get_node("/root/Spatial").playerMe.get_node("HandLeft").controller_id
@@ -58,7 +63,7 @@ func _ready():
 	$Viewport/GUI/Panel/ButtonUpdateShell.connect("toggled", self, "_on_buttonupdateshell_toggled")
 	$Viewport/GUI/Panel/ButtonSwapControllers.connect("pressed", self, "_on_buttonswapcontrollers_pressed")
 	$Viewport/GUI/Panel/ButtonOnlyCentrelines.connect("toggled", self, "_on_buttononlycentrelines_toggled")
-	$Viewport/GUI/Panel/ButtonToggleFloorType.connect("pressed", self, "_on_buttontogglefloortype_pressed")
+	$Viewport/GUI/Panel/ButtonToggleCentrelines.connect("toggled", self, "_on_buttontogglecentreline_toggled")
 	
 	
 func clickbuttonheadtorch():
@@ -131,7 +136,7 @@ func guipanelreleasemouse():
 func _input(event):
 	if event is InputEventKey and event.pressed:
 		if event.scancode == KEY_L:
-			sketchsystem.loadsketchsystem()
+			sketchsystem.loadsketchsystem(savegamefile)
 		#elif event.scancode == KEY_S:
 		#	sketchsystem.savesketchsystem()
 		elif event.scancode == KEY_T:

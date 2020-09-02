@@ -22,6 +22,11 @@ func _on_request_completed(result, response_code, headers, body):
 
 func _run():
 	var x = IP.get_local_addresses()
-	var a = Transform()
-	a.basis.x.dot(a.basis.x)
-	
+	var lefthandmodel = load("res://addons/godot_ovrmobile/example_scenes/left_hand_model.glb").instance()
+	print(lefthandmodel)
+	for a in lefthandmodel.get_node("ArmatureLeft/Skeleton").get_children():
+		print("  ", a, " ", a.get_name())
+	var skel = lefthandmodel.get_node("ArmatureLeft/Skeleton")
+	print(skel)
+	print(skel.get_bone_count())
+	print(skel.get_bone_rest(0))
