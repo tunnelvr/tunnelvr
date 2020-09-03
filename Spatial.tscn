@@ -1,4 +1,4 @@
-[gd_scene load_steps=117 format=2]
+[gd_scene load_steps=119 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/default_env.tres" type="Environment" id=2]
@@ -395,39 +395,59 @@ normal_scale = 2.03
 normal_texture = ExtResource( 30 )
 uv1_triplanar = true
 
-[sub_resource type="DynamicFont" id=65]
+[sub_resource type="SpatialMaterial" id=65]
+flags_transparent = true
+params_cull_mode = 2
+albedo_color = Color( 0.992157, 0.92549, 0.917647, 0 )
+metallic = 0.22
+uv1_triplanar = true
+
+[sub_resource type="SpatialMaterial" id=66]
+flags_transparent = true
+params_cull_mode = 2
+albedo_color = Color( 1, 1, 1, 0.447059 )
+metallic = 0.22
+emission_enabled = true
+emission = Color( 0, 0, 0, 1 )
+emission_energy = 0.25
+emission_operator = 0
+emission_on_uv2 = false
+emission_texture = ExtResource( 37 )
+uv1_triplanar = true
+
+[sub_resource type="DynamicFont" id=67]
 font_data = ExtResource( 40 )
 
-[sub_resource type="DynamicFont" id=66]
+[sub_resource type="DynamicFont" id=68]
 font_data = ExtResource( 39 )
 
-[sub_resource type="PlaneMesh" id=67]
+[sub_resource type="PlaneMesh" id=69]
 size = Vector2( 2, 0.1 )
 
-[sub_resource type="ViewportTexture" id=68]
+[sub_resource type="ViewportTexture" id=70]
 viewport_path = NodePath("LabelGenerator/Viewport")
 
-[sub_resource type="SpatialMaterial" id=69]
+[sub_resource type="SpatialMaterial" id=71]
 resource_local_to_scene = true
 flags_unshaded = true
 flags_no_depth_test = true
 flags_do_not_receive_shadows = true
 params_cull_mode = 2
-albedo_texture = SubResource( 68 )
+albedo_texture = SubResource( 70 )
 
-[sub_resource type="BoxShape" id=70]
+[sub_resource type="BoxShape" id=72]
 
-[sub_resource type="SpatialMaterial" id=71]
+[sub_resource type="SpatialMaterial" id=73]
 params_cull_mode = 2
 albedo_texture = ExtResource( 7 )
 uv1_scale = Vector3( 20, 20, 1 )
 
-[sub_resource type="PlaneMesh" id=72]
-material = SubResource( 71 )
+[sub_resource type="PlaneMesh" id=74]
+material = SubResource( 73 )
 subdivide_width = 4
 subdivide_depth = 4
 
-[sub_resource type="Shader" id=73]
+[sub_resource type="Shader" id=75]
 code = "shader_type spatial;
 render_mode blend_mix,depth_draw_opaque,cull_back,diffuse_burley,specular_schlick_ggx;
 uniform vec4 albedo : hint_color;
@@ -458,10 +478,10 @@ void fragment() {
 }
 "
 
-[sub_resource type="ProxyTexture" id=74]
+[sub_resource type="ProxyTexture" id=76]
 
-[sub_resource type="ShaderMaterial" id=75]
-shader = SubResource( 73 )
+[sub_resource type="ShaderMaterial" id=77]
+shader = SubResource( 75 )
 shader_param/albedo = Color( 0.435294, 0.215686, 0.141176, 0.454902 )
 shader_param/specular = 0.5
 shader_param/metallic = 0.48
@@ -469,10 +489,10 @@ shader_param/roughness = 0.71
 shader_param/point_size = 1.0
 shader_param/uv1_scale = Vector3( 3, 1, 1 )
 shader_param/uv1_offset = Vector3( 0, 0, 0 )
-shader_param/texture_albedo = SubResource( 74 )
+shader_param/texture_albedo = SubResource( 76 )
 
-[sub_resource type="PlaneMesh" id=76]
-material = SubResource( 75 )
+[sub_resource type="PlaneMesh" id=78]
+material = SubResource( 77 )
 size = Vector2( 4, 2 )
 
 [node name="Spatial" type="Spatial"]
@@ -1161,6 +1181,15 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.09902 )
 mesh = SubResource( 62 )
 material/0 = SubResource( 64 )
 
+[node name="transparent" type="MeshInstance" parent="MaterialSystem"]
+mesh = SubResource( 47 )
+material/0 = SubResource( 65 )
+
+[node name="highlight" type="MeshInstance" parent="MaterialSystem/transparent"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.02206 )
+mesh = SubResource( 48 )
+material/0 = SubResource( 66 )
+
 [node name="LabelGenerator" type="Spatial" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -2.08929e-06, 3.6, -6.412 )
 script = ExtResource( 38 )
@@ -1175,8 +1204,8 @@ render_target_v_flip = true
 margin_right = 430.0
 margin_bottom = 46.0
 size_flags_stretch_ratio = 0.0
-custom_fonts/mono_font = SubResource( 65 )
-custom_fonts/normal_font = SubResource( 66 )
+custom_fonts/mono_font = SubResource( 67 )
+custom_fonts/normal_font = SubResource( 68 )
 bbcode_enabled = true
 bbcode_text = "testing"
 text = "testing"
@@ -1187,8 +1216,8 @@ __meta__ = {
 
 [node name="ViewportForceRender" type="MeshInstance" parent="LabelGenerator"]
 transform = Transform( 1, 0, 0, 0, 0.655202, -0.755453, 0, 0.755453, 0.655202, 0, -3.44091, -4.59181 )
-mesh = SubResource( 67 )
-material/0 = SubResource( 69 )
+mesh = SubResource( 69 )
+material/0 = SubResource( 71 )
 
 [node name="ImageSystem" type="Node" parent="."]
 script = ExtResource( 17 )
@@ -1203,10 +1232,10 @@ collision_mask = 0
 
 [node name="CollisionShape" type="CollisionShape" parent="underfloor"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0 )
-shape = SubResource( 70 )
+shape = SubResource( 72 )
 
 [node name="Mesh" type="MeshInstance" parent="underfloor"]
-mesh = SubResource( 72 )
+mesh = SubResource( 74 )
 material/0 = null
 
 [node name="BoulderClutter" type="Spatial" parent="."]
@@ -1215,7 +1244,7 @@ material/0 = null
 transform = Transform( 1, 0, 0, 0, 0.697453, 0.716631, 0, -0.716631, 0.697453, 2.42691, 1.16181, 1.94417 )
 visible = false
 material_override = ExtResource( 3 )
-mesh = SubResource( 76 )
+mesh = SubResource( 78 )
 material/0 = ExtResource( 3 )
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]

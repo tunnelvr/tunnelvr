@@ -277,15 +277,13 @@ func buttonpressed_vrgrip():
 	gripmenu.gripmenuon(handright.get_node("LaserOrient").global_transform, pointertargetwall, pointertargettype, activetargettube)
 	
 func buttonpressed_vrtrigger(gripbuttonheld):
-	if gripbuttonheld:
-		gripbuttonpressused = true
-		gripmenu.disableallgripmenus()
-					
+	var dontdisablegripmenus = false
+	
 	if not is_instance_valid(pointertarget):
 		pass
 		
 	elif pointertarget == guipanel3d:
-		pass  #this is processed elsewhere
+		pass  # done in _process()
 
 	elif pointertarget.has_method("jump_up"):
 		pointertarget.jump_up()
@@ -322,8 +320,6 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 			activetargettube = pointertargetwall
 			setactivetargettubesector(0)
 
-
-
 	elif pointertargettype == "Papersheet" or pointertargettype == "PlanView":
 		setselectedtarget(null)
 		var alaserspot = activelaserroot.get_node("LaserSpot")
@@ -347,10 +343,6 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 		activetargetwallgrabbedpoint = alaserspot.global_transform.origin
 		activetargetwallgrabbedlocalpoint = pointertargetwall.global_transform.affine_inverse() * alaserspot.global_transform.origin
 		activetargetwallgrabbedpointoffset = alaserspot.global_transform.origin - pointertargetwall.global_transform.origin
-
-	# grip condition is ignored (assumed off) her on
-	#elif gripbuttonheld:
-	#	pass
 		
 	# make new point onto wall, connected if necessary
 	elif pointertargettype == "XCdrawing":
@@ -386,6 +378,43 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 			if pointertargetwall != activetargetwall:
 				setactivetargetwall(pointertargetwall)
 		setselectedtarget(pointertarget)
+
+	elif pointertargettype == "GripMenuItem" and pointertarget.get_name() == "NewSlice" and gripbuttonheld and is_instance_valid(activetargettube):
+		var xcdrawing = sketchsystem.newXCuniquedrawing(DRAWING_TYPE.DT_XCDRAWING, sketchsystem.uniqueXCname())
+		var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(activetargettube.xcname0)
+		var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(activetargettube.xcname1)
+		xcdrawing.get_node("XCdrawingplane").set_scale(gripmenu.gripmenupointertargetwall.get_node("XCdrawingplane").scale)
+		
+		var sliceinitpoint = lerp(gripmenu.gripmenupointertargetwall.global_transform.origin, playerMe.get_node("HeadCam").global_transform.origin, 0.5)
+		var v0c = sliceinitpoint - xcdrawing0.global_transform.origin
+		var v1c = sliceinitpoint - xcdrawing1.global_transform.origin
+		v0c.y = 0
+		v1c.y = 0
+		var h0c = abs(xcdrawing0.global_transform.basis.z.dot(v0c))
+		var h1c = abs(xcdrawing1.global_transform.basis.z.dot(v1c))
+		var lam = h0c/(h0c+h1c)
+		print(" dd ", v0c, h0c, v1c, h1c, "  ", lam)
+		if 0.05 < lam and lam < 0.95:
+			var va0c = Vector2(xcdrawing0.global_transform.basis.x.x, xcdrawing0.global_transform.basis.x.z)
+			var va1c = Vector2(xcdrawing1.global_transform.basis.x.x, xcdrawing1.global_transform.basis.x.z)
+			if va1c.dot(va0c) < 0:
+				va1c = -va1c
+			var vang = lerp_angle(va0c.angle(), va1c.angle(), lam)
+			var vwallmid = lerp(xcdrawing0.global_transform.origin, xcdrawing1.global_transform.origin, lam)
+			xcdrawing.setxcpositionangle(vang)
+			xcdrawing.setxcpositionorigin(vwallmid)
+			sketchsystem.rpc("xcdrawingfromdata", xcdrawing.exportxcrpcdata())
+			setactivetargetwall(xcdrawing)
+			setselectedtarget(null)
+		gripmenu.get_node("NewSlice").get_node("MeshInstance").visible = false
+		gripmenu.get_node("NewSlice").get_node("CollisionShape").disabled = true
+		gripmenu.get_node("DoSlice").get_node("MeshInstance").visible = true
+		gripmenu.get_node("DoSlice").get_node("CollisionShape").disabled = false
+		dontdisablegripmenus = true
+		
+	if gripbuttonheld and not dontdisablegripmenus:
+		gripbuttonpressused = true
+		gripmenu.disableallgripmenus()
 
 				
 func buttonpressed_vrpad(gripbuttonheld, joypos):
@@ -476,34 +505,11 @@ func buttonreleased_vrgrip():
 				print("Not implemented")
 
 			elif pointertarget.get_name() == "NewSlice" and is_instance_valid(activetargettube):
-				var xcdrawing = sketchsystem.newXCuniquedrawing(DRAWING_TYPE.DT_XCDRAWING, sketchsystem.uniqueXCname())
-				var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(activetargettube.xcname0)
-				var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(activetargettube.xcname1)
+				print("Press trigger to action")
 				
-				var sliceinitpoint = lerp(gripmenu.gripmenupointertargetwall.global_transform.origin, playerMe.get_node("HeadCam").global_transform.origin, 0.5)
-				var v0c = sliceinitpoint - xcdrawing0.global_transform.origin
-				var v1c = sliceinitpoint - xcdrawing1.global_transform.origin
-				v0c.y = 0
-				v1c.y = 0
-				var h0c = abs(xcdrawing0.global_transform.basis.z.dot(v0c))
-				var h1c = abs(xcdrawing1.global_transform.basis.z.dot(v1c))
-				var lam = h0c/(h0c+h1c)
-				print(" dd ", v0c, h0c, v1c, h1c, "  ", lam)
-				if 0.05 < lam and lam < 0.95:
-					var va0c = Vector2(xcdrawing0.global_transform.basis.x.x, xcdrawing0.global_transform.basis.x.z)
-					var va1c = Vector2(xcdrawing1.global_transform.basis.x.x, xcdrawing1.global_transform.basis.x.z)
-					if va1c.dot(va0c) < 0:
-						va1c = -va1c
-					var vang = lerp_angle(va0c.angle(), va1c.angle(), lam)
-					var vwallmid = lerp(xcdrawing0.global_transform.origin, xcdrawing1.global_transform.origin, lam)
-					xcdrawing.setxcpositionangle(vang)
-					xcdrawing.setxcpositionorigin(vwallmid)
-					sketchsystem.rpc("xcdrawingfromdata", xcdrawing.exportxcrpcdata())
-					setactivetargetwall(xcdrawing)
-					setselectedtarget(null)
-				
-			elif pointertarget.get_name() == "DoSlice" and is_instance_valid(activetargettube) and len(gripmenu.gripmenupointertargetwall.nodepoints) == 0:
-				var xcdrawing = gripmenu.gripmenupointertargetwall
+			elif pointertarget.get_name() == "DoSlice" and is_instance_valid(activetargettube) and len(activetargetwall.nodepoints) == 0:
+				print(activetargettube, " ", len(activetargetwall.nodepoints))
+				var xcdrawing = activetargetwall
 				var vang = Vector2(xcdrawing.global_transform.basis.x.x, xcdrawing.global_transform.basis.x.z).angle()
 				xcdrawing.setxcpositionangle(vang)
 				var xcdrawinglink0 = [ ]
@@ -520,6 +526,7 @@ func buttonreleased_vrgrip():
 
 				var xctube0 = sketchsystem.newXCtube(xcdrawing0, xcdrawing)
 				xctube0.xcdrawinglink = xcdrawinglink0
+				xctube0.xcsectormaterials = activetargettube.xcsectormaterials.duplicate()
 				xctube0.updatetubelinkpaths(sketchsystem)
 				sketchsystem.rpc("xctubefromdata", xctube0.exportxctrpcdata())
 				xctube0.updatetubeshell(sketchsystem.get_node("XCdrawings"), sketchsystem.tubeshellsvisible)
@@ -527,6 +534,11 @@ func buttonreleased_vrgrip():
 				var xctube1 = sketchsystem.newXCtube(xcdrawing, xcdrawing1)
 				xctube1.xcdrawinglink = xcdrawinglink1
 				xctube1.updatetubelinkpaths(sketchsystem)
+				xctube1.xcsectormaterials = activetargettube.xcsectormaterials.duplicate()
+				
+				#xctube1.xcsectormaterials.push_front(xctube1.xcsectormaterials.pop_back())
+				#xctube1.xcsectormaterials.push_front(xctube1.xcsectormaterials.pop_back())
+
 				sketchsystem.rpc("xctubefromdata", xctube0.exportxctrpcdata())
 				xctube1.updatetubeshell(sketchsystem.get_node("XCdrawings"), sketchsystem.tubeshellsvisible)
 
@@ -605,6 +617,19 @@ func _physics_process(_delta):
 		else:
 			planviewsystem.get_node("RealPlanCamera/LaserScope").visible = false
 			activelaserroot = LaserOrient
+		if activetargetwall != null and pointertargetwall == activetargetwall and len(activetargetwall.nodepoints) == 0 and handright.get_is_active() and handright.is_button_pressed(BUTTONS.VR_GRIP):
+			var joypos = Vector2(handright.get_joystick_axis(0), handright.get_joystick_axis(1))
+			if abs(joypos.x) > 0.3:
+				activetargetwall.rotation_degrees.y += joypos.x*30*_delta
+			if abs(joypos.y) > 0.3:
+				var p0 = gripmenu.gripmenupointertargetwall.global_transform.origin
+				var p1 = handright.global_transform.origin
+				var pm = activetargetwall.global_transform.origin
+				var vp = p1 - p0
+				var lam = vp.dot(pm - p0)/vp.dot(vp)
+				if (lam > 0.1 and joypos.y > 0) or (lam < 0.9 and joypos.y < 0):
+					activetargetwall.global_transform.origin += -vp.normalized()*2*_delta*sign(joypos.y)
+
 		onpointing(activelaserroot)
 		
 	if activetargetwallgrabbedtransform != null:

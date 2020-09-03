@@ -228,7 +228,11 @@ func maketubepolyassociation(xcdrawing0, xcdrawing1):
 	#if xcdrawing0.global_transform.basis.z.dot(xcdrawing1.global_transform.basis.z) < 0:
 	#	poly1.invert()
 	#	print("reversssing poly1", xcdrawing0.global_transform.basis.z, xcdrawing1.global_transform.basis.z, poly1)
-		
+
+	while len(xcsectormaterials) < len(xcdrawinglink)/2:
+		xcsectormaterials.append(0 if ((len(xcsectormaterials)%2) == 0) else 1)
+	xcsectormaterials.resize(len(xcdrawinglink)/2)
+
 	# get all the connections in here between the polygons but in the right order
 	var ila = [ ]  # [ [ il0, il1 ] ]
 	var xcdrawinglinkneedsreorder = false
@@ -237,7 +241,7 @@ func maketubepolyassociation(xcdrawing0, xcdrawing1):
 		var il0 = poly0.find(xcdrawinglink[j])
 		var il1 = poly1.find(xcdrawinglink[j+1])
 		if il0 != -1 and il1 != -1:
-			ila.append([il0, il1])
+			ila.append([il0, il1, j])
 		else:
 			missingjvals.append(j)
 		if j != 0 and not fa(ila[-2], ila[-1]):
@@ -245,18 +249,18 @@ func maketubepolyassociation(xcdrawing0, xcdrawing1):
 	if xcdrawinglinkneedsreorder or (len(missingjvals) != 0 and (missingjvals.min() < len(xcdrawinglink) - 2*len(missingjvals))):
 		ila.sort_custom(self, "fa")
 		var newxcdrawinglink = [ ]
+		var newxcsectormaterials = [ ]
 		for i in range(len(ila)):
 			newxcdrawinglink.append(poly0[ila[i][0]])
 			newxcdrawinglink.append(poly1[ila[i][1]])
+			newxcsectormaterials.append(xcsectormaterials[ila[i][2]/2])
 		for j in missingjvals:
 			newxcdrawinglink.append(xcdrawinglink[j])
 			newxcdrawinglink.append(xcdrawinglink[j+1])
+			newxcsectormaterials.append(xcsectormaterials[j/2])
 		assert(len(xcdrawinglink) == len(newxcdrawinglink))
 		xcdrawinglink = newxcdrawinglink
-		
-	while len(xcsectormaterials) < len(ila):
-		xcsectormaterials.append(0 if ((len(xcsectormaterials)%2) == 0) else 1)
-	xcsectormaterials.resize(len(ila))
+		xcsectormaterials = newxcsectormaterials
 		
 	return [poly0, poly1, ila]
 
@@ -385,6 +389,11 @@ func slicetubetoxcdrawing(xcdrawing, xcdrawinglink0, xcdrawinglink1):
 
 	xcdrawing.onepathpairs.append(xcnlast.get_name())
 	xcdrawing.onepathpairs.append(xcnfirst.get_name())
+	
+	# undo mysterious advancing of the sector links
+	#xcdrawinglink1.push_back(xcdrawinglink1.pop_front())
+	#xcdrawinglink1.push_back(xcdrawinglink1.pop_front())
+	
 	return true
 
 func updatetubeshell(xcdrawings, makevisible):
