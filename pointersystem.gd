@@ -64,7 +64,6 @@ func setpointertargetmaterial():
 	if pointertargettype == "GripMenuItem":
 		pointertarget.get_node("MeshInstance").get_surface_material(0).albedo_color = Color("#FFCCCC")
 
-
 func clearactivetargetnode():
 	if activetargetnode != null:
 		activetargetnode.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("nodepthtest" if activetargetnodewall == activetargetwall else "normal"))
@@ -128,7 +127,6 @@ func setactivetargettube(newactivetargettube):
 func _ready():
 	handright.connect("button_pressed", self, "_on_button_pressed")
 	handright.connect("button_release", self, "_on_button_release")
-	print("in the pointer onready")
 
 func targettype(target):
 	if not is_instance_valid(target):
@@ -315,27 +313,21 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 			activetargetwallgrabbedtransform = alaserspot.global_transform.affine_inverse() * activetargetwallgrabbed.global_transform
 			activetargetwallgrabbedpoint = null
 			
-	# grab and rotate XCdrawing in place (if empty)
-	elif pointertargettype == "XCdrawing" and gripbuttonheld and activetargetnode == null and len(pointertargetwall.nodepoints) == 0:
-		var alaserspot = activelaserroot.get_node("LaserSpot")
-		activetargetwallgrabbed = pointertargetwall
-		activetargetwallgrabbedtransform = alaserspot.global_transform.affine_inverse() * pointertargetwall.global_transform
-		activetargetwallgrabbedpoint = alaserspot.global_transform.origin
-		activetargetwallgrabbedlocalpoint = pointertargetwall.global_transform.affine_inverse() * alaserspot.global_transform.origin
-		activetargetwallgrabbedpointoffset = alaserspot.global_transform.origin - pointertargetwall.global_transform.origin
 		
-	# make new point onto wall, connected if necessary
 	elif pointertargettype == "XCdrawing":
-		var newpointertarget = pointertargetwall.newxcnode()
-		newpointertarget.global_transform.origin = pointertargetpoint
-		pointertargetwall.copyxcntootnode(newpointertarget)
-		sketchsystem.get_node("SoundPos1").global_transform.origin = pointertargetpoint
-		sketchsystem.get_node("SoundPos1").play()
-		if activetargetnode != null:
-			if activetargetnodewall == pointertargetwall:
-				sketchsystem.xcapplyonepath(activetargetnode, newpointertarget)
-		sketchsystem.rpc("xcdrawingfromdata", pointertargetwall.exportxcrpcdata())
-		setactivetargetnode(newpointertarget)
+		if pointertargetwall != activetargetwall:
+			setactivetargetwall(pointertargetwall)
+		if activetargetnode != null or len(pointertargetwall.nodepoints) == 0:
+			var newpointertarget = pointertargetwall.newxcnode()
+			newpointertarget.global_transform.origin = pointertargetpoint
+			pointertargetwall.copyxcntootnode(newpointertarget)
+			sketchsystem.get_node("SoundPos1").global_transform.origin = pointertargetpoint
+			sketchsystem.get_node("SoundPos1").play()
+			if activetargetnode != null:
+				if activetargetnodewall == pointertargetwall:
+					pointertargetwall.xcotapplyonepath(activetargetnode.get_name(), newpointertarget.get_name())
+					pointertargetwall.updatexcpaths()
+			setactivetargetnode(newpointertarget)
 	
 									
 	# reselection clears selection
@@ -345,14 +337,16 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 	# connecting lines between xctype nodes
 	elif activetargetnode != null and pointertargettype == "XCnode":
 		if not ((activetargetnodewall.drawingtype == DRAWING_TYPE.DT_CENTRELINE and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING) or (activetargetnodewall.drawingtype == DRAWING_TYPE.DT_XCDRAWING and pointertargetwall.drawingtype == DRAWING_TYPE.DT_CENTRELINE)):
-			sketchsystem.xcapplyonepath(activetargetnode, pointertarget)
 			if activetargetnodewall == pointertargetwall:
-				sketchsystem.rpc("xcdrawingfromdata", activetargetnodewall.exportxcrpcdata())
+				pointertargetwall.xcotapplyonepath(activetargetnode.get_name(), pointertarget.get_name())
+				pointertargetwall.updatexcpaths()
+			else:
+				sketchsystem.xcapplyonepathtube(activetargetnode, activetargetnodewall, pointertarget, pointertargetwall)
 			sketchsystem.get_node("SoundPos1").global_transform.origin = pointertargetpoint
 			sketchsystem.get_node("SoundPos1").play()
 			clearactivetargetnode()
 											
-	elif pointertargettype == "XCnode":
+	elif activetargetnode == null and pointertargettype == "XCnode":
 		if pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 			pointertargetwall.rpc("setxcdrawingvisibility", true)
 			if pointertargetwall != activetargetwall:

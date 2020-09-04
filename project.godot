@@ -23,11 +23,17 @@ _global_script_classes=[ {
 "class": "DRAWING_TYPE",
 "language": "GDScript",
 "path": "res://utilities/DRAWING_TYPE.gd"
+}, {
+"base": "Reference",
+"class": "Polynets",
+"language": "GDScript",
+"path": "res://utilities/Polynets.gd"
 } ]
 _global_script_class_icons={
 "BUTTONS": "",
 "CollisionLayer": "",
-"DRAWING_TYPE": ""
+"DRAWING_TYPE": "",
+"Polynets": ""
 }
 
 [application]

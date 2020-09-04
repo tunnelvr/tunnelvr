@@ -19,15 +19,12 @@ func _ready():
 	changetubedxcsvizmode()
 	updateworkingshell()
 		
-func xcapplyonepath(xcn0, xcn1): 
-	var xcdrawing0 = xcn0.get_parent().get_parent()
-	var xcdrawing1 = xcn1.get_parent().get_parent()
-					
-	if xcdrawing0 == xcdrawing1:
-		xcdrawing0.xcotapplyonepath(xcn0.get_name(), xcn1.get_name())
-		xcdrawing0.updatexcpaths()
-		return
-		
+
+func xcapplyonepathtube(xcn0, xcdrawing0, xcn1, xcdrawing1): 
+	assert (xcdrawing0 == xcn0.get_parent().get_parent())
+	assert (xcdrawing1 == xcn1.get_parent().get_parent())
+	assert (xcdrawing0 != xcdrawing1)
+	
 	var xctube = null
 	var xctubeRev = null
 	for lxctube in xcdrawing0.xctubesconn:

@@ -13,6 +13,13 @@ extends Spatial
 # * func _on_xcdrawingvisibility_selected(index):
 # * func _on_centrelinevisibility_selected(index):
 
+# * optional cross section based on floor node
+# * pointertargettype as an enum
+# * sort out the setopnpos junk
+
+# * Make XCdrawing on floor node!
+
+# * updatetubeshells to be cleared up 
 
 # * How is it going to work from planview?
 # * a gripclick inserts a new XC in the tube that we can orient and move before applying the slice
