@@ -1,13 +1,14 @@
 [gd_scene load_steps=4 format=2]
 
-[ext_resource path="res://guimaterials/XCnode.material" type="Material" id=2]
-
-[sub_resource type="CylinderShape" id=1]
+[sub_resource type="CylinderShape" id=80]
 radius = 0.1
 height = 0.2
 
-[sub_resource type="CylinderMesh" id=2]
-material = ExtResource( 2 )
+[sub_resource type="SpatialMaterial" id=81]
+albedo_color = Color( 0.180392, 0.482353, 0.905882, 1 )
+
+[sub_resource type="CylinderMesh" id=79]
+material = SubResource( 81 )
 top_radius = 0.1
 bottom_radius = 0.1
 height = 0.2
@@ -20,8 +21,8 @@ collision_mask = 0
 
 [node name="CollisionShape" type="CollisionShape" parent="."]
 transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, 0, 0, 0 )
-shape = SubResource( 1 )
+shape = SubResource( 80 )
 
 [node name="MeshInstance" type="MeshInstance" parent="CollisionShape"]
-mesh = SubResource( 2 )
+mesh = SubResource( 79 )
 material/0 = null

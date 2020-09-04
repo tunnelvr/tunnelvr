@@ -14,3 +14,7 @@ func tubematerialtransparent(highlighted):
 
 func tubematerialcount():
 	return $tubematerials.get_child_count()
+
+func nodematerial(mtype):
+	var mm = $nodematerial.get_node(mtype)
+	return mm.get_surface_material(0)

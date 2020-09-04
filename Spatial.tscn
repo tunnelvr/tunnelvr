@@ -1,4 +1,4 @@
-[gd_scene load_steps=119 format=2]
+[gd_scene load_steps=126 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/default_env.tres" type="Environment" id=2]
@@ -415,6 +415,50 @@ emission_on_uv2 = false
 emission_texture = ExtResource( 37 )
 uv1_triplanar = true
 
+[sub_resource type="SpatialMaterial" id=81]
+albedo_color = Color( 0.180392, 0.482353, 0.905882, 1 )
+
+[sub_resource type="CylinderMesh" id=79]
+material = SubResource( 81 )
+top_radius = 0.1
+bottom_radius = 0.1
+height = 0.2
+radial_segments = 6
+rings = 1
+
+[sub_resource type="SpatialMaterial" id=85]
+albedo_color = Color( 0.180392, 0.482353, 0.905882, 1 )
+
+[sub_resource type="SpatialMaterial" id=82]
+flags_no_depth_test = true
+albedo_color = Color( 0.180392, 0.482353, 0.905882, 1 )
+
+[sub_resource type="SpatialMaterial" id=80]
+flags_no_depth_test = true
+params_grow = true
+params_grow_amount = 0.02
+albedo_color = Color( 0.886275, 0.101961, 0.113725, 1 )
+emission_enabled = true
+emission = Color( 0.768627, 0.027451, 0.027451, 1 )
+emission_energy = 1.0
+emission_operator = 0
+emission_on_uv2 = false
+
+[sub_resource type="SpatialMaterial" id=83]
+flags_no_depth_test = true
+albedo_color = Color( 0.854902, 1, 0.172549, 1 )
+
+[sub_resource type="SpatialMaterial" id=84]
+flags_no_depth_test = true
+params_grow = true
+params_grow_amount = 0.02
+albedo_color = Color( 0.996078, 0.960784, 0.32549, 1 )
+emission_enabled = true
+emission = Color( 0.921569, 0.901961, 0.12549, 1 )
+emission_energy = 0.47
+emission_operator = 0
+emission_on_uv2 = false
+
 [sub_resource type="DynamicFont" id=67]
 font_data = ExtResource( 40 )
 
@@ -654,6 +698,7 @@ remote_path = NodePath("../../../GuiSystem")
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -2.08929e-06, 2, -6.412 )
 
 [node name="GUIPanel3D" type="StaticBody" parent="GuiSystem"]
+visible = false
 collision_layer = 8
 collision_mask = 0
 script = ExtResource( 14 )
@@ -859,6 +904,7 @@ __meta__ = {
 [node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GUIPanel3D"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.01 )
 shape = SubResource( 15 )
+disabled = true
 
 [node name="Quad" type="MeshInstance" parent="GuiSystem/GUIPanel3D"]
 cast_shadow = 0
@@ -1202,6 +1248,33 @@ material/0 = SubResource( 65 )
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.02206 )
 mesh = SubResource( 48 )
 material/0 = SubResource( 66 )
+
+[node name="nodematerial" type="Spatial" parent="MaterialSystem"]
+
+[node name="normal" type="MeshInstance" parent="MaterialSystem/nodematerial"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -1.98746, 0, 0.00670433 )
+mesh = SubResource( 79 )
+material/0 = SubResource( 85 )
+
+[node name="nodepthtest" type="MeshInstance" parent="MaterialSystem/nodematerial"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -2.70873, 0, -0.40383 )
+mesh = SubResource( 79 )
+material/0 = SubResource( 82 )
+
+[node name="highlight" type="MeshInstance" parent="MaterialSystem/nodematerial"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -1.98746, 0, -1.45584 )
+mesh = SubResource( 79 )
+material/0 = SubResource( 80 )
+
+[node name="selected" type="MeshInstance" parent="MaterialSystem/nodematerial"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -2.56832, 0, -1.45584 )
+mesh = SubResource( 79 )
+material/0 = SubResource( 83 )
+
+[node name="selected_highlight" type="MeshInstance" parent="MaterialSystem/nodematerial"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -1.98746, 0, -1.45584 )
+mesh = SubResource( 79 )
+material/0 = SubResource( 84 )
 
 [node name="LabelGenerator" type="Spatial" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -2.08929e-06, 3.6, -6.412 )

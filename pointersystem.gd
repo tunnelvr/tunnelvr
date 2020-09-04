@@ -20,12 +20,7 @@ var viewport_point = null
 const XCdrawig = preload("res://nodescenes/XCdrawing.tscn")
 const XCnode = preload("res://nodescenes/XCnode.tscn")
 				
-var pointinghighlightmaterial = preload("res://guimaterials/XCnode_highlight.material")
-var selectedhighlightmaterial = preload("res://guimaterials/XCnode_selected.material")
-var selectedpointerhighlightmaterial = preload("res://guimaterials/XCnode_selectedhighlight.material")
-
 var laserspothighlightmaterial = preload("res://guimaterials/laserspot_selected.material"); 
-
 
 onready var ARVRworld_scale = ARVRServer.world_scale
 var mousecontrollervec = Vector3(0.2, -0.1, -0.5)
@@ -38,14 +33,8 @@ var pointertargetwall = null
 var pointertargetpoint = Vector3(0, 0, 0)
 var gripbuttonpressused = false
 
-
-#var selectedtarget = null
-#var selectedtargettype = "none"  # only ever XCnode
-#var selectedtargetwall = null
-
 var activetargetnode = null
 var activetargetnodewall = null
-
 
 var activetargetwall = null
 var activetargetwallgrabbed = null
@@ -61,8 +50,8 @@ var xcdrawingmaterial = preload("res://guimaterials/XCdrawing.material")
 var xcdrawinghighlightmaterial = preload("res://guimaterials/XCdrawing_highlight.material")
 
 func clearpointertargetmaterial():
-	if pointertargettype == "XCnode":
-		pointertarget.get_node("CollisionShape/MeshInstance").set_surface_material(0, selectedhighlightmaterial if pointertarget == activetargetnode else (preload("res://guimaterials/XCnode_nodepthtest.material") if pointertargetwall == activetargetwall else preload("res://guimaterials/XCnode.material")))
+	if pointertargettype == "XCnode":  
+		pointertarget.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("selected" if pointertarget == activetargetnode else ("nodepthtest" if pointertargetwall == activetargetwall else "normal")))
 	if (pointertargettype == "XCdrawing" or pointertargettype == "XCnode") and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		if pointertargetwall == activetargetwall:
 			xcdrawingactivematerial.uv1_scale = pointertargetwall.get_node("XCdrawingplane").get_scale()
@@ -75,7 +64,7 @@ func clearpointertargetmaterial():
 			
 func setpointertargetmaterial():
 	if pointertargettype == "XCnode":
-		pointertarget.get_node("CollisionShape/MeshInstance").set_surface_material(0, selectedpointerhighlightmaterial if pointertarget == activetargetnode else pointinghighlightmaterial)
+		pointertarget.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("selected_highlight" if pointertarget == activetargetnode else "highlight"))
 		handright.get_node("csghandright").setpartcolor(2, "#FFFF60")
 	if (pointertargettype == "XCdrawing" or pointertargettype == "XCnode") and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		xcdrawinghighlightmaterial.uv1_scale = pointertargetwall.get_node("XCdrawingplane").get_scale()
@@ -88,7 +77,7 @@ func setpointertargetmaterial():
 
 func clearactivetargetnode():
 	if activetargetnode != null:
-		activetargetnode.get_node("CollisionShape/MeshInstance").set_surface_material(0, preload("res://guimaterials/XCnode_nodepthtest.material") if activetargetnodewall == activetargetwall else preload("res://guimaterials/XCnode.material"))
+		activetargetnode.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("nodepthtest" if activetargetnodewall == activetargetwall else "normal"))
 	activetargetnode = null
 	activetargetnodewall = null
 	activelaserroot.get_node("LaserSpot").material_override = null
@@ -99,7 +88,7 @@ func setactivetargetnode(newactivetargetnode):
 	assert (targettype(activetargetnode) == "XCnode")
 	activetargetnodewall = targetwall(activetargetnode, "XCnode")
 	if activetargetnode != pointertarget:
-		activetargetnode.get_node("CollisionShape/MeshInstance").set_surface_material(0, selectedhighlightmaterial)
+		activetargetnode.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("selected"))
 	activelaserroot.get_node("LaserSpot").material_override = preload("res://guimaterials/laserspot_selected.material")
 	setpointertargetmaterial()
 
@@ -108,7 +97,7 @@ func setactivetargetwall(newactivetargetwall):
 		activetargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").set_surface_material(0, preload("res://guimaterials/XCdrawing.material"))
 		activetargetwall.get_node("PathLines").set_surface_material(0, preload("res://guimaterials/XCdrawingPathlines.material"))
 		for xcnode in activetargetwall.get_node("XCnodes").get_children():
-			xcnode.get_node("CollisionShape/MeshInstance").set_surface_material(0, preload("res://guimaterials/XCnode_selected.material") if xcnode == activetargetnode else preload("res://guimaterials/XCnode.material"))
+			xcnode.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("selected" if xcnode == activetargetnode else "normal"))
 		for xctube in activetargetwall.xctubesconn:
 			if not xctube.positioningtube:
 				xctube.updatetubeshell(sketchsystem.get_node("XCdrawings"), sketchsystem.tubeshellsvisible)
@@ -123,7 +112,7 @@ func setactivetargetwall(newactivetargetwall):
 		activetargetwall.get_node("PathLines").set_surface_material(0, preload("res://guimaterials/XCdrawingPathlines_nodepthtest.material"))
 		for xcnode in activetargetwall.get_node("XCnodes").get_children():
 			if xcnode != activetargetnode:
-				xcnode.get_node("CollisionShape/MeshInstance").set_surface_material(0, preload("res://guimaterials/XCnode_nodepthtest.material"))
+				xcnode.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("nodepthtest"))
 		LaserOrient.get_node("RayCast").collision_mask = CollisionLayer.CL_Pointer | CollisionLayer.CL_PointerFloor 
 	else:
 		LaserOrient.get_node("RayCast").collision_mask = CollisionLayer.CL_Pointer | CollisionLayer.CL_PointerFloor | CollisionLayer.CL_CaveWall

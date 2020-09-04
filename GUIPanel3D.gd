@@ -46,10 +46,9 @@ func _on_buttontogglecentreline_toggled(button_pressed):
 	$Viewport/GUI/Panel/Label.text = "Centrelines on" if button_pressed else "Centreline hidden"
 
 func _on_untubedxcsviz_toggled(button_pressed):
-	sketchsystem.changetubedxcsvizmode(button_pressed)
+	Tglobal.tubedxcsvisible = button_pressed
+	sketchsystem.changetubedxcsvizmode()
 	$Viewport/GUI/Panel/Label.text = "UntubedXCs Viz" if button_pressed else "UntubedXCs Unviz"
-
-
 
 func _on_buttonswapcontrollers_pressed():
 	var cidl = get_node("/root/Spatial").playerMe.get_node("HandLeft").controller_id
@@ -87,6 +86,7 @@ func toggleguipanelvisibility(controller_global_transform):
 		$Viewport/GUI/Panel/Label.text = "Control panel"
 		visible = true
 		$CollisionShape.disabled = false
+		$Viewport/GUI/Panel/ButtonUntubedXCsViz.pressed = Tglobal.tubedxcsvisible
 	else:
 		visible = false	
 		$CollisionShape.disabled = true
