@@ -40,6 +40,10 @@ config/icon="res://icon.png"
 
 enable_audio_input=true
 
+[autoload]
+
+Tglobal="*res://Tglobal.gd"
+
 [debug]
 
 gdscript/warnings/unused_argument=false

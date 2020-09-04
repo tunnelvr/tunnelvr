@@ -5,10 +5,10 @@ extends Spatial
 
 # * should give the other player a position near to me:  $SketchSystem.rpc_id(id, "sketchsystemfromdict", $SketchSystem.sketchsystemtodict())
 		
+# * xctubesconn) == 0 should be a count of the tube types excluding connections to floor
 # * DelXC would delete XC and join between the tubes
 # * Ghost a wall (or unghost) so we can see through it
 # * Cut hole in wall is a different thing -- a proper type and recalculation
-# * Hide all nodes and pathlines (what's that look like?) 
 
 # * copy tubeshellsvisible down to the GUID on startup of GUID
 
@@ -285,7 +285,7 @@ func clearallprocessactivityforreload():
 	$ImageSystem.paperdrawinglist.clear()
 
 	var pointersystem = playerMe.get_node("pointersystem")
-	pointersystem.setselectedtarget(null)  # clear all the objects before they are freed
+	pointersystem.clearactivetargetnode()  # clear all the objects before they are freed
 	#pointersystem.clearpointertargetmaterial()
 	pointersystem.pointertarget = null
 	pointersystem.pointertargettype = "none"

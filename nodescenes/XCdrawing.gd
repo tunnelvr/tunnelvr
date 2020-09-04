@@ -22,7 +22,7 @@ remotesync func setxcdrawingvisibility(makevisible):
 	if not makevisible:
 		$XCdrawingplane.visible = false
 		$XCdrawingplane/CollisionShape.disabled = true
-		$XCnodes.visible = get_node("/root/Spatial/SketchSystem").tubedxcsvisible or (drawingtype != DRAWING_TYPE.DT_XCDRAWING)
+		$XCnodes.visible = get_node("/root/Spatial/SketchSystem").tubedxcsvisible or (drawingtype != DRAWING_TYPE.DT_XCDRAWING) or (len(xctubesconn) == 0)
 		$PathLines.visible = $XCnodes.visible
 	elif makevisible != $XCdrawingplane.visible:
 		$XCdrawingplane.visible = true
