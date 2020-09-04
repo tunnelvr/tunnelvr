@@ -326,7 +326,7 @@ func maketubeshell(xcdrawings):
 		surfaceTool.generate_normals()
 		surfaceTool.commit(arraymesh)
 	return arraymesh
-	#return surfaceTool.commit()
+
 
 func slicetubetoxcdrawing(xcdrawing, xcdrawinglink0, xcdrawinglink1):
 	var xcdrawings = get_node("../../XCdrawings")
@@ -367,12 +367,8 @@ func slicetubetoxcdrawing(xcdrawing, xcdrawinglink0, xcdrawinglink1):
 			# 0 = xcdrawing.global_transform.basis.z.dot(pt0 + lam*(pt1 - pt0) - xcdrawing.global_transform.origin)
 			# lam*xcdrawing.global_transform.basis.z.dot(pt0 - pt1) = xcdrawing.global_transform.basis.z.dot(pt0 - xcdrawing.global_transform.origin)
 			var lam = xcdrawing.global_transform.basis.z.dot(pt0 - xcdrawing.global_transform.origin)/xcdrawing.global_transform.basis.z.dot(pt0 - pt1)
-			xcn.global_transform.origin = lerp(pt0, pt1, lam)
-			xcdrawing.copyxcntootnode(xcn)
-			print(xcn.get_name(), " ", xcdrawing.nodepoints[xcn.get_name()].z)  # flatten into the plane
-			xcdrawing.nodepoints[xcn.get_name()].z = 0  # flatten into the plane
-			xcdrawing.copyotnodetoxcn(xcn)
-			
+			xcdrawing.setxcnpoint(xcn, lerp(pt0, pt1, lam), true)
+				
 			assert (i0 <= ila0N and i1 <= ila1N)
 			if i0 < ila0N and (acc - ila0N < 0 or i1 == ila1N):
 				acc += ila1N

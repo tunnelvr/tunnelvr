@@ -10,8 +10,7 @@ extends Spatial
 # * Ghost a wall (or unghost) so we can see through it
 # * Cut hole in wall is a different thing -- a proper type and recalculation
 
-# * func _on_xcdrawingvisibility_selected(index):
-# * func _on_centrelinevisibility_selected(index):
+# * update tubes whenever a connection is made, not just on deselection
 
 # * optional cross section based on floor node
 # * pointertargettype as an enum
@@ -292,10 +291,7 @@ func clearallprocessactivityforreload():
 	var pointersystem = playerMe.get_node("pointersystem")
 	pointersystem.clearactivetargetnode()  # clear all the objects before they are freed
 	#pointersystem.clearpointertargetmaterial()
-	pointersystem.pointertarget = null
-	pointersystem.pointertargettype = "none"
-	pointersystem.pointertargetwall = null
-	pointersystem.activetargetwall = null
-	pointersystem.activetargetwallgrabbedtransform = null
+	pointersystem.clearpointertarget()
+	pointersystem.setactivetargetwall(null)
 
 

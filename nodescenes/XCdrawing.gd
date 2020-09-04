@@ -18,7 +18,7 @@ var maxnodepointnumber = 0
 
 var linewidth = 0.05
 
-remotesync func setxcdrawingvisibility(makevisible):
+func setxcdrawingvisibility(makevisible):
 	if not makevisible:
 		$XCdrawingplane.visible = false
 		$XCdrawingplane/CollisionShape.disabled = true
@@ -41,8 +41,8 @@ remotesync func setxcdrawingvisibility(makevisible):
 func scalexcnodepointspointsxy(scax, scay):
 	for i in nodepoints.keys():
 		nodepoints[i] = Vector3(nodepoints[i].x*scax, nodepoints[i].y*scay, nodepoints[i].z)
-		copyotnodetoxcn($XCnodes.get_node(i))
-
+		$XCnodes.get_node(i).translation = nodepoints[i]
+	
 func setxcpositionangle(drawingwallangle):
 	global_transform = Transform(Basis().rotated(Vector3(0,-1,0), drawingwallangle), global_transform.origin)
 
@@ -169,26 +169,14 @@ func importcentrelinedata(centrelinedata, sketchsystem):
 				xctube.xcdrawinglink = ["hl", "hl", "hr", "hr"].duplicate()
 				xctube.updatetubelinkpaths(sketchsystem)
 			xcdrawingSect = xcdrawingSect1
-
-
-func duplicatexcdrawing(sketchsystem):
-	var xcdrawing = sketchsystem.newXCuniquedrawing(DRAWING_TYPE.DT_XCDRAWING, sketchsystem.uniqueXCname())
 	
-	xcdrawing.global_transform = global_transform
-	for i in nodepoints.keys():
-		var xcn = xcdrawing.newxcnode(i)
-		xcdrawing.nodepoints[i] = nodepoints[i]
-		copyotnodetoxcn(xcn)
-	xcdrawing.onepathpairs = onepathpairs.duplicate()
-	xcdrawing.updatexcpaths()
-	return xcdrawing
-	
-func copyxcntootnode(xcn):
+func setxcnpoint(xcn, pt, planar):
+	xcn.global_transform.origin = pt
 	nodepoints[xcn.get_name()] = xcn.translation
-	
-func copyotnodetoxcn(xcn):
-	xcn.translation = nodepoints[xcn.get_name()]
-	
+	if planar:
+		nodepoints[xcn.get_name()].z = 0
+		xcn.translation = nodepoints[xcn.get_name()]
+		
 func xcotapplyonepath(i0, i1):
 	for j in range(len(onepathpairs)-2, -3, -2):
 		if j == -2:
@@ -239,8 +227,7 @@ func removexcnode(xcn, brejoinlines, sketchsystem):
 
 func movexcnode(xcn, pt, sketchsystem):
 	print("m,mmmmxmxmxm ", xcn.global_transform.origin, pt)
-	xcn.global_transform.origin = pt
-	copyxcntootnode(xcn)
+	setxcnpoint(xcn, pt, true)
 	var	xctubesconnupdated = [ ]
 	for xctube in xctubesconn:
 		if xctube.checknodelinkedto(get_name(), xcn.get_name()):
@@ -296,7 +283,6 @@ func updatexcpaths():
 		var m = $PathLines.get_surface_material(0)
 		$PathLines.mesh = newmesh
 		$PathLines.set_surface_material(0, m)
-	
 
 
 func makexctubeshell(xcdrawings):

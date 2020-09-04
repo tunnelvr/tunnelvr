@@ -16,9 +16,6 @@ onready var LaserSelectLine = handright.get_node("LaserSelectLine")
 
 var viewport_point = null
 
-const XCdrawig = preload("res://nodescenes/XCdrawing.tscn")
-const XCnode = preload("res://nodescenes/XCnode.tscn")
-
 var mousecontrollervec = Vector3(0.2, -0.1, -0.5)
 
 onready var activelaserroot = handright.get_node("LaserOrient")
@@ -95,8 +92,10 @@ func setactivetargetwall(newactivetargetwall):
 		activetargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").get_surface_material(0).albedo_color = Color("#FEF4D5")
 	
 	activetargetwall = newactivetargetwall
+	activetargetwallgrabbedtransform = null
 	
 	if activetargetwall != null and activetargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
+		activetargetwall.setxcdrawingvisibility(true)
 		activetargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").set_surface_material(0, materialsystem.xcdrawingmaterial("active", null))
 		activetargetwall.get_node("PathLines").set_surface_material(0, materialsystem.pathlinematerial("nodepthtest"))
 		for xcnode in activetargetwall.get_node("XCnodes").get_children():
@@ -165,8 +164,17 @@ func targetwall(target, targettype):
 	
 func setopnpos(opn, p):
 	opn.global_transform.origin = p
+
 		
-func onpointing(laserroot):
+func clearpointertarget():
+	if pointertarget == guipanel3d:
+		guipanel3d.guipanelreleasemouse()
+	clearpointertargetmaterial()
+	pointertarget = null
+	pointertargettype = "none"
+	pointertargetwall = null
+
+func setpointertarget(laserroot):
 	var newpointertarget = laserroot.get_node("RayCast").get_collider()
 	if newpointertarget != null:
 		if newpointertarget.is_queued_for_deletion():
@@ -187,26 +195,8 @@ func onpointing(laserroot):
 		setpointertargetmaterial()
 		
 		print("ppp  ", activetargetnode, " ", pointertargettype)
-		if pointertargettype == "XCnode":
-			laserroot.get_node("LaserSpot").visible = false
-		elif pointertargettype == "GUIPanel3D" or pointertargettype == "Papersheet":
-			laserroot.get_node("LaserSpot").visible = false
-		elif pointertargettype == "XCdrawing":
-			laserroot.get_node("LaserSpot").visible = true
-		elif pointertargettype == "XCtube":
-			laserroot.get_node("LaserSpot").visible = true
-		else:
-			laserroot.get_node("LaserSpot").visible = false
-			
-		# work out the logic for the LaserSelectLine here
-		if handright.is_button_pressed(BUTTONS.VR_GRIP):
-			pass
-		elif pointertargettype == "XCdrawing":
-			LaserSelectLine.visible = (activetargetnode != null)
-		elif pointertargettype == "XCnode":
-			LaserSelectLine.visible = (activetargetnode != null)
-		else:
-			LaserSelectLine.visible = false
+		laserroot.get_node("LaserSpot").visible = ((pointertargettype == "XCdrawing") or (pointertargettype == "XCtube"))
+		LaserSelectLine.visible = (activetargetnode != null) and not handright.is_button_pressed(BUTTONS.VR_GRIP) and ((pointertargettype == "XCdrawing") or (activetargetnode != null))
 			
 	pointertargetpoint = newpointertargetpoint
 	if is_instance_valid(pointertarget) and pointertarget == guipanel3d:
@@ -270,15 +260,14 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 	# grip click moves node on xcwall
 	elif gripbuttonheld and activetargetnode != null and pointertargettype == "XCdrawing" and pointertargetwall == activetargetnodewall:
 		activetargetnodewall.movexcnode(activetargetnode, pointertargetpoint, sketchsystem)
-
+		clearactivetargetnode()
+		
 	# reselection when selected on grip deletes the node		
 	elif gripbuttonheld and activetargetnode != null and pointertarget == activetargetnode and (activetargetnodewall.drawingtype != DRAWING_TYPE.DT_CENTRELINE):
 		var recselectedtarget = activetargetnode
 		var recselectedtargetwall = activetargetnodewall
 		clearactivetargetnode()
-		pointertarget = null
-		pointertargettype = "none"
-		pointertargetwall = null
+		clearpointertarget()
 		activelaserroot.get_node("LaserSpot").visible = false
 		recselectedtargetwall.removexcnode(recselectedtarget, false, sketchsystem)
 		sketchsystem.get_node("SoundPos2").global_transform.origin = pointertargetpoint
@@ -313,14 +302,12 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 			activetargetwallgrabbedtransform = alaserspot.global_transform.affine_inverse() * activetargetwallgrabbed.global_transform
 			activetargetwallgrabbedpoint = null
 			
-		
 	elif pointertargettype == "XCdrawing":
 		if pointertargetwall != activetargetwall:
 			setactivetargetwall(pointertargetwall)
 		if activetargetnode != null or len(pointertargetwall.nodepoints) == 0:
 			var newpointertarget = pointertargetwall.newxcnode()
-			newpointertarget.global_transform.origin = pointertargetpoint
-			pointertargetwall.copyxcntootnode(newpointertarget)
+			pointertargetwall.setxcnpoint(newpointertarget, pointertargetpoint, true)
 			sketchsystem.get_node("SoundPos1").global_transform.origin = pointertargetpoint
 			sketchsystem.get_node("SoundPos1").play()
 			if activetargetnode != null:
@@ -348,7 +335,6 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 											
 	elif activetargetnode == null and pointertargettype == "XCnode":
 		if pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
-			pointertargetwall.rpc("setxcdrawingvisibility", true)
 			if pointertargetwall != activetargetwall:
 				setactivetargetwall(pointertargetwall)
 		setactivetargetnode(pointertarget)
@@ -378,8 +364,8 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 			xcdrawing.setxcpositionangle(vang)
 			xcdrawing.setxcpositionorigin(vwallmid)
 			sketchsystem.rpc("xcdrawingfromdata", xcdrawing.exportxcrpcdata())
-			setactivetargetwall(xcdrawing)
 			clearactivetargetnode()
+			setactivetargetwall(xcdrawing)
 		gripmenu.get_node("NewSlice").get_node("MeshInstance").visible = false
 		gripmenu.get_node("NewSlice").get_node("CollisionShape").disabled = true
 		gripmenu.get_node("DoSlice").get_node("MeshInstance").visible = true
@@ -467,8 +453,8 @@ func buttonreleased_vrgrip():
 				var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(gripmenu.gripmenupointertargetwall.xcname0)
 				var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(gripmenu.gripmenupointertargetwall.xcname1)
 				if xcdrawing0.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
-					xcdrawing0.rpc("setxcdrawingvisibility", true)
-					xcdrawing1.rpc("setxcdrawingvisibility", true)
+					xcdrawing0.setxcdrawingvisibility(true)
+					xcdrawing1.setxcdrawingvisibility(true)
 					if xcdrawing0 != activetargetwall:
 						setactivetargetwall(xcdrawing0)
 					elif xcdrawing1 != activetargetwall:
@@ -521,10 +507,8 @@ func buttonreleased_vrgrip():
 				xctube1.updatetubeshell(sketchsystem.get_node("XCdrawings"), Tglobal.tubeshellsvisible)
 
 				xcdrawing.updatexctubeshell(sketchsystem.get_node("XCdrawings"), Tglobal.tubeshellsvisible)  # not strictly necessary as there won't be any shells in a sliced tube xc
-
-				pointertargettype = "none"
-				pointertarget = null
-				activetargettube.queue_free()  # must remove from xctubesconn
+				clearpointertarget()
+				activetargettube.queue_free()
 				activetargettube = null
 				activelaserroot.get_node("LaserSpot").visible = false
 
@@ -535,12 +519,10 @@ func buttonreleased_vrgrip():
 
 	elif pointertargettype == "XCdrawing" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		clearpointertargetmaterial()
-		pointertargetwall.rpc("setxcdrawingvisibility", false)
+		pointertargetwall.setxcdrawingvisibility(false)
 		sketchsystem.rpc("xcdrawingfromdata", pointertargetwall.exportxcrpcdata())
 		setactivetargetwall(null)
-		pointertarget = null
-		pointertargettype = "none"
-		pointertargetwall = null
+		clearpointertarget()
 		activelaserroot.get_node("LaserSpot").visible = false
 
 	elif pointertargettype == "XCtube":
@@ -550,7 +532,6 @@ func buttonreleased_vrgrip():
 
 	elif activetargetnode != null:
 		clearactivetargetnode()
-		
 
 	gripmenu.disableallgripmenus()
 
@@ -607,7 +588,7 @@ func _physics_process(_delta):
 				if (lam > 0.1 and joypos.y > 0) or (lam < 0.9 and joypos.y < 0):
 					activetargetwall.global_transform.origin += -vp.normalized()*2*_delta*sign(joypos.y)
 
-		onpointing(activelaserroot)
+		setpointertarget(activelaserroot)
 		
 	if activetargetwallgrabbedtransform != null:
 		if activetargetwallgrabbedpoint != null:
