@@ -19,7 +19,6 @@ var viewport_point = null
 const XCdrawig = preload("res://nodescenes/XCdrawing.tscn")
 const XCnode = preload("res://nodescenes/XCnode.tscn")
 
-onready var ARVRworld_scale = ARVRServer.world_scale
 var mousecontrollervec = Vector3(0.2, -0.1, -0.5)
 
 onready var activelaserroot = handright.get_node("LaserOrient")
@@ -91,8 +90,8 @@ func setactivetargetwall(newactivetargetwall):
 			xcnode.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("selected" if xcnode == activetargetnode else "normal"))
 		for xctube in activetargetwall.xctubesconn:
 			if not xctube.positioningtube:
-				xctube.updatetubeshell(sketchsystem.get_node("XCdrawings"), sketchsystem.tubeshellsvisible)
-		activetargetwall.updatexctubeshell(sketchsystem.get_node("XCdrawings"), sketchsystem.tubeshellsvisible)
+				xctube.updatetubeshell(sketchsystem.get_node("XCdrawings"), Tglobal.tubeshellsvisible)
+		activetargetwall.updatexctubeshell(sketchsystem.get_node("XCdrawings"), Tglobal.tubeshellsvisible)
 	if activetargetwall != null and activetargetwall.drawingtype == DRAWING_TYPE.DT_PAPERTEXTURE:
 		activetargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").get_surface_material(0).albedo_color = Color("#FEF4D5")
 	
@@ -514,7 +513,7 @@ func buttonreleased_vrgrip():
 				xctube0.xcsectormaterials = activetargettube.xcsectormaterials.duplicate()
 				xctube0.updatetubelinkpaths(sketchsystem)
 				sketchsystem.rpc("xctubefromdata", xctube0.exportxctrpcdata())
-				xctube0.updatetubeshell(sketchsystem.get_node("XCdrawings"), sketchsystem.tubeshellsvisible)
+				xctube0.updatetubeshell(sketchsystem.get_node("XCdrawings"), Tglobal.tubeshellsvisible)
 			
 				var xctube1 = sketchsystem.newXCtube(xcdrawing, xcdrawing1)
 				xctube1.xcdrawinglink = xcdrawinglink1
@@ -525,9 +524,9 @@ func buttonreleased_vrgrip():
 				#xctube1.xcsectormaterials.push_front(xctube1.xcsectormaterials.pop_back())
 
 				sketchsystem.rpc("xctubefromdata", xctube0.exportxctrpcdata())
-				xctube1.updatetubeshell(sketchsystem.get_node("XCdrawings"), sketchsystem.tubeshellsvisible)
+				xctube1.updatetubeshell(sketchsystem.get_node("XCdrawings"), Tglobal.tubeshellsvisible)
 
-				xcdrawing.updatexctubeshell(sketchsystem.get_node("XCdrawings"), sketchsystem.tubeshellsvisible)  # not strictly necessary as there won't be any shells in a sliced tube xc
+				xcdrawing.updatexctubeshell(sketchsystem.get_node("XCdrawings"), Tglobal.tubeshellsvisible)  # not strictly necessary as there won't be any shells in a sliced tube xc
 
 				pointertargettype = "none"
 				pointertarget = null

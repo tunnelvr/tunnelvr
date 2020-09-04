@@ -10,7 +10,9 @@ extends Spatial
 # * Ghost a wall (or unghost) so we can see through it
 # * Cut hole in wall is a different thing -- a proper type and recalculation
 
-# * copy tubeshellsvisible down to the GUID on startup of GUID
+# * func _on_xcdrawingvisibility_selected(index):
+# * func _on_centrelinevisibility_selected(index):
+
 
 # * How is it going to work from planview?
 # * a gripclick inserts a new XC in the tube that we can orient and move before applying the slice
@@ -222,10 +224,6 @@ func _ready():
 	print("nnet-id ", networkID)
 	playerMe.set_network_master(networkID)
 	playerMe.networkID = networkID
-
-	$GuiSystem/GUIPanel3D/Viewport/GUI/Panel/ButtonUpdateShell.pressed = true
-	$GuiSystem/GUIPanel3D._on_buttonupdateshell_toggled(true)
-
 
 func nextplayernetworkidinringskippingdoppelganger(deletedid):
 	for i in range($Players.get_child_count()):

@@ -4,20 +4,21 @@ const XCdrawing = preload("res://nodescenes/XCdrawing.tscn")
 const XCtube = preload("res://nodescenes/XCtube.tscn")
 
 const linewidth = 0.05
-var tubeshellsvisible = false
-var centrelineonlymode = false
-var centrelinevisible = false
+
+
 
 const defaultfloordrawing = "http://cave-registry.org.uk/svn/NorthernEngland/ThreeCountiesArea/rawscans/Ireby/DukeStResurvey-drawnup-p3.jpg"
 
 func _ready():
 	var floordrawing = newXCuniquedrawingPaper(defaultfloordrawing, DRAWING_TYPE.DT_FLOORTEXTURE)
 	get_node("/root/Spatial/ImageSystem").fetchpaperdrawing(floordrawing)
-
 	#loadcentrelinefile("res://surveyscans/dukest1resurvey2009.json")
 	#loadcentrelinefile("res://surveyscans/dukest1resurvey2009json.res")
 	loadcentrelinefile("res://surveyscans/Ireby/Ireby2/Ireby2.json")
-	
+	updatecentrelinevisibility()
+	changetubedxcsvizmode()
+	updateworkingshell()
+		
 func xcapplyonepath(xcn0, xcn1): 
 	var xcdrawing0 = xcn0.get_parent().get_parent()
 	var xcdrawing1 = xcn1.get_parent().get_parent()
@@ -75,24 +76,19 @@ remote func xctubefromdata(xctdata):
 	xctube.xcsectormaterials = xctdata["xcsectormaterials"]
 	xctube.updatetubelinkpaths(self)
 
-remotesync func updateworkingshell(makevisible):
-	tubeshellsvisible = makevisible
+func updateworkingshell():
 	for xctube in $XCtubes.get_children():
 		if not xctube.positioningtube:
-			xctube.updatetubeshell($XCdrawings, makevisible)
+			xctube.updatetubeshell($XCdrawings, Tglobal.tubeshellsvisible)
 	for xcdrawing in $XCdrawings.get_children():
 		if xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
-			xcdrawing.updatexctubeshell($XCdrawings, makevisible)
+			xcdrawing.updatexctubeshell($XCdrawings, Tglobal.tubeshellsvisible)
 
-func changecentrelineonlymode(lcentrelineonlymode):
-	centrelineonlymode = lcentrelineonlymode
-	get_tree().call_group("gpnoncentrelinegeo", "xcdfullsetvisibilitycollision", not centrelineonlymode)
+func updatecentrelinevisibility():
+	get_tree().call_group("gpnoncentrelinegeo", "xcdfullsetvisibilitycollision", not Tglobal.centrelineonly)
 	get_node("/root/Spatial/PlanViewSystem").updatecentrelinesizes()
-
-func changecentrevisiblemode(lcentrelinevisible):
-	centrelinevisible = lcentrelinevisible
 	for centrelinexcdrawing in get_tree().get_nodes_in_group("gpcentrelinegeo"):
-		get_node("/root/Spatial/LabelGenerator").makenodelabelstask(centrelinexcdrawing, false, centrelinevisible)
+		get_node("/root/Spatial/LabelGenerator").makenodelabelstask(centrelinexcdrawing, false)
 
 func changetubedxcsvizmode():
 	for xcdrawing in $XCdrawings.get_children():
@@ -112,8 +108,7 @@ func sketchsystemtodict():
 	for xctube in $XCtubes.get_children():
 		xctubesData.append(xctube.exportxctrpcdata())
 	var sketchdatadict = { "xcdrawings":xcdrawingsData,
-						   "xctubes":xctubesData,
-						   "tubeshellsvisible":tubeshellsvisible }
+						   "xctubes":xctubesData }
 	return sketchdatadict
 	
 func savesketchsystem():
@@ -143,7 +138,7 @@ func loadcentrelinefile(centrelinefile):
 	var centrelinedata = parse_json(centrelinedatafile.get_line())
 	centrelinedrawing.importcentrelinedata(centrelinedata, self)
 	#var xsectgps = centrelinedata.xsectgps
-	get_node("/root/Spatial/LabelGenerator").makenodelabelstask(centrelinedrawing, true, centrelinevisible)
+	get_node("/root/Spatial/LabelGenerator").makenodelabelstask(centrelinedrawing, true)
 	print("default lllloaded")
 
 remote func xcdrawingfromdata(xcdata):
@@ -159,7 +154,7 @@ remote func xcdrawingfromdata(xcdata):
 		get_node("/root/Spatial/ImageSystem").fetchpaperdrawing(xcdrawing)
 	if xcdrawing.drawingtype == DRAWING_TYPE.DT_CENTRELINE:
 		assert (false)   # shouldn't happen, not to be updated!
-		get_node("/root/Spatial/LabelGenerator").makenodelabelstask(xcdrawing, true, centrelinevisible)
+		get_node("/root/Spatial/LabelGenerator").makenodelabelstask(xcdrawing, true)
 	
 remote func sketchsystemfromdict(sketchdatadict):
 	get_node("/root/Spatial").clearallprocessactivityforreload()
@@ -193,12 +188,14 @@ remote func sketchsystemfromdict(sketchdatadict):
 			xcdrawing.get_node("XCdrawingplane/CollisionShape").disabled = true
 			xcdrawing.mergexcrpcdata(xcdrawingData)
 			if xcdrawing.drawingtype == DRAWING_TYPE.DT_CENTRELINE:
-				get_node("/root/Spatial/LabelGenerator").makenodelabelstask(xcdrawing, true, centrelinevisible)
+				get_node("/root/Spatial/LabelGenerator").makenodelabelstask(xcdrawing, true)
 		assert (xcdrawing.get_name() == xcdrawingData["name"])
 
 	for xctdata in sketchdatadict["xctubes"]:
 		var xctube = xctubefromdata(xctdata)
-	updateworkingshell(sketchdatadict.get("tubeshellsvisible", tubeshellsvisible))
+	updatecentrelinevisibility()
+	changetubedxcsvizmode()
+	updateworkingshell()
 	print("lllloaded")
 
 func loadsketchsystem(fname):

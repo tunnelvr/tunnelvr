@@ -1,4 +1,4 @@
-[gd_scene load_steps=143 format=2]
+[gd_scene load_steps=145 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/default_env.tres" type="Environment" id=2]
@@ -480,7 +480,19 @@ emission_energy = 0.47
 emission_operator = 0
 emission_on_uv2 = false
 
-[sub_resource type="SpatialMaterial" id=88]
+[sub_resource type="CubeMesh" id=108]
+size = Vector3( 0.2, 0.2, 0.2 )
+
+[sub_resource type="SpatialMaterial" id=109]
+albedo_color = Color( 0.180392, 0.905882, 0.309804, 1 )
+
+[sub_resource type="SphereMesh" id=89]
+radius = 0.05
+height = 0.1
+radial_segments = 8
+rings = 4
+
+[sub_resource type="SpatialMaterial" id=110]
 flags_no_depth_test = true
 flags_disable_ambient_light = true
 albedo_color = Color( 0.980392, 0.741176, 0.027451, 1 )
@@ -492,13 +504,6 @@ emission = Color( 0.976471, 0.862745, 0.333333, 1 )
 emission_energy = 0.5
 emission_operator = 0
 emission_on_uv2 = false
-
-[sub_resource type="SphereMesh" id=89]
-material = SubResource( 88 )
-radius = 0.05
-height = 0.1
-radial_segments = 8
-rings = 4
 
 [sub_resource type="CubeMesh" id=97]
 resource_local_to_scene = true
@@ -859,106 +864,43 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ButtonPlanView" type="Button" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 15.3899
-margin_top = 113.177
-margin_right = 155.39
-margin_bottom = 141.177
+[node name="ButtonPlanView" type="CheckBox" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
+margin_left = 14.3899
+margin_top = 143.177
+margin_right = 154.39
+margin_bottom = 171.177
 rect_pivot_offset = Vector2( 138.61, -8.13628 )
 hint_tooltip = "test tooltip"
-toggle_mode = true
 text = "Plan View"
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="ButtonFetchImages" type="Button" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 14.9266
-margin_top = 147.461
-margin_right = 154.926
-margin_bottom = 175.461
+margin_left = 13.9266
+margin_top = 109.461
+margin_right = 153.926
+margin_bottom = 137.461
 rect_pivot_offset = Vector2( 111.073, 28.0005 )
 text = "FetchImages"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ButtonToggleCentrelines" type="Button" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 159.927
-margin_top = 147.461
-margin_right = 299.926
-margin_bottom = 175.461
-rect_pivot_offset = Vector2( 111.073, 28.0005 )
-toggle_mode = true
-text = "Centrelines viz"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="ButtonUntubedXCsViz" type="Button" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 160.927
-margin_top = 180.461
-margin_right = 300.926
-margin_bottom = 208.461
-rect_pivot_offset = Vector2( 111.073, 28.0005 )
-toggle_mode = true
-pressed = true
-text = "UntubedXCs viz"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="ButtonHeadtorch" type="Button" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 15.3899
-margin_top = 179.177
-margin_right = 155.39
-margin_bottom = 207.177
+[node name="ButtonHeadtorch" type="CheckBox" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
+margin_left = 14.3899
+margin_top = 164.177
+margin_right = 160.39
+margin_bottom = 204.177
 rect_pivot_offset = Vector2( 138.61, -8.13628 )
 hint_tooltip = "test tooltip"
-toggle_mode = true
 text = "Headtorch"
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
-[node name="ButtonDoppelganger" type="Button" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 15.3899
-margin_top = 212.177
-margin_right = 155.39
-margin_bottom = 240.177
+[node name="ButtonDoppelganger" type="CheckBox" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
+margin_left = 14.3899
+margin_top = 199.177
+margin_right = 154.39
+margin_bottom = 227.177
 rect_pivot_offset = Vector2( 138.61, -8.13628 )
 hint_tooltip = "test tooltip"
-toggle_mode = true
 text = "Doppelganger"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="ButtonUpdateShell" type="Button" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 160.4
-margin_top = 43.6836
-margin_right = 300.4
-margin_bottom = 71.6836
-rect_pivot_offset = Vector2( 138.61, -8.13628 )
-hint_tooltip = "test tooltip"
-toggle_mode = true
-text = "Update Shell"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="ButtonOnlyCentrelines" type="Button" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 159.4
-margin_top = 111.684
-margin_right = 299.4
-margin_bottom = 139.684
-rect_pivot_offset = Vector2( 138.61, -8.13628 )
-hint_tooltip = "test tooltip"
-toggle_mode = true
-text = "Only Centrelines"
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="ButtonSwapControllers" type="Button" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
 margin_left = 160.4
@@ -968,6 +910,50 @@ margin_bottom = 105.684
 rect_pivot_offset = Vector2( 138.61, -8.13628 )
 hint_tooltip = "test tooltip"
 text = "Swap Controllers"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Centreline" type="Label" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
+margin_left = 160.0
+margin_top = 119.0
+margin_right = 230.0
+margin_bottom = 133.0
+text = "Centreline:"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="XCdrawing" type="Label" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
+margin_left = 174.0
+margin_top = 147.0
+margin_right = 229.0
+margin_bottom = 161.0
+text = "XCdraw:"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="CentrelineVisibility" type="OptionButton" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
+margin_left = 233.0
+margin_top = 111.0
+margin_right = 290.0
+margin_bottom = 138.0
+text = "hide"
+items = [ "hide", null, false, 0, null, "show", null, false, 1, null, "only", null, false, 2, null ]
+selected = 0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="XCdrawingVisibility" type="OptionButton" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
+margin_left = 233.0
+margin_top = 142.0
+margin_right = 290.0
+margin_bottom = 169.0
+text = "hide"
+items = [ "hide", null, false, 0, null, "show", null, false, 1, null, "only", null, false, 2, null ]
+selected = 0
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -990,18 +976,6 @@ margin_right = 177.0
 margin_bottom = -32.0
 texture = ExtResource( 11 )
 expand = true
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="OptionButton" type="OptionButton" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 286.58
-margin_top = 211.256
-margin_right = 368.58
-margin_bottom = 265.256
-text = "Item 0"
-items = [ "Item 0", null, false, 0, null, "Item 1", null, false, 1, null, "Item 2", null, false, 2, null ]
-selected = 0
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -1378,9 +1352,14 @@ mesh = SubResource( 79 )
 material/0 = SubResource( 83 )
 
 [node name="selected_highlight" type="MeshInstance" parent="MaterialSystem/nodematerial"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0876317, 0, -1.20633 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.00370264, 0, -1.20633 )
 mesh = SubResource( 79 )
 material/0 = SubResource( 84 )
+
+[node name="station" type="MeshInstance" parent="MaterialSystem/nodematerial"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.658091, 0, -1.33024 )
+mesh = SubResource( 108 )
+material/0 = SubResource( 109 )
 
 [node name="lasermaterial" type="Spatial" parent="MaterialSystem"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -1.90702, 0, -1.16549 )
@@ -1393,7 +1372,7 @@ material/0 = null
 [node name="spotselected" type="MeshInstance" parent="MaterialSystem/lasermaterial"]
 transform = Transform( 1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, -0.610968, 0, 0 )
 mesh = SubResource( 89 )
-material/0 = null
+material/0 = SubResource( 110 )
 
 [node name="spike" type="MeshInstance" parent="MaterialSystem/lasermaterial"]
 transform = Transform( 1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, 0, 0, -0.361475 )

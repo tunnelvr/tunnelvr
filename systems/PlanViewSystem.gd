@@ -63,7 +63,7 @@ func processplanviewpointing(raycastcollisionpoint):
 	planviewsystem.get_node("RealPlanCamera/LaserScope/LaserOrient/RayCast").force_raycast_update()
 
 func updatecentrelinesizes():
-	var sca = $PlanView/Viewport/Camera.size/70.0*2.5 if get_node("/root/Spatial/SketchSystem").centrelineonlymode else 1.0
+	var sca = $PlanView/Viewport/Camera.size/70.0*2.5 if Tglobal.centrelineonly else 1.0
 	for xcdrawing in get_tree().get_nodes_in_group("gpcentrelinegeo"):
 		for xcn in xcdrawing.get_node("XCnodes").get_children():
 			xcn.get_node("Quad").get_surface_material(0).set_shader_param("vertex_scale", sca)

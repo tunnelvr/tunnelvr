@@ -6,31 +6,28 @@ var workingxcnode = null
 
 const textlabelcountdowntime = 0.2
 var textlabelcountdowntimer = 0.0
-var centrelinevisible = false
 
 var sortdfunctorigin = Vector3(0,0,0)
 func sortdfunc(a, b):
 	return sortdfunctorigin.distance_squared_to(a.global_transform.origin) > sortdfunctorigin.distance_squared_to(b.global_transform.origin)
 
-func makenodelabelstask(centrelinedrawing, addtolabelgeneratingtask, lcentrelinevisible):
-	centrelinevisible = lcentrelinevisible
+func makenodelabelstask(centrelinedrawing, addtolabelgeneratingtask):
 	for xcn in centrelinedrawing.get_node("XCnodes").get_children():
 		#xcn.get_node("Quad").visible = centrelinevisible
-		xcn.visible = centrelinevisible
-		xcn.get_node("CollisionShape").disabled = not centrelinevisible
+		xcn.visible = Tglobal.centrelinevisible
+		xcn.get_node("CollisionShape").disabled = not Tglobal.centrelinevisible
 		if addtolabelgeneratingtask:
 			remainingxcnodes.append(xcn)
-	centrelinedrawing.get_node("PathLines").visible = centrelinevisible
-	centrelinedrawing.get_node("PathLines").visible = centrelinevisible
-	$ViewportForceRender.visible = centrelinevisible
-	if centrelinevisible and len(remainingxcnodes) != 0:
+	centrelinedrawing.get_node("PathLines").visible = Tglobal.centrelinevisible
+	centrelinedrawing.get_node("PathLines").visible = Tglobal.centrelinevisible
+	$ViewportForceRender.visible = Tglobal.centrelinevisible
+	if Tglobal.centrelinevisible and len(remainingxcnodes) != 0:
 		sortdfunctorigin = get_node("/root/Spatial").playerMe.get_node("HeadCam").global_transform.origin
 		remainingxcnodes.sort_custom(self, "sortdfunc")
-			
-	set_process(centrelinevisible)
+	set_process(Tglobal.centrelinevisible)
 
 func _process(delta):
-	if not centrelinevisible:
+	if not Tglobal.centrelinevisible:
 		set_process(false)
 		return
 	if workingxcnode == null:
