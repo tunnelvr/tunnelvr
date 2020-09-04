@@ -3,16 +3,12 @@ extends Spatial
 # Stuff to do:
 
 
-# should give the other player a position near to me:  $SketchSystem.rpc_id(id, "sketchsystemfromdict", $SketchSystem.sketchsystemtodict())
+# * should give the other player a position near to me:  $SketchSystem.rpc_id(id, "sketchsystemfromdict", $SketchSystem.sketchsystemtodict())
 		
-# * LabelGenerator should sort by distance proximity of headcam first.  Make the default label width smaller and make unique before setting its width
-		
-# * needs to be locked down when in this moving tube mode (or kill off this slice if you drop it)		
-# * NewSlice should only happen with a selected tube
-# * New slice should only allow moving (no drawing) (drag up move closer) within the tube
-
-# * Do Slice should preserve the material sectors
-# * Remove all the old slicing and XC dublication code
+# * DelXC would delete XC and join between the tubes
+# * Ghost a wall (or unghost) so we can see through it
+# * Cut hole in wall is a different thing -- a proper type and recalculation
+# * Hide all nodes and pathlines (what's that look like?) 
 
 # * copy tubeshellsvisible down to the GUID on startup of GUID
 
@@ -21,16 +17,12 @@ extends Spatial
 #   -- this can be done from the plan view too, 
 #   -- plot with front-culling so as to see inside the shapes, and plot with image textures on
 
-# * Make a blank XCdrawing in a selected tube and be able to move it around in the vertical plane.  
-# * This then locks and slices the tube.  (keep tube directions same and maintain the sector values)
-
 # * save and load puts saves my standing position
 
-# * abolish duplicating xc drawing mode
-# * process engine updating of the tubes
+# * process engine loading of file.  
 
 # * XC in mode where it cannot take new nodes, only as continuation
-# * and automatically deletes connective bits
+# * and automatically deletes connective bits -- and reconnects tubes
 
 # * tube has easy clicky ways to add in connecting lines between them (advancing the selected node after starting at a join)
 

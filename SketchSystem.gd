@@ -7,6 +7,7 @@ const linewidth = 0.05
 var tubeshellsvisible = false
 var centrelineonlymode = false
 var centrelinevisible = false
+var tubedxcsvisible = true
 const defaultfloordrawing = "http://cave-registry.org.uk/svn/NorthernEngland/ThreeCountiesArea/rawscans/Ireby/DukeStResurvey-drawnup-p3.jpg"
 
 func _ready():
@@ -92,6 +93,15 @@ func changecentrevisiblemode(lcentrelinevisible):
 	centrelinevisible = lcentrelinevisible
 	for centrelinexcdrawing in get_tree().get_nodes_in_group("gpcentrelinegeo"):
 		get_node("/root/Spatial/LabelGenerator").makenodelabelstask(centrelinexcdrawing, false, centrelinevisible)
+
+func changetubedxcsvizmode(ltubedxcsvisible):
+	tubedxcsvisible = ltubedxcsvisible
+	for xcdrawing in $XCdrawings.get_children():
+		if xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
+			var xcsvisible = xcdrawing.get_node("XCdrawingplane").visible or tubedxcsvisible or len(xcdrawing.xctubesconn) == 0
+			xcdrawing.get_node("XCnodes").visible = xcsvisible
+			xcdrawing.get_node("PathLines").visible = xcsvisible
+
 
 # Quick saving and loading of shape.  It goes to 
 # C:\Users\ViveOne\AppData\Roaming\Godot\app_userdata\digtunnel

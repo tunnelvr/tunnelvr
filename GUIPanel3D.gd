@@ -45,6 +45,11 @@ func _on_buttontogglecentreline_toggled(button_pressed):
 	sketchsystem.changecentrevisiblemode(button_pressed)
 	$Viewport/GUI/Panel/Label.text = "Centrelines on" if button_pressed else "Centreline hidden"
 
+func _on_untubedxcsviz_toggled(button_pressed):
+	sketchsystem.changetubedxcsvizmode(button_pressed)
+	$Viewport/GUI/Panel/Label.text = "UntubedXCs Viz" if button_pressed else "UntubedXCs Unviz"
+
+
 
 func _on_buttonswapcontrollers_pressed():
 	var cidl = get_node("/root/Spatial").playerMe.get_node("HandLeft").controller_id
@@ -64,6 +69,7 @@ func _ready():
 	$Viewport/GUI/Panel/ButtonSwapControllers.connect("pressed", self, "_on_buttonswapcontrollers_pressed")
 	$Viewport/GUI/Panel/ButtonOnlyCentrelines.connect("toggled", self, "_on_buttononlycentrelines_toggled")
 	$Viewport/GUI/Panel/ButtonToggleCentrelines.connect("toggled", self, "_on_buttontogglecentreline_toggled")
+	$Viewport/GUI/Panel/ButtonUntubedXCsViz.connect("toggled", self, "_on_untubedxcsviz_toggled")
 	
 	
 func clickbuttonheadtorch():
