@@ -151,5 +151,7 @@ func _input(event):
 		elif event.scancode == KEY_D:
 			$Viewport/GUI/Panel/ButtonDoppelganger.pressed = not $Viewport/GUI/Panel/ButtonDoppelganger.pressed
 			_on_buttondoppelganger_toggled($Viewport/GUI/Panel/ButtonDoppelganger.pressed)	
+		elif event.scancode == KEY_O:
+			_on_buttonswapcontrollers_pressed()
 
 

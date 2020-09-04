@@ -3,8 +3,6 @@
 [ext_resource path="res://nodescenes/PlayerPuppet.gd" type="Script" id=1]
 [ext_resource path="res://guimeshes/handrightmesh.tscn" type="PackedScene" id=2]
 [ext_resource path="res://guimeshes/headmesh.tscn" type="PackedScene" id=3]
-[ext_resource path="res://guimaterials/laser.material" type="Material" id=4]
-[ext_resource path="res://guimaterials/laserspot.material" type="Material" id=5]
 [ext_resource path="res://guimeshes/headtorchmesh.tscn" type="PackedScene" id=6]
 
 [sub_resource type="Animation" id=1]
@@ -47,11 +45,22 @@ tracks/2/keys = {
 [sub_resource type="CubeMesh" id=2]
 size = Vector3( 0.002, 0.002, 1 )
 
-[sub_resource type="SphereMesh" id=3]
+[sub_resource type="SpatialMaterial" id=3]
+flags_unshaded = true
+params_diffuse_mode = 1
+albedo_color = Color( 1, 0.156863, 0.156863, 0.741176 )
+
+[sub_resource type="SphereMesh" id=4]
 radius = 0.05
 height = 0.1
 radial_segments = 8
 rings = 4
+
+[sub_resource type="SpatialMaterial" id=5]
+flags_no_depth_test = true
+albedo_color = Color( 0.984314, 0.0705882, 0.0705882, 1 )
+metallic = 0.46
+roughness = 0.28
 
 [node name="PlayerPuppet" type="Spatial"]
 transform = Transform( -1, 0, -3.25841e-07, 0, 1, 0, 3.25841e-07, 0, -1, 0, 0, -8 )
@@ -93,9 +102,9 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 50, 0, 0, 0 )
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.5 )
 cast_shadow = 0
 mesh = SubResource( 2 )
-material/0 = ExtResource( 4 )
+material/0 = SubResource( 3 )
 
 [node name="LaserSpot" type="MeshInstance" parent="HandRight/LaserOrient"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1 )
-mesh = SubResource( 3 )
-material/0 = ExtResource( 5 )
+mesh = SubResource( 4 )
+material/0 = SubResource( 5 )

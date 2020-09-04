@@ -1,9 +1,5 @@
 extends ARVROrigin
 
-var xcdrawing_material = preload("res://guimaterials/XCdrawing.material")
-var xcdrawing_active_material = preload("res://guimaterials/XCdrawing_active.material")
-onready var xcdrawing_material_albedoa = xcdrawing_material.albedo_color.a
-onready var xcdrawing_active_material_albedoa = xcdrawing_active_material.albedo_color.a
 var doppelganger = null 
 
 var arvrinterface = null
@@ -16,9 +12,7 @@ func setheadtorchlight(torchon):
 	$HeadCam/HeadtorchLight.visible = torchon
 	get_node("/root/Spatial/WorldEnvironment").environment = preload("res://environments/underground_env.tres") if torchon else preload("res://environments/default_env.tres")
 	get_node("/root/Spatial/WorldEnvironment/DirectionalLight").visible = not torchon
-	# translucent walls reflect too much when torchlight is on
-	xcdrawing_material.albedo_color.a = 0.1 if torchon else xcdrawing_material_albedoa
-	xcdrawing_active_material.albedo_color.a = 0.1 if torchon else xcdrawing_active_material_albedoa
+	get_node("/root/Spatial/MaterialSystem").adjustmaterialtotorchlight(torchon)
 	get_node("/root/Spatial/SketchSystem").get_node("SoundPos1").global_transform.origin = $HeadCam.global_transform.origin + $HeadCam.global_transform.basis.y * 0.2
 	get_node("/root/Spatial/SketchSystem").get_node("SoundPos1").play()
 

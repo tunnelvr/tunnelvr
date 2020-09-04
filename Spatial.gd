@@ -64,7 +64,7 @@ extends Spatial
 
 # * special materials are the sketch image and invisible
 # * we can toggle culling to the materials to see inside (means we get everything oriented right) 
-# * LaserShadow out in global space under a node
+
 
 # * highlight nodes under pointer system so it's global and simplifies colouring code (active node to be an overlay)
 

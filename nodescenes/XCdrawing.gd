@@ -290,7 +290,8 @@ func updatexcpaths():
 	var newmesh = surfaceTool.commit()
 	if $PathLines.mesh == null:
 		$PathLines.mesh = newmesh
-		$PathLines.set_surface_material(0, load("res://guimaterials/XCdrawingCentrelines.material") if drawingtype == DRAWING_TYPE.DT_CENTRELINE else load("res://guimaterials/XCdrawingPathlines.material"))
+		var materialsystem = get_node("/root/Spatial/MaterialSystem")
+		$PathLines.set_surface_material(0, materialsystem.pathlinematerial("centreline" if drawingtype == DRAWING_TYPE.DT_CENTRELINE else "normal"))
 	else:
 		var m = $PathLines.get_surface_material(0)
 		$PathLines.mesh = newmesh
