@@ -4,3 +4,4 @@ var tubedxcsvisible = true
 var tubeshellsvisible = true
 var centrelinevisible = false
 var centrelineonly = false
+var connectiontoserveractive = false

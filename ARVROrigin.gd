@@ -3,7 +3,6 @@ extends ARVROrigin
 var doppelganger = null 
 
 var arvrinterface = null
-var connectiontoserveractive = false
 var networkID = 0
 var bouncetestnetworkID = 0
 var VRstatus = "unknown"
@@ -90,12 +89,15 @@ func _clear_bone_rest(skel):
 
 func initquesthandtrackingnow(lovr_hand_tracking):
 	ovr_hand_tracking = lovr_hand_tracking
-	var lefthandmodel = load("res://addons/godot_ovrmobile/example_scenes/left_hand_model.glb").instance()
-	var righthandmodel = load("res://addons/godot_ovrmobile/example_scenes/right_hand_model.glb").instance()
-	$HandLeft.add_child(lefthandmodel)
-	$HandRight.add_child(righthandmodel)
+	#var lefthandmodel = load("res://addons/godot_ovrmobile/example_scenes/left_hand_model.glb").instance()
+	#var righthandmodel = load("res://addons/godot_ovrmobile/example_scenes/right_hand_model.glb").instance()
+	#$HandLeft.add_child(lefthandmodel)
+	#$HandRight.add_child(righthandmodel)
 	$HandLeft/csghandleft.visible = false
 	$HandRight/csghandright.visible = false
+	$HandLeft/left_hand_model.visible = true
+	$HandRight/right_hand_model.visible = true
+	
 	
 	_clear_bone_rest($HandLeft/left_hand_model/ArmatureLeft/Skeleton);
 	_clear_bone_rest($HandRight/right_hand_model/ArmatureRight/Skeleton);

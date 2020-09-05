@@ -220,7 +220,7 @@ func _physics_process(delta):
 		else:
 			doppelganger.setavatarposition(positiondict)
 
-	if playerMe.connectiontoserveractive:
+	if Tglobal.connectiontoserveractive:
 		playerMe.rpc_unreliable("setavatarposition", playerMe.playerpositiondict())
 	
 

@@ -216,13 +216,13 @@ func _ready():
 	get_tree().connect("network_peer_disconnected", self, "_player_disconnected")
 	if hostipnumber == "":
 		networkedmultiplayerenet.create_server(hostportnumber, 5)
-		playerMe.connectiontoserveractive = (not arvr_quest)
+		Tglobal.connectiontoserveractive = (not arvr_quest)
 	else:
 		networkedmultiplayerenet.create_client(hostipnumber, hostportnumber)
 		get_tree().connect("connected_to_server", self, "_connected_to_server")
 		get_tree().connect("connection_failed", self, "_connection_failed")
 		get_tree().connect("server_disconnected", self, "_server_disconnected")
-		playerMe.connectiontoserveractive = false
+		Tglobal.connectiontoserveractive = false
 		#playerMe.rotate_y(180)  
 		playerMe.global_transform.origin += 3*Vector3(playerMe.get_node("HeadCam").global_transform.basis.z.x, 0, playerMe.get_node("HeadCam").global_transform.basis.z.z).normalized()
 	get_tree().set_network_peer(networkedmultiplayerenet)
@@ -266,14 +266,14 @@ func _player_disconnected(id):
 		
 func _connected_to_server():
 	print("_connected_to_server")
-	playerMe.connectiontoserveractive = true 
+	Tglobal.connectiontoserveractive = true 
 	
 	
 func _connection_failed():
 	print("_connection_failed")
 func _server_disconnected():
 	print("_server_disconnected")
-	playerMe.connectiontoserveractive = false
+	Tglobal.connectiontoserveractive = false
 	
 func _process(_delta):
 	if !perform_runtime_config:
@@ -288,10 +288,11 @@ func clearallprocessactivityforreload():
 	$ImageSystem.fetcheddrawing = null
 	$ImageSystem.paperdrawinglist.clear()
 
-	var pointersystem = playerMe.get_node("pointersystem")
-	pointersystem.clearactivetargetnode()  # clear all the objects before they are freed
-	#pointersystem.clearpointertargetmaterial()
-	pointersystem.clearpointertarget()
-	pointersystem.setactivetargetwall(null)
+	if playerMe != null:
+		var pointersystem = playerMe.get_node("pointersystem")
+		pointersystem.clearactivetargetnode()  # clear all the objects before they are freed
+		#pointersystem.clearpointertargetmaterial()
+		pointersystem.clearpointertarget()
+		pointersystem.setactivetargetwall(null)
 
 

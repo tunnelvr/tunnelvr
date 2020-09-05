@@ -14,7 +14,8 @@ func _ready():
 	get_node("/root/Spatial/ImageSystem").fetchpaperdrawing(floordrawing)
 	#loadcentrelinefile("res://surveyscans/dukest1resurvey2009.json")
 	#loadcentrelinefile("res://surveyscans/dukest1resurvey2009json.res")
-	loadcentrelinefile("res://surveyscans/Ireby/Ireby2/Ireby2.json")
+	#loadcentrelinefile("res://surveyscans/Ireby/Ireby2/Ireby2.json")
+	loadsketchsystem("res://surveyscans/ireby2save.res")
 	updatecentrelinevisibility()
 	changetubedxcsvizmode()
 	updateworkingshell()
@@ -200,7 +201,8 @@ func loadsketchsystem(fname):
 	sketchdatafile.open(fname, File.READ)
 	var sketchdatadict = sketchdatafile.get_var()
 	sketchdatafile.close()
-	if get_node("/root/Spatial").playerMe.connectiontoserveractive:
+	print([sketchdatadict])
+	if Tglobal.connectiontoserveractive:
 		rpc("sketchsystemfromdict", sketchdatadict)
 	sketchsystemfromdict(sketchdatadict)
 
