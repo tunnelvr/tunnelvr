@@ -12,13 +12,15 @@ const defaultfloordrawing = "http://cave-registry.org.uk/svn/NorthernEngland/Thr
 func _ready():
 	var floordrawing = newXCuniquedrawingPaper(defaultfloordrawing, DRAWING_TYPE.DT_FLOORTEXTURE)
 	get_node("/root/Spatial/ImageSystem").fetchpaperdrawing(floordrawing)
-	#loadcentrelinefile("res://surveyscans/dukest1resurvey2009.json")
-	#loadcentrelinefile("res://surveyscans/dukest1resurvey2009json.res")
-	#loadcentrelinefile("res://surveyscans/Ireby/Ireby2/Ireby2.json")
-	loadsketchsystem("res://surveyscans/ireby2save.res")
-	updatecentrelinevisibility()
-	changetubedxcsvizmode()
-	updateworkingshell()
+	if false:
+		#loadcentrelinefile("res://surveyscans/dukest1resurvey2009.json")
+		loadcentrelinefile("res://surveyscans/dukest1resurvey2009json.res")
+		#loadcentrelinefile("res://surveyscans/Ireby/Ireby2/Ireby2.json")
+		updatecentrelinevisibility()
+		changetubedxcsvizmode()
+		updateworkingshell()
+	else:
+		loadsketchsystem("res://surveyscans/ireby2save.res")
 		
 
 func xcapplyonepathtube(xcn0, xcdrawing0, xcn1, xcdrawing1): 
@@ -67,7 +69,7 @@ remote func xctubefromdata(xctdata):
 			break
 		assert (lxctube.xcname0 != xctdata["xcname1"])
 	if xctube == null:
-		assert ($XCtubes.get_node(xctdata["name"]) == null)
+		assert (not $XCtubes.has_node(xctdata["name"]))
 		xctube = newXCtube(xcdrawing0, get_node("XCdrawings").get_node(xctdata["xcname1"]))
 	assert (xctube.get_name() == xctdata["name"])
 	xctube.xcdrawinglink = xctdata["xcdrawinglink"]
@@ -94,7 +96,7 @@ func changetubedxcsvizmode():
 			var xcsvisible = xcdrawing.get_node("XCdrawingplane").visible or Tglobal.tubedxcsvisible or len(xcdrawing.xctubesconn) == 0
 			xcdrawing.get_node("XCnodes").visible = xcsvisible
 			xcdrawing.get_node("PathLines").visible = xcsvisible
-
+			assert (xcdrawing.get_node("XCdrawingplane").visible != xcdrawing.get_node("XCdrawingplane/CollisionShape").disabled)
 
 # Quick saving and loading of shape.  It goes to 
 # C:\Users\ViveOne\AppData\Roaming\Godot\app_userdata\digtunnel
@@ -189,6 +191,7 @@ remote func sketchsystemfromdict(sketchdatadict):
 				get_node("/root/Spatial/LabelGenerator").makenodelabelstask(xcdrawing, true)
 		assert (xcdrawing.get_name() == xcdrawingData["name"])
 
+	
 	for xctdata in sketchdatadict["xctubes"]:
 		var xctube = xctubefromdata(xctdata)
 	updatecentrelinevisibility()

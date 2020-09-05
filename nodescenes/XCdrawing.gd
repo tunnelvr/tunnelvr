@@ -19,6 +19,7 @@ var maxnodepointnumber = 0
 var linewidth = 0.05
 
 func setxcdrawingvisibility(makevisible):
+	assert ($XCdrawingplane.visible != $XCdrawingplane/CollisionShape.disabled)	
 	if not makevisible:
 		$XCdrawingplane.visible = false
 		$XCdrawingplane/CollisionShape.disabled = true
@@ -36,7 +37,8 @@ func setxcdrawingvisibility(makevisible):
 				sca = max(sca, abs(nodepoint.y) + 1)
 			if sca > $XCdrawingplane.scale.x:
 				$XCdrawingplane.set_scale(Vector3(sca, sca, 1.0))
-
+	assert ($XCdrawingplane.visible != $XCdrawingplane/CollisionShape.disabled)
+	
 # these transforming operations work in sequence, each correcting the relative position change caused by the other
 func scalexcnodepointspointsxy(scax, scay):
 	for i in nodepoints.keys():
@@ -360,10 +362,10 @@ func updatexctubeshell(xcdrawings, makevisible):
 func xcdfullsetvisibilitycollision(bvisible):
 	visible = bvisible
 	if visible:
-		$XCdrawingplane/CollisionShape.disabled = true
-		if has_node("XCflatshell"):
-			$XCflatshell/CollisionShape.disabled = true
-	else:
 		$XCdrawingplane/CollisionShape.disabled = not $XCdrawingplane.visible
 		if has_node("XCflatshell"):
 			$XCflatshell/CollisionShape.disabled = not $XCflatshell.visible
+	else:
+		$XCdrawingplane/CollisionShape.disabled = true
+		if has_node("XCflatshell"):
+			$XCflatshell/CollisionShape.disabled = true

@@ -42,8 +42,11 @@ radius = 0.1
 height = 0.18
 
 [sub_resource type="CylinderMesh" id=2]
+top_radius = 0.01
 bottom_radius = 0.001
-height = 4.0
+height = 0.03
+radial_segments = 12
+rings = 1
 
 [sub_resource type="SpatialMaterial" id=3]
 albedo_color = Color( 0.968627, 0.0392157, 0.0392157, 1 )
@@ -898,6 +901,19 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.2, 1.5, -0.5 )
 [node name="csghandleft" parent="Players/PlayerMe/HandLeft" instance=ExtResource( 6 )]
 transform = Transform( -1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0 )
 
+[node name="csgtip" type="Spatial" parent="Players/PlayerMe/HandLeft"]
+transform = Transform( -1.62921e-07, 0, 1, 0, 1, 0, -1, 0, -1.62921e-07, -0.026, -0.007, -0.112 )
+
+[node name="MeshInstance2" type="MeshInstance" parent="Players/PlayerMe/HandLeft/csgtip"]
+transform = Transform( -1.62921e-07, -1, 0, 1, -1.62921e-07, 0, 0, 0, 1, 0, 0, 0 )
+visible = false
+mesh = SubResource( 2 )
+material/0 = SubResource( 3 )
+
+[node name="MovePointThimble" type="RemoteTransform" parent="Players/PlayerMe/HandLeft/csgtip"]
+remote_path = NodePath("../../../../../HandObjects/MovePointThimble")
+update_scale = false
+
 [node name="left_hand_model" type="Spatial" parent="Players/PlayerMe/HandLeft"]
 visible = false
 
@@ -1082,10 +1098,11 @@ bone_name = "b_l_middle_3"
 [node name="l_middle_finger_tip_marker" type="Spatial" parent="Players/PlayerMe/HandLeft/left_hand_model/ArmatureLeft/Skeleton/BoneAttachment 8"]
 transform = Transform( 1, 0, 0, 0, 0, -1, 0, 1, 0, 2.49649, -0.11373, 0.0308652 )
 
-[node name="MeshInstance" type="MeshInstance" parent="Players/PlayerMe/HandLeft/left_hand_model/ArmatureLeft/Skeleton/BoneAttachment 8/l_middle_finger_tip_marker"]
-transform = Transform( -1.62921e-07, -1, 0, 1, -1.62921e-07, 0, 0, 0, 1, 0, 0, 0 )
-mesh = SubResource( 2 )
-material/0 = SubResource( 3 )
+[node name="MovePointThimble" type="RemoteTransform" parent="Players/PlayerMe/HandLeft/left_hand_model/ArmatureLeft/Skeleton/BoneAttachment 8/l_middle_finger_tip_marker"]
+remote_path = NodePath("../../../../../../../../../HandObjects/MovePointThimble")
+update_position = false
+update_rotation = false
+update_scale = false
 
 [node name="BoneAttachment 9" type="BoneAttachment" parent="Players/PlayerMe/HandLeft/left_hand_model/ArmatureLeft/Skeleton"]
 transform = Transform( 0.987593, 0.0968453, -0.123618, 0.132458, -0.0908865, 0.987014, 0.0843529, -0.991142, -0.102587, 16.5356, 0.568592, -0.979276 )
@@ -1112,13 +1129,6 @@ transform = Transform( 1, 0, 0, 0, 0, -1, 0, 1, 0, 10.0162, 2.38383, -2.42547 )
 mesh = SubResource( 5 )
 skin = SubResource( 6 )
 material/0 = null
-
-[node name="TipTouchRay" type="RayCast" parent="Players/PlayerMe/HandLeft"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0261416, -0.00699997, -0.069097 )
-enabled = true
-cast_to = Vector3( 0, 0, -0.1 )
-collision_mask = 3072
-collide_with_areas = true
 
 [node name="AudioStreamPlayer3D" type="AudioStreamPlayer3D" parent="Players/PlayerMe/HandLeft"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.024738, 0, -0.130972 )
@@ -1460,6 +1470,23 @@ remote_path = NodePath("../../../PlanViewSystem")
 
 [node name="toGuiSystem" type="RemoteTransform" parent="Players/PlayerMe"]
 remote_path = NodePath("../../../GuiSystem")
+
+[node name="HandObjects" type="Spatial" parent="."]
+
+[node name="MovePointThimble" type="Spatial" parent="HandObjects"]
+transform = Transform( -1.62921e-07, 0, 1, 0, 1, 0, -1, 0, -1.62921e-07, -0.226002, 3.493, -7.024 )
+
+[node name="MeshInstance" type="MeshInstance" parent="HandObjects/MovePointThimble"]
+transform = Transform( -1.62921e-07, -1, 0, 1, -1.62921e-07, 0, 0, 0, 1, 0, 0, 0 )
+mesh = SubResource( 2 )
+material/0 = SubResource( 3 )
+
+[node name="TipTouchRay" type="RayCast" parent="HandObjects/MovePointThimble"]
+transform = Transform( -1.62921e-07, 0, -1, 0, 1, 0, 1, 0, -1.62921e-07, -0.0429029, 0, -0.000141606 )
+enabled = true
+cast_to = Vector3( 0, 0, -0.1 )
+collision_mask = 3072
+collide_with_areas = true
 
 [node name="GuiSystem" type="Spatial" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -2.08929e-06, 2, -6.412 )

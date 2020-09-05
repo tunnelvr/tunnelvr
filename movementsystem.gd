@@ -10,6 +10,8 @@ onready var collision_shape: CollisionShape = playerMe.get_node("KinematicBody/C
 onready var tail : RayCast = playerMe.get_node("KinematicBody/Tail")
 onready var world_scale = ARVRServer.world_scale
 
+onready var tiptouchray = get_node("/root/Spatial/HandObjects/MovePointThimble/TipTouchRay")
+
 var player_radius = 0.25
 var nextphysicsrotatestep = 0.0  # avoid flicker if done in _physics_process 
 var velocity = Vector3(0.0, 0.0, 0.0)
@@ -37,7 +39,7 @@ func _on_button_pressed(p_button):
 		if abs(joypos.y) < 0.5 and abs(joypos.x) > 0.1:
 			nextphysicsrotatestep += (1 if joypos.x > 0 else -1)*(22.5 if abs(joypos.x) > 0.8 else 90.0)
 
-	laserangleadjustmode = (p_button == BUTTONS.VR_GRIP) and handleft.get_node("TipTouchRay").is_colliding() and handleft.get_node("TipTouchRay").get_collider() == handright.get_node("HeelHotspot")
+	laserangleadjustmode = (p_button == BUTTONS.VR_GRIP) and tiptouchray.is_colliding() and tiptouchray.get_collider() == handright.get_node("HeelHotspot")
 	if laserangleadjustmode:
 		laserangleoriginal = handright.get_node("LaserOrient").rotation.x
 		laserhandanglevector = Vector2(handleft.global_transform.basis.x.dot(handright.global_transform.basis.y), handleft.global_transform.basis.y.dot(handright.global_transform.basis.y))
@@ -109,9 +111,9 @@ func _physics_process(delta):
 		handleft.visible = true
 	else:
 		handleft.visible = playerMe.arvrinterface != null and handleft.get_is_active()
-		if handleft.get_node("TipTouchRay").is_colliding() != handright.get_node("LaserOrient/MeshDial").visible:
-			handright.get_node("LaserOrient/MeshDial").visible = handleft.get_node("TipTouchRay").is_colliding()
-			handleft.get_node("csghandleft").setpartcolor(2, Color("222277") if handleft.get_node("TipTouchRay").is_colliding() else Color("#FFFFFF"))
+		if tiptouchray.is_colliding() != handright.get_node("LaserOrient/MeshDial").visible:
+			handright.get_node("LaserOrient/MeshDial").visible = tiptouchray.is_colliding()
+			handleft.get_node("csghandleft").setpartcolor(2, Color("222277") if tiptouchray.is_colliding() else Color("#FFFFFF"))
 
 	if nextphysicsrotatestep != 0:
 		var t1 = Transform()
@@ -144,7 +146,7 @@ func _physics_process(delta):
 		
 	if laserangleadjustmode and handleft.is_button_pressed(BUTTONS.VR_GRIP):
 		var laserangleoffset = 0
-		if handleft.get_node("TipTouchRay").is_colliding() and handleft.get_node("TipTouchRay").get_collider() == handright.get_node("HeelHotspot"):
+		if tiptouchray.is_colliding() and tiptouchray.get_collider() == handright.get_node("HeelHotspot"):
 			var laserhandanglevectornew = Vector2(handleft.global_transform.basis.x.dot(handright.global_transform.basis.y), handleft.global_transform.basis.y.dot(handright.global_transform.basis.y))
 			laserangleoffset = laserhandanglevector.angle_to(laserhandanglevectornew)
 		handright.rumble = min(1.0, abs(prevlaserangleoffset - laserangleoffset)*delta*290)

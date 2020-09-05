@@ -91,13 +91,16 @@ func initquesthandtrackingnow(lovr_hand_tracking):
 	ovr_hand_tracking = lovr_hand_tracking
 	#var lefthandmodel = load("res://addons/godot_ovrmobile/example_scenes/left_hand_model.glb").instance()
 	#var righthandmodel = load("res://addons/godot_ovrmobile/example_scenes/right_hand_model.glb").instance()
-	#$HandLeft.add_child(lefthandmodel)
-	#$HandRight.add_child(righthandmodel)
+	$HandLeft/csgtip/MovePointThimble.update_position = false
+	$HandLeft/csgtip/MovePointThimble.update_rotation = false
+	var leftmidfingremotetrans = get_node("HandLeft/left_hand_model/ArmatureLeft/Skeleton/BoneAttachment 8/l_middle_finger_tip_marker/MovePointThimble")
+	leftmidfingremotetrans.update_position = true
+	leftmidfingremotetrans.update_rotation = true
+
 	$HandLeft/csghandleft.visible = false
 	$HandRight/csghandright.visible = false
 	$HandLeft/left_hand_model.visible = true
 	$HandRight/right_hand_model.visible = true
-	
 	
 	_clear_bone_rest($HandLeft/left_hand_model/ArmatureLeft/Skeleton);
 	_clear_bone_rest($HandRight/right_hand_model/ArmatureRight/Skeleton);
