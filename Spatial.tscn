@@ -1,4 +1,4 @@
-[gd_scene load_steps=160 format=2]
+[gd_scene load_steps=162 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/default_env.tres" type="Environment" id=2]
@@ -318,6 +318,19 @@ size = Vector3( 0.002, 0.002, 0.1 )
 
 [sub_resource type="SpatialMaterial" id=121]
 albedo_color = Color( 0.988235, 0.0235294, 0.0235294, 1 )
+
+[sub_resource type="CylinderMesh" id=124]
+top_radius = 0.01
+bottom_radius = 0.01
+height = 0.005
+radial_segments = 6
+rings = 1
+
+[sub_resource type="SpatialMaterial" id=125]
+albedo_color = Color( 0.807843, 0.470588, 0.223529, 1 )
+metallic = 0.55
+metallic_specular = 0.49
+roughness = 0.36
 
 [sub_resource type="BoxShape" id=25]
 extents = Vector3( 0.3, 0.2, 0.01 )
@@ -1160,6 +1173,7 @@ material/0 = null
 
 [node name="AudioStreamPlayer3D" type="AudioStreamPlayer3D" parent="Players/PlayerMe/HandLeft"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.024738, 0, -0.130972 )
+visible = false
 
 [node name="AudioStreamRecord" type="AudioStreamPlayer" parent="Players/PlayerMe/HandLeft"]
 stream = SubResource( 7 )
@@ -1513,13 +1527,19 @@ material/0 = SubResource( 3 )
 transform = Transform( -1.62921e-07, 0, -1, 0, 1, 0, 1, 0, -1.62921e-07, -0.0429029, 0, -0.000141606 )
 enabled = true
 cast_to = Vector3( 0, 0, -0.1 )
-collision_mask = 3072
+collision_mask = 3104
 collide_with_areas = true
 
 [node name="MeshInstance" type="MeshInstance" parent="HandObjects/MovePointThimble/TipTouchRay"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.000141606, 0, -0.0429029 )
 mesh = SubResource( 120 )
 material/0 = SubResource( 121 )
+
+[node name="GroundSpikePoint" type="MeshInstance" parent="HandObjects/MovePointThimble/TipTouchRay"]
+transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, 0, 0, -0.0754981 )
+visible = false
+mesh = SubResource( 124 )
+material/0 = SubResource( 125 )
 
 [node name="GuiSystem" type="Spatial" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -2.08929e-06, 2, -6.412 )

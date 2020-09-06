@@ -556,13 +556,13 @@ func buttonreleased_vrtrigger():
 		sketchsystem.rpc("xcdrawingfromdata", xcdrawing.exportxcrpcdata())
 						
 func _physics_process(_delta):
-	if playerMe.arvrinterface == null:
+	if Tglobal.VRstatus == "none":
 		var mvec = headcam.global_transform.basis.xform(mousecontrollervec)
 		handright.global_transform.origin = headcam.global_transform.origin + mvec
 		handright.look_at(handright.global_transform.origin + 1.0*mvec + 0.0*headcam.global_transform.basis.z, Vector3(0,1,0))
 		handright.global_transform.origin.y -= 0.3
 		
-	if playerMe.VRstatus != "quest":
+	if Tglobal.VRstatus != "quest":
 		var firstlasertarget = LaserOrient.get_node("RayCast").get_collider() if LaserOrient.get_node("RayCast").is_colliding() and not LaserOrient.get_node("RayCast").get_collider().is_queued_for_deletion() else null
 		pointerplanviewtarget = planviewsystem if firstlasertarget != null and firstlasertarget.get_name() == "PlanView" and planviewsystem.checkplanviewinfront(handright) else null
 		if pointerplanviewtarget != null:
@@ -605,7 +605,7 @@ func _physics_process(_delta):
 var rightmousebuttonheld = false
 func _input(event):
 	if event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
-		if playerMe.arvrinterface == null or playerMe.arvrinterface.get_tracking_status() == ARVRInterface.ARVR_NOT_TRACKING:
+		if Tglobal.VRstatus == "none" or playerMe.arvrinterface.get_tracking_status() == ARVRInterface.ARVR_NOT_TRACKING:
 			var rhvec = mousecontrollervec + Vector3(event.relative.x, -event.relative.y, 0)*0.002
 			rhvec.x = clamp(rhvec.x, -0.4, 0.4)
 			rhvec.y = clamp(rhvec.y, -0.3, 0.6)

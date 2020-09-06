@@ -6,3 +6,4 @@ var centrelinevisible = false
 var centrelineonly = false
 var connectiontoserveractive = false
 var questhandtracking = false
+var VRstatus = "unknown"

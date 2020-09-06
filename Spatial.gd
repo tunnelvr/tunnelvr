@@ -158,7 +158,6 @@ var ovr_hand_tracking = null
 var networkID = 0
 
 onready var playerMe = $Players/PlayerMe
-var VRstatus = "none"
 	
 func _ready():
 	if hostipnumber == "":
@@ -179,7 +178,7 @@ func _ready():
 			if arvr_quest.initialize():
 				get_viewport().arvr = true;
 				Engine.target_fps = 72;
-				VRstatus = "quest"
+				Tglobal.VRstatus = "quest"
 				print("  Success initializing Quest Interface.");
 
 		elif arvr_oculus:
@@ -188,7 +187,7 @@ func _ready():
 				get_viewport().arvr = true;
 				Engine.target_fps = 80 # TODO: this is headset dependent (RiftS == 80)=> figure out how to get this info at runtime
 				OS.vsync_enabled = false;
-				VRstatus = "oculus"
+				Tglobal.VRstatus = "oculus"
 				print("  Success initializing Oculus Interface.");
 
 		elif arvr_openvr:
@@ -201,14 +200,12 @@ func _ready():
 				viewport.keep_3d_linear = true
 				Engine.target_fps = 90
 				OS.vsync_enabled = false;
-				VRstatus = "vive"
+				Tglobal.VRstatus = "vive"
 				print("  Success initializing OpenVR Interface.");
-				playerMe.arvrinterface = arvr_openvr
 
-	if VRstatus == "none":
+	if Tglobal.VRstatus == "none":
 		print("*** VR not working")
-	playerMe.VRstatus = VRstatus
-	if VRstatus == "quest":
+	if Tglobal.VRstatus == "quest":
 		playerMe.initquesthandtrackingnow(ovr_hand_tracking)
 
 	var networkedmultiplayerenet = NetworkedMultiplayerENet.new()
@@ -230,6 +227,19 @@ func _ready():
 	print("nnet-id ", networkID)
 	playerMe.set_network_master(networkID)
 	playerMe.networkID = networkID
+
+	if false:
+		#loadcentrelinefile("res://surveyscans/dukest1resurvey2009.json")
+		$SketchSystem.loadcentrelinefile("res://surveyscans/dukest1resurvey2009json.res")
+		#loadcentrelinefile("res://surveyscans/Ireby/Ireby2/Ireby2.json")
+		$SketchSystem.updatecentrelinevisibility()
+		$SketchSystem.changetubedxcsvizmode()
+		$SketchSystem.updateworkingshell()
+	else:
+		$SketchSystem.loadsketchsystem("res://surveyscans/smallirebysave.res")
+		#loadsketchsystem("res://surveyscans/ireby2save.res")
+	playerMe.global_transform.origin.y += 5
+
 
 func nextplayernetworkidinringskippingdoppelganger(deletedid):
 	for i in range($Players.get_child_count()):

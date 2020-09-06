@@ -24,7 +24,7 @@ puppet func setdoppelgangerposition(positiondict):
 	if is_instance_valid(doppelganger):
 		doppelganger.setavatarposition(positiondict)
 
-remotesync func playvoicerecording(wavrecording):
+remote func playvoicerecording(wavrecording):
 	print("playing recording ", wavrecording.size()) 
 	var stream = AudioStreamSample.new()
 	stream.format = AudioStreamSample.FORMAT_16_BITS

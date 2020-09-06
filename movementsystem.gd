@@ -16,6 +16,8 @@ var player_radius = 0.25
 var nextphysicsrotatestep = 0.0  # avoid flicker if done in _physics_process 
 var velocity = Vector3(0.0, 0.0, 0.0)
 var gravity = -30.0
+var groundspikedrelative = null
+var groundspikedplayerposition = null
 
 export var walkspeed = 180.0
 export var flyspeed = 250.0
@@ -81,7 +83,9 @@ func _on_button_release(p_button):
 			print("COMPRESSION_DEFLATE ", recording.get_data().compress(File.COMPRESSION_DEFLATE).size())
 			print("COMPRESSION_ZSTD ", recording.get_data().compress(File.COMPRESSION_ZSTD).size())
 			print("COMPRESSION_GZIP ", recording.get_data().compress(File.COMPRESSION_GZIP).size())
-			playerMe.rpc("playvoicerecording", recording.get_data())
+			playerMe.playvoicerecording(recording.get_data())
+			if Tglobal.connectiontoserveractive:
+				playerMe.rpc("playvoicerecording", recording.get_data())
 
 	if p_button == BUTTONS.VR_GRIP:
 		handleft.get_node("csghandleft").setpartcolor(4, "#FFFFFF")
@@ -120,10 +124,11 @@ func _physics_process(delta):
 		joypos = Vector2(0.0, 0.0)
 		handleft.visible = true
 	else:
-		handleft.visible = playerMe.arvrinterface != null and handleft.get_is_active()
-		if tiptouchray.is_colliding() != handright.get_node("LaserOrient/MeshDial").visible:
-			handright.get_node("LaserOrient/MeshDial").visible = tiptouchray.is_colliding()
-			handleft.get_node("csghandleft").setpartcolor(2, Color("222277") if tiptouchray.is_colliding() else Color("#FFFFFF"))
+		handleft.visible = Tglobal.VRstatus != "none" and handleft.get_is_active()
+		var heelhotspot = tiptouchray.is_colliding() and tiptouchray.get_collider().get_name() == "HeelHotspot"
+		if heelhotspot != handright.get_node("LaserOrient/MeshDial").visible:
+			handright.get_node("LaserOrient/MeshDial").visible = heelhotspot
+			handleft.get_node("csghandleft").setpartcolor(2, Color("222277") if heelhotspot else Color("#FFFFFF"))
 
 	if nextphysicsrotatestep != 0:
 		var t1 = Transform()
@@ -147,16 +152,32 @@ func _physics_process(delta):
 	if not Input.is_action_pressed("lh_shift"):
 		joypos += 0.6*60*delta*lhkeyvec
 		
-	if playerMe.arvrinterface == null:
+	if Tglobal.VRstatus == "none":
 		if Input.is_action_pressed("lh_shift") and lhkeyvec != Vector2(0,0):
 			var vtarget = -headcam.global_transform.basis.z*20 + headcam.global_transform.basis.x*lhkeyvec.x*15*delta + Vector3(0, lhkeyvec.y, 0)*15*delta
 			headcam.look_at(headcam.global_transform.origin + vtarget, Vector3(0,1,0))
 			playerMe.rotation_degrees.y += headcam.rotation_degrees.y
 			headcam.rotation_degrees.y = 0
 
+
 	var isflying = false
 	var controlvelocity = Vector3(0, 0, 0)
-	if tiptouchray.is_colliding() and tiptouchray.get_collider().get_name() == "GreenBlob":
+	var isgroundspiked = tiptouchray.is_colliding() and tiptouchray.get_collider().get_name() == "XCtubeshell"
+	if isgroundspiked:
+		if groundspikedrelative == null:
+			tiptouchray.get_node("GroundSpikePoint").global_transform.origin = tiptouchray.get_collision_point()
+			groundspikedrelative = tiptouchray.get_node("GroundSpikePoint").global_transform.origin - playerMe.global_transform.origin
+			groundspikedplayerposition = playerMe.global_transform.origin
+			print("begin ground spiked ", groundspikedplayerposition)
+	elif groundspikedrelative != null:
+		tiptouchray.get_node("GroundSpikePoint").visible = false
+		groundspikedrelative = null
+		print("exit ground spiked ")
+	
+	if isgroundspiked:
+		var groundspikednowrelative = tiptouchray.get_node("GroundSpikePoint").global_transform.origin - playerMe.global_transform.origin
+		playerMe.global_transform.origin = groundspikedplayerposition - (groundspikednowrelative - groundspikedrelative)
+	elif tiptouchray.is_colliding() and tiptouchray.get_collider().get_name() == "GreenBlob":
 		joypos += Vector2(0,1)
 		var greenblob = tiptouchray.get_collider()
 		var vec = greenblob.get_node("SteeringSphere").global_transform.origin - tiptouchray.get_collision_point()
@@ -169,7 +190,6 @@ func _physics_process(delta):
 			controlvelocity = vec.normalized()
 			controlvelocity.y = 0
 			controlvelocity *= walkspeed
-	
 	elif Tglobal.questhandtracking:
 		isflying = handleft.is_button_pressed(BUTTONS.HT_PINCH_INDEX_FINGER)
 			
@@ -187,7 +207,10 @@ func _physics_process(delta):
 			var dir = Vector3(headcam.global_transform.basis.z.x, 0, headcam.global_transform.basis.z.z)
 			controlvelocity = dir.normalized()*(-joypos.y*walkspeed)
 	
-	if laserangleadjustmode and handleft.is_button_pressed(BUTTONS.VR_GRIP):
+	if isgroundspiked:
+		pass
+
+	elif laserangleadjustmode and handleft.is_button_pressed(BUTTONS.VR_GRIP):
 		var laserangleoffset = 0
 		if tiptouchray.is_colliding() and tiptouchray.get_collider() == handright.get_node("HeelHotspot"):
 			var laserhandanglevectornew = Vector2(handleft.global_transform.basis.x.dot(handright.global_transform.basis.y), handleft.global_transform.basis.y.dot(handright.global_transform.basis.y))
@@ -230,7 +253,7 @@ func _physics_process(delta):
 		
 		if controlvelocity != Vector3(0,0,0):
 			var dir = camera_transform.basis.z
-			dir.y = 0.0					
+			dir.y = 0.0
 			velocity = controlvelocity*(delta*world_scale)
 			#velocity = velocity.linear_interpolate(dir, delta * 100.0)		
 		

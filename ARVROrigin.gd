@@ -2,10 +2,8 @@ extends ARVROrigin
 
 var doppelganger = null 
 
-var arvrinterface = null
 var networkID = 0
 var bouncetestnetworkID = 0
-var VRstatus = "unknown"
 
 func setheadtorchlight(torchon):
 	$HeadCam/HeadtorchLight.visible = torchon

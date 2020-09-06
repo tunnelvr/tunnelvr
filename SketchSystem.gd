@@ -12,16 +12,6 @@ const defaultfloordrawing = "http://cave-registry.org.uk/svn/NorthernEngland/Thr
 func _ready():
 	var floordrawing = newXCuniquedrawingPaper(defaultfloordrawing, DRAWING_TYPE.DT_FLOORTEXTURE)
 	get_node("/root/Spatial/ImageSystem").fetchpaperdrawing(floordrawing)
-	if false:
-		#loadcentrelinefile("res://surveyscans/dukest1resurvey2009.json")
-		loadcentrelinefile("res://surveyscans/dukest1resurvey2009json.res")
-		#loadcentrelinefile("res://surveyscans/Ireby/Ireby2/Ireby2.json")
-		updatecentrelinevisibility()
-		changetubedxcsvizmode()
-		updateworkingshell()
-	else:
-		loadsketchsystem("res://surveyscans/smallirebysave.res")
-		#loadsketchsystem("res://surveyscans/ireby2save.res")
 		
 
 func xcapplyonepathtube(xcn0, xcdrawing0, xcn1, xcdrawing1): 
