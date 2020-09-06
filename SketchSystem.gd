@@ -20,7 +20,8 @@ func _ready():
 		changetubedxcsvizmode()
 		updateworkingshell()
 	else:
-		loadsketchsystem("res://surveyscans/ireby2save.res")
+		loadsketchsystem("res://surveyscans/smallirebysave.res")
+		#loadsketchsystem("res://surveyscans/ireby2save.res")
 		
 
 func xcapplyonepathtube(xcn0, xcdrawing0, xcn1, xcdrawing1): 
@@ -111,9 +112,9 @@ func sketchsystemtodict():
 						   "xctubes":xctubesData }
 	return sketchdatadict
 	
-func savesketchsystem():
+func savesketchsystem(fname):
 	var sketchdatadict = sketchsystemtodict()
-	var fname = "user://savegame.save"
+	sketchdatadict["playerMe"] = { "transformpos":get_node("/root/Spatial").playerMe.global_transform }
 	var sketchdatafile = File.new()
 	sketchdatafile.open(fname, File.WRITE)
 	sketchdatafile.store_var(sketchdatadict)
@@ -204,11 +205,13 @@ func loadsketchsystem(fname):
 	sketchdatafile.open(fname, File.READ)
 	var sketchdatadict = sketchdatafile.get_var()
 	sketchdatafile.close()
-	print([sketchdatadict])
 	if Tglobal.connectiontoserveractive:
 		rpc("sketchsystemfromdict", sketchdatadict)
 	sketchsystemfromdict(sketchdatadict)
-
+	if sketchdatadict.has("playerMe"):
+		var playerMe = get_node("/root/Spatial").playerMe if get_node("/root/Spatial").playerMe != null else get_node("/root/Spatial/Players/PlayerMe")
+		playerMe.global_transform = sketchdatadict["playerMe"]["transformpos"]
+			
 func uniqueXCname():
 	var largestxcdrawingnumber = 0
 	for xcdrawing in get_node("XCdrawings").get_children():

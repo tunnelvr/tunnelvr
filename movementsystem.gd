@@ -24,7 +24,6 @@ export var drag_factor = 0.1
 func _ready():
 	handleft.connect("button_pressed", self, "_on_button_pressed")
 	handleft.connect("button_release", self, "_on_button_release")
-	print("ARVRinterfaces ", ARVRServer.get_interfaces())
 
 var laserangleadjustmode = false
 var laserangleoriginal = 0
@@ -34,6 +33,12 @@ var prevlaserangleoffset = 0
 onready var audiobusrecordeffect = AudioServer.get_bus_effect(AudioServer.get_bus_index("Record"), 0)
 
 func _on_button_pressed(p_button):
+	if Tglobal.questhandtracking:
+		print("Hand-tracked pinch button on ", p_button)
+		if p_button == BUTTONS.HT_PINCH_MIDDLE_FINGER:
+			get_node("/root/Spatial/GuiSystem/GreenBlob").global_transform.origin = get_node("/root/Spatial/HandObjects/MovePointThimble").global_transform.origin
+		return
+	
 	if p_button == BUTTONS.VR_PAD:
 		var joypos = Vector2(handleft.get_joystick_axis(0), handleft.get_joystick_axis(1))
 		if abs(joypos.y) < 0.5 and abs(joypos.x) > 0.1:
@@ -47,12 +52,17 @@ func _on_button_pressed(p_button):
 	if p_button == BUTTONS.VR_BUTTON_BY:
 		audiobusrecordeffect.set_recording_active(true)
 		print("Doing the recording ", audiobusrecordeffect)
+		get_node("/root/Spatial/GuiSystem/GreenBlob").global_transform.origin = get_node("/root/Spatial/HandObjects/MovePointThimble").global_transform.origin
 
 	if p_button == BUTTONS.VR_GRIP:
 		handleft.get_node("csghandleft").setpartcolor(4, "#00CC00")
 
 		
 func _on_button_release(p_button):
+	if Tglobal.questhandtracking:
+		print("Hand-tracked pinch button off ", p_button)
+		return
+	
 	if laserangleadjustmode:
 		laserangleadjustmode = false
 		handright.rumble = 0.0
@@ -106,7 +116,7 @@ func _physics_process(delta):
 	collision_shape.transform.origin.y = (player_height / 2.0)
 	#print(get_viewport().get_mouse_position(), Input.get_mouse_mode())
 	var joypos = Vector2(handleft.get_joystick_axis(0), handleft.get_joystick_axis(1)) if handleft.get_is_active() else Vector2(0.0, 0.0)
-	if playerMe.VRstatus == "quest":
+	if Tglobal.questhandtracking:
 		joypos = Vector2(0.0, 0.0)
 		handleft.visible = true
 	else:
@@ -144,10 +154,39 @@ func _physics_process(delta):
 			playerMe.rotation_degrees.y += headcam.rotation_degrees.y
 			headcam.rotation_degrees.y = 0
 
+	var isflying = false
+	var controlvelocity = Vector3(0, 0, 0)
 	if tiptouchray.is_colliding() and tiptouchray.get_collider().get_name() == "GreenBlob":
 		joypos += Vector2(0,1)
-
-		
+		var greenblob = tiptouchray.get_collider()
+		var vec = greenblob.get_node("SteeringSphere").global_transform.origin - tiptouchray.get_collision_point()
+		var fvec = Vector2(vec.x, vec.z)
+		greenblob.get_node("SteeringSphere/TouchpointOrientation").rotation = Vector3(Vector2(fvec.length(), vec.y).angle(), -fvec.angle() - greenblob.get_node("..").rotation.y - deg2rad(90), 0)
+		isflying = handleft.is_button_pressed(BUTTONS.HT_PINCH_INDEX_FINGER) if Tglobal.questhandtracking else handleft.is_button_pressed(BUTTONS.VR_GRIP)
+		if isflying:
+			controlvelocity = vec.normalized()*flyspeed
+		else:
+			controlvelocity = vec.normalized()
+			controlvelocity.y = 0
+			controlvelocity *= walkspeed
+	
+	elif Tglobal.questhandtracking:
+		isflying = handleft.is_button_pressed(BUTTONS.HT_PINCH_INDEX_FINGER)
+			
+	elif handleft.is_button_pressed(BUTTONS.VR_GRIP) or Input.is_action_pressed("lh_fly"):
+		isflying = true
+		if handleft.is_button_pressed(BUTTONS.VR_TRIGGER) or Input.is_action_pressed("lh_forward") or Input.is_action_pressed("lh_backward"):
+			var flydir = handleft.global_transform.basis.z if handleft.get_is_active() else headcam.global_transform.basis.z
+			if joypos.y < -0.5:
+				flydir = -flydir
+			controlvelocity = -flydir.normalized()*flyspeed
+			if handleft.is_button_pressed(BUTTONS.VR_PAD):
+				controlvelocity *= 3.0
+	else:
+		if (abs(joypos.y) > 0.1 and tail.is_colliding()):
+			var dir = Vector3(headcam.global_transform.basis.z.x, 0, headcam.global_transform.basis.z.z)
+			controlvelocity = dir.normalized()*(-joypos.y*walkspeed)
+	
 	if laserangleadjustmode and handleft.is_button_pressed(BUTTONS.VR_GRIP):
 		var laserangleoffset = 0
 		if tiptouchray.is_colliding() and tiptouchray.get_collider() == handright.get_node("HeelHotspot"):
@@ -160,15 +199,10 @@ func _physics_process(delta):
 			prevlaserangleoffset = laserangleoffset
 		handright.get_node("LaserOrient").rotation.x = laserangleoriginal + laserangleoffset
 		
-	elif handleft.is_button_pressed(BUTTONS.VR_GRIP) or Input.is_action_pressed("lh_fly"):
-		if handleft.is_button_pressed(BUTTONS.VR_TRIGGER) or Input.is_action_pressed("lh_forward") or Input.is_action_pressed("lh_backward"):
+	elif isflying:
+		if controlvelocity != Vector3(0,0,0):
 			var curr_transform = kinematic_body.global_transform
-			var flydir = handleft.global_transform.basis.z if handleft.get_is_active() else headcam.global_transform.basis.z
-			if joypos.y < -0.5:
-				flydir = -flydir
-			velocity = flydir.normalized() * -delta * flyspeed * world_scale
-			if handleft.is_button_pressed(BUTTONS.VR_PAD):
-				velocity *= 3.0
+			velocity = controlvelocity*delta*world_scale
 			velocity = kinematic_body.move_and_slide(velocity)
 			var movement = (kinematic_body.global_transform.origin - curr_transform.origin)
 			kinematic_body.global_transform.origin = curr_transform.origin
@@ -185,7 +219,6 @@ func _physics_process(delta):
 		forward_dir.y = 0.0
 		if forward_dir.length() > 0.01:
 			curr_transform.origin += forward_dir.normalized() * -0.75 * player_radius
-		
 		kinematic_body.global_transform = curr_transform
 		
 		# we'll handle gravity separately
@@ -195,10 +228,10 @@ func _physics_process(delta):
 		# Apply our drag
 		velocity *= (1.0 - drag_factor)
 		
-		if (abs(joypos.y) > 0.1 and tail.is_colliding()):
+		if controlvelocity != Vector3(0,0,0):
 			var dir = camera_transform.basis.z
 			dir.y = 0.0					
-			velocity = dir.normalized() * (-joypos.y * delta * walkspeed * world_scale)
+			velocity = controlvelocity*(delta*world_scale)
 			#velocity = velocity.linear_interpolate(dir, delta * 100.0)		
 		
 		# apply move and slide to our kinematic body

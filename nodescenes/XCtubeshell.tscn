@@ -6,7 +6,7 @@ collision_layer = 32
 collision_mask = 0
 
 [node name="MeshInstance" type="MeshInstance" parent="."]
-layers = 18
+cast_shadow = 2
 
 [node name="CollisionShape" type="CollisionShape" parent="."]
 disabled = true

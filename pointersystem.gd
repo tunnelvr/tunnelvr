@@ -219,7 +219,10 @@ func setpointertarget(laserroot):
 func _on_button_pressed(p_button):
 	var gripbuttonheld = handright.is_button_pressed(BUTTONS.VR_GRIP)
 	print("pppp ", pointertargetpoint, " ", [activetargetnode, pointertargettype])
-	if p_button == BUTTONS.VR_BUTTON_BY:
+	if Tglobal.questhandtracking:
+		if p_button == BUTTONS.HT_PINCH_RING_FINGER:
+			guipanel3d.clickbuttonheadtorch()
+	elif p_button == BUTTONS.VR_BUTTON_BY:
 		buttonpressed_vrby(gripbuttonheld)
 	elif p_button == BUTTONS.VR_GRIP:
 		buttonpressed_vrgrip()

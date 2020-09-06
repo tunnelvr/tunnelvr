@@ -88,6 +88,9 @@ func _clear_bone_rest(skel):
 		skel.set_bone_rest(i, bone_rest);
 
 func initquesthandtrackingnow(lovr_hand_tracking):
+	Tglobal.questhandtracking = true
+	$HeadCam/HeadtorchLight.shadow_enabled = false
+
 	ovr_hand_tracking = lovr_hand_tracking
 	#var lefthandmodel = load("res://addons/godot_ovrmobile/example_scenes/left_hand_model.glb").instance()
 	#var righthandmodel = load("res://addons/godot_ovrmobile/example_scenes/right_hand_model.glb").instance()
@@ -105,7 +108,6 @@ func initquesthandtrackingnow(lovr_hand_tracking):
 	_clear_bone_rest($HandLeft/left_hand_model/ArmatureLeft/Skeleton);
 	_clear_bone_rest($HandRight/right_hand_model/ArmatureRight/Skeleton);
 	_vrapi_bone_orientations.resize(24);
-
 	
 func _update_hand_model(hand: ARVRController, model : Spatial, skel: Skeleton):
 	var ls = ovr_hand_tracking.get_hand_scale(hand.controller_id);

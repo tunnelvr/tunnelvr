@@ -11,7 +11,7 @@ func _on_buttonload_pressed():
 	$Viewport/GUI/Panel/Label.text = "Sketch Loaded"
 	
 func _on_buttonsave_pressed():
-	sketchsystem.savesketchsystem()
+	sketchsystem.savesketchsystem(savegamefile)
 	$Viewport/GUI/Panel/Label.text = "Sketch Saved"
 
 func _on_buttonfetchimages_pressed():

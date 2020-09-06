@@ -1,4 +1,4 @@
-[gd_scene load_steps=156 format=2]
+[gd_scene load_steps=160 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/default_env.tres" type="Environment" id=2]
@@ -299,6 +299,7 @@ rings = 1
 
 [sub_resource type="SpatialMaterial" id=21]
 flags_unshaded = true
+flags_no_depth_test = true
 albedo_color = Color( 0.937255, 0.901961, 0.0431373, 0.67451 )
 
 [sub_resource type="CubeMesh" id=22]
@@ -311,6 +312,12 @@ extents = Vector3( 0.02, 0.07, 0.04 )
 [sub_resource type="CapsuleShape" id=24]
 radius = 0.3
 height = 1.2
+
+[sub_resource type="CubeMesh" id=120]
+size = Vector3( 0.002, 0.002, 0.1 )
+
+[sub_resource type="SpatialMaterial" id=121]
+albedo_color = Color( 0.988235, 0.0235294, 0.0235294, 1 )
 
 [sub_resource type="BoxShape" id=25]
 extents = Vector3( 0.3, 0.2, 0.01 )
@@ -419,6 +426,17 @@ height = 0.1
 
 [sub_resource type="SpatialMaterial" id=46]
 albedo_color = Color( 0.290196, 0.94902, 0.105882, 1 )
+
+[sub_resource type="CubeMesh" id=122]
+size = Vector3( 0.01, 0.01, 0.01 )
+
+[sub_resource type="SpatialMaterial" id=123]
+albedo_color = Color( 0.956863, 0.556863, 0.0431373, 1 )
+emission_enabled = true
+emission = Color( 0.627451, 0.501961, 0.337255, 1 )
+emission_energy = 1.0
+emission_operator = 0
+emission_on_uv2 = false
 
 [sub_resource type="QuadMesh" id=47]
 size = Vector2( 1.6, 1 )
@@ -1417,7 +1435,7 @@ cast_to = Vector3( 0, 0, -50 )
 collision_mask = 56
 
 [node name="LaserSpot" type="MeshInstance" parent="Players/PlayerMe/HandRight/LaserOrient"]
-transform = Transform( 1, 0, 0, 0, 1, -8.9407e-08, 0, 8.9407e-08, 1, -0.721119, 1.90355, -5.47553 )
+transform = Transform( 1, 0, 0, 0, 1, -8.9407e-08, 0, 8.9407e-08, 1, 0, 0, -5.476 )
 mesh = SubResource( 14 )
 material/0 = null
 
@@ -1497,6 +1515,11 @@ enabled = true
 cast_to = Vector3( 0, 0, -0.1 )
 collision_mask = 3072
 collide_with_areas = true
+
+[node name="MeshInstance" type="MeshInstance" parent="HandObjects/MovePointThimble/TipTouchRay"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.000141606, 0, -0.0429029 )
+mesh = SubResource( 120 )
+material/0 = SubResource( 121 )
 
 [node name="GuiSystem" type="Spatial" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -2.08929e-06, 2, -6.412 )
@@ -1852,9 +1875,16 @@ collision_mask = 0
 [node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GreenBlob"]
 shape = SubResource( 44 )
 
-[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GreenBlob"]
+[node name="SteeringSphere" type="MeshInstance" parent="GuiSystem/GreenBlob"]
 mesh = SubResource( 45 )
 material/0 = SubResource( 46 )
+
+[node name="TouchpointOrientation" type="Spatial" parent="GuiSystem/GreenBlob/SteeringSphere"]
+
+[node name="Touchpoint" type="MeshInstance" parent="GuiSystem/GreenBlob/SteeringSphere/TouchpointOrientation"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.05 )
+mesh = SubResource( 122 )
+material/0 = SubResource( 123 )
 
 [node name="SketchSystem" type="Spatial" parent="."]
 script = ExtResource( 10 )
