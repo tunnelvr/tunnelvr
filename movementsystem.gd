@@ -143,6 +143,10 @@ func _physics_process(delta):
 			headcam.look_at(headcam.global_transform.origin + vtarget, Vector3(0,1,0))
 			playerMe.rotation_degrees.y += headcam.rotation_degrees.y
 			headcam.rotation_degrees.y = 0
+
+	if tiptouchray.is_colliding() and tiptouchray.get_collider().get_name() == "GreenBlob":
+		joypos += Vector2(0,1)
+
 		
 	if laserangleadjustmode and handleft.is_button_pressed(BUTTONS.VR_GRIP):
 		var laserangleoffset = 0
