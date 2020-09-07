@@ -273,10 +273,8 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 		clearpointertarget()
 		activelaserroot.get_node("LaserSpot").visible = false
 		recselectedtargetwall.removexcnode(recselectedtarget, false, sketchsystem)
-		sketchsystem.get_node("SoundPos2").global_transform.origin = pointertargetpoint
-		sketchsystem.get_node("SoundPos2").play()
+		Tglobal.soundsystem.quicksound("BlipSound", pointertargetpoint)
 	
-			
 	elif pointertargettype == "XCtube":
 		if activetargettube == pointertargetwall:
 			if gripbuttonheld:
@@ -308,11 +306,10 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 	elif pointertargettype == "XCdrawing":
 		if pointertargetwall != activetargetwall:
 			setactivetargetwall(pointertargetwall)
-		if activetargetnode != null or len(pointertargetwall.nodepoints) == 0:
+		if activetargetnode != null or pointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE or len(pointertargetwall.nodepoints) == 0:
 			var newpointertarget = pointertargetwall.newxcnode()
 			pointertargetwall.setxcnpoint(newpointertarget, pointertargetpoint, true)
-			sketchsystem.get_node("SoundPos1").global_transform.origin = pointertargetpoint
-			sketchsystem.get_node("SoundPos1").play()
+			Tglobal.soundsystem.quicksound("ClickSound", pointertargetpoint)
 			if activetargetnode != null:
 				if activetargetnodewall == pointertargetwall:
 					pointertargetwall.xcotapplyonepath(activetargetnode.get_name(), newpointertarget.get_name())
@@ -332,8 +329,7 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 				pointertargetwall.updatexcpaths()
 			else:
 				sketchsystem.xcapplyonepathtube(activetargetnode, activetargetnodewall, pointertarget, pointertargetwall)
-			sketchsystem.get_node("SoundPos1").global_transform.origin = pointertargetpoint
-			sketchsystem.get_node("SoundPos1").play()
+			Tglobal.soundsystem.quicksound("ClickSound", pointertargetpoint)
 			clearactivetargetnode()
 											
 	elif activetargetnode == null and pointertargettype == "XCnode":

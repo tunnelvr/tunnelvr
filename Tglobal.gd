@@ -7,3 +7,5 @@ var centrelineonly = false
 var connectiontoserveractive = false
 var questhandtracking = false
 var VRstatus = "unknown"
+
+var soundsystem = null

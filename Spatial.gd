@@ -3,6 +3,13 @@ extends Spatial
 # Stuff to do:
 
 
+
+# * new nodes on floor allowed
+# * Make XCdrawing on floor node grip menu
+# * implement deleteXC
+
+# * floorgrab crawling (move_and_slide tech)
+
 # * should give the other player a position near to me:  $SketchSystem.rpc_id(id, "sketchsystemfromdict", $SketchSystem.sketchsystemtodict())
 		
 # * xctubesconn) == 0 should be a count of the tube types excluding connections to floor
@@ -15,8 +22,6 @@ extends Spatial
 # * optional cross section based on floor node
 # * pointertargettype as an enum
 # * sort out the setopnpos junk
-
-# * Make XCdrawing on floor node!
 
 # * updatetubeshells to be cleared up 
 

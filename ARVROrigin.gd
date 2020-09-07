@@ -10,8 +10,7 @@ func setheadtorchlight(torchon):
 	get_node("/root/Spatial/WorldEnvironment").environment = preload("res://environments/underground_env.tres") if torchon else preload("res://environments/default_env.tres")
 	get_node("/root/Spatial/WorldEnvironment/DirectionalLight").visible = not torchon
 	get_node("/root/Spatial/MaterialSystem").adjustmaterialtotorchlight(torchon)
-	get_node("/root/Spatial/SketchSystem").get_node("SoundPos1").global_transform.origin = $HeadCam.global_transform.origin + $HeadCam.global_transform.basis.y * 0.2
-	get_node("/root/Spatial/SketchSystem").get_node("SoundPos1").play()
+	get_node("/root/Spatial/SoundSystem").quicksound("ClickSound", $HeadCam.global_transform.origin + $HeadCam.global_transform.basis.y * 0.2)
 
 func setdoppelganger(doppelgangeron):
 	if doppelgangeron:

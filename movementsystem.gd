@@ -165,11 +165,14 @@ func _physics_process(delta):
 	var isgroundspiked = tiptouchray.is_colliding() and tiptouchray.get_collider().get_name() == "XCtubeshell"
 	if isgroundspiked:
 		if groundspikedrelative == null:
-			tiptouchray.get_node("GroundSpikePoint").global_transform.origin = tiptouchray.get_collision_point()
-			groundspikedrelative = tiptouchray.get_node("GroundSpikePoint").global_transform.origin - playerMe.global_transform.origin
+			var clawengageposition = tiptouchray.get_node("GroundSpikePoint").global_transform.origin
+			tiptouchray.get_node("GroundSpikePoint").global_transform.origin = clawengageposition
+			groundspikedrelative = clawengageposition - playerMe.global_transform.origin
 			groundspikedplayerposition = playerMe.global_transform.origin
 			print("begin ground spiked ", groundspikedplayerposition)
+			Tglobal.soundsystem.quicksound("ClawGripSound", clawengageposition)
 	elif groundspikedrelative != null:
+		Tglobal.soundsystem.quicksound("ClawReleaseSound", tiptouchray.get_node("GroundSpikePoint").global_transform.origin)
 		tiptouchray.get_node("GroundSpikePoint").visible = false
 		groundspikedrelative = null
 		print("exit ground spiked ")

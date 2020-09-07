@@ -1,4 +1,4 @@
-[gd_scene load_steps=162 format=2]
+[gd_scene load_steps=165 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/default_env.tres" type="Environment" id=2]
@@ -12,13 +12,16 @@
 [ext_resource path="res://SketchSystem.gd" type="Script" id=10]
 [ext_resource path="res://icon.png" type="Texture" id=11]
 [ext_resource path="res://guimeshes/headmesh.tscn" type="PackedScene" id=12]
-[ext_resource path="res://sounds/laser8.wav" type="AudioStream" id=13]
+[ext_resource path="res://sounds/laser3.wav" type="AudioStream" id=13]
 [ext_resource path="res://GUIPanel3D.gd" type="Script" id=14]
 [ext_resource path="res://GripMenu.gd" type="Script" id=15]
 [ext_resource path="res://guimaterials/UV_Grid_Lrg.jpg" type="Texture" id=16]
 [ext_resource path="res://ImageSystem.gd" type="Script" id=17]
 [ext_resource path="res://ARVROrigin.gd" type="Script" id=18]
+[ext_resource path="res://sounds/SoundSystem.gd" type="Script" id=19]
 [ext_resource path="res://environments/overheadview_env.tres" type="Environment" id=20]
+[ext_resource path="res://sounds/switch6.wav" type="AudioStream" id=21]
+[ext_resource path="res://sounds/switch5.wav" type="AudioStream" id=22]
 [ext_resource path="res://systems/PlanViewSystem.gd" type="Script" id=24]
 [ext_resource path="res://guimaterials/grip_commands.png" type="Texture" id=25]
 [ext_resource path="res://lightweighttextures/rock_albedo.jpg" type="Texture" id=26]
@@ -1913,14 +1916,6 @@ script = ExtResource( 10 )
 
 [node name="XCtubes" type="Spatial" parent="SketchSystem"]
 
-[node name="SoundPos1" type="AudioStreamPlayer3D" parent="SketchSystem"]
-stream = ExtResource( 9 )
-unit_db = 9.032
-
-[node name="SoundPos2" type="AudioStreamPlayer3D" parent="SketchSystem"]
-stream = ExtResource( 13 )
-unit_db = 19.367
-
 [node name="PlanViewSystem" type="Spatial" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -2.08929e-06, 2, -6.412 )
 visible = false
@@ -2176,6 +2171,25 @@ material/0 = SubResource( 105 )
 transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, 0, 0, -1.12788 )
 mesh = SubResource( 106 )
 material/0 = SubResource( 107 )
+
+[node name="SoundSystem" type="Spatial" parent="."]
+script = ExtResource( 19 )
+
+[node name="ClickSound" type="AudioStreamPlayer3D" parent="SoundSystem"]
+stream = ExtResource( 9 )
+unit_db = 9.032
+
+[node name="BlipSound" type="AudioStreamPlayer3D" parent="SoundSystem"]
+stream = ExtResource( 13 )
+unit_db = 19.367
+
+[node name="ClawGripSound" type="AudioStreamPlayer3D" parent="SoundSystem"]
+stream = ExtResource( 22 )
+unit_db = 9.032
+
+[node name="ClawReleaseSound" type="AudioStreamPlayer3D" parent="SoundSystem"]
+stream = ExtResource( 21 )
+unit_db = 9.032
 
 [node name="LabelGenerator" type="Spatial" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -2.08929e-06, 3.6, -6.412 )

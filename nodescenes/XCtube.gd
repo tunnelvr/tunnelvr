@@ -122,7 +122,7 @@ func shiftfloorfromdrawnstations(sketchsystem):
 		var vxc = xcn1.global_transform.origin - xcn0.global_transform.origin
 		var vxcl = xcn1.transform.origin - xcn0.transform.origin
 		var vxang = Vector2(-vx.x, -vx.z).angle()
-		var vxcang = Vector2(-vxc.x, -vxc.z).angle()
+		#var vxcang = Vector2(-vxc.x, -vxc.z).angle()
 		var vxclang = Vector2(-vxcl.x, vxcl.y).angle()
 
 		var vxlen = vx.length()
@@ -214,7 +214,7 @@ func maketubepolyassociation(xcdrawing0, xcdrawing1):
 	var tubevecdot1 = xcdrawing1.global_transform.basis.z.dot(tubevec)
 	var polyinvert0 = (tubevecdot0 <= 0) == (pickedpolyindex0 != len(polys0) - 1)
 	var polyinvert1 = (tubevecdot1 <= 0) == (pickedpolyindex1 != len(polys1) - 1)
-	var tubenormdot = xcdrawing0.global_transform.basis.z.dot(xcdrawing1.global_transform.basis.z)
+	#var tubenormdot = xcdrawing0.global_transform.basis.z.dot(xcdrawing1.global_transform.basis.z)
 	#if not ((tubenormdot < 0) != (polyinvert0 != polyinvert1)):
 	#	print("invert problem?")
 	var poly0 = polys0[pickedpolyindex0].duplicate()
@@ -266,16 +266,17 @@ func maketubepolyassociation(xcdrawing0, xcdrawing1):
 
 func add_uvvertex(surfaceTool, xcnodes, poly, ila, i, floorsize, dfinv):
 	var pt = xcnodes.get_node(poly[(ila+i)%len(poly)]).global_transform.origin
-	var afloorpoint = dfinv.xform(pt)
-	var uvpt = Vector2(afloorpoint.x/floorsize.x + 0.5, afloorpoint.z/floorsize.y + 0.5)
-	surfaceTool.add_uv(uvpt)
+	if dfinv != null:
+		var afloorpoint = dfinv.xform(pt)
+		var uvpt = Vector2(afloorpoint.x/floorsize.x + 0.5, afloorpoint.z/floorsize.y + 0.5)
+		surfaceTool.add_uv(uvpt)
 	surfaceTool.add_vertex(pt)
 
 func maketubeshell(xcdrawings):
 	var sketchsystem = xcdrawings.get_parent()
-	var floordrawing = sketchsystem.getactivefloordrawing()
-	var floorsize = floordrawing.get_node("XCdrawingplane/CollisionShape/MeshInstance").mesh.size
-	var dfinv = floordrawing.get_node("XCdrawingplane/CollisionShape/MeshInstance").global_transform.affine_inverse()
+	var floordrawing = null # sketchsystem.getactivefloordrawing()
+	var floorsize = floordrawing.get_node("XCdrawingplane/CollisionShape/MeshInstance").mesh.size if floordrawing != null else null
+	var dfinv = floordrawing.get_node("XCdrawingplane/CollisionShape/MeshInstance").global_transform.affine_inverse() if floordrawing != null else null
 	
 	var xcdrawing0 = xcdrawings.get_node(xcname0)
 	var xcdrawing1 = xcdrawings.get_node(xcname1)
