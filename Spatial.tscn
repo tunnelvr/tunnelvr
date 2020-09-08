@@ -1,4 +1,4 @@
-[gd_scene load_steps=165 format=2]
+[gd_scene load_steps=176 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/default_env.tres" type="Environment" id=2]
@@ -22,6 +22,7 @@
 [ext_resource path="res://environments/overheadview_env.tres" type="Environment" id=20]
 [ext_resource path="res://sounds/switch6.wav" type="AudioStream" id=21]
 [ext_resource path="res://sounds/switch5.wav" type="AudioStream" id=22]
+[ext_resource path="res://PlayerMotion.gd" type="Script" id=23]
 [ext_resource path="res://systems/PlanViewSystem.gd" type="Script" id=24]
 [ext_resource path="res://guimaterials/grip_commands.png" type="Texture" id=25]
 [ext_resource path="res://lightweighttextures/rock_albedo.jpg" type="Texture" id=26]
@@ -43,6 +44,9 @@
 [sub_resource type="CylinderShape" id=1]
 radius = 0.1
 height = 0.18
+
+[sub_resource type="CubeMesh" id=126]
+size = Vector3( 0.35, 0.01, 0.01 )
 
 [sub_resource type="CylinderMesh" id=2]
 top_radius = 0.01
@@ -313,7 +317,7 @@ size = Vector3( 0.01, 0.01, 1 )
 extents = Vector3( 0.02, 0.07, 0.04 )
 
 [sub_resource type="CapsuleShape" id=24]
-radius = 0.3
+radius = 0.25
 height = 1.2
 
 [sub_resource type="CubeMesh" id=120]
@@ -334,6 +338,39 @@ albedo_color = Color( 0.807843, 0.470588, 0.223529, 1 )
 metallic = 0.55
 metallic_specular = 0.49
 roughness = 0.36
+
+[sub_resource type="CapsuleShape" id=127]
+radius = 0.15
+height = 0.15
+
+[sub_resource type="CapsuleMesh" id=132]
+radius = 0.15
+mid_height = 0.15
+
+[sub_resource type="SpatialMaterial" id=133]
+albedo_color = Color( 0.396078, 0.796078, 0.988235, 1 )
+
+[sub_resource type="CylinderMesh" id=136]
+top_radius = 0.2
+bottom_radius = 0.2
+height = 0.05
+
+[sub_resource type="SpatialMaterial" id=137]
+albedo_color = Color( 0.960784, 0.0313726, 0.0313726, 1 )
+
+[sub_resource type="SpatialMaterial" id=138]
+albedo_color = Color( 0.321569, 0.0313726, 0.960784, 1 )
+
+[sub_resource type="PrismMesh" id=130]
+left_to_right = 0.0
+size = Vector3( 0.2, 0.2, 0.2 )
+
+[sub_resource type="SpatialMaterial" id=134]
+albedo_color = Color( 0.309804, 0.94902, 0.0784314, 1 )
+
+[sub_resource type="CubeMesh" id=135]
+material = SubResource( 21 )
+size = Vector3( 0.01, 0.01, 1 )
 
 [sub_resource type="BoxShape" id=25]
 extents = Vector3( 0.3, 0.2, 0.01 )
@@ -910,7 +947,7 @@ transform = Transform( -1, 0, 3.25841e-07, 0, 1, 0, -3.25841e-07, 0, -1, 0, 2, 6
 script = ExtResource( 18 )
 
 [node name="HeadCam" type="ARVRCamera" parent="Players/PlayerMe"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.52571, 0 )
 far = 321.0
 
 [node name="csgheadmesh" parent="Players/PlayerMe/HeadCam" instance=ExtResource( 12 )]
@@ -939,6 +976,11 @@ shape = SubResource( 1 )
 [node name="toLabelGenerator" type="RemoteTransform" parent="Players/PlayerMe/HeadCam"]
 remote_path = NodePath("../../../../LabelGenerator")
 
+[node name="HeadCentre" type="MeshInstance" parent="Players/PlayerMe/HeadCam"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.051, 0.085 )
+mesh = SubResource( 126 )
+material/0 = null
+
 [node name="HandLeft" type="ARVRController" parent="Players/PlayerMe"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.2, 1.5, -0.5 )
 
@@ -955,7 +997,7 @@ mesh = SubResource( 2 )
 material/0 = SubResource( 3 )
 
 [node name="MovePointThimble" type="RemoteTransform" parent="Players/PlayerMe/HandLeft/csgtip"]
-remote_path = NodePath("../../../../../HandObjects/MovePointThimble")
+remote_path = NodePath("../../../../../BodyObjects/MovePointThimble")
 update_scale = false
 
 [node name="left_hand_model" type="Spatial" parent="Players/PlayerMe/HandLeft"]
@@ -1143,7 +1185,7 @@ bone_name = "b_l_middle_3"
 transform = Transform( 1, 0, 0, 0, 0, -1, 0, 1, 0, 2.49649, -0.11373, 0.0308652 )
 
 [node name="MovePointThimble" type="RemoteTransform" parent="Players/PlayerMe/HandLeft/left_hand_model/ArmatureLeft/Skeleton/BoneAttachment 8/l_middle_finger_tip_marker"]
-remote_path = NodePath("../../../../../../../../../HandObjects/MovePointThimble")
+remote_path = NodePath("../../../../../../../../../BodyObjects/MovePointThimble")
 update_position = false
 update_rotation = false
 update_scale = false
@@ -1452,7 +1494,7 @@ cast_to = Vector3( 0, 0, -50 )
 collision_mask = 56
 
 [node name="LaserSpot" type="MeshInstance" parent="Players/PlayerMe/HandRight/LaserOrient"]
-transform = Transform( 1, 0, 0, 0, 1, -8.9407e-08, 0, 8.9407e-08, 1, 0, 0, -5.476 )
+transform = Transform( 1, 0, 0, 0, 1, -8.9407e-08, 0, 8.9407e-08, 1, 0, -4.76837e-07, -5.476 )
 mesh = SubResource( 14 )
 material/0 = null
 
@@ -1516,33 +1558,74 @@ remote_path = NodePath("../../../PlanViewSystem")
 [node name="toGuiSystem" type="RemoteTransform" parent="Players/PlayerMe"]
 remote_path = NodePath("../../../GuiSystem")
 
-[node name="HandObjects" type="Spatial" parent="."]
+[node name="BodyObjects" type="Spatial" parent="."]
 
-[node name="MovePointThimble" type="Spatial" parent="HandObjects"]
+[node name="MovePointThimble" type="Spatial" parent="BodyObjects"]
 transform = Transform( -1.62921e-07, 0, 1, 0, 1, 0, -1, 0, -1.62921e-07, -0.226002, 3.493, -7.024 )
 
-[node name="MeshInstance" type="MeshInstance" parent="HandObjects/MovePointThimble"]
+[node name="MeshInstance" type="MeshInstance" parent="BodyObjects/MovePointThimble"]
 transform = Transform( -1.62921e-07, -1, 0, 1, -1.62921e-07, 0, 0, 0, 1, 0, 0, 0 )
 mesh = SubResource( 2 )
 material/0 = SubResource( 3 )
 
-[node name="TipTouchRay" type="RayCast" parent="HandObjects/MovePointThimble"]
+[node name="TipTouchRay" type="RayCast" parent="BodyObjects/MovePointThimble"]
 transform = Transform( -1.62921e-07, 0, -1, 0, 1, 0, 1, 0, -1.62921e-07, -0.0429029, 0, -0.000141606 )
 enabled = true
 cast_to = Vector3( 0, 0, -0.1 )
 collision_mask = 3104
 collide_with_areas = true
 
-[node name="MeshInstance" type="MeshInstance" parent="HandObjects/MovePointThimble/TipTouchRay"]
+[node name="MeshInstance" type="MeshInstance" parent="BodyObjects/MovePointThimble/TipTouchRay"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.000141606, 0, -0.0429029 )
 mesh = SubResource( 120 )
 material/0 = SubResource( 121 )
 
-[node name="GroundSpikePoint" type="MeshInstance" parent="HandObjects/MovePointThimble/TipTouchRay"]
-transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, 0, 0, -0.0754981 )
-visible = false
+[node name="GroundSpikePoint" type="MeshInstance" parent="BodyObjects/MovePointThimble/TipTouchRay"]
+transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, 0, 0, -0.0477982 )
 mesh = SubResource( 124 )
 material/0 = SubResource( 125 )
+
+[node name="PlayerMotion" type="Spatial" parent="BodyObjects"]
+script = ExtResource( 23 )
+
+[node name="PlayerKinematicBody" type="KinematicBody" parent="BodyObjects/PlayerMotion"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, -6.412 )
+input_ray_pickable = false
+collision_mask = 38
+
+[node name="PlayerBodyCapsule" type="CollisionShape" parent="BodyObjects/PlayerMotion/PlayerKinematicBody"]
+transform = Transform( 1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0 )
+shape = SubResource( 127 )
+
+[node name="CapsuleShapePreview" type="MeshInstance" parent="BodyObjects/PlayerMotion/PlayerKinematicBody/PlayerBodyCapsule"]
+mesh = SubResource( 132 )
+material/0 = SubResource( 133 )
+
+[node name="CollisionWarning" type="MeshInstance" parent="BodyObjects/PlayerMotion/PlayerKinematicBody/PlayerBodyCapsule/CapsuleShapePreview"]
+transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, 0, 0, 0 )
+mesh = SubResource( 136 )
+material/0 = SubResource( 137 )
+
+[node name="FreefallWarning" type="MeshInstance" parent="BodyObjects/PlayerMotion/PlayerKinematicBody/PlayerBodyCapsule/CapsuleShapePreview"]
+transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, 0, 0, 0.0653608 )
+visible = false
+mesh = SubResource( 136 )
+material/0 = SubResource( 138 )
+
+[node name="FloorOriginMarker" type="MeshInstance" parent="BodyObjects/PlayerMotion"]
+transform = Transform( -1.62921e-07, 0, 1, 0, 1, 0, -1, 0, -1.62921e-07, 1.78533, 0, -4.96781 )
+mesh = SubResource( 130 )
+material/0 = SubResource( 134 )
+
+[node name="MotionVectorPreview" type="Spatial" parent="BodyObjects/PlayerMotion"]
+transform = Transform( 1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, -0.0598552, 2.25315, -6.31372 )
+
+[node name="Scale" type="Spatial" parent="BodyObjects/PlayerMotion/MotionVectorPreview"]
+
+[node name="Mesh" type="MeshInstance" parent="BodyObjects/PlayerMotion/MotionVectorPreview/Scale"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.5 )
+mesh = SubResource( 135 )
+material/0 = null
 
 [node name="GuiSystem" type="Spatial" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -2.08929e-06, 2, -6.412 )
@@ -2113,7 +2196,7 @@ mesh = SubResource( 90 )
 material/0 = SubResource( 91 )
 
 [node name="lasermaterial" type="Spatial" parent="MaterialSystem"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -1.90702, 0, -1.16549 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -1.74416, 0, -1.16549 )
 
 [node name="spot" type="MeshInstance" parent="MaterialSystem/lasermaterial"]
 transform = Transform( 1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, 0, 0, 0 )
@@ -2126,12 +2209,12 @@ mesh = SubResource( 92 )
 material/0 = SubResource( 93 )
 
 [node name="spike" type="MeshInstance" parent="MaterialSystem/lasermaterial"]
-transform = Transform( 1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, 0, 0, -0.361475 )
+transform = Transform( 1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, 0, 0.07, -0.07 )
 mesh = SubResource( 16 )
 material/0 = null
 
 [node name="laser" type="MeshInstance" parent="MaterialSystem/lasermaterial"]
-transform = Transform( 1, 0, 0, 0, 0.707107, 35.3554, 0, -0.707107, 35.3554, -6.73909, -16.3862, -47.3107 )
+transform = Transform( 1, 0, 0, 0, 0.707107, 0.353553, 0, -0.707107, 0.353553, 0, 0.14, 0.14 )
 cast_shadow = 0
 mesh = SubResource( 94 )
 material/0 = SubResource( 95 )
@@ -2192,7 +2275,7 @@ stream = ExtResource( 21 )
 unit_db = 9.032
 
 [node name="LabelGenerator" type="Spatial" parent="."]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -2.08929e-06, 3.6, -6.412 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -2.08929e-06, 3.52571, -6.412 )
 script = ExtResource( 38 )
 
 [node name="Viewport" type="Viewport" parent="LabelGenerator"]

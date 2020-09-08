@@ -8,11 +8,9 @@ onready var handright = playerMe.get_node("HandRight")
 onready var kinematic_body: KinematicBody = playerMe.get_node("KinematicBody")
 onready var collision_shape: CollisionShape = playerMe.get_node("KinematicBody/CollisionShape")
 onready var tail : RayCast = playerMe.get_node("KinematicBody/Tail")
-onready var world_scale = ARVRServer.world_scale
 
-onready var tiptouchray = get_node("/root/Spatial/HandObjects/MovePointThimble/TipTouchRay")
+onready var tiptouchray = get_node("/root/Spatial/BodyObjects/MovePointThimble/TipTouchRay")
 
-var player_radius = 0.25
 var nextphysicsrotatestep = 0.0  # avoid flicker if done in _physics_process 
 var velocity = Vector3(0.0, 0.0, 0.0)
 var gravity = -30.0
@@ -20,13 +18,14 @@ var groundspikedrelative = null
 var groundspikedplayerposition = null
 
 export var walkspeed = 180.0
-export var flyspeed = 250.0
+export var flyspeed = 5.0
 export var drag_factor = 0.1
 
 func _ready():
 	handleft.connect("button_pressed", self, "_on_button_pressed")
 	handleft.connect("button_release", self, "_on_button_release")
-
+	assert (ARVRServer.world_scale == 1.0)
+	
 var laserangleadjustmode = false
 var laserangleoriginal = 0
 var laserhandanglevector = Vector2(0,0)
@@ -38,7 +37,7 @@ func _on_button_pressed(p_button):
 	if Tglobal.questhandtracking:
 		print("Hand-tracked pinch button on ", p_button)
 		if p_button == BUTTONS.HT_PINCH_MIDDLE_FINGER:
-			get_node("/root/Spatial/GuiSystem/GreenBlob").global_transform.origin = get_node("/root/Spatial/HandObjects/MovePointThimble").global_transform.origin
+			get_node("/root/Spatial/GuiSystem/GreenBlob").global_transform.origin = get_node("/root/Spatial/BodyObjects/MovePointThimble").global_transform.origin
 		return
 	
 	if p_button == BUTTONS.VR_PAD:
@@ -54,7 +53,7 @@ func _on_button_pressed(p_button):
 	if p_button == BUTTONS.VR_BUTTON_BY:
 		audiobusrecordeffect.set_recording_active(true)
 		print("Doing the recording ", audiobusrecordeffect)
-		get_node("/root/Spatial/GuiSystem/GreenBlob").global_transform.origin = get_node("/root/Spatial/HandObjects/MovePointThimble").global_transform.origin
+		get_node("/root/Spatial/GuiSystem/GreenBlob").global_transform.origin = get_node("/root/Spatial/BodyObjects/MovePointThimble").global_transform.origin
 
 	if p_button == BUTTONS.VR_GRIP:
 		handleft.get_node("csghandleft").setpartcolor(4, "#00CC00")
@@ -113,63 +112,51 @@ func _input(event):
 			boulderclutter.add_child(markernode)
 
 func _physics_process(delta):
-	# Adjust the height of our player according to our camera position
-	var player_height = max(player_radius, headcam.transform.origin.y + player_radius)
-	collision_shape.shape.radius = player_radius
-	collision_shape.shape.height = player_height - (player_radius * 2.0)
-	collision_shape.transform.origin.y = (player_height / 2.0)
+	set_physics_process(false)
+	var player_radius = collision_shape.shape.radius
+	var player_height = max(player_radius*2, headcam.transform.origin.y + player_radius)
+	collision_shape.shape.height = player_height - player_radius*2.0
+	collision_shape.transform.origin.y = player_height/2.0
 	#print(get_viewport().get_mouse_position(), Input.get_mouse_mode())
-	var joypos = Vector2(handleft.get_joystick_axis(0), handleft.get_joystick_axis(1)) if handleft.get_is_active() else Vector2(0.0, 0.0)
-	if Tglobal.questhandtracking:
-		joypos = Vector2(0.0, 0.0)
-		handleft.visible = true
-	else:
-		handleft.visible = Tglobal.VRstatus != "none" and handleft.get_is_active()
-		var heelhotspot = tiptouchray.is_colliding() and tiptouchray.get_collider().get_name() == "HeelHotspot"
-		if heelhotspot != handright.get_node("LaserOrient/MeshDial").visible:
-			handright.get_node("LaserOrient/MeshDial").visible = heelhotspot
-			handleft.get_node("csghandleft").setpartcolor(2, Color("222277") if heelhotspot else Color("#FFFFFF"))
+	var joypos = Vector2(handleft.get_joystick_axis(0), handleft.get_joystick_axis(1)) if (handleft.get_is_active() and not Tglobal.questhandtracking) else Vector2(0.0, 0.0)
+	handleft.visible = Tglobal.VRstatus != "none" and handleft.get_is_active()
+	var heelhotspot = tiptouchray.is_colliding() and tiptouchray.get_collider().get_name() == "HeelHotspot"
+	if heelhotspot != handright.get_node("LaserOrient/MeshDial").visible:
+		handright.get_node("LaserOrient/MeshDial").visible = heelhotspot
+		handleft.get_node("csghandleft").setpartcolor(2, Color("222277") if heelhotspot else Color("#FFFFFF"))
 
 	if nextphysicsrotatestep != 0:
-		var t1 = Transform()
-		var t2 = Transform()
-		var rot = Transform()
-		t1.origin = -headcam.transform.origin
-		t2.origin = headcam.transform.origin
-		rot = rot.rotated(Vector3(0.0, -1, 0.0), deg2rad(nextphysicsrotatestep))
+		var t1 = Transform(Basis(), -headcam.transform.origin)
+		var t2 = Transform(Basis(), headcam.transform.origin)
+		var rot = Transform().rotated(Vector3(0.0, -1, 0.0), deg2rad(nextphysicsrotatestep))
 		playerMe.transform *= t2 * rot * t1
 		nextphysicsrotatestep = 0.0
 	
 	var lhkeyvec = Vector2(0, 0)
-	if Input.is_action_pressed("lh_forward"):
-		lhkeyvec.y += 1
-	if Input.is_action_pressed("lh_backward"):
-		lhkeyvec.y += -1
-	if Input.is_action_pressed("lh_left"):
-		lhkeyvec.x += -1
-	if Input.is_action_pressed("lh_right"):
-		lhkeyvec.x += 1
-	if not Input.is_action_pressed("lh_shift"):
-		joypos += 0.6*60*delta*lhkeyvec
-		
-	if Tglobal.VRstatus == "none":
-		if Input.is_action_pressed("lh_shift") and lhkeyvec != Vector2(0,0):
+	if Input.is_action_pressed("lh_forward"):   lhkeyvec.y += 1
+	if Input.is_action_pressed("lh_backward"):  lhkeyvec.y += -1
+	if Input.is_action_pressed("lh_left"):      lhkeyvec.x += -1
+	if Input.is_action_pressed("lh_right"):     lhkeyvec.x += 1
+	if Input.is_action_pressed("lh_shift"):
+		if Tglobal.VRstatus == "none" and lhkeyvec != Vector2(0,0):
 			var vtarget = -headcam.global_transform.basis.z*20 + headcam.global_transform.basis.x*lhkeyvec.x*15*delta + Vector3(0, lhkeyvec.y, 0)*15*delta
 			headcam.look_at(headcam.global_transform.origin + vtarget, Vector3(0,1,0))
 			playerMe.rotation_degrees.y += headcam.rotation_degrees.y
 			headcam.rotation_degrees.y = 0
-
+	else:
+		joypos += lhkeyvec
+		
 
 	var isflying = false
 	var controlvelocity = Vector3(0, 0, 0)
 	var isgroundspiked = tiptouchray.is_colliding() and tiptouchray.get_collider().get_name() == "XCtubeshell"
 	if isgroundspiked:
 		if groundspikedrelative == null:
-			var clawengageposition = tiptouchray.get_node("GroundSpikePoint").global_transform.origin
+			var clawengageposition = tiptouchray.get_collision_point()
 			tiptouchray.get_node("GroundSpikePoint").global_transform.origin = clawengageposition
+			tiptouchray.get_node("GroundSpikePoint").visible = true
 			groundspikedrelative = clawengageposition - playerMe.global_transform.origin
 			groundspikedplayerposition = playerMe.global_transform.origin
-			print("begin ground spiked ", groundspikedplayerposition)
 			Tglobal.soundsystem.quicksound("ClawGripSound", clawengageposition)
 	elif groundspikedrelative != null:
 		Tglobal.soundsystem.quicksound("ClawReleaseSound", tiptouchray.get_node("GroundSpikePoint").global_transform.origin)
@@ -228,11 +215,12 @@ func _physics_process(delta):
 	elif isflying:
 		if controlvelocity != Vector3(0,0,0):
 			var curr_transform = kinematic_body.global_transform
-			velocity = controlvelocity*delta*world_scale
-			velocity = kinematic_body.move_and_slide(velocity)
-			var movement = (kinematic_body.global_transform.origin - curr_transform.origin)
+			velocity = kinematic_body.move_and_slide(controlvelocity)
+			var movement = kinematic_body.global_transform.origin - curr_transform.origin
 			kinematic_body.global_transform.origin = curr_transform.origin
 			playerMe.global_transform.origin += movement
+		else:
+			velocity = Vector3(0,0,0)
 	
 	else:
 		var curr_transform = kinematic_body.global_transform
@@ -257,7 +245,7 @@ func _physics_process(delta):
 		if controlvelocity != Vector3(0,0,0):
 			var dir = camera_transform.basis.z
 			dir.y = 0.0
-			velocity = controlvelocity*(delta*world_scale)
+			velocity = controlvelocity*(delta)
 			#velocity = velocity.linear_interpolate(dir, delta * 100.0)		
 		
 		# apply move and slide to our kinematic body
@@ -274,6 +262,7 @@ func _physics_process(delta):
 		
 		# Return this back to where it was so we can use its collision shape for other things too
 		kinematic_body.global_transform.origin = curr_transform.origin
+
 
 	var doppelganger = playerMe.doppelganger
 	if is_inside_tree() and is_instance_valid(doppelganger):
