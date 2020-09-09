@@ -185,7 +185,8 @@ func _ready():
 				Engine.target_fps = 72;
 				Tglobal.VRstatus = "quest"
 				print("  Success initializing Quest Interface.");
-
+				Tglobal.arvrinterface = arvr_quest
+				
 		elif arvr_oculus:
 			print("  Found Oculus Interface.");
 			if arvr_oculus.initialize():
@@ -194,6 +195,7 @@ func _ready():
 				OS.vsync_enabled = false;
 				Tglobal.VRstatus = "oculus"
 				print("  Success initializing Oculus Interface.");
+				Tglobal.arvrinterface = arvr_oculus
 
 		elif arvr_openvr:
 			print("found openvr, initializing")
@@ -207,11 +209,17 @@ func _ready():
 				OS.vsync_enabled = false;
 				Tglobal.VRstatus = "vive"
 				print("  Success initializing OpenVR Interface.");
-
+				Tglobal.arvrinterface = arvr_openvr
+				
+	
+	Tglobal.VRoperating = (Tglobal.VRstatus != "none")
 	if Tglobal.VRstatus == "none":
 		print("*** VR not working")
 	if Tglobal.VRstatus == "quest":
 		playerMe.initquesthandtrackingnow(ovr_hand_tracking)
+	if Tglobal.VRoperating:
+		$BodyObjects/PlayerDirections.inithandvrsignalconnections()
+
 
 	var networkedmultiplayerenet = NetworkedMultiplayerENet.new()
 	get_tree().connect("network_peer_connected", self, "_player_connected")

@@ -52,6 +52,8 @@ func gripmenuon(controllertrans, pointertargetwall, pointertargettype, activetar
 		gripmenupointertargettype = ""
 				
 
+
+
 # Calibri Fontsize 20: height 664 width 159
 var grip_commands_text = """
 Z+5

@@ -33,6 +33,7 @@ var playerbodycentre = Vector3(0,0,0)
 
 var playerinfreefall = false
 var playerfreefallbodyvelocity = null
+var playerdirectedflight_prev = false
 var playerbodycentre_prev = Vector3(0,0,0)
 var playercentrevelocitystack = [ Vector3(0,0,0), Vector3(0,0,0), Vector3(0,0,0), Vector3(0,0,0) ]
 var playercentrevelocitystack_index = -2
@@ -74,7 +75,15 @@ func _ready():
 
 	$PlayerEnlargedKinematicBody/PlayerBodyCapsule.shape.radius = playerheadbodyradius + flyingkinematicenlargement
 
+var physicsprocessTimeStamp = 0
 func _physics_process(delta):
+	physicsprocessTimeStamp += delta
+
+	# The Quest reliably spits out a run of bad camera orientation (translated into nans in the HeadCentre) between time stamp 0.15 and 0.26667
+	if is_nan(HeadCentre.global_transform.origin.x):
+		print(" skipping bad headcam position:", physicsprocessTimeStamp, " orientation ", HeadCam.global_transform.basis.x)
+		return
+
 	if PlayerDirections.nextphysicsrotatestep != 0.0:
 		var t1 = Transform(Basis(), -HeadCam.transform.origin)
 		var t2 = Transform(Basis(), HeadCam.transform.origin)
@@ -108,6 +117,7 @@ func _physics_process(delta):
 		var playerdirectedwalkmovement = process_directedwalkmovement(delta, PlayerDirections.playerdirectedwalkingvelocity) if PlayerDirections.playerdirectedwalkingvelocity != Vector3(0,0,0) else Vector3(0,0,0)
 		process_feet_on_floor(delta, playerdirectedwalkmovement)
 	process_shareplayerposition()
+	playerdirectedflight_prev = PlayerDirections.playerdirectedflightvelocity
 
 	$FloorOriginMarker.global_transform = playerMe.global_transform
 	if $MotionVectorPreview.visible:
@@ -131,6 +141,7 @@ func process_clawengagement(delta, clawengagementrelativedisplacement):
 	playerbodycentre_prev = playerbodycentre
 	$PlayerKinematicBody.global_transform.origin = playerbodycentre
 		
+
 func process_feet_on_floor(delta, playerdirectedwalkmovement):
 	playerbodycentre = HeadCentre.global_transform.origin - Vector3(0, playerheadcentreabovebodycentreheight, 0) + Ddebugvisualoffset
 	
@@ -150,7 +161,7 @@ func process_feet_on_floor(delta, playerdirectedwalkmovement):
 			psqparams.transform = Transform(playerbodycapsulebasis, playerbodycentrewithdirectedmotion + Vector3(0, stepupdistanceclear, 0))
 			if len(get_world().direct_space_state.intersect_shape(psqparams, 1)) != 0:
 				playeriscolliding = true
-
+	
 	if not playeriscolliding and playerdirectedwalkmovement != Vector3(0,0,0):
 		playerMe.global_transform.origin += playerdirectedwalkmovement
 		playerbodycentre = playerbodycentrewithdirectedmotion
@@ -176,6 +187,7 @@ func process_feet_on_floor(delta, playerdirectedwalkmovement):
 
 	if not playeriscolliding:
 		playerbodycentre.y += stepupdistance
+#		print("HHH  ", playerMe.global_transform.origin.y, "  ", playerbodycentre.y, "  ", playerheadcentreabovebodycentreheight, "  ", headcentreabovephysicalfloorheight)
 		playerMe.global_transform.origin.y = playerbodycentre.y + playerheadcentreabovebodycentreheight - headcentreabovephysicalfloorheight
 		$PlayerKinematicBody.global_transform.origin = playerbodycentre
 		addplayervelocitystack((playerbodycentre - playerbodycentre_prev)/delta)
@@ -207,12 +219,12 @@ func process_freefall(delta):
 	playerfreefallbodyvelocity *= 1.0 - freefallairdragfactor*delta
 	playerfreefallbodyvelocity = $PlayerKinematicBody.move_and_slide(playerfreefallbodyvelocity, Vector3(0, 1, 0))
 	playerbodycentre = $PlayerKinematicBody.global_transform.origin
-	#print("playerbodycentre ", playerbodycentre, playerfreefallbodyvelocity)
 	playerMe.global_transform.origin = -Ddebugvisualoffset + playerbodycentre + Vector3(0, playerheadcentreabovebodycentreheight, 0) - headcentrefromvroriginvector
 	var slidecount = $PlayerKinematicBody.get_slide_count()
 	if slidecount > 0:
 		var slidecollision = $PlayerKinematicBody.get_slide_collision(slidecount - 1)
 		var slideincidence = -slidecollision.normal.dot(playerfreefallbodyvelocity)
+		print(playerbodycentre, slideincidence, playerfreefallbodyvelocity, freefallsurfaceslidedragfactor, " delta ", delta)
 		playerfreefallbodyvelocity *= 1 - max(0, slideincidence)*freefallsurfaceslidedragfactor*delta
 		if slidecollision.normal.y > floor_max_angle_wallgradient:
 			endfreefallmode()
@@ -231,6 +243,9 @@ func process_directedwalkmovement(delta, playerdirectedwalkingvelocity):
 	return Vector3(0,0,0)
 
 func process_directedflight(delta, playerdirectedflightvelocity):
+	if not playerdirectedflight_prev:
+		playerbodycentre = HeadCentre.global_transform.origin - Vector3(0, playerheadcentreabovebodycentreheight, 0) + Ddebugvisualoffset
+		playerbodycentre_prev = playerbodycentre
 	var capsuleshaftheight = playerbodyverticalheight - 2*playerheadbodyradius
 	$PlayerEnlargedKinematicBody/PlayerBodyCapsule.shape.height = capsuleshaftheight
 	$PlayerEnlargedKinematicBody.global_transform.origin = playerbodycentre

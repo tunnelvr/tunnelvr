@@ -3,6 +3,7 @@ extends Node
 onready var playerMe = get_node("/root/Spatial/Players/PlayerMe")
 onready var HeadCam = playerMe.get_node("HeadCam")
 onready var HandLeft = playerMe.get_node("HandLeft")
+onready var HandRight = playerMe.get_node("HandLeft")
 onready var MovePointThimble = get_node("../MovePointThimble")
 onready var tiptouchray = MovePointThimble.get_node("TipTouchRay")
 onready var GroundSpikePoint = tiptouchray.get_node("GroundSpikePoint")
@@ -17,10 +18,9 @@ var playerdirectedwalkingvelocity = Vector3(0,0,0)
 var clawengageposition = null
 
 
-func _ready():
-	if Tglobal.VRstatus != "none":
-		HandLeft.connect("button_pressed", self, "_on_questhandtracking_button_pressed" if Tglobal.questhandtracking else "_on_button_pressed")
-		HandLeft.connect("button_release", self, "_on_questhandtracking_button_release" if Tglobal.questhandtracking else "_on_button_release")
+func inithandvrsignalconnections():
+	HandLeft.connect("button_pressed", self, "_on_questhandtracking_button_pressed" if Tglobal.questhandtracking else "_on_button_pressed")
+	HandLeft.connect("button_release", self, "_on_questhandtracking_button_release" if Tglobal.questhandtracking else "_on_button_release")
 
 func _input(event):
 	if event is InputEventKey and event.pressed and not Input.is_action_pressed("lh_shift"):
@@ -83,12 +83,12 @@ func _physics_process(delta):
 func _on_questhandtracking_button_pressed(p_button):
 	if p_button == BUTTONS.HT_PINCH_MIDDLE_FINGER:
 		newgreenblobposition = MovePointThimble.global_transform.origin
-	if p_button == BUTTONS.HT_PINCH_INDEX_FINGER:
+	elif p_button == BUTTONS.HT_PINCH_INDEX_FINGER:
 		playerdirectedflight = true
-		
+				
 func _on_questhandtracking_button_release(p_button):
 	if p_button == BUTTONS.HT_PINCH_INDEX_FINGER:
-		playerdirectedflight = true
+		playerdirectedflight = false
 
 func _on_button_pressed(p_button):
 	if p_button == BUTTONS.VR_PAD:
@@ -97,11 +97,12 @@ func _on_button_pressed(p_button):
 			nextphysicsrotatestep += (1 if joypos.x > 0 else -1)*(22.5 if abs(joypos.x) > 0.8 else 90.0)
 
 	if p_button == BUTTONS.VR_BUTTON_BY:
-		newgreenblobposition = get_node("/root/Spatial/BodyObjects/MovePointThimble").global_transform.origin
+		newgreenblobposition = MovePointThimble.global_transform.origin
 
 	if p_button == BUTTONS.VR_GRIP:
 		HandLeft.get_node("csghandleft").setpartcolor(4, "#00CC00")
 		playerdirectedflight = true
+
 		
 func _on_button_release(p_button):
 	if p_button == BUTTONS.VR_BUTTON_BY:
@@ -111,3 +112,43 @@ func _on_button_release(p_button):
 		HandLeft.get_node("csghandleft").setpartcolor(4, "#FFFFFF")
 		playerdirectedflight = false
 
+func Dhanglelaserorient():
+	var heelhotspot = tiptouchray.is_colliding() and tiptouchray.get_collider().get_name() == "HeelHotspot"
+	if heelhotspot != HandRight.get_node("LaserOrient/MeshDial").visible:
+		HandRight.get_node("LaserOrient/MeshDial").visible = heelhotspot
+		HandLeft.get_node("csghandleft").setpartcolor(2, Color("222277") if heelhotspot else Color("#FFFFFF"))
+
+	#laserangleadjustmode = (p_button == BUTTONS.VR_GRIP) and tiptouchray.is_colliding() and tiptouchray.get_collider() == handright.get_node("HeelHotspot")
+	if laserangleadjustmode:
+		laserangleoriginal = HandRight.get_node("LaserOrient").rotation.x
+		laserhandanglevector = Vector2(HandLeft.global_transform.basis.x.dot(HandRight.global_transform.basis.y), HandLeft.global_transform.basis.y.dot(HandRight.global_transform.basis.y))
+
+var laserangleadjustmode = false
+var laserangleoriginal = 0
+var laserhandanglevector = Vector2(0,0)
+var prevlaserangleoffset = 0
+
+func Dlaserangleadjustmode(delta):
+	if HandLeft.is_button_pressed(BUTTONS.VR_GRIP):
+		var laserangleoffset = 0
+		if tiptouchray.is_colliding() and tiptouchray.get_collider() == HandRight.get_node("HeelHotspot"):
+			var laserhandanglevectornew = Vector2(HandLeft.global_transform.basis.x.dot(HandRight.global_transform.basis.y), HandLeft.global_transform.basis.y.dot(HandRight.global_transform.basis.y))
+			laserangleoffset = laserhandanglevector.angle_to(laserhandanglevectornew)
+		HandRight.rumble = min(1.0, abs(prevlaserangleoffset - laserangleoffset)*delta*290)
+		if HandRight.rumble < 0.1:
+			HandRight.rumble = 0
+		else:
+			prevlaserangleoffset = laserangleoffset
+		HandRight.get_node("LaserOrient").rotation.x = laserangleoriginal + laserangleoffset
+
+
+func DMakeNewBoulder(event):
+	#if event is InputEventKey and event.pressed and event.is_action_pressed("newboulder"):
+	print("making new boulder")
+	var markernode = preload("res://nodescenes/MarkerNode.tscn").instance()
+	var boulderclutter = get_node("/root/Spatial/BoulderClutter")
+	var nc = boulderclutter.get_child_count()
+	markernode.get_node("CollisionShape").scale = Vector3(0.4, 0.6, 0.4) if ((nc%2) == 0) else Vector3(0.2, 0.4, 0.2)
+	markernode.global_transform.origin = HandRight.global_transform.origin - 0.9*HandRight.global_transform.basis.z
+	markernode.linear_velocity = -5.1*HandRight.global_transform.basis.z
+	boulderclutter.add_child(markernode)

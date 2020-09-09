@@ -121,9 +121,9 @@ func initquesthandtrackingnow(lovr_hand_tracking):
 	_vrapi_bone_orientations.resize(24);
 	
 func _update_hand_model(hand: ARVRController, model : Spatial, skel: Skeleton):
-	var ls = ovr_hand_tracking.get_hand_scale(hand.controller_id);
+	var ls = ovr_hand_tracking.get_hand_scale(hand.controller_id)
 	if ls != null and (ls > 0.0):
-		model.scale = Vector3(ls, ls, ls);
+		model.scale = Vector3(ls, ls, ls)
 
 	var confidence = ovr_hand_tracking.get_hand_pose(hand.controller_id, _vrapi_bone_orientations);
 	if confidence != null and (confidence > 0.0):
@@ -136,10 +136,9 @@ func _update_hand_model(hand: ARVRController, model : Spatial, skel: Skeleton):
 
 var t = 0.0;
 func process_handtracking(delta):
+	t += delta;
 	_update_hand_model($HandLeft, $HandLeft/left_hand_model, $HandLeft/left_hand_model/ArmatureLeft/Skeleton)
 	_update_hand_model($HandRight, $HandRight/right_hand_model, $HandRight/right_hand_model/ArmatureRight/Skeleton)
-
-	t += delta;
 	if (t > 1.0):
 		t = 0.0;
 		print("Left Pinches: %.3f %.3f %.3f %.3f; Right Pinches %.3f %.3f %.3f %.3f" %
