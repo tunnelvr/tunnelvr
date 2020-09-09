@@ -22,8 +22,8 @@ export var flyspeed = 5.0
 export var drag_factor = 0.1
 
 func _ready():
-	handleft.connect("button_pressed", self, "_on_button_pressed")
-	handleft.connect("button_release", self, "_on_button_release")
+	#handleft.connect("button_pressed", self, "_on_button_pressed")
+	#handleft.connect("button_release", self, "_on_button_release")
 	assert (ARVRServer.world_scale == 1.0)
 	
 var laserangleadjustmode = false
@@ -92,15 +92,6 @@ func _on_button_release(p_button):
 
 func _input(event):
 	if event is InputEventKey and event.pressed:
-		if event.is_action_pressed("lh_left") and not Input.is_action_pressed("lh_shift"):
-			nextphysicsrotatestep += -22.5
-		if event.is_action_pressed("lh_right") and not Input.is_action_pressed("lh_shift"):
-			nextphysicsrotatestep += 22.5
-		if event.is_action_pressed("ui_cancel"):
-			if Input.get_mouse_mode() == Input.MOUSE_MODE_VISIBLE:
-				Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
-			else:
-				Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 		if event.is_action_pressed("newboulder"):
 			print("making new boulder")
 			var markernode = preload("res://nodescenes/MarkerNode.tscn").instance()
@@ -262,19 +253,5 @@ func _physics_process(delta):
 		
 		# Return this back to where it was so we can use its collision shape for other things too
 		kinematic_body.global_transform.origin = curr_transform.origin
-
-
-	var doppelganger = playerMe.doppelganger
-	if is_inside_tree() and is_instance_valid(doppelganger):
-		var positiondict = playerMe.playerpositiondict()
-		positiondict["playertransform"] = Transform(Basis(-positiondict["playertransform"].basis.x, positiondict["playertransform"].basis.y, -positiondict["playertransform"].basis.z), 
-													Vector3(doppelganger.global_transform.origin.x, positiondict["playertransform"].origin.y, doppelganger.global_transform.origin.z))
-		if playerMe.bouncetestnetworkID != 0:
-			playerMe.rpc_unreliable_id(playerMe.bouncetestnetworkID, "bouncedoppelgangerposition", playerMe.networkID, positiondict)
-		else:
-			doppelganger.setavatarposition(positiondict)
-
-	if Tglobal.connectiontoserveractive:
-		playerMe.rpc_unreliable("setavatarposition", playerMe.playerpositiondict())
 	
 

@@ -600,8 +600,14 @@ func _physics_process(_delta):
 
 var rightmousebuttonheld = false
 func _input(event):
-	if event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
-		if Tglobal.VRstatus == "none" or playerMe.arvrinterface.get_tracking_status() == ARVRInterface.ARVR_NOT_TRACKING:
+	if event.is_action_pressed("ui_cancel"):
+		if Input.get_mouse_mode() == Input.MOUSE_MODE_VISIBLE:
+			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+		else:
+			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+
+	elif event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
+		if Tglobal.VRstatus == "none": # or playerMe.arvrinterface.get_tracking_status() == ARVRInterface.ARVR_NOT_TRACKING:
 			var rhvec = mousecontrollervec + Vector3(event.relative.x, -event.relative.y, 0)*0.002
 			rhvec.x = clamp(rhvec.x, -0.4, 0.4)
 			rhvec.y = clamp(rhvec.y, -0.3, 0.6)

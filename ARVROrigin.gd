@@ -60,6 +60,20 @@ func playerpositiondict():
 			 "timestamp":OS.get_ticks_usec() 
 			}
 
+func _process(delta):
+	if ovr_hand_tracking != null:
+		process_handtracking(delta)
+	if Tglobal.VRstatus == "none" and Input.is_action_pressed("lh_shift"):
+		var lhkeyvec = Vector2(0, 0)
+		if Input.is_action_pressed("lh_forward"):   lhkeyvec.y += 1
+		if Input.is_action_pressed("lh_backward"):  lhkeyvec.y += -1
+		if Input.is_action_pressed("lh_left"):      lhkeyvec.x += -1
+		if Input.is_action_pressed("lh_right"):     lhkeyvec.x += 1
+		var vtarget = -$HeadCam.global_transform.basis.z*20 + $HeadCam.global_transform.basis.x*lhkeyvec.x*15*delta + Vector3(0, lhkeyvec.y, 0)*15*delta
+		$HeadCam.look_at($HeadCam.global_transform.origin + vtarget, Vector3(0,1,0))
+		rotation_degrees.y += $HeadCam.rotation_degrees.y
+		$HeadCam.rotation_degrees.y = 0
+
 
 ###################
 var ovr_hand_tracking = null
@@ -121,16 +135,15 @@ func _update_hand_model(hand: ARVRController, model : Spatial, skel: Skeleton):
 
 
 var t = 0.0;
-func _process(delta_t):
-	if ovr_hand_tracking != null:
-		_update_hand_model($HandLeft, $HandLeft/left_hand_model, $HandLeft/left_hand_model/ArmatureLeft/Skeleton)
-		_update_hand_model($HandRight, $HandRight/right_hand_model, $HandRight/right_hand_model/ArmatureRight/Skeleton)
+func process_handtracking(delta):
+	_update_hand_model($HandLeft, $HandLeft/left_hand_model, $HandLeft/left_hand_model/ArmatureLeft/Skeleton)
+	_update_hand_model($HandRight, $HandRight/right_hand_model, $HandRight/right_hand_model/ArmatureRight/Skeleton)
 
-		t += delta_t;
-		if (t > 1.0):
-			t = 0.0;
-			print("Left Pinches: %.3f %.3f %.3f %.3f; Right Pinches %.3f %.3f %.3f %.3f" %
-				 [$HandLeft.get_joystick_axis(0)+1, $HandLeft.get_joystick_axis(1)+1, $HandLeft.get_joystick_axis(2)+1, $HandLeft.get_joystick_axis(3)+1,
-				  $HandRight.get_joystick_axis(0)+1, $HandRight.get_joystick_axis(1)+1, $HandRight.get_joystick_axis(2)+1, $HandRight.get_joystick_axis(3)+1]);
+	t += delta;
+	if (t > 1.0):
+		t = 0.0;
+		print("Left Pinches: %.3f %.3f %.3f %.3f; Right Pinches %.3f %.3f %.3f %.3f" %
+			 [$HandLeft.get_joystick_axis(0)+1, $HandLeft.get_joystick_axis(1)+1, $HandLeft.get_joystick_axis(2)+1, $HandLeft.get_joystick_axis(3)+1,
+			  $HandRight.get_joystick_axis(0)+1, $HandRight.get_joystick_axis(1)+1, $HandRight.get_joystick_axis(2)+1, $HandRight.get_joystick_axis(3)+1]);
 
 

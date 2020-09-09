@@ -1,4 +1,4 @@
-[gd_scene load_steps=181 format=2]
+[gd_scene load_steps=182 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/default_env.tres" type="Environment" id=2]
@@ -40,6 +40,7 @@
 [ext_resource path="res://fonts/LabelGenerator.gd" type="Script" id=38]
 [ext_resource path="res://fonts/Fira_Mono/FiraMono-Regular.ttf" type="DynamicFontData" id=39]
 [ext_resource path="res://fonts/Fira_Mono/FiraMono-Bold.ttf" type="DynamicFontData" id=40]
+[ext_resource path="res://PlayerDirections.gd" type="Script" id=41]
 
 [sub_resource type="CylinderShape" id=1]
 radius = 0.1
@@ -327,68 +328,6 @@ extents = Vector3( 0.02, 0.07, 0.04 )
 radius = 0.25
 height = 1.2
 
-[sub_resource type="CubeMesh" id=120]
-size = Vector3( 0.002, 0.002, 0.1 )
-
-[sub_resource type="SpatialMaterial" id=121]
-albedo_color = Color( 0.988235, 0.0235294, 0.0235294, 1 )
-
-[sub_resource type="CylinderMesh" id=124]
-top_radius = 0.01
-bottom_radius = 0.01
-height = 0.005
-radial_segments = 6
-rings = 1
-
-[sub_resource type="SpatialMaterial" id=125]
-albedo_color = Color( 0.807843, 0.470588, 0.223529, 1 )
-metallic = 0.55
-metallic_specular = 0.49
-roughness = 0.36
-
-[sub_resource type="CapsuleShape" id=127]
-radius = 0.15
-height = 0.15
-
-[sub_resource type="CapsuleMesh" id=132]
-radius = 0.15
-mid_height = 0.15
-
-[sub_resource type="SpatialMaterial" id=133]
-albedo_color = Color( 0.396078, 0.796078, 0.988235, 1 )
-
-[sub_resource type="CylinderMesh" id=136]
-top_radius = 0.2
-bottom_radius = 0.2
-height = 0.05
-
-[sub_resource type="SpatialMaterial" id=140]
-albedo_color = Color( 0.960784, 0.792157, 0.0313726, 1 )
-
-[sub_resource type="SpatialMaterial" id=137]
-albedo_color = Color( 0.960784, 0.0313726, 0.0313726, 1 )
-
-[sub_resource type="SpatialMaterial" id=138]
-albedo_color = Color( 0.321569, 0.0313726, 0.960784, 1 )
-
-[sub_resource type="CapsuleShape" id=139]
-radius = 0.15
-height = 0.01
-
-[sub_resource type="SphereShape" id=141]
-radius = 0.13
-
-[sub_resource type="PrismMesh" id=130]
-left_to_right = 0.0
-size = Vector3( 0.2, 0.2, 0.2 )
-
-[sub_resource type="SpatialMaterial" id=134]
-albedo_color = Color( 0.309804, 0.94902, 0.0784314, 1 )
-
-[sub_resource type="CubeMesh" id=135]
-material = SubResource( 21 )
-size = Vector3( 0.01, 0.01, 1 )
-
 [sub_resource type="BoxShape" id=25]
 extents = Vector3( 0.3, 0.2, 0.01 )
 
@@ -507,6 +446,68 @@ emission = Color( 0.627451, 0.501961, 0.337255, 1 )
 emission_energy = 1.0
 emission_operator = 0
 emission_on_uv2 = false
+
+[sub_resource type="CubeMesh" id=120]
+size = Vector3( 0.002, 0.002, 0.1 )
+
+[sub_resource type="SpatialMaterial" id=121]
+albedo_color = Color( 0.988235, 0.0235294, 0.0235294, 1 )
+
+[sub_resource type="CylinderMesh" id=124]
+top_radius = 0.01
+bottom_radius = 0.01
+height = 0.005
+radial_segments = 6
+rings = 1
+
+[sub_resource type="SpatialMaterial" id=125]
+albedo_color = Color( 0.807843, 0.470588, 0.223529, 1 )
+metallic = 0.55
+metallic_specular = 0.49
+roughness = 0.36
+
+[sub_resource type="CapsuleShape" id=127]
+radius = 0.15
+height = 0.15
+
+[sub_resource type="CapsuleMesh" id=132]
+radius = 0.15
+mid_height = 0.15
+
+[sub_resource type="SpatialMaterial" id=133]
+albedo_color = Color( 0.396078, 0.796078, 0.988235, 1 )
+
+[sub_resource type="CylinderMesh" id=136]
+top_radius = 0.2
+bottom_radius = 0.2
+height = 0.05
+
+[sub_resource type="SpatialMaterial" id=140]
+albedo_color = Color( 0.960784, 0.792157, 0.0313726, 1 )
+
+[sub_resource type="SpatialMaterial" id=137]
+albedo_color = Color( 0.960784, 0.0313726, 0.0313726, 1 )
+
+[sub_resource type="SpatialMaterial" id=138]
+albedo_color = Color( 0.321569, 0.0313726, 0.960784, 1 )
+
+[sub_resource type="CapsuleShape" id=139]
+radius = 0.15
+height = 0.01
+
+[sub_resource type="SphereShape" id=141]
+radius = 0.12
+
+[sub_resource type="PrismMesh" id=130]
+left_to_right = 0.0
+size = Vector3( 0.2, 0.2, 0.2 )
+
+[sub_resource type="SpatialMaterial" id=134]
+albedo_color = Color( 0.309804, 0.94902, 0.0784314, 1 )
+
+[sub_resource type="CubeMesh" id=135]
+material = SubResource( 21 )
+size = Vector3( 0.01, 0.01, 1 )
 
 [sub_resource type="QuadMesh" id=47]
 size = Vector2( 1.6, 1 )
@@ -960,7 +961,7 @@ script = ExtResource( 1 )
 transform = Transform( -1, 0, -3.25841e-07, 0, 1, 0, 3.25841e-07, 0, -1, 0, 0, 0 )
 
 [node name="PlayerMe" type="ARVROrigin" parent="Players"]
-transform = Transform( -1, 0, 3.25841e-07, 0, 1, 0, -3.25841e-07, 0, -1, 0, 2, 6.412 )
+transform = Transform( -1, 0, -3.25841e-07, 0, 1, 0, 3.25841e-07, 0, -1, 0, 2, 6.412 )
 script = ExtResource( 18 )
 
 [node name="HeadCam" type="ARVRCamera" parent="Players/PlayerMe"]
@@ -1034,7 +1035,7 @@ bones/0/name = "b_l_wrist"
 bones/0/parent = -1
 bones/0/rest = Transform( 1, 0, 0, 0, 0, 1, 0, -1, 0, 0, 0, 0 )
 bones/0/enabled = true
-bones/0/bound_children = [ NodePath("BoneAttachment 11") ]
+bones/0/bound_children = [  ]
 bones/1/name = "b_l_thumb_0"
 bones/1/parent = 0
 bones/1/rest = Transform( 0.639336, 0.331584, 0.693759, 0.305949, 0.718048, -0.625142, -0.70544, 0.61193, 0.357626, 2.00693, 1.15541, -1.04965 )
@@ -1044,7 +1045,7 @@ bones/2/name = "b_l_thumb_1"
 bones/2/parent = 1
 bones/2/rest = Transform( 0.967226, -0.22789, 0.111981, 0.253217, 0.832971, -0.491977, 0.01884, 0.504209, 0.863376, 2.48526, 2.56281e-07, -2.74327e-07 )
 bones/2/enabled = true
-bones/2/bound_children = [ NodePath("BoneAttachment") ]
+bones/2/bound_children = [  ]
 bones/3/name = "b_l_thumb_2"
 bones/3/parent = 2
 bones/3/rest = Transform( 0.974021, 0.179179, -0.138485, -0.153719, 0.972187, 0.176698, 0.166294, -0.15082, 0.974474, 3.25129, -4.77677e-07, -1.01843e-07 )
@@ -1064,17 +1065,17 @@ bones/6/name = "b_l_index_1"
 bones/6/parent = 0
 bones/6/rest = Transform( 0.995542, -0.0875827, -0.0349953, 0.0852684, 0.994371, -0.062901, 0.0403074, 0.0596366, 0.997406, 9.59962, 0.731646, -2.35507 )
 bones/6/enabled = true
-bones/6/bound_children = [ NodePath("BoneAttachment 6") ]
+bones/6/bound_children = [  ]
 bones/7/name = "b_l_index_2"
 bones/7/parent = 6
 bones/7/rest = Transform( 0.999877, -0.00621557, -0.0143972, 0.00695144, 0.998641, 0.0516391, 0.0140566, -0.0517328, 0.998562, 3.79273, 2.06186e-07, 2.63352e-07 )
 bones/7/enabled = true
-bones/7/bound_children = [ NodePath("BoneAttachment 5") ]
+bones/7/bound_children = [  ]
 bones/8/name = "b_l_index_3"
 bones/8/parent = 7
 bones/8/rest = Transform( 0.988148, 0.144493, -0.0518162, -0.14275, 0.989107, 0.0359237, 0.0564425, -0.0281012, 0.99801, 2.43037, -8.7442e-07, -1.28656e-07 )
 bones/8/enabled = true
-bones/8/bound_children = [ NodePath("BoneAttachment 2"), NodePath("BoneAttachment 3"), NodePath("BoneAttachment 4") ]
+bones/8/bound_children = [  ]
 bones/9/name = "b_l_index_null"
 bones/9/parent = 8
 bones/9/rest = Transform( 1, -8.73115e-10, 7.6252e-09, 8.73115e-10, 1, -1.16415e-09, -7.6252e-09, 1.16415e-09, 1, 1.1583, -5.55068e-07, 6.14673e-08 )
@@ -1089,12 +1090,12 @@ bones/11/name = "b_l_middle_2"
 bones/11/parent = 10
 bones/11/rest = Transform( 0.999954, 0.00405442, -0.00871268, -0.00385775, 0.99974, 0.0224721, 0.00880152, -0.0224375, 0.99971, 4.2927, 5.31597e-07, 1.6967e-07 )
 bones/11/enabled = true
-bones/11/bound_children = [ NodePath("BoneAttachment 10") ]
+bones/11/bound_children = [  ]
 bones/12/name = "b_l_middle_3"
 bones/12/parent = 11
 bones/12/rest = Transform( 0.982656, 0.185413, -0.00279413, -0.18478, 0.980344, 0.0691582, 0.015562, -0.0674424, 0.997602, 2.75496, -6.38197e-07, -6.37868e-08 )
 bones/12/enabled = true
-bones/12/bound_children = [ NodePath("BoneAttachment 7"), NodePath("BoneAttachment 8"), NodePath("BoneAttachment 9") ]
+bones/12/bound_children = [  ]
 bones/13/name = "b_l_middle_null"
 bones/13/parent = 12
 bones/13/rest = Transform( 1, -9.82545e-08, 9.3132e-10, 9.82545e-08, 1, 4.61005e-08, -9.31325e-10, -4.61005e-08, 1, 1.22035, 1.43796e-06, 3.05474e-07 )
@@ -1265,7 +1266,7 @@ bones/0/name = "b_r_wrist"
 bones/0/parent = -1
 bones/0/rest = Transform( 1, 0, 0, 0, 0, 1, 0, -1, 0, 0, 0, 0 )
 bones/0/enabled = true
-bones/0/bound_children = [ NodePath("BoneAttachment 5"), NodePath("BoneAttachment 6"), NodePath("BoneAttachment 7"), NodePath("BoneAttachment 8"), NodePath("BoneAttachment 9"), NodePath("BoneAttachment 10"), NodePath("BoneAttachment 11"), NodePath("BoneAttachment 12"), NodePath("BoneAttachment 13"), NodePath("BoneAttachment 14"), NodePath("BoneAttachment 15"), NodePath("BoneAttachment 16") ]
+bones/0/bound_children = [  ]
 bones/1/name = "b_r_thumb_0"
 bones/1/parent = 0
 bones/1/rest = Transform( 0.639336, 0.331584, 0.693759, 0.305949, 0.718048, -0.625141, -0.70544, 0.61193, 0.357626, -2.00693, -1.15541, 1.04965 )
@@ -1275,17 +1276,17 @@ bones/2/name = "b_r_thumb_1"
 bones/2/parent = 1
 bones/2/rest = Transform( 0.967226, -0.22789, 0.111981, 0.253217, 0.832971, -0.491977, 0.0188399, 0.504209, 0.863376, -2.48526, -2.56281e-07, -8.33007e-08 )
 bones/2/enabled = true
-bones/2/bound_children = [ NodePath("BoneAttachment 3") ]
+bones/2/bound_children = [  ]
 bones/3/name = "b_r_thumb_2"
 bones/3/parent = 2
 bones/3/rest = Transform( 0.974021, 0.179179, -0.138485, -0.153719, 0.972187, 0.176698, 0.166294, -0.15082, 0.974474, -3.25129, -6.69714e-07, -2.25983e-07 )
 bones/3/enabled = true
-bones/3/bound_children = [ NodePath("BoneAttachment 2") ]
+bones/3/bound_children = [  ]
 bones/4/name = "b_r_thumb_3"
 bones/4/parent = 3
 bones/4/rest = Transform( 0.984754, 0.126553, 0.119347, -0.104836, 0.979262, -0.173366, -0.138811, 0.158211, 0.9776, -3.37931, 3.74931e-07, -4.57547e-08 )
 bones/4/enabled = true
-bones/4/bound_children = [ NodePath("BoneAttachment") ]
+bones/4/bound_children = [  ]
 bones/5/name = "b_r_thumb_null"
 bones/5/parent = 4
 bones/5/rest = Transform( 1, -1.63913e-07, 2.45869e-07, 1.63913e-07, 1, -2.98023e-08, -2.45869e-07, 2.98023e-08, 1, -1.48634, 2.38419e-07, -2.98023e-07 )
@@ -1315,7 +1316,7 @@ bones/10/name = "b_r_middle_1"
 bones/10/parent = 0
 bones/10/rest = Transform( 0.989329, -0.102457, -0.103592, 0.104323, 0.994462, 0.012748, 0.101712, -0.023419, 0.994538, -9.56466, -0.254316, 0.172591 )
 bones/10/enabled = true
-bones/10/bound_children = [ NodePath("BoneAttachment 4") ]
+bones/10/bound_children = [  ]
 bones/11/name = "b_r_middle_2"
 bones/11/parent = 10
 bones/11/rest = Transform( 0.999954, 0.00405477, -0.00871269, -0.0038581, 0.99974, 0.0224721, 0.00880154, -0.0224375, 0.99971, -4.2927, -5.32528e-07, -1.66876e-07 )
@@ -1581,100 +1582,8 @@ remote_path = NodePath("../../../PlanViewSystem")
 [node name="toGuiSystem" type="RemoteTransform" parent="Players/PlayerMe"]
 remote_path = NodePath("../../../GuiSystem")
 
-[node name="BodyObjects" type="Spatial" parent="."]
-
-[node name="MovePointThimble" type="Spatial" parent="BodyObjects"]
-transform = Transform( -1.62921e-07, 0, 1, 0, 1, 0, -1, 0, -1.62921e-07, -0.226002, 3.493, -7.024 )
-
-[node name="MeshInstance" type="MeshInstance" parent="BodyObjects/MovePointThimble"]
-transform = Transform( -1.62921e-07, -1, 0, 1, -1.62921e-07, 0, 0, 0, 1, 0, 0, 0 )
-mesh = SubResource( 2 )
-material/0 = SubResource( 3 )
-
-[node name="TipTouchRay" type="RayCast" parent="BodyObjects/MovePointThimble"]
-transform = Transform( -1.62921e-07, 0, -1, 0, 1, 0, 1, 0, -1.62921e-07, -0.0429029, 0, -0.000141606 )
-enabled = true
-cast_to = Vector3( 0, 0, -0.1 )
-collision_mask = 3104
-collide_with_areas = true
-
-[node name="MeshInstance" type="MeshInstance" parent="BodyObjects/MovePointThimble/TipTouchRay"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.000141606, 0, -0.0429029 )
-mesh = SubResource( 120 )
-material/0 = SubResource( 121 )
-
-[node name="GroundSpikePoint" type="MeshInstance" parent="BodyObjects/MovePointThimble/TipTouchRay"]
-transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, 0, 0, -0.0477982 )
-mesh = SubResource( 124 )
-material/0 = SubResource( 125 )
-
-[node name="PlayerMotion" type="Spatial" parent="BodyObjects"]
-script = ExtResource( 23 )
-
-[node name="PlayerKinematicBody" type="KinematicBody" parent="BodyObjects/PlayerMotion"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, -6.412 )
-input_ray_pickable = false
-collision_mask = 38
-
-[node name="PlayerBodyCapsule" type="CollisionShape" parent="BodyObjects/PlayerMotion/PlayerKinematicBody"]
-transform = Transform( 1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0 )
-shape = SubResource( 127 )
-
-[node name="CapsuleShapePreview" type="MeshInstance" parent="BodyObjects/PlayerMotion/PlayerKinematicBody/PlayerBodyCapsule"]
-mesh = SubResource( 132 )
-material/0 = SubResource( 133 )
-
-[node name="HeadCollisionWarning" type="MeshInstance" parent="BodyObjects/PlayerMotion/PlayerKinematicBody/PlayerBodyCapsule/CapsuleShapePreview"]
-transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, 0, 0, -0.0743194 )
-mesh = SubResource( 136 )
-material/0 = SubResource( 140 )
-
-[node name="CollisionWarning" type="MeshInstance" parent="BodyObjects/PlayerMotion/PlayerKinematicBody/PlayerBodyCapsule/CapsuleShapePreview"]
-transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, 0, 0, 0 )
-mesh = SubResource( 136 )
-material/0 = SubResource( 137 )
-
-[node name="FreefallWarning" type="MeshInstance" parent="BodyObjects/PlayerMotion/PlayerKinematicBody/PlayerBodyCapsule/CapsuleShapePreview"]
-transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, 0, 0, 0.0653608 )
-visible = false
-mesh = SubResource( 136 )
-material/0 = SubResource( 138 )
-
-[node name="PlayerEnlargedKinematicBody" type="KinematicBody" parent="BodyObjects/PlayerMotion"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, -6.412 )
-input_ray_pickable = false
-collision_mask = 38
-
-[node name="PlayerBodyCapsule" type="CollisionShape" parent="BodyObjects/PlayerMotion/PlayerEnlargedKinematicBody"]
-transform = Transform( 1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0 )
-shape = SubResource( 139 )
-
-[node name="PlayerHeadKinematicBody" type="KinematicBody" parent="BodyObjects/PlayerMotion"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.55385, -6.3318 )
-input_ray_pickable = false
-collision_mask = 38
-
-[node name="PlayerHeadCapsule" type="CollisionShape" parent="BodyObjects/PlayerMotion/PlayerHeadKinematicBody"]
-transform = Transform( 1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0 )
-shape = SubResource( 141 )
-
-[node name="FloorOriginMarker" type="MeshInstance" parent="BodyObjects/PlayerMotion"]
-transform = Transform( -1.62921e-07, 0, 1, 0, 1, 0, -1, 0, -1.62921e-07, 1.78533, 0, -4.96781 )
-mesh = SubResource( 130 )
-material/0 = SubResource( 134 )
-
-[node name="MotionVectorPreview" type="Spatial" parent="BodyObjects/PlayerMotion"]
-transform = Transform( 1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, -0.0598552, 2.25315, -6.31372 )
-
-[node name="Scale" type="Spatial" parent="BodyObjects/PlayerMotion/MotionVectorPreview"]
-
-[node name="Mesh" type="MeshInstance" parent="BodyObjects/PlayerMotion/MotionVectorPreview/Scale"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.5 )
-mesh = SubResource( 135 )
-material/0 = null
-
 [node name="GuiSystem" type="Spatial" parent="."]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -2.08929e-06, 2, -6.412 )
+transform = Transform( 1, 0, 6.51682e-07, 0, 1, 0, -6.51682e-07, 0, 1, -2.08929e-06, 2, -6.412 )
 
 [node name="GUIPanel3D" type="StaticBody" parent="GuiSystem"]
 visible = false
@@ -2038,6 +1947,100 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.05 )
 mesh = SubResource( 122 )
 material/0 = SubResource( 123 )
 
+[node name="BodyObjects" type="Spatial" parent="."]
+
+[node name="MovePointThimble" type="Spatial" parent="BodyObjects"]
+transform = Transform( -7.58967e-07, 0, 1, 0, 1, 0, -1, 0, -7.58967e-07, -0.226002, 3.493, -7.024 )
+
+[node name="MeshInstance" type="MeshInstance" parent="BodyObjects/MovePointThimble"]
+transform = Transform( -1.62921e-07, -1, 0, 1, -1.62921e-07, 0, 0, 0, 1, 0, 0, 0 )
+mesh = SubResource( 2 )
+material/0 = SubResource( 3 )
+
+[node name="TipTouchRay" type="RayCast" parent="BodyObjects/MovePointThimble"]
+transform = Transform( -1.62921e-07, 0, -1, 0, 1, 0, 1, 0, -1.62921e-07, -0.0429029, 0, -0.000141606 )
+enabled = true
+cast_to = Vector3( 0, 0, -0.1 )
+collision_mask = 3104
+collide_with_areas = true
+
+[node name="MeshInstance" type="MeshInstance" parent="BodyObjects/MovePointThimble/TipTouchRay"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.000141606, 0, -0.0429029 )
+mesh = SubResource( 120 )
+material/0 = SubResource( 121 )
+
+[node name="GroundSpikePoint" type="MeshInstance" parent="BodyObjects/MovePointThimble/TipTouchRay"]
+transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, 0, 0, -0.0477982 )
+mesh = SubResource( 124 )
+material/0 = SubResource( 125 )
+
+[node name="PlayerDirections" type="Node" parent="BodyObjects"]
+script = ExtResource( 41 )
+
+[node name="PlayerMotion" type="Spatial" parent="BodyObjects"]
+script = ExtResource( 23 )
+
+[node name="PlayerKinematicBody" type="KinematicBody" parent="BodyObjects/PlayerMotion"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, -6.412 )
+input_ray_pickable = false
+collision_mask = 38
+
+[node name="PlayerBodyCapsule" type="CollisionShape" parent="BodyObjects/PlayerMotion/PlayerKinematicBody"]
+transform = Transform( 1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0 )
+shape = SubResource( 127 )
+
+[node name="CapsuleShapePreview" type="MeshInstance" parent="BodyObjects/PlayerMotion/PlayerKinematicBody/PlayerBodyCapsule"]
+mesh = SubResource( 132 )
+material/0 = SubResource( 133 )
+
+[node name="HeadCollisionWarning" type="MeshInstance" parent="BodyObjects/PlayerMotion/PlayerKinematicBody/PlayerBodyCapsule/CapsuleShapePreview"]
+transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, 0, 0, -0.0743194 )
+mesh = SubResource( 136 )
+material/0 = SubResource( 140 )
+
+[node name="CollisionWarning" type="MeshInstance" parent="BodyObjects/PlayerMotion/PlayerKinematicBody/PlayerBodyCapsule/CapsuleShapePreview"]
+transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, 0, 0, 0 )
+mesh = SubResource( 136 )
+material/0 = SubResource( 137 )
+
+[node name="FreefallWarning" type="MeshInstance" parent="BodyObjects/PlayerMotion/PlayerKinematicBody/PlayerBodyCapsule/CapsuleShapePreview"]
+transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, 0, 0, 0.0653608 )
+visible = false
+mesh = SubResource( 136 )
+material/0 = SubResource( 138 )
+
+[node name="PlayerEnlargedKinematicBody" type="KinematicBody" parent="BodyObjects/PlayerMotion"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, -6.412 )
+input_ray_pickable = false
+collision_mask = 38
+
+[node name="PlayerBodyCapsule" type="CollisionShape" parent="BodyObjects/PlayerMotion/PlayerEnlargedKinematicBody"]
+transform = Transform( 1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0 )
+shape = SubResource( 139 )
+
+[node name="PlayerHeadKinematicBody" type="KinematicBody" parent="BodyObjects/PlayerMotion"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.55385, -6.3318 )
+input_ray_pickable = false
+collision_mask = 38
+
+[node name="PlayerHeadCapsule" type="CollisionShape" parent="BodyObjects/PlayerMotion/PlayerHeadKinematicBody"]
+shape = SubResource( 141 )
+
+[node name="FloorOriginMarker" type="MeshInstance" parent="BodyObjects/PlayerMotion"]
+transform = Transform( -1.62921e-07, 0, 1, 0, 1, 0, -1, 0, -1.62921e-07, 1.78533, 0, -4.96781 )
+mesh = SubResource( 130 )
+material/0 = SubResource( 134 )
+
+[node name="MotionVectorPreview" type="Spatial" parent="BodyObjects/PlayerMotion"]
+transform = Transform( 1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, -0.0598552, 2.25315, -6.31372 )
+
+[node name="Scale" type="Spatial" parent="BodyObjects/PlayerMotion/MotionVectorPreview"]
+
+[node name="Mesh" type="MeshInstance" parent="BodyObjects/PlayerMotion/MotionVectorPreview/Scale"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.5 )
+mesh = SubResource( 135 )
+material/0 = null
+
 [node name="SketchSystem" type="Spatial" parent="."]
 script = ExtResource( 10 )
 
@@ -2046,7 +2049,7 @@ script = ExtResource( 10 )
 [node name="XCtubes" type="Spatial" parent="SketchSystem"]
 
 [node name="PlanViewSystem" type="Spatial" parent="."]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -2.08929e-06, 2, -6.412 )
+transform = Transform( 1, 0, 6.51682e-07, 0, 1, 0, -6.51682e-07, 0, 1, -2.08929e-06, 2, -6.412 )
 visible = false
 script = ExtResource( 24 )
 
@@ -2321,7 +2324,7 @@ stream = ExtResource( 21 )
 unit_db = 9.032
 
 [node name="LabelGenerator" type="Spatial" parent="."]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -2.08929e-06, 3.52571, -6.412 )
+transform = Transform( 1, 0, 6.51682e-07, 0, 1, 0, -6.51682e-07, 0, 1, -2.08929e-06, 3.52571, -6.412 )
 script = ExtResource( 38 )
 
 [node name="Viewport" type="Viewport" parent="LabelGenerator"]
