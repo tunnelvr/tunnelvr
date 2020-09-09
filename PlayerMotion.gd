@@ -1,7 +1,7 @@
 extends Spatial
 
-var Ddebugvisualoffset = Vector3(-2, 0, 0)
-#var Ddebugvisualoffset = Vector3(0, 0, 0)
+#var Ddebugvisualoffset = Vector3(-2, 0, 0)
+var Ddebugvisualoffset = Vector3(0, 0, 0)
 
 onready var playerMe = get_node("/root/Spatial/Players/PlayerMe")
 onready var HeadCam = playerMe.get_node("HeadCam")
@@ -21,6 +21,7 @@ var playerstepdownbump = 0.05
 var freefallsurfaceslidedragfactor = 1.1
 var freefallairdragfactor = 0.8
 var flyingkinematicenlargement = 0.03
+var clawengagementmaxpulldistance = 0.18
 
 onready var psqparams = PhysicsShapeQueryParameters.new()
 onready var psqparamshead = PhysicsShapeQueryParameters.new()
@@ -44,7 +45,6 @@ func getplayerrecentvelocity():
 		return velsum/len(playercentrevelocitystack)
 	return Vector3(0,0,0)
 
-
 func addplayervelocitystack(vel):
 	if playercentrevelocitystack_index >= -1:
 		if playercentrevelocitystack_index >= 0:
@@ -55,6 +55,9 @@ func addplayervelocitystack(vel):
 		playercentrevelocitystack_index = (playercentrevelocitystack_index + 1)%len(playercentrevelocitystack)
 	else:
 		playercentrevelocitystack_index += 1
+
+func resetplayervelocitystack(n):
+	playercentrevelocitystack_index = n
 
 
 func _ready():
@@ -92,7 +95,12 @@ func _physics_process(delta):
 	$PlayerKinematicBody/PlayerBodyCapsule.shape.height = capsuleshaftheight
 	$PlayerKinematicBody/PlayerBodyCapsule/CapsuleShapePreview.mesh.mid_height = capsuleshaftheight
 	
-	if PlayerDirections.playerdirectedflight:
+	if PlayerDirections.clawengageposition != null:
+		var clawengagementrelativedisplacement = PlayerDirections.clawengageposition - PlayerDirections.GroundSpikePoint.global_transform.origin
+		if playerinfreefall:
+			endfreefallmode()
+		process_clawengagement(delta, clawengagementrelativedisplacement)
+	elif PlayerDirections.playerdirectedflight:
 		process_directedflight(delta, PlayerDirections.playerdirectedflightvelocity)
 	elif playerinfreefall:
 		process_freefall(delta)
@@ -108,6 +116,20 @@ func _physics_process(delta):
 		$MotionVectorPreview/Scale.scale.z = playercentrevelocitylength
 		if playercentrevelocitylength > 0.01:
 			$MotionVectorPreview.global_transform = Transform(Basis(), playerbodycentre).looking_at(playerbodycentre - playercentrevelocity, Vector3(0,1,0) if abs(playercentrevelocity.y) < 0.8*playercentrevelocitylength else Vector3(1,0,0))
+
+func process_clawengagement(delta, clawengagementrelativedisplacement):
+	playerbodycentre = HeadCentre.global_transform.origin - Vector3(0, playerheadcentreabovebodycentreheight, 0) + Ddebugvisualoffset
+	var playerbodycapsulebasis = $PlayerKinematicBody/PlayerBodyCapsule.global_transform.basis
+	var playerbodycentrewithdirectedmotion = playerbodycentre + clawengagementrelativedisplacement
+	psqparams.transform = Transform(playerbodycapsulebasis, playerbodycentrewithdirectedmotion + Vector3(0,0.05,0))
+	if len(get_world().direct_space_state.intersect_shape(psqparams, 1)) == 0:
+		playerMe.global_transform.origin += clawengagementrelativedisplacement
+		playerbodycentre = playerbodycentrewithdirectedmotion
+	else:
+		PlayerDirections.endclawengagement()
+	addplayervelocitystack((playerbodycentre - playerbodycentre_prev)/delta)
+	playerbodycentre_prev = playerbodycentre
+	$PlayerKinematicBody.global_transform.origin = playerbodycentre
 		
 func process_feet_on_floor(delta, playerdirectedwalkmovement):
 	playerbodycentre = HeadCentre.global_transform.origin - Vector3(0, playerheadcentreabovebodycentreheight, 0) + Ddebugvisualoffset
@@ -163,7 +185,7 @@ func process_feet_on_floor(delta, playerdirectedwalkmovement):
 			playerfreefallbodyvelocity = getplayerrecentvelocity()
 			playerinfreefall = true
 	else:
-		playercentrevelocitystack_index = -2
+		resetplayervelocitystack(-2)
 		var playerheadcentreforcollision = playerbodycentre + Vector3(0, playerheadcentreabovebodycentreheight, 0)
 		psqparamshead.transform = Transform(playerbodycapsulebasis, playerheadcentreforcollision)
 		playerheadcolliding = len(get_world().direct_space_state.intersect_shape(psqparamshead, 1)) != 0
@@ -173,6 +195,11 @@ func process_feet_on_floor(delta, playerdirectedwalkmovement):
 	$PlayerKinematicBody/PlayerBodyCapsule/CapsuleShapePreview/CollisionWarning.visible = playeriscolliding
 	$PlayerKinematicBody/PlayerBodyCapsule/CapsuleShapePreview/HeadCollisionWarning.visible = playerheadcolliding
 	HeadCollisionWarning.visible = playerheadcolliding
+	
+func endfreefallmode():
+	resetplayervelocitystack(-1)
+	playerinfreefall = false
+	$PlayerKinematicBody/PlayerBodyCapsule/CapsuleShapePreview/FreefallWarning.visible = false
 	
 func process_freefall(delta):
 	$PlayerKinematicBody.global_transform.origin = playerbodycentre
@@ -188,9 +215,7 @@ func process_freefall(delta):
 		var slideincidence = -slidecollision.normal.dot(playerfreefallbodyvelocity)
 		playerfreefallbodyvelocity *= 1 - max(0, slideincidence)*freefallsurfaceslidedragfactor*delta
 		if slidecollision.normal.y > floor_max_angle_wallgradient:
-			playercentrevelocitystack_index = -1
-			playerinfreefall = false
-			$PlayerKinematicBody/PlayerBodyCapsule/CapsuleShapePreview/FreefallWarning.visible = false
+			endfreefallmode()
 	playerbodycentre_prev = playerbodycentre
 
 func process_directedwalkmovement(delta, playerdirectedwalkingvelocity):
@@ -213,8 +238,8 @@ func process_directedflight(delta, playerdirectedflightvelocity):
 		playerfreefallbodyvelocity = $PlayerEnlargedKinematicBody.move_and_slide(playerdirectedflightvelocity, Vector3(0, 1, 0))
 		playerbodycentre = $PlayerEnlargedKinematicBody.global_transform.origin
 	playerMe.global_transform.origin = -Ddebugvisualoffset + playerbodycentre + Vector3(0, playerheadcentreabovebodycentreheight, 0) - headcentrefromvroriginvector
-	playerbodycentre_prev = playerbodycentre
 	addplayervelocitystack((playerbodycentre - playerbodycentre_prev)/delta)
+	playerbodycentre_prev = playerbodycentre
 	$PlayerKinematicBody.global_transform.origin = playerbodycentre
 
 func process_shareplayerposition():

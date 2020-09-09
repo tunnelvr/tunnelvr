@@ -5,6 +5,7 @@ onready var HeadCam = playerMe.get_node("HeadCam")
 onready var HandLeft = playerMe.get_node("HandLeft")
 onready var MovePointThimble = get_node("../MovePointThimble")
 onready var tiptouchray = MovePointThimble.get_node("TipTouchRay")
+onready var GroundSpikePoint = tiptouchray.get_node("GroundSpikePoint")
 
 var flyspeed = 5.0
 var walkspeed = 3.0
@@ -13,6 +14,8 @@ var nextphysicsrotatestep = 0.0
 var playerdirectedflight = false
 var playerdirectedflightvelocity = Vector3(0,0,0)
 var playerdirectedwalkingvelocity = Vector3(0,0,0)
+var clawengageposition = null
+
 
 func _ready():
 	if Tglobal.VRstatus != "none":
@@ -23,6 +26,11 @@ func _input(event):
 	if event is InputEventKey and event.pressed and not Input.is_action_pressed("lh_shift"):
 		if event.is_action_pressed("lh_left"):  nextphysicsrotatestep += -22.5
 		if event.is_action_pressed("lh_right"): nextphysicsrotatestep += 22.5
+
+func endclawengagement():
+	Tglobal.soundsystem.quicksound("ClawReleaseSound", GroundSpikePoint.global_transform.origin)
+	GroundSpikePoint.visible = false
+	clawengageposition = null
 
 func _physics_process(delta):
 	playerdirectedflightvelocity = Vector3(0,0,0)
@@ -38,6 +46,8 @@ func _physics_process(delta):
 		if Input.is_action_pressed("lh_right"):     joypos.x += 1
 
 	if playerdirectedflight and Tglobal.VRstatus != "none" and not Tglobal.questhandtracking and HandLeft.get_is_active():
+		if clawengageposition != null:
+			endclawengagement()
 		if HandLeft.is_button_pressed(BUTTONS.VR_TRIGGER) or Input.is_action_pressed("lh_forward") or Input.is_action_pressed("lh_backward"):
 			var flydir = HandLeft.global_transform.basis.z if HandLeft.get_is_active() else HeadCam.global_transform.basis.z
 			if joypos.y < -0.5:
@@ -53,13 +63,22 @@ func _physics_process(delta):
 	if tiptouchray.is_colliding() and tiptouchray.get_collider().get_name() == "GreenBlob":
 		var greenblob = tiptouchray.get_collider()
 		var vec = greenblob.get_node("SteeringSphere").global_transform.origin - tiptouchray.get_collision_point()
-		var fvec = Vector2(vec.x, vec.z)
-		greenblob.get_node("SteeringSphere/TouchpointOrientation").rotation = Vector3(Vector2(fvec.length(), vec.y).angle(), -fvec.angle() - greenblob.get_node("..").rotation.y - deg2rad(90), 0)
+		var fvec2 = Vector2(vec.x, vec.z)
+		greenblob.get_node("SteeringSphere/TouchpointOrientation").rotation = Vector3(Vector2(fvec2.length(), vec.y).angle(), -fvec2.angle() - greenblob.get_node("..").rotation.y - deg2rad(90), 0)
 		if playerdirectedflight:
 			playerdirectedflightvelocity = vec.normalized()*flyspeed
 		else:
-			playerdirectedwalkingvelocity = fvec.normalized()*walkspeed
+			playerdirectedwalkingvelocity = Vector3(vec.x, 0, vec.z).normalized()*walkspeed
 
+	var isgroundspiked = tiptouchray.is_colliding() and tiptouchray.get_collider().get_name() == "XCtubeshell"
+	if isgroundspiked:
+		if clawengageposition == null:
+			clawengageposition = tiptouchray.get_collision_point()
+			GroundSpikePoint.global_transform.origin = clawengageposition
+			GroundSpikePoint.visible = true
+			Tglobal.soundsystem.quicksound("ClawGripSound", clawengageposition)
+	elif clawengageposition != null:
+		endclawengagement()
 
 func _on_questhandtracking_button_pressed(p_button):
 	if p_button == BUTTONS.HT_PINCH_MIDDLE_FINGER:
@@ -83,7 +102,6 @@ func _on_button_pressed(p_button):
 	if p_button == BUTTONS.VR_GRIP:
 		HandLeft.get_node("csghandleft").setpartcolor(4, "#00CC00")
 		playerdirectedflight = true
-
 		
 func _on_button_release(p_button):
 	if p_button == BUTTONS.VR_BUTTON_BY:
