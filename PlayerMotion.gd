@@ -1,10 +1,13 @@
 extends Spatial
 
+var Ddebugvisualoffset = Vector3(-2, 0, 0)
+#var Ddebugvisualoffset = Vector3(0, 0, 0)
+
 onready var playerMe = get_node("/root/Spatial/Players/PlayerMe")
 onready var HeadCam = playerMe.get_node("HeadCam")
 onready var HeadCentre = HeadCam.get_node("HeadCentre")
+onready var HeadCollisionWarning = HeadCam.get_node("HeadCollisionWarning")
 onready var playerheadbodyradius = $PlayerKinematicBody/PlayerBodyCapsule.shape.radius
-onready var psqparams = PhysicsShapeQueryParameters.new()
 onready var HandLeft = playerMe.get_node("HandLeft")
 
 var floor_max_angle = deg2rad(45)
@@ -17,9 +20,10 @@ var playerstepdownbump = 0.05
 var freefallsurfaceslidedragfactor = 1.1
 var freefallairdragfactor = 0.8
 var flyspeed = 5.0
+var flyingkinematicenlargement = 0.03
 
-var Ddebugvisualoffset = Vector3(-2, 0, 0)
-
+onready var psqparams = PhysicsShapeQueryParameters.new()
+onready var psqparamshead = PhysicsShapeQueryParameters.new()
 var headcentrefromvroriginvector = Vector3(0,1.6,0)
 var headcentreabovephysicalfloorheight = 1.7
 var playerbodyverticalheight = 1.1
@@ -73,11 +77,13 @@ func determdirectedflight():
 func _ready():
 	var visualpreview = (Ddebugvisualoffset != Vector3(0,0,0))
 	$PlayerKinematicBody/PlayerBodyCapsule/CapsuleShapePreview.visible = visualpreview
-	$FloorOriginMarker.visible = visualpreview
 	$MotionVectorPreview.visible = visualpreview
 
 	psqparams.set_shape($PlayerKinematicBody/PlayerBodyCapsule.shape)
 	psqparams.collision_mask = $PlayerKinematicBody.collision_mask
+
+	psqparamshead.set_shape($PlayerHeadKinematicBody/PlayerHeadCapsule.shape)
+	psqparamshead.collision_mask = $PlayerKinematicBody.collision_mask
 
 func _physics_process(delta):
 	headcentrefromvroriginvector = HeadCentre.global_transform.origin - playerMe.global_transform.origin
@@ -106,13 +112,12 @@ func _physics_process(delta):
 		$MotionVectorPreview/Scale.scale.z = playercentrevelocitylength
 		if playercentrevelocitylength > 0.01:
 			$MotionVectorPreview.global_transform = Transform(Basis(), playerbodycentre).looking_at(playerbodycentre - playercentrevelocity, Vector3(0,1,0) if abs(playercentrevelocity.y) < 0.8*playercentrevelocitylength else Vector3(1,0,0))
-	else:
-		print(playerfootheight)
 		
 func process_feet_on_floor(delta):
 	playerbodycentre = HeadCentre.global_transform.origin - Vector3(0, playerheadcentreabovebodycentreheight, 0) + Ddebugvisualoffset
 	
 	var playeriscolliding = false
+	var playerheadcolliding = false	
 	var playerstartsfreefall = false
 
 	var stepupdistanceclear = playermaxstepupheight
@@ -157,10 +162,14 @@ func process_feet_on_floor(delta):
 			playerinfreefall = true
 	else:
 		playercentrevelocitystack_index = -2
+		psqparamshead.transform = Transform(playerbodycapsulebasis, playerbodycentre + Vector3(0, playerheadcentreabovebodycentreheight, 0))
+		playerheadcolliding = len(get_world().direct_space_state.intersect_shape(psqparams, 1)) != 0
+		
 	$PlayerKinematicBody.global_transform.origin = playerbodycentre
 	$PlayerKinematicBody/PlayerBodyCapsule/CapsuleShapePreview/CollisionWarning.visible = playeriscolliding
-
-
+	$PlayerKinematicBody/PlayerBodyCapsule/CapsuleShapePreview/HeadCollisionWarning.visible = playerheadcolliding
+	HeadCollisionWarning.visible = playerheadcolliding
+	
 func process_freefall(delta):
 	$PlayerKinematicBody.global_transform.origin = playerbodycentre
 	playerfreefallbodyvelocity.y -= gravityacceleration*delta
@@ -181,10 +190,13 @@ func process_freefall(delta):
 	playerbodycentre_prev = playerbodycentre
 
 func process_directedflight(delta):
-	$PlayerKinematicBody.global_transform.origin = playerbodycentre
+	$PlayerEnlargedKinematicBody/PlayerBodyCapsule.shape.height = $PlayerKinematicBody/PlayerBodyCapsule.shape.height
+	$PlayerEnlargedKinematicBody/PlayerBodyCapsule.shape.radius = $PlayerKinematicBody/PlayerBodyCapsule.shape.radius + flyingkinematicenlargement
+	$PlayerEnlargedKinematicBody.global_transform.origin = playerbodycentre
 	if playerdirectedflightvelocity != Vector3(0,0,0):
-		playerfreefallbodyvelocity = $PlayerKinematicBody.move_and_slide(playerdirectedflightvelocity, Vector3(0, 1, 0))
-		playerbodycentre = $PlayerKinematicBody.global_transform.origin
+		playerfreefallbodyvelocity = $PlayerEnlargedKinematicBody.move_and_slide(playerdirectedflightvelocity, Vector3(0, 1, 0))
+		playerbodycentre = $PlayerEnlargedKinematicBody.global_transform.origin
 	playerMe.global_transform.origin = -Ddebugvisualoffset + playerbodycentre + Vector3(0, playerheadcentreabovebodycentreheight, 0) - headcentrefromvroriginvector
 	playerbodycentre_prev = playerbodycentre
 	addplayervelocitystack((playerbodycentre - playerbodycentre_prev)/delta)
+	$PlayerKinematicBody.global_transform.origin = playerbodycentre

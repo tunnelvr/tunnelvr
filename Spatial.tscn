@@ -1,4 +1,4 @@
-[gd_scene load_steps=176 format=2]
+[gd_scene load_steps=181 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/default_env.tres" type="Environment" id=2]
@@ -47,6 +47,13 @@ height = 0.18
 
 [sub_resource type="CubeMesh" id=126]
 size = Vector3( 0.35, 0.01, 0.01 )
+
+[sub_resource type="QuadMesh" id=142]
+size = Vector2( 0.4, 0.2 )
+
+[sub_resource type="SpatialMaterial" id=143]
+flags_transparent = true
+albedo_color = Color( 0.980392, 0.898039, 0.0431373, 0.501961 )
 
 [sub_resource type="CylinderMesh" id=2]
 top_radius = 0.01
@@ -355,11 +362,21 @@ top_radius = 0.2
 bottom_radius = 0.2
 height = 0.05
 
+[sub_resource type="SpatialMaterial" id=140]
+albedo_color = Color( 0.960784, 0.792157, 0.0313726, 1 )
+
 [sub_resource type="SpatialMaterial" id=137]
 albedo_color = Color( 0.960784, 0.0313726, 0.0313726, 1 )
 
 [sub_resource type="SpatialMaterial" id=138]
 albedo_color = Color( 0.321569, 0.0313726, 0.960784, 1 )
+
+[sub_resource type="CapsuleShape" id=139]
+radius = 0.15
+height = 0.01
+
+[sub_resource type="SphereShape" id=141]
+radius = 0.13
 
 [sub_resource type="PrismMesh" id=130]
 left_to_right = 0.0
@@ -981,6 +998,12 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.051, 0.085 )
 mesh = SubResource( 126 )
 material/0 = null
 
+[node name="HeadCollisionWarning" type="MeshInstance" parent="Players/PlayerMe/HeadCam"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.020133, -0.13966 )
+visible = false
+mesh = SubResource( 142 )
+material/0 = SubResource( 143 )
+
 [node name="HandLeft" type="ARVRController" parent="Players/PlayerMe"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.2, 1.5, -0.5 )
 
@@ -1601,6 +1624,11 @@ shape = SubResource( 127 )
 mesh = SubResource( 132 )
 material/0 = SubResource( 133 )
 
+[node name="HeadCollisionWarning" type="MeshInstance" parent="BodyObjects/PlayerMotion/PlayerKinematicBody/PlayerBodyCapsule/CapsuleShapePreview"]
+transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, 0, 0, -0.0743194 )
+mesh = SubResource( 136 )
+material/0 = SubResource( 140 )
+
 [node name="CollisionWarning" type="MeshInstance" parent="BodyObjects/PlayerMotion/PlayerKinematicBody/PlayerBodyCapsule/CapsuleShapePreview"]
 transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, 0, 0, 0 )
 mesh = SubResource( 136 )
@@ -1611,6 +1639,24 @@ transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, 0, 0, 0
 visible = false
 mesh = SubResource( 136 )
 material/0 = SubResource( 138 )
+
+[node name="PlayerEnlargedKinematicBody" type="KinematicBody" parent="BodyObjects/PlayerMotion"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, -6.412 )
+input_ray_pickable = false
+collision_mask = 38
+
+[node name="PlayerBodyCapsule" type="CollisionShape" parent="BodyObjects/PlayerMotion/PlayerEnlargedKinematicBody"]
+transform = Transform( 1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0 )
+shape = SubResource( 139 )
+
+[node name="PlayerHeadKinematicBody" type="KinematicBody" parent="BodyObjects/PlayerMotion"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.55385, -6.3318 )
+input_ray_pickable = false
+collision_mask = 38
+
+[node name="PlayerHeadCapsule" type="CollisionShape" parent="BodyObjects/PlayerMotion/PlayerHeadKinematicBody"]
+transform = Transform( 1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0 )
+shape = SubResource( 141 )
 
 [node name="FloorOriginMarker" type="MeshInstance" parent="BodyObjects/PlayerMotion"]
 transform = Transform( -1.62921e-07, 0, 1, 0, 1, 0, -1, 0, -1.62921e-07, 1.78533, 0, -4.96781 )
