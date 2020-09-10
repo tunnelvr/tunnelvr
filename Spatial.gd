@@ -152,7 +152,8 @@ extends Spatial
 var arvr_openvr = null; 
 var arvr_quest = null; 
 var arvr_oculus = null; 
-
+var arvr_nativemobile
+	
 export var hostipnumber: String = ""
 export var hostportnumber: int = 8002
 
@@ -172,6 +173,7 @@ func _ready():
 		arvr_openvr = ARVRServer.find_interface("OpenVR")
 		arvr_quest = ARVRServer.find_interface("OVRMobile")
 		arvr_oculus = ARVRServer.find_interface("Oculus")
+		arvr_nativemobile = ARVRServer.find_interface("Native mobile")
 		
 		if arvr_quest:
 			print("found quest, initializing")
@@ -211,6 +213,15 @@ func _ready():
 				print("  Success initializing OpenVR Interface.");
 				Tglobal.arvrinterface = arvr_openvr
 				
+		elif arvr_nativemobile:
+			print("found native mobile, initializing")
+			if arvr_nativemobile.initialize():
+				var viewport = get_viewport()
+				viewport.arvr = true
+				viewport.render_target_v_flip = true # <---- for your upside down screens
+				viewport.transparent_bg = true # <--- For the AR
+				arvr_nativemobile. k1 = 0.2    # Lens distortion constants
+				arvr_nativemobile. k2 = 0.23
 	
 	Tglobal.VRoperating = (Tglobal.VRstatus != "none")
 	if Tglobal.VRstatus == "none":
@@ -219,6 +230,7 @@ func _ready():
 		playerMe.initquesthandtrackingnow(ovr_hand_tracking)
 	if Tglobal.VRoperating:
 		$BodyObjects/PlayerDirections.inithandvrsignalconnections()
+		#$BodyObjects/Locomotion_WalkInPlace.initjogdetectionsystem(playerMe.get_node("HeadCam"))
 
 
 	var networkedmultiplayerenet = NetworkedMultiplayerENet.new()

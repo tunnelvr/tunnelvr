@@ -370,6 +370,10 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 		gripmenu.get_node("DoSlice").get_node("MeshInstance").visible = true
 		gripmenu.get_node("DoSlice").get_node("CollisionShape").disabled = false
 		dontdisablegripmenus = true
+
+	elif pointertargettype == "GripMenuItem" and pointertarget.get_name() == "Record" and gripbuttonheld:
+		Tglobal.soundsystem.startmyvoicerecording()
+		dontdisablegripmenus = true
 		
 	if gripbuttonheld and not dontdisablegripmenus:
 		gripbuttonpressused = true
@@ -419,6 +423,8 @@ func _on_button_release(p_button):
 
 func buttonreleased_vrgrip():
 	handright.get_node("csghandright").setpartcolor(4, "#FFFFFF")
+	if Tglobal.soundsystem.nowrecording:
+		Tglobal.soundsystem.stopmyvoicerecording()
 	
 	if gripbuttonpressused:
 		pass  # the trigger was pulled during the grip operation
@@ -469,6 +475,12 @@ func buttonreleased_vrgrip():
 
 			elif pointertarget.get_name() == "NewSlice" and is_instance_valid(activetargettube):
 				print("Press trigger to action")
+
+			elif pointertarget.get_name() == "Record":
+				print("Press trigger to action (record from mic)")
+				
+			elif pointertarget.get_name() == "Replay":
+				Tglobal.soundsystem.playmyvoicerecording()
 				
 			elif pointertarget.get_name() == "DoSlice" and is_instance_valid(activetargettube) and len(activetargetwall.nodepoints) == 0:
 				print(activetargettube, " ", len(activetargetwall.nodepoints))
@@ -536,6 +548,9 @@ func buttonreleased_vrgrip():
 
 		
 func buttonreleased_vrtrigger():
+	if Tglobal.soundsystem.nowrecording:
+		Tglobal.soundsystem.stopmyvoicerecording()
+			
 	if activetargetwallgrabbedtransform != null:
 		#setactivetargetwall(null)
 		activetargetwallgrabbedtransform = null

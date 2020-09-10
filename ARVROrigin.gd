@@ -46,8 +46,8 @@ remotesync func playvoicerecording(wavrecording):
 	stream.data = wavrecording
 	stream.mix_rate = 44100
 	stream.stereo = true
-	$HandLeft/AudioStreamPlayer3D.stream = stream
-	$HandLeft/AudioStreamPlayer3D.play()
+	$HandRight/AudioStreamPlayer3D.stream = stream
+	$HandRight/AudioStreamPlayer3D.play()
 
 func playerpositiondict():
 	return { "playertransform":global_transform, 

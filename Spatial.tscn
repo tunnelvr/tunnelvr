@@ -1,8 +1,9 @@
-[gd_scene load_steps=180 format=2]
+[gd_scene load_steps=198 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/default_env.tres" type="Environment" id=2]
 [ext_resource path="res://lightweighttextures/watersurface.material" type="Material" id=3]
+[ext_resource path="res://utilities/Locomotion_WalkInPlace.gd" type="Script" id=4]
 [ext_resource path="res://pointersystem.gd" type="Script" id=5]
 [ext_resource path="res://guimeshes/handrightmesh.tscn" type="PackedScene" id=6]
 [ext_resource path="res://lightweighttextures/Ground030_2K_Color_small.jpg" type="Texture" id=7]
@@ -157,8 +158,6 @@ bind/22/pose = Transform( 96.5994, 24.9915, -6.6318, 1.23382, -30.0746, -95.3625
 bind/23/name = "b_l_forearm_stub"
 bind/23/bone = -1
 bind/23/pose = Transform( 100, 0, 0, 0, 6.51683e-05, -100, 0, 100, 6.51683e-05, 0, 0, 0 )
-
-[sub_resource type="AudioStreamMicrophone" id=10]
 
 [sub_resource type="SpatialMaterial" id=11]
 params_cull_mode = 2
@@ -417,6 +416,24 @@ albedo_texture = ExtResource( 25 )
 uv1_scale = Vector3( 1, 0.05, 1 )
 uv1_offset = Vector3( -0.2, 0.303, 0 )
 
+[sub_resource type="SpatialMaterial" id=156]
+albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
+albedo_texture = ExtResource( 25 )
+uv1_scale = Vector3( 1, 0.05, 1 )
+uv1_offset = Vector3( -0.2, 0.7, 0 )
+
+[sub_resource type="SpatialMaterial" id=157]
+albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
+albedo_texture = ExtResource( 25 )
+uv1_scale = Vector3( 1, 0.05, 1 )
+uv1_offset = Vector3( -0.2, 0.75, 0 )
+
+[sub_resource type="SpatialMaterial" id=158]
+albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
+albedo_texture = ExtResource( 25 )
+uv1_scale = Vector3( 1, 0.05, 1 )
+uv1_offset = Vector3( -0.2, 0.8, 0 )
+
 [sub_resource type="SphereShape" id=46]
 radius = 0.05
 
@@ -616,26 +633,61 @@ uv1_triplanar = true
 
 [sub_resource type="PlaneMesh" id=88]
 
-[sub_resource type="SpatialMaterial" id=89]
+[sub_resource type="OpenSimplexNoise" id=145]
+period = 44.2
+
+[sub_resource type="NoiseTexture" id=146]
+seamless = true
+noise = SubResource( 145 )
+
+[sub_resource type="OpenSimplexNoise" id=147]
+octaves = 1
+period = 105.7
+
+[sub_resource type="NoiseTexture" id=148]
+seamless = true
+noise = SubResource( 147 )
+
+[sub_resource type="OpenSimplexNoise" id=149]
+period = 93.7
+lacunarity = 2.24
+
+[sub_resource type="NoiseTexture" id=150]
+seamless = true
+noise = SubResource( 149 )
+
+[sub_resource type="SpatialMaterial" id=153]
 params_cull_mode = 2
-albedo_texture = ExtResource( 34 )
-normal_enabled = true
-normal_scale = 2.04
-normal_texture = ExtResource( 33 )
+albedo_color = Color( 0.980392, 0.552941, 0.054902, 1 )
+albedo_texture = SubResource( 146 )
+metallic = 0.56
+metallic_texture = SubResource( 150 )
+roughness = 0.53
+ao_enabled = true
+ao_light_affect = 1.0
+ao_texture = SubResource( 148 )
+ao_on_uv2 = false
+ao_texture_channel = 0
 uv1_triplanar = true
 
-[sub_resource type="SpatialMaterial" id=90]
+[sub_resource type="SpatialMaterial" id=154]
 params_cull_mode = 2
-albedo_texture = ExtResource( 34 )
+albedo_color = Color( 0.980392, 0.552941, 0.054902, 1 )
+albedo_texture = SubResource( 146 )
+metallic = 0.56
+metallic_texture = SubResource( 150 )
+roughness = 0.53
 emission_enabled = true
 emission = Color( 0, 0, 0, 1 )
-emission_energy = 0.31
+emission_energy = 0.52
 emission_operator = 0
 emission_on_uv2 = false
 emission_texture = ExtResource( 37 )
-normal_enabled = true
-normal_scale = 2.04
-normal_texture = ExtResource( 33 )
+ao_enabled = true
+ao_light_affect = 1.0
+ao_texture = SubResource( 148 )
+ao_on_uv2 = false
+ao_texture_channel = 0
 uv1_triplanar = true
 
 [sub_resource type="PlaneMesh" id=91]
@@ -684,12 +736,77 @@ uv1_triplanar = true
 
 [sub_resource type="PlaneMesh" id=98]
 
+[sub_resource type="OpenSimplexNoise" id=140]
+period = 71.9
+persistence = 0.407
+lacunarity = 3.15
+
+[sub_resource type="NoiseTexture" id=141]
+seamless = true
+noise = SubResource( 140 )
+
+[sub_resource type="OpenSimplexNoise" id=151]
+period = 24.3
+
+[sub_resource type="NoiseTexture" id=152]
+seamless = true
+noise = SubResource( 151 )
+
+[sub_resource type="SpatialMaterial" id=142]
+params_cull_mode = 2
+albedo_color = Color( 0.12549, 0.258824, 0.890196, 1 )
+albedo_texture = SubResource( 141 )
+metallic_specular = 0.55
+roughness = 0.21
+roughness_texture = SubResource( 152 )
+uv1_triplanar = true
+
+[sub_resource type="SpatialMaterial" id=155]
+params_cull_mode = 2
+albedo_color = Color( 0.12549, 0.258824, 0.890196, 1 )
+albedo_texture = SubResource( 141 )
+metallic_specular = 0.55
+roughness = 0.21
+roughness_texture = SubResource( 152 )
+emission_enabled = true
+emission = Color( 0, 0, 0, 1 )
+emission_energy = 0.64
+emission_operator = 0
+emission_on_uv2 = false
+emission_texture = ExtResource( 37 )
+uv1_triplanar = true
+
+[sub_resource type="SpatialMaterial" id=89]
+params_cull_mode = 2
+albedo_color = Color( 0.980392, 0.552941, 0.054902, 1 )
+albedo_texture = SubResource( 146 )
+metallic = 0.56
+metallic_texture = SubResource( 150 )
+roughness = 0.97
+ao_enabled = true
+ao_light_affect = 1.0
+ao_texture = SubResource( 148 )
+ao_on_uv2 = false
+ao_texture_channel = 0
+uv1_triplanar = true
+
+[sub_resource type="SpatialMaterial" id=90]
+params_cull_mode = 2
+albedo_texture = ExtResource( 34 )
+emission_enabled = true
+emission = Color( 0, 0, 0, 1 )
+emission_energy = 0.31
+emission_operator = 0
+emission_on_uv2 = false
+emission_texture = ExtResource( 37 )
+normal_enabled = true
+normal_scale = 2.04
+normal_texture = ExtResource( 33 )
+uv1_triplanar = true
+
 [sub_resource type="SpatialMaterial" id=99]
 params_cull_mode = 2
 albedo_texture = ExtResource( 31 )
-normal_enabled = true
-normal_scale = 2.03
-normal_texture = ExtResource( 30 )
 uv1_triplanar = true
 
 [sub_resource type="SpatialMaterial" id=100]
@@ -864,6 +981,8 @@ params_cull_mode = 2
 albedo_color = Color( 0.180392, 0.835294, 0.105882, 1 )
 metallic = 0.8
 roughness = 0.67
+
+[sub_resource type="AudioStreamMicrophone" id=10]
 
 [sub_resource type="DynamicFont" id=128]
 font_data = ExtResource( 40 )
@@ -1231,15 +1350,6 @@ mesh = SubResource( 8 )
 skin = SubResource( 9 )
 material/0 = null
 
-[node name="AudioStreamPlayer3D" type="AudioStreamPlayer3D" parent="Players/PlayerMe/HandLeft"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.024738, 0, -0.130972 )
-visible = false
-
-[node name="AudioStreamRecord" type="AudioStreamPlayer" parent="Players/PlayerMe/HandLeft"]
-stream = SubResource( 10 )
-autoplay = true
-bus = "Record"
-
 [node name="HandRight" type="ARVRController" parent="Players/PlayerMe"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.2, 1.5, -0.5 )
 controller_id = 2
@@ -1541,12 +1651,17 @@ mesh = SubResource( 25 )
 material/0 = null
 
 [node name="HeelHotspot" type="Area" parent="Players/PlayerMe/HandRight"]
+monitoring = false
 collision_layer = 3072
 collision_mask = 3072
 
 [node name="CollisionShape" type="CollisionShape" parent="Players/PlayerMe/HandRight/HeelHotspot"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0577492, 0, 0.0655208 )
 shape = SubResource( 26 )
+
+[node name="AudioStreamPlayer3D" type="AudioStreamPlayer3D" parent="Players/PlayerMe/HandRight"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.424738, 0, -0.130972 )
+visible = false
 
 [node name="pointersystem" type="Node" parent="Players/PlayerMe"]
 script = ExtResource( 5 )
@@ -1903,6 +2018,42 @@ material/0 = SubResource( 45 )
 [node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/toBig"]
 shape = SubResource( 33 )
 
+[node name="NewXC" type="StaticBody" parent="GuiSystem/GripMenu"]
+transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, -0.25, -0.2, 0 )
+collision_layer = 8
+collision_mask = 0
+
+[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/NewXC"]
+mesh = SubResource( 31 )
+material/0 = SubResource( 156 )
+
+[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/NewXC"]
+shape = SubResource( 33 )
+
+[node name="Record" type="StaticBody" parent="GuiSystem/GripMenu"]
+transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, 0, -0.2, 0 )
+collision_layer = 8
+collision_mask = 0
+
+[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/Record"]
+mesh = SubResource( 31 )
+material/0 = SubResource( 157 )
+
+[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/Record"]
+shape = SubResource( 33 )
+
+[node name="Replay" type="StaticBody" parent="GuiSystem/GripMenu"]
+transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, 0.25, -0.2, 0 )
+collision_layer = 8
+collision_mask = 0
+
+[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/Replay"]
+mesh = SubResource( 31 )
+material/0 = SubResource( 158 )
+
+[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/Replay"]
+shape = SubResource( 33 )
+
 [node name="GreenBlob" type="Area" parent="GuiSystem"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0072, -0.266123 )
 collision_layer = 1024
@@ -1948,6 +2099,9 @@ material/0 = SubResource( 52 )
 transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, 0, 0, -0.0477982 )
 mesh = SubResource( 53 )
 material/0 = SubResource( 54 )
+
+[node name="Locomotion_WalkInPlace" type="Node" parent="BodyObjects"]
+script = ExtResource( 4 )
 
 [node name="PlayerDirections" type="Node" parent="BodyObjects"]
 script = ExtResource( 41 )
@@ -2140,12 +2294,12 @@ material/0 = SubResource( 87 )
 [node name="rockwater" type="MeshInstance" parent="MaterialSystem/tubematerials"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 4.21638, -0.00722432, -0.0259316 )
 mesh = SubResource( 88 )
-material/0 = SubResource( 89 )
+material/0 = SubResource( 153 )
 
 [node name="highlight" type="MeshInstance" parent="MaterialSystem/tubematerials/rockwater"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0123711, 0.00378895, -2.07264 )
 mesh = SubResource( 88 )
-material/0 = SubResource( 90 )
+material/0 = SubResource( 154 )
 
 [node name="pebbles" type="MeshInstance" parent="MaterialSystem/tubematerials"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 6.40124, 0, 0 )
@@ -2168,11 +2322,73 @@ mesh = SubResource( 95 )
 material/0 = SubResource( 97 )
 
 [node name="bluewater" type="MeshInstance" parent="MaterialSystem/tubematerials"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 10.6566, 0, -0.0338948 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 10.6665, 0, -0.0338955 )
+mesh = SubResource( 98 )
+material/0 = SubResource( 142 )
+
+[node name="highlight" type="MeshInstance" parent="MaterialSystem/tubematerials/bluewater"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.09902 )
+mesh = SubResource( 98 )
+material/0 = SubResource( 155 )
+
+[node name="tubematerials2" type="Spatial" parent="MaterialSystem"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 5.17274 )
+
+[node name="simpledirt" type="MeshInstance" parent="MaterialSystem/tubematerials2"]
+mesh = SubResource( 83 )
+material/0 = ExtResource( 35 )
+
+[node name="highlight" type="MeshInstance" parent="MaterialSystem/tubematerials2/simpledirt"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.02206 )
+mesh = SubResource( 84 )
+material/0 = ExtResource( 27 )
+
+[node name="partialrock" type="MeshInstance" parent="MaterialSystem/tubematerials2"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 2.05663, 0, 0 )
+mesh = SubResource( 85 )
+material/0 = ExtResource( 28 )
+
+[node name="highlight" type="MeshInstance" parent="MaterialSystem/tubematerials2/partialrock"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.08184 )
+mesh = SubResource( 86 )
+material/0 = SubResource( 87 )
+
+[node name="rockwater" type="MeshInstance" parent="MaterialSystem/tubematerials2"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 4.21638, -0.00722432, -0.0259316 )
+mesh = SubResource( 88 )
+material/0 = SubResource( 89 )
+
+[node name="highlight" type="MeshInstance" parent="MaterialSystem/tubematerials2/rockwater"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0123711, 0.00378895, -2.07264 )
+mesh = SubResource( 88 )
+material/0 = SubResource( 90 )
+
+[node name="pebbles" type="MeshInstance" parent="MaterialSystem/tubematerials2"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 6.40124, 0, 0 )
+mesh = SubResource( 91 )
+material/0 = SubResource( 92 )
+
+[node name="highlight" type="MeshInstance" parent="MaterialSystem/tubematerials2/pebbles"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.09424 )
+mesh = SubResource( 93 )
+material/0 = SubResource( 94 )
+
+[node name="mediumrock" type="MeshInstance" parent="MaterialSystem/tubematerials2"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 8.56555, 0, 0 )
+mesh = SubResource( 95 )
+material/0 = SubResource( 96 )
+
+[node name="highlight" type="MeshInstance" parent="MaterialSystem/tubematerials2/mediumrock"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.14453 )
+mesh = SubResource( 95 )
+material/0 = SubResource( 97 )
+
+[node name="bluewater" type="MeshInstance" parent="MaterialSystem/tubematerials2"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 10.6566, 0, -0.0338955 )
 mesh = SubResource( 98 )
 material/0 = SubResource( 99 )
 
-[node name="highlight" type="MeshInstance" parent="MaterialSystem/tubematerials/bluewater"]
+[node name="highlight" type="MeshInstance" parent="MaterialSystem/tubematerials2/bluewater"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.09902 )
 mesh = SubResource( 98 )
 material/0 = SubResource( 100 )
@@ -2282,19 +2498,26 @@ material/0 = SubResource( 127 )
 [node name="SoundSystem" type="Spatial" parent="."]
 script = ExtResource( 19 )
 
-[node name="ClickSound" type="AudioStreamPlayer3D" parent="SoundSystem"]
+[node name="AudioStreamRecord" type="AudioStreamPlayer" parent="SoundSystem"]
+stream = SubResource( 10 )
+autoplay = true
+bus = "Record"
+
+[node name="quicksounds" type="Spatial" parent="SoundSystem"]
+
+[node name="ClickSound" type="AudioStreamPlayer3D" parent="SoundSystem/quicksounds"]
 stream = ExtResource( 9 )
 unit_db = 9.032
 
-[node name="BlipSound" type="AudioStreamPlayer3D" parent="SoundSystem"]
+[node name="BlipSound" type="AudioStreamPlayer3D" parent="SoundSystem/quicksounds"]
 stream = ExtResource( 13 )
 unit_db = 19.367
 
-[node name="ClawGripSound" type="AudioStreamPlayer3D" parent="SoundSystem"]
+[node name="ClawGripSound" type="AudioStreamPlayer3D" parent="SoundSystem/quicksounds"]
 stream = ExtResource( 22 )
 unit_db = 9.032
 
-[node name="ClawReleaseSound" type="AudioStreamPlayer3D" parent="SoundSystem"]
+[node name="ClawReleaseSound" type="AudioStreamPlayer3D" parent="SoundSystem/quicksounds"]
 stream = ExtResource( 21 )
 unit_db = 9.032
 
@@ -2361,7 +2584,6 @@ environment = ExtResource( 2 )
 [node name="DirectionalLight" type="DirectionalLight" parent="WorldEnvironment"]
 transform = Transform( -1, 2.66913e-07, -1.86895e-07, 0, 0.573576, 0.819152, 3.25841e-07, 0.819152, -0.573576, 0, 50, 0 )
 light_energy = 0.6
-shadow_enabled = true
 shadow_color = Color( 0.388235, 0.0705882, 0.0705882, 1 )
 [connection signal="body_entered" from="Players/PlayerMe/HandRight/HeelHotspot" to="Players/PlayerMe/pointersystem" method="_on_HeelHotspot_body_entered"]
 [connection signal="body_exited" from="Players/PlayerMe/HandRight/HeelHotspot" to="Players/PlayerMe/pointersystem" method="_on_HeelHotspot_body_exited"]

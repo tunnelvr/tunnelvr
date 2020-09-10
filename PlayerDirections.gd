@@ -32,6 +32,19 @@ func endclawengagement():
 	GroundSpikePoint.visible = false
 	clawengageposition = null
 
+var prevgait = ""
+func _process(delta):
+	return
+	var WIP = get_node("../Locomotion_WalkInPlace")
+	var gait = WIP.getgait()
+	if gait != prevgait:
+		print("WIP gait ", gait) 
+		prevgait = gait
+	if WIP.step_low_just_detected:
+		print("WIP step_low_just_detected")
+	if WIP.step_high_just_detected:
+		print("WIP step_high_just_detected")
+
 func _physics_process(delta):
 	playerdirectedflightvelocity = Vector3(0,0,0)
 	playerdirectedwalkingvelocity = Vector3(0,0,0)
@@ -45,7 +58,7 @@ func _physics_process(delta):
 		if Input.is_action_pressed("lh_left"):      joypos.x += -1
 		if Input.is_action_pressed("lh_right"):     joypos.x += 1
 
-	if playerdirectedflight and Tglobal.VRstatus != "none" and not Tglobal.questhandtracking and HandLeft.get_is_active():
+	if playerdirectedflight and Tglobal.VRoperating and not Tglobal.questhandtracking and HandLeft.get_is_active():
 		if clawengageposition != null:
 			endclawengagement()
 		if HandLeft.is_button_pressed(BUTTONS.VR_TRIGGER) or Input.is_action_pressed("lh_forward") or Input.is_action_pressed("lh_backward"):
@@ -56,7 +69,7 @@ func _physics_process(delta):
 			if HandLeft.is_button_pressed(BUTTONS.VR_PAD):
 				playerdirectedflightvelocity *= 3.0
 
-	if not playerdirectedflight and Tglobal.VRstatus != "none" and not Tglobal.questhandtracking and HandLeft.get_is_active():
+	if not playerdirectedflight and not Tglobal.questhandtracking:
 		var dir = Vector3(HeadCam.global_transform.basis.z.x, 0, HeadCam.global_transform.basis.z.z)
 		playerdirectedwalkingvelocity = dir.normalized()*(-joypos.y*walkspeed)
 
