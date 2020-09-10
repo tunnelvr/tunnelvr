@@ -173,7 +173,7 @@ func _ready():
 		arvr_openvr = ARVRServer.find_interface("OpenVR")
 		arvr_quest = ARVRServer.find_interface("OVRMobile")
 		arvr_oculus = ARVRServer.find_interface("Oculus")
-		arvr_nativemobile = ARVRServer.find_interface("Native mobile")
+		#arvr_nativemobile = ARVRServer.find_interface("Native mobile")
 		
 		if arvr_quest:
 			print("found quest, initializing")
@@ -198,7 +198,8 @@ func _ready():
 				Tglobal.VRstatus = "oculus"
 				print("  Success initializing Oculus Interface.");
 				Tglobal.arvrinterface = arvr_oculus
-
+				# C:/Users/henry/Appdata/Local/Android/Sdk/platform-tools/adb.exe logcat -s
+				
 		elif arvr_openvr:
 			print("found openvr, initializing")
 			if arvr_openvr.initialize():

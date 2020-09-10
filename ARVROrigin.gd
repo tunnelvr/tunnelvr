@@ -111,6 +111,12 @@ func initquesthandtrackingnow(lovr_hand_tracking):
 	leftmidfingremotetrans.update_position = true
 	leftmidfingremotetrans.update_rotation = true
 
+	$HandRight/csgtip/MovePointThimble2.update_position = false
+	$HandRight/csgtip/MovePointThimble2.update_rotation = false
+#	var rightindexfingremotetrans = get_node("HandRight/right_hand_model/ArmatureRight/Skeleton/BoneAttachment_A/MovePointThimble2")
+#	rightindexfingremotetrans.update_position = true
+#	rightindexfingremotetrans.update_rotation = true
+
 	$HandLeft/csghandleft.visible = false
 	$HandRight/csghandright.visible = false
 	$HandLeft/left_hand_model.visible = true

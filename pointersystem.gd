@@ -10,6 +10,7 @@ onready var headcam = playerMe.get_node('HeadCam')
 onready var handleft = playerMe.get_node("HandLeft")
 onready var handright = playerMe.get_node("HandRight")
 onready var guipanel3d = get_node("/root/Spatial/GuiSystem/GUIPanel3D")
+onready var movepointthimble2 = get_node("/root/Spatial/BodyObjects/MovePointThimble2")
 
 onready var LaserOrient = handright.get_node("LaserOrient") 
 onready var LaserSelectLine = handright.get_node("LaserSelectLine") 
@@ -200,7 +201,7 @@ func setpointertarget(laserroot):
 			
 	pointertargetpoint = newpointertargetpoint
 	if is_instance_valid(pointertarget) and pointertarget == guipanel3d:
-		guipanel3d.guipanelsendmousemotion(pointertargetpoint, handright.global_transform, handright.is_button_pressed(BUTTONS.VR_TRIGGER) or Input.is_mouse_button_pressed(BUTTON_LEFT))
+		guipanel3d.guipanelsendmousemotion(pointertargetpoint, movepointthimble2.global_transform, handright.is_button_pressed(BUTTONS.VR_TRIGGER) or Input.is_mouse_button_pressed(BUTTON_LEFT))
 
 	if pointertargetpoint != null:
 		laserroot.get_node("LaserSpot").global_transform.origin = pointertargetpoint
