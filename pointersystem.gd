@@ -110,11 +110,11 @@ func setactivetargetwall(newactivetargetwall):
 
 func setactivetargettubesector(advancesector):
 	if advancesector != 0:
-		activetargettube.get_node("XCtubeshell/MeshInstance").set_surface_material(activetargettube.activesector, materialsystem.tubematerialfromnumber(activetargettube.xcsectormaterials[activetargettube.activesector], false))
+		activetargettube.get_node("XCtubeshell/MeshInstance").set_surface_material(activetargettube.activesector, materialsystem.gettubematerial(activetargettube.xcsectormaterials[activetargettube.activesector], false))
 	if advancesector != -2:
 		var nsectors = activetargettube.get_node("XCtubeshell/MeshInstance").get_surface_material_count()
 		activetargettube.activesector = (activetargettube.activesector + advancesector + nsectors)%nsectors
-		activetargettube.get_node("XCtubeshell/MeshInstance").set_surface_material(activetargettube.activesector, materialsystem.tubematerialfromnumber(activetargettube.xcsectormaterials[activetargettube.activesector], true))
+		activetargettube.get_node("XCtubeshell/MeshInstance").set_surface_material(activetargettube.activesector, materialsystem.gettubematerial(activetargettube.xcsectormaterials[activetargettube.activesector], true))
 
 func setactivetargettube(newactivetargettube):
 	setactivetargetwall(null)
@@ -279,7 +279,7 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 	elif pointertargettype == "XCtube":
 		if activetargettube == pointertargetwall:
 			if gripbuttonheld:
-				activetargettube.xcsectormaterials[activetargettube.activesector] = int(activetargettube.xcsectormaterials[activetargettube.activesector] + 1)%materialsystem.tubematerialcount()
+				activetargettube.xcsectormaterials[activetargettube.activesector] = materialsystem.advancetubematerial(activetargettube.xcsectormaterials[activetargettube.activesector], +1)
 				setactivetargettubesector(0)
 			else:
 				setactivetargettubesector(+1)
@@ -406,7 +406,7 @@ func buttonpressed_vrpad(gripbuttonheld, joypos):
 			var nsectors = activetargettube.get_node("XCtubeshell/MeshInstance").get_surface_material_count()
 			setactivetargettubesector(1 if joypos.x > 0 else -1)
 		elif abs(joypos.y) > 0.65:
-			activetargettube.xcsectormaterials[activetargettube.activesector] = int(activetargettube.xcsectormaterials[activetargettube.activesector] + (1 if joypos.y > 0 else materialsystem.tubematerialcount() - 1))%materialsystem.tubematerialcount()
+			activetargettube.xcsectormaterials[activetargettube.activesector] = materialsystem.advancetubematerial(activetargettube.xcsectormaterials[activetargettube.activesector], (+1 if joypos.y > 0 else -1))
 			setactivetargettubesector(0)
 			
 	#elif pointertargettype == "PlanView":

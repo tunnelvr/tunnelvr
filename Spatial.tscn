@@ -673,11 +673,11 @@ noise = SubResource( 97 )
 
 [sub_resource type="SpatialMaterial" id=99]
 params_cull_mode = 2
-albedo_color = Color( 0.980392, 0.552941, 0.054902, 1 )
+albedo_color = Color( 0.996078, 0.717647, 0.388235, 1 )
 albedo_texture = SubResource( 94 )
-metallic = 0.56
+metallic = 0.61
 metallic_texture = SubResource( 98 )
-roughness = 0.53
+roughness = 0.7
 ao_enabled = true
 ao_light_affect = 1.0
 ao_texture = SubResource( 96 )
@@ -2313,71 +2313,7 @@ material/0 = null
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 8.84611, 2.20853, 23.9465 )
 script = ExtResource( 36 )
 
-[node name="tubematerials3" type="Spatial" parent="MaterialSystem"]
-visible = false
-
-[node name="simpledirt" type="MeshInstance" parent="MaterialSystem/tubematerials3"]
-mesh = SubResource( 87 )
-material/0 = ExtResource( 35 )
-
-[node name="highlight" type="MeshInstance" parent="MaterialSystem/tubematerials3/simpledirt"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.02206 )
-mesh = SubResource( 88 )
-material/0 = ExtResource( 27 )
-
-[node name="partialrock" type="MeshInstance" parent="MaterialSystem/tubematerials3"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 2.05663, 0, 0 )
-mesh = SubResource( 89 )
-material/0 = ExtResource( 28 )
-
-[node name="highlight" type="MeshInstance" parent="MaterialSystem/tubematerials3/partialrock"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.08184 )
-mesh = SubResource( 90 )
-material/0 = SubResource( 91 )
-
-[node name="rockwater" type="MeshInstance" parent="MaterialSystem/tubematerials3"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 4.21638, -0.00722432, -0.0259316 )
-mesh = SubResource( 92 )
-material/0 = SubResource( 99 )
-
-[node name="highlight" type="MeshInstance" parent="MaterialSystem/tubematerials3/rockwater"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0123711, 0.00378895, -2.07264 )
-mesh = SubResource( 92 )
-material/0 = SubResource( 100 )
-
-[node name="pebbles" type="MeshInstance" parent="MaterialSystem/tubematerials3"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 6.40124, 0, 0 )
-mesh = SubResource( 101 )
-material/0 = SubResource( 102 )
-
-[node name="highlight" type="MeshInstance" parent="MaterialSystem/tubematerials3/pebbles"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.09424 )
-mesh = SubResource( 103 )
-material/0 = SubResource( 104 )
-
-[node name="mediumrock" type="MeshInstance" parent="MaterialSystem/tubematerials3"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 8.56555, 0, 0 )
-mesh = SubResource( 105 )
-material/0 = SubResource( 106 )
-
-[node name="highlight" type="MeshInstance" parent="MaterialSystem/tubematerials3/mediumrock"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.14453 )
-mesh = SubResource( 105 )
-material/0 = SubResource( 107 )
-
-[node name="bluewater" type="MeshInstance" parent="MaterialSystem/tubematerials3"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 10.6665, 0, -0.0338955 )
-mesh = SubResource( 108 )
-material/0 = SubResource( 113 )
-
-[node name="highlight" type="MeshInstance" parent="MaterialSystem/tubematerials3/bluewater"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.09902 )
-mesh = SubResource( 108 )
-material/0 = SubResource( 114 )
-
 [node name="tubematerials" type="Spatial" parent="MaterialSystem"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 5.17274 )
-visible = false
 
 [node name="simpledirt" type="MeshInstance" parent="MaterialSystem/tubematerials"]
 mesh = SubResource( 87 )
@@ -2401,12 +2337,12 @@ material/0 = SubResource( 91 )
 [node name="rockwater" type="MeshInstance" parent="MaterialSystem/tubematerials"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 4.21638, -0.00722432, -0.0259316 )
 mesh = SubResource( 92 )
-material/0 = SubResource( 115 )
+material/0 = SubResource( 99 )
 
 [node name="highlight" type="MeshInstance" parent="MaterialSystem/tubematerials/rockwater"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0123711, 0.00378895, -2.07264 )
 mesh = SubResource( 92 )
-material/0 = SubResource( 116 )
+material/0 = SubResource( 100 )
 
 [node name="pebbles" type="MeshInstance" parent="MaterialSystem/tubematerials"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 6.40124, 0, 0 )
@@ -2429,11 +2365,73 @@ mesh = SubResource( 105 )
 material/0 = SubResource( 107 )
 
 [node name="bluewater" type="MeshInstance" parent="MaterialSystem/tubematerials"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 10.6665, 0, -0.0338955 )
+mesh = SubResource( 108 )
+material/0 = SubResource( 113 )
+
+[node name="highlight" type="MeshInstance" parent="MaterialSystem/tubematerials/bluewater"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.09902 )
+mesh = SubResource( 108 )
+material/0 = SubResource( 114 )
+
+[node name="tubematerials2" type="Spatial" parent="MaterialSystem"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 5.17274 )
+
+[node name="simpledirt" type="MeshInstance" parent="MaterialSystem/tubematerials2"]
+mesh = SubResource( 87 )
+material/0 = ExtResource( 35 )
+
+[node name="highlight" type="MeshInstance" parent="MaterialSystem/tubematerials2/simpledirt"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.02206 )
+mesh = SubResource( 88 )
+material/0 = ExtResource( 27 )
+
+[node name="partialrock" type="MeshInstance" parent="MaterialSystem/tubematerials2"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 2.05663, 0, 0 )
+mesh = SubResource( 89 )
+material/0 = ExtResource( 28 )
+
+[node name="highlight" type="MeshInstance" parent="MaterialSystem/tubematerials2/partialrock"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.08184 )
+mesh = SubResource( 90 )
+material/0 = SubResource( 91 )
+
+[node name="rockwater" type="MeshInstance" parent="MaterialSystem/tubematerials2"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 4.21638, -0.00722432, -0.0259316 )
+mesh = SubResource( 92 )
+material/0 = SubResource( 115 )
+
+[node name="highlight" type="MeshInstance" parent="MaterialSystem/tubematerials2/rockwater"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0123711, 0.00378895, -2.07264 )
+mesh = SubResource( 92 )
+material/0 = SubResource( 116 )
+
+[node name="pebbles" type="MeshInstance" parent="MaterialSystem/tubematerials2"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 6.40124, 0, 0 )
+mesh = SubResource( 101 )
+material/0 = SubResource( 102 )
+
+[node name="highlight" type="MeshInstance" parent="MaterialSystem/tubematerials2/pebbles"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.09424 )
+mesh = SubResource( 103 )
+material/0 = SubResource( 104 )
+
+[node name="mediumrock" type="MeshInstance" parent="MaterialSystem/tubematerials2"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 8.56555, 0, 0 )
+mesh = SubResource( 105 )
+material/0 = SubResource( 106 )
+
+[node name="highlight" type="MeshInstance" parent="MaterialSystem/tubematerials2/mediumrock"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.14453 )
+mesh = SubResource( 105 )
+material/0 = SubResource( 107 )
+
+[node name="bluewater" type="MeshInstance" parent="MaterialSystem/tubematerials2"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 10.6566, 0, -0.0338955 )
 mesh = SubResource( 108 )
 material/0 = SubResource( 117 )
 
-[node name="highlight" type="MeshInstance" parent="MaterialSystem/tubematerials/bluewater"]
+[node name="highlight" type="MeshInstance" parent="MaterialSystem/tubematerials2/bluewater"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.09902 )
 mesh = SubResource( 108 )
 material/0 = SubResource( 118 )

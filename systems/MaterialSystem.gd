@@ -6,11 +6,28 @@ func tubematerialfromnumber(n, highlighted):
 		mm = mm.get_node("highlight")
 	return mm.get_surface_material(0)
 
+func tubematerialnamefromnumber(n):
+	var mm = $tubematerials.get_child(n)
+	return mm.get_name()
+
+func gettubematerial(name, highlighted):
+	var mm = $tubematerials.get_node(name) if $tubematerials.has_node(name) else $tubematerials.get_child(0)
+	if highlighted:
+		mm = mm.get_node("highlight")
+	return mm.get_surface_material(0)
+
+func advancetubematerial(name, dir):
+	var mm = $tubematerials.get_node(name) if $tubematerials.has_node(name) else $tubematerials.get_child(0)
+	var n = mm.get_index()
+	var np = (n + dir)%$tubematerials.get_child_count()
+	return $tubematerials.get_child(np)
+
 func tubematerialtransparent(highlighted):
 	var mm = $transparent
 	if highlighted:
 		mm = mm.get_node("highlight")
 	return mm.get_surface_material(0)
+
 
 func tubematerialcount():
 	return $tubematerials.get_child_count()

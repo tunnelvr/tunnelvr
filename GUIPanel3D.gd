@@ -4,7 +4,7 @@ extends StaticBody
 var viewport_point := Vector2(0, 0)
 var viewport_mousedown := false
 onready var sketchsystem = get_node("/root/Spatial/SketchSystem")
-var savegamefile = "user://savegame.save"
+var savegamefile = "user://savegame.res"
 
 func _on_buttonload_pressed():
 	sketchsystem.loadsketchsystem(savegamefile)

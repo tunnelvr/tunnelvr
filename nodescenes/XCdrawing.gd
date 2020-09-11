@@ -9,8 +9,7 @@ var xcresource = ""     # source file
 var nodepoints = { }    # { nodename:Vector3 }
 var onepathpairs = [ ]  # [ Anodename0, Anodename1, Bnodename0, Bnodename1, ... ]
 var drawingtype = DRAWING_TYPE.DT_XCDRAWING
-var xcflatshellmaterial = 0
-
+var xcflatshellmaterial = "simpledirt"
 
 # derived data
 var xctubesconn = [ ]   # references to xctubes that connect to here (could use their names instead)
@@ -345,7 +344,7 @@ func updatexctubeshell(xcdrawings, makevisible):
 				xcflatshell.get_node("CollisionShape").shape = ConcavePolygonShape.new()
 				add_child(xcflatshell)
 			$XCflatshell/MeshInstance.mesh = xctubeshellmesh
-			var flatshellmaterial = get_node("/root/Spatial/MaterialSystem").tubematerialfromnumber(xcflatshellmaterial, false)
+			var flatshellmaterial = get_node("/root/Spatial/MaterialSystem").gettubematerial(xcflatshellmaterial, false)
 			for i in range($XCflatshell/MeshInstance.get_surface_material_count()):
 				$XCflatshell/MeshInstance.set_surface_material(i, flatshellmaterial)
 			$XCflatshell/CollisionShape.shape.set_faces(xctubeshellmesh.get_faces())

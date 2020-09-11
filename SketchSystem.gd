@@ -65,7 +65,6 @@ remote func xctubefromdata(xctdata):
 	assert (xctube.get_name() == xctdata["name"])
 	xctube.xcdrawinglink = xctdata["xcdrawinglink"]
 	xctube.xcsectormaterials = xctdata["xcsectormaterials"]
-	xctube.updatetubelinkpaths(self)
 
 func updateworkingshell():
 	for xctube in $XCtubes.get_children():

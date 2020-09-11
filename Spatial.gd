@@ -2,13 +2,9 @@ extends Spatial
 
 # Stuff to do:
 
-
-
 # * new nodes on floor allowed
 # * Make XCdrawing on floor node grip menu
 # * implement deleteXC
-
-# * floorgrab crawling (move_and_slide tech)
 
 # * should give the other player a position near to me:  $SketchSystem.rpc_id(id, "sketchsystemfromdict", $SketchSystem.sketchsystemtodict())
 		
@@ -273,9 +269,8 @@ func _ready():
 		playerMe.networkID = networkID
 
 	if false:
-		#loadcentrelinefile("res://surveyscans/dukest1resurvey2009.json")
-		$SketchSystem.loadcentrelinefile("res://surveyscans/dukest1resurvey2009json.res")
-		#loadcentrelinefile("res://surveyscans/Ireby/Ireby2/Ireby2.json")
+		#$SketchSystem.loadcentrelinefile("res://surveyscans/dukest1resurvey2009json.res")
+		$SketchSystem.loadcentrelinefile("res://surveyscans/Ireby/Ireby2/Ireby2.json")
 		$SketchSystem.updatecentrelinevisibility()
 		$SketchSystem.changetubedxcsvizmode()
 		$SketchSystem.updateworkingshell()

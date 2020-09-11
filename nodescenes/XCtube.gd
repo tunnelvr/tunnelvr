@@ -155,8 +155,8 @@ func updatetubelinkpaths(sketchsystem):
 	for j in range(0, len(xcdrawinglink), 2):
 		#var p0 = xcdrawing0.nodepoints[xcdrawinglink[j]]
 		#var p1 = xcdrawing1.nodepoints[xcdrawinglink[j+1]]
-		var p0 = xcdrawing0nodes.get_node(xcdrawinglink[j]).global_transform.origin
-		var p1 = xcdrawing1nodes.get_node(xcdrawinglink[j+1]).global_transform.origin
+		var p0 = xcdrawing0nodes.get_node(xcdrawinglink[j]).global_transform.origin + Vector3(0,0.001,0)
+		var p1 = xcdrawing1nodes.get_node(xcdrawinglink[j+1]).global_transform.origin + Vector3(0,0.001,0)
 		var vec = p1 - p0
 		var veclen = max(0.01, vec.length())
 		var perp = Vector3(1, 0, 0)
@@ -230,7 +230,7 @@ func maketubepolyassociation(xcdrawing0, xcdrawing1):
 	#	print("reversssing poly1", xcdrawing0.global_transform.basis.z, xcdrawing1.global_transform.basis.z, poly1)
 
 	while len(xcsectormaterials) < len(xcdrawinglink)/2:
-		xcsectormaterials.append(0 if ((len(xcsectormaterials)%2) == 0) else 1)
+		xcsectormaterials.append(get_node("/root/Spatial/MaterialSystem").tubematerialnamefromnumber(0 if ((len(xcsectormaterials)%2) == 0) else 1))
 	xcsectormaterials.resize(len(xcdrawinglink)/2)
 
 	# get all the connections in here between the polygons but in the right order
@@ -400,7 +400,7 @@ func updatetubeshell(xcdrawings, makevisible):
 			$XCtubeshell/MeshInstance.mesh = tubeshellmesh
 			assert ($XCtubeshell/MeshInstance.get_surface_material_count() == len(xcsectormaterials))
 			for i in range($XCtubeshell/MeshInstance.get_surface_material_count()):
-				$XCtubeshell/MeshInstance.set_surface_material(i, get_node("/root/Spatial/MaterialSystem").tubematerialfromnumber(xcsectormaterials[i], false))
+				$XCtubeshell/MeshInstance.set_surface_material(i, get_node("/root/Spatial/MaterialSystem").gettubematerial(xcsectormaterials[i], false))
 			$XCtubeshell/CollisionShape.shape.set_faces(tubeshellmesh.get_faces())
 			$XCtubeshell.visible = true
 			$XCtubeshell/CollisionShape.disabled = false
