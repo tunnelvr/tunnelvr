@@ -198,7 +198,7 @@ func _ready():
 				Tglobal.VRstatus = "oculus"
 				print("  Success initializing Oculus Interface.");
 				Tglobal.arvrinterface = arvr_oculus
-				# C:/Users/henry/Appdata/Local/Android/Sdk/platform-tools/adb.exe logcat -s
+				# C:/Users/henry/Appdata/Local/Android/Sdk/platform-tools/adb.exe logcat -s VrApi
 				
 		elif arvr_openvr:
 			print("found openvr, initializing")

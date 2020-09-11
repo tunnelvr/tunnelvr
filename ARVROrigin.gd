@@ -113,9 +113,9 @@ func initquesthandtrackingnow(lovr_hand_tracking):
 
 	$HandRight/csgtip/MovePointThimble2.update_position = false
 	$HandRight/csgtip/MovePointThimble2.update_rotation = false
-#	var rightindexfingremotetrans = get_node("HandRight/right_hand_model/ArmatureRight/Skeleton/BoneAttachment_A/MovePointThimble2")
-#	rightindexfingremotetrans.update_position = true
-#	rightindexfingremotetrans.update_rotation = true
+	#var rightindexfingremotetrans = get_node("HandRight/right_hand_model/ArmatureRight/Skeleton/BoneAttachment_A/Spatial/MovePointThimble2")
+	#rightindexfingremotetrans.update_position = true
+	#rightindexfingremotetrans.update_rotation = true
 
 	$HandLeft/csghandleft.visible = false
 	$HandRight/csghandright.visible = false
@@ -138,13 +138,19 @@ func _update_hand_model(hand: ARVRController, model : Spatial, skel: Skeleton):
 			skel.set_bone_pose(_hand_bone_mappings[i], Transform(_vrapi_bone_orientations[i]));
 	else:
 		model.visible = false;
-
+	return model.visible
+	
 
 var t = 0.0;
 func process_handtracking(delta):
 	t += delta;
 	_update_hand_model($HandLeft, $HandLeft/left_hand_model, $HandLeft/left_hand_model/ArmatureLeft/Skeleton)
-	_update_hand_model($HandRight, $HandRight/right_hand_model, $HandRight/right_hand_model/ArmatureRight/Skeleton)
+	if _update_hand_model($HandRight, $HandRight/right_hand_model, $HandRight/right_hand_model/ArmatureRight/Skeleton):
+		var pointertrans = Transform(_vrapi_bone_orientations[5])
+		var rpointertrans = $HandRight/right_hand_model/ArmatureRight/Skeleton.global_transform
+		if (t > 1.0):
+			print(pointertrans)
+		#get_node("/root/Spatial/BodyObjects/MovePointThimble2").global_transform = pointertrans
 	if (t > 1.0):
 		t = 0.0;
 		print("Left Pinches: %.3f %.3f %.3f %.3f; Right Pinches %.3f %.3f %.3f %.3f" %
