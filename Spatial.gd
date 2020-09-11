@@ -149,6 +149,7 @@ extends Spatial
 
 # * Report bug that disable depth check puts transparent objects in front
 
+# lose these
 var arvr_openvr = null; 
 var arvr_quest = null; 
 var arvr_oculus = null; 
@@ -156,6 +157,8 @@ var arvr_nativemobile
 	
 export var hostipnumber: String = ""
 export var hostportnumber: int = 8002
+export var enablevr: = true
+export var enablenetworking: = true
 
 var perform_runtime_config = true
 var ovr_init_config = null
@@ -164,95 +167,110 @@ var ovr_hand_tracking = null
 var networkID = 0
 
 onready var playerMe = $Players/PlayerMe
+
+func checkloadinterface(larvrinterfacename):
+	var available_interfaces = ARVRServer.get_interfaces()
+	for x in available_interfaces:
+		if x["name"] == larvrinterfacename:
+			Tglobal.arvrinterface = ARVRServer.find_interface(larvrinterfacename)
+			if Tglobal.arvrinterface != null:
+				Tglobal.arvrinterfacename = larvrinterfacename
+				print("Found VR interface ", x)
+				return true
+	return false
 	
+
 func _ready():
-	if hostipnumber == "":
-		print("Initializing VR");
-		var available_interfaces = ARVRServer.get_interfaces();
-		print("  Available Interfaces are %s: " % str(available_interfaces));
-		arvr_openvr = ARVRServer.find_interface("OpenVR")
-		arvr_quest = ARVRServer.find_interface("OVRMobile")
-		arvr_oculus = ARVRServer.find_interface("Oculus")
-		#arvr_nativemobile = ARVRServer.find_interface("Native mobile")
-		
-		if arvr_quest:
-			print("found quest, initializing")
-			ovr_init_config = load("res://addons/godot_ovrmobile/OvrInitConfig.gdns").new()
-			ovr_performance = load("res://addons/godot_ovrmobile/OvrPerformance.gdns").new()
-			ovr_hand_tracking = load("res://addons/godot_ovrmobile/OvrHandTracking.gdns").new();
-			perform_runtime_config = false
-			ovr_init_config.set_render_target_size_multiplier(1)
-			if arvr_quest.initialize():
-				get_viewport().arvr = true;
-				Engine.target_fps = 72;
-				Tglobal.VRstatus = "quest"
-				print("  Success initializing Quest Interface.");
-				Tglobal.arvrinterface = arvr_quest
+	print("  Available Interfaces are %s: " % str(ARVRServer.get_interfaces()));
+	print("Initializing VR" if enablevr else "VR disabled");
+
+	if enablevr and checkloadinterface("OVRMobile"):
+		print("found quest, initializing")
+		ovr_init_config = load("res://addons/godot_ovrmobile/OvrInitConfig.gdns").new()
+		ovr_performance = load("res://addons/godot_ovrmobile/OvrPerformance.gdns").new()
+		ovr_hand_tracking = load("res://addons/godot_ovrmobile/OvrHandTracking.gdns").new();
+		perform_runtime_config = false
+		ovr_init_config.set_render_target_size_multiplier(1)
+		if Tglobal.arvrinterface.initialize():
+			get_viewport().arvr = true
+			Engine.target_fps = 72
+			Engine.iterations_per_second = 72
+			Tglobal.VRstatus = "quest"
+			print("  Success initializing Quest Interface.")
+		else:
+			Tglobal.arvrinterface = null
+
+	if enablevr and checkloadinterface("Oculus"):
+		print("  Found Oculus Interface.");
+		if Tglobal.arvrinterface.initialize():
+			get_viewport().arvr = true;
+			Engine.target_fps = 80 # TODO: this is headset dependent (RiftS == 80)=> figure out how to get this info at runtime
+			Engine.iterations_per_second = 80
+			OS.vsync_enabled = false;
+			Tglobal.VRstatus = "oculus"
+			print("  Success initializing Oculus Interface.");
+			# C:/Users/henry/Appdata/Local/Android/Sdk/platform-tools/adb.exe logcat -s VrApi
+		else:
+			Tglobal.arvrinterface = null
 				
-		elif arvr_oculus:
-			print("  Found Oculus Interface.");
-			if arvr_oculus.initialize():
-				get_viewport().arvr = true;
-				Engine.target_fps = 80 # TODO: this is headset dependent (RiftS == 80)=> figure out how to get this info at runtime
-				OS.vsync_enabled = false;
-				Tglobal.VRstatus = "oculus"
-				print("  Success initializing Oculus Interface.");
-				Tglobal.arvrinterface = arvr_oculus
-				# C:/Users/henry/Appdata/Local/Android/Sdk/platform-tools/adb.exe logcat -s VrApi
+	if enablevr and checkloadinterface("OpenVR"):
+		print("found openvr, initializing")
+		if Tglobal.arvrinterface.initialize():
+			var viewport = get_viewport()
+			viewport.arvr = true
+			print("tttt", viewport.hdr, " ", viewport.keep_3d_linear)
+			#viewport.hdr = false
+			viewport.keep_3d_linear = true
+			Engine.target_fps = 90
+			Engine.iterations_per_second = 90
+			OS.vsync_enabled = false;
+			Tglobal.VRstatus = "vive"
+			print("  Success initializing OpenVR Interface.");
+		else:
+			Tglobal.arvrinterface = null
 				
-		elif arvr_openvr:
-			print("found openvr, initializing")
-			if arvr_openvr.initialize():
-				var viewport = get_viewport()
-				viewport.arvr = true
-				print("tttt", viewport.hdr, " ", viewport.keep_3d_linear)
-				#viewport.hdr = false
-				viewport.keep_3d_linear = true
-				Engine.target_fps = 90
-				OS.vsync_enabled = false;
-				Tglobal.VRstatus = "vive"
-				print("  Success initializing OpenVR Interface.");
-				Tglobal.arvrinterface = arvr_openvr
-				
-		elif arvr_nativemobile:
-			print("found native mobile, initializing")
-			if arvr_nativemobile.initialize():
-				var viewport = get_viewport()
-				viewport.arvr = true
-				viewport.render_target_v_flip = true # <---- for your upside down screens
-				viewport.transparent_bg = true # <--- For the AR
-				arvr_nativemobile. k1 = 0.2    # Lens distortion constants
-				arvr_nativemobile. k2 = 0.23
+	if enablevr and false and checkloadinterface("Native mobile"):
+		print("found nativemobile, initializing")
+		if Tglobal.arvrinterface.initialize():
+			var viewport = get_viewport()
+			viewport.arvr = true
+			viewport.render_target_v_flip = true # <---- for your upside down screens
+			viewport.transparent_bg = true       # <--- For the AR
+			Tglobal.arvrinterface.k1 = 0.2          # Lens distortion constants
+			Tglobal.arvrinterface.k2 = 0.23
 	
-	Tglobal.VRoperating = (Tglobal.VRstatus != "none")
-	if Tglobal.VRstatus == "none":
-		print("*** VR not working")
-	if Tglobal.VRstatus == "quest":
-		playerMe.initquesthandtrackingnow(ovr_hand_tracking)
+	Tglobal.VRoperating = (Tglobal.arvrinterfacename != "none")
 	if Tglobal.VRoperating:
-		$BodyObjects/PlayerDirections.inithandvrsignalconnections()
 		#$BodyObjects/Locomotion_WalkInPlace.initjogdetectionsystem(playerMe.get_node("HeadCam"))
-
-
-	var networkedmultiplayerenet = NetworkedMultiplayerENet.new()
-	get_tree().connect("network_peer_connected", self, "_player_connected")
-	get_tree().connect("network_peer_disconnected", self, "_player_disconnected")
-	if hostipnumber == "":
-		networkedmultiplayerenet.create_server(hostportnumber, 5)
-		Tglobal.connectiontoserveractive = (not arvr_quest)
+		if Tglobal.VRstatus == "quest":
+			playerMe.initquesthandtrackingnow(ovr_hand_tracking)
+			$WorldEnvironment/DirectionalLight.shadow_enabled = false
+			$BodyObjects/PlayerDirections.initquesthandcontrollersignalconnections()
+		else:
+			$BodyObjects/PlayerDirections.initcontrollersignalconnections()
 	else:
-		networkedmultiplayerenet.create_client(hostipnumber, hostportnumber)
-		get_tree().connect("connected_to_server", self, "_connected_to_server")
-		get_tree().connect("connection_failed", self, "_connection_failed")
-		get_tree().connect("server_disconnected", self, "_server_disconnected")
-		Tglobal.connectiontoserveractive = false
-		#playerMe.rotate_y(180)  
-		playerMe.global_transform.origin += 3*Vector3(playerMe.get_node("HeadCam").global_transform.basis.z.x, 0, playerMe.get_node("HeadCam").global_transform.basis.z.z).normalized()
-	get_tree().set_network_peer(networkedmultiplayerenet)
-	networkID = get_tree().get_network_unique_id()
-	print("nnet-id ", networkID)
-	playerMe.set_network_master(networkID)
-	playerMe.networkID = networkID
+		print("*** VR not working")
+		
+	if enablenetworking:
+		var networkedmultiplayerenet = NetworkedMultiplayerENet.new()
+		get_tree().connect("network_peer_connected", self, "_player_connected")
+		get_tree().connect("network_peer_disconnected", self, "_player_disconnected")
+		if hostipnumber == "":
+			networkedmultiplayerenet.create_server(hostportnumber, 5)
+			Tglobal.connectiontoserveractive = (not arvr_quest)
+		else:
+			networkedmultiplayerenet.create_client(hostipnumber, hostportnumber)
+			get_tree().connect("connected_to_server", self, "_connected_to_server")
+			get_tree().connect("connection_failed", self, "_connection_failed")
+			get_tree().connect("server_disconnected", self, "_server_disconnected")
+			Tglobal.connectiontoserveractive = false
+			#playerMe.rotate_y(180)  
+			playerMe.global_transform.origin += 3*Vector3(playerMe.get_node("HeadCam").global_transform.basis.z.x, 0, playerMe.get_node("HeadCam").global_transform.basis.z.z).normalized()
+		get_tree().set_network_peer(networkedmultiplayerenet)
+		networkID = get_tree().get_network_unique_id()
+		print("nnet-id ", networkID)
+		playerMe.set_network_master(networkID)
+		playerMe.networkID = networkID
 
 	if false:
 		#loadcentrelinefile("res://surveyscans/dukest1resurvey2009.json")

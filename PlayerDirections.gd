@@ -18,9 +18,14 @@ var playerdirectedwalkingvelocity = Vector3(0,0,0)
 var clawengageposition = null
 
 
-func inithandvrsignalconnections():
-	HandLeft.connect("button_pressed", self, "_on_questhandtracking_button_pressed" if Tglobal.questhandtracking else "_on_button_pressed")
-	HandLeft.connect("button_release", self, "_on_questhandtracking_button_release" if Tglobal.questhandtracking else "_on_button_release")
+func initcontrollersignalconnections():
+	HandLeft.connect("button_pressed", self, "_on_button_pressed")
+	HandLeft.connect("button_release", self, "_on_button_release")
+
+func initquesthandcontrollersignalconnections():
+	HandLeft.connect("button_pressed", self, "_on_questhandtracking_button_pressed")
+	HandLeft.connect("button_release", self, "_on_questhandtracking_button_release")
+
 
 func _input(event):
 	if event is InputEventKey and event.pressed and not Input.is_action_pressed("lh_shift"):
