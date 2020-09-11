@@ -27,7 +27,6 @@
 [ext_resource path="res://guimaterials/grip_commands.png" type="Texture" id=25]
 [ext_resource path="res://lightweighttextures/rock_albedo.jpg" type="Texture" id=26]
 [ext_resource path="res://lightweighttextures/simpledirt_highlight.material" type="Material" id=27]
-[ext_resource path="res://lightweighttextures/partialrock.material" type="Material" id=28]
 [ext_resource path="res://lightweighttextures/seamlesspebbles1.jpg" type="Texture" id=29]
 [ext_resource path="res://lightweighttextures/water 0342normal.jpg" type="Texture" id=30]
 [ext_resource path="res://lightweighttextures/water-0342.jpg" type="Texture" id=31]
@@ -631,6 +630,12 @@ rings = 1
 [sub_resource type="PlaneMesh" id=88]
 
 [sub_resource type="PlaneMesh" id=89]
+
+[sub_resource type="SpatialMaterial" id=159]
+params_cull_mode = 2
+albedo_texture = ExtResource( 26 )
+uv1_scale = Vector3( 0.2, 0.2, 0.2 )
+uv1_triplanar = true
 
 [sub_resource type="PlaneMesh" id=90]
 
@@ -2327,7 +2332,7 @@ material/0 = ExtResource( 27 )
 [node name="partialrock" type="MeshInstance" parent="MaterialSystem/tubematerials"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 2.05663, 0, 0 )
 mesh = SubResource( 89 )
-material/0 = ExtResource( 28 )
+material/0 = SubResource( 159 )
 
 [node name="highlight" type="MeshInstance" parent="MaterialSystem/tubematerials/partialrock"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.08184 )
@@ -2335,7 +2340,7 @@ mesh = SubResource( 90 )
 material/0 = SubResource( 91 )
 
 [node name="rockwater" type="MeshInstance" parent="MaterialSystem/tubematerials"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 4.21638, -0.00722432, -0.0259316 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 4.21638, -0.00722432, -0.0259323 )
 mesh = SubResource( 92 )
 material/0 = SubResource( 99 )
 
@@ -2389,7 +2394,7 @@ material/0 = ExtResource( 27 )
 [node name="partialrock" type="MeshInstance" parent="MaterialSystem/tubematerials2"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 2.05663, 0, 0 )
 mesh = SubResource( 89 )
-material/0 = ExtResource( 28 )
+material/0 = SubResource( 159 )
 
 [node name="highlight" type="MeshInstance" parent="MaterialSystem/tubematerials2/partialrock"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.08184 )
@@ -2609,6 +2614,7 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0 )
 shape = SubResource( 152 )
 
 [node name="Mesh" type="MeshInstance" parent="underfloor"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0354076, -1.90735e-06, 0.00133395 )
 mesh = SubResource( 154 )
 material/0 = null
 
