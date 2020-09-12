@@ -434,11 +434,17 @@ func buttonreleased_vrgrip():
 		if is_instance_valid(gripmenu.gripmenupointertargetwall):
 			print("executing ", pointertarget.get_name(), " on ", gripmenu.gripmenupointertargetwall.get_name())
 			if pointertarget.get_name() == "Up5":
-				gripmenu.gripmenupointertargetwall.global_transform.origin.y += 1
-				playerMe.global_transform.origin.y = max(playerMe.global_transform.origin.y, gripmenu.gripmenupointertargetwall.global_transform.origin.y)
+				#gripmenu.gripmenupointertargetwall.global_transform.origin.y += 1
+				#playerMe.global_transform.origin.y = max(playerMe.global_transform.origin.y, gripmenu.gripmenupointertargetwall.global_transform.origin.y)
+				var floortween = gripmenu.get_node("Up5/Tween")
+				floortween.interpolate_property(gripmenu.gripmenupointertargetwall, "translation:y", gripmenu.gripmenupointertargetwall.translation.y, gripmenu.gripmenupointertargetwall.translation.y + 1, 0.5, Tween.TRANS_QUART, Tween.EASE_IN_OUT)
+				floortween.start()
 			elif pointertarget.get_name() == "Down5":
-				gripmenu.gripmenupointertargetwall.global_transform.origin.y -= 1
-				gripmenu.gripmenupointertargetwall.global_transform.origin.y = max(gripmenu.gripmenupointertargetwall.global_transform.origin.y, get_node("/root/Spatial/underfloor").global_transform.origin.y + 0.5)
+				#gripmenu.gripmenupointertargetwall.global_transform.origin.y -= 1
+				#gripmenu.gripmenupointertargetwall.global_transform.origin.y = max(gripmenu.gripmenupointertargetwall.global_transform.origin.y - 1, get_node("/root/Spatial/underfloor").global_transform.origin.y + 0.5)
+				var floortween = gripmenu.get_node("Up5/Tween")
+				floortween.interpolate_property(gripmenu.gripmenupointertargetwall, "translation:y", gripmenu.gripmenupointertargetwall.translation.y, max(gripmenu.gripmenupointertargetwall.global_transform.origin.y - 1, get_node("/root/Spatial/underfloor").global_transform.origin.y + 0.5), 0.5, Tween.TRANS_QUART, Tween.EASE_IN_OUT)
+				floortween.start()
 			elif pointertarget.get_name() == "toPaper":
 				gripmenu.gripmenupointertargetwall.drawingtype = DRAWING_TYPE.DT_PAPERTEXTURE
 				gripmenu.gripmenupointertargetwall.get_node("XCdrawingplane").collision_layer = CollisionLayer.CL_Pointer

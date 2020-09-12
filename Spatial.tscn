@@ -1930,6 +1930,8 @@ material/0 = SubResource( 31 )
 [node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/Up5"]
 shape = SubResource( 32 )
 
+[node name="Tween" type="Tween" parent="GuiSystem/GripMenu/Up5"]
+
 [node name="Down5" type="StaticBody" parent="GuiSystem/GripMenu"]
 transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, 0, -0.2, 0 )
 collision_layer = 8

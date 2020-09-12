@@ -198,12 +198,13 @@ func process_feet_on_floor(delta, playerdirectedwalkmovement):
 #		print("HHH  ", playerMe.global_transform.origin.y, "  ", playerbodycentre.y, "  ", playerheadcentreabovebodycentreheight, "  ", headcentreabovephysicalfloorheight)
 		playerMe.global_transform.origin.y = playerbodycentre.y + playerheadcentreabovebodycentreheight - headcentreabovephysicalfloorheight
 		$PlayerKinematicBody.global_transform.origin = playerbodycentre
-		addplayervelocitystack((playerbodycentre - playerbodycentre_prev)/delta)
-		playerbodycentre_prev = playerbodycentre
 		if playerstartsfreefall:
 			$PlayerKinematicBody/PlayerBodyCapsule/CapsuleShapePreview/FreefallWarning.visible = true
 			playerfreefallbodyvelocity = getplayerrecentvelocity()
 			playerinfreefall = true
+		else:
+			addplayervelocitystack((playerbodycentre - playerbodycentre_prev)/delta)
+		playerbodycentre_prev = playerbodycentre
 	else:
 		resetplayervelocitystack(-2)
 		var playerheadcentreforcollision = playerbodycentre + Vector3(0, playerheadcentreabovebodycentreheight, 0)
