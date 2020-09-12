@@ -307,7 +307,7 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 	elif pointertargettype == "XCdrawing":
 		if pointertargetwall != activetargetwall:
 			setactivetargetwall(pointertargetwall)
-		if activetargetnode != null or pointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE or len(pointertargetwall.nodepoints) == 0:
+		if (activetargetnode != null and activetargetnodewall == pointertargetwall) or pointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE or len(pointertargetwall.nodepoints) == 0:
 			var newpointertarget = pointertargetwall.newxcnode()
 			pointertargetwall.setxcnpoint(newpointertarget, pointertargetpoint, true)
 			Tglobal.soundsystem.quicksound("ClickSound", pointertargetpoint)
