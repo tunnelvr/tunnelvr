@@ -54,6 +54,11 @@ size = Vector2( 0.4, 0.2 )
 [sub_resource type="SpatialMaterial" id=4]
 flags_transparent = true
 albedo_color = Color( 0.980392, 0.898039, 0.0431373, 0.501961 )
+emission_enabled = true
+emission = Color( 0.980392, 0.898039, 0.0431373, 1 )
+emission_energy = 1.0
+emission_operator = 0
+emission_on_uv2 = false
 
 [sub_resource type="CylinderMesh" id=5]
 top_radius = 0.01
@@ -1129,7 +1134,6 @@ material/0 = null
 
 [node name="HeadCollisionWarning" type="MeshInstance" parent="Players/PlayerMe/HeadCam"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.020133, -0.13966 )
-visible = false
 mesh = SubResource( 3 )
 material/0 = SubResource( 4 )
 
@@ -2112,6 +2116,8 @@ material/0 = SubResource( 50 )
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.05 )
 mesh = SubResource( 51 )
 material/0 = SubResource( 52 )
+
+[node name="Tween" type="Tween" parent="GuiSystem/GreenBlob"]
 
 [node name="BodyObjects" type="Spatial" parent="."]
 

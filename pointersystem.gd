@@ -467,7 +467,7 @@ func buttonreleased_vrgrip():
 						setactivetargetwall(xcdrawing1)
 
 			elif pointertarget.get_name() == "DelXC":
-				print("Not implemented") 				
+				print("Not implemented")
 				
 			elif pointertarget.get_name() == "ghost":
 				print("Not implemented")
