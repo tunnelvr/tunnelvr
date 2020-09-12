@@ -851,7 +851,7 @@ uv1_triplanar = true
 [sub_resource type="SpatialMaterial" id=119]
 flags_transparent = true
 params_cull_mode = 2
-albedo_color = Color( 0.992157, 0.92549, 0.917647, 0 )
+albedo_color = Color( 0.431373, 0.992157, 0.478431, 0.180392 )
 metallic = 0.22
 uv1_triplanar = true
 
@@ -952,9 +952,9 @@ albedo_color = Color( 1, 0.156863, 0.156863, 0.741176 )
 flags_transparent = true
 params_cull_mode = 2
 albedo_color = Color( 0, 1, 0.901961, 0.439216 )
-metallic = 0.07
+metallic = 0.44
 metallic_specular = 0.22
-roughness = 0.49
+roughness = 0.74
 uv1_scale = Vector3( 1.5, 1.5, 1 )
 
 [sub_resource type="QuadMesh" id=136]
@@ -964,9 +964,15 @@ flags_transparent = true
 params_cull_mode = 2
 albedo_color = Color( 0.960784, 0.980392, 0.368627, 0.435294 )
 albedo_texture = ExtResource( 16 )
-metallic = 0.01
+metallic = 0.03
 metallic_specular = 0.22
-roughness = 0.43
+roughness = 0.81
+emission_enabled = true
+emission = Color( 0.972549, 0.827451, 0.160784, 1 )
+emission_energy = 0.43
+emission_operator = 0
+emission_on_uv2 = false
+emission_texture = ExtResource( 16 )
 
 [sub_resource type="QuadMesh" id=138]
 
@@ -977,7 +983,13 @@ albedo_color = Color( 0.980392, 0.596078, 0.635294, 0.486275 )
 albedo_texture = ExtResource( 16 )
 metallic = 0.06
 metallic_specular = 0.22
-roughness = 0.53
+roughness = 0.76
+emission_enabled = true
+emission = Color( 0.74902, 0.0392157, 0.0392157, 1 )
+emission_energy = 0.52
+emission_operator = 0
+emission_on_uv2 = false
+emission_texture = ExtResource( 16 )
 
 [sub_resource type="QuadMesh" id=140]
 size = Vector2( 1, 0.2 )
@@ -1864,7 +1876,7 @@ margin_top = 142.0
 margin_right = 290.0
 margin_bottom = 169.0
 text = "hide"
-items = [ "hide", null, false, 0, null, "show", null, false, 1, null, "only", null, false, 2, null ]
+items = [ "hide", null, false, 0, null, "hide2", null, false, 1, null, "show", null, false, 2, null, "only", null, false, 3, null ]
 selected = 0
 __meta__ = {
 "_edit_use_anchors_": false

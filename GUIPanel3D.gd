@@ -52,7 +52,7 @@ func _on_xcdrawingvisibility_selected(index):
 	if cvsel == "only":
 		Tglobal.tubedxcsvisible = true
 		Tglobal.tubeshellsvisible = false
-	if cvsel == "hide":
+	if cvsel == "hide" or cvsel == "hide2":
 		Tglobal.tubedxcsvisible = false
 		Tglobal.tubeshellsvisible = true
 	sketchsystem.changetubedxcsvizmode()

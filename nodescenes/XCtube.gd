@@ -94,11 +94,11 @@ func shiftxcdrawingposition(sketchsystem):
 		xcdrawingXC.setxcpositionorigin(Vector3(xco.x, xcdrawingXC.global_transform.origin.y, xco.z))
 		xcdrawingXC.updatexcpaths()
 		
-	sketchsystem.rpc("xcdrawingfromdata", xcdrawingXC.exportxcrpcdata())
+	sketchsystem.sharexcdrawingovernetwork(xcdrawingXC)
 	for xctube in xcdrawingXC.xctubesconn:
 		if sketchsystem.get_node("XCdrawings").get_node(xctube.xcname0).drawingtype == DRAWING_TYPE.DT_XCDRAWING:  # not other floor types pointing in
 			xctube.updatetubelinkpaths(sketchsystem)
-			sketchsystem.rpc("xctubefromdata", xctube.exportxctrpcdata())
+			sketchsystem.sharexctubeovernetwork(xctube)
 
 func shiftfloorfromdrawnstations(sketchsystem):
 	if len(xcdrawinglink) == 0:

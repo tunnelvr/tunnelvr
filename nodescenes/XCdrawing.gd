@@ -22,8 +22,8 @@ func setxcdrawingvisibility(makevisible):
 	if not makevisible:
 		$XCdrawingplane.visible = false
 		$XCdrawingplane/CollisionShape.disabled = true
-		$XCnodes.visible = Tglobal.tubedxcsvisible or (drawingtype != DRAWING_TYPE.DT_XCDRAWING) or (len(xctubesconn) == 0)
-		$PathLines.visible = $XCnodes.visible
+		#$XCnodes.visible = Tglobal.tubedxcsvisible or (drawingtype != DRAWING_TYPE.DT_XCDRAWING) or (len(xctubesconn) == 0)
+		#$PathLines.visible = $XCnodes.visible
 	elif makevisible != $XCdrawingplane.visible:
 		$XCdrawingplane.visible = true
 		$XCdrawingplane/CollisionShape.disabled = false
@@ -245,10 +245,10 @@ func updatelinksandtubesafterchange(xctubesconnupdated, sketchsystem):
 				xcdrawingnamesmoved.append(xctube.xcname1)
 		
 	for xcdrawingname in xcdrawingnamesmoved:
-		sketchsystem.rpc("xcdrawingfromdata", sketchsystem.get_node("XCdrawings").get_node(xcdrawingname).exportxcrpcdata())
+		sketchsystem.sharexcdrawingovernetwork(sketchsystem.get_node("XCdrawings").get_node(xcdrawingname))
 	for xctube in xctubesconnupdated:
 		xctube.updatetubelinkpaths(sketchsystem)
-		sketchsystem.rpc("xctubefromdata", xctube.exportxctrpcdata())
+		sketchsystem.sharexctubeovernetwork(xctube)
 
 func updatexcpaths():
 	if drawingtype == DRAWING_TYPE.DT_PAPERTEXTURE:

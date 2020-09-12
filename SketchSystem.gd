@@ -45,9 +45,13 @@ func xcapplyonepathtube(xcn0, xcdrawing0, xcn1, xcdrawing1):
 		
 	if xctube.positioningtube:
 		xctube.positionfromtubelinkpaths(self)
-		rpc("xcdrawingfromdata", xcdrawing1.exportxcrpcdata())
+		sharexcdrawingovernetwork(xcdrawing1.exportxcrpcdata())
 	xctube.updatetubelinkpaths(self)
-	rpc("xctubefromdata", xctube.exportxctrpcdata())
+	sharexctubeovernetwork(xctube)
+
+func sharexctubeovernetwork(xctube):
+	if Tglobal.connectiontoserveractive:
+		rpc("xctubefromdata", xctube.exportxctrpcdata())
 
 remote func xctubefromdata(xctdata):
 	# exportxctrpcdata():  return [ get_name(), xcname0, xcname1, xcdrawinglink ]
@@ -130,6 +134,11 @@ func loadcentrelinefile(centrelinefile):
 	#var xsectgps = centrelinedata.xsectgps
 	get_node("/root/Spatial/LabelGenerator").makenodelabelstask(centrelinedrawing, true)
 	print("default lllloaded")
+
+func sharexcdrawingovernetwork(xcdrawing):
+	if Tglobal.connectiontoserveractive:
+		rpc("xcdrawingfromdata", xcdrawing.exportxcrpcdata())
+
 
 remote func xcdrawingfromdata(xcdata):
 	var xcdrawing = $XCdrawings.get_node(xcdata["name"])

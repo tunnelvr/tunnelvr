@@ -363,7 +363,7 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 			var vwallmid = lerp(xcdrawing0.global_transform.origin, xcdrawing1.global_transform.origin, lam)
 			xcdrawing.setxcpositionangle(vang)
 			xcdrawing.setxcpositionorigin(vwallmid)
-			sketchsystem.rpc("xcdrawingfromdata", xcdrawing.exportxcrpcdata())
+			sketchsystem.sharexcdrawingovernetwork(xcdrawing)
 			clearactivetargetnode()
 			setactivetargetwall(xcdrawing)
 		gripmenu.get_node("NewSlice").get_node("MeshInstance").visible = false
@@ -468,6 +468,9 @@ func buttonreleased_vrgrip():
 
 			elif pointertarget.get_name() == "DelXC":
 				print("Not implemented")
+
+			elif pointertarget.get_name() == "NXC":
+				print("Not implemented")
 				
 			elif pointertarget.get_name() == "ghost":
 				print("Not implemented")
@@ -483,7 +486,7 @@ func buttonreleased_vrgrip():
 			elif pointertarget.get_name() == "Replay":
 				Tglobal.soundsystem.playmyvoicerecording()
 				
-			elif pointertarget.get_name() == "DoSlice" and is_instance_valid(activetargettube) and len(activetargetwall.nodepoints) == 0:
+			elif pointertarget.get_name() == "DoSlice" and is_instance_valid(activetargettube) and is_instance_valid(activetargetwall) and len(activetargetwall.nodepoints) == 0:
 				print(activetargettube, " ", len(activetargetwall.nodepoints))
 				var xcdrawing = activetargetwall
 				var vang = Vector2(xcdrawing.global_transform.basis.x.x, xcdrawing.global_transform.basis.x.z).angle()
@@ -492,7 +495,7 @@ func buttonreleased_vrgrip():
 				var xcdrawinglink1 = [ ]
 				activetargettube.slicetubetoxcdrawing(xcdrawing, xcdrawinglink0, xcdrawinglink1)
 				xcdrawing.updatexcpaths()
-				sketchsystem.rpc("xcdrawingfromdata", xcdrawing.exportxcrpcdata())
+				sketchsystem.sharexcdrawingovernetwork(xcdrawing)
 				setactivetargetwall(xcdrawing)
 				clearactivetargetnode()
 				var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(activetargettube.xcname0)
@@ -504,7 +507,7 @@ func buttonreleased_vrgrip():
 				xctube0.xcdrawinglink = xcdrawinglink0
 				xctube0.xcsectormaterials = activetargettube.xcsectormaterials.duplicate()
 				xctube0.updatetubelinkpaths(sketchsystem)
-				sketchsystem.rpc("xctubefromdata", xctube0.exportxctrpcdata())
+				sketchsystem.sharexctubeovernetwork(xctube0)
 				xctube0.updatetubeshell(sketchsystem.get_node("XCdrawings"), Tglobal.tubeshellsvisible)
 			
 				var xctube1 = sketchsystem.newXCtube(xcdrawing, xcdrawing1)
@@ -515,7 +518,7 @@ func buttonreleased_vrgrip():
 				#xctube1.xcsectormaterials.push_front(xctube1.xcsectormaterials.pop_back())
 				#xctube1.xcsectormaterials.push_front(xctube1.xcsectormaterials.pop_back())
 
-				sketchsystem.rpc("xctubefromdata", xctube0.exportxctrpcdata())
+				sketchsystem.sharexctubeovernetwork(xctube0)
 				xctube1.updatetubeshell(sketchsystem.get_node("XCdrawings"), Tglobal.tubeshellsvisible)
 
 				xcdrawing.updatexctubeshell(sketchsystem.get_node("XCdrawings"), Tglobal.tubeshellsvisible)  # not strictly necessary as there won't be any shells in a sliced tube xc
@@ -532,15 +535,20 @@ func buttonreleased_vrgrip():
 	elif pointertargettype == "XCdrawing" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		clearpointertargetmaterial()
 		pointertargetwall.setxcdrawingvisibility(false)
-		sketchsystem.rpc("xcdrawingfromdata", pointertargetwall.exportxcrpcdata())
+		sketchsystem.sharexcdrawingovernetwork(pointertargetwall)
 		setactivetargetwall(null)
 		clearpointertarget()
 		activelaserroot.get_node("LaserSpot").visible = false
-
+		# keep nodes visible???
+		
 	elif pointertargettype == "XCtube":
 		if activetargettube != null:
 			setactivetargettubesector(-2)
 			activetargettube = null
+
+	elif activetargetwall != null:
+		sketchsystem.sharexcdrawingovernetwork(activetargetwall)
+		setactivetargetwall(null)
 
 	elif activetargetnode != null:
 		clearactivetargetnode()
@@ -565,7 +573,7 @@ func buttonreleased_vrtrigger():
 		xcdrawing.setxcpositionorigin(vwallmid)
 		clearactivetargetnode()
 		setactivetargetwall(xcdrawing)
-		sketchsystem.rpc("xcdrawingfromdata", xcdrawing.exportxcrpcdata())
+		sketchsystem.sharexcdrawingovernetwork(xcdrawing)
 						
 func _physics_process(_delta):
 	if Tglobal.VRstatus == "none":

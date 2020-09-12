@@ -111,7 +111,7 @@ func fetchimportpapers():
 		paperdrawing.global_transform = papertrans
 		paperdrawing.get_node("XCdrawingplane").scale = Vector3(paperwidth/2, paperwidth/2, 1)
 		paperdrawinglist.append(paperdrawing)
-		get_node("/root/Spatial/SketchSystem").rpc("xcdrawingfromdata", paperdrawing.exportxcrpcdata())
+		get_node("/root/Spatial/SketchSystem").sharexcdrawingovernetwork(paperdrawing)
 		fetchpaperdrawing(paperdrawing)
 
 
