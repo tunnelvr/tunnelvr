@@ -1,6 +1,6 @@
 extends Spatial
 
-#var Ddebugvisualoffset = Vector3(-2, 0, 0)
+#var Ddebugvisualoffset = Vector3(-2, 0, 0)   # put Visible Collision Shapes on when you do this
 var Ddebugvisualoffset = Vector3(0, 0, 0)
 
 onready var playerMe = get_node("/root/Spatial/Players/PlayerMe")

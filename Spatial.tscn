@@ -525,7 +525,7 @@ radius = 0.15
 height = 0.01
 
 [sub_resource type="SphereShape" id=67]
-radius = 0.12
+radius = 0.15
 
 [sub_resource type="PrismMesh" id=68]
 left_to_right = 0.0
