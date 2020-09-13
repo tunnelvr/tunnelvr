@@ -211,6 +211,8 @@ func process_feet_on_floor(delta, playerdirectedwalkmovement):
 		psqparamshead.transform = Transform(playerbodycapsulebasis, playerheadcentreforcollision)
 		playerheadcolliding = len(get_world().direct_space_state.intersect_shape(psqparamshead, 1)) != 0
 		$PlayerHeadKinematicBody/PlayerHeadCapsule.global_transform.origin = playerheadcentreforcollision
+		Tglobal.soundsystem.quicksoundonpositionchange("GentleCollide", playerbodycentre, 0.15)
+
 
 	$PlayerKinematicBody.global_transform.origin = playerbodycentre
 	$PlayerKinematicBody/PlayerBodyCapsule/CapsuleShapePreview/CollisionWarning.visible = playeriscolliding
@@ -260,6 +262,8 @@ func process_directedflight(delta, playerdirectedflightvelocity):
 	$PlayerEnlargedKinematicBody.global_transform.origin = playerbodycentre
 	if playerdirectedflightvelocity != Vector3(0,0,0):
 		playerfreefallbodyvelocity = $PlayerEnlargedKinematicBody.move_and_slide(playerdirectedflightvelocity, Vector3(0, 1, 0))
+		if playerfreefallbodyvelocity.normalized().dot(playerdirectedflightvelocity.normalized()) < 0.86:
+			Tglobal.soundsystem.quicksoundonpositionchange("GlancingMotion", playerbodycentre + Vector3(0,3,0), 0)			
 		playerbodycentre = $PlayerEnlargedKinematicBody.global_transform.origin
 	playerMe.global_transform.origin = -Ddebugvisualoffset + playerbodycentre + Vector3(0, playerheadcentreabovebodycentreheight, 0) - headcentrefromvroriginvector
 	addplayervelocitystack((playerbodycentre - playerbodycentre_prev)/delta)

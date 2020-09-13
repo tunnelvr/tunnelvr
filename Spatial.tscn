@@ -1,4 +1,4 @@
-[gd_scene load_steps=200 format=2]
+[gd_scene load_steps=202 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/default_env.tres" type="Environment" id=2]
@@ -27,6 +27,7 @@
 [ext_resource path="res://guimaterials/grip_commands.png" type="Texture" id=25]
 [ext_resource path="res://lightweighttextures/rock_albedo.jpg" type="Texture" id=26]
 [ext_resource path="res://lightweighttextures/simpledirt_highlight.material" type="Material" id=27]
+[ext_resource path="res://sounds/sfx_step_grass_l.wav" type="AudioStream" id=28]
 [ext_resource path="res://lightweighttextures/seamlesspebbles1.jpg" type="Texture" id=29]
 [ext_resource path="res://lightweighttextures/water 0342normal.jpg" type="Texture" id=30]
 [ext_resource path="res://lightweighttextures/water-0342.jpg" type="Texture" id=31]
@@ -40,6 +41,7 @@
 [ext_resource path="res://fonts/Fira_Mono/FiraMono-Regular.ttf" type="DynamicFontData" id=39]
 [ext_resource path="res://fonts/Fira_Mono/FiraMono-Bold.ttf" type="DynamicFontData" id=40]
 [ext_resource path="res://PlayerDirections.gd" type="Script" id=41]
+[ext_resource path="res://sounds/Moving Metal Hits.wav" type="AudioStream" id=42]
 
 [sub_resource type="CylinderShape" id=1]
 radius = 0.1
@@ -2575,6 +2577,14 @@ bus = "Record"
 
 [node name="ClickSound" type="AudioStreamPlayer3D" parent="SoundSystem/quicksounds"]
 stream = ExtResource( 9 )
+unit_db = 9.032
+
+[node name="GentleCollide" type="AudioStreamPlayer3D" parent="SoundSystem/quicksounds"]
+stream = ExtResource( 28 )
+unit_db = 9.032
+
+[node name="GlancingMotion" type="AudioStreamPlayer3D" parent="SoundSystem/quicksounds"]
+stream = ExtResource( 42 )
 unit_db = 9.032
 
 [node name="BlipSound" type="AudioStreamPlayer3D" parent="SoundSystem/quicksounds"]
