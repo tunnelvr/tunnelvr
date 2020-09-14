@@ -24,12 +24,12 @@ func setplanviewvisible(planviewvisible, guidpaneltransform, guidpanelsize):
 		$PlanView/CollisionShape.disabled = true
 
 	
-func processplanviewsliding(handright, _delta):
+func processplanviewsliding(handright, delta):
 	var planviewsystem = self
 	var joypos = Vector2(handright.get_joystick_axis(0) if handright.get_is_active() else 0.0, handright.get_joystick_axis(1) if handright.get_is_active() else 0.0)
 	var plancamera = planviewsystem.get_node("PlanView/Viewport/Camera")
 	if joypos.length() > 0.1 and not handright.is_button_pressed(BUTTONS.VR_GRIP):
-		plancamera.translation += Vector3(joypos.x, 0, -joypos.y)*plancamera.size/2*_delta
+		plancamera.translation += Vector3(joypos.x, 0, -joypos.y)*plancamera.size/2*delta
 
 func camerascalechange(sca):
 	$PlanView/Viewport/Camera.size *= sca
@@ -60,10 +60,10 @@ func processplanviewpointing(raycastcollisionpoint):
 	#print("pp ", laspt)
 	
 	planviewsystem.get_node("RealPlanCamera/LaserScope").visible = true
-	planviewsystem.get_node("RealPlanCamera/LaserScope/RayCast").force_raycast_update()
+	planviewsystem.get_node("RealPlanCamera/LaserScope/LaserOrient/RayCast").force_raycast_update()
 
 func updatecentrelinesizes():
-	var sca = $PlanView/Viewport/Camera.size/70.0*2.5 if get_node("/root/Spatial/SketchSystem").centrelineonlymode else 1.0
+	var sca = $PlanView/Viewport/Camera.size/70.0*2.5 if Tglobal.centrelineonly else 1.0
 	for xcdrawing in get_tree().get_nodes_in_group("gpcentrelinegeo"):
 		for xcn in xcdrawing.get_node("XCnodes").get_children():
 			xcn.get_node("Quad").get_surface_material(0).set_shader_param("vertex_scale", sca)

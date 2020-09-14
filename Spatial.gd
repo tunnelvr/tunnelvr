@@ -1,274 +1,160 @@
 extends Spatial
 
-
 # Stuff to do:
 
+# * new nodes on floor allowed
+# * Make XCdrawing on floor node grip menu
+# * implement deleteXC
 
-# * add networking instructions to README
-# * then networking to the Quest(!)
+# * should give the other player a position near to me:  $SketchSystem.rpc_id(id, "sketchsystemfromdict", $SketchSystem.sketchsystemtodict())
+		
+# * xctubesconn) == 0 should be a count of the tube types excluding connections to floor
+# * DelXC would delete XC and join between the tubes
+# * Ghost a wall (or unghost) so we can see through it
+# * Cut hole in wall is a different thing -- a proper type and recalculation
 
-# * Take a papersheet (same as floor sheet), done with thickness.
-# * Put this papersheet under my feet and make it real big.  Ability to lift it up.  
-# * Then connect centreline node to it, and a second one.  Now it can only be horizontal, but move up and down.
-# * Possibly ability to trim this sheet down with a closed contour in it
+# * update tubes whenever a connection is made, not just on deselection
 
-# * Make a blank XCdrawing in a tube and be able to move it around.  
-# * This then locks and slices the tube.  (keep tube directions same and maintain the sector values)
-# * Make a consistent bit of cave in Ireby2
+# * optional cross section based on floor node
+# * pointertargettype as an enum
+# * sort out the setopnpos junk
 
-# * Finally abolish the floorsheet.  Have a very large grassy plane underneath it all 
+# * updatetubeshells to be cleared up 
 
-
-
-# * exportxcdata and exportcxcdata should be merged and use the same dict.
-# * exportxctrpcdata to be primary tube record
-# * xcdrawing should have file name of image (separate from the system name)
-# * nodes should have label name separate from system name
-
-# * floor sheet and paper sheet to be the same thing.  
-# * papersheet under your feet and made big, so it can then be aligned with centrelines
-# * trimming of papersheet view?
-
+# * How is it going to work from planview?
 # * a gripclick inserts a new XC in the tube that we can orient and move before applying the slice
 #   -- this can be done from the plan view too, 
 #   -- plot with front-culling so as to see inside the shapes, and plot with image textures on
 
-# * loading second round of images does not make new nodes (or controls the names properly) 
+# * save and load puts saves my standing position
+
+# * process engine loading of file.  
+
+# * XC in mode where it cannot take new nodes, only as continuation
+# * and automatically deletes connective bits -- and reconnects tubes
+
+# * tube has easy clicky ways to add in connecting lines between them (advancing the selected node after starting at a join)
+
+# * confusion between papersheet and floordrawing being XCtype
+
+# * getactivefloordrawing is duff.  we should record floor we are working with relative to an object, by connection
+
+# * deal with positioning papersheet underlay
+# * deal with connecting to the papersheet (bigger connectivities needed)
+# * deal with seeing the paper drawing when you are inside 
+# * active floor papersheet which we used for drawn texture (maybe on the ceiling)
+
+# * check at loading gets the new paper bits in the right place
+
+# * Make a consistent bit of cave in Ireby2
+
+# * A selected tube makes the XCnodes bigger?
+# * or we can equivalently cycle through the nodes with right and left VR_Pad
+
+# * papertype should not be environment collision (just pointer collisions)
+# * paper to be carried (nailed to same spot on the laser) when we move
+
+# * add networking instructions to README
+# * then networking to the Quest(!)  -- this is plausible now
+
+# * remove reliance on rpc sync (a sync call in sketch system) connectiontoserveractive
+
+# * selected XCdrawing would have a handle for moving through the planview
+# * enlarged nodes on selected XCdrawing to be visible
+
+# * Quest -- try attaching things to the fingers for steering by relative motions.  
+# * Steering by a captain's engine wheel aligned vertical so your left hand can point and move right and touch any part of it
+# *  -- you are directing a cursor out there.
+
+# * refraction sphere for accurate pointing -- you hit the sphere and it then goes aligned with your eyes
 
 # * Centrelines and centreline labels off (unless we want them)
-
 # * centreline xcdrawing as extended class?
 
-# * use joypos instead of left_right stuff
-
 # * special materials are the sketch image and invisible
-# * we can toggle culling to the materials to see inside 
-# * LaserShadow out in global space under a node
+# * we can toggle culling to the materials to see inside (means we get everything oriented right) 
 
-# * Use Remote transform to move GUIPanel3D out of PlayerMe
 
-# * highlight nodes under pointer system so it's global and simplifies colouring code
-
-# * active node to be an overlay
-
-# * should correspond to the join we have  
+# * highlight nodes under pointer system so it's global and simplifies colouring code (active node to be an overlay)
 
 # * XCdrawings only visible when tube is selected (could save a lot of memory)
 
 # * can set the type of the material (including invisible and no collision, so open on side)
 
-# * Position of the doppelganger other player is queued in its own object by the rpc and only updated on the physics process
-# * must find an answer to the var materialscanimage = load("res://surveyscans/scanimagefloor.material")
-
-# * updatetubeshell to know the material colours from xcsectormaterials
+# * Position of the avatar other player is queued in its own object by the rpc and only updated on the physics process (and can be delayed and tweened)
 
 # * On the Occulus joystick, a move to the right is equivalent to a click when above 0.9 (but would need to be debounced)
 
-# * may hide/delete all the nodes of an XC not on a selected tube.
-# * so the way to find an XC is to click on the tube
-
-# * A selected tube makes the XCnodes bigger?
-# * or we can equivalently cycle through the nodes with right and left VR_Pad
-
 # * grip on XCshape then click gets into rotate mode like with papersheets (but preserving upwardness)
-
-# * what's the black papersheet?
 
 # * possibly lose the connecting xcdrawings to floor feature 
 # * just have trimmed sheets that can become floors (or xcs)
 
-# * selection node should be a mask on top of the node rather than a change in its material (so we can make it sticky)
-# * apply this tech to a vertical marker in an XC wall for positioning it, or cutting new one
-# * perfect overhead light so things project down to the correct place
-
-# * put xcresource (and xcname) into mergexcrpcdata
-
-# * hold back laggy motions by 500ms and animate between the positions
-# * (simulate this with dodgy doppelganger.  Local game timestamp is OS.get_ticks_usec()
-
-# * some way to see the names of things in the distance
-
-# * put name of image into XCdrawing (incl paper type)
-
-# * give it a default cave in position in the resources
-
-# * save and load xcname and xcresource
-
-# * floordrawing not special
+# * give it a default cave in position in the resources with default image
 
 # * pointertargettypes should be an enum for itself
-# * LaserRayCast.collision_mask should use an enum
-
-# * xctubesconn and xctubesconnpositioning
-# func updatetubeshell(xcdrawings, makevisible):
-#	if makevisible:
-#		var tubeshellmesh = maketubeshell(xcdrawings)
 
 # * godot docs.  assert returns null from the function it's in when you ignore it
-
-# * could have makexcdpolys cached
-
 # * check out HDR example https://godotengine.org/asset-library/asset/110
-
-# * need to have a file value on XCnode instead of the name to say the paper image because you could have two with same image
-
-# * sort out the textures of the XCs so they are large enough there.  
-# * XCs are going to be translated upwards (and the points back down by offset) so we can have them up by the centrelines
-# * XCs positioned by centreline, proportion along and angles relative -- always on a segment and length
-# *   Like the position of the trimmed horizontal drawing altitude relative to the centreline station 
-
-# * inline copyxcntootnode and copyotnodetoxcn
-
-# * break up and inline xcapplyonepath
-
-# * bring loose papers to me.  Superimpose one paper on another to make a frame
-
-# * papertype should not be environment collision (just pointer collisions)
-
-# * load in all the cross-sections as hexagons we can make -- as tubes to start off
 
 # * duplicate floor trimming out and place at different Z-levels
 #			sketchsystem.rpc("xcdrawingfromdict", xcdrawing.exportxcrpcdata())
 # * all XCdrawing repositions should communicate.  
 #			sketchsystem.rpc("xcdrawingfromdata", xcdrawing.exportxcrpcdata())
 # * formalize the exact order of updates of positions of things so we don't get race conditions
-
 # * transmit rpc_reliable when trigger released on the positioning of a papersheet
 
-# * A bit more quest work
-#  -- print out left hand transforms and find what's crashing it
-#  -- GUIPanel that prints all the gestures and button states
-#  -- find list of canned gestures for the buttons used
-#  -- disable pad for motions in left hand.  Find what it is to fly
-#  -- start making a signal list for the different commands
-#  -- what's wrong with the laser spot in the quest
-#  -- what is the networking situation
-#  -- To rotate hands round to match controllers pointing in -Z thumb +Y, left hand needs rotation (0,-90,90) and right hand needs (0,90,90) 
-#  --   Thumb to index finger is Input.is_joy_button_pressed=JOY_OCULUS_AX=7
-#  --   Thumb to middle finger is Input.is_joy_button_pressed=JOY_OCULUS_BY=1
-#  --   Thumb to ring finger is Input.is_joy_button_pressed=JOY_VR_GRIP=2
-#  --   Thumb to pinky is Input.is_joy_button_pressed=JOY_VR_TRIGGER=15
-#  --   Unreliably can get 2 or 3 at once.  Touchpad activates briefly, but is usually -1, 1 or 0 when idle
-#  --   Fist with thumb sliding from top down along fingers, Input.get_joy_axis(1) -1 -> +1  (axis 0 is not worked out)
 # https://developer.oculus.com/learn/hands-design-interactions/
 # https://developer.oculus.com/learn/hands-design-ui/
 # https://learn.unity.com/tutorial/unit-5-hand-presence-and-interaction?uv=2018.4&courseId=5d955b5dedbc2a319caab9a0#5d96924dedbc2a6236bc1191
 # https://www.youtube.com/watch?v=gpQePH-Ffbw
 
-
 # * moving floor up and down (also transmitted)
 # *  XCpositions and new ones going through rsync?  
-
 # * regexp option button to download all the files into the user directory.  
-
 # * VR leads@skydeas1  and @brainonsilicon in Leeds (can do a trip there)
-
-# * keyboard controls to do mouse buttons (and point and click when not captured)
-# * point and click under the mouse cursor when not captured! should be a laser beam out of the camera!
-#var dropPlane  = Plane(Vector3(0, 0, 1), z)
-#var position3D = dropPlane.intersects_ray(camera.project_ray_origin(position2D),
-#                             			  camera.project_ray_normal(position2D))
-# * show this on the remote computer (the status of the laser)
 
 # * copy in more drawings as bits of paper size that can be picked up and looked at
 # * think on how to remap the controls somehow.  Maybe some twist menus
-# * add more keyboard controls
-# * some XCtypes are little bits of paper we have made, before they become full floors that can be moved by hand before they are expanded
-# * keyboard control of mouseclicks (when not in mouse capture mode) to do the laser (or remove laser entirely for the clicking on windows)
-
 # * CSG avatar head to have headtorch light that goes on or off and doesn't hit ceiling (gets moved down)
 
-# * bring in a tiny version of the floor drawing as a holdable object
-# * use cursor as tractor beam for those and the pick up and reorient
-
-# * shiftfloorfromdrawnstations in shiftxcdrawingposition
-# * hexagonal crosssections	for xsectgp in xsectgps:
-#		var xsectindexes = xsectgp.xsectindexes
-#		var xsectrightvecs = xsectgp.xsectrightvecs
-#		var xsectlruds = xsectgp.xsectlruds
-
 # * delete a tube that has no connections on it
-# * Movement connection between floortype and centreline
-# * cache value of sketchsystem.get_node("XCdrawings").get_node(xctube.xcname1).drawingtype
-# * removexcnode should actually cause a redraw (but not a move)
-# * ^^ should move redraws out of the system
-
 # * systematically do the updatetubelinkpaths and updatetubelinkpaths recursion properly 
-
-# * Alter the OnePathNode system to make centreline nodes (with different meshes)
-
-# * include a list of URLs for the drawings and bring them in as small bits of xccrossing bits of paper
-# *  option in the GUIpanel
 
 # * Bring in XCdrawings that are hooked to the centreline that will highlight when they get it
 # * these cross sections are tied to the centrelinenodes and not the floor, and are prepopulated with the cross sections dimensions and tubes
 # * Load and move the floor on load
 
-# * holding and moving and trimming small texture xcdrawings like puzzling places
-# * remove all previous centreline code
-# * ability to duplicate the floor with windows in it and move it up close to the centrelines
-# * mapping texture types in the zones of the cross sections (cross sections should be hexes) 
-
-# * experiment with junctions cross sections
-# * finally kinked xcs
-
-# * systems into own file
-
 # * use chinhotspot to use as microphone (on grip) and then button to playback
-
 # * compress and decompress the audio stream (LZstream) and make a godot proposal
-# * do advanced functions like slicetubetoxcdrawing only on the nodepoints array (though still need to implement plane flattening)
-
-# * Laser change colour when pointing onto something (according to what it points onto)
 # * pointer target and selected target from pointersystem into sketchsystem
-# * import other floor XCs for drawing on and snipping out, putting into places.
-# * ability to adjust angle and brightness of headtorch in same way with raycast stub
 
-# * change colour of head and hands of each avatar
-
-# * avoid calling network peer when not connected to anything
-# * start the sending over of positions from the server as updates happen
-# * laser/spot/laser shadow/laser-selectline all more global (shared selection, or not)
-# * begin with mapfinding system from downloaded png files that are snipped up and placed in relation to a cave model
-# *  lay out the bits of paper on a board and lets you put them on the survey
-# *  online copies of the survey scans
-
-# * simplify the double points we get in the slices (take the mid-point of them) or detect the coplanar points from coplanar corresponding input edges)
 # * clear up the laser pointer logic and materials
 # * automatically make the xcplane big enough as you draw close to its edge
 # * shift pick connection to delete nodes up to next junction
 # * scan through other drawings on back of hand
 # * check stationdrawnnode moves the ground up
+
 # * Need to ask to improve the documentation on https://docs.godotengine.org/en/latest/classes/class_meshinstance.html#class-meshinstance-method-set-surface-material
 # *   See also https://godotengine.org/qa/3488/how-to-generate-a-mesh-with-multiple-materials
 # *   And explain how meshes can have their own materials, that are copied into material/0, and the material reappears if material/0 set to null
 # * CSG mesh with multiple materials group should have material0, material1 etc
-# * Report bug check ray intersect plane is in the plane and report if not!
-
-# * quest hand tracking https://github.com/GodotVR/godot_oculus_mobile#features
 
 # * and loading (remembering the transforms) so it starts exactly where it left off
 # * redo shiftfloorfromdrawnstations with nodes in the area of some kind (decide what to do about the scale)
-# * grip click to hide a tube segment (how to bring back?)
-# * xcdrawingplane background thing be scaled when copied
-# * xcdrawingplane background thing change colour on grip and hide
-# * think about the height plane
-# * third (middle) connection point on xcdrawing bends it into 2 planes
 
-# * Colour floor/wall/ceiling faces accordingly
-# * Requires an undo of each of these settings
-# * capability of selecting faces and splitting with points
 # * Report bug that disable depth check puts transparent objects in front
-# * node flags of floor, wall, ceiling types so that edges and triangles inherit from this 
-# * floor and wall textures programmable
-# * Boulders and gravel and particles
 
+# lose these
 var arvr_openvr = null; 
 var arvr_quest = null; 
 var arvr_oculus = null; 
-
+var arvr_nativemobile
+	
 export var hostipnumber: String = ""
 export var hostportnumber: int = 8002
+export var enablevr: = true
+export var enablenetworking: = true
 
 var perform_runtime_config = true
 var ovr_init_config = null
@@ -277,81 +163,121 @@ var ovr_hand_tracking = null
 var networkID = 0
 
 onready var playerMe = $Players/PlayerMe
-var VRstatus = "none"
+
+func checkloadinterface(larvrinterfacename):
+	var available_interfaces = ARVRServer.get_interfaces()
+	for x in available_interfaces:
+		if x["name"] == larvrinterfacename:
+			Tglobal.arvrinterface = ARVRServer.find_interface(larvrinterfacename)
+			if Tglobal.arvrinterface != null:
+				Tglobal.arvrinterfacename = larvrinterfacename
+				print("Found VR interface ", x)
+				return true
+	return false
 	
+
 func _ready():
-	if hostipnumber == "":
-		print("Initializing VR");
-		var available_interfaces = ARVRServer.get_interfaces();
-		print("  Available Interfaces are %s: " % str(available_interfaces));
-		arvr_openvr = ARVRServer.find_interface("OpenVR")
-		arvr_quest = ARVRServer.find_interface("OVRMobile")
-		arvr_oculus = ARVRServer.find_interface("Oculus")
-		
-		if arvr_quest:
-			print("found quest, initializing")
-			ovr_init_config = load("res://addons/godot_ovrmobile/OvrInitConfig.gdns").new()
-			ovr_performance = load("res://addons/godot_ovrmobile/OvrPerformance.gdns").new()
-			ovr_hand_tracking = load("res://addons/godot_ovrmobile/OvrHandTracking.gdns").new();
-			perform_runtime_config = false
-			ovr_init_config.set_render_target_size_multiplier(1)
-			if arvr_quest.initialize():
-				get_viewport().arvr = true;
-				Engine.target_fps = 72;
-				VRstatus = "quest"
-				print("  Success initializing Quest Interface.");
+	print("  Available Interfaces are %s: " % str(ARVRServer.get_interfaces()));
+	print("Initializing VR" if enablevr else "VR disabled");
 
-		elif arvr_oculus:
-			print("  Found Oculus Interface.");
-			if arvr_oculus.initialize():
-				get_viewport().arvr = true;
-				Engine.target_fps = 80 # TODO: this is headset dependent (RiftS == 80)=> figure out how to get this info at runtime
-				OS.vsync_enabled = false;
-				VRstatus = "oculus"
-				print("  Success initializing Oculus Interface.");
+	if enablevr and checkloadinterface("OVRMobile"):
+		print("found quest, initializing")
+		ovr_init_config = load("res://addons/godot_ovrmobile/OvrInitConfig.gdns").new()
+		ovr_performance = load("res://addons/godot_ovrmobile/OvrPerformance.gdns").new()
+		ovr_hand_tracking = load("res://addons/godot_ovrmobile/OvrHandTracking.gdns").new();
+		perform_runtime_config = false
+		ovr_init_config.set_render_target_size_multiplier(1)
+		if Tglobal.arvrinterface.initialize():
+			get_viewport().arvr = true
+			Engine.target_fps = 72
+			Engine.iterations_per_second = 72
+			Tglobal.VRstatus = "quest"
+			print("  Success initializing Quest Interface.")
+		else:
+			Tglobal.arvrinterface = null
 
-		elif arvr_openvr:
-			print("found openvr, initializing")
-			if arvr_openvr.initialize():
-				var viewport = get_viewport()
-				viewport.arvr = true
-				print("tttt", viewport.hdr, " ", viewport.keep_3d_linear)
-				#viewport.hdr = false
-				viewport.keep_3d_linear = true
-				Engine.target_fps = 90
-				OS.vsync_enabled = false;
-				VRstatus = "vive"
-				print("  Success initializing OpenVR Interface.");
-				playerMe.arvrinterface = arvr_openvr
-
-	if VRstatus == "none":
-		print("*** VR not working")
-	playerMe.VRstatus = VRstatus
-	if VRstatus == "quest":
-		playerMe.initquesthandtrackingnow(ovr_hand_tracking)
-
-	var networkedmultiplayerenet = NetworkedMultiplayerENet.new()
-	get_tree().connect("network_peer_connected", self, "_player_connected")
-	get_tree().connect("network_peer_disconnected", self, "_player_disconnected")
-	if hostipnumber == "":
-		networkedmultiplayerenet.create_server(hostportnumber, 5)
-		playerMe.connectiontoserveractive = (not arvr_quest)
+	if enablevr and checkloadinterface("Oculus"):
+		print("  Found Oculus Interface.");
+		if Tglobal.arvrinterface.initialize():
+			get_viewport().arvr = true;
+			Engine.target_fps = 80 # TODO: this is headset dependent (RiftS == 80)=> figure out how to get this info at runtime
+			Engine.iterations_per_second = 80
+			OS.vsync_enabled = false;
+			Tglobal.VRstatus = "oculus"
+			print("  Success initializing Oculus Interface.");
+			# C:/Users/henry/Appdata/Local/Android/Sdk/platform-tools/adb.exe logcat -s VrApi
+		else:
+			Tglobal.arvrinterface = null
+				
+	if enablevr and checkloadinterface("OpenVR"):
+		print("found openvr, initializing")
+		if Tglobal.arvrinterface.initialize():
+			var viewport = get_viewport()
+			viewport.arvr = true
+			print("tttt", viewport.hdr, " ", viewport.keep_3d_linear)
+			#viewport.hdr = false
+			viewport.keep_3d_linear = true
+			Engine.target_fps = 90
+			Engine.iterations_per_second = 90
+			OS.vsync_enabled = false;
+			Tglobal.VRstatus = "vive"
+			print("  Success initializing OpenVR Interface.");
+		else:
+			Tglobal.arvrinterface = null
+				
+	if enablevr and false and checkloadinterface("Native mobile"):
+		print("found nativemobile, initializing")
+		if Tglobal.arvrinterface.initialize():
+			var viewport = get_viewport()
+			viewport.arvr = true
+			viewport.render_target_v_flip = true # <---- for your upside down screens
+			viewport.transparent_bg = true       # <--- For the AR
+			Tglobal.arvrinterface.k1 = 0.2          # Lens distortion constants
+			Tglobal.arvrinterface.k2 = 0.23
+	
+	Tglobal.VRoperating = (Tglobal.arvrinterfacename != "none")
+	if Tglobal.VRoperating:
+		#$BodyObjects/Locomotion_WalkInPlace.initjogdetectionsystem(playerMe.get_node("HeadCam"))
+		if Tglobal.VRstatus == "quest":
+			playerMe.initquesthandtrackingnow(ovr_hand_tracking)
+			$WorldEnvironment/DirectionalLight.shadow_enabled = false
+			$BodyObjects/PlayerDirections.initquesthandcontrollersignalconnections()
+		else:
+			$BodyObjects/PlayerDirections.initcontrollersignalconnections()
 	else:
-		networkedmultiplayerenet.create_client(hostipnumber, hostportnumber)
-		get_tree().connect("connected_to_server", self, "_connected_to_server")
-		get_tree().connect("connection_failed", self, "_connection_failed")
-		get_tree().connect("server_disconnected", self, "_server_disconnected")
-		playerMe.connectiontoserveractive = false
-		#playerMe.rotate_y(180)  
-		playerMe.global_transform.origin += 3*Vector3(playerMe.get_node("HeadCam").global_transform.basis.z.x, 0, playerMe.get_node("HeadCam").global_transform.basis.z.z).normalized()
-	get_tree().set_network_peer(networkedmultiplayerenet)
-	networkID = get_tree().get_network_unique_id()
-	print("nnet-id ", networkID)
-	playerMe.set_network_master(networkID)
-	playerMe.networkID = networkID
+		print("*** VR not working")
+		
+	if enablenetworking:
+		var networkedmultiplayerenet = NetworkedMultiplayerENet.new()
+		get_tree().connect("network_peer_connected", self, "_player_connected")
+		get_tree().connect("network_peer_disconnected", self, "_player_disconnected")
+		if hostipnumber == "":
+			networkedmultiplayerenet.create_server(hostportnumber, 5)
+			Tglobal.connectiontoserveractive = (not arvr_quest)
+		else:
+			networkedmultiplayerenet.create_client(hostipnumber, hostportnumber)
+			get_tree().connect("connected_to_server", self, "_connected_to_server")
+			get_tree().connect("connection_failed", self, "_connection_failed")
+			get_tree().connect("server_disconnected", self, "_server_disconnected")
+			Tglobal.connectiontoserveractive = false
+			#playerMe.rotate_y(180)  
+			playerMe.global_transform.origin += 3*Vector3(playerMe.get_node("HeadCam").global_transform.basis.z.x, 0, playerMe.get_node("HeadCam").global_transform.basis.z.z).normalized()
+		get_tree().set_network_peer(networkedmultiplayerenet)
+		networkID = get_tree().get_network_unique_id()
+		print("nnet-id ", networkID)
+		playerMe.set_network_master(networkID)
+		playerMe.networkID = networkID
 
-	playerMe.get_node("GUIPanel3D/Viewport/GUI/Panel/ButtonUpdateShell").pressed = true
-	playerMe.get_node("GUIPanel3D")._on_buttonupdateshell_toggled(true)
+	if false:
+		#$SketchSystem.loadcentrelinefile("res://surveyscans/dukest1resurvey2009json.res")
+		$SketchSystem.loadcentrelinefile("res://surveyscans/Ireby/Ireby2/Ireby2.json")
+		$SketchSystem.updatecentrelinevisibility()
+		$SketchSystem.changetubedxcsvizmode()
+		$SketchSystem.updateworkingshell()
+	else:
+		$SketchSystem.loadsketchsystem("res://surveyscans/smallirebysave.res")
+		#loadsketchsystem("res://surveyscans/ireby2save.res")
+	playerMe.global_transform.origin.y += 5
 
 
 func nextplayernetworkidinringskippingdoppelganger(deletedid):
@@ -389,23 +315,33 @@ func _player_disconnected(id):
 		
 func _connected_to_server():
 	print("_connected_to_server")
-	playerMe.connectiontoserveractive = true 
+	Tglobal.connectiontoserveractive = true 
 	
 	
 func _connection_failed():
 	print("_connection_failed")
 func _server_disconnected():
 	print("_server_disconnected")
-	playerMe.connectiontoserveractive = false
+	Tglobal.connectiontoserveractive = false
 	
-remotesync func ding(t, dd):
-	print("ding ding ding ", t)	
-	print("currentpath ", get_path())
-
 func _process(_delta):
 	if !perform_runtime_config:
 		ovr_performance.set_clock_levels(1, 1)
 		ovr_performance.set_extra_latency_mode(1)
 		perform_runtime_config = true
+		set_process(false)
+
+func clearallprocessactivityforreload():
+	$LabelGenerator.workingxcnode = null
+	$LabelGenerator.remainingxcnodes.clear()
+	$ImageSystem.fetcheddrawing = null
+	$ImageSystem.paperdrawinglist.clear()
+
+	if playerMe != null:
+		var pointersystem = playerMe.get_node("pointersystem")
+		pointersystem.clearactivetargetnode()  # clear all the objects before they are freed
+		#pointersystem.clearpointertargetmaterial()
+		pointersystem.clearpointertarget()
+		pointersystem.setactivetargetwall(null)
 
 

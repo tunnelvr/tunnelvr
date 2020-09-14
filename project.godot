@@ -23,11 +23,17 @@ _global_script_classes=[ {
 "class": "DRAWING_TYPE",
 "language": "GDScript",
 "path": "res://utilities/DRAWING_TYPE.gd"
+}, {
+"base": "Reference",
+"class": "Polynets",
+"language": "GDScript",
+"path": "res://utilities/Polynets.gd"
 } ]
 _global_script_class_icons={
 "BUTTONS": "",
 "CollisionLayer": "",
-"DRAWING_TYPE": ""
+"DRAWING_TYPE": "",
+"Polynets": ""
 }
 
 [application]
@@ -39,6 +45,10 @@ config/icon="res://icon.png"
 [audio]
 
 enable_audio_input=true
+
+[autoload]
+
+Tglobal="*res://Tglobal.gd"
 
 [debug]
 
@@ -111,9 +121,11 @@ newboulder={
 
 [rendering]
 
-quality/driver/driver_name="GLES2"
 vram_compression/import_etc=true
 quality/directional_shadow/size=8192
 quality/directional_shadow/size.mobile=512
 quality/shadow_atlas/size.mobile=512
+quality/shading/force_vertex_shading.mobile=false
+quality/shading/force_lambert_over_burley=true
+quality/shading/force_blinn_over_ggx=true
 environment/default_environment="res://environments/default_env.tres"

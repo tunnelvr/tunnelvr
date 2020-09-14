@@ -1,26 +1,16 @@
 extends ARVROrigin
 
-var xcdrawing_material = preload("res://guimaterials/XCdrawing.material")
-var xcdrawing_active_material = preload("res://guimaterials/XCdrawing_active.material")
-onready var xcdrawing_material_albedoa = xcdrawing_material.albedo_color.a
-onready var xcdrawing_active_material_albedoa = xcdrawing_active_material.albedo_color.a
 var doppelganger = null 
 
-var arvrinterface = null
-var connectiontoserveractive = false
 var networkID = 0
 var bouncetestnetworkID = 0
-var VRstatus = "unknown"
 
 func setheadtorchlight(torchon):
 	$HeadCam/HeadtorchLight.visible = torchon
 	get_node("/root/Spatial/WorldEnvironment").environment = preload("res://environments/underground_env.tres") if torchon else preload("res://environments/default_env.tres")
 	get_node("/root/Spatial/WorldEnvironment/DirectionalLight").visible = not torchon
-	# translucent walls reflect too much when torchlight is on
-	xcdrawing_material.albedo_color.a = 0.1 if torchon else xcdrawing_material_albedoa
-	xcdrawing_active_material.albedo_color.a = 0.1 if torchon else xcdrawing_active_material_albedoa
-	get_node("/root/Spatial/SketchSystem").get_node("SoundPos1").global_transform.origin = $HeadCam.global_transform.origin + $HeadCam.global_transform.basis.y * 0.2
-	get_node("/root/Spatial/SketchSystem").get_node("SoundPos1").play()
+	get_node("/root/Spatial/MaterialSystem").adjustmaterialtotorchlight(torchon)
+	get_node("/root/Spatial/SoundSystem").quicksound("ClickSound", $HeadCam.global_transform.origin + $HeadCam.global_transform.basis.y * 0.2)
 
 func setdoppelganger(doppelgangeron):
 	if doppelgangeron:
@@ -56,8 +46,8 @@ remotesync func playvoicerecording(wavrecording):
 	stream.data = wavrecording
 	stream.mix_rate = 44100
 	stream.stereo = true
-	$HandLeft/AudioStreamPlayer3D.stream = stream
-	$HandLeft/AudioStreamPlayer3D.play()
+	$HandRight/AudioStreamPlayer3D.stream = stream
+	$HandRight/AudioStreamPlayer3D.play()
 
 func playerpositiondict():
 	return { "playertransform":global_transform, 
@@ -69,6 +59,20 @@ func playerpositiondict():
 			 "laserspot":$HandRight/LaserOrient/LaserSpot.visible, 
 			 "timestamp":OS.get_ticks_usec() 
 			}
+
+func _process(delta):
+	if ovr_hand_tracking != null:
+		process_handtracking(delta)
+	if Tglobal.VRstatus == "none" and Input.is_action_pressed("lh_shift"):
+		var lhkeyvec = Vector2(0, 0)
+		if Input.is_action_pressed("lh_forward"):   lhkeyvec.y += 1
+		if Input.is_action_pressed("lh_backward"):  lhkeyvec.y += -1
+		if Input.is_action_pressed("lh_left"):      lhkeyvec.x += -1
+		if Input.is_action_pressed("lh_right"):     lhkeyvec.x += 1
+		var vtarget = -$HeadCam.global_transform.basis.z*20 + $HeadCam.global_transform.basis.x*lhkeyvec.x*15*delta + Vector3(0, lhkeyvec.y, 0)*15*delta
+		$HeadCam.look_at($HeadCam.global_transform.origin + vtarget, Vector3(0,1,0))
+		rotation_degrees.y += $HeadCam.rotation_degrees.y
+		$HeadCam.rotation_degrees.y = 0
 
 
 ###################
@@ -95,23 +99,37 @@ func _clear_bone_rest(skel):
 		skel.set_bone_rest(i, bone_rest);
 
 func initquesthandtrackingnow(lovr_hand_tracking):
+	Tglobal.questhandtracking = true
+	$HeadCam/HeadtorchLight.shadow_enabled = false
+
 	ovr_hand_tracking = lovr_hand_tracking
-	var lefthandmodel = load("res://addons/godot_ovrmobile/example_scenes/left_hand_model.glb").instance()
-	var righthandmodel = load("res://addons/godot_ovrmobile/example_scenes/right_hand_model.glb").instance()
-	$HandLeft.add_child(lefthandmodel)
-	$HandRight.add_child(righthandmodel)
+	#var lefthandmodel = load("res://addons/godot_ovrmobile/example_scenes/left_hand_model.glb").instance()
+	#var righthandmodel = load("res://addons/godot_ovrmobile/example_scenes/right_hand_model.glb").instance()
+	$HandLeft/csgtip/MovePointThimble.update_position = false
+	$HandLeft/csgtip/MovePointThimble.update_rotation = false
+	var leftmidfingremotetrans = get_node("HandLeft/left_hand_model/ArmatureLeft/Skeleton/BoneAttachment 8/l_middle_finger_tip_marker/MovePointThimble")
+	leftmidfingremotetrans.update_position = true
+	leftmidfingremotetrans.update_rotation = true
+
+	$HandRight/csgtip/MovePointThimble2.update_position = false
+	$HandRight/csgtip/MovePointThimble2.update_rotation = false
+	#var rightindexfingremotetrans = get_node("HandRight/right_hand_model/ArmatureRight/Skeleton/BoneAttachment_A/Spatial/MovePointThimble2")
+	#rightindexfingremotetrans.update_position = true
+	#rightindexfingremotetrans.update_rotation = true
+
 	$HandLeft/csghandleft.visible = false
 	$HandRight/csghandright.visible = false
+	$HandLeft/left_hand_model.visible = true
+	$HandRight/right_hand_model.visible = true
 	
 	_clear_bone_rest($HandLeft/left_hand_model/ArmatureLeft/Skeleton);
 	_clear_bone_rest($HandRight/right_hand_model/ArmatureRight/Skeleton);
 	_vrapi_bone_orientations.resize(24);
-
 	
 func _update_hand_model(hand: ARVRController, model : Spatial, skel: Skeleton):
-	var ls = ovr_hand_tracking.get_hand_scale(hand.controller_id);
+	var ls = ovr_hand_tracking.get_hand_scale(hand.controller_id)
 	if ls != null and (ls > 0.0):
-		model.scale = Vector3(ls, ls, ls);
+		model.scale = Vector3(ls, ls, ls)
 
 	var confidence = ovr_hand_tracking.get_hand_pose(hand.controller_id, _vrapi_bone_orientations);
 	if confidence != null and (confidence > 0.0):
@@ -120,19 +138,23 @@ func _update_hand_model(hand: ARVRController, model : Spatial, skel: Skeleton):
 			skel.set_bone_pose(_hand_bone_mappings[i], Transform(_vrapi_bone_orientations[i]));
 	else:
 		model.visible = false;
-
+	return model.visible
+	
 
 var t = 0.0;
-func _process(delta_t):
-	if ovr_hand_tracking != null:
-		_update_hand_model($HandLeft, $HandLeft/left_hand_model, $HandLeft/left_hand_model/ArmatureLeft/Skeleton)
-		_update_hand_model($HandRight, $HandRight/right_hand_model, $HandRight/right_hand_model/ArmatureRight/Skeleton)
-
-		t += delta_t;
+func process_handtracking(delta):
+	t += delta;
+	_update_hand_model($HandLeft, $HandLeft/left_hand_model, $HandLeft/left_hand_model/ArmatureLeft/Skeleton)
+	if _update_hand_model($HandRight, $HandRight/right_hand_model, $HandRight/right_hand_model/ArmatureRight/Skeleton):
+		var pointertrans = Transform(_vrapi_bone_orientations[5])
+		var rpointertrans = $HandRight/right_hand_model/ArmatureRight/Skeleton.global_transform
 		if (t > 1.0):
-			t = 0.0;
-			print("Left Pinches: %.3f %.3f %.3f %.3f; Right Pinches %.3f %.3f %.3f %.3f" %
-				 [$HandLeft.get_joystick_axis(0), $HandLeft.get_joystick_axis(1), $HandLeft.get_joystick_axis(2), $HandLeft.get_joystick_axis(3),
-				  $HandRight.get_joystick_axis(0), $HandRight.get_joystick_axis(1), $HandRight.get_joystick_axis(2), $HandRight.get_joystick_axis(3)]);
+			print(pointertrans)
+		#get_node("/root/Spatial/BodyObjects/MovePointThimble2").global_transform = pointertrans
+	if (t > 1.0):
+		t = 0.0;
+		print("Left Pinches: %.3f %.3f %.3f %.3f; Right Pinches %.3f %.3f %.3f %.3f" %
+			 [$HandLeft.get_joystick_axis(0)+1, $HandLeft.get_joystick_axis(1)+1, $HandLeft.get_joystick_axis(2)+1, $HandLeft.get_joystick_axis(3)+1,
+			  $HandRight.get_joystick_axis(0)+1, $HandRight.get_joystick_axis(1)+1, $HandRight.get_joystick_axis(2)+1, $HandRight.get_joystick_axis(3)+1]);
 
 

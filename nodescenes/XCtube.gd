@@ -13,6 +13,7 @@ var positioningtube = false
 var pickedpolyindex0 = -1
 var pickedpolyindex1 = -1
 
+var activesector = 0
 const linewidth = 0.02
 
 func _ready():
@@ -53,8 +54,13 @@ func checknodelinkedto(xcname, nodename):
 			return true
 	return false
 
-func exportxctrpcdata():
-	return [ get_name(), xcname0, xcname1, xcdrawinglink, xcsectormaterials ]
+func exportxctrpcdata():   # read by xctubefromdata()
+	return { "name":get_name(), 
+			 "xcname0":xcname0, 
+			 "xcname1":xcname1, 
+			 "xcdrawinglink":xcdrawinglink, 
+			 "xcsectormaterials":xcsectormaterials 
+		   }
 
 func shiftxcdrawingposition(sketchsystem):
 	if len(xcdrawinglink) == 0:
@@ -68,8 +74,8 @@ func shiftxcdrawingposition(sketchsystem):
 	var xcn0 = xcdrawingXC.get_node("XCnodes").get_node(xcdrawinglink[-1 if bsingledrag else -3])
 	if bsingledrag:
 		var xcn0rel = xcn0.global_transform.origin - xcdrawingXC.global_transform.origin
-		var pt0 = opn0.global_transform.origin - Vector3(xcn0rel.x, 0, xcn0rel.z)
-		xcdrawingXC.setxcpositionorigin(pt0)
+		var pt0 = opn0.global_transform.origin - xcn0rel
+		xcdrawingXC.setxcpositionorigin(Vector3(pt0.x, xcdrawingXC.global_transform.origin.y, pt0.z))
 
 	else:
 		var opn1 = xcdrawingFloor.get_node("XCnodes").get_node(xcdrawinglink[-2])
@@ -85,14 +91,14 @@ func shiftxcdrawingposition(sketchsystem):
 		if vdot != 0:
 			xcdrawingXC.scalexcnodepointspointsxy(vx2len/vxc2len*(sign(vdot)), 1)
 		var xco = opn0.global_transform.origin - xcn0.global_transform.origin + xcdrawingXC.global_transform.origin
-		xcdrawingXC.setxcpositionorigin(xco)
+		xcdrawingXC.setxcpositionorigin(Vector3(xco.x, xcdrawingXC.global_transform.origin.y, xco.z))
 		xcdrawingXC.updatexcpaths()
 		
-	sketchsystem.rpc("xcdrawingfromdata", xcdrawingXC.exportxcrpcdata())
+	sketchsystem.sharexcdrawingovernetwork(xcdrawingXC)
 	for xctube in xcdrawingXC.xctubesconn:
 		if sketchsystem.get_node("XCdrawings").get_node(xctube.xcname0).drawingtype == DRAWING_TYPE.DT_XCDRAWING:  # not other floor types pointing in
 			xctube.updatetubelinkpaths(sketchsystem)
-			sketchsystem.rpc("xctubefromdata", xctube.exportxctrpcdata())
+			sketchsystem.sharexctubeovernetwork(xctube)
 
 func shiftfloorfromdrawnstations(sketchsystem):
 	if len(xcdrawinglink) == 0:
@@ -116,7 +122,7 @@ func shiftfloorfromdrawnstations(sketchsystem):
 		var vxc = xcn1.global_transform.origin - xcn0.global_transform.origin
 		var vxcl = xcn1.transform.origin - xcn0.transform.origin
 		var vxang = Vector2(-vx.x, -vx.z).angle()
-		var vxcang = Vector2(-vxc.x, -vxc.z).angle()
+		#var vxcang = Vector2(-vxc.x, -vxc.z).angle()
 		var vxclang = Vector2(-vxcl.x, vxcl.y).angle()
 
 		var vxlen = vx.length()
@@ -149,8 +155,8 @@ func updatetubelinkpaths(sketchsystem):
 	for j in range(0, len(xcdrawinglink), 2):
 		#var p0 = xcdrawing0.nodepoints[xcdrawinglink[j]]
 		#var p1 = xcdrawing1.nodepoints[xcdrawinglink[j+1]]
-		var p0 = xcdrawing0nodes.get_node(xcdrawinglink[j]).global_transform.origin
-		var p1 = xcdrawing1nodes.get_node(xcdrawinglink[j+1]).global_transform.origin
+		var p0 = xcdrawing0nodes.get_node(xcdrawinglink[j]).global_transform.origin + Vector3(0,0.001,0)
+		var p1 = xcdrawing1nodes.get_node(xcdrawinglink[j+1]).global_transform.origin + Vector3(0,0.001,0)
 		var vec = p1 - p0
 		var veclen = max(0.01, vec.length())
 		var perp = Vector3(1, 0, 0)
@@ -194,8 +200,8 @@ func fa(a, b):
 
 func maketubepolyassociation(xcdrawing0, xcdrawing1):
 	assert ((xcdrawing0.get_name() == xcname0) and (xcdrawing1.get_name() == xcname1))
-	var polys0 = xcdrawing0.makexcdpolys(true)
-	var polys1 = xcdrawing1.makexcdpolys(true)
+	var polys0 = Polynets.makexcdpolys(xcdrawing0.nodepoints, xcdrawing0.onepathpairs, true)
+	var polys1 = Polynets.makexcdpolys(xcdrawing1.nodepoints, xcdrawing1.onepathpairs, true)
 	pickedpolyindex0 = pickpolysindex(polys0, xcdrawinglink.slice(0, len(xcdrawinglink), 2))
 	pickedpolyindex1 = pickpolysindex(polys1, xcdrawinglink.slice(1, len(xcdrawinglink), 2))
 	
@@ -208,7 +214,7 @@ func maketubepolyassociation(xcdrawing0, xcdrawing1):
 	var tubevecdot1 = xcdrawing1.global_transform.basis.z.dot(tubevec)
 	var polyinvert0 = (tubevecdot0 <= 0) == (pickedpolyindex0 != len(polys0) - 1)
 	var polyinvert1 = (tubevecdot1 <= 0) == (pickedpolyindex1 != len(polys1) - 1)
-	var tubenormdot = xcdrawing0.global_transform.basis.z.dot(xcdrawing1.global_transform.basis.z)
+	#var tubenormdot = xcdrawing0.global_transform.basis.z.dot(xcdrawing1.global_transform.basis.z)
 	#if not ((tubenormdot < 0) != (polyinvert0 != polyinvert1)):
 	#	print("invert problem?")
 	var poly0 = polys0[pickedpolyindex0].duplicate()
@@ -222,7 +228,11 @@ func maketubepolyassociation(xcdrawing0, xcdrawing1):
 	#if xcdrawing0.global_transform.basis.z.dot(xcdrawing1.global_transform.basis.z) < 0:
 	#	poly1.invert()
 	#	print("reversssing poly1", xcdrawing0.global_transform.basis.z, xcdrawing1.global_transform.basis.z, poly1)
-		
+
+	while len(xcsectormaterials) < len(xcdrawinglink)/2:
+		xcsectormaterials.append(get_node("/root/Spatial/MaterialSystem").tubematerialnamefromnumber(0 if ((len(xcsectormaterials)%2) == 0) else 1))
+	xcsectormaterials.resize(len(xcdrawinglink)/2)
+
 	# get all the connections in here between the polygons but in the right order
 	var ila = [ ]  # [ [ il0, il1 ] ]
 	var xcdrawinglinkneedsreorder = false
@@ -231,7 +241,7 @@ func maketubepolyassociation(xcdrawing0, xcdrawing1):
 		var il0 = poly0.find(xcdrawinglink[j])
 		var il1 = poly1.find(xcdrawinglink[j+1])
 		if il0 != -1 and il1 != -1:
-			ila.append([il0, il1])
+			ila.append([il0, il1, j])
 		else:
 			missingjvals.append(j)
 		if j != 0 and not fa(ila[-2], ila[-1]):
@@ -239,33 +249,34 @@ func maketubepolyassociation(xcdrawing0, xcdrawing1):
 	if xcdrawinglinkneedsreorder or (len(missingjvals) != 0 and (missingjvals.min() < len(xcdrawinglink) - 2*len(missingjvals))):
 		ila.sort_custom(self, "fa")
 		var newxcdrawinglink = [ ]
+		var newxcsectormaterials = [ ]
 		for i in range(len(ila)):
 			newxcdrawinglink.append(poly0[ila[i][0]])
 			newxcdrawinglink.append(poly1[ila[i][1]])
+			newxcsectormaterials.append(xcsectormaterials[ila[i][2]/2])
 		for j in missingjvals:
 			newxcdrawinglink.append(xcdrawinglink[j])
 			newxcdrawinglink.append(xcdrawinglink[j+1])
+			newxcsectormaterials.append(xcsectormaterials[j/2])
 		assert(len(xcdrawinglink) == len(newxcdrawinglink))
 		xcdrawinglink = newxcdrawinglink
-		
-	while len(xcsectormaterials) < len(ila):
-		xcsectormaterials.append(0 if ((len(xcsectormaterials)%2) == 0) else 1)
-	xcsectormaterials.resize(len(ila))
+		xcsectormaterials = newxcsectormaterials
 		
 	return [poly0, poly1, ila]
 
 func add_uvvertex(surfaceTool, xcnodes, poly, ila, i, floorsize, dfinv):
 	var pt = xcnodes.get_node(poly[(ila+i)%len(poly)]).global_transform.origin
-	var afloorpoint = dfinv.xform(pt)
-	var uvpt = Vector2(afloorpoint.x/floorsize.x + 0.5, afloorpoint.z/floorsize.y + 0.5)
-	surfaceTool.add_uv(uvpt)
+	if dfinv != null:
+		var afloorpoint = dfinv.xform(pt)
+		var uvpt = Vector2(afloorpoint.x/floorsize.x + 0.5, afloorpoint.z/floorsize.y + 0.5)
+		surfaceTool.add_uv(uvpt)
 	surfaceTool.add_vertex(pt)
 
 func maketubeshell(xcdrawings):
 	var sketchsystem = xcdrawings.get_parent()
-	var floordrawing = sketchsystem.getactivefloordrawing()
-	var floorsize = floordrawing.get_node("XCdrawingplane/CollisionShape/MeshInstance").mesh.size
-	var dfinv = floordrawing.get_node("XCdrawingplane/CollisionShape/MeshInstance").global_transform.affine_inverse()
+	var floordrawing = null # sketchsystem.getactivefloordrawing()
+	var floorsize = floordrawing.get_node("XCdrawingplane/CollisionShape/MeshInstance").mesh.size if floordrawing != null else null
+	var dfinv = floordrawing.get_node("XCdrawingplane/CollisionShape/MeshInstance").global_transform.affine_inverse() if floordrawing != null else null
 	
 	var xcdrawing0 = xcdrawings.get_node(xcname0)
 	var xcdrawing1 = xcdrawings.get_node(xcname1)
@@ -316,9 +327,9 @@ func maketubeshell(xcdrawings):
 		surfaceTool.generate_normals()
 		surfaceTool.commit(arraymesh)
 	return arraymesh
-	#return surfaceTool.commit()
 
-func slicetubetoxcdrawing(xcdrawing, xcdrawinglink0, xcdrawinglink1, lam):
+
+func slicetubetoxcdrawing(xcdrawing, xcdrawinglink0, xcdrawinglink1):
 	var xcdrawings = get_node("../../XCdrawings")
 	var xcdrawing0 = xcdrawings.get_node(xcname0)
 	var xcdrawing1 = xcdrawings.get_node(xcname1)
@@ -351,14 +362,14 @@ func slicetubetoxcdrawing(xcdrawing, xcdrawinglink0, xcdrawinglink1, lam):
 			if i0 == 0 and i1 == 0:
 				xcdrawinglink0.append(poly0[ila0])
 				xcdrawinglink0.append(xcn.get_name())
-				xcdrawinglink1.append(poly1[ila1])
 				xcdrawinglink1.append(xcn.get_name())
+				xcdrawinglink1.append(poly1[ila1])
 			
-			xcn.global_transform.origin = lerp(pt0, pt1, lam)
-			xcdrawing.copyxcntootnode(xcn)
-			xcdrawing.nodepoints[xcn.get_name()].z = 0  # flatten into the plane
-			xcdrawing.copyotnodetoxcn(xcn)
-			
+			# 0 = xcdrawing.global_transform.basis.z.dot(pt0 + lam*(pt1 - pt0) - xcdrawing.global_transform.origin)
+			# lam*xcdrawing.global_transform.basis.z.dot(pt0 - pt1) = xcdrawing.global_transform.basis.z.dot(pt0 - xcdrawing.global_transform.origin)
+			var lam = xcdrawing.global_transform.basis.z.dot(pt0 - xcdrawing.global_transform.origin)/xcdrawing.global_transform.basis.z.dot(pt0 - pt1)
+			xcdrawing.setxcnpoint(xcn, lerp(pt0, pt1, lam), true)
+				
 			assert (i0 <= ila0N and i1 <= ila1N)
 			if i0 < ila0N and (acc - ila0N < 0 or i1 == ila1N):
 				acc += ila1N
@@ -375,6 +386,11 @@ func slicetubetoxcdrawing(xcdrawing, xcdrawinglink0, xcdrawinglink1, lam):
 
 	xcdrawing.onepathpairs.append(xcnlast.get_name())
 	xcdrawing.onepathpairs.append(xcnfirst.get_name())
+	
+	# undo mysterious advancing of the sector links
+	#xcdrawinglink1.push_back(xcdrawinglink1.pop_front())
+	#xcdrawinglink1.push_back(xcdrawinglink1.pop_front())
+	
 	return true
 
 func updatetubeshell(xcdrawings, makevisible):
@@ -384,7 +400,7 @@ func updatetubeshell(xcdrawings, makevisible):
 			$XCtubeshell/MeshInstance.mesh = tubeshellmesh
 			assert ($XCtubeshell/MeshInstance.get_surface_material_count() == len(xcsectormaterials))
 			for i in range($XCtubeshell/MeshInstance.get_surface_material_count()):
-				$XCtubeshell/MeshInstance.set_surface_material(i, get_node("/root/Spatial/MaterialSystem").tubematerialfromnumber(xcsectormaterials[i], false))
+				$XCtubeshell/MeshInstance.set_surface_material(i, get_node("/root/Spatial/MaterialSystem").gettubematerial(xcsectormaterials[i], false))
 			$XCtubeshell/CollisionShape.shape.set_faces(tubeshellmesh.get_faces())
 			$XCtubeshell.visible = true
 			$XCtubeshell/CollisionShape.disabled = false

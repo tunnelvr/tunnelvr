@@ -19,18 +19,8 @@ func _on_request_completed(result, response_code, headers, body):
 	#var r = JSON.parse(body.get_string_from_utf8())
 	print(body)
 	
-func gg(x):
-	print(x)
-	assert (x)
-	print("ggg")	
-	return 55
 
 func _run():
 	var x = IP.get_local_addresses()
-	var a = [8,65,3,5,6]
-	a.resize(3)
-	var h = load("nodescenes/XCtubeshell.tscn").instance()
-	print(h)
-	
-	
-
+	for i in range(1, 4):
+		print("i", i)

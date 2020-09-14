@@ -1,17 +1,17 @@
 extends StaticBody
 
-onready var ARVRworld_scale = ARVRServer.world_scale
 
 var viewport_point := Vector2(0, 0)
 var viewport_mousedown := false
 onready var sketchsystem = get_node("/root/Spatial/SketchSystem")
+var savegamefile = "user://savegame.res"
 
 func _on_buttonload_pressed():
-	sketchsystem.loadsketchsystem()
+	sketchsystem.loadsketchsystem(savegamefile)
 	$Viewport/GUI/Panel/Label.text = "Sketch Loaded"
 	
 func _on_buttonsave_pressed():
-	sketchsystem.savesketchsystem()
+	sketchsystem.savesketchsystem(savegamefile)
 	$Viewport/GUI/Panel/Label.text = "Sketch Saved"
 
 func _on_buttonfetchimages_pressed():
@@ -23,20 +23,41 @@ func _on_buttonplanview_toggled(button_pressed):
 	$Viewport/GUI/Panel/Label.text = "Planview on" if button_pressed else "Planview off"
 	
 func _on_buttonheadtorch_toggled(button_pressed):
-	get_parent().setheadtorchlight(button_pressed)
+	get_node("/root/Spatial").playerMe.setheadtorchlight(button_pressed)
 	$Viewport/GUI/Panel/Label.text = "Headtorch on" if button_pressed else "Headtorch off"
 
 func _on_buttondoppelganger_toggled(button_pressed):
-	get_parent().setdoppelganger(button_pressed)
+	get_node("/root/Spatial").playerMe.setdoppelganger(button_pressed)
 	$Viewport/GUI/Panel/Label.text = "Doppelganger on" if button_pressed else "Doppelganger off"
 
-func _on_buttonupdateshell_toggled(button_pressed):
-	sketchsystem.rpc("updateworkingshell", button_pressed)
-	$Viewport/GUI/Panel/Label.text = "shell made" if button_pressed else "shell hidden"
+func _on_centrelinevisibility_selected(index):
+	var cvsel = $Viewport/GUI/Panel/CentrelineVisibility.get_item_text(index)
+	if cvsel == "show":
+		Tglobal.centrelinevisible = true
+		Tglobal.centrelineonly = false
+	if cvsel == "only":
+		Tglobal.centrelinevisible = true
+		Tglobal.centrelineonly = true
+	if cvsel == "hide":
+		Tglobal.centrelinevisible = false
+		Tglobal.centrelineonly = false
+	sketchsystem.updatecentrelinevisibility()
+	$Viewport/GUI/Panel/Label.text = "Centrelines: "+cvsel
 
-func _on_buttononlycentrelines_toggled(button_pressed):
-	sketchsystem.rpc("changecentrelineonlymode", button_pressed)
-	$Viewport/GUI/Panel/Label.text = "centrelines only" if button_pressed else "normal view"
+func _on_xcdrawingvisibility_selected(index):
+	var cvsel = $Viewport/GUI/Panel/XCdrawingVisibility.get_item_text(index)
+	if cvsel == "show":
+		Tglobal.tubedxcsvisible = true
+		Tglobal.tubeshellsvisible = true
+	if cvsel == "only":
+		Tglobal.tubedxcsvisible = true
+		Tglobal.tubeshellsvisible = false
+	if cvsel == "hide" or cvsel == "hide2":
+		Tglobal.tubedxcsvisible = false
+		Tglobal.tubeshellsvisible = true
+	sketchsystem.changetubedxcsvizmode()
+	sketchsystem.updateworkingshell()
+	$Viewport/GUI/Panel/Label.text = "XCdrawings: "+cvsel
 
 func _on_buttonswapcontrollers_pressed():
 	var cidl = get_node("/root/Spatial").playerMe.get_node("HandLeft").controller_id
@@ -52,20 +73,23 @@ func _ready():
 	$Viewport/GUI/Panel/ButtonFetchImages.connect("pressed", self, "_on_buttonfetchimages_pressed")
 	$Viewport/GUI/Panel/ButtonHeadtorch.connect("toggled", self, "_on_buttonheadtorch_toggled")
 	$Viewport/GUI/Panel/ButtonDoppelganger.connect("toggled", self, "_on_buttondoppelganger_toggled")
-	$Viewport/GUI/Panel/ButtonUpdateShell.connect("toggled", self, "_on_buttonupdateshell_toggled")
 	$Viewport/GUI/Panel/ButtonSwapControllers.connect("pressed", self, "_on_buttonswapcontrollers_pressed")
-	$Viewport/GUI/Panel/ButtonOnlyCentrelines.connect("toggled", self, "_on_buttononlycentrelines_toggled")
+
+	$Viewport/GUI/Panel/CentrelineVisibility.connect("item_selected", self, "_on_centrelinevisibility_selected")
+	$Viewport/GUI/Panel/XCdrawingVisibility.connect("item_selected", self, "_on_xcdrawingvisibility_selected")
+
+
 	
 func clickbuttonheadtorch():
 	$Viewport/GUI/Panel/ButtonHeadtorch.pressed = not $Viewport/GUI/Panel/ButtonHeadtorch.pressed
 	_on_buttonheadtorch_toggled($Viewport/GUI/Panel/ButtonHeadtorch.pressed)
 
-func togglevisibility(controller_global_transform):
-	if not visible:
+func toggleguipanelvisibility(controller_global_transform):
+	if not visible and controller_global_transform != null:
 		var paneltrans = global_transform
 		var controllertrans = controller_global_transform
-		paneltrans.origin = controllertrans.origin - 0.8*ARVRworld_scale*(controllertrans.basis.z)
-		var lookatpos = controllertrans.origin - 1.6*ARVRworld_scale*(controllertrans.basis.z)
+		paneltrans.origin = controllertrans.origin - 0.8*ARVRServer.world_scale*(controllertrans.basis.z)
+		var lookatpos = controllertrans.origin - 1.6*ARVRServer.world_scale*(controllertrans.basis.z)
 		paneltrans = paneltrans.looking_at(lookatpos, Vector3(0, 1, 0))
 		global_transform = paneltrans
 		$Viewport/GUI/Panel/Label.text = "Control panel"
@@ -99,7 +123,7 @@ func guipanelsendmousemotion(collision_point, controller_global_transform, contr
 	
 	# Figure out whether or not we should trigger a click.
 	var new_viewport_mousedown := false
-	var distance = controller_global_transform.origin.distance_to(collision_point) / ARVRworld_scale
+	var distance = controller_global_transform.origin.distance_to(collision_point)/ARVRServer.world_scale
 	if distance < 0.1:
 		new_viewport_mousedown = true # Allow poking the GUI with finger
 	else:
@@ -126,14 +150,13 @@ func guipanelreleasemouse():
 func _input(event):
 	if event is InputEventKey and event.pressed:
 		if event.scancode == KEY_L:
-			sketchsystem.loadsketchsystem()
+			sketchsystem.loadsketchsystem(savegamefile)
 		#elif event.scancode == KEY_S:
 		#	sketchsystem.savesketchsystem()
-		elif event.scancode == KEY_T:
-			$Viewport/GUI/Panel/ButtonUpdateShell.pressed = not $Viewport/GUI/Panel/ButtonUpdateShell.pressed
-			_on_buttonupdateshell_toggled($Viewport/GUI/Panel/ButtonUpdateShell.pressed)
 		elif event.scancode == KEY_D:
 			$Viewport/GUI/Panel/ButtonDoppelganger.pressed = not $Viewport/GUI/Panel/ButtonDoppelganger.pressed
 			_on_buttondoppelganger_toggled($Viewport/GUI/Panel/ButtonDoppelganger.pressed)	
+		elif event.scancode == KEY_O:
+			_on_buttonswapcontrollers_pressed()
 
 
