@@ -111,12 +111,6 @@ func initquesthandtrackingnow(lovr_hand_tracking):
 	leftmidfingremotetrans.update_position = true
 	leftmidfingremotetrans.update_rotation = true
 
-	$HandRight/csgtip/MovePointThimble2.update_position = false
-	$HandRight/csgtip/MovePointThimble2.update_rotation = false
-	#var rightindexfingremotetrans = get_node("HandRight/right_hand_model/ArmatureRight/Skeleton/BoneAttachment_A/Spatial/MovePointThimble2")
-	#rightindexfingremotetrans.update_position = true
-	#rightindexfingremotetrans.update_rotation = true
-
 	$HandLeft/csghandleft.visible = false
 	$HandRight/csghandright.visible = false
 	$HandLeft/left_hand_model.visible = true
@@ -143,18 +137,23 @@ func _update_hand_model(hand: ARVRController, model : Spatial, skel: Skeleton):
 
 var t = 0.0;
 func process_handtracking(delta):
-	t += delta;
 	_update_hand_model($HandLeft, $HandLeft/left_hand_model, $HandLeft/left_hand_model/ArmatureLeft/Skeleton)
-	if _update_hand_model($HandRight, $HandRight/right_hand_model, $HandRight/right_hand_model/ArmatureRight/Skeleton):
-		var pointertrans = Transform(_vrapi_bone_orientations[5])
-		var rpointertrans = $HandRight/right_hand_model/ArmatureRight/Skeleton.global_transform
-		if (t > 1.0):
-			print(pointertrans)
+	_update_hand_model($HandRight, $HandRight/right_hand_model, $HandRight/right_hand_model/ArmatureRight/Skeleton)
+	if ovr_hand_tracking.is_pointer_pose_valid($HandRight.controller_id):
+		$HandRight/LaserOrient.visible = true
+		var pointerpose = ovr_hand_tracking.get_pointer_pose($HandRight.controller_id)
+		$HandRight/LaserOrient.set_as_toplevel(true)
+		$HandRight/LaserOrient.global_transform = global_transform * pointerpose
+	else:
+		$HandRight/LaserOrient.visible = false
+
 		#get_node("/root/Spatial/BodyObjects/MovePointThimble2").global_transform = pointertrans
+	t += delta;
 	if (t > 1.0):
 		t = 0.0;
-		print("Left Pinches: %.3f %.3f %.3f %.3f; Right Pinches %.3f %.3f %.3f %.3f" %
-			 [$HandLeft.get_joystick_axis(0)+1, $HandLeft.get_joystick_axis(1)+1, $HandLeft.get_joystick_axis(2)+1, $HandLeft.get_joystick_axis(3)+1,
-			  $HandRight.get_joystick_axis(0)+1, $HandRight.get_joystick_axis(1)+1, $HandRight.get_joystick_axis(2)+1, $HandRight.get_joystick_axis(3)+1]);
+		#print("ppose ", ovr_hand_tracking.is_pointer_pose_valid($HandLeft.controller_id), " ", ovr_hand_tracking.is_pointer_pose_valid($HandRight.controller_id))
+		#print("Left Pinches: %.3f %.3f %.3f %.3f; Right Pinches %.3f %.3f %.3f %.3f" %
+		#	 [$HandLeft.get_joystick_axis(0)+1, $HandLeft.get_joystick_axis(1)+1, $HandLeft.get_joystick_axis(2)+1, $HandLeft.get_joystick_axis(3)+1,
+		#	  $HandRight.get_joystick_axis(0)+1, $HandRight.get_joystick_axis(1)+1, $HandRight.get_joystick_axis(2)+1, $HandRight.get_joystick_axis(3)+1]);
 
 

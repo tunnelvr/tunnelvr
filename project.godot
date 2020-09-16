@@ -38,7 +38,7 @@ _global_script_class_icons={
 
 [application]
 
-config/name="tunnelvr"
+config/name="tunnelvr2"
 run/main_scene="res://Spatial.tscn"
 config/icon="res://icon.png"
 
@@ -58,7 +58,7 @@ gdscript/warnings/integer_division=false
 
 [gdnative]
 
-singletons=[ "res://addons/godot-openvr/godot_openvr.gdnlib", "res://addons/godot_ovrmobile/godot_ovrmobile.gdnlib" ]
+singletons=[ "res://addons/godot_ovrmobile/godot_ovrmobile.gdnlib" ]
 
 [input]
 
@@ -121,6 +121,7 @@ newboulder={
 
 [rendering]
 
+quality/driver/driver_name="GLES2"
 vram_compression/import_etc=true
 quality/directional_shadow/size=8192
 quality/directional_shadow/size.mobile=512

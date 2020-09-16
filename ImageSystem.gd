@@ -1,6 +1,8 @@
 extends Node
 
-	
+const defaultfloordrawing = "http://cave-registry.org.uk/svn/NorthernEngland/ThreeCountiesArea/rawscans/Ireby/DukeStResurvey-drawnup-p3.jpg"
+const defaultfloordrawingres = "res://surveyscans/DukeStResurvey-drawnup-p3.jpg"
+
 var imgdir = "user://northernimages/"
 var urldir = "http://cave-registry.org.uk/svn/NorthernEngland/ThreeCountiesArea/rawscans/Ireby/"
 var imglistD = [ "BoltonExtensionsResurvey-DrawnUpSketch-1.jpg", 
@@ -62,6 +64,7 @@ func _process(delta):
 		imagefetchingcountdowntimer -= delta
 	elif fetcheddrawing != null:
 		var img = Image.new()
+		print("FFF", [fetcheddrawing, fetcheddrawingfile])
 		img.load(fetcheddrawingfile)
 		var papertexture = ImageTexture.new()
 		papertexture.create_from_image(img)
@@ -76,6 +79,10 @@ func _process(delta):
 	elif len(paperdrawinglist) > 0:
 		var paperdrawing = paperdrawinglist.pop_front()
 		fetcheddrawingfile = imgdir+getshortimagename(paperdrawing.xcresource, true)
+		print([paperdrawing.xcresource, defaultfloordrawing])
+		print([1, fetcheddrawingfile])
+		#if paperdrawing.xcresource == defaultfloordrawing:
+		#	fetcheddrawingfile = defaultfloordrawingres
 		if not File.new().file_exists(fetcheddrawingfile):
 			if not Directory.new().dir_exists(imgdir):
 				Directory.new().make_dir(imgdir)

@@ -10,7 +10,6 @@ onready var headcam = playerMe.get_node('HeadCam')
 onready var handleft = playerMe.get_node("HandLeft")
 onready var handright = playerMe.get_node("HandRight")
 onready var guipanel3d = get_node("/root/Spatial/GuiSystem/GUIPanel3D")
-onready var movepointthimble2 = get_node("/root/Spatial/BodyObjects/MovePointThimble2")
 
 onready var LaserOrient = handright.get_node("LaserOrient") 
 onready var LaserSelectLine = handright.get_node("LaserSelectLine") 
@@ -201,7 +200,7 @@ func setpointertarget(laserroot):
 			
 	pointertargetpoint = newpointertargetpoint
 	if is_instance_valid(pointertarget) and pointertarget == guipanel3d:
-		guipanel3d.guipanelsendmousemotion(pointertargetpoint, movepointthimble2.global_transform, handright.is_button_pressed(BUTTONS.VR_TRIGGER) or Input.is_mouse_button_pressed(BUTTON_LEFT))
+		guipanel3d.guipanelsendmousemotion(pointertargetpoint, handright.global_transform, (handright.is_button_pressed(BUTTONS.HT_PINCH_INDEX_FINGER) if Tglobal.questhandtracking else handright.is_button_pressed(BUTTONS.VR_TRIGGER)) or Input.is_mouse_button_pressed(BUTTON_LEFT))
 
 	if pointertargetpoint != null:
 		laserroot.get_node("LaserSpot").global_transform.origin = pointertargetpoint
@@ -219,18 +218,26 @@ func setpointertarget(laserroot):
 		
 func _on_button_pressed(p_button):
 	var gripbuttonheld = handright.is_button_pressed(BUTTONS.VR_GRIP)
-	print("pppp ", pointertargetpoint, " ", [activetargetnode, pointertargettype])
+	print("pppp ", pointertargetpoint, " ", [activetargetnode, pointertargettype, " pbutton", p_button])
 	if Tglobal.questhandtracking:
-		if p_button == BUTTONS.HT_PINCH_RING_FINGER:
+		gripbuttonheld = handright.is_button_pressed(BUTTONS.HT_PINCH_MIDDLE_FINGER)
+		if p_button == BUTTONS.HT_PINCH_INDEX_FINGER:
+			buttonpressed_vrtrigger(gripbuttonheld)
+		elif p_button == BUTTONS.HT_PINCH_MIDDLE_FINGER:
+			buttonpressed_vrgrip()
+		elif p_button == BUTTONS.HT_PINCH_RING_FINGER:
 			guipanel3d.clickbuttonheadtorch()
-	elif p_button == BUTTONS.VR_BUTTON_BY:
-		buttonpressed_vrby(gripbuttonheld)
-	elif p_button == BUTTONS.VR_GRIP:
-		buttonpressed_vrgrip()
-	elif p_button == BUTTONS.VR_TRIGGER:
-		buttonpressed_vrtrigger(gripbuttonheld)
-	elif p_button == BUTTONS.VR_PAD:
-		buttonpressed_vrpad(gripbuttonheld, Vector2(handright.get_joystick_axis(0), handright.get_joystick_axis(1)))
+		elif p_button == BUTTONS.HT_PINCH_PINKY:
+			buttonpressed_vrby(gripbuttonheld)
+	else:
+		if p_button == BUTTONS.VR_BUTTON_BY:
+			buttonpressed_vrby(gripbuttonheld)
+		elif p_button == BUTTONS.VR_GRIP:
+			buttonpressed_vrgrip()
+		elif p_button == BUTTONS.VR_TRIGGER:
+			buttonpressed_vrtrigger(gripbuttonheld)
+		elif p_button == BUTTONS.VR_PAD:
+			buttonpressed_vrpad(gripbuttonheld, Vector2(handright.get_joystick_axis(0), handright.get_joystick_axis(1)))
 	
 func buttonpressed_vrby(gripbuttonheld):
 	var cameracontrollervec = handright.global_transform.origin - headcam.global_transform.origin
@@ -417,10 +424,16 @@ func buttonpressed_vrpad(gripbuttonheld, joypos):
 			pointerplanviewtarget.cameraresetcentre(headcam)
 		
 func _on_button_release(p_button):
-	if p_button == BUTTONS.VR_GRIP:
-		buttonreleased_vrgrip()
-	elif p_button == BUTTONS.VR_TRIGGER:
-		buttonreleased_vrtrigger()
+	if Tglobal.questhandtracking:
+		if p_button == BUTTONS.HT_PINCH_MIDDLE_FINGER:
+			buttonreleased_vrgrip()
+		elif p_button == BUTTONS.HT_PINCH_INDEX_FINGER:
+			buttonreleased_vrtrigger()
+	else:
+		if p_button == BUTTONS.VR_GRIP:
+			buttonreleased_vrgrip()
+		elif p_button == BUTTONS.VR_TRIGGER:
+			buttonreleased_vrtrigger()
 
 func buttonreleased_vrgrip():
 	handright.get_node("csghandright").setpartcolor(4, "#FFFFFF")
@@ -588,7 +601,7 @@ func _physics_process(_delta):
 		handright.look_at(handright.global_transform.origin + 1.0*mvec + 0.0*headcam.global_transform.basis.z, Vector3(0,1,0))
 		handright.global_transform.origin.y -= 0.3
 		
-	if Tglobal.VRstatus != "quest":
+	if LaserOrient.visible: # Tglobal.VRstatus != "quest":
 		var firstlasertarget = LaserOrient.get_node("RayCast").get_collider() if LaserOrient.get_node("RayCast").is_colliding() and not LaserOrient.get_node("RayCast").get_collider().is_queued_for_deletion() else null
 		pointerplanviewtarget = planviewsystem if firstlasertarget != null and firstlasertarget.get_name() == "PlanView" and planviewsystem.checkplanviewinfront(handright) else null
 		if pointerplanviewtarget != null:
@@ -604,7 +617,7 @@ func _physics_process(_delta):
 		else:
 			planviewsystem.get_node("RealPlanCamera/LaserScope").visible = false
 			activelaserroot = LaserOrient
-		if activetargetwall != null and pointertargetwall == activetargetwall and len(activetargetwall.nodepoints) == 0 and handright.get_is_active() and handright.is_button_pressed(BUTTONS.VR_GRIP):
+		if activetargetwall != null and not Tglobal.questhandtracking and pointertargetwall == activetargetwall and len(activetargetwall.nodepoints) == 0 and handright.get_is_active() and handright.is_button_pressed(BUTTONS.VR_GRIP):
 			var joypos = Vector2(handright.get_joystick_axis(0), handright.get_joystick_axis(1))
 			if abs(joypos.x) > 0.3:
 				activetargetwall.rotation_degrees.y += joypos.x*30*_delta
