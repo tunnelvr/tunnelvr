@@ -49,15 +49,12 @@ func clearpointertargetmaterial():
 	if pointertargettype == "GripMenuItem":
 		pointertarget.get_node("MeshInstance").get_surface_material(0).albedo_color = Color("#E8D619")
 
-	handright.get_node("csghandright").setpartcolor(2, "#FFFFFF")
 			
 func setpointertargetmaterial():
 	if pointertargettype == "XCnode":
 		pointertarget.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("selected_highlight" if pointertarget == activetargetnode else "highlight"))
-		handright.get_node("csghandright").setpartcolor(2, "#FFFF60")
 	if (pointertargettype == "XCdrawing" or pointertargettype == "XCnode") and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		pointertargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").set_surface_material(0, materialsystem.xcdrawingmaterial("highlight", pointertargetwall.get_node("XCdrawingplane").get_scale()))
-		handright.get_node("csghandright").setpartcolor(2, "#FFFF60")
 	if pointertargettype == "GripMenuItem":
 		pointertarget.get_node("MeshInstance").get_surface_material(0).albedo_color = Color("#FFCCCC")
 
@@ -255,7 +252,6 @@ func buttonpressed_vrby(gripbuttonheld):
 
 func buttonpressed_vrgrip():
 	gripbuttonpressused = false
-	handright.get_node("csghandright").setpartcolor(4, "#00CC00")
 	gripmenu.gripmenuon(handright.get_node("LaserOrient").global_transform, pointertargetwall, pointertargettype, activetargettube)
 	
 func buttonpressed_vrtrigger(gripbuttonheld):
@@ -438,7 +434,6 @@ func _on_button_release(p_button):
 			buttonreleased_vrtrigger()
 
 func buttonreleased_vrgrip():
-	handright.get_node("csghandright").setpartcolor(4, "#FFFFFF")
 	if Tglobal.soundsystem.nowrecording:
 		Tglobal.soundsystem.stopmyvoicerecording()
 	
@@ -684,9 +679,3 @@ func _input(event):
 	elif event is InputEventKey and event.pressed and event.scancode == KEY_M:
 		buttonpressed_vrby(false)	
 	
-
-func _on_HeelHotspot_body_entered(body):
-	print("_on_HeelHotspot_body_entered ", body)
-
-func _on_HeelHotspot_body_exited(body):
-	print("_on_HeelHotspot_body_exited ", body)

@@ -118,7 +118,6 @@ func _on_button_pressed(p_button):
 		newgreenblobposition = MovePointThimble.global_transform.origin
 
 	if p_button == BUTTONS.VR_GRIP:
-		HandLeft.get_node("csghandleft").setpartcolor(4, "#00CC00")
 		playerdirectedflight = true
 
 		
@@ -127,14 +126,8 @@ func _on_button_release(p_button):
 		pass
 		
 	if p_button == BUTTONS.VR_GRIP:
-		HandLeft.get_node("csghandleft").setpartcolor(4, "#FFFFFF")
 		playerdirectedflight = false
 
-func Dhanglelaserorient():
-	var heelhotspot = tiptouchray.is_colliding() and tiptouchray.get_collider().get_name() == "HeelHotspot"
-	if heelhotspot != HandRight.get_node("LaserOrient/MeshDial").visible:
-		HandRight.get_node("LaserOrient/MeshDial").visible = heelhotspot
-		HandLeft.get_node("csghandleft").setpartcolor(2, Color("222277") if heelhotspot else Color("#FFFFFF"))
 
 	#laserangleadjustmode = (p_button == BUTTONS.VR_GRIP) and tiptouchray.is_colliding() and tiptouchray.get_collider() == handright.get_node("HeelHotspot")
 	if laserangleadjustmode:
@@ -145,19 +138,6 @@ var laserangleadjustmode = false
 var laserangleoriginal = 0
 var laserhandanglevector = Vector2(0,0)
 var prevlaserangleoffset = 0
-
-func Dlaserangleadjustmode(delta):
-	if HandLeft.is_button_pressed(BUTTONS.VR_GRIP):
-		var laserangleoffset = 0
-		if tiptouchray.is_colliding() and tiptouchray.get_collider() == HandRight.get_node("HeelHotspot"):
-			var laserhandanglevectornew = Vector2(HandLeft.global_transform.basis.x.dot(HandRight.global_transform.basis.y), HandLeft.global_transform.basis.y.dot(HandRight.global_transform.basis.y))
-			laserangleoffset = laserhandanglevector.angle_to(laserhandanglevectornew)
-		HandRight.rumble = min(1.0, abs(prevlaserangleoffset - laserangleoffset)*delta*290)
-		if HandRight.rumble < 0.1:
-			HandRight.rumble = 0
-		else:
-			prevlaserangleoffset = laserangleoffset
-		HandRight.get_node("LaserOrient").rotation.x = laserangleoriginal + laserangleoffset
 
 
 func DMakeNewBoulder(event):

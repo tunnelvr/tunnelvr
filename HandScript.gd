@@ -183,6 +183,7 @@ func initnormalvrtracking(lhandcontroller):
 		handmodel.rotation_degrees.z = 180
 	else:
 		handmodel.rotation_degrees.y = -90
+	handmodel.translation.z += 0.1
 
 func _process(delta):
 	if ovr_hand_tracking == null:
