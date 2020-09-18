@@ -243,7 +243,9 @@ func _ready():
 			$WorldEnvironment/DirectionalLight.shadow_enabled = false
 			$BodyObjects/PlayerDirections.initquesthandcontrollersignalconnections()
 		else:
+			playerMe.initnormalvrtrackingnow()
 			$BodyObjects/PlayerDirections.initcontrollersignalconnections()
+			
 	else:
 		print("*** VR not working")
 		

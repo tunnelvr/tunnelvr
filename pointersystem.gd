@@ -216,6 +216,8 @@ func setpointertarget(laserroot):
 		else:
 			LaserSelectLine.visible = false
 		
+		
+
 func _on_button_pressed(p_button):
 	var gripbuttonheld = handright.is_button_pressed(BUTTONS.VR_GRIP)
 	print("pppp ", pointertargetpoint, " ", [activetargetnode, pointertargettype, " pbutton", p_button])

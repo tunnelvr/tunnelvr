@@ -13,7 +13,7 @@ func gettubematerial(name, highlighted):
 func advancetubematerial(name, dir):
 	var mm = $tubematerials.get_node(name) if $tubematerials.has_node(name) else $tubematerials.get_child(0)
 	var n = mm.get_index()
-	var np = (n + dir)%$tubematerials.get_child_count()
+	var np = (n + dir + $tubematerials.get_child_count())%$tubematerials.get_child_count()
 	return $tubematerials.get_child(np).get_name()
 
 func tubematerialtransparent(highlighted):

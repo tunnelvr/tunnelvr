@@ -30,6 +30,8 @@ func _ready():
 	$HandRight/csghandright.setpartcolor(2, Color("#FFFFFF"))
 	$HandLeft/csghandleft.setpartcolor(2, Color("#FFFFFF"))
 
+
+
 func _physics_process(_delta):
 	pass
 
@@ -62,7 +64,11 @@ func playerpositiondict():
 
 func _process(delta):
 	if ovr_hand_tracking != null:
-		process_handtracking(delta)
+		#process_handtracking(delta)
+		$HandLeftH.process_ovrhandtracking(delta)
+		$HandRightH.process_ovrhandtracking(delta)
+
+
 	if Tglobal.VRstatus == "none" and Input.is_action_pressed("lh_shift"):
 		var lhkeyvec = Vector2(0, 0)
 		if Input.is_action_pressed("lh_forward"):   lhkeyvec.y += 1
@@ -98,15 +104,27 @@ func _clear_bone_rest(skel):
 		bone_rest.basis = Basis();
 		skel.set_bone_rest(i, bone_rest);
 
+func initnormalvrtrackingnow():
+	$HandLeftH.initnormalvrtracking($HandLeft)
+	$HandRightH.initnormalvrtracking($HandRight)
+
 func initquesthandtrackingnow(lovr_hand_tracking):
 	Tglobal.questhandtracking = true
 	$HeadCam/HeadtorchLight.shadow_enabled = false
 
 	ovr_hand_tracking = lovr_hand_tracking
+	$HandLeftH.initovrhandtracking(ovr_hand_tracking, $HandLeft)
+	$HandRightH.initovrhandtracking(ovr_hand_tracking, $HandRight)
+	
+	
 	#var lefthandmodel = load("res://addons/godot_ovrmobile/example_scenes/left_hand_model.glb").instance()
 	#var righthandmodel = load("res://addons/godot_ovrmobile/example_scenes/right_hand_model.glb").instance()
 	$HandLeft/csgtip/MovePointThimble.update_position = false
 	$HandLeft/csgtip/MovePointThimble.update_rotation = false
+	$HandLeft.addremotetransform("middle_null", get_node("/root/Spatial/BodyObjects/MovePointThimble"))
+	return
+
+
 	var leftmidfingremotetrans = get_node("HandLeft/left_hand_model/ArmatureLeft/Skeleton/BoneAttachment 8/l_middle_finger_tip_marker/MovePointThimble")
 	leftmidfingremotetrans.update_position = true
 	leftmidfingremotetrans.update_rotation = true
@@ -119,6 +137,8 @@ func initquesthandtrackingnow(lovr_hand_tracking):
 	_clear_bone_rest($HandLeft/left_hand_model/ArmatureLeft/Skeleton);
 	_clear_bone_rest($HandRight/right_hand_model/ArmatureRight/Skeleton);
 	_vrapi_bone_orientations.resize(24);
+	
+
 	
 func _update_hand_model(hand: ARVRController, model : Spatial, skel: Skeleton):
 	var ls = ovr_hand_tracking.get_hand_scale(hand.controller_id)

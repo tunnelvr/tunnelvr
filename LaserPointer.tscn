@@ -1,0 +1,16 @@
+[gd_scene load_steps=3 format=2]
+
+[sub_resource type="CubeMesh" id=1]
+size = Vector3( 0.002, 0.002, 1 )
+
+[sub_resource type="SpatialMaterial" id=2]
+albedo_color = Color( 0.976471, 0.0117647, 0.0117647, 1 )
+
+[node name="LaserPointer" type="Spatial"]
+
+[node name="Length" type="Spatial" parent="."]
+
+[node name="MeshInstance" type="MeshInstance" parent="Length"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.5 )
+mesh = SubResource( 1 )
+material/0 = SubResource( 2 )
