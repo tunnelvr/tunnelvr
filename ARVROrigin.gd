@@ -5,6 +5,7 @@ var doppelganger = null
 var networkID = 0
 var bouncetestnetworkID = 0
 onready var LaserOrient = get_node("/root/Spatial/BodyObjects/LaserOrient")
+var ovr_hand_tracking = null
 
 func setheadtorchlight(torchon):
 	$HeadCam/HeadtorchLight.visible = torchon
@@ -16,9 +17,10 @@ func setheadtorchlight(torchon):
 func setdoppelganger(doppelgangeron):
 	if doppelgangeron:
 		if doppelganger == null:
-			doppelganger = preload("res://nodescenes/PlayerPuppet.tscn").instance()
+			doppelganger = load("res://nodescenes/PlayerPuppet.tscn").instance()
 			doppelganger.set_name("Doppelganger")
 			get_parent().add_child(doppelganger)
+			doppelganger.initplayerpuppet(ovr_hand_tracking != null)
 		doppelganger.visible = true
 		doppelganger.global_transform.origin = $HeadCam.global_transform.origin - 3*Vector3($HeadCam.global_transform.basis.z.x, 0, $HeadCam.global_transform.basis.z.z).normalized()
 		
@@ -57,14 +59,15 @@ remotesync func playvoicerecording(wavrecording):
 	$HandRight/AudioStreamPlayer3D.play()
 
 func playerpositiondict():
-	return { "playertransform":global_transform, 
+	var t0 = OS.get_ticks_msec()
+	return { "timestamp":t0, 
+			 "playertransform":global_transform, 
 			 "headcamtransform":$HeadCam.transform, 
-			 "handlefttransform":$HandLeft.transform if $HandLeft.visible else null, 
-			 "handrighttransform":$HandRight.transform if $HandRight.visible else null, 
-			 "laserrotation":LaserOrient.rotation.x, 
-			 "laserlength":LaserOrient.get_node("Length").scale.z, 
-			 "laserspot":LaserOrient.get_node("LaserSpot").visible, 
-			 "timestamp":OS.get_ticks_usec() 
+			 "handleft": $HandLeft.handpositiondict(t0), 
+			 "handright": $HandRight.handpositiondict(t0), 
+			 #"laserrotation":LaserOrient.rotation.x, 
+			 #"laserlength":LaserOrient.get_node("Length").scale.z, 
+			 #"laserspot":LaserOrient.get_node("LaserSpot").visible, 
 			}
 
 var pointerposechangeangle = Transform()
@@ -89,7 +92,6 @@ func _process(delta):
 		$HeadCam.rotation_degrees.y = 0
 
 
-var ovr_hand_tracking = null
 
 func initnormalvrtrackingnow():
 	$HandLeft.initnormalvrtracking($HandLeftController)

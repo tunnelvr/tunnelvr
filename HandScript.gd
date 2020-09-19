@@ -5,6 +5,7 @@ const handmodelfile2 = "res://addons/godot_ovrmobile/example_scenes/right_hand_m
 
 const hand_bone_mappings = [0, 23,  1, 2, 3, 4,  6, 7, 8,  10, 11, 12,  14, 15, 16, 18, 19, 20, 21];
 var ovr_hand_tracking = null
+var playerishandtracked = false
 var islefthand = false
 var handcontroller = null
 var controller_id = 0
@@ -13,7 +14,9 @@ var handskeleton = null
 var meshnode = null
 var handmaterial = null
 var joypos = Vector2(0, 0)
+
 var gripbuttonheld = false
+var triggerbuttonheld = false
 
 var handscale = 0.0
 var handconfidence = 0
@@ -34,7 +37,7 @@ const fadetimevalidity = 1/0.2
 var handtranslucentvalidity = 0.0
 var pointertranslucentvalidity = 0.0
 
-var handpositionstack = [ ]  # [ { "timestamp", "validity", "transform", "boneorientations" } ] 
+var handpositionstack = [ ]  # [ { "timestamp", "valid", "transform", "boneorientations" } ] 
 
 func _ready():
 	islefthand = (get_name() == "HandLeft")
@@ -77,7 +80,6 @@ func update_handpose(delta):
 	if handvalid:
 		for i in range(hand_bone_mappings.size()):
 			handskeleton.set_bone_pose(hand_bone_mappings[i], Transform(hand_boneorientations[i]))
-
 
 func update_fademode(delta, valid, translucentvalidity, model, material):
 	if valid:
@@ -124,7 +126,7 @@ func process_handpositionstack(delta):
 		if hp.has("valid"):
 			handvalid = hp["valid"]
 		if hp.has("transform"):
-			handmodel.transform = hp["transform"]
+			transform = hp["transform"]
 		if hp.has("boneorientations"):
 			for i in range(hand_bone_mappings.size()):
 				hand_boneorientations[i] = hp["boneorientations"][i]
@@ -135,11 +137,17 @@ func process_handpositionstack(delta):
 		if hp.has("valid") and hp1.has("valid"):
 			handvalid = hp["valid"] if lam < 0.5 else hp1["valid"]
 		if hp.has("transform") and hp1.has("transform"):
-			handmodel.transform = Transform(hp["transform"].basis.slerp(hp1["transform"].basis, lam), lerp(hp["transform"].origin, hp1["transform"].origin, lam))
+			transform = Transform(hp["transform"].basis.slerp(hp1["transform"].basis, lam), lerp(hp["transform"].origin, hp1["transform"].origin, lam))
 		if hp.has("boneorientations") and hp1.has("boneorientations"):
 			for i in range(hand_bone_mappings.size()):
 				hand_boneorientations[i] = hp["boneorientations"][i].slerp(hp1["boneorientations"][i], lam)
 	update_handpose(delta)
+
+func handpositiondict(t0):
+	if true or ovr_hand_tracking != null:
+		return { "timestamp":t0, "valid":handvalid, "transform":transform, "boneorientations":hand_boneorientations }
+	else:
+		return { "timestamp":t0, "valid":handvalid, "transform":transform, "gripbuttonheld":gripbuttonheld, "triggerbuttonheld":triggerbuttonheld }
 
 func handposeimmediate(boneorientations, dt):
 	handpositionstack.clear()
@@ -174,6 +182,16 @@ func initnormalvrtracking(lhandcontroller):
 		handmodel.rotation_degrees.y = -90
 	handmodel.translation.z += 0.1
 
+func initpuppetracking(lplayerishandtracked):
+	playerishandtracked = lplayerishandtracked
+	if not playerishandtracked:
+		handposeimmediate(handokay00, 600)
+		if islefthand:
+			handmodel.rotation_degrees.y = -90
+			handmodel.rotation_degrees.z = 180
+		else:
+			handmodel.rotation_degrees.y = -90
+		handmodel.translation.z += 0.1
 
 func process_ovrhandtracking(delta):
 	handconfidence = ovr_hand_tracking.get_hand_pose(controller_id, hand_boneorientations)
@@ -182,11 +200,12 @@ func process_ovrhandtracking(delta):
 	if pointervalid:
 		pointerpose = ovr_hand_tracking.get_pointer_pose(controller_id)
 	if handvalid:
-		handmodel.transform = handcontroller.transform
+		transform = handcontroller.transform
 	update_handpose(delta)
 	if pointervalid:
 		pointermodel.transform = pointerpose
 	gripbuttonheld = handcontroller.is_button_pressed(BUTTONS.HT_PINCH_MIDDLE_FINGER)
+	triggerbuttonheld = handcontroller.is_button_pressed(BUTTONS.HT_PINCH_INDEX_FINGER)
 		
 func process_normalvrtracking(delta):
 	if handcontroller != null:
@@ -196,7 +215,7 @@ func process_normalvrtracking(delta):
 	if pointervalid:
 		pointermodel.transform = pointerpose
 	gripbuttonheld = handcontroller.is_button_pressed(BUTTONS.VR_GRIP)
-
+	triggerbuttonheld = handcontroller.is_button_pressed(BUTTONS.VR_TRIGGER)
 
 func _process(delta):
 	if len(handpositionstack) != 0:

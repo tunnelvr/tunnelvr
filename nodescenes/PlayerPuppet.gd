@@ -2,19 +2,20 @@ extends Spatial
 
 var networkID = 0
 
+	
+func initplayerpuppet(playerishandtracked):
+	$HandLeft.initpuppetracking(playerishandtracked)
+	$HandRight.initpuppetracking(playerishandtracked)
+
+	
 remote func setavatarposition(positiondict):
+	var t0 = OS.get_ticks_msec()
+	positiondict["handleft"]["timestamp"] = t0  # disable timestamping for now
+	positiondict["handright"]["timestamp"] = t0  
 	global_transform = positiondict["playertransform"]
 	$HeadCam.transform = positiondict["headcamtransform"]
-	$HandLeft.visible = (positiondict["handlefttransform"] != null)
-	if $HandLeft.visible:
-		$HandLeft.transform = positiondict["handlefttransform"]
-	$HandRight.visible = (positiondict["handrighttransform"] != null)
-	if $HandRight.visible:
-		$HandRight.transform = positiondict["handrighttransform"]
-		$HandRight/LaserOrient.rotation.x = positiondict["laserrotation"]
-		$HandRight/LaserOrient/Length.scale.z = positiondict["laserlength"]
-		$HandRight/LaserOrient/LaserSpot.translation.z = -positiondict["laserlength"]
-		$HandRight/LaserOrient/LaserSpot.visible = positiondict["laserspot"]
+	$HandLeft.handpositionstack.push_back(positiondict.handleft)
+	$HandRight.handpositionstack.push_back(positiondict.handright)
 
 puppet func bouncedoppelgangerposition(bouncebackID, positiondict):
 	get_parent().get_parent().playerMe.rpc_unreliable_id(bouncebackID, "setdoppelgangerposition", positiondict)
