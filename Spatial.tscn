@@ -116,15 +116,6 @@ height = 0.068
 radial_segments = 6
 rings = 1
 
-[sub_resource type="SpatialMaterial" id=23]
-flags_unshaded = true
-flags_no_depth_test = true
-albedo_color = Color( 0.937255, 0.901961, 0.0431373, 0.67451 )
-
-[sub_resource type="CubeMesh" id=24]
-material = SubResource( 23 )
-size = Vector3( 0.01, 0.01, 1 )
-
 [sub_resource type="BoxShape" id=26]
 extents = Vector3( 0.3, 0.2, 0.01 )
 
@@ -330,7 +321,16 @@ size = Vector3( 0.2, 0.2, 0.2 )
 [sub_resource type="SpatialMaterial" id=67]
 albedo_color = Color( 0.309804, 0.94902, 0.0784314, 1 )
 
+[sub_resource type="SpatialMaterial" id=23]
+flags_unshaded = true
+flags_no_depth_test = true
+albedo_color = Color( 0.937255, 0.901961, 0.0431373, 0.67451 )
+
 [sub_resource type="CubeMesh" id=68]
+material = SubResource( 23 )
+size = Vector3( 0.01, 0.01, 1 )
+
+[sub_resource type="CubeMesh" id=24]
 material = SubResource( 23 )
 size = Vector3( 0.01, 0.01, 1 )
 
@@ -998,17 +998,6 @@ transform = Transform( -1.62921e-07, -0.707107, 0.707107, -1, 1.15202e-07, -1.15
 mesh = SubResource( 22 )
 material/0 = null
 
-[node name="LaserSelectLine" type="Spatial" parent="Players/PlayerMe/HandRight"]
-transform = Transform( 1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, 0, 0, 7.02335 )
-visible = false
-
-[node name="Scale" type="Spatial" parent="Players/PlayerMe/HandRight/LaserSelectLine"]
-
-[node name="Mesh" type="MeshInstance" parent="Players/PlayerMe/HandRight/LaserSelectLine/Scale"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.5 )
-mesh = SubResource( 24 )
-material/0 = null
-
 [node name="AudioStreamPlayer3D" type="AudioStreamPlayer3D" parent="Players/PlayerMe/HandRight"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.424738, 0, -0.130972 )
 visible = false
@@ -1525,6 +1514,17 @@ transform = Transform( 1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, -
 [node name="Mesh" type="MeshInstance" parent="BodyObjects/PlayerMotion/MotionVectorPreview/Scale"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.5 )
 mesh = SubResource( 68 )
+material/0 = null
+
+[node name="LaserSelectLine" type="Spatial" parent="BodyObjects"]
+transform = Transform( 1, -4.60809e-07, 4.60809e-07, 0, 0.707107, 0.707107, -6.51682e-07, -0.707107, 0.707107, 0.200002, 3.5, 0.11135 )
+visible = false
+
+[node name="Scale" type="Spatial" parent="BodyObjects/LaserSelectLine"]
+
+[node name="Mesh" type="MeshInstance" parent="BodyObjects/LaserSelectLine/Scale"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.5 )
+mesh = SubResource( 24 )
 material/0 = null
 
 [node name="SketchSystem" type="Spatial" parent="."]

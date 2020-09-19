@@ -37,6 +37,15 @@ remote func setavatarposition(positiondict):
 puppet func bouncedoppelgangerposition(bouncebackID, positiondict):
 	rpc_unreliable_id(bouncebackID, "setdoppelgangerposition", positiondict)
 
+func swapcontrollers():
+	var cidl = $HandLeft.controller_id
+	var cidr = $HandRight.controller_id
+	$HandLeft.controller_id = cidr
+	$HandRight.controller_id = cidl
+	$HandLeftH.controller_id = cidr
+	$HandRightH.controller_id = cidl
+
+
 remotesync func playvoicerecording(wavrecording):
 	print("playing recording ", wavrecording.size()) 
 	var stream = AudioStreamSample.new()
@@ -64,6 +73,14 @@ func _process(delta):
 		$HandLeftH.process_ovrhandtracking(delta)
 		$HandRightH.process_ovrhandtracking(delta)
 
+		if ovr_hand_tracking.is_pointer_pose_valid($HandRight.controller_id):
+			$HandRight/LaserOrient.visible = true
+			var pointerpose = ovr_hand_tracking.get_pointer_pose($HandRight.controller_id)
+			$HandRight/LaserOrient.set_as_toplevel(true)
+			$HandRight/LaserOrient.global_transform = global_transform * pointerpose
+
+
+
 	if Tglobal.VRstatus == "none" and Input.is_action_pressed("lh_shift"):
 		var lhkeyvec = Vector2(0, 0)
 		if Input.is_action_pressed("lh_forward"):   lhkeyvec.y += 1
@@ -81,6 +98,8 @@ var ovr_hand_tracking = null
 func initnormalvrtrackingnow():
 	$HandLeftH.initnormalvrtracking($HandLeft)
 	$HandRightH.initnormalvrtracking($HandRight)
+
+
 
 func initquesthandtrackingnow(lovr_hand_tracking):
 	Tglobal.questhandtracking = true

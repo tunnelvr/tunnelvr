@@ -12,7 +12,7 @@ onready var handright = playerMe.get_node("HandRight")
 onready var guipanel3d = get_node("/root/Spatial/GuiSystem/GUIPanel3D")
 
 onready var LaserOrient = handright.get_node("LaserOrient") 
-onready var LaserSelectLine = handright.get_node("LaserSelectLine") 
+onready var LaserSelectLine = get_node("/root/Spatial/BodyObjects/LaserSelectLine") 
 
 var viewport_point = null
 

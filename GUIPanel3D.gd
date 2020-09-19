@@ -60,10 +60,7 @@ func _on_xcdrawingvisibility_selected(index):
 	$Viewport/GUI/Panel/Label.text = "XCdrawings: "+cvsel
 
 func _on_buttonswapcontrollers_pressed():
-	var cidl = get_node("/root/Spatial").playerMe.get_node("HandLeft").controller_id
-	var cidr = get_node("/root/Spatial").playerMe.get_node("HandRight").controller_id
-	get_node("/root/Spatial").playerMe.get_node("HandLeft").controller_id = cidr
-	get_node("/root/Spatial").playerMe.get_node("HandRight").controller_id = cidl
+	var cidl = get_node("/root/Spatial").playerMe.swapcontrollers()
 	$Viewport/GUI/Panel/Label.text = "Controllers swapped"
 	
 func _ready():
