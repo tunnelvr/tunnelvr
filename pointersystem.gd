@@ -106,11 +106,14 @@ func setactivetargetwall(newactivetargetwall):
 
 func setactivetargettubesector(advancesector):
 	if advancesector != 0:
-		activetargettube.get_node("XCtubeshell/MeshInstance").set_surface_material(activetargettube.activesector, materialsystem.gettubematerial(activetargettube.xcsectormaterials[activetargettube.activesector], false))
+		#activetargettube.get_node("XCtubeshell/MeshInstance").set_surface_material(activetargettube.activesector, materialsystem.gettubematerial(activetargettube.xcsectormaterials[activetargettube.activesector], false))
+		activetargettube.get_node("XCtubesectors").get_child(activetargettube.activesector).get_node("MeshInstance").set_surface_material(0, materialsystem.gettubematerial(activetargettube.xcsectormaterials[activetargettube.activesector], false))
 	if advancesector != -2:
-		var nsectors = activetargettube.get_node("XCtubeshell/MeshInstance").get_surface_material_count()
+		#var nsectors = activetargettube.get_node("XCtubeshell/MeshInstance").get_surface_material_count()
+		var nsectors = activetargettube.get_node("XCtubesectors").get_child_count()
 		activetargettube.activesector = (activetargettube.activesector + advancesector + nsectors)%nsectors
-		activetargettube.get_node("XCtubeshell/MeshInstance").set_surface_material(activetargettube.activesector, materialsystem.gettubematerial(activetargettube.xcsectormaterials[activetargettube.activesector], true))
+		#activetargettube.get_node("XCtubeshell/MeshInstance").set_surface_material(activetargettube.activesector, materialsystem.gettubematerial(activetargettube.xcsectormaterials[activetargettube.activesector], true))
+		activetargettube.get_node("XCtubesectors").get_child(activetargettube.activesector).get_node("MeshInstance").set_surface_material(0, materialsystem.gettubematerial(activetargettube.xcsectormaterials[activetargettube.activesector], true))
 
 func setactivetargettube(newactivetargettube):
 	setactivetargetwall(null)
@@ -142,6 +145,8 @@ func targettype(target):
 		if targetparent.drawingtype == DRAWING_TYPE.DT_PAPERTEXTURE:
 			return "Papersheet"
 		return "XCdrawing"
+	if targetparent.get_name() == "XCtubesectors":
+		return "XCtubesector"
 	if targetparent.get_name() == "XCnodes":
 		return "XCnode"
 	if targetparent.get_name() == "GripMenu":
@@ -155,6 +160,8 @@ func targetwall(target, targettype):
 		return target.get_parent().get_parent()
 	if targettype == "XCtube":
 		return target.get_parent()
+	if targettype == "XCtubesector":
+		return target.get_parent().get_parent()
 	if targettype == "PlanView":
 		return target.get_parent()
 	return null
@@ -192,7 +199,7 @@ func setpointertarget(laserroot):
 		setpointertargetmaterial()
 		
 		print("ppp  ", activetargetnode, " ", pointertargettype)
-		laserroot.get_node("LaserSpot").visible = ((pointertargettype == "XCdrawing") or (pointertargettype == "XCtube"))
+		laserroot.get_node("LaserSpot").visible = ((pointertargettype == "XCdrawing") or (pointertargettype == "XCtubesector"))
 		LaserSelectLine.visible = (activetargetnode != null) and not handright.gripbuttonheld and ((pointertargettype == "XCdrawing") or (activetargetnode != null))
 			
 	pointertargetpoint = newpointertargetpoint
@@ -275,7 +282,7 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 		recselectedtargetwall.removexcnode(recselectedtarget, false, sketchsystem)
 		Tglobal.soundsystem.quicksound("BlipSound", pointertargetpoint)
 	
-	elif pointertargettype == "XCtube":
+	elif pointertargettype == "XCtubesector":
 		if activetargettube == pointertargetwall:
 			if gripbuttonheld:
 				activetargettube.xcsectormaterials[activetargettube.activesector] = materialsystem.advancetubematerial(activetargettube.xcsectormaterials[activetargettube.activesector], +1)
@@ -400,7 +407,7 @@ func buttonpressed_vrpad(gripbuttonheld, joypos):
 			pointertargetwall.get_node("XCdrawingplane").scale.x *= fs
 			pointertargetwall.get_node("XCdrawingplane").scale.y *= fs
 
-	elif pointertargettype == "XCtube" and activetargettube != null and pointertargetwall == activetargettube:
+	elif pointertargettype == "XCtubesector" and activetargettube != null and pointertargetwall == activetargettube:
 		if abs(joypos.x) > 0.65:
 			var nsectors = activetargettube.get_node("XCtubeshell/MeshInstance").get_surface_material_count()
 			setactivetargettubesector(1 if joypos.x > 0 else -1)
@@ -551,7 +558,7 @@ func buttonreleased_vrgrip():
 		activelaserroot.get_node("LaserSpot").visible = false
 		# keep nodes visible???
 		
-	elif pointertargettype == "XCtube":
+	elif pointertargettype == "XCtubesector":
 		if activetargettube != null:
 			setactivetargettubesector(-2)
 			activetargettube = null

@@ -46,6 +46,8 @@ func gripmenuon(controllertrans, pointertargetwall, pointertargettype, activetar
 		
 	elif gripmenupointertargettype == "XCtube":
 		enablegripmenus(["SelectXC", "ghost", "FloorTex"])
+	elif gripmenupointertargettype == "XCtubesector":
+		enablegripmenus(["SelectXC", "ghost", "FloorTex"])
 
 	elif gripmenupointertargettype == "XCnode":
 		enablegripmenus(["NewXC", "Record", "Replay"])

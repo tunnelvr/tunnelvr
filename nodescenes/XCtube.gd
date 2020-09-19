@@ -393,7 +393,7 @@ func slicetubetoxcdrawing(xcdrawing, xcdrawinglink0, xcdrawinglink1):
 	
 	return true
 
-func updatetubeshell(xcdrawings, makevisible):
+func Dupdatetubeshell(xcdrawings, makevisible):
 	if makevisible:
 		var tubeshellmesh = maketubeshell(xcdrawings)
 		if tubeshellmesh != null:
@@ -411,11 +411,83 @@ func updatetubeshell(xcdrawings, makevisible):
 		$XCtubeshell.visible = false
 		$XCtubeshell/CollisionShape.disabled = true
 
+func add_vertex(surfaceTool, xcnodes, poly, ila, i):
+	var pt = xcnodes.get_node(poly[(ila+i)%len(poly)]).global_transform.origin
+	surfaceTool.add_vertex(pt)
 
+func updatetubeshell(xcdrawings, makevisible):
+	if not makevisible:
+		$XCtubesectors.visible = false
+		for tubesector in $XCtubesectors.get_children():
+			tubesector.get_node("CollisionShape").disabled = true
+		return
+
+	if $XCtubesectors.get_child_count() != 0:
+		var xctubesectors_old = $XCtubesectors
+		xctubesectors_old.set_name("XCtubesectors_old")
+		for x in xctubesectors_old.get_children():
+			x.queue_free()   # because it's not transitive (should file a ticket)
+		xctubesectors_old.queue_free()
+		var xctubesectors_new = Spatial.new()
+		xctubesectors_new.set_name("XCtubesectors")
+		add_child(xctubesectors_new)
+		
+	var xcdrawing0 = xcdrawings.get_node(xcname0)
+	var xcdrawing1 = xcdrawings.get_node(xcname1)
+	var mtpa = maketubepolyassociation(xcdrawing0, xcdrawing1)
+	var poly0 = mtpa[0]
+	var poly1 = mtpa[1]
+	var ila = mtpa[2]
+
+	var xcnodes0 = xcdrawing0.get_node("XCnodes")
+	var xcnodes1 = xcdrawing1.get_node("XCnodes")
+	for i in range(len(ila)):
+		var ila0 = ila[i][0]
+		var ila0N = ila[i+1][0] - ila0  if i < len(ila)-1  else len(poly0) + ila[0][0] - ila0 
+		var ila1 = ila[i][1]
+		var ila1N = ila[(i+1)%len(ila)][1] - ila1
+		if ila1N < 0 or len(ila) == 1:   # there's a V-shaped case where this isn't good enough
+			ila1N += len(poly1)
+		#print("  iiilla ", [ila0, ila0N, ila1, ila1N])
+		var surfaceTool = SurfaceTool.new()
+		surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
+
+		var acc = -ila0N/2.0  if ila0N>=ila1N  else  ila1N/2
+		var i0 = 0
+		var i1 = 0
+		while i0 < ila0N or i1 < ila1N:
+			assert (i0 <= ila0N and i1 <= ila1N)
+			if i0 < ila0N and (acc - ila0N < 0 or i1 == ila1N):
+				acc += ila1N
+				add_vertex(surfaceTool, xcnodes0, poly0, ila0, i0)
+				add_vertex(surfaceTool, xcnodes1, poly1, ila1, i1)
+				i0 += 1
+				add_vertex(surfaceTool, xcnodes0, poly0, ila0, i0)
+			if i1 < ila1N and (acc >= 0 or i0 == ila0N):
+				acc -= ila0N
+				add_vertex(surfaceTool, xcnodes0, poly0, ila0, i0)
+				add_vertex(surfaceTool, xcnodes1, poly1, ila1, i1)
+				i1 += 1
+				add_vertex(surfaceTool, xcnodes1, poly1, ila1, i1)
+		
+		surfaceTool.generate_normals()
+		var tubesectormesh = surfaceTool.commit()
+		var xctubesector = preload("res://nodescenes/XCtubeshell.tscn").instance()
+		xctubesector.set_name("XCtubesector_"+String(i))
+		xctubesector.get_node("MeshInstance").mesh = tubesectormesh
+		xctubesector.get_node("MeshInstance").set_surface_material(0, get_node("/root/Spatial/MaterialSystem").gettubematerial(xcsectormaterials[i], false))
+		xctubesector.get_node("CollisionShape").shape = ConcavePolygonShape.new()
+		xctubesector.get_node("CollisionShape").shape.set_faces(tubesectormesh.get_faces())
+		xctubesector.visible = true
+		xctubesector.get_node("CollisionShape").disabled = false
+		$XCtubesectors.add_child(xctubesector)
+	activesector = min(activesector, $XCtubesectors.get_child_count()-1)
+	
 func xcdfullsetvisibilitycollision(bvisible):
 	visible = bvisible
-	if visible:
-		$XCtubeshell/CollisionShape.disabled = not $XCtubeshell.visible
-	else:
-		$XCtubeshell/CollisionShape.disabled = true
+	for tubesector in $XCtubesectors.get_children():
+		if visible:
+			tubesector.get_node("CollisionShape").disabled = not tubesector.get_node("MeshInstance").visible
+		else:
+			tubesector.get_node("CollisionShape").disabled = true
 
