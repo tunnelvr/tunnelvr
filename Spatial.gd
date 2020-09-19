@@ -2,7 +2,7 @@ extends Spatial
 
 # Stuff to do:
 
-# * new nodes on floor allowed
+
 # * Make XCdrawing on floor node grip menu
 # * implement deleteXC
 
@@ -26,10 +26,6 @@ extends Spatial
 #   -- this can be done from the plan view too, 
 #   -- plot with front-culling so as to see inside the shapes, and plot with image textures on
 
-# * save and load puts saves my standing position
-
-# * process engine loading of file.  
-
 # * XC in mode where it cannot take new nodes, only as continuation
 # * and automatically deletes connective bits -- and reconnects tubes
 
@@ -48,55 +44,25 @@ extends Spatial
 
 # * Make a consistent bit of cave in Ireby2
 
-# * A selected tube makes the XCnodes bigger?
-# * or we can equivalently cycle through the nodes with right and left VR_Pad
-
 # * papertype should not be environment collision (just pointer collisions)
 # * paper to be carried (nailed to same spot on the laser) when we move
 
-# * add networking instructions to README
-# * then networking to the Quest(!)  -- this is plausible now
-
 # * remove reliance on rpc sync (a sync call in sketch system) connectiontoserveractive
-
-# * selected XCdrawing would have a handle for moving through the planview
-# * enlarged nodes on selected XCdrawing to be visible
-
-# * Quest -- try attaching things to the fingers for steering by relative motions.  
-# * Steering by a captain's engine wheel aligned vertical so your left hand can point and move right and touch any part of it
-# *  -- you are directing a cursor out there.
 
 # * refraction sphere for accurate pointing -- you hit the sphere and it then goes aligned with your eyes
 
-# * Centrelines and centreline labels off (unless we want them)
-# * centreline xcdrawing as extended class?
-
-# * special materials are the sketch image and invisible
-# * we can toggle culling to the materials to see inside (means we get everything oriented right) 
-
-
 # * highlight nodes under pointer system so it's global and simplifies colouring code (active node to be an overlay)
-
-# * XCdrawings only visible when tube is selected (could save a lot of memory)
 
 # * can set the type of the material (including invisible and no collision, so open on side)
 
 # * Position of the avatar other player is queued in its own object by the rpc and only updated on the physics process (and can be delayed and tweened)
 
-# * On the Occulus joystick, a move to the right is equivalent to a click when above 0.9 (but would need to be debounced)
-
 # * grip on XCshape then click gets into rotate mode like with papersheets (but preserving upwardness)
-
-# * possibly lose the connecting xcdrawings to floor feature 
-# * just have trimmed sheets that can become floors (or xcs)
-
-# * give it a default cave in position in the resources with default image
-
-# * pointertargettypes should be an enum for itself
 
 # * godot docs.  assert returns null from the function it's in when you ignore it
 # * check out HDR example https://godotengine.org/asset-library/asset/110
 
+# * pointertargettypes should be an enum for itself
 # * duplicate floor trimming out and place at different Z-levels
 #			sketchsystem.rpc("xcdrawingfromdict", xcdrawing.exportxcrpcdata())
 # * all XCdrawing repositions should communicate.  
@@ -125,10 +91,6 @@ extends Spatial
 # * these cross sections are tied to the centrelinenodes and not the floor, and are prepopulated with the cross sections dimensions and tubes
 # * Load and move the floor on load
 
-# * use chinhotspot to use as microphone (on grip) and then button to playback
-# * compress and decompress the audio stream (LZstream) and make a godot proposal
-# * pointer target and selected target from pointersystem into sketchsystem
-
 # * clear up the laser pointer logic and materials
 # * automatically make the xcplane big enough as you draw close to its edge
 # * shift pick connection to delete nodes up to next junction
@@ -142,14 +104,6 @@ extends Spatial
 
 # * and loading (remembering the transforms) so it starts exactly where it left off
 # * redo shiftfloorfromdrawnstations with nodes in the area of some kind (decide what to do about the scale)
-
-# * Report bug that disable depth check puts transparent objects in front
-
-# lose these
-var arvr_openvr = null; 
-var arvr_quest = null; 
-var arvr_oculus = null; 
-var arvr_nativemobile
 	
 export var hostipnumber: String = ""
 export var hostportnumber: int = 8002

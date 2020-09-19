@@ -80,6 +80,8 @@ albedo_texture = SubResource( 7 )
 [sub_resource type="QuadMesh" id=9]
 
 [sub_resource type="SpatialMaterial" id=10]
+flags_unshaded = true
+flags_do_not_receive_shadows = true
 albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
 albedo_texture = ExtResource( 25 )
 uv1_scale = Vector3( 1, 0.05, 1 )
@@ -89,90 +91,120 @@ uv1_offset = Vector3( -0.3, 0.003, 0 )
 extents = Vector3( 0.5, 0.5, 0.02 )
 
 [sub_resource type="SpatialMaterial" id=12]
+flags_unshaded = true
+flags_do_not_receive_shadows = true
 albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
 albedo_texture = ExtResource( 25 )
 uv1_scale = Vector3( 1, 0.05, 1 )
 uv1_offset = Vector3( -0.3, 0.053, 0 )
 
 [sub_resource type="SpatialMaterial" id=13]
+flags_unshaded = true
+flags_do_not_receive_shadows = true
 albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
 albedo_texture = ExtResource( 25 )
 uv1_scale = Vector3( 1, 0.05, 1 )
 uv1_offset = Vector3( -0.2, 0.103, 0 )
 
 [sub_resource type="SpatialMaterial" id=14]
+flags_unshaded = true
+flags_do_not_receive_shadows = true
 albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
 albedo_texture = ExtResource( 25 )
 uv1_scale = Vector3( 1, 0.05, 1 )
 uv1_offset = Vector3( -0.2, 0.353, 0 )
 
 [sub_resource type="SpatialMaterial" id=15]
+flags_unshaded = true
+flags_do_not_receive_shadows = true
 albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
 albedo_texture = ExtResource( 25 )
 uv1_scale = Vector3( 1, 0.05, 1 )
 uv1_offset = Vector3( -0.2, 0.403, 0 )
 
 [sub_resource type="SpatialMaterial" id=16]
+flags_unshaded = true
+flags_do_not_receive_shadows = true
 albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
 albedo_texture = ExtResource( 25 )
 uv1_scale = Vector3( 1, 0.05, 1 )
 uv1_offset = Vector3( -0.2, 0.453, 0 )
 
 [sub_resource type="SpatialMaterial" id=17]
+flags_unshaded = true
+flags_do_not_receive_shadows = true
 albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
 albedo_texture = ExtResource( 25 )
 uv1_scale = Vector3( 1, 0.05, 1 )
 uv1_offset = Vector3( -0.2, 0.503, 0 )
 
 [sub_resource type="SpatialMaterial" id=18]
+flags_unshaded = true
+flags_do_not_receive_shadows = true
 albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
 albedo_texture = ExtResource( 25 )
 uv1_scale = Vector3( 1, 0.05, 1 )
 uv1_offset = Vector3( -0.2, 0.603, 0 )
 
 [sub_resource type="SpatialMaterial" id=19]
+flags_unshaded = true
+flags_do_not_receive_shadows = true
 albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
 albedo_texture = ExtResource( 25 )
 uv1_scale = Vector3( 1, 0.05, 1 )
 uv1_offset = Vector3( -0.2, 0.553, 0 )
 
 [sub_resource type="SpatialMaterial" id=20]
+flags_unshaded = true
+flags_do_not_receive_shadows = true
 albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
 albedo_texture = ExtResource( 25 )
 uv1_scale = Vector3( 1, 0.05, 1 )
 uv1_offset = Vector3( -0.2, 0.153, 0 )
 
 [sub_resource type="SpatialMaterial" id=21]
+flags_unshaded = true
+flags_do_not_receive_shadows = true
 albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
 albedo_texture = ExtResource( 25 )
 uv1_scale = Vector3( 1, 0.05, 1 )
 uv1_offset = Vector3( -0.2, 0.203, 0 )
 
 [sub_resource type="SpatialMaterial" id=22]
+flags_unshaded = true
+flags_do_not_receive_shadows = true
 albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
 albedo_texture = ExtResource( 25 )
 uv1_scale = Vector3( 1, 0.05, 1 )
 uv1_offset = Vector3( -0.2, 0.253, 0 )
 
 [sub_resource type="SpatialMaterial" id=23]
+flags_unshaded = true
+flags_do_not_receive_shadows = true
 albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
 albedo_texture = ExtResource( 25 )
 uv1_scale = Vector3( 1, 0.05, 1 )
 uv1_offset = Vector3( -0.2, 0.303, 0 )
 
 [sub_resource type="SpatialMaterial" id=24]
+flags_unshaded = true
+flags_do_not_receive_shadows = true
 albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
 albedo_texture = ExtResource( 25 )
 uv1_scale = Vector3( 1, 0.05, 1 )
 uv1_offset = Vector3( -0.2, 0.7, 0 )
 
 [sub_resource type="SpatialMaterial" id=25]
+flags_unshaded = true
+flags_do_not_receive_shadows = true
 albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
 albedo_texture = ExtResource( 25 )
 uv1_scale = Vector3( 1, 0.05, 1 )
 uv1_offset = Vector3( -0.2, 0.75, 0 )
 
 [sub_resource type="SpatialMaterial" id=26]
+flags_unshaded = true
+flags_do_not_receive_shadows = true
 albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
 albedo_texture = ExtResource( 25 )
 uv1_scale = Vector3( 1, 0.05, 1 )
@@ -901,7 +933,6 @@ size = Vector2( 4, 2 )
 
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
-hostipnumber = "192.168.1.224"
 
 [node name="Players" type="Spatial" parent="."]
 transform = Transform( -1, 0, -3.25841e-07, 0, 1, 0, 3.25841e-07, 0, -1, 0, 0, 0 )
@@ -1172,6 +1203,7 @@ collision_layer = 8
 collision_mask = 0
 
 [node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/Up5"]
+cast_shadow = 0
 mesh = SubResource( 9 )
 material/0 = SubResource( 10 )
 
@@ -1186,6 +1218,7 @@ collision_layer = 8
 collision_mask = 0
 
 [node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/Down5"]
+cast_shadow = 0
 mesh = SubResource( 9 )
 material/0 = SubResource( 12 )
 
@@ -1198,6 +1231,7 @@ collision_layer = 8
 collision_mask = 0
 
 [node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/toPaper"]
+cast_shadow = 0
 mesh = SubResource( 9 )
 material/0 = SubResource( 13 )
 
@@ -1210,6 +1244,7 @@ collision_layer = 8
 collision_mask = 0
 
 [node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/NewSlice"]
+cast_shadow = 0
 mesh = SubResource( 9 )
 material/0 = SubResource( 14 )
 
@@ -1222,6 +1257,7 @@ collision_layer = 8
 collision_mask = 0
 
 [node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/DoSlice"]
+cast_shadow = 0
 mesh = SubResource( 9 )
 material/0 = SubResource( 15 )
 
@@ -1234,6 +1270,7 @@ collision_layer = 8
 collision_mask = 0
 
 [node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/DelXC"]
+cast_shadow = 0
 mesh = SubResource( 9 )
 material/0 = SubResource( 16 )
 
@@ -1246,6 +1283,7 @@ collision_layer = 8
 collision_mask = 0
 
 [node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/SelectXC"]
+cast_shadow = 0
 mesh = SubResource( 9 )
 material/0 = SubResource( 17 )
 
@@ -1258,6 +1296,7 @@ collision_layer = 8
 collision_mask = 0
 
 [node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/ghost"]
+cast_shadow = 0
 mesh = SubResource( 9 )
 material/0 = SubResource( 18 )
 
@@ -1270,6 +1309,7 @@ collision_layer = 8
 collision_mask = 0
 
 [node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/FloorTex"]
+cast_shadow = 0
 mesh = SubResource( 9 )
 material/0 = SubResource( 19 )
 
@@ -1282,6 +1322,7 @@ collision_layer = 8
 collision_mask = 0
 
 [node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/toSolid"]
+cast_shadow = 0
 mesh = SubResource( 9 )
 material/0 = SubResource( 20 )
 
@@ -1294,6 +1335,7 @@ collision_layer = 8
 collision_mask = 0
 
 [node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/toGas"]
+cast_shadow = 0
 mesh = SubResource( 9 )
 material/0 = SubResource( 21 )
 
@@ -1306,6 +1348,7 @@ collision_layer = 8
 collision_mask = 0
 
 [node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/toFloor"]
+cast_shadow = 0
 mesh = SubResource( 9 )
 material/0 = SubResource( 22 )
 
@@ -1318,6 +1361,7 @@ collision_layer = 8
 collision_mask = 0
 
 [node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/toBig"]
+cast_shadow = 0
 mesh = SubResource( 9 )
 material/0 = SubResource( 23 )
 
@@ -1330,6 +1374,7 @@ collision_layer = 8
 collision_mask = 0
 
 [node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/NewXC"]
+cast_shadow = 0
 mesh = SubResource( 9 )
 material/0 = SubResource( 24 )
 
@@ -1342,6 +1387,7 @@ collision_layer = 8
 collision_mask = 0
 
 [node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/Record"]
+cast_shadow = 0
 mesh = SubResource( 9 )
 material/0 = SubResource( 25 )
 
@@ -1354,6 +1400,7 @@ collision_layer = 8
 collision_mask = 0
 
 [node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/Replay"]
+cast_shadow = 0
 mesh = SubResource( 9 )
 material/0 = SubResource( 26 )
 
