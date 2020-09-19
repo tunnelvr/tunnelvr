@@ -129,10 +129,6 @@ func _on_button_release(p_button):
 		playerdirectedflight = false
 
 
-	#laserangleadjustmode = (p_button == BUTTONS.VR_GRIP) and tiptouchray.is_colliding() and tiptouchray.get_collider() == handright.get_node("HeelHotspot")
-	if laserangleadjustmode:
-		laserangleoriginal = HandRight.get_node("LaserOrient").rotation.x
-		laserhandanglevector = Vector2(HandLeft.global_transform.basis.x.dot(HandRight.global_transform.basis.y), HandLeft.global_transform.basis.y.dot(HandRight.global_transform.basis.y))
 
 var laserangleadjustmode = false
 var laserangleoriginal = 0

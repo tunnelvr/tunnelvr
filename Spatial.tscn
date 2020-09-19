@@ -62,60 +62,6 @@ emission_energy = 1.0
 emission_operator = 0
 emission_on_uv2 = false
 
-[sub_resource type="CubeMesh" id=13]
-resource_local_to_scene = true
-size = Vector3( 0.002, 0.002, 1 )
-
-[sub_resource type="SpatialMaterial" id=14]
-flags_unshaded = true
-flags_do_not_receive_shadows = true
-albedo_color = Color( 0.945098, 0.133333, 0.133333, 1 )
-
-[sub_resource type="SpatialMaterial" id=15]
-flags_no_depth_test = true
-albedo_color = Color( 0.984314, 0.0705882, 0.0705882, 1 )
-metallic = 0.46
-roughness = 0.28
-
-[sub_resource type="SphereMesh" id=16]
-material = SubResource( 15 )
-radius = 0.05
-height = 0.1
-radial_segments = 8
-rings = 4
-
-[sub_resource type="SpatialMaterial" id=17]
-albedo_color = Color( 1, 0.439216, 0.439216, 1 )
-
-[sub_resource type="CylinderMesh" id=18]
-material = SubResource( 17 )
-top_radius = 0.001
-bottom_radius = 0.02
-height = 0.2
-radial_segments = 6
-rings = 1
-
-[sub_resource type="CylinderMesh" id=19]
-top_radius = 0.03
-bottom_radius = 0.03
-height = 0.02
-radial_segments = 30
-rings = 1
-
-[sub_resource type="SpatialMaterial" id=20]
-albedo_color = Color( 0.172549, 0.168627, 0.168627, 1 )
-
-[sub_resource type="SpatialMaterial" id=21]
-albedo_color = Color( 0.968627, 0.0156863, 0.0156863, 1 )
-
-[sub_resource type="CylinderMesh" id=22]
-material = SubResource( 21 )
-top_radius = 0.002
-bottom_radius = 0.002
-height = 0.068
-radial_segments = 6
-rings = 1
-
 [sub_resource type="BoxShape" id=26]
 extents = Vector3( 0.3, 0.2, 0.01 )
 
@@ -333,6 +279,60 @@ size = Vector3( 0.01, 0.01, 1 )
 [sub_resource type="CubeMesh" id=24]
 material = SubResource( 23 )
 size = Vector3( 0.01, 0.01, 1 )
+
+[sub_resource type="CubeMesh" id=13]
+resource_local_to_scene = true
+size = Vector3( 0.002, 0.002, 1 )
+
+[sub_resource type="SpatialMaterial" id=14]
+flags_unshaded = true
+flags_do_not_receive_shadows = true
+albedo_color = Color( 0.945098, 0.133333, 0.133333, 1 )
+
+[sub_resource type="SpatialMaterial" id=15]
+flags_no_depth_test = true
+albedo_color = Color( 0.984314, 0.0705882, 0.0705882, 1 )
+metallic = 0.46
+roughness = 0.28
+
+[sub_resource type="SphereMesh" id=16]
+material = SubResource( 15 )
+radius = 0.05
+height = 0.1
+radial_segments = 8
+rings = 4
+
+[sub_resource type="SpatialMaterial" id=17]
+albedo_color = Color( 1, 0.439216, 0.439216, 1 )
+
+[sub_resource type="CylinderMesh" id=18]
+material = SubResource( 17 )
+top_radius = 0.001
+bottom_radius = 0.02
+height = 0.2
+radial_segments = 6
+rings = 1
+
+[sub_resource type="CylinderMesh" id=19]
+top_radius = 0.03
+bottom_radius = 0.03
+height = 0.02
+radial_segments = 30
+rings = 1
+
+[sub_resource type="SpatialMaterial" id=20]
+albedo_color = Color( 0.172549, 0.168627, 0.168627, 1 )
+
+[sub_resource type="SpatialMaterial" id=21]
+albedo_color = Color( 0.968627, 0.0156863, 0.0156863, 1 )
+
+[sub_resource type="CylinderMesh" id=22]
+material = SubResource( 21 )
+top_radius = 0.002
+bottom_radius = 0.002
+height = 0.068
+radial_segments = 6
+rings = 1
 
 [sub_resource type="QuadMesh" id=69]
 size = Vector2( 1.6, 1 )
@@ -960,44 +960,6 @@ script = ExtResource( 43 )
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.2, 1.5, -0.5 )
 controller_id = 2
 
-[node name="LaserOrient" type="Spatial" parent="Players/PlayerMe/HandRight"]
-transform = Transform( 1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, 0, 0, 0.06 )
-
-[node name="Length" type="Spatial" parent="Players/PlayerMe/HandRight/LaserOrient"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 50, 0, 0, 0 )
-
-[node name="Laser" type="MeshInstance" parent="Players/PlayerMe/HandRight/LaserOrient/Length"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.43051e-06, -0.5 )
-cast_shadow = 0
-mesh = SubResource( 13 )
-material/0 = SubResource( 14 )
-
-[node name="RayCast" type="RayCast" parent="Players/PlayerMe/HandRight/LaserOrient"]
-enabled = true
-cast_to = Vector3( 0, 0, -50 )
-collision_mask = 56
-
-[node name="LaserSpot" type="MeshInstance" parent="Players/PlayerMe/HandRight/LaserOrient"]
-transform = Transform( 1, 0, 0, 0, 1, -8.9407e-08, 0, 8.9407e-08, 1, 0, -4.76837e-07, -5.476 )
-mesh = SubResource( 16 )
-material/0 = null
-
-[node name="LaserSpike" type="MeshInstance" parent="Players/PlayerMe/HandRight/LaserOrient/LaserSpot"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0 )
-mesh = SubResource( 18 )
-material/0 = null
-
-[node name="MeshDial" type="MeshInstance" parent="Players/PlayerMe/HandRight/LaserOrient"]
-transform = Transform( -1.62921e-07, -1, 0, 0.707107, -1.15202e-07, -0.707107, 0.707107, -1.15202e-07, 0.707107, -0.057, 0, 0 )
-visible = false
-mesh = SubResource( 19 )
-material/0 = SubResource( 20 )
-
-[node name="MeshDialArrow" type="MeshInstance" parent="Players/PlayerMe/HandRight/LaserOrient/MeshDial"]
-transform = Transform( -1.62921e-07, -0.707107, 0.707107, -1, 1.15202e-07, -1.15202e-07, 4.50002e-15, -0.707107, -0.707107, 0, 0.01, 0 )
-mesh = SubResource( 22 )
-material/0 = null
-
 [node name="AudioStreamPlayer3D" type="AudioStreamPlayer3D" parent="Players/PlayerMe/HandRight"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.424738, 0, -0.130972 )
 visible = false
@@ -1525,6 +1487,44 @@ visible = false
 [node name="Mesh" type="MeshInstance" parent="BodyObjects/LaserSelectLine/Scale"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.5 )
 mesh = SubResource( 24 )
+material/0 = null
+
+[node name="LaserOrient" type="Spatial" parent="BodyObjects"]
+transform = Transform( 1, -4.60809e-07, 4.60809e-07, 0, 0.707107, 0.707107, -6.51682e-07, -0.707107, 0.707107, 0.199998, 3.5, -6.852 )
+
+[node name="Length" type="Spatial" parent="BodyObjects/LaserOrient"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 50, 0, 0, 0 )
+
+[node name="Laser" type="MeshInstance" parent="BodyObjects/LaserOrient/Length"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.43051e-06, -0.5 )
+cast_shadow = 0
+mesh = SubResource( 13 )
+material/0 = SubResource( 14 )
+
+[node name="RayCast" type="RayCast" parent="BodyObjects/LaserOrient"]
+enabled = true
+cast_to = Vector3( 0, 0, -50 )
+collision_mask = 56
+
+[node name="LaserSpot" type="MeshInstance" parent="BodyObjects/LaserOrient"]
+transform = Transform( 1, 0, 0, 0, 1, -8.9407e-08, 0, 8.9407e-08, 1, 0, -4.76837e-07, -5.476 )
+mesh = SubResource( 16 )
+material/0 = null
+
+[node name="LaserSpike" type="MeshInstance" parent="BodyObjects/LaserOrient/LaserSpot"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0 )
+mesh = SubResource( 18 )
+material/0 = null
+
+[node name="MeshDial" type="MeshInstance" parent="BodyObjects/LaserOrient"]
+transform = Transform( -1.62921e-07, -1, 0, 0.707107, -1.15202e-07, -0.707107, 0.707107, -1.15202e-07, 0.707107, -0.057, 0, 0 )
+visible = false
+mesh = SubResource( 19 )
+material/0 = SubResource( 20 )
+
+[node name="MeshDialArrow" type="MeshInstance" parent="BodyObjects/LaserOrient/MeshDial"]
+transform = Transform( -1.62921e-07, -0.707107, 0.707107, -1, 1.15202e-07, -1.15202e-07, 4.50002e-15, -0.707107, -0.707107, 0, 0.01, 0 )
+mesh = SubResource( 22 )
 material/0 = null
 
 [node name="SketchSystem" type="Spatial" parent="."]

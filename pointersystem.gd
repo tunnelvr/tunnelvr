@@ -11,14 +11,14 @@ onready var handleft = playerMe.get_node("HandLeft")
 onready var handright = playerMe.get_node("HandRight")
 onready var guipanel3d = get_node("/root/Spatial/GuiSystem/GUIPanel3D")
 
-onready var LaserOrient = handright.get_node("LaserOrient") 
+onready var LaserOrient = get_node("/root/Spatial/BodyObjects/LaserOrient") 
 onready var LaserSelectLine = get_node("/root/Spatial/BodyObjects/LaserSelectLine") 
 
 var viewport_point = null
 
 var mousecontrollervec = Vector3(0.2, -0.1, -0.5)
 
-onready var activelaserroot = handright.get_node("LaserOrient")
+onready var activelaserroot = LaserOrient
 var pointerplanviewtarget = null
 var pointertarget = null
 var pointertargettype = "none"
@@ -248,11 +248,11 @@ func buttonpressed_vrby(gripbuttonheld):
 	elif ccaxvec > 0.85 and pswitchdist < 0.1:
 		guipanel3d.clickbuttonheadtorch()
 	else:
-		guipanel3d.toggleguipanelvisibility(handright.get_node("LaserOrient").global_transform)
+		guipanel3d.toggleguipanelvisibility(LaserOrient.global_transform)
 
 func buttonpressed_vrgrip():
 	gripbuttonpressused = false
-	gripmenu.gripmenuon(handright.get_node("LaserOrient").global_transform, pointertargetwall, pointertargettype, activetargettube)
+	gripmenu.gripmenuon(LaserOrient.global_transform, pointertargetwall, pointertargettype, activetargettube)
 	
 func buttonpressed_vrtrigger(gripbuttonheld):
 	var dontdisablegripmenus = false

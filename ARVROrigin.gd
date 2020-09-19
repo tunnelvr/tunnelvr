@@ -4,6 +4,7 @@ var doppelganger = null
 
 var networkID = 0
 var bouncetestnetworkID = 0
+onready var LaserOrient = get_node("/root/Spatial/BodyObjects/LaserOrient")
 
 func setheadtorchlight(torchon):
 	$HeadCam/HeadtorchLight.visible = torchon
@@ -61,9 +62,9 @@ func playerpositiondict():
 			 "headcamtransform":$HeadCam.transform, 
 			 "handlefttransform":$HandLeft.transform if $HandLeft.visible else null, 
 			 "handrighttransform":$HandRight.transform if $HandRight.visible else null, 
-			 "laserrotation":$HandRight/LaserOrient.rotation.x, 
-			 "laserlength":$HandRight/LaserOrient/Length.scale.z, 
-			 "laserspot":$HandRight/LaserOrient/LaserSpot.visible, 
+			 "laserrotation":LaserOrient.rotation.x, 
+			 "laserlength":LaserOrient.get_node("Length").scale.z, 
+			 "laserspot":LaserOrient.get_node("LaserSpot").visible, 
 			 "timestamp":OS.get_ticks_usec() 
 			}
 
@@ -74,11 +75,15 @@ func _process(delta):
 		$HandRightH.process_ovrhandtracking(delta)
 
 		if ovr_hand_tracking.is_pointer_pose_valid($HandRight.controller_id):
-			$HandRight/LaserOrient.visible = true
+			LaserOrient.visible = true
 			var pointerpose = ovr_hand_tracking.get_pointer_pose($HandRight.controller_id)
-			$HandRight/LaserOrient.set_as_toplevel(true)
-			$HandRight/LaserOrient.global_transform = global_transform * pointerpose
-
+			LaserOrient.set_as_toplevel(true)
+			LaserOrient.global_transform = global_transform * pointerpose
+		else:
+			LaserOrient.visible = false
+	else:
+		LaserOrient.global_transform = $HandRight.global_transform
+		
 
 
 	if Tglobal.VRstatus == "none" and Input.is_action_pressed("lh_shift"):
