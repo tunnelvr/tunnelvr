@@ -211,11 +211,11 @@ func process_normalvrtracking(delta):
 	if handcontroller != null:
 		transform = handcontroller.transform
 		joypos = Vector2(handcontroller.get_joystick_axis(0), handcontroller.get_joystick_axis(1))
+		gripbuttonheld = handcontroller.is_button_pressed(BUTTONS.VR_GRIP)
+		triggerbuttonheld = handcontroller.is_button_pressed(BUTTONS.VR_TRIGGER)
 	pointerpose = transform
 	if pointervalid:
 		pointermodel.transform = pointerpose
-	gripbuttonheld = handcontroller.is_button_pressed(BUTTONS.VR_GRIP)
-	triggerbuttonheld = handcontroller.is_button_pressed(BUTTONS.VR_TRIGGER)
 
 func _process(delta):
 	if len(handpositionstack) != 0:

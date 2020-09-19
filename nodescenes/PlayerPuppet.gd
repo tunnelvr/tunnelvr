@@ -3,17 +3,20 @@ extends Spatial
 var networkID = 0
 
 	
-func initplayerpuppet(playerishandtracked):
+remote func initplayerpuppet(playerishandtracked):
 	$HandLeft.initpuppetracking(playerishandtracked)
 	$HandRight.initpuppetracking(playerishandtracked)
 
-	
 remote func setavatarposition(positiondict):
 	var t0 = OS.get_ticks_msec()
 	positiondict["handleft"]["timestamp"] = t0  # disable timestamping for now
 	positiondict["handright"]["timestamp"] = t0  
 	global_transform = positiondict["playertransform"]
 	$HeadCam.transform = positiondict["headcamtransform"]
+	while len($HandLeft.handpositionstack) > 10:
+		$HandLeft.handpositionstack.pop_front()
+	while len($HandRight.handpositionstack) > 10:
+		$HandRight.handpositionstack.pop_front()
 	$HandLeft.handpositionstack.push_back(positiondict.handleft)
 	$HandRight.handpositionstack.push_back(positiondict.handright)
 

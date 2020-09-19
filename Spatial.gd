@@ -249,13 +249,18 @@ func _ready():
 	else:
 		print("*** VR not working")
 		
+	print("*-*-*-*  requesting permissions: ", OS.request_permissions())
+	var perm = OS.get_granted_permissions()
+	print("Granted permissions: ", perm)
 	if enablenetworking:
+		print("IP local addressess ", IP.get_local_addresses())
+		print("IP local interfaces ", IP.get_local_interfaces())
 		var networkedmultiplayerenet = NetworkedMultiplayerENet.new()
 		get_tree().connect("network_peer_connected", self, "_player_connected")
 		get_tree().connect("network_peer_disconnected", self, "_player_disconnected")
 		if hostipnumber == "":
 			networkedmultiplayerenet.create_server(hostportnumber, 5)
-			Tglobal.connectiontoserveractive = (not arvr_quest)
+			Tglobal.connectiontoserveractive = true
 		else:
 			networkedmultiplayerenet.create_client(hostipnumber, hostportnumber)
 			get_tree().connect("connected_to_server", self, "_connected_to_server")
@@ -297,7 +302,7 @@ func _player_connected(id):
 	playerMe.set_name("NetworkedPlayer"+String(networkID))
 	var playerothername = "NetworkedPlayer"+String(id)
 	if not $Players.has_node(playerothername):
-		var playerOther = preload("res://nodescenes/PlayerPuppet.tscn").instance()
+		var playerOther = load("res://nodescenes/PlayerPuppet.tscn").instance()
 		playerOther.set_network_master(id)
 		playerOther.set_name(playerothername)
 		playerOther.networkID = id
@@ -305,6 +310,7 @@ func _player_connected(id):
 	if networkID == 1:
 		$SketchSystem.rpc_id(id, "sketchsystemfromdict", $SketchSystem.sketchsystemtodict())
 	playerMe.bouncetestnetworkID = nextplayernetworkidinringskippingdoppelganger(0)
+	playerMe.rpc("initplayerpuppet", (ovr_hand_tracking != null))
 	
 func _player_disconnected(id):
 	print("_player_disconnected ", id)
@@ -317,8 +323,7 @@ func _player_disconnected(id):
 		
 func _connected_to_server():
 	print("_connected_to_server")
-	Tglobal.connectiontoserveractive = true 
-	
+	Tglobal.connectiontoserveractive = true
 	
 func _connection_failed():
 	print("_connection_failed")
