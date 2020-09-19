@@ -24,11 +24,10 @@ func setplanviewvisible(planviewvisible, guidpaneltransform, guidpanelsize):
 		$PlanView/CollisionShape.disabled = true
 
 	
-func processplanviewsliding(handright, delta):
+func processplanviewsliding(joypos, gripbuttonheld, delta):
 	var planviewsystem = self
-	var joypos = Vector2(handright.get_joystick_axis(0) if handright.get_is_active() else 0.0, handright.get_joystick_axis(1) if handright.get_is_active() else 0.0)
 	var plancamera = planviewsystem.get_node("PlanView/Viewport/Camera")
-	if joypos.length() > 0.1 and not handright.is_button_pressed(BUTTONS.VR_GRIP):
+	if joypos.length() > 0.1 and not gripbuttonheld:
 		plancamera.translation += Vector3(joypos.x, 0, -joypos.y)*plancamera.size/2*delta
 
 func camerascalechange(sca):
@@ -39,10 +38,10 @@ func camerascalechange(sca):
 func cameraresetcentre(headcam):
 	$PlanView/Viewport/Camera.translation = Vector3(headcam.global_transform.origin.x, $PlanView/Viewport/Camera.translation.y, headcam.global_transform.origin.z)
 
-func checkplanviewinfront(handright):
+func checkplanviewinfront(handrightcontroller):
 	var planviewsystem = self
 	var collider_transform = planviewsystem.get_node("PlanView").global_transform
-	return collider_transform.xform_inv(handright.global_transform.origin).z > 0
+	return collider_transform.xform_inv(handrightcontroller.global_transform.origin).z > 0
 
 func processplanviewpointing(raycastcollisionpoint):
 	var planviewsystem = self

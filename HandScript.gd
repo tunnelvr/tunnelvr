@@ -12,6 +12,8 @@ var handmodel = null
 var handskeleton = null
 var meshnode = null
 var handmaterial = null
+var joypos = Vector2(0, 0)
+var gripbuttonheld = false
 
 var handscale = 0.0
 var handconfidence = 0
@@ -35,7 +37,7 @@ var pointertranslucentvalidity = 0.0
 var handpositionstack = [ ]  # [ { "timestamp", "validity", "transform", "boneorientations" } ] 
 
 func _ready():
-	islefthand = (get_name() == "HandLeftH")
+	islefthand = (get_name() == "HandLeft")
 	var handmodelfile = handmodelfile1 if islefthand else handmodelfile2
 	var handmodelres = load(handmodelfile)
 	if handmodelres == null:
@@ -70,18 +72,6 @@ func initovrhandtracking(lovr_hand_tracking, lhandcontroller):
 	handmodel.visible = false
 	handmaterial.flags_transparent = true
 
-
-func process_ovrhandtracking(delta):
-	handconfidence = ovr_hand_tracking.get_hand_pose(controller_id, hand_boneorientations)
-	handvalid = handconfidence != null and handconfidence == 1
-	pointervalid = handvalid and ovr_hand_tracking.is_pointer_pose_valid(controller_id)
-	if pointervalid:
-		pointerpose = ovr_hand_tracking.get_pointer_pose(controller_id)
-	if handvalid:
-		handmodel.transform = handcontroller.transform
-	update_handpose(delta)
-	if pointervalid:
-		pointermodel.transform = pointerpose
 
 func update_handpose(delta):
 	if handvalid:
@@ -184,12 +174,29 @@ func initnormalvrtracking(lhandcontroller):
 		handmodel.rotation_degrees.y = -90
 	handmodel.translation.z += 0.1
 
+
+func process_ovrhandtracking(delta):
+	handconfidence = ovr_hand_tracking.get_hand_pose(controller_id, hand_boneorientations)
+	handvalid = handconfidence != null and handconfidence == 1
+	pointervalid = handvalid and ovr_hand_tracking.is_pointer_pose_valid(controller_id)
+	if pointervalid:
+		pointerpose = ovr_hand_tracking.get_pointer_pose(controller_id)
+	if handvalid:
+		handmodel.transform = handcontroller.transform
+	update_handpose(delta)
+	if pointervalid:
+		pointermodel.transform = pointerpose
+	gripbuttonheld = handcontroller.is_button_pressed(BUTTONS.HT_PINCH_MIDDLE_FINGER)
+		
 func process_normalvrtracking(delta):
 	if handcontroller != null:
 		transform = handcontroller.transform
+		joypos = Vector2(handcontroller.get_joystick_axis(0), handcontroller.get_joystick_axis(1))
 	pointerpose = transform
 	if pointervalid:
 		pointermodel.transform = pointerpose
+	gripbuttonheld = handcontroller.is_button_pressed(BUTTONS.VR_GRIP)
+
 
 func _process(delta):
 	if len(handpositionstack) != 0:

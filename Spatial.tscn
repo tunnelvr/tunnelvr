@@ -950,22 +950,22 @@ material/0 = SubResource( 4 )
 
 [node name="csgheadmesh" parent="Players/PlayerMe/HeadCam" instance=ExtResource( 12 )]
 
-[node name="HandLeft" type="ARVRController" parent="Players/PlayerMe"]
+[node name="HandLeftController" type="ARVRController" parent="Players/PlayerMe"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.2, 1.5, -0.5 )
 
-[node name="HandLeftH" type="Spatial" parent="Players/PlayerMe"]
+[node name="HandLeft" type="Spatial" parent="Players/PlayerMe"]
 script = ExtResource( 43 )
 
-[node name="HandRight" type="ARVRController" parent="Players/PlayerMe"]
+[node name="HandRightController" type="ARVRController" parent="Players/PlayerMe"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.2, 1.5, -0.5 )
 controller_id = 2
 
-[node name="AudioStreamPlayer3D" type="AudioStreamPlayer3D" parent="Players/PlayerMe/HandRight"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.424738, 0, -0.130972 )
-visible = false
-
-[node name="HandRightH" type="Spatial" parent="Players/PlayerMe"]
+[node name="HandRight" type="Spatial" parent="Players/PlayerMe"]
 script = ExtResource( 43 )
+
+[node name="AudioStreamPlayer3D" type="AudioStreamPlayer3D" parent="Players/PlayerMe/HandRight"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.224738, 1.5, -0.630972 )
+visible = false
 
 [node name="pointersystem" type="Node" parent="Players/PlayerMe"]
 script = ExtResource( 5 )

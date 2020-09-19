@@ -8,7 +8,6 @@ onready var HeadCam = playerMe.get_node("HeadCam")
 onready var HeadCentre = HeadCam.get_node("HeadCentre")
 onready var HeadCollisionWarning = HeadCam.get_node("HeadCollisionWarning")
 onready var playerheadbodyradius = $PlayerKinematicBody/PlayerBodyCapsule.shape.radius
-onready var HandLeft = playerMe.get_node("HandLeft")
 onready var PlayerDirections = get_node("../PlayerDirections")
 
 var floor_max_angle = deg2rad(45)

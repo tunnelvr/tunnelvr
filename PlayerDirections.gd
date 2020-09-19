@@ -3,7 +3,7 @@ extends Node
 onready var playerMe = get_node("/root/Spatial/Players/PlayerMe")
 onready var HeadCam = playerMe.get_node("HeadCam")
 onready var HandLeft = playerMe.get_node("HandLeft")
-onready var HandRight = playerMe.get_node("HandLeft")
+onready var HandLeftController = playerMe.get_node("HandLeftController")
 onready var MovePointThimble = get_node("../MovePointThimble")
 onready var tiptouchray = MovePointThimble.get_node("TipTouchRay")
 onready var GroundSpikePoint = tiptouchray.get_node("GroundSpikePoint")
@@ -19,12 +19,12 @@ var clawengageposition = null
 
 
 func initcontrollersignalconnections():
-	HandLeft.connect("button_pressed", self, "_on_button_pressed")
-	HandLeft.connect("button_release", self, "_on_button_release")
+	HandLeftController.connect("button_pressed", self, "_on_button_pressed")
+	HandLeftController.connect("button_release", self, "_on_button_release")
 
 func initquesthandcontrollersignalconnections():
-	HandLeft.connect("button_pressed", self, "_on_questhandtracking_button_pressed")
-	HandLeft.connect("button_release", self, "_on_questhandtracking_button_release")
+	HandLeftController.connect("button_pressed", self, "_on_questhandtracking_button_pressed")
+	HandLeftController.connect("button_release", self, "_on_questhandtracking_button_release")
 
 
 func _input(event):
@@ -54,24 +54,22 @@ func _physics_process(delta):
 	playerdirectedflightvelocity = Vector3(0,0,0)
 	playerdirectedwalkingvelocity = Vector3(0,0,0)
 
-	var joypos = Vector2(0, 0)
-	if Tglobal.VRstatus != "none" and not Tglobal.questhandtracking and HandLeft.get_is_active():
-		joypos = Vector2(HandLeft.get_joystick_axis(0), HandLeft.get_joystick_axis(1))
+	var joypos = HandLeft.joypos
 	if not Input.is_action_pressed("lh_shift"):
 		if Input.is_action_pressed("lh_forward"):   joypos.y += 1
 		if Input.is_action_pressed("lh_backward"):  joypos.y += -1
 		if Input.is_action_pressed("lh_left"):      joypos.x += -1
 		if Input.is_action_pressed("lh_right"):     joypos.x += 1
 
-	if playerdirectedflight and Tglobal.VRoperating and not Tglobal.questhandtracking and HandLeft.get_is_active():
+	if playerdirectedflight and Tglobal.VRoperating and not Tglobal.questhandtracking and HandLeftController.get_is_active():
 		if clawengageposition != null:
 			endclawengagement()
-		if HandLeft.is_button_pressed(BUTTONS.VR_TRIGGER) or Input.is_action_pressed("lh_forward") or Input.is_action_pressed("lh_backward"):
-			var flydir = HandLeft.global_transform.basis.z if HandLeft.get_is_active() else HeadCam.global_transform.basis.z
+		if HandLeftController.is_button_pressed(BUTTONS.VR_TRIGGER) or Input.is_action_pressed("lh_forward") or Input.is_action_pressed("lh_backward"):
+			var flydir = HandLeftController.global_transform.basis.z if HandLeftController.get_is_active() else HeadCam.global_transform.basis.z
 			if joypos.y < -0.5:
 				flydir = -flydir
 			playerdirectedflightvelocity = -flydir.normalized()*flyspeed
-			if HandLeft.is_button_pressed(BUTTONS.VR_PAD):
+			if HandLeftController.is_button_pressed(BUTTONS.VR_PAD):
 				playerdirectedflightvelocity *= 3.0
 
 	if not playerdirectedflight and not Tglobal.questhandtracking:
@@ -110,7 +108,7 @@ func _on_questhandtracking_button_release(p_button):
 
 func _on_button_pressed(p_button):
 	if p_button == BUTTONS.VR_PAD:
-		var joypos = Vector2(HandLeft.get_joystick_axis(0), HandLeft.get_joystick_axis(1))
+		var joypos = HandLeft.joypos
 		if abs(joypos.y) < 0.5 and abs(joypos.x) > 0.1:
 			nextphysicsrotatestep += (1 if joypos.x > 0 else -1)*(22.5 if abs(joypos.x) > 0.8 else 90.0)
 
@@ -128,8 +126,6 @@ func _on_button_release(p_button):
 	if p_button == BUTTONS.VR_GRIP:
 		playerdirectedflight = false
 
-
-
 var laserangleadjustmode = false
 var laserangleoriginal = 0
 var laserhandanglevector = Vector2(0,0)
@@ -139,6 +135,7 @@ var prevlaserangleoffset = 0
 func DMakeNewBoulder(event):
 	#if event is InputEventKey and event.pressed and event.is_action_pressed("newboulder"):
 	print("making new boulder")
+	var HandRight = playerMe.get_node("HandRight")
 	var markernode = preload("res://nodescenes/MarkerNode.tscn").instance()
 	var boulderclutter = get_node("/root/Spatial/BoulderClutter")
 	var nc = boulderclutter.get_child_count()

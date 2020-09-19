@@ -39,12 +39,12 @@ puppet func bouncedoppelgangerposition(bouncebackID, positiondict):
 	rpc_unreliable_id(bouncebackID, "setdoppelgangerposition", positiondict)
 
 func swapcontrollers():
-	var cidl = $HandLeft.controller_id
-	var cidr = $HandRight.controller_id
+	var cidl = $HandLeftController.controller_id
+	var cidr = $HandRightController.controller_id
+	$HandLeftController.controller_id = cidr
+	$HandRightController.controller_id = cidl
 	$HandLeft.controller_id = cidr
 	$HandRight.controller_id = cidl
-	$HandLeftH.controller_id = cidr
-	$HandRightH.controller_id = cidl
 
 remotesync func playvoicerecording(wavrecording):
 	print("playing recording ", wavrecording.size()) 
@@ -70,12 +70,12 @@ func playerpositiondict():
 var pointerposechangeangle = Transform()
 func _process(delta):
 	if ovr_hand_tracking != null:
-		$HandLeftH.process_ovrhandtracking(delta)
-		$HandRightH.process_ovrhandtracking(delta)
+		$HandLeft.process_ovrhandtracking(delta)
+		$HandRight.process_ovrhandtracking(delta)
 	else:
-		$HandLeftH.process_normalvrtracking(delta)
-		$HandRightH.process_normalvrtracking(delta)
-	LaserOrient.global_transform = global_transform*$HandRightH.pointerpose*pointerposechangeangle
+		$HandLeft.process_normalvrtracking(delta)
+		$HandRight.process_normalvrtracking(delta)
+	LaserOrient.global_transform = global_transform*$HandRight.pointerpose*pointerposechangeangle
 
 	if Tglobal.VRstatus == "none" and Input.is_action_pressed("lh_shift"):
 		var lhkeyvec = Vector2(0, 0)
@@ -92,17 +92,17 @@ func _process(delta):
 var ovr_hand_tracking = null
 
 func initnormalvrtrackingnow():
-	$HandLeftH.initnormalvrtracking($HandLeft)
-	$HandRightH.initnormalvrtracking($HandRight)
+	$HandLeft.initnormalvrtracking($HandLeftController)
+	$HandRight.initnormalvrtracking($HandRightController)
 	pointerposechangeangle = Transform(Basis(Vector3(1,0,0), deg2rad(-45)), Vector3(0,0,0))
-
+	$HandLeft.addremotetransform("middle_null", get_node("/root/Spatial/BodyObjects/MovePointThimble"))
 
 func initquesthandtrackingnow(lovr_hand_tracking):
 	Tglobal.questhandtracking = true
 	$HeadCam/HeadtorchLight.shadow_enabled = false
 
 	ovr_hand_tracking = lovr_hand_tracking
-	$HandLeftH.initovrhandtracking(ovr_hand_tracking, $HandLeft)
-	$HandRightH.initovrhandtracking(ovr_hand_tracking, $HandRight)
-	$HandLeftH.addremotetransform("middle_null", get_node("/root/Spatial/BodyObjects/MovePointThimble"))
+	$HandLeft.initovrhandtracking(ovr_hand_tracking, $HandLeftController)
+	$HandRight.initovrhandtracking(ovr_hand_tracking, $HandRightController)
+	$HandLeft.addremotetransform("middle_null", get_node("/root/Spatial/BodyObjects/MovePointThimble"))
 	
