@@ -38,7 +38,7 @@ _global_script_class_icons={
 
 [application]
 
-config/name="tunnelvr2"
+config/name="tunnelvr3"
 run/main_scene="res://Spatial.tscn"
 config/icon="res://icon.png"
 

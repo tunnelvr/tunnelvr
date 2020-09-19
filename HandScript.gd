@@ -25,7 +25,7 @@ const handokay11 = [ Quat( 0, 0, 0, 1 ), Quat( 0, 0, 0, 1 ), Quat( 0.468796, 0.3
 
 var pointermodel = null
 var pointervalid = false
-var pointerpose = null
+var pointerpose = Transform()
 var pointermaterial = null
 
 const fadetimevalidity = 1/0.2
@@ -80,6 +80,8 @@ func process_ovrhandtracking(delta):
 	if handvalid:
 		handmodel.transform = handcontroller.transform
 	update_handpose(delta)
+	if pointervalid:
+		pointermodel.transform = pointerpose
 
 func update_handpose(delta):
 	if handvalid:
@@ -170,9 +172,6 @@ func update_hand_shape(_button):
 	print("hh ", h1, " ", h2, "  ", boneorientations[2])
 	handposeimmediate(boneorientations, 200)
 
-func update_hand_shape2(_button):
-	update_hand_shape(_button)
-
 func initnormalvrtracking(lhandcontroller):
 	handcontroller = lhandcontroller
 	handposeimmediate(handokay00, 600)
@@ -185,14 +184,16 @@ func initnormalvrtracking(lhandcontroller):
 		handmodel.rotation_degrees.y = -90
 	handmodel.translation.z += 0.1
 
-func _process(delta):
-	if ovr_hand_tracking == null:
-		if handcontroller != null:
-			transform = handcontroller.transform
-		if len(handpositionstack) != 0:
-			process_handpositionstack(delta)
-	handtranslucentvalidity = update_fademode(delta, handvalid, handtranslucentvalidity, handmodel, handmaterial)
+func process_normalvrtracking(delta):
+	if handcontroller != null:
+		transform = handcontroller.transform
+	pointerpose = transform
 	if pointervalid:
 		pointermodel.transform = pointerpose
+
+func _process(delta):
+	if len(handpositionstack) != 0:
+		process_handpositionstack(delta)
+	handtranslucentvalidity = update_fademode(delta, handvalid, handtranslucentvalidity, handmodel, handmaterial)
 	pointertranslucentvalidity = update_fademode(delta, pointervalid, pointertranslucentvalidity, pointermodel, pointermaterial)
 
