@@ -22,6 +22,8 @@ func quicksoundonpositionchange(sname, position, dist):
 			quicksoundlastsoundposition[sname] = position
 			$quicksounds.get_node(sname).global_transform.origin = position
 			$quicksounds.get_node(sname).play()
+			return true
+	return false
 	
 func startmyvoicerecording():
 	var audiobusrecordeffect = AudioServer.get_bus_effect(AudioServer.get_bus_index("Record"), 0)

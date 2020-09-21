@@ -107,6 +107,9 @@ func _physics_process(delta):
 	playerbodyverticalheight = min(playerbodyabsoluteheight, playerheadbodyradius + headcentreabovephysicalfloorheight)
 	playerheadcentreabovebodycentreheight = playerbodyverticalheight/2 - playerheadbodyradius
 
+	var Dgo = playerMe.global_transform.origin
+	var Dplayerbodycentre = HeadCentre.global_transform.origin - Vector3(0, playerheadcentreabovebodycentreheight, 0) + Ddebugvisualoffset
+
 	var capsuleshaftheight = playerbodyverticalheight - 2*playerheadbodyradius
 	$PlayerKinematicBody/PlayerBodyCapsule.shape.height = capsuleshaftheight
 	$PlayerKinematicBody/PlayerBodyCapsule/CapsuleShapePreview.mesh.mid_height = capsuleshaftheight
@@ -121,7 +124,9 @@ func _physics_process(delta):
 	elif playerinfreefall:
 		process_freefall(delta)
 	else:
-		var playerdirectedwalkmovement = process_directedwalkmovement(delta, PlayerDirections.playerdirectedwalkingvelocity) if PlayerDirections.playerdirectedwalkingvelocity != Vector3(0,0,0) else Vector3(0,0,0)
+		var playerdirectedwalkmovement = Vector3(0,0,0)
+		if PlayerDirections.playerdirectedwalkingvelocity != Vector3(0,0,0):
+			playerdirectedwalkmovement = process_directedwalkmovement(delta, PlayerDirections.playerdirectedwalkingvelocity)
 		process_feet_on_floor(delta, playerdirectedwalkmovement)
 	process_shareplayerposition()
 	playerdirectedflight_prev = PlayerDirections.playerdirectedflightvelocity
@@ -151,6 +156,9 @@ func process_clawengagement(delta, clawengagementrelativedisplacement):
 
 func process_feet_on_floor(delta, playerdirectedwalkmovement):
 	playerbodycentre = HeadCentre.global_transform.origin - Vector3(0, playerheadcentreabovebodycentreheight, 0) + Ddebugvisualoffset
+	var xxx = HeadCentre.global_transform.origin
+	var xxx1 = xxx.y - playerheadcentreabovebodycentreheight	
+	var xxxT = null
 	
 	var playeriscolliding = false
 	var playerheadcolliding = false	
@@ -158,25 +166,41 @@ func process_feet_on_floor(delta, playerdirectedwalkmovement):
 
 	var stepupdistanceclear = playermaxstepupheight
 	var playerbodycapsulebasis = $PlayerKinematicBody/PlayerBodyCapsule.global_transform.basis
-	var playerbodycentrewithdirectedmotion = playerbodycentre + playerdirectedwalkmovement
+	var playerbodycentrewithdirectedmotion = playerbodycentre + Vector3(playerdirectedwalkmovement.x, 0, playerdirectedwalkmovement.z)
 	psqparams.transform = Transform(playerbodycapsulebasis, playerbodycentrewithdirectedmotion + Vector3(0, stepupdistanceclear, 0))
 	if len(get_world().direct_space_state.intersect_shape(psqparams, 1)) != 0:
-		stepupdistanceclear = playermaxstepupheight/2
+		stepupdistanceclear = max(playermaxstepupheight*0.01, playerdirectedwalkmovement.y - playermaxstepupheight*0.02)
 		psqparams.transform = Transform(playerbodycapsulebasis, playerbodycentrewithdirectedmotion + Vector3(0, stepupdistanceclear, 0))
+		xxxT = psqparams.transform
 		if len(get_world().direct_space_state.intersect_shape(psqparams, 1)) != 0:
-			stepupdistanceclear = -playerstepdownbump
+			stepupdistanceclear = 0.05 # -playerstepdownbump
 			psqparams.transform = Transform(playerbodycapsulebasis, playerbodycentrewithdirectedmotion + Vector3(0, stepupdistanceclear, 0))
 			if len(get_world().direct_space_state.intersect_shape(psqparams, 1)) != 0:
 				playeriscolliding = true
 	
+	if playeriscolliding and playerdirectedwalkmovement != Vector3(0,0,0) and Ddebugvisualoffset != Vector3(0,0,0):
+		var ds = [ ]
+		for i in range(1, 5):
+			var dyy = playermaxstepupheight/20.0*i
+			psqparams.transform = Transform(playerbodycapsulebasis, playerbodycentrewithdirectedmotion + Vector3(0, dyy, 0))
+			if len(get_world().direct_space_state.intersect_shape(psqparams, 1)) == 0:
+				ds.append(dyy)
+		if len(ds) != 0:
+			print("better stepup ", ds, playerdirectedwalkmovement.y)
+			stepupdistanceclear = ds[0]
+			playeriscolliding = false
+		
 	if not playeriscolliding and playerdirectedwalkmovement != Vector3(0,0,0):
-		playerMe.global_transform.origin += playerdirectedwalkmovement
+		playerMe.global_transform.origin += Vector3(playerdirectedwalkmovement.x, 0, playerdirectedwalkmovement.z)
 		playerbodycentre = playerbodycentrewithdirectedmotion
 		assert (playerbodycentre.is_equal_approx(HeadCentre.global_transform.origin - Vector3(0, playerheadcentreabovebodycentreheight, 0) + Ddebugvisualoffset))
 	
 	var stepupdistance = 0.0
 	if not playeriscolliding:
 		if stepupdistanceclear > 0:
+			var Dyyy = psqparams.transform
+			var Dyyy1 = Transform(playerbodycapsulebasis, playerbodycentrewithdirectedmotion + Vector3(0, stepupdistanceclear, 0))
+
 			var downcastdistance = stepupdistanceclear + playerstepdownbump
 			var dropcollision = get_world().direct_space_state.cast_motion(psqparams, Vector3(0, -downcastdistance, 0))
 			if len(dropcollision) != 0 and dropcollision[0] != 0.0:
@@ -195,7 +219,8 @@ func process_feet_on_floor(delta, playerdirectedwalkmovement):
 	if not playeriscolliding:
 		playerbodycentre.y += stepupdistance
 #		print("HHH  ", playerMe.global_transform.origin.y, "  ", playerbodycentre.y, "  ", playerheadcentreabovebodycentreheight, "  ", headcentreabovephysicalfloorheight)
-		playerMe.global_transform.origin.y = playerbodycentre.y + playerheadcentreabovebodycentreheight - headcentreabovephysicalfloorheight
+		var neworiginheight = playerbodycentre.y + playerheadcentreabovebodycentreheight - headcentreabovephysicalfloorheight
+		playerMe.global_transform.origin.y = neworiginheight
 		$PlayerKinematicBody.global_transform.origin = playerbodycentre
 		if playerstartsfreefall:
 			$PlayerKinematicBody/PlayerBodyCapsule/CapsuleShapePreview/FreefallWarning.visible = true
@@ -210,10 +235,18 @@ func process_feet_on_floor(delta, playerdirectedwalkmovement):
 		psqparamshead.transform = Transform(playerbodycapsulebasis, playerheadcentreforcollision)
 		playerheadcolliding = len(get_world().direct_space_state.intersect_shape(psqparamshead, 1)) != 0
 		$PlayerHeadKinematicBody/PlayerHeadCapsule.global_transform.origin = playerheadcentreforcollision
-		Tglobal.soundsystem.quicksoundonpositionchange("GentleCollide", playerbodycentre, 0.15)
+		if Tglobal.soundsystem.quicksoundonpositionchange("GentleCollide", playerbodycentre, 0.15):
+			if Ddebugvisualoffset != Vector3(0,0,0):
+				var ds = [ ]
+				for i in range(0, 8):
+					var dyy = playermaxstepupheight/30.0*i
+					psqparams.transform = Transform(playerbodycapsulebasis, playerbodycentre + Vector3(0, dyy, 0))
+					var xxxTT = psqparams.transform
+					if len(get_world().direct_space_state.intersect_shape(psqparams, 1)) == 0:
+						ds.append([i,dyy,xxxTT])
+				print("Height offsets that are clear: ", ds)
 
-
-	$PlayerKinematicBody.global_transform.origin = playerbodycentre
+	$PlayerKinematicBody.global_transform.origin = playerbodycentre # + Vector3(0,0.03,0)
 	$PlayerKinematicBody/PlayerBodyCapsule/CapsuleShapePreview/CollisionWarning.visible = playeriscolliding
 	$PlayerKinematicBody/PlayerBodyCapsule/CapsuleShapePreview/HeadCollisionWarning.visible = playerheadcolliding
 	HeadCollisionWarning.visible = playerheadcolliding
@@ -225,6 +258,7 @@ func endfreefallmode():
 	
 func process_freefall(delta):
 	$PlayerKinematicBody.global_transform.origin = playerbodycentre
+	var Dplayerbodycentre = playerbodycentre
 	playerfreefallbodyvelocity.y -= gravityacceleration*delta
 	playerfreefallbodyvelocity *= 1.0 - freefallairdragfactor*delta
 	playerfreefallbodyvelocity = $PlayerKinematicBody.move_and_slide(playerfreefallbodyvelocity, Vector3(0, 1, 0))
@@ -247,9 +281,12 @@ func process_directedwalkmovement(delta, playerdirectedwalkingvelocity):
 	$PlayerEnlargedKinematicBody.global_transform.origin = playerbodycentre + Vector3(0, directedcollisionstepup, 0)
 	$PlayerEnlargedKinematicBody.move_and_slide(playerdirectedwalkingvelocity, Vector3(0, 1, 0))
 	var playerdirectedwalkmovement = $PlayerEnlargedKinematicBody.global_transform.origin - playerbodycentre
-	playerdirectedwalkmovement.y = 0
 	if playerdirectedwalkingvelocity.dot(playerdirectedwalkmovement) > 0:
-		return playerdirectedwalkmovement
+		var playerenlargedbodycentrewithdirectedmotion = playerbodycentre + Vector3(0, directedcollisionstepup, 0) + Vector3(playerdirectedwalkmovement.x, 0, playerdirectedwalkmovement.z)
+		$PlayerEnlargedKinematicBody.global_transform.origin = playerenlargedbodycentrewithdirectedmotion
+		var kinematiccollision = $PlayerEnlargedKinematicBody.move_and_collide(Vector3(0, -playermaxstepupheight, 0))
+		var bumpup = playermaxstepupheight - (playerenlargedbodycentrewithdirectedmotion.y - $PlayerEnlargedKinematicBody.global_transform.origin.y)
+		return Vector3(playerdirectedwalkmovement.x, bumpup, playerdirectedwalkmovement.z)
 	return Vector3(0,0,0)
 
 func process_directedflight(delta, playerdirectedflightvelocity):
@@ -269,15 +306,93 @@ func process_directedflight(delta, playerdirectedflightvelocity):
 	playerbodycentre_prev = playerbodycentre
 	$PlayerKinematicBody.global_transform.origin = playerbodycentre
 
+
+const fingeranglechange = cos(deg2rad(1))
+const handanglechange = cos(deg2rad(2))
+const handpositionchange = 0.01
+const headanglechange = cos(deg2rad(4))
+const headpositionchange = 0.01
+const dtmin = 0.05
+const dtmax = 0.8
+var prevpositiondict = null
+func transformwithinrange(trans0, trans1, poschange, cosangchange):
+	var distorigin = trans0.origin.distance_to(trans1.origin)
+	if distorigin > poschange:
+		return false
+	var q0 = trans0.basis.get_rotation_quat()
+	var q1 = trans1.basis.get_rotation_quat()
+	var dq = q0.inverse()*q1
+	if dq.w < cosangchange:
+		return false
+	return true
+
+func filter_playerhand_bandwidth(prevhand, hand):
+	if transformwithinrange(prevhand["transform"], hand["transform"], handpositionchange, handanglechange):
+		hand.erase("transform")
+	else:
+		prevhand["transform"] = hand["transform"]
+
+	if hand.has("boneorientations"):
+		var boneorientationwithinrange = true
+		for i in range(len(hand["boneorientations"])):  # should use simply fingertip transforms
+			var dq = prevhand["boneorientations"][i].inverse()*hand["boneorientations"][i]
+			if dq.w < fingeranglechange:
+				boneorientationwithinrange = false
+				break
+		if boneorientationwithinrange:
+			hand.erase("boneorientations")
+		else:
+			prevhand["boneorientations"] = hand["boneorientations"].duplicate(true)
+	if hand.has("boneorientations") or hand.has("transform") or prevhand["valid"] != hand["valid"]:
+		prevhand["timestamp"] = hand["timestamp"]
+		return false
+	return true
+		
+func filter_playerposition_bandwidth(positiondict):
+	if prevpositiondict == null:
+		prevpositiondict = positiondict.duplicate(true)
+		return positiondict
+	var dt = positiondict["timestamp"] - prevpositiondict["timestamp"]
+	if dt < dtmin:
+		return null
+	if dt > dtmax:
+		prevpositiondict = positiondict.duplicate(true)
+		return positiondict
+	if transformwithinrange(prevpositiondict["playertransform"], positiondict["playertransform"], headpositionchange, headanglechange):
+		positiondict.erase("playertransform")
+	else:
+		prevpositiondict["playertransform"] = positiondict["playertransform"]
+	if transformwithinrange(prevpositiondict["headcamtransform"], positiondict["headcamtransform"], headpositionchange, headanglechange):
+		positiondict.erase("headcamtransform")
+	else:
+		prevpositiondict["headcamtransform"] = positiondict["headcamtransform"]
+		
+	if filter_playerhand_bandwidth(prevpositiondict["handleft"], positiondict["handleft"]):
+		positiondict.erase("handleft")
+	#else:
+	#	print("Left ", positiondict["handleft"]["timestamp"])
+	if filter_playerhand_bandwidth(prevpositiondict["handright"], positiondict["handright"]):
+		positiondict.erase("handright")
+	
+	if not positiondict.has("playertransform") and not positiondict.has("headcamtransform") and not positiondict.has("handleft") and not positiondict.has("handright"):
+		return null
+	prevpositiondict["timestamp"] = positiondict["timestamp"]
+	return positiondict
+
+
 func process_shareplayerposition():
 	var doppelganger = playerMe.doppelganger
-	if is_inside_tree() and is_instance_valid(doppelganger):
+	if is_instance_valid(playerMe.doppelganger) or Tglobal.morethanoneplayer:
 		var positiondict = playerMe.playerpositiondict()
-		positiondict["playertransform"] = Transform(Basis(-positiondict["playertransform"].basis.x, positiondict["playertransform"].basis.y, -positiondict["playertransform"].basis.z), 
-													Vector3(doppelganger.global_transform.origin.x, positiondict["playertransform"].origin.y, doppelganger.global_transform.origin.z))
-		if playerMe.bouncetestnetworkID != 0:
-			playerMe.rpc_unreliable_id(playerMe.bouncetestnetworkID, "bouncedoppelgangerposition", playerMe.networkID, positiondict)
-		else:
-			doppelganger.setavatarposition(positiondict)
-	if Tglobal.connectiontoserveractive:
-		playerMe.rpc_unreliable("setavatarposition", playerMe.playerpositiondict())
+		positiondict = filter_playerposition_bandwidth(positiondict)
+		if positiondict != null:
+			if Tglobal.morethanoneplayer:
+				playerMe.rpc_unreliable("setavatarposition", positiondict)
+			if is_instance_valid(playerMe.doppelganger):
+				if positiondict.has("playertransform"):
+					positiondict["playertransform"] = Transform(Basis(-positiondict["playertransform"].basis.x, positiondict["playertransform"].basis.y, -positiondict["playertransform"].basis.z), 
+																Vector3(doppelganger.global_transform.origin.x, positiondict["playertransform"].origin.y, doppelganger.global_transform.origin.z))
+				if playerMe.bouncetestnetworkID != 0:
+					playerMe.rpc_unreliable_id(playerMe.bouncetestnetworkID, "bouncedoppelgangerposition", playerMe.networkID, positiondict)
+				else:
+					doppelganger.setavatarposition(positiondict)

@@ -109,12 +109,16 @@ export var hostipnumber: String = ""
 export var hostportnumber: int = 8002
 export var enablevr: = true
 export var enablenetworking: = true
+export var usewebsockets: = true
 
 var perform_runtime_config = true
 var ovr_init_config = null
 var ovr_performance = null
 var ovr_hand_tracking = null
 var networkID = 0
+
+var websocketserverclient = null
+var isserver
 
 onready var playerMe = $Players/PlayerMe
 
@@ -206,28 +210,46 @@ func _ready():
 	print("*-*-*-*  requesting permissions: ", OS.request_permissions())
 	var perm = OS.get_granted_permissions()
 	print("Granted permissions: ", perm)
+	isserver = (hostipnumber == "")
+	print("isserver: ", isserver, ", ", [hostipnumber])
 	if enablenetworking:
 		print("IP local addressess ", IP.get_local_addresses())
 		print("IP local interfaces ", IP.get_local_interfaces())
-		var networkedmultiplayerenet = NetworkedMultiplayerENet.new()
 		get_tree().connect("network_peer_connected", self, "_player_connected")
 		get_tree().connect("network_peer_disconnected", self, "_player_disconnected")
-		if hostipnumber == "":
-			networkedmultiplayerenet.create_server(hostportnumber, 5)
-			Tglobal.connectiontoserveractive = true
-		else:
-			networkedmultiplayerenet.create_client(hostipnumber, hostportnumber)
+		Tglobal.connectiontoserveractive = isserver
+		print("Tglobal.connectiontoserveractive: ", Tglobal.connectiontoserveractive)
+		if not isserver:
 			get_tree().connect("connected_to_server", self, "_connected_to_server")
 			get_tree().connect("connection_failed", self, "_connection_failed")
 			get_tree().connect("server_disconnected", self, "_server_disconnected")
-			Tglobal.connectiontoserveractive = false
 			#playerMe.rotate_y(180)  
 			playerMe.global_transform.origin += 3*Vector3(playerMe.get_node("HeadCam").global_transform.basis.z.x, 0, playerMe.get_node("HeadCam").global_transform.basis.z.z).normalized()
-		get_tree().set_network_peer(networkedmultiplayerenet)
+
+		if usewebsockets:
+			if isserver:
+				websocketserverclient = WebSocketServer.new();
+				var e = websocketserverclient.listen(hostportnumber, PoolStringArray(), true);
+				print("Websocketserverclient listen: ", e)
+				get_tree().set_network_peer(websocketserverclient)
+			else:
+				websocketserverclient = null # defer to the _ready()
+			
+		else:
+			var networkedmultiplayerenet = NetworkedMultiplayerENet.new()
+			if isserver:
+				var e = networkedmultiplayerenet.create_server(hostportnumber, 5)
+				print("networkedmultiplayerenet createserver: ", e)
+			else:
+				var e = networkedmultiplayerenet.create_client(hostipnumber, hostportnumber)
+				print("networkedmultiplayerenet createclient: ", e)
+			get_tree().set_network_peer(networkedmultiplayerenet)
+			
 		networkID = get_tree().get_network_unique_id()
-		print("nnet-id ", networkID)
-		playerMe.set_network_master(networkID)
-		playerMe.networkID = networkID
+		print("networkID: ", networkID)
+		if networkID != 0:
+			playerMe.set_network_master(networkID)
+			playerMe.networkID = networkID
 
 	if false:
 		#$SketchSystem.loadcentrelinefile("res://surveyscans/dukest1resurvey2009json.res")
@@ -264,11 +286,13 @@ func _player_connected(id):
 	if networkID == 1:
 		$SketchSystem.rpc_id(id, "sketchsystemfromdict", $SketchSystem.sketchsystemtodict())
 	playerMe.bouncetestnetworkID = nextplayernetworkidinringskippingdoppelganger(0)
+	Tglobal.morethanoneplayer = $Players.get_child_count() >= 2
 	playerMe.rpc("initplayerpuppet", (ovr_hand_tracking != null))
 	
 func _player_disconnected(id):
 	print("_player_disconnected ", id)
 	var playerothername = "NetworkedPlayer"+String(id)
+	Tglobal.morethanoneplayer = $Players.get_child_count() >= 2
 	print("Number of players before queuefree ", $Players.get_child_count())
 	if $Players.has_node(playerothername):
 		$Players.get_node(playerothername).queue_free()
@@ -277,10 +301,22 @@ func _player_disconnected(id):
 		
 func _connected_to_server():
 	print("_connected_to_server")
+	var newnetworkID = get_tree().get_network_unique_id()
+	if networkID != newnetworkID:
+		print("setting the newnetworkID: ", newnetworkID)
+		networkID = newnetworkID
+		playerMe.set_network_master(networkID)
+		playerMe.networkID = networkID
+		playerMe.set_name("NetworkedPlayer"+String(networkID))
+			
+	print("SETTING connectiontoserveractive true now")
 	Tglobal.connectiontoserveractive = true
-	
+	playerMe.rpc("initplayerpuppet", (ovr_hand_tracking != null))
+		
 func _connection_failed():
 	print("_connection_failed")
+	websocketserverclient = null
+	
 func _server_disconnected():
 	print("_server_disconnected")
 	Tglobal.connectiontoserveractive = false
@@ -290,7 +326,23 @@ func _process(_delta):
 		ovr_performance.set_clock_levels(1, 1)
 		ovr_performance.set_extra_latency_mode(1)
 		perform_runtime_config = true
-		set_process(false)
+		if not (enablenetworking and usewebsockets):
+			set_process(false)
+	if enablenetworking and usewebsockets:
+		if isserver:
+			if websocketserverclient.is_listening():
+				websocketserverclient.poll()
+		else:
+			if websocketserverclient == null:  # defer to the _ready()
+				websocketserverclient = WebSocketClient.new();
+				var url = "ws://"+hostipnumber+":" + str(hostportnumber)
+				var e = websocketserverclient.connect_to_url(url, PoolStringArray(), true)
+				print("Websocketclient connectto: ", url, " ", e, " <<----ERROR " if e != 0 else "")
+				get_tree().set_network_peer(websocketserverclient)
+			
+			if (websocketserverclient.get_connection_status() == NetworkedMultiplayerPeer.CONNECTION_CONNECTED or websocketserverclient.get_connection_status() == NetworkedMultiplayerPeer.CONNECTION_CONNECTING):
+				websocketserverclient.poll()
+				
 
 func clearallprocessactivityforreload():
 	$LabelGenerator.workingxcnode = null

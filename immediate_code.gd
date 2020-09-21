@@ -21,6 +21,16 @@ func _on_request_completed(result, response_code, headers, body):
 	
 
 func _run():
-	var x = IP.get_local_addresses()
-	for i in range(1, 4):
-		print("i", i)
+	var x = Basis()
+	x = x.rotated(Vector3(0.22,1,0).normalized(), 1.01)
+	var q = x.get_rotation_quat()
+	var y = x.rotated(Vector3(0,0,1), 0.34)
+	var q2 = y.get_rotation_quat()
+	print(q2)
+	#var a = q.inverse()*q2
+	var a = q2.inverse()*q
+	print(a, a.w, " ", acos(a.w)*2)
+	var v = {"a":9, "jj":10}
+	print(v)
+	v.erase("a")
+	print(v)

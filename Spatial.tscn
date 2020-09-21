@@ -1,4 +1,4 @@
-[gd_scene load_steps=193 format=2]
+[gd_scene load_steps=192 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/default_env.tres" type="Environment" id=2]
@@ -6,7 +6,6 @@
 [ext_resource path="res://utilities/Locomotion_WalkInPlace.gd" type="Script" id=4]
 [ext_resource path="res://pointersystem.gd" type="Script" id=5]
 [ext_resource path="res://lightweighttextures/Ground030_2K_Color_small.jpg" type="Texture" id=7]
-[ext_resource path="res://WebsocketSystem.gd" type="Script" id=8]
 [ext_resource path="res://sounds/switch7.wav" type="AudioStream" id=9]
 [ext_resource path="res://SketchSystem.gd" type="Script" id=10]
 [ext_resource path="res://icon.png" type="Texture" id=11]
@@ -261,6 +260,7 @@ metallic_specular = 0.49
 roughness = 0.36
 
 [sub_resource type="CapsuleShape" id=38]
+margin = 0.01
 radius = 0.15
 height = 0.15
 
@@ -286,10 +286,12 @@ albedo_color = Color( 0.960784, 0.0313726, 0.0313726, 1 )
 albedo_color = Color( 0.321569, 0.0313726, 0.960784, 1 )
 
 [sub_resource type="CapsuleShape" id=45]
+margin = 0.01
 radius = 0.15
 height = 0.01
 
 [sub_resource type="SphereShape" id=46]
+margin = 0.01
 radius = 0.15
 
 [sub_resource type="PrismMesh" id=47]
@@ -933,6 +935,7 @@ size = Vector2( 4, 2 )
 
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
+hostipnumber = "192.168.1.224"
 
 [node name="Players" type="Spatial" parent="."]
 transform = Transform( -1, 0, -3.25841e-07, 0, 1, 0, 3.25841e-07, 0, -1, 0, 0, 0 )
@@ -1964,9 +1967,6 @@ material/0 = SubResource( 143 )
 
 [node name="ImageSystem" type="Node" parent="."]
 script = ExtResource( 17 )
-
-[node name="WebsocketSystem" type="Node" parent="."]
-script = ExtResource( 8 )
 
 [node name="underfloor" type="StaticBody" parent="."]
 transform = Transform( 200, 0, 0, 0, 1, 0, 0, 0, 200, 0, -10.5, 0 )

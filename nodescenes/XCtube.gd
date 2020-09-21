@@ -476,7 +476,9 @@ func updatetubeshell(xcdrawings, makevisible):
 		xctubesector.set_name("XCtubesector_"+String(i))
 		xctubesector.get_node("MeshInstance").mesh = tubesectormesh
 		xctubesector.get_node("MeshInstance").set_surface_material(0, get_node("/root/Spatial/MaterialSystem").gettubematerial(xcsectormaterials[i], false))
-		xctubesector.get_node("CollisionShape").shape = ConcavePolygonShape.new()
+		var cps = ConcavePolygonShape.new()
+		cps.margin = 0.01
+		xctubesector.get_node("CollisionShape").shape = cps
 		xctubesector.get_node("CollisionShape").shape.set_faces(tubesectormesh.get_faces())
 		xctubesector.visible = true
 		xctubesector.get_node("CollisionShape").disabled = false

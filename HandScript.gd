@@ -37,7 +37,7 @@ const fadetimevalidity = 1/0.2
 var handtranslucentvalidity = 0.0
 var pointertranslucentvalidity = 0.0
 
-var handpositionstack = [ ]  # [ { "timestamp", "valid", "transform", "boneorientations" } ] 
+var handpositionstack = [ ]  # [ { "Ltimestamp", "valid", "transform", "boneorientations" } ] 
 
 func _ready():
 	islefthand = (get_name() == "HandLeft")
@@ -65,6 +65,7 @@ func _ready():
 	add_child(pointermodel)
 	
 func initovrhandtracking(lovr_hand_tracking, lhandcontroller):
+	handpositionstack = null
 	ovr_hand_tracking = lovr_hand_tracking
 	handcontroller = lhandcontroller
 	controller_id = handcontroller.controller_id
@@ -113,13 +114,13 @@ func addremotetransform(bname, node):
 	boneattachment.add_child(remotetransform)
 	remotetransform.remote_path = remotetransform.get_path_to(node)
 
-var timeoffset = 0
+var timeoffset = -0.2
 # [ { "timestamp", "valid", "transform", "boneorientations" } ] 
 func process_handpositionstack(delta):
-	var tms = OS.get_ticks_msec() + timeoffset
-	while len(handpositionstack) >= 2 and handpositionstack[1]["timestamp"] <= tms:
+	var t = OS.get_ticks_msec()*0.001
+	while len(handpositionstack) >= 2 and handpositionstack[1]["Ltimestamp"] <= t:
 		handpositionstack.pop_front()
-	if len(handpositionstack) == 0 or tms < handpositionstack[0]["timestamp"]:
+	if len(handpositionstack) == 0 or t < handpositionstack[0]["Ltimestamp"]:
 		return
 	var hp = handpositionstack[0]
 	if len(handpositionstack) == 1:
@@ -133,7 +134,7 @@ func process_handpositionstack(delta):
 		handpositionstack.pop_front()
 	else:
 		var hp1 = handpositionstack[1]
-		var lam = inverse_lerp(hp["timestamp"], hp1["timestamp"], tms)
+		var lam = inverse_lerp(hp["Ltimestamp"], hp1["Ltimestamp"], t)
 		if hp.has("valid") and hp1.has("valid"):
 			handvalid = hp["valid"] if lam < 0.5 else hp1["valid"]
 		if hp.has("transform") and hp1.has("transform"):
@@ -151,9 +152,9 @@ func handpositiondict(t0):
 
 func handposeimmediate(boneorientations, dt):
 	handpositionstack.clear()
-	var t0 = OS.get_ticks_msec()
-	handpositionstack.push_back({"timestamp":t0, "valid":true, "boneorientations":hand_boneorientations })
-	handpositionstack.push_back({"timestamp":t0+dt, "valid":true, "boneorientations":boneorientations })
+	var t0 = OS.get_ticks_msec()*0.001
+	handpositionstack.push_back({"Ltimestamp":t0, "valid":true, "boneorientations":hand_boneorientations.duplicate() })
+	handpositionstack.push_back({"Ltimestamp":t0+dt, "valid":true, "boneorientations":boneorientations })
 
 func update_hand_shape(_button):
 	var h1 = handcontroller.is_button_pressed(BUTTONS.VR_TRIGGER)
@@ -168,11 +169,12 @@ func update_hand_shape(_button):
 	if h1 and h2:
 		boneorientations = handokay11
 	print("hh ", h1, " ", h2, "  ", boneorientations[2])
-	handposeimmediate(boneorientations, 200)
+	handposeimmediate(boneorientations, 0.2)
 
 func initnormalvrtracking(lhandcontroller):
+	handpositionstack = [ ]
 	handcontroller = lhandcontroller
-	handposeimmediate(handokay00, 600)
+	handposeimmediate(handokay00, 0.6)
 	handcontroller.connect("button_pressed", self, "update_hand_shape")
 	handcontroller.connect("button_release", self, "update_hand_shape")
 	if islefthand:
@@ -183,9 +185,11 @@ func initnormalvrtracking(lhandcontroller):
 	handmodel.translation.z += 0.1
 
 func initpuppetracking(lplayerishandtracked):
+	print("initpuppetracking: ", lplayerishandtracked, " ", islefthand)
+	handpositionstack = [ ]
 	playerishandtracked = lplayerishandtracked
 	if not playerishandtracked:
-		handposeimmediate(handokay00, 600)
+		handposeimmediate(handokay00, 0.6)
 		if islefthand:
 			handmodel.rotation_degrees.y = -90
 			handmodel.rotation_degrees.z = 180
@@ -216,9 +220,9 @@ func process_normalvrtracking(delta):
 	pointerpose = transform
 	if pointervalid:
 		pointermodel.transform = pointerpose
-
+	
 func _process(delta):
-	if len(handpositionstack) != 0:
+	if handpositionstack != null and len(handpositionstack) != 0:
 		process_handpositionstack(delta)
 	handtranslucentvalidity = update_fademode(delta, handvalid, handtranslucentvalidity, handmodel, handmaterial)
 	pointertranslucentvalidity = update_fademode(delta, pointervalid, pointertranslucentvalidity, pointermodel, pointermaterial)
