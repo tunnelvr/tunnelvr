@@ -35,19 +35,20 @@ remote func setavatarposition(positiondict):
 		if firstrelativetimenotset or remotetimegapmin > remotetimegapmaxmin:
 			remotetimegapmaxmin = remotetimegapmin
 		reltimebatchcount = 0
-		firstrelativetimenotset = false
-		print("relativetimeminmax ", relativetimeminmax, "  ", remotetimegapmaxmin)
+		if firstrelativetimenotset:
+			print("relativetimeminmax ", relativetimeminmax, "  ", remotetimegapmaxmin)
+			firstrelativetimenotset = false
 
 	var dt = reltime   # pipe through directly and then buffer
 	if not firstrelativetimenotset:
 		dt = relativetimeminmax + remotetimegap_dtmax + 0.05  # was remotetimegapmaxmin, but only gets smooth when it gets to that value
 	
-	var puppetbody = { "timestamp":positiondict["timestamp"] }
+	var Ltimestamp = positiondict["timestamp"] + dt
+	var puppetbody = { "timestamp":positiondict["timestamp"], "Ltimestamp":Ltimestamp }
 	if positiondict.has("playertransform"):
 		puppetbody["playertransform"] = positiondict["playertransform"]
 	if positiondict.has("headcamtransform"):
 		puppetbody["headcamtransform"] = positiondict["headcamtransform"]
-	puppetbody["Ltimestamp"] = positiondict["timestamp"] + dt
 	if puppetbody.has("playertransform") or puppetbody.has("headcamtransform"):
 		while len(puppetpositionstack) > 20:
 			puppetpositionstack.pop_front()
@@ -56,21 +57,21 @@ remote func setavatarposition(positiondict):
 	if positiondict.has("laserpointer"):
 		var puppetpointerposition = positiondict["laserpointer"]
 		puppetpointerposition["timestamp"] = positiondict["timestamp"]
-		puppetpointerposition["Ltimestamp"] = positiondict["timestamp"] + dt
+		puppetpointerposition["Ltimestamp"] = Ltimestamp
 		while len(puppetpointerpositionstack) > 20:
 			puppetpointerpositionstack.pop_front()
 		puppetpointerpositionstack.push_back(puppetpointerposition)
 
 	if positiondict.has("handleft"):
 		var handleftposition = positiondict["handleft"]
-		handleftposition["Ltimestamp"] = handleftposition["timestamp"] + dt
+		handleftposition["Ltimestamp"] = Ltimestamp
 		while len($HandLeft.handpositionstack) > 20:
 			$HandLeft.handpositionstack.pop_front()
 		$HandLeft.handpositionstack.push_back(handleftposition)
 
 	if positiondict.has("handright"):
 		var handrightposition = positiondict["handright"]
-		handrightposition["Ltimestamp"] = handrightposition["timestamp"] + dt
+		handrightposition["Ltimestamp"] = Ltimestamp
 		while len($HandRight.handpositionstack) > 20:
 			$HandRight.handpositionstack.pop_front()
 		$HandRight.handpositionstack.push_back(handrightposition)

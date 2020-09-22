@@ -336,16 +336,18 @@ func filter_playerhand_bandwidth(prevhand, hand):
 			if dq.w < fingeranglechange:
 				boneorientationwithinrange = false
 				break
-	if prevhand["valid"] == hand["valid"] and boneorientationwithinrange and transformwithinrange(prevhand["transform"], hand["transform"], handpositionchange, handanglechange):
+	if prevhand["valid"] == hand["valid"] and prevhand["triggerbuttonheld"] == hand["triggerbuttonheld"] and prevhand["gripbuttonheld"] == hand["gripbuttonheld"] \
+			and boneorientationwithinrange and transformwithinrange(prevhand["transform"], hand["transform"], handpositionchange, handanglechange):
 		hand.erase("transform")
 		if hand.has("boneorientations"):
 			hand.erase("boneorientations")
 	else:
-		prevhand["transform"] = hand["transform"]
-		if hand.has("boneorientations"):
-			prevhand["boneorientations"] = hand["boneorientations"].duplicate(true)
-		prevhand["timestamp"] = hand["timestamp"]
-		prevhand["valid"] == hand["valid"]
+		prevhand = hand.duplicate(true)
+		#prevhand["transform"] = hand["transform"]
+		#if hand.has("boneorientations"):
+		#	prevhand["boneorientations"] = hand["boneorientations"].duplicate(true)
+		#prevhand["timestamp"] = hand["timestamp"]
+		#prevhand["valid"] = hand["valid"]
 		return false
 	return true
 		
@@ -400,4 +402,8 @@ func process_shareplayerposition():
 				if playerMe.bouncetestnetworkID != 0:
 					playerMe.rpc_unreliable_id(playerMe.bouncetestnetworkID, "bouncedoppelgangerposition", playerMe.networkID, positiondict)
 				else:
+					if positiondict.has("handright"):
+						positiondict["handright"] = positiondict["handright"].duplicate(true)
+					if positiondict.has("handleft"):
+						positiondict["handleft"] = positiondict["handleft"].duplicate(true)
 					doppelganger.setavatarposition(positiondict)

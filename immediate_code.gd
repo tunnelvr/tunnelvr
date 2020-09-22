@@ -21,11 +21,10 @@ func _on_request_completed(result, response_code, headers, body):
 	
 
 func _run():
-	var x = Spatial.new()
-	x.rotation_degrees.y = -90
-	#x.rotation_degrees.z = 180
-	var a = x.transform
-	print(a.basis.x, a.basis.y, a.basis.z)
+	var a = Vector3(1,2,3)
+	print(1*a)
+	var b = true
+	print(int(b))
 
 #		if islefthand:
 #			handmodel.rotation_degrees.y = -90

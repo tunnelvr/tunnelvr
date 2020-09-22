@@ -10,15 +10,18 @@ var islefthand = false
 var handcontroller = null
 var controller_id = 0
 var handmodel = null
-var controllerhandtransform = null
+var handarmature = null
 var handskeleton = null
 var meshnode = null
 var handmaterial = null
 var joypos = Vector2(0, 0)
 
+var controllerhandtransform = null
 var mousecontrollermotioncumulative = Vector2(0, 0)
 var gripbuttonheld = false
 var triggerbuttonheld = false
+var indexfingerpinchbutton = null
+var middlefingerpinchbutton = null
 
 var handscale = 0.0
 var handconfidence = 0
@@ -57,7 +60,8 @@ func _ready():
 	handmodel = handmodelres.instance()
 	add_child(handmodel)
 	#handmodel.translation = Vector3(-0.2 if islefthand else 0.2, 0.8, 0)
-	handskeleton = handmodel.get_child(0).get_node("Skeleton")
+	handarmature = handmodel.get_child(0)
+	handskeleton = handarmature.get_node("Skeleton")
 	for i in range(0, handskeleton.get_bone_count()):
 		var bone_rest = handskeleton.get_bone_rest(i)
 		#print(i, "++++", var2str(bone_rest))
@@ -65,13 +69,28 @@ func _ready():
 		bone_rest.basis = Basis()
 		handskeleton.set_bone_rest(i, bone_rest)
 	meshnode = handskeleton.get_node("l_handMeshNode" if islefthand else "r_handMeshNode")
-	handmaterial = load("shinyhandmesh.material").duplicate()
+	handmaterial = load("res://shinyhandmesh.material").duplicate()
 	handmaterial.albedo_color = "#21db2c" if islefthand else "#db212c"
 	meshnode.set_surface_material(0, handmaterial)
-	pointermodel = load("LaserPointer.tscn").instance()
+	pointermodel = load("res://LaserPointer.tscn").instance()
 	pointermaterial = pointermodel.get_node("Length/MeshInstance").get_surface_material(0).duplicate()
 	pointermodel.get_node("Length/MeshInstance").set_surface_material(0, pointermaterial)
 	add_child(pointermodel)
+	indexfingerpinchbutton = addfingerpinchbutton("index_null")
+	middlefingerpinchbutton = addfingerpinchbutton("middle_null")
+
+func addfingerpinchbutton(bname):
+	var boneattachment = BoneAttachment.new()
+	boneattachment.bone_name = ("b_l_" if islefthand else "b_r_") + bname
+	handskeleton.add_child(boneattachment)
+	var fingerpinchbutton = load("res://nodescenes/FingerPinchButton.tscn").instance()
+	var handmodelscale = meshnode.global_transform.basis.get_scale()
+	fingerpinchbutton.scale = Vector3(1/handmodelscale.x, 1/handmodelscale.y, 1/handmodelscale.z)
+	if islefthand:
+		fingerpinchbutton.get_node("MeshInstance").transform.origin *= -1
+	fingerpinchbutton.get_node("MeshInstance").set_surface_material(0, fingerpinchbutton.get_node("MeshInstance").get_surface_material(0).duplicate())
+	boneattachment.add_child(fingerpinchbutton)
+	return fingerpinchbutton
 	
 func initovrhandtracking(lovr_hand_tracking, lhandcontroller):
 	handpositionstack = null
@@ -114,12 +133,13 @@ func update_fademode(delta, valid, translucentvalidity, model, material):
 				model.visible = false
 	return translucentvalidity
 	
-func addremotetransform(bname, node):
+func addremotetransform(bname, node, rtransform):
 	var boneattachment = BoneAttachment.new()
 	boneattachment.bone_name = ("b_l_" if islefthand else "b_r_") + bname
 	handskeleton.add_child(boneattachment)
 	var remotetransform = RemoteTransform.new()
 	remotetransform.update_scale = false
+	remotetransform.transform = rtransform
 	boneattachment.add_child(remotetransform)
 	remotetransform.remote_path = remotetransform.get_path_to(node)
 
@@ -151,14 +171,23 @@ func process_handpositionstack(delta):
 		if hp.has("boneorientations") and hp1.has("boneorientations"):
 			for i in range(hand_bone_mappings.size()):
 				hand_boneorientations[i] = hp["boneorientations"][i].slerp(hp1["boneorientations"][i], lam)
+			hp = hp1
+	if hp.has("triggerbuttonheld"): 
+		indexfingerpinchbutton.get_node("MeshInstance").get_surface_material(0).emission = Color("#E6E31B") if hp["triggerbuttonheld"] else Color("#000000")
+	if hp.has("gripbuttonheld"): 
+		middlefingerpinchbutton.get_node("MeshInstance").get_surface_material(0).emission = Color("#E6E31B") if hp["gripbuttonheld"] else Color("#000000")
 	update_handpose(delta)
 
 func handpositiondict(t0):
-	if true or ovr_hand_tracking != null:
-		return { "timestamp":t0, "valid":handvalid, "transform":transform, "boneorientations":hand_boneorientations }
-	else:
-		return { "timestamp":t0, "valid":handvalid, "transform":transform, "gripbuttonheld":gripbuttonheld, "triggerbuttonheld":triggerbuttonheld }
-
+	var handposdict = { "timestamp":t0, 
+						"valid":handvalid, 
+						"transform":transform, 
+						"gripbuttonheld":int(gripbuttonheld), 
+						"triggerbuttonheld":int(triggerbuttonheld)
+					  }
+	if true or Tglobal.questhandtracking:
+		handposdict["boneorientations"] = hand_boneorientations
+	return handposdict
 
 func handposeimmediate(boneorientations, dt):
 	handpositionstack.clear()
@@ -199,6 +228,8 @@ func process_normalvrtracking(delta):
 	transform = handcontroller.transform*controllerhandtransform
 	pointervalid = true
 	pointerposearvrorigin = handcontroller.transform*pointerposechangeangle
+	indexfingerpinchbutton.get_node("MeshInstance").get_surface_material(0).emission = Color("#E6E31B") if triggerbuttonheld else Color("#000000")
+	middlefingerpinchbutton.get_node("MeshInstance").get_surface_material(0).emission = Color("#E6E31B") if gripbuttonheld else Color("#000000")
 	process_handgesturefromcontrol()
 
 func process_keyboardcontroltracking(headcam, dmousecontrollermotioncumulative):
