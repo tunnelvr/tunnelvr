@@ -149,7 +149,6 @@ func _ready():
 			get_viewport().arvr = true
 			Engine.target_fps = 72
 			Engine.iterations_per_second = 72
-			Tglobal.VRstatus = "quest"
 			print("  Success initializing Quest Interface.")
 		else:
 			Tglobal.arvrinterface = null
@@ -161,7 +160,6 @@ func _ready():
 			Engine.target_fps = 80 # TODO: this is headset dependent (RiftS == 80)=> figure out how to get this info at runtime
 			Engine.iterations_per_second = 80
 			OS.vsync_enabled = false;
-			Tglobal.VRstatus = "oculus"
 			print("  Success initializing Oculus Interface.");
 			# C:/Users/henry/Appdata/Local/Android/Sdk/platform-tools/adb.exe logcat -s VrApi
 		else:
@@ -178,7 +176,6 @@ func _ready():
 			Engine.target_fps = 90
 			Engine.iterations_per_second = 90
 			OS.vsync_enabled = false;
-			Tglobal.VRstatus = "vive"
 			print("  Success initializing OpenVR Interface.");
 		else:
 			Tglobal.arvrinterface = null
@@ -196,7 +193,7 @@ func _ready():
 	Tglobal.VRoperating = (Tglobal.arvrinterfacename != "none")
 	if Tglobal.VRoperating:
 		#$BodyObjects/Locomotion_WalkInPlace.initjogdetectionsystem(playerMe.get_node("HeadCam"))
-		if Tglobal.VRstatus == "quest":
+		if Tglobal.arvrinterfacename == "OVRMobile":
 			playerMe.initquesthandtrackingnow(ovr_hand_tracking)
 			$WorldEnvironment/DirectionalLight.shadow_enabled = false
 			$BodyObjects/PlayerDirections.initquesthandcontrollersignalconnections()
@@ -205,6 +202,7 @@ func _ready():
 			$BodyObjects/PlayerDirections.initcontrollersignalconnections()
 			
 	else:
+		playerMe.initkeyboardcontroltrackingnow()
 		print("*** VR not working")
 		
 	print("*-*-*-*  requesting permissions: ", OS.request_permissions())

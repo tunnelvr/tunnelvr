@@ -3,7 +3,8 @@ extends Spatial
 var networkID = 0
 
 var puppetpositionstack = [ ]  # [ { "timestamp", "Ltimestamp", "playertransform", "headcamtransform" } ] 
-	
+var puppetpointerpositionstack = [ ]  # [ { "timestamp", "Ltimestamp", "orient", "length", "spotvisible" } ] 
+
 remote func initplayerpuppet(playerishandtracked):
 	$HandLeft.initpuppetracking(playerishandtracked)
 	$HandRight.initpuppetracking(playerishandtracked)
@@ -36,10 +37,10 @@ remote func setavatarposition(positiondict):
 		reltimebatchcount = 0
 		firstrelativetimenotset = false
 		print("relativetimeminmax ", relativetimeminmax, "  ", remotetimegapmaxmin)
-	if firstrelativetimenotset:
-		return
-			
-	var dt = relativetimeminmax + remotetimegap_dtmax + 0.05  # was remotetimegapmaxmin, but only gets smooth when it gets to that value
+
+	var dt = reltime   # pipe through directly and then buffer
+	if not firstrelativetimenotset:
+		dt = relativetimeminmax + remotetimegap_dtmax + 0.05  # was remotetimegapmaxmin, but only gets smooth when it gets to that value
 	
 	var puppetbody = { "timestamp":positiondict["timestamp"] }
 	if positiondict.has("playertransform"):
@@ -47,24 +48,40 @@ remote func setavatarposition(positiondict):
 	if positiondict.has("headcamtransform"):
 		puppetbody["headcamtransform"] = positiondict["headcamtransform"]
 	puppetbody["Ltimestamp"] = positiondict["timestamp"] + dt
-	while len(puppetpositionstack) > 20:
-		puppetpositionstack.pop_front()
 	if puppetbody.has("playertransform") or puppetbody.has("headcamtransform"):
+		while len(puppetpositionstack) > 20:
+			puppetpositionstack.pop_front()
 		puppetpositionstack.push_back(puppetbody)
-	
-	while len($HandLeft.handpositionstack) > 20:
-		$HandLeft.handpositionstack.pop_front()
-	while len($HandRight.handpositionstack) > 20:
-		$HandRight.handpositionstack.pop_front()
+
+	if positiondict.has("laserpointer"):
+		var puppetpointerposition = positiondict["laserpointer"]
+		puppetpointerposition["timestamp"] = positiondict["timestamp"]
+		puppetpointerposition["Ltimestamp"] = positiondict["timestamp"] + dt
+		while len(puppetpointerpositionstack) > 20:
+			puppetpointerpositionstack.pop_front()
+		puppetpointerpositionstack.push_back(puppetpointerposition)
+
 	if positiondict.has("handleft"):
-		positiondict["handleft"]["Ltimestamp"] = positiondict["handleft"]["timestamp"] + dt
-		$HandLeft.handpositionstack.push_back(positiondict["handleft"])
+		var handleftposition = positiondict["handleft"]
+		handleftposition["Ltimestamp"] = handleftposition["timestamp"] + dt
+		while len($HandLeft.handpositionstack) > 20:
+			$HandLeft.handpositionstack.pop_front()
+		$HandLeft.handpositionstack.push_back(handleftposition)
+
 	if positiondict.has("handright"):
-		positiondict["handright"]["Ltimestamp"] = positiondict["handright"]["timestamp"] + dt
-		$HandRight.handpositionstack.push_back(positiondict["handright"])
+		var handrightposition = positiondict["handright"]
+		handrightposition["Ltimestamp"] = handrightposition["timestamp"] + dt
+		while len($HandRight.handpositionstack) > 20:
+			$HandRight.handpositionstack.pop_front()
+		$HandRight.handpositionstack.push_back(handrightposition)
+
+func _ready():
+	$HandLeft/LaserPointer.visible = false
+	$HandRight/LaserPointer.visible = false
 
 func _process(delta):
 	process_puppetpositionstack(delta)
+	process_puppetpointerpositionstack(delta)
 
 func process_puppetpositionstack(delta):
 	var t = OS.get_ticks_msec()*0.001
@@ -79,6 +96,7 @@ func process_puppetpositionstack(delta):
 		if pp.has("headcamtransform"):
 			$HeadCam.transform = pp["headcamtransform"]
 		puppetpositionstack.pop_front()
+		
 	else:
 		var pp1 = puppetpositionstack[1]
 		var lam = inverse_lerp(pp["Ltimestamp"], pp1["Ltimestamp"], t)
@@ -86,6 +104,26 @@ func process_puppetpositionstack(delta):
 			global_transform = Transform(pp["playertransform"].basis.slerp(pp1["playertransform"].basis, lam), lerp(pp["playertransform"].origin, pp1["playertransform"].origin, lam))
 		if pp.has("headcamtransform") and pp1.has("headcamtransform"):
 			$HeadCam.transform = Transform(pp["headcamtransform"].basis.slerp(pp1["headcamtransform"].basis, lam), lerp(pp["headcamtransform"].origin, pp1["headcamtransform"].origin, lam))
+
+func process_puppetpointerpositionstack(delta):
+	var t = OS.get_ticks_msec()*0.001
+	while len(puppetpointerpositionstack) >= 2 and puppetpointerpositionstack[1]["Ltimestamp"] <= t:
+		puppetpointerpositionstack.pop_front()
+	if len(puppetpointerpositionstack) == 0 or t < puppetpointerpositionstack[0]["Ltimestamp"]:
+		return
+	var pp = puppetpointerpositionstack[0]
+	if len(puppetpointerpositionstack) == 1:
+		$LaserOrient.transform = pp["orient"]
+		$LaserOrient/Length.scale.z = pp["length"]
+		#pp["spotvisible"]
+		puppetpointerpositionstack.pop_front()
+		
+	else:
+		var pp1 = puppetpointerpositionstack[1]
+		var lam = inverse_lerp(pp["Ltimestamp"], pp1["Ltimestamp"], t)
+		$LaserOrient.transform = Transform(pp["orient"].basis.slerp(pp1["orient"].basis, lam), lerp(pp["orient"].origin, pp1["orient"].origin, lam)) 
+		$LaserOrient/Length.scale.z = lerp(pp["length"], pp1["length"], lam)
+		#$LaserOrient/LaserSpot.scale.z = pp["laserpointer"]["spotvisible"]
 
 
 puppet func bouncedoppelgangerposition(bouncebackID, positiondict):

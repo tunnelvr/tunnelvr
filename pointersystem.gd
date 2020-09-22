@@ -16,7 +16,8 @@ onready var LaserSelectLine = get_node("/root/Spatial/BodyObjects/LaserSelectLin
 
 var viewport_point = null
 
-var mousecontrollervec = Vector3(0.2, -0.1, -0.5)
+
+
 
 onready var activelaserroot = LaserOrient
 var pointerplanviewtarget = null
@@ -593,12 +594,6 @@ func buttonreleased_vrtrigger():
 		sketchsystem.sharexcdrawingovernetwork(xcdrawing)
 						
 func _physics_process(_delta):
-	if Tglobal.VRstatus == "none":
-		var handright = playerMe.get_node("HandRight")
-		var mvec = headcam.global_transform.basis.xform(mousecontrollervec)
-		handright.global_transform.origin = headcam.global_transform.origin + mvec
-		handright.look_at(handright.global_transform.origin + 1.0*mvec + 0.0*headcam.global_transform.basis.z, Vector3(0,1,0))
-		handright.global_transform.origin.y -= 0.3
 		
 	if LaserOrient.visible: # Tglobal.VRstatus != "quest":
 		var firstlasertarget = LaserOrient.get_node("RayCast").get_collider() if LaserOrient.get_node("RayCast").is_colliding() and not LaserOrient.get_node("RayCast").get_collider().is_queued_for_deletion() else null
@@ -649,12 +644,12 @@ func _input(event):
 		else:
 			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 
-	elif event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
-		if Tglobal.VRstatus == "none": # or playerMe.arvrinterface.get_tracking_status() == ARVRInterface.ARVR_NOT_TRACKING:
-			var rhvec = mousecontrollervec + Vector3(event.relative.x, -event.relative.y, 0)*0.002
-			rhvec.x = clamp(rhvec.x, -0.4, 0.4)
-			rhvec.y = clamp(rhvec.y, -0.3, 0.6)
-			mousecontrollervec = rhvec.normalized()*0.8
+	elif Input.get_mouse_mode() != Input.MOUSE_MODE_CAPTURED:
+		pass
+
+	elif event is InputEventMouseMotion:
+		if not Tglobal.VRoperating: # or playerMe.arvrinterface.get_tracking_status() == ARVRInterface.ARVR_NOT_TRACKING:
+			handright.process_keyboardcontroltracking(headcam, event.relative*0.005)
 			
 	elif event is InputEventMouseButton:
 		if event.button_index == BUTTON_RIGHT:
@@ -665,19 +660,17 @@ func _input(event):
 				buttonpressed_vrtrigger(rightmousebuttonheld)
 			else:
 				buttonreleased_vrtrigger()
+			if not Tglobal.VRoperating:
+				handright.triggerbuttonheld = event.pressed
+				handright.process_handgesturefromcontrol()
 		if event.button_index == BUTTON_RIGHT:
 			if event.pressed:
 				buttonpressed_vrgrip()
 			else:
 				buttonreleased_vrgrip()
-
-	elif event is InputEventMouseButton and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
-		var gripbuttonheld = false
-		if event.button_index == BUTTON_LEFT:
-			if event.pressed:
-				buttonpressed_vrtrigger(gripbuttonheld)
-			else:
-				buttonreleased_vrtrigger()
+			if not Tglobal.VRoperating:
+				handright.gripbuttonheld = event.pressed
+				handright.process_handgesturefromcontrol()
 				
 	elif event is InputEventKey and event.pressed and event.scancode == KEY_M:
 		buttonpressed_vrby(false)	

@@ -66,38 +66,42 @@ func playerpositiondict():
 			 "headcamtransform":$HeadCam.transform, 
 			 "handleft": $HandLeft.handpositiondict(t0), 
 			 "handright": $HandRight.handpositiondict(t0), 
-			 #"laserrotation":LaserOrient.rotation.x, 
-			 #"laserlength":LaserOrient.get_node("Length").scale.z, 
-			 #"laserspot":LaserOrient.get_node("LaserSpot").visible, 
+			 "laserpointer": { "orient":$HandRight.pointerposearvrorigin, 
+							   "length": LaserOrient.get_node("Length").scale.z, 
+							   "spotvisible": LaserOrient.get_node("LaserSpot").visible }
 			}
 
-var pointerposechangeangle = Transform()
 func _process(delta):
-	if ovr_hand_tracking != null:
+	if Tglobal.questhandtracking:
 		$HandLeft.process_ovrhandtracking(delta)
 		$HandRight.process_ovrhandtracking(delta)
-	else:
+	elif Tglobal.VRoperating:
 		$HandLeft.process_normalvrtracking(delta)
 		$HandRight.process_normalvrtracking(delta)
-	LaserOrient.global_transform = global_transform*$HandRight.pointerpose*pointerposechangeangle
+	else:
+		var hx = 0
+		if Input.is_action_pressed("lh_shift"):
+			var lhkeyvec = Vector2(0, 0)
+			if Input.is_action_pressed("lh_forward"):   lhkeyvec.y += 1
+			if Input.is_action_pressed("lh_backward"):  lhkeyvec.y += -1
+			if Input.is_action_pressed("lh_left"):      lhkeyvec.x += -1
+			if Input.is_action_pressed("lh_right"):     lhkeyvec.x += 1
+			hx = lhkeyvec.x
+			lhkeyvec.x = 0
+			var vtarget = -$HeadCam.global_transform.basis.z*20 + $HeadCam.global_transform.basis.x*lhkeyvec.x*15*delta + Vector3(0, lhkeyvec.y, 0)*15*delta
+			$HeadCam.look_at($HeadCam.global_transform.origin + vtarget, Vector3(0,1,0))
+			rotation_degrees.y += $HeadCam.rotation_degrees.y
+			$HeadCam.rotation_degrees.y = 0
+		$HandRight.process_keyboardcontroltracking($HeadCam, Vector2(hx*0.033, 0))
+	LaserOrient.global_transform = global_transform*$HandRight.pointerposearvrorigin
 
-	if Tglobal.VRstatus == "none" and Input.is_action_pressed("lh_shift"):
-		var lhkeyvec = Vector2(0, 0)
-		if Input.is_action_pressed("lh_forward"):   lhkeyvec.y += 1
-		if Input.is_action_pressed("lh_backward"):  lhkeyvec.y += -1
-		if Input.is_action_pressed("lh_left"):      lhkeyvec.x += -1
-		if Input.is_action_pressed("lh_right"):     lhkeyvec.x += 1
-		var vtarget = -$HeadCam.global_transform.basis.z*20 + $HeadCam.global_transform.basis.x*lhkeyvec.x*15*delta + Vector3(0, lhkeyvec.y, 0)*15*delta
-		$HeadCam.look_at($HeadCam.global_transform.origin + vtarget, Vector3(0,1,0))
-		rotation_degrees.y += $HeadCam.rotation_degrees.y
-		$HeadCam.rotation_degrees.y = 0
-
-
+func initkeyboardcontroltrackingnow():
+	$HandLeft.initkeyboardtracking()
+	$HandRight.initkeyboardtracking()
 
 func initnormalvrtrackingnow():
 	$HandLeft.initnormalvrtracking($HandLeftController)
 	$HandRight.initnormalvrtracking($HandRightController)
-	pointerposechangeangle = Transform(Basis(Vector3(1,0,0), deg2rad(-45)), Vector3(0,0,0))
 	$HandLeft.addremotetransform("middle_null", get_node("/root/Spatial/BodyObjects/MovePointThimble"))
 
 func initquesthandtrackingnow(lovr_hand_tracking):

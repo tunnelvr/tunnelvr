@@ -312,6 +312,8 @@ const handanglechange = cos(deg2rad(2))
 const handpositionchange = 0.01
 const headanglechange = cos(deg2rad(4))
 const headpositionchange = 0.01
+const pointeranglechange = cos(deg2rad(3))
+const pointerpositionchange = 0.015
 const dtmin = 0.05
 const dtmax = 0.8
 var prevpositiondict = null
@@ -327,24 +329,23 @@ func transformwithinrange(trans0, trans1, poschange, cosangchange):
 	return true
 
 func filter_playerhand_bandwidth(prevhand, hand):
-	if transformwithinrange(prevhand["transform"], hand["transform"], handpositionchange, handanglechange):
-		hand.erase("transform")
-	else:
-		prevhand["transform"] = hand["transform"]
-
+	var boneorientationwithinrange = true
 	if hand.has("boneorientations"):
-		var boneorientationwithinrange = true
 		for i in range(len(hand["boneorientations"])):  # should use simply fingertip transforms
 			var dq = prevhand["boneorientations"][i].inverse()*hand["boneorientations"][i]
 			if dq.w < fingeranglechange:
 				boneorientationwithinrange = false
 				break
-		if boneorientationwithinrange:
+	if prevhand["valid"] == hand["valid"] and boneorientationwithinrange and transformwithinrange(prevhand["transform"], hand["transform"], handpositionchange, handanglechange):
+		hand.erase("transform")
+		if hand.has("boneorientations"):
 			hand.erase("boneorientations")
-		else:
+	else:
+		prevhand["transform"] = hand["transform"]
+		if hand.has("boneorientations"):
 			prevhand["boneorientations"] = hand["boneorientations"].duplicate(true)
-	if hand.has("boneorientations") or hand.has("transform") or prevhand["valid"] != hand["valid"]:
 		prevhand["timestamp"] = hand["timestamp"]
+		prevhand["valid"] == hand["valid"]
 		return false
 	return true
 		
@@ -366,11 +367,15 @@ func filter_playerposition_bandwidth(positiondict):
 		positiondict.erase("headcamtransform")
 	else:
 		prevpositiondict["headcamtransform"] = positiondict["headcamtransform"]
+
+	if transformwithinrange(prevpositiondict["laserpointer"]["orient"], positiondict["laserpointer"]["orient"], pointerpositionchange, pointeranglechange) and abs(prevpositiondict["laserpointer"]["length"] - positiondict["laserpointer"]["length"]) < pointerpositionchange and prevpositiondict["laserpointer"]["spotvisible"] == positiondict["laserpointer"]["spotvisible"]:
+		positiondict.erase("laserpointer")
+	else:
+		prevpositiondict["laserpointer"] = positiondict["laserpointer"].duplicate()
+
 		
 	if filter_playerhand_bandwidth(prevpositiondict["handleft"], positiondict["handleft"]):
 		positiondict.erase("handleft")
-	#else:
-	#	print("Left ", positiondict["handleft"]["timestamp"])
 	if filter_playerhand_bandwidth(prevpositiondict["handright"], positiondict["handright"]):
 		positiondict.erase("handright")
 	

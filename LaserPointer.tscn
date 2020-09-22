@@ -4,7 +4,7 @@
 size = Vector3( 0.002, 0.002, 1 )
 
 [sub_resource type="SpatialMaterial" id=2]
-albedo_color = Color( 0.976471, 0.0117647, 0.0117647, 1 )
+albedo_color = Color( 0.976471, 0.552941, 0.0117647, 1 )
 
 [node name="LaserPointer" type="Spatial"]
 

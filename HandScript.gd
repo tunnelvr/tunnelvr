@@ -10,11 +10,13 @@ var islefthand = false
 var handcontroller = null
 var controller_id = 0
 var handmodel = null
+var controllerhandtransform = null
 var handskeleton = null
 var meshnode = null
 var handmaterial = null
 var joypos = Vector2(0, 0)
 
+var mousecontrollermotioncumulative = Vector2(0, 0)
 var gripbuttonheld = false
 var triggerbuttonheld = false
 
@@ -23,15 +25,19 @@ var handconfidence = 0
 var handvalid = false
 var hand_boneorientations = [ Quat( 0, 0, 0, 1 ), Quat( 0, 0, 0, 1 ), Quat( 0.467562, 0.371268, 0.0784822, 0.798365 ), Quat( 0.253112, 0.141304, 0.155991, 0.944264 ), Quat( -0.0820883, -0.0530134, 0.190872, 0.976739 ), Quat( 0.0813293, 0.0570069, 0.0396865, 0.994264 ), Quat( 0.0443113, 0.0529943, 0.211373, 0.974961 ), Quat( -0.0262251, 0.000635884, 0.291161, 0.956315 ), Quat( -0.0167604, -0.0247861, 0.0716335, 0.996982 ), Quat( -0.0144094, -0.0484558, 0.17288, 0.983645 ), Quat( -0.0127633, -0.000258344, 0.341284, 0.939874 ), Quat( -0.0484786, 0.00163537, 0.0500899, 0.997566 ), Quat( -0.0682813, -0.113321, 0.185936, 0.973614 ), Quat( -0.0401938, 0.00888745, 0.348554, 0.936384 ), Quat( -0.0114638, 0.0296684, 0.146252, 0.988736 ), Quat( -0.207036, -0.140343, 0.0183118, 0.968042 ), Quat( 0.0544313, -0.108607, 0.254061, 0.959528 ), Quat( -0.0522058, -0.0357106, 0.158563, 0.985321 ), Quat( 0.00130541, 0.0483228, 0.170572, 0.984159 ), Quat( 0, 0, 0, 1 ), Quat( 0, 0, 0, 1 ), Quat( 0, 0, 0, 1 ), Quat( 0, 0, 0, 1 ), Quat( 0, 0, 0, 1 ) ]
 
-const handokay00 = [ Quat( 0, 0, 0, 1 ), Quat( 0, 0, 0, 1 ), Quat( 0.467562, 0.371268, 0.0784822, 0.798365 ), Quat( 0.253112, 0.141304, 0.155991, 0.944264 ), Quat( -0.0820883, -0.0530134, 0.190872, 0.976739 ), Quat( 0.0813293, 0.0570069, 0.0396865, 0.994264 ), Quat( 0.0443113, 0.0529943, 0.211373, 0.974961 ), Quat( -0.0262251, 0.000635884, 0.291161, 0.956315 ), Quat( -0.0167604, -0.0247861, 0.0716335, 0.996982 ), Quat( -0.0144094, -0.0484558, 0.17288, 0.983645 ), Quat( -0.0127633, -0.000258344, 0.341284, 0.939874 ), Quat( -0.0484786, 0.00163537, 0.0500899, 0.997566 ), Quat( -0.0682813, -0.113321, 0.185936, 0.973614 ), Quat( -0.0401938, 0.00888745, 0.348554, 0.936384 ), Quat( -0.0114638, 0.0296684, 0.146252, 0.988736 ), Quat( -0.207036, -0.140343, 0.0183118, 0.968042 ), Quat( 0.0544313, -0.108607, 0.254061, 0.959528 ), Quat( -0.0522058, -0.0357106, 0.158563, 0.985321 ), Quat( 0.00130541, 0.0483228, 0.170572, 0.984159 ), Quat( 0, 0, 0, 1 ), Quat( 0, 0, 0, 1 ), Quat( 0, 0, 0, 1 ), Quat( 0, 0, 0, 1 ), Quat( 0, 0, 0, 1 ) ]
-const handokay10 = [ Quat( 0, 0, 0, 1 ), Quat( 0, 0, 0, 1 ), Quat( 0.492735, 0.354362, 0.103353, 0.788009 ), Quat( 0.256355, 0.0956267, 0.144365, 0.950945 ), Quat( -0.0816594, -0.0502562, 0.218979, 0.971007 ), Quat( 0.084894, 0.0725345, -0.157577, 0.981173 ), Quat( 0.0949116, 0.100794, 0.477651, 0.867572 ), Quat( -0.0261218, 0.00155448, 0.323766, 0.945775 ), Quat( -0.0169196, -0.0238768, 0.119608, 0.99239 ), Quat( -0.00877956, -0.00536436, 0.174319, 0.984636 ), Quat( -0.011972, -0.00288329, 0.127877, 0.991714 ), Quat( -0.0344616, -0.00455115, -0.0916157, 0.995188 ), Quat( -0.0491183, -0.0784361, -0.0137709, 0.995613 ), Quat( -0.0364712, 0.00137097, 0.129095, 0.99096 ), Quat( -0.00430107, 0.0292692, -0.00750024, 0.999534 ), Quat( -0.207036, -0.140343, 0.0183118, 0.968042 ), Quat( 0.105822, -0.0387376, -0.140094, 0.983705 ), Quat( -0.0454153, -0.0393059, 0.0768608, 0.995231 ), Quat( 0.000672678, 0.0491727, -0.0159533, 0.998663 ), Quat( 0, 0, 0, 1 ), Quat( 0, 0, 0, 1 ), Quat( 0, 0, 0, 1 ), Quat( 0, 0, 0, 1 ), Quat( 0, 0, 0, 1 ) ]
-const handokay01 = [ Quat( 0, 0, 0, 1 ), Quat( 0, 0, 0, 1 ), Quat( 0.511247, 0.341179, 0.122062, 0.77931 ), Quat( 0.253986, 0.129789, 0.153086, 0.946156 ), Quat( -0.0804297, -0.0438226, 0.282298, 0.954944 ), Quat( 0.0851365, 0.0745735, -0.186007, 0.976008 ), Quat( 0.0345697, -0.00183333, 0.175622, 0.983849 ), Quat( -0.0263425, -0.00263059, 0.172663, 0.984625 ), Quat( -0.0164912, -0.0258961, 0.00817259, 0.999495 ), Quat( -0.0249918, -0.0351505, 0.486862, 0.872413 ), Quat( -0.0128632, 0.000383946, 0.390856, 0.920362 ), Quat( -0.0608747, 0.00747798, 0.183681, 0.981071 ), Quat( -0.0622974, -0.0814373, 0.164758, 0.98099 ), Quat( -0.0394571, 0.00705154, 0.29538, 0.954539 ), Quat( -0.00836909, 0.0295813, 0.0795284, 0.996359 ), Quat( -0.207036, -0.140343, 0.0183118, 0.968042 ), Quat( 0.0996507, -0.0809182, -0.0547796, 0.990213 ), Quat( -0.0525219, -0.0355324, 0.162446, 0.984678 ), Quat( 0.00073414, 0.049166, 0.0018408, 0.998789 ), Quat( 0, 0, 0, 1 ), Quat( 0, 0, 0, 1 ), Quat( 0, 0, 0, 1 ), Quat( 0, 0, 0, 1 ), Quat( 0, 0, 0, 1 ) ]
-const handokay11 = [ Quat( 0, 0, 0, 1 ), Quat( 0, 0, 0, 1 ), Quat( 0.468796, 0.370465, 0.0796873, 0.797894 ), Quat( 0.253679, 0.133886, 0.154121, 0.945499 ), Quat( -0.0801607, -0.0425963, 0.294025, 0.951477 ), Quat( 0.0844133, 0.0694556, -0.115931, 0.987224 ), Quat( 0.0989639, 0.0962944, 0.510129, 0.848942 ), Quat( -0.0260832, 0.0018412, 0.333878, 0.942254 ), Quat( -0.0164311, -0.0260999, -0.00417691, 0.999516 ), Quat( -0.0169925, -0.0204683, 0.465035, 0.884892 ), Quat( -0.012763, -0.000259974, 0.341157, 0.93992 ), Quat( -0.0658786, 0.00995623, 0.240274, 0.968416 ), Quat( -0.0853593, -0.116181, 0.31502, 0.938071 ), Quat( -0.0389637, 0.00595738, 0.263555, 0.963839 ), Quat( -0.0110353, 0.0296643, 0.136986, 0.990067 ), Quat( -0.207036, -0.140343, 0.0183118, 0.968042 ), Quat( 0.103993, -0.123004, -0.0700513, 0.984453 ), Quat( -0.0584458, -0.0319938, 0.236702, 0.969295 ), Quat( 0.000860983, 0.0491022, 0.038777, 0.99804 ), Quat( 0, 0, 0, 1 ), Quat( 0, 0, 0, 1 ), Quat( 0, 0, 0, 1 ), Quat( 0, 0, 0, 1 ), Quat( 0, 0, 0, 1 ) ]
+const gestureboneorientations = { 
+	"handokay00":[ Quat( 0, 0, 0, 1 ), Quat( 0, 0, 0, 1 ), Quat( 0.467562, 0.371268, 0.0784822, 0.798365 ), Quat( 0.253112, 0.141304, 0.155991, 0.944264 ), Quat( -0.0820883, -0.0530134, 0.190872, 0.976739 ), Quat( 0.0813293, 0.0570069, 0.0396865, 0.994264 ), Quat( 0.0443113, 0.0529943, 0.211373, 0.974961 ), Quat( -0.0262251, 0.000635884, 0.291161, 0.956315 ), Quat( -0.0167604, -0.0247861, 0.0716335, 0.996982 ), Quat( -0.0144094, -0.0484558, 0.17288, 0.983645 ), Quat( -0.0127633, -0.000258344, 0.341284, 0.939874 ), Quat( -0.0484786, 0.00163537, 0.0500899, 0.997566 ), Quat( -0.0682813, -0.113321, 0.185936, 0.973614 ), Quat( -0.0401938, 0.00888745, 0.348554, 0.936384 ), Quat( -0.0114638, 0.0296684, 0.146252, 0.988736 ), Quat( -0.207036, -0.140343, 0.0183118, 0.968042 ), Quat( 0.0544313, -0.108607, 0.254061, 0.959528 ), Quat( -0.0522058, -0.0357106, 0.158563, 0.985321 ), Quat( 0.00130541, 0.0483228, 0.170572, 0.984159 ), Quat( 0, 0, 0, 1 ), Quat( 0, 0, 0, 1 ), Quat( 0, 0, 0, 1 ), Quat( 0, 0, 0, 1 ), Quat( 0, 0, 0, 1 ) ],
+	"handokay10":[ Quat( 0, 0, 0, 1 ), Quat( 0, 0, 0, 1 ), Quat( 0.492735, 0.354362, 0.103353, 0.788009 ), Quat( 0.256355, 0.0956267, 0.144365, 0.950945 ), Quat( -0.0816594, -0.0502562, 0.218979, 0.971007 ), Quat( 0.084894, 0.0725345, -0.157577, 0.981173 ), Quat( 0.0949116, 0.100794, 0.477651, 0.867572 ), Quat( -0.0261218, 0.00155448, 0.323766, 0.945775 ), Quat( -0.0169196, -0.0238768, 0.119608, 0.99239 ), Quat( -0.00877956, -0.00536436, 0.174319, 0.984636 ), Quat( -0.011972, -0.00288329, 0.127877, 0.991714 ), Quat( -0.0344616, -0.00455115, -0.0916157, 0.995188 ), Quat( -0.0491183, -0.0784361, -0.0137709, 0.995613 ), Quat( -0.0364712, 0.00137097, 0.129095, 0.99096 ), Quat( -0.00430107, 0.0292692, -0.00750024, 0.999534 ), Quat( -0.207036, -0.140343, 0.0183118, 0.968042 ), Quat( 0.105822, -0.0387376, -0.140094, 0.983705 ), Quat( -0.0454153, -0.0393059, 0.0768608, 0.995231 ), Quat( 0.000672678, 0.0491727, -0.0159533, 0.998663 ), Quat( 0, 0, 0, 1 ), Quat( 0, 0, 0, 1 ), Quat( 0, 0, 0, 1 ), Quat( 0, 0, 0, 1 ), Quat( 0, 0, 0, 1 ) ],
+	"handokay01":[ Quat( 0, 0, 0, 1 ), Quat( 0, 0, 0, 1 ), Quat( 0.511247, 0.341179, 0.122062, 0.77931 ), Quat( 0.253986, 0.129789, 0.153086, 0.946156 ), Quat( -0.0804297, -0.0438226, 0.282298, 0.954944 ), Quat( 0.0851365, 0.0745735, -0.186007, 0.976008 ), Quat( 0.0345697, -0.00183333, 0.175622, 0.983849 ), Quat( -0.0263425, -0.00263059, 0.172663, 0.984625 ), Quat( -0.0164912, -0.0258961, 0.00817259, 0.999495 ), Quat( -0.0249918, -0.0351505, 0.486862, 0.872413 ), Quat( -0.0128632, 0.000383946, 0.390856, 0.920362 ), Quat( -0.0608747, 0.00747798, 0.183681, 0.981071 ), Quat( -0.0622974, -0.0814373, 0.164758, 0.98099 ), Quat( -0.0394571, 0.00705154, 0.29538, 0.954539 ), Quat( -0.00836909, 0.0295813, 0.0795284, 0.996359 ), Quat( -0.207036, -0.140343, 0.0183118, 0.968042 ), Quat( 0.0996507, -0.0809182, -0.0547796, 0.990213 ), Quat( -0.0525219, -0.0355324, 0.162446, 0.984678 ), Quat( 0.00073414, 0.049166, 0.0018408, 0.998789 ), Quat( 0, 0, 0, 1 ), Quat( 0, 0, 0, 1 ), Quat( 0, 0, 0, 1 ), Quat( 0, 0, 0, 1 ), Quat( 0, 0, 0, 1 ) ],
+	"handokay11":[ Quat( 0, 0, 0, 1 ), Quat( 0, 0, 0, 1 ), Quat( 0.468796, 0.370465, 0.0796873, 0.797894 ), Quat( 0.253679, 0.133886, 0.154121, 0.945499 ), Quat( -0.0801607, -0.0425963, 0.294025, 0.951477 ), Quat( 0.0844133, 0.0694556, -0.115931, 0.987224 ), Quat( 0.0989639, 0.0962944, 0.510129, 0.848942 ), Quat( -0.0260832, 0.0018412, 0.333878, 0.942254 ), Quat( -0.0164311, -0.0260999, -0.00417691, 0.999516 ), Quat( -0.0169925, -0.0204683, 0.465035, 0.884892 ), Quat( -0.012763, -0.000259974, 0.341157, 0.93992 ), Quat( -0.0658786, 0.00995623, 0.240274, 0.968416 ), Quat( -0.0853593, -0.116181, 0.31502, 0.938071 ), Quat( -0.0389637, 0.00595738, 0.263555, 0.963839 ), Quat( -0.0110353, 0.0296643, 0.136986, 0.990067 ), Quat( -0.207036, -0.140343, 0.0183118, 0.968042 ), Quat( 0.103993, -0.123004, -0.0700513, 0.984453 ), Quat( -0.0584458, -0.0319938, 0.236702, 0.969295 ), Quat( 0.000860983, 0.0491022, 0.038777, 0.99804 ), Quat( 0, 0, 0, 1 ), Quat( 0, 0, 0, 1 ), Quat( 0, 0, 0, 1 ), Quat( 0, 0, 0, 1 ), Quat( 0, 0, 0, 1 ) ]
+}
+var currentgesture = "none"
 
 var pointermodel = null
 var pointervalid = false
-var pointerpose = Transform()
+var pointerposearvrorigin = Transform()
 var pointermaterial = null
+var pointerposechangeangle = Transform(Basis(Vector3(1,0,0), deg2rad(-65)), Vector3(0,0,0))
 
 const fadetimevalidity = 1/0.2
 var handtranslucentvalidity = 0.0
@@ -41,6 +47,9 @@ var handpositionstack = [ ]  # [ { "Ltimestamp", "valid", "transform", "boneorie
 
 func _ready():
 	islefthand = (get_name() == "HandLeft")
+	controllerhandtransform = Transform(Vector3(0,0,-1), Vector3(0,-1,0), Vector3(-1,0,0), Vector3(0,0,0.1)) if islefthand else \
+							  Transform(Vector3(0,0,1), Vector3(0,1,0), Vector3(-1,0,0), Vector3(0,0,0.1))
+	transform = controllerhandtransform
 	var handmodelfile = handmodelfile1 if islefthand else handmodelfile2
 	var handmodelres = load(handmodelfile)
 	if handmodelres == null:
@@ -53,7 +62,7 @@ func _ready():
 		var bone_rest = handskeleton.get_bone_rest(i)
 		#print(i, "++++", var2str(bone_rest))
 		handskeleton.set_bone_pose(i, Transform(bone_rest.basis)); # use the original rest as pose
-		bone_rest.basis = Basis();
+		bone_rest.basis = Basis()
 		handskeleton.set_bone_rest(i, bone_rest)
 	meshnode = handskeleton.get_node("l_handMeshNode" if islefthand else "r_handMeshNode")
 	handmaterial = load("shinyhandmesh.material").duplicate()
@@ -150,80 +159,71 @@ func handpositiondict(t0):
 	else:
 		return { "timestamp":t0, "valid":handvalid, "transform":transform, "gripbuttonheld":gripbuttonheld, "triggerbuttonheld":triggerbuttonheld }
 
+
 func handposeimmediate(boneorientations, dt):
 	handpositionstack.clear()
 	var t0 = OS.get_ticks_msec()*0.001
 	handpositionstack.push_back({"Ltimestamp":t0, "valid":true, "boneorientations":hand_boneorientations.duplicate() })
 	handpositionstack.push_back({"Ltimestamp":t0+dt, "valid":true, "boneorientations":boneorientations })
 
-func update_hand_shape(_button):
-	var h1 = handcontroller.is_button_pressed(BUTTONS.VR_TRIGGER)
-	var h2 = handcontroller.is_button_pressed(BUTTONS.VR_GRIP)
-	var boneorientations = null
-	if not h1 and not h2:
-		boneorientations = handokay00
-	if h1 and not h2:
-		boneorientations = handokay10
-	if not h1 and h2:
-		boneorientations = handokay01
-	if h1 and h2:
-		boneorientations = handokay11
-	print("hh ", h1, " ", h2, "  ", boneorientations[2])
-	handposeimmediate(boneorientations, 0.2)
+func initkeyboardtracking():
+	handpositionstack = [ ]
+	handcontroller = null
+	process_handgesturefromcontrol()
 
 func initnormalvrtracking(lhandcontroller):
 	handpositionstack = [ ]
 	handcontroller = lhandcontroller
-	handposeimmediate(handokay00, 0.6)
-	handcontroller.connect("button_pressed", self, "update_hand_shape")
-	handcontroller.connect("button_release", self, "update_hand_shape")
-	if islefthand:
-		handmodel.rotation_degrees.y = -90
-		handmodel.rotation_degrees.z = 180
-	else:
-		handmodel.rotation_degrees.y = -90
-	handmodel.translation.z += 0.1
 
 func initpuppetracking(lplayerishandtracked):
 	print("initpuppetracking: ", lplayerishandtracked, " ", islefthand)
 	handpositionstack = [ ]
 	playerishandtracked = lplayerishandtracked
-	if not playerishandtracked:
-		handposeimmediate(handokay00, 0.6)
-		if islefthand:
-			handmodel.rotation_degrees.y = -90
-			handmodel.rotation_degrees.z = 180
-		else:
-			handmodel.rotation_degrees.y = -90
-		handmodel.translation.z += 0.1
 
 func process_ovrhandtracking(delta):
 	handconfidence = ovr_hand_tracking.get_hand_pose(controller_id, hand_boneorientations)
 	handvalid = handconfidence != null and handconfidence == 1
+	if handvalid:
+		transform = handcontroller.transform 
+		gripbuttonheld = handcontroller.is_button_pressed(BUTTONS.HT_PINCH_MIDDLE_FINGER)
+		triggerbuttonheld = handcontroller.is_button_pressed(BUTTONS.HT_PINCH_INDEX_FINGER)
+	update_handpose(delta)
 	pointervalid = handvalid and ovr_hand_tracking.is_pointer_pose_valid(controller_id)
 	if pointervalid:
-		pointerpose = ovr_hand_tracking.get_pointer_pose(controller_id)
-	if handvalid:
-		transform = handcontroller.transform
-	update_handpose(delta)
-	if pointervalid:
-		pointermodel.transform = pointerpose
-	gripbuttonheld = handcontroller.is_button_pressed(BUTTONS.HT_PINCH_MIDDLE_FINGER)
-	triggerbuttonheld = handcontroller.is_button_pressed(BUTTONS.HT_PINCH_INDEX_FINGER)
+		pointerposearvrorigin = ovr_hand_tracking.get_pointer_pose(controller_id)  # should this be inverted
 		
 func process_normalvrtracking(delta):
-	if handcontroller != null:
-		transform = handcontroller.transform
-		joypos = Vector2(handcontroller.get_joystick_axis(0), handcontroller.get_joystick_axis(1))
-		gripbuttonheld = handcontroller.is_button_pressed(BUTTONS.VR_GRIP)
-		triggerbuttonheld = handcontroller.is_button_pressed(BUTTONS.VR_TRIGGER)
-	pointerpose = transform
-	if pointervalid:
-		pointermodel.transform = pointerpose
+	joypos = Vector2(handcontroller.get_joystick_axis(0), handcontroller.get_joystick_axis(1))
+	gripbuttonheld = handcontroller.is_button_pressed(BUTTONS.VR_GRIP)
+	triggerbuttonheld = handcontroller.is_button_pressed(BUTTONS.VR_TRIGGER)
+	transform = handcontroller.transform*controllerhandtransform
+	pointervalid = true
+	pointerposearvrorigin = handcontroller.transform*pointerposechangeangle
+	process_handgesturefromcontrol()
+
+func process_keyboardcontroltracking(headcam, dmousecontrollermotioncumulative):
+	mousecontrollermotioncumulative = Vector2(clamp(mousecontrollermotioncumulative.x + dmousecontrollermotioncumulative.x, -1.0, 1.0), 
+											  clamp(mousecontrollermotioncumulative.y + dmousecontrollermotioncumulative.y, -1.0, 1.0))
+	var ht = headcam.transform
+	ht = ht*Transform().rotated(Vector3(1,0,0), deg2rad(-mousecontrollermotioncumulative.y*30))*Transform().rotated(Vector3(0,1,0), deg2rad(-mousecontrollermotioncumulative.x*50-10))
+	ht.origin += -0.5*ht.basis.z
+	pointervalid = true
+	ht = ht*Transform().rotated(Vector3(1,0,0), deg2rad(45))*Transform().rotated(Vector3(0,1,0), deg2rad(30))
+	transform = ht*controllerhandtransform
+	pointerposearvrorigin = ht*pointerposechangeangle # *Transform().rotated(Vector3(0,1,0), deg2rad(90))
+	process_handgesturefromcontrol()	
+
+func process_handgesturefromcontrol():
+	var newcurrentgesture = "handokay" + ("1" if triggerbuttonheld else "0") + ("1" if gripbuttonheld else "0")
+	if newcurrentgesture != currentgesture:
+		currentgesture = newcurrentgesture
+		handposeimmediate(gestureboneorientations[currentgesture], 0.2)
 	
 func _process(delta):
 	if handpositionstack != null and len(handpositionstack) != 0:
 		process_handpositionstack(delta)
 	handtranslucentvalidity = update_fademode(delta, handvalid, handtranslucentvalidity, handmodel, handmaterial)
+	if pointervalid:
+		pointermodel.transform = transform.inverse()*pointerposearvrorigin
 	pointertranslucentvalidity = update_fademode(delta, pointervalid, pointertranslucentvalidity, pointermodel, pointermaterial)
 

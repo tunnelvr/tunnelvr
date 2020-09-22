@@ -7,12 +7,12 @@ var centrelineonly = false
 var connectiontoserveractive = false
 var morethanoneplayer = false
 
-var arvrinterfacename = "none"
+var arvrinterfacename = "none"  # OVRMobile, Oculus, OpenVR
 var arvrinterface = null
 var VRoperating = false
 
 
-var VRstatus = "unknown"   # should be a flag
+
 var questhandtracking = false
 
 var soundsystem = null
