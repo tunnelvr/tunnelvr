@@ -935,7 +935,7 @@ size = Vector2( 4, 2 )
 
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
-hostipnumber = "192.168.1.224"
+enablenetworking = false
 
 [node name="Players" type="Spatial" parent="."]
 transform = Transform( -1, 0, -3.25841e-07, 0, 1, 0, 3.25841e-07, 0, -1, 0, 0, 0 )

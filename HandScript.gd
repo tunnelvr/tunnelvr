@@ -173,9 +173,9 @@ func process_handpositionstack(delta):
 				hand_boneorientations[i] = hp["boneorientations"][i].slerp(hp1["boneorientations"][i], lam)
 			hp = hp1
 	if hp.has("triggerbuttonheld"): 
-		indexfingerpinchbutton.get_node("MeshInstance").get_surface_material(0).emission = Color("#E6E31B") if hp["triggerbuttonheld"] else Color("#000000")
+		indexfingerpinchbutton.get_node("MeshInstance").get_surface_material(0).emission_energy = 1 if hp["triggerbuttonheld"] else 0
 	if hp.has("gripbuttonheld"): 
-		middlefingerpinchbutton.get_node("MeshInstance").get_surface_material(0).emission = Color("#E6E31B") if hp["gripbuttonheld"] else Color("#000000")
+		middlefingerpinchbutton.get_node("MeshInstance").get_surface_material(0).emission_energy = 1 if hp["gripbuttonheld"] else 0
 	update_handpose(delta)
 
 func handpositiondict(t0):
@@ -216,6 +216,8 @@ func process_ovrhandtracking(delta):
 		transform = handcontroller.transform 
 		gripbuttonheld = handcontroller.is_button_pressed(BUTTONS.HT_PINCH_MIDDLE_FINGER)
 		triggerbuttonheld = handcontroller.is_button_pressed(BUTTONS.HT_PINCH_INDEX_FINGER)
+	indexfingerpinchbutton.get_node("MeshInstance").get_surface_material(0).emission_energy = 1 if triggerbuttonheld else (handcontroller.get_joystick_axis(0)+1)/3
+	middlefingerpinchbutton.get_node("MeshInstance").get_surface_material(0).emission_energy = 1 if gripbuttonheld else (handcontroller.get_joystick_axis(1)+1)/3
 	update_handpose(delta)
 	pointervalid = handvalid and ovr_hand_tracking.is_pointer_pose_valid(controller_id)
 	if pointervalid:
@@ -228,8 +230,8 @@ func process_normalvrtracking(delta):
 	transform = handcontroller.transform*controllerhandtransform
 	pointervalid = true
 	pointerposearvrorigin = handcontroller.transform*pointerposechangeangle
-	indexfingerpinchbutton.get_node("MeshInstance").get_surface_material(0).emission = Color("#E6E31B") if triggerbuttonheld else Color("#000000")
-	middlefingerpinchbutton.get_node("MeshInstance").get_surface_material(0).emission = Color("#E6E31B") if gripbuttonheld else Color("#000000")
+	indexfingerpinchbutton.get_node("MeshInstance").get_surface_material(0).emission_energy = 1 if triggerbuttonheld else 0
+	middlefingerpinchbutton.get_node("MeshInstance").get_surface_material(0).emission_energy = 1 if gripbuttonheld else 0
 	process_handgesturefromcontrol()
 
 func process_keyboardcontroltracking(headcam, dmousecontrollermotioncumulative):
@@ -242,6 +244,8 @@ func process_keyboardcontroltracking(headcam, dmousecontrollermotioncumulative):
 	ht = ht*Transform().rotated(Vector3(1,0,0), deg2rad(45))*Transform().rotated(Vector3(0,1,0), deg2rad(30))
 	transform = ht*controllerhandtransform
 	pointerposearvrorigin = ht*pointerposechangeangle # *Transform().rotated(Vector3(0,1,0), deg2rad(90))
+	indexfingerpinchbutton.get_node("MeshInstance").get_surface_material(0).emission_energy = 1 if triggerbuttonheld else 0
+	middlefingerpinchbutton.get_node("MeshInstance").get_surface_material(0).emission_energy = 1 if gripbuttonheld else 0
 	process_handgesturefromcontrol()	
 
 func process_handgesturefromcontrol():
