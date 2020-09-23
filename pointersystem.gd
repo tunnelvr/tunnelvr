@@ -633,6 +633,7 @@ func buttonreleased_vrtrigger():
 		setactivetargetwall(xcdrawing)
 		sketchsystem.sharexcdrawingovernetwork(xcdrawing)
 						
+var Dtsum = 0
 func _physics_process(_delta):
 	if LaserOrient.visible: # Tglobal.VRstatus != "quest":
 		var firstlasertarget = LaserOrient.get_node("RayCast").get_collider() if LaserOrient.get_node("RayCast").is_colliding() and not LaserOrient.get_node("RayCast").get_collider().is_queued_for_deletion() else null
@@ -651,7 +652,7 @@ func _physics_process(_delta):
 		else:
 			planviewsystem.get_node("RealPlanCamera/LaserScope").visible = false
 			activelaserroot = LaserOrient
-		if activetargetwall != null and not Tglobal.questhandtracking and pointertargetwall == activetargetwall and len(activetargetwall.nodepoints) == 0 and handrightcontroller.get_is_active() and handrightcontroller.is_button_pressed(BUTTONS.VR_GRIP):
+		if false and activetargetwall != null and not Tglobal.questhandtracking and pointertargetwall == activetargetwall and len(activetargetwall.nodepoints) == 0 and handrightcontroller.get_is_active() and handrightcontroller.is_button_pressed(BUTTONS.VR_GRIP):
 			var joypos = handright.joypos
 			if abs(joypos.x) > 0.3:
 				activetargetwall.rotation_degrees.y += joypos.x*30*_delta
@@ -668,10 +669,15 @@ func _physics_process(_delta):
 		
 	if activetargetwallgrabbedtransform != null:
 		if activetargetwallgrabbed.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
-			var laserrelrotate = activelaserroot.global_transform*activetargetwallgrabbedlaserroottrans.inverse()
-			var laserrelrotateEuler = laserrelrotate.basis.get_euler()
-			activetargetwallgrabbed.global_transform = activetargetwallgrabbedorgtransform.rotated(Vector3(0,1,0), laserrelrotateEuler.y)
-			var activetargetwallgrabbedpointmoved = activetargetwallgrabbedpoint + 20*laserrelrotateEuler.x*activetargetwallgrabbeddispvector.normalized()
+			var laserrelvec = activelaserroot.global_transform.basis.inverse()*activetargetwallgrabbedlaserroottrans.basis.z
+			var angy = -Vector2(laserrelvec.z, laserrelvec.x).angle()
+			var angpush =-(activetargetwallgrabbedlaserroottrans.origin.y - activelaserroot.global_transform.origin.y)
+			Dtsum += _delta
+			if Dtsum > 0.5:
+				print("laserrelrotateEuler ", angy, " ", angpush)
+				Dtsum = 0
+			activetargetwallgrabbed.global_transform = activetargetwallgrabbedorgtransform.rotated(Vector3(0,1,0), angy)
+			var activetargetwallgrabbedpointmoved = activetargetwallgrabbedpoint + 20*angpush*activetargetwallgrabbeddispvector.normalized()
 			activetargetwallgrabbed.global_transform.origin += activetargetwallgrabbedpointmoved - activetargetwallgrabbed.global_transform*activetargetwallgrabbedlocalpoint
 
 		elif activetargetwallgrabbedpoint != null:
@@ -679,7 +685,8 @@ func _physics_process(_delta):
 			activetargetwallgrabbed.global_transform.origin += activetargetwallgrabbedpoint - activetargetwallgrabbed.global_transform * activetargetwallgrabbedlocalpoint
 		else:
 			activetargetwallgrabbed.global_transform = activelaserroot.get_node("LaserSpot").global_transform * activetargetwallgrabbedtransform
-		activetargetwallgrabbed.rpc_unreliable("setxcdrawingposition", activetargetwallgrabbed.global_transform)
+		if Tglobal.connectiontoserveractive:
+			activetargetwallgrabbed.rpc_unreliable("setxcdrawingposition", activetargetwallgrabbed.global_transform)
 
 
 var rightmousebuttonheld = false

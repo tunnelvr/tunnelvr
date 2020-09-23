@@ -268,7 +268,7 @@ func process_freefall(delta):
 	if slidecount > 0:
 		var slidecollision = $PlayerKinematicBody.get_slide_collision(slidecount - 1)
 		var slideincidence = -slidecollision.normal.dot(playerfreefallbodyvelocity)
-		print(playerbodycentre, slideincidence, playerfreefallbodyvelocity, freefallsurfaceslidedragfactor, " delta ", delta)
+		#print(playerbodycentre, slideincidence, playerfreefallbodyvelocity, freefallsurfaceslidedragfactor, " delta ", delta)
 		playerfreefallbodyvelocity *= 1 - max(0, slideincidence)*freefallsurfaceslidedragfactor*delta
 		if slidecollision.normal.y > floor_max_angle_wallgradient:
 			endfreefallmode()
