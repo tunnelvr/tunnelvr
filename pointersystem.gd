@@ -33,9 +33,12 @@ var activetargetnodewall = null
 var activetargetwall = null
 var activetargetwallgrabbed = null
 var activetargetwallgrabbedtransform = null
+var activetargetwallgrabbedorgtransform = null
+var activetargetwallgrabbeddispvector = null
 var activetargetwallgrabbedpoint = null
 var activetargetwallgrabbedpointoffset = null
 var activetargetwallgrabbedlocalpoint = null
+var activetargetwallgrabbedlaserroottrans = null
 
 var activetargettube = null
 
@@ -303,11 +306,26 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 		else:
 			activetargetwallgrabbedtransform = alaserspot.global_transform.affine_inverse() * activetargetwallgrabbed.global_transform
 			activetargetwallgrabbedpoint = null
+
 			
 	elif pointertargettype == "XCdrawing":
 		if pointertargetwall != activetargetwall:
 			setactivetargetwall(pointertargetwall)
-		if (activetargetnode != null and activetargetnodewall == pointertargetwall) or pointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE or len(pointertargetwall.nodepoints) == 0:
+			
+		if gripbuttonheld and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING and len(pointertargetwall.nodepoints) == 0:
+			clearactivetargetnode()
+			var alaserspot = activelaserroot.get_node("LaserSpot")
+			alaserspot.global_transform.origin = pointertargetpoint
+			activetargetwallgrabbed = activetargetwall
+			activetargetwallgrabbedlaserroottrans = activelaserroot.global_transform
+			activetargetwallgrabbedtransform = alaserspot.global_transform.affine_inverse() * activetargetwallgrabbed.global_transform
+			activetargetwallgrabbedorgtransform = activetargetwallgrabbed.global_transform
+			activetargetwallgrabbeddispvector = alaserspot.global_transform.origin - activelaserroot.global_transform.origin
+			activetargetwallgrabbedpoint = alaserspot.global_transform.origin
+			activetargetwallgrabbedlocalpoint = activetargetwallgrabbed.global_transform.affine_inverse() * alaserspot.global_transform.origin
+			activetargetwallgrabbedpointoffset = alaserspot.global_transform.origin - activetargetwallgrabbed.global_transform.origin
+
+		elif (activetargetnode != null and activetargetnodewall == pointertargetwall) or pointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE or len(pointertargetwall.nodepoints) == 0:
 			var newpointertarget = pointertargetwall.newxcnode()
 			pointertargetwall.setxcnpoint(newpointertarget, pointertargetpoint, true)
 			Tglobal.soundsystem.quicksound("ClickSound", pointertargetpoint)
@@ -616,7 +634,6 @@ func buttonreleased_vrtrigger():
 		sketchsystem.sharexcdrawingovernetwork(xcdrawing)
 						
 func _physics_process(_delta):
-		
 	if LaserOrient.visible: # Tglobal.VRstatus != "quest":
 		var firstlasertarget = LaserOrient.get_node("RayCast").get_collider() if LaserOrient.get_node("RayCast").is_colliding() and not LaserOrient.get_node("RayCast").get_collider().is_queued_for_deletion() else null
 		pointerplanviewtarget = planviewsystem if firstlasertarget != null and firstlasertarget.get_name() == "PlanView" and planviewsystem.checkplanviewinfront(LaserOrient) else null
@@ -650,7 +667,14 @@ func _physics_process(_delta):
 		setpointertarget(activelaserroot)
 		
 	if activetargetwallgrabbedtransform != null:
-		if activetargetwallgrabbedpoint != null:
+		if activetargetwallgrabbed.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
+			var laserrelrotate = activelaserroot.global_transform*activetargetwallgrabbedlaserroottrans.inverse()
+			var laserrelrotateEuler = laserrelrotate.basis.get_euler()
+			activetargetwallgrabbed.global_transform = activetargetwallgrabbedorgtransform.rotated(Vector3(0,1,0), laserrelrotateEuler.y)
+			var activetargetwallgrabbedpointmoved = activetargetwallgrabbedpoint + 20*laserrelrotateEuler.x*activetargetwallgrabbeddispvector.normalized()
+			activetargetwallgrabbed.global_transform.origin += activetargetwallgrabbedpointmoved - activetargetwallgrabbed.global_transform*activetargetwallgrabbedlocalpoint
+
+		elif activetargetwallgrabbedpoint != null:
 			activetargetwallgrabbed.global_transform = activelaserroot.get_node("LaserSpot").global_transform * activetargetwallgrabbedtransform
 			activetargetwallgrabbed.global_transform.origin += activetargetwallgrabbedpoint - activetargetwallgrabbed.global_transform * activetargetwallgrabbedlocalpoint
 		else:
