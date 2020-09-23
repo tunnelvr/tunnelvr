@@ -17,8 +17,8 @@ var activesector = 0
 const linewidth = 0.02
 
 func _ready():
-	$XCtubeshell/CollisionShape.shape = ConcavePolygonShape.new()
-
+	pass
+	
 func xctubeapplyonepath(xcn0, xcn1):
 	print("xcapplyonepathxcapplyonepath-pre", xcn0, xcn1, xcdrawinglink)
 	assert (xcn0.get_parent().get_parent().get_name() == xcname0 and xcn1.get_parent().get_parent().get_name() == xcname1)
@@ -393,23 +393,6 @@ func slicetubetoxcdrawing(xcdrawing, xcdrawinglink0, xcdrawinglink1):
 	
 	return true
 
-func Dupdatetubeshell(xcdrawings, makevisible):
-	if makevisible:
-		var tubeshellmesh = maketubeshell(xcdrawings)
-		if tubeshellmesh != null:
-			$XCtubeshell/MeshInstance.mesh = tubeshellmesh
-			assert ($XCtubeshell/MeshInstance.get_surface_material_count() == len(xcsectormaterials))
-			for i in range($XCtubeshell/MeshInstance.get_surface_material_count()):
-				$XCtubeshell/MeshInstance.set_surface_material(i, get_node("/root/Spatial/MaterialSystem").gettubematerial(xcsectormaterials[i], false))
-			$XCtubeshell/CollisionShape.shape.set_faces(tubeshellmesh.get_faces())
-			$XCtubeshell.visible = true
-			$XCtubeshell/CollisionShape.disabled = false
-		else:
-			$XCtubeshell.visible = false
-			$XCtubeshell/CollisionShape.disabled = true
-	else:
-		$XCtubeshell.visible = false
-		$XCtubeshell/CollisionShape.disabled = true
 
 func add_vertex(surfaceTool, xcnodes, poly, ila, i):
 	var pt = xcnodes.get_node(poly[(ila+i)%len(poly)]).global_transform.origin

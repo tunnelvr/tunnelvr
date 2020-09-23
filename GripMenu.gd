@@ -14,8 +14,9 @@ func disableallgripmenus():
 
 func enablegripmenus(gmlist):
 	for g in gmlist:
-		get_node(g).get_node("MeshInstance").visible = true
-		get_node(g).get_node("CollisionShape").disabled = false
+		if g != "":
+			get_node(g).get_node("MeshInstance").visible = true
+			get_node(g).get_node("CollisionShape").disabled = false
 	
 func _ready():
 	disableallgripmenus()
@@ -53,6 +54,7 @@ func gripmenuon(controllertrans, pointertargetwall, pointertargettype, activetar
 		enablegripmenus(["NewXC", "Record", "Replay"])
 
 	else:
+		enablegripmenus(["NewXC", "", ""])
 		gripmenupointertargetwall = null
 		gripmenupointertargettype = ""
 				

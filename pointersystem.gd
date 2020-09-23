@@ -107,13 +107,10 @@ func setactivetargetwall(newactivetargetwall):
 
 func setactivetargettubesector(advancesector):
 	if advancesector != 0:
-		#activetargettube.get_node("XCtubeshell/MeshInstance").set_surface_material(activetargettube.activesector, materialsystem.gettubematerial(activetargettube.xcsectormaterials[activetargettube.activesector], false))
 		activetargettube.get_node("XCtubesectors").get_child(activetargettube.activesector).get_node("MeshInstance").set_surface_material(0, materialsystem.gettubematerial(activetargettube.xcsectormaterials[activetargettube.activesector], false))
 	if advancesector != -2:
-		#var nsectors = activetargettube.get_node("XCtubeshell/MeshInstance").get_surface_material_count()
 		var nsectors = activetargettube.get_node("XCtubesectors").get_child_count()
 		activetargettube.activesector = (activetargettube.activesector + advancesector + nsectors)%nsectors
-		#activetargettube.get_node("XCtubeshell/MeshInstance").set_surface_material(activetargettube.activesector, materialsystem.gettubematerial(activetargettube.xcsectormaterials[activetargettube.activesector], true))
 		activetargettube.get_node("XCtubesectors").get_child(activetargettube.activesector).get_node("MeshInstance").set_surface_material(0, materialsystem.gettubematerial(activetargettube.xcsectormaterials[activetargettube.activesector], true))
 
 func setactivetargettube(newactivetargettube):
@@ -136,8 +133,6 @@ func targettype(target):
 		return "GUIPanel3D"
 	if targetname == "PlanView":
 		return "PlanView"
-	if targetname == "XCtubeshell":
-		return "XCtube"
 	if targetname == "XCflatshell":
 		return "XCflatshell"
 	var targetparent = target.get_parent()
@@ -159,8 +154,6 @@ func targetwall(target, targettype):
 		return target.get_parent()
 	if targettype == "XCnode":
 		return target.get_parent().get_parent()
-	if targettype == "XCtube":
-		return target.get_parent()
 	if targettype == "XCtubesector":
 		return target.get_parent().get_parent()
 	if targettype == "PlanView":
@@ -487,14 +480,14 @@ func buttonreleased_vrgrip():
 			elif pointertarget.get_name() == "DelXC":
 				print("Not implemented")
 
-			elif pointertarget.get_name() == "NXC":
+			elif pointertarget.get_name() == "NewXC":
 				print("Not implemented")
 				
 			elif pointertarget.get_name() == "ghost":
 				print("Not implemented")
 				if activetargettube != null:
-					 activetargettube.get_node("XCtubeshell/MeshInstance").set_surface_material(activetargettube.activesector, materialsystem.tubematerialtransparent(false))
-
+					activetargettube.get_node("XCtubesectors").get_child(activetargettube.activesector).get_node("MeshInstance").set_surface_material(0, materialsystem.tubematerialtransparent(false))
+		
 			elif pointertarget.get_name() == "NewSlice" and is_instance_valid(activetargettube):
 				print("Press trigger to action")
 
