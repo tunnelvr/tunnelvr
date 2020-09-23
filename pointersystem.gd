@@ -247,7 +247,7 @@ func buttonpressed_vrby(gripbuttonheld):
 
 func buttonpressed_vrgrip():
 	gripbuttonpressused = false
-	gripmenu.gripmenuon(LaserOrient.global_transform, pointertargetwall, pointertargettype, activetargettube)
+	gripmenu.gripmenuon(LaserOrient.global_transform, pointertargetpoint, pointertargetwall, pointertargettype, activetargettube)
 	
 func buttonpressed_vrtrigger(gripbuttonheld):
 	var dontdisablegripmenus = false
@@ -436,7 +436,39 @@ func buttonreleased_vrgrip():
 		pass  # the trigger was pulled during the grip operation
 	
 	elif pointertargettype == "GripMenuItem":
-		if is_instance_valid(gripmenu.gripmenupointertargetwall):
+		if pointertarget.get_name() == "NewXC":
+			var pt0 = gripmenu.gripmenupointertargetpoint
+			var eyept0vec = pt0 - headcam.global_transform.origin
+			if gripmenu.gripmenupointertargettype == "XCtubesector":
+				var xcdrawing0 = sketchsystem.xcdrawings.get_node(gripmenu.gripmenupointertargetwall.xcname0)
+				var xcdrawing1 = sketchsystem.xcdrawings.get_node(gripmenu.gripmenupointertargetwall.xcname1)
+				var tubevec = xcdrawing1.global_transform.origin - xcdrawing0.global_transform.origin
+				eyept0vec = tubevec if eyept0vec.dot(tubevec) > 0 else -tubevec
+			elif gripmenu.gripmenupointertargettype == "Papersheet":
+				pass
+			elif gripmenu.gripmenupointertargettype == "XCnode":
+				if gripmenu.gripmenupointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
+					pt0 += -eyept0vec/2
+				eyept0vec = gripmenu.gripmenulaservector
+			elif gripmenu.gripmenupointertargettype == "PlanView":
+				pt0 = null
+			elif gripmenu.gripmenupointertargettype == "XCdrawing" and gripmenu.gripmenupointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
+				pt0 += -eyept0vec/2
+			else:
+				print(gripmenu.gripmenupointertargettype)
+				assert (gripmenu.gripmenupointertargettype == "none")
+				eyept0vec = gripmenu.gripmenulaservector
+				pt0 = headcam.global_transform.origin + eyept0vec.normalized()*2.9
+			if pt0 != null:
+				var xcdrawing = sketchsystem.newXCuniquedrawing(DRAWING_TYPE.DT_XCDRAWING, sketchsystem.uniqueXCname())
+				var drawingwallangle = Vector2(eyept0vec.x, eyept0vec.z).angle() + deg2rad(90)					
+				xcdrawing.setxcpositionangle(drawingwallangle)
+				xcdrawing.setxcpositionorigin(pt0)
+				clearactivetargetnode()
+				setactivetargetwall(xcdrawing)
+				sketchsystem.sharexcdrawingovernetwork(xcdrawing)
+
+		elif is_instance_valid(gripmenu.gripmenupointertargetwall):
 			print("executing ", pointertarget.get_name(), " on ", gripmenu.gripmenupointertargetwall.get_name())
 			if pointertarget.get_name() == "Up5":
 				#gripmenu.gripmenupointertargetwall.global_transform.origin.y += 1
@@ -480,11 +512,8 @@ func buttonreleased_vrgrip():
 			elif pointertarget.get_name() == "DelXC":
 				print("Not implemented")
 
-			elif pointertarget.get_name() == "NewXC":
-				print("Not implemented")
 				
 			elif pointertarget.get_name() == "ghost":
-				print("Not implemented")
 				if activetargettube != null:
 					activetargettube.get_node("XCtubesectors").get_child(activetargettube.activesector).get_node("MeshInstance").set_surface_material(0, materialsystem.tubematerialtransparent(false))
 		

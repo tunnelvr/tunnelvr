@@ -1,9 +1,12 @@
 extends Spatial
 
 
+
+var gripmenupointertargetpoint = Vector3(0,0,0)
+var gripmenulaservector = Vector3(0,0,1)
 var gripmenupointertargetwall = null
 var gripmenupointertargettype = ""
-# look at gripbuttonpressused
+
 
 func disableallgripmenus():
 	for s in get_children():
@@ -21,8 +24,10 @@ func enablegripmenus(gmlist):
 func _ready():
 	disableallgripmenus()
 
-func gripmenuon(controllertrans, pointertargetwall, pointertargettype, activetargettube):
+func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointertargettype, activetargettube):
+	gripmenupointertargetpoint = pointertargetpoint if pointertargetpoint != null else controllertrans.origin
 	gripmenupointertargetwall = pointertargetwall
+	gripmenulaservector = -controllertrans.basis.z
 	gripmenupointertargettype = pointertargettype
 
 	var paneltrans = global_transform
@@ -55,8 +60,6 @@ func gripmenuon(controllertrans, pointertargetwall, pointertargettype, activetar
 
 	else:
 		enablegripmenus(["NewXC", "", ""])
-		gripmenupointertargetwall = null
-		gripmenupointertargettype = ""
 				
 
 

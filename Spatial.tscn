@@ -1005,7 +1005,6 @@ controller_id = 2
 script = ExtResource( 43 )
 
 [node name="AudioStreamPlayer3D" type="AudioStreamPlayer3D" parent="Players/PlayerMe/HandRight"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.224738, 1.5, -0.630972 )
 visible = false
 
 [node name="pointersystem" type="Node" parent="Players/PlayerMe"]

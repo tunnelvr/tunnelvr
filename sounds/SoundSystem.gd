@@ -46,9 +46,10 @@ func stopmyvoicerecording():
 
 func playmyvoicerecording():
 	var playerMe = get_node("/root/Spatial").playerMe
-	playerMe.playvoicerecording(recording.get_data())
-	if Tglobal.connectiontoserveractive:
-		playerMe.rpc("playvoicerecording", recording.get_data())
+	if recording:
+		playerMe.playvoicerecording(recording.get_data())
+		if Tglobal.connectiontoserveractive:
+			playerMe.rpc("playvoicerecording", recording.get_data())
 
 
 
