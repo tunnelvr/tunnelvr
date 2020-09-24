@@ -13,7 +13,6 @@ var positioningtube = false
 var pickedpolyindex0 = -1
 var pickedpolyindex1 = -1
 
-var activesector = 0
 const linewidth = 0.02
 
 func _ready():
@@ -466,7 +465,7 @@ func updatetubeshell(xcdrawings, makevisible):
 		xctubesector.visible = true
 		xctubesector.get_node("CollisionShape").disabled = false
 		$XCtubesectors.add_child(xctubesector)
-	activesector = min(activesector, $XCtubesectors.get_child_count()-1)
+
 	
 func xcdfullsetvisibilitycollision(bvisible):
 	visible = bvisible

@@ -1,28 +1,65 @@
 extends Spatial
 
-
-
 var gripmenupointertargetpoint = Vector3(0,0,0)
 var gripmenulaservector = Vector3(0,0,1)
 var gripmenupointertargetwall = null
 var gripmenupointertargettype = ""
 
+var previewtubematerials = { }
+var tubenamematerials = { }
 
+func _ready():
+	var tubematerials = get_node("/root/Spatial/MaterialSystem/tubematerials")
+	var MaterialButton = load("res://nodescenes/MaterialButton.tscn")
+	for i in range(tubematerials.get_child_count()):
+		var tubematerial = tubematerials.get_child(i)
+		var materialbutton = MaterialButton.instance()
+		var materialname = tubematerial.get_name()
+		materialbutton.set_name(materialname)
+		var material = tubematerial.get_surface_material(0).duplicate()
+		material.flags_unshaded = true
+		material.uv1_triplanar = false
+		previewtubematerials[materialname] = material
+		tubenamematerials[materialname] = tubematerial.get_node("name").get_surface_material(0)
+		materialbutton.get_node("MeshInstance").set_surface_material(0, material)
+		$MaterialButtons.add_child(materialbutton)
+		materialbutton.transform.origin = Vector3(0.25, 0.15 - i*0.11, 0)
+	disableallgripmenus()
+	
 func disableallgripmenus():
-	for s in get_children():
+	for s in $WordButtons.get_children():
 		s.get_node("MeshInstance").visible = false
 		s.get_node("CollisionShape").disabled = true
 	gripmenupointertargetwall = null
 	gripmenupointertargettype = ""
+	for s in $MaterialButtons.get_children():
+		s.get_node("MeshInstance").visible = false
+		s.get_node("CollisionShape").disabled = true
 
 func enablegripmenus(gmlist):
 	for g in gmlist:
-		if g != "":
-			get_node(g).get_node("MeshInstance").visible = true
-			get_node(g).get_node("CollisionShape").disabled = false
-	
-func _ready():
-	disableallgripmenus()
+		if g == "materials":
+			for s in $MaterialButtons.get_children():
+				s.get_node("MeshInstance").visible = true
+				s.get_node("CollisionShape").disabled = false
+		elif g != "":
+			$WordButtons.get_node(g).get_node("MeshInstance").visible = true
+			$WordButtons.get_node(g).get_node("CollisionShape").disabled = false
+
+
+
+func cleargripmenupointer(pointertarget):
+	if pointertarget.get_parent().get_name() == "MaterialButtons":
+		pointertarget.get_node("MeshInstance").set_surface_material(0, previewtubematerials[pointertarget.get_name()])
+	else:
+		pointertarget.get_node("MeshInstance").get_surface_material(0).albedo_color = Color("#E8D619")
+
+func setgripmenupointer(pointertarget):
+	if pointertarget.get_parent().get_name() == "MaterialButtons":
+		pointertarget.get_node("MeshInstance").set_surface_material(0, tubenamematerials[pointertarget.get_name()])
+	else:
+		pointertarget.get_node("MeshInstance").get_surface_material(0).albedo_color = Color("#FFCCCC")
+
 
 func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointertargettype, activetargettube):
 	gripmenupointertargetpoint = pointertargetpoint if pointertargetpoint != null else controllertrans.origin
@@ -50,10 +87,8 @@ func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointert
 	elif gripmenupointertargettype == "Papersheet":
 		enablegripmenus(["toFloor", "toBig"])
 		
-	elif gripmenupointertargettype == "XCtube":
-		enablegripmenus(["SelectXC", "ghost", "FloorTex"])
 	elif gripmenupointertargettype == "XCtubesector":
-		enablegripmenus(["SelectXC", "ghost", "FloorTex"])
+		enablegripmenus(["SelectXC", "ghost", "materials"])
 
 	elif gripmenupointertargettype == "XCnode":
 		enablegripmenus(["NewXC", "Record", "Replay"])
@@ -61,8 +96,6 @@ func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointert
 	else:
 		enablegripmenus(["NewXC", "", ""])
 				
-
-
 
 # Calibri Fontsize 20: height 664 width 159
 var grip_commands_text = """

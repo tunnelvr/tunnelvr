@@ -69,8 +69,11 @@ func _ready():
 		bone_rest.basis = Basis()
 		handskeleton.set_bone_rest(i, bone_rest)
 	meshnode = handskeleton.get_node("l_handMeshNode" if islefthand else "r_handMeshNode")
-	handmaterial = load("res://shinyhandmesh.material").duplicate()
-	handmaterial.albedo_color = "#21db2c" if islefthand else "#db212c"
+	#handmaterial = load("res://shinyhandmesh.material").duplicate()
+	handmaterial = load("res://translucenthandmesh.material")
+	if islefthand:
+		handmaterial = handmaterial.duplicate()
+		handmaterial.albedo_color = "#76f6864b"
 	meshnode.set_surface_material(0, handmaterial)
 	pointermodel = load("res://LaserPointer.tscn").instance()
 	pointermaterial = pointermodel.get_node("Length/MeshInstance").get_surface_material(0).duplicate()

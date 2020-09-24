@@ -29,8 +29,10 @@ var gripbuttonpressused = false
 
 var activetargetnode = null
 var activetargetnodewall = null
-
 var activetargetwall = null
+var activetargettube = null
+var activetargettubesectorindex = -1
+
 var activetargetwallgrabbed = null
 var activetargetwallgrabbedtransform = null
 var activetargetwallgrabbedorgtransform = null
@@ -40,7 +42,6 @@ var activetargetwallgrabbedpointoffset = null
 var activetargetwallgrabbedlocalpoint = null
 var activetargetwallgrabbedlaserroottrans = null
 
-var activetargettube = null
 
 func clearpointertargetmaterial():
 	if pointertargettype == "XCnode":  
@@ -51,7 +52,7 @@ func clearpointertargetmaterial():
 		else:
 			pointertargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").set_surface_material(0, materialsystem.xcdrawingmaterial("normal", null))
 	if pointertargettype == "GripMenuItem":
-		pointertarget.get_node("MeshInstance").get_surface_material(0).albedo_color = Color("#E8D619")
+		gripmenu.cleargripmenupointer(pointertarget)
 
 			
 func setpointertargetmaterial():
@@ -60,7 +61,7 @@ func setpointertargetmaterial():
 	if (pointertargettype == "XCdrawing" or pointertargettype == "XCnode") and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		pointertargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").set_surface_material(0, materialsystem.xcdrawingmaterial("highlight", pointertargetwall.get_node("XCdrawingplane").get_scale()))
 	if pointertargettype == "GripMenuItem":
-		pointertarget.get_node("MeshInstance").get_surface_material(0).albedo_color = Color("#FFCCCC")
+		gripmenu.setgripmenupointer(pointertarget)
 
 func clearactivetargetnode():
 	if activetargetnode != null:
@@ -108,21 +109,7 @@ func setactivetargetwall(newactivetargetwall):
 	if activetargetwall != null and activetargetwall.drawingtype == DRAWING_TYPE.DT_PAPERTEXTURE:
 		activetargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").get_surface_material(0).albedo_color = Color("#DDFFCC")
 
-func setactivetargettubesector(advancesector):
-	if advancesector != 0:
-		activetargettube.get_node("XCtubesectors").get_child(activetargettube.activesector).get_node("MeshInstance").set_surface_material(0, materialsystem.gettubematerial(activetargettube.xcsectormaterials[activetargettube.activesector], false))
-	if advancesector != -2:
-		var nsectors = activetargettube.get_node("XCtubesectors").get_child_count()
-		activetargettube.activesector = (activetargettube.activesector + advancesector + nsectors)%nsectors
-		activetargettube.get_node("XCtubesectors").get_child(activetargettube.activesector).get_node("MeshInstance").set_surface_material(0, materialsystem.gettubematerial(activetargettube.xcsectormaterials[activetargettube.activesector], true))
 
-func setactivetargettube(newactivetargettube):
-	setactivetargetwall(null)
-	if activetargettube != null:
-		setactivetargettubesector(-2)
-	activetargettube = newactivetargettube
-	if activetargettube != null:
-		setactivetargettubesector(0)
 
 func _ready():
 	handrightcontroller.connect("button_pressed", self, "_on_button_pressed")
@@ -148,7 +135,7 @@ func targettype(target):
 		return "XCtubesector"
 	if targetparent.get_name() == "XCnodes":
 		return "XCnode"
-	if targetparent.get_name() == "GripMenu":
+	if targetparent.get_parent().get_name() == "GripMenu":
 		return "GripMenuItem"
 	return "unknown"
 		
@@ -250,7 +237,13 @@ func buttonpressed_vrby(gripbuttonheld):
 
 func buttonpressed_vrgrip():
 	gripbuttonpressused = false
+	if pointertargettype == "XCtubesector":
+		activetargettube = pointertargetwall
+		activetargettubesectorindex = pointertarget.get_index()
+		activetargettube.get_node("XCtubesectors").get_child(activetargettubesectorindex).get_node("MeshInstance").set_surface_material(0, materialsystem.gettubematerial(activetargettube.xcsectormaterials[activetargettubesectorindex], true))
+
 	gripmenu.gripmenuon(LaserOrient.global_transform, pointertargetpoint, pointertargetwall, pointertargettype, activetargettube)
+	
 	
 func buttonpressed_vrtrigger(gripbuttonheld):
 	var dontdisablegripmenus = false
@@ -279,19 +272,6 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 		recselectedtargetwall.removexcnode(recselectedtarget, false, sketchsystem)
 		Tglobal.soundsystem.quicksound("BlipSound", pointertargetpoint)
 	
-	elif pointertargettype == "XCtubesector":
-		if activetargettube == pointertargetwall:
-			if gripbuttonheld:
-				activetargettube.xcsectormaterials[activetargettube.activesector] = materialsystem.advancetubematerial(activetargettube.xcsectormaterials[activetargettube.activesector], +1)
-				setactivetargettubesector(0)
-			else:
-				setactivetargettubesector(+1)
-		else:
-			if activetargettube != null:
-				setactivetargettubesector(-2)
-			activetargettube = pointertargetwall
-			setactivetargettubesector(0)
-
 	elif pointertargettype == "Papersheet" or pointertargettype == "PlanView":
 		clearactivetargetnode()
 		var alaserspot = activelaserroot.get_node("LaserSpot")
@@ -418,14 +398,6 @@ func buttonpressed_vrpad(gripbuttonheld, joypos):
 				fs = 1/fs
 			pointertargetwall.get_node("XCdrawingplane").scale.x *= fs
 			pointertargetwall.get_node("XCdrawingplane").scale.y *= fs
-
-	elif pointertargettype == "XCtubesector" and activetargettube != null and pointertargetwall == activetargettube:
-		if abs(joypos.x) > 0.65:
-			var nsectors = activetargettube.get_node("XCtubeshell/MeshInstance").get_surface_material_count()
-			setactivetargettubesector(1 if joypos.x > 0 else -1)
-		elif abs(joypos.y) > 0.65:
-			activetargettube.xcsectormaterials[activetargettube.activesector] = materialsystem.advancetubematerial(activetargettube.xcsectormaterials[activetargettube.activesector], (+1 if joypos.y > 0 else -1))
-			setactivetargettubesector(0)
 			
 	#elif pointertargettype == "PlanView":
 	elif pointerplanviewtarget != null and not pointerplanviewtarget.planviewactive:
@@ -449,6 +421,17 @@ func _on_button_release(p_button):
 func buttonreleased_vrgrip():
 	if Tglobal.soundsystem.nowrecording:
 		Tglobal.soundsystem.stopmyvoicerecording()
+	
+	if activetargettube != null:
+		if pointertargettype == "GripMenuItem" and pointertarget.get_parent().get_name() == "MaterialButtons":
+			assert (gripmenu.gripmenupointertargettype == "XCtubesector") 
+			assert (activetargettube != null)
+			if activetargettube != null:
+				var sectormaterialname = pointertarget.get_name()
+				activetargettube.xcsectormaterials[activetargettubesectorindex] = sectormaterialname
+				#activetargettube.get_node("XCtubesectors").get_child(activetargettubesectorindex).set_surface_material(0, get_node("/root/Spatial/MaterialSystem").gettubematerial(sectormaterialname, false))
+		activetargettube.get_node("XCtubesectors").get_child(activetargettubesectorindex).get_node("MeshInstance").set_surface_material(0, materialsystem.gettubematerial(activetargettube.xcsectormaterials[activetargettubesectorindex], false))
+		activetargettube = null
 	
 	if gripbuttonpressused:
 		pass  # the trigger was pulled during the grip operation
@@ -491,13 +474,13 @@ func buttonreleased_vrgrip():
 			if pointertarget.get_name() == "Up5":
 				#gripmenu.gripmenupointertargetwall.global_transform.origin.y += 1
 				#playerMe.global_transform.origin.y = max(playerMe.global_transform.origin.y, gripmenu.gripmenupointertargetwall.global_transform.origin.y)
-				var floortween = gripmenu.get_node("Up5/Tween")
+				var floortween = gripmenu.get_node("FloorMoveTween")
 				floortween.interpolate_property(gripmenu.gripmenupointertargetwall, "translation:y", gripmenu.gripmenupointertargetwall.translation.y, gripmenu.gripmenupointertargetwall.translation.y + 1, 0.5, Tween.TRANS_QUART, Tween.EASE_IN_OUT)
 				floortween.start()
 			elif pointertarget.get_name() == "Down5":
 				#gripmenu.gripmenupointertargetwall.global_transform.origin.y -= 1
 				#gripmenu.gripmenupointertargetwall.global_transform.origin.y = max(gripmenu.gripmenupointertargetwall.global_transform.origin.y - 1, get_node("/root/Spatial/underfloor").global_transform.origin.y + 0.5)
-				var floortween = gripmenu.get_node("Up5/Tween")
+				var floortween = gripmenu.get_node("FloorMoveTween")
 				floortween.interpolate_property(gripmenu.gripmenupointertargetwall, "translation:y", gripmenu.gripmenupointertargetwall.translation.y, max(gripmenu.gripmenupointertargetwall.global_transform.origin.y - 1, get_node("/root/Spatial/underfloor").global_transform.origin.y + 0.5), 0.5, Tween.TRANS_QUART, Tween.EASE_IN_OUT)
 				floortween.start()
 			elif pointertarget.get_name() == "toPaper":
@@ -529,7 +512,6 @@ func buttonreleased_vrgrip():
 
 			elif pointertarget.get_name() == "DelXC":
 				print("Not implemented")
-
 				
 			elif pointertarget.get_name() == "ghost":
 				if activetargettube != null:
@@ -599,11 +581,6 @@ func buttonreleased_vrgrip():
 		activelaserroot.get_node("LaserSpot").visible = false
 		# keep nodes visible???
 		
-	elif pointertargettype == "XCtubesector":
-		if activetargettube != null:
-			setactivetargettubesector(-2)
-			activetargettube = null
-
 	elif activetargetwall != null:
 		sketchsystem.sharexcdrawingovernetwork(activetargetwall)
 		setactivetargetwall(null)
@@ -617,23 +594,11 @@ func buttonreleased_vrgrip():
 func buttonreleased_vrtrigger():
 	if Tglobal.soundsystem.nowrecording:
 		Tglobal.soundsystem.stopmyvoicerecording()
-			
 	if activetargetwallgrabbedtransform != null:
-		#setactivetargetwall(null)
+		if Tglobal.connectiontoserveractive:
+			activetargetwallgrabbed.rpc("setxcdrawingposition", activetargetwallgrabbed.global_transform)
 		activetargetwallgrabbedtransform = null
-	
-	if (pointertargettype == "XCnode" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE) and (activetargetnode != null and activetargetnodewall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE) and pointertarget != activetargetnode:
-		print("makingxcplane")
-		var xcdrawing = sketchsystem.newXCuniquedrawing(DRAWING_TYPE.DT_XCDRAWING, sketchsystem.uniqueXCname())
-		var vx = pointertarget.global_transform.origin - activetargetnode.global_transform.origin
-		xcdrawing.setxcpositionangle(Vector2(vx.x, vx.z).angle())
-		var vwallmid = (pointertarget.global_transform.origin + activetargetnode.global_transform.origin)/2
-		xcdrawing.setxcpositionorigin(vwallmid)
-		clearactivetargetnode()
-		setactivetargetwall(xcdrawing)
-		sketchsystem.sharexcdrawingovernetwork(xcdrawing)
 						
-var Dtsum = 0
 func _physics_process(_delta):
 	if LaserOrient.visible: # Tglobal.VRstatus != "quest":
 		var firstlasertarget = LaserOrient.get_node("RayCast").get_collider() if LaserOrient.get_node("RayCast").is_colliding() and not LaserOrient.get_node("RayCast").get_collider().is_queued_for_deletion() else null
@@ -652,18 +617,6 @@ func _physics_process(_delta):
 		else:
 			planviewsystem.get_node("RealPlanCamera/LaserScope").visible = false
 			activelaserroot = LaserOrient
-		if false and activetargetwall != null and not Tglobal.questhandtracking and pointertargetwall == activetargetwall and len(activetargetwall.nodepoints) == 0 and handrightcontroller.get_is_active() and handrightcontroller.is_button_pressed(BUTTONS.VR_GRIP):
-			var joypos = handright.joypos
-			if abs(joypos.x) > 0.3:
-				activetargetwall.rotation_degrees.y += joypos.x*30*_delta
-			if abs(joypos.y) > 0.3:
-				var p0 = gripmenu.gripmenupointertargetwall.global_transform.origin
-				var p1 = handrightcontroller.global_transform.origin
-				var pm = activetargetwall.global_transform.origin
-				var vp = p1 - p0
-				var lam = vp.dot(pm - p0)/vp.dot(vp)
-				if (lam > 0.1 and joypos.y > 0) or (lam < 0.9 and joypos.y < 0):
-					activetargetwall.global_transform.origin += -vp.normalized()*2*_delta*sign(joypos.y)
 
 		setpointertarget(activelaserroot)
 		
@@ -672,10 +625,6 @@ func _physics_process(_delta):
 			var laserrelvec = activelaserroot.global_transform.basis.inverse()*activetargetwallgrabbedlaserroottrans.basis.z
 			var angy = -Vector2(laserrelvec.z, laserrelvec.x).angle()
 			var angpush =-(activetargetwallgrabbedlaserroottrans.origin.y - activelaserroot.global_transform.origin.y)
-			Dtsum += _delta
-			if Dtsum > 0.5:
-				print("laserrelrotateEuler ", angy, " ", angpush)
-				Dtsum = 0
 			activetargetwallgrabbed.global_transform = activetargetwallgrabbedorgtransform.rotated(Vector3(0,1,0), angy)
 			var activetargetwallgrabbedpointmoved = activetargetwallgrabbedpoint + 20*angpush*activetargetwallgrabbeddispvector.normalized()
 			activetargetwallgrabbed.global_transform.origin += activetargetwallgrabbedpointmoved - activetargetwallgrabbed.global_transform*activetargetwallgrabbedlocalpoint

@@ -4,14 +4,20 @@ extends StaticBody
 var viewport_point := Vector2(0, 0)
 var viewport_mousedown := false
 onready var sketchsystem = get_node("/root/Spatial/SketchSystem")
-var savegamefile = "user://savegame.res"
 
 func _on_buttonload_pressed():
-	sketchsystem.loadsketchsystem(savegamefile)
+	var savegamefileid = $Viewport/GUI/Panel/Savegamefilename.get_selected_id()
+	var savegamefilename = "user://"+$Viewport/GUI/Panel/Savegamefilename.get_item_text(savegamefileid)
+	if not File.new().file_exists(savegamefilename):
+		$Viewport/GUI/Panel/Label.text = savegamefilename + " does not exist"
+		return
+	sketchsystem.loadsketchsystem(savegamefilename)
 	$Viewport/GUI/Panel/Label.text = "Sketch Loaded"
 	
 func _on_buttonsave_pressed():
-	sketchsystem.savesketchsystem(savegamefile)
+	var savegamefileid = $Viewport/GUI/Panel/Savegamefilename.get_selected_id()
+	var savegamefilename = "user://"+$Viewport/GUI/Panel/Savegamefilename.get_item_text(savegamefileid)
+	sketchsystem.savesketchsystem(savegamefilename)
 	$Viewport/GUI/Panel/Label.text = "Sketch Saved"
 
 func _on_buttonfetchimages_pressed():
@@ -25,10 +31,12 @@ func _on_buttonplanview_toggled(button_pressed):
 func _on_buttonheadtorch_toggled(button_pressed):
 	get_node("/root/Spatial").playerMe.setheadtorchlight(button_pressed)
 	$Viewport/GUI/Panel/Label.text = "Headtorch on" if button_pressed else "Headtorch off"
+	toggleguipanelvisibility(null)
 
 func _on_buttondoppelganger_toggled(button_pressed):
 	get_node("/root/Spatial").playerMe.setdoppelganger(button_pressed)
 	$Viewport/GUI/Panel/Label.text = "Doppelganger on" if button_pressed else "Doppelganger off"
+	toggleguipanelvisibility(null)
 
 func _on_centrelinevisibility_selected(index):
 	var cvsel = $Viewport/GUI/Panel/CentrelineVisibility.get_item_text(index)
@@ -147,7 +155,8 @@ func guipanelreleasemouse():
 func _input(event):
 	if event is InputEventKey and event.pressed:
 		if event.scancode == KEY_L:
-			sketchsystem.loadsketchsystem(savegamefile)
+			#sketchsystem.loadsketchsystem(savegamefile)
+			_on_buttonload_pressed()
 		#elif event.scancode == KEY_S:
 		#	sketchsystem.savesketchsystem()
 		elif event.scancode == KEY_D:

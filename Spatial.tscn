@@ -1,4 +1,4 @@
-[gd_scene load_steps=194 format=2]
+[gd_scene load_steps=202 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/default_env.tres" type="Environment" id=2]
@@ -7,6 +7,7 @@
 [ext_resource path="res://pointersystem.gd" type="Script" id=5]
 [ext_resource path="res://Freeze.obj" type="ArrayMesh" id=6]
 [ext_resource path="res://lightweighttextures/Ground030_2K_Color_small.jpg" type="Texture" id=7]
+[ext_resource path="res://guimaterials/materialnames.png" type="Texture" id=8]
 [ext_resource path="res://sounds/switch7.wav" type="AudioStream" id=9]
 [ext_resource path="res://SketchSystem.gd" type="Script" id=10]
 [ext_resource path="res://icon.png" type="Texture" id=11]
@@ -467,6 +468,15 @@ rings = 1
 
 [sub_resource type="PlaneMesh" id=79]
 
+[sub_resource type="PlaneMesh" id=152]
+size = Vector2( 2, 0.5 )
+
+[sub_resource type="SpatialMaterial" id=153]
+flags_unshaded = true
+albedo_texture = ExtResource( 8 )
+uv1_scale = Vector3( 1, 0.05, 1 )
+uv1_offset = Vector3( 0, 0.01, 0 )
+
 [sub_resource type="PlaneMesh" id=80]
 
 [sub_resource type="SpatialMaterial" id=81]
@@ -488,6 +498,12 @@ emission_on_uv2 = false
 emission_texture = ExtResource( 37 )
 uv1_scale = Vector3( 0.2, 0.2, 0.2 )
 uv1_triplanar = true
+
+[sub_resource type="SpatialMaterial" id=154]
+flags_unshaded = true
+albedo_texture = ExtResource( 8 )
+uv1_scale = Vector3( 1, 0.05, 1 )
+uv1_offset = Vector3( 0, 0.06, 0 )
 
 [sub_resource type="PlaneMesh" id=84]
 
@@ -548,6 +564,12 @@ ao_on_uv2 = false
 ao_texture_channel = 0
 uv1_triplanar = true
 
+[sub_resource type="SpatialMaterial" id=155]
+flags_unshaded = true
+albedo_texture = ExtResource( 8 )
+uv1_scale = Vector3( 1, 0.05, 1 )
+uv1_offset = Vector3( 0, 0.11, 0 )
+
 [sub_resource type="PlaneMesh" id=93]
 
 [sub_resource type="SpatialMaterial" id=94]
@@ -572,6 +594,12 @@ uv1_triplanar = true
 uv2_scale = Vector3( 0.5, 0.5, 0.5 )
 uv2_triplanar = true
 
+[sub_resource type="SpatialMaterial" id=156]
+flags_unshaded = true
+albedo_texture = ExtResource( 8 )
+uv1_scale = Vector3( 1, 0.05, 1 )
+uv1_offset = Vector3( 0, 0.16, 0 )
+
 [sub_resource type="PlaneMesh" id=97]
 
 [sub_resource type="SpatialMaterial" id=98]
@@ -591,6 +619,12 @@ emission_operator = 0
 emission_on_uv2 = false
 emission_texture = ExtResource( 37 )
 uv1_triplanar = true
+
+[sub_resource type="SpatialMaterial" id=157]
+flags_unshaded = true
+albedo_texture = ExtResource( 8 )
+uv1_scale = Vector3( 1, 0.05, 1 )
+uv1_offset = Vector3( 0, 0.21, 0 )
 
 [sub_resource type="PlaneMesh" id=100]
 
@@ -633,6 +667,12 @@ emission_operator = 0
 emission_on_uv2 = false
 emission_texture = ExtResource( 37 )
 uv1_triplanar = true
+
+[sub_resource type="SpatialMaterial" id=158]
+flags_unshaded = true
+albedo_texture = ExtResource( 8 )
+uv1_scale = Vector3( 1, 0.05, 1 )
+uv1_offset = Vector3( 0, 0.26, 0 )
 
 [sub_resource type="SpatialMaterial" id=107]
 params_cull_mode = 2
@@ -1076,6 +1116,18 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="Savegamefilename" type="OptionButton" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
+margin_left = 164.0
+margin_top = 46.0
+margin_right = 281.0
+margin_bottom = 73.0
+text = "savegame.res"
+items = [ "savegame.res", null, false, 0, null, "savegame2.res", null, false, 1, null, "savegame3.res", null, false, 2, null, "savegame4.res", null, false, 3, null, "savegame5.res", null, false, 4, null ]
+selected = 0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [node name="ButtonPlanView" type="CheckBox" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
 margin_left = 14.3899
 margin_top = 143.177
@@ -1206,215 +1258,219 @@ material/0 = SubResource( 8 )
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.61731 )
 script = ExtResource( 15 )
 
-[node name="Up5" type="StaticBody" parent="GuiSystem/GripMenu"]
+[node name="WordButtons" type="Spatial" parent="GuiSystem/GripMenu"]
+
+[node name="Up5" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
 transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, -0.25, -0.2, 0 )
 collision_layer = 8
 collision_mask = 0
 
-[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/Up5"]
+[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/Up5"]
 cast_shadow = 0
 mesh = SubResource( 9 )
 material/0 = SubResource( 10 )
 
-[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/Up5"]
+[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/Up5"]
 shape = SubResource( 11 )
 
-[node name="Tween" type="Tween" parent="GuiSystem/GripMenu/Up5"]
-
-[node name="Down5" type="StaticBody" parent="GuiSystem/GripMenu"]
+[node name="Down5" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
 transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, 0, -0.2, 0 )
 collision_layer = 8
 collision_mask = 0
 
-[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/Down5"]
+[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/Down5"]
 cast_shadow = 0
 mesh = SubResource( 9 )
 material/0 = SubResource( 12 )
 
-[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/Down5"]
+[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/Down5"]
 shape = SubResource( 11 )
 
-[node name="toPaper" type="StaticBody" parent="GuiSystem/GripMenu"]
+[node name="toPaper" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
 transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, 0.25, -0.2, 0 )
 collision_layer = 8
 collision_mask = 0
 
-[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/toPaper"]
+[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/toPaper"]
 cast_shadow = 0
 mesh = SubResource( 9 )
 material/0 = SubResource( 13 )
 
-[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/toPaper"]
+[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/toPaper"]
 shape = SubResource( 11 )
 
-[node name="NewSlice" type="StaticBody" parent="GuiSystem/GripMenu"]
+[node name="NewSlice" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
 transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, -0.25, -0.2, 0 )
 collision_layer = 8
 collision_mask = 0
 
-[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/NewSlice"]
+[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/NewSlice"]
 cast_shadow = 0
 mesh = SubResource( 9 )
 material/0 = SubResource( 14 )
 
-[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/NewSlice"]
+[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/NewSlice"]
 shape = SubResource( 11 )
 
-[node name="DoSlice" type="StaticBody" parent="GuiSystem/GripMenu"]
+[node name="DoSlice" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
 transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, 0, -0.2, 0 )
 collision_layer = 8
 collision_mask = 0
 
-[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/DoSlice"]
+[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/DoSlice"]
 cast_shadow = 0
 mesh = SubResource( 9 )
 material/0 = SubResource( 15 )
 
-[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/DoSlice"]
+[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/DoSlice"]
 shape = SubResource( 11 )
 
-[node name="DelXC" type="StaticBody" parent="GuiSystem/GripMenu"]
+[node name="DelXC" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
 transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, 0.25, -0.2, 0 )
 collision_layer = 8
 collision_mask = 0
 
-[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/DelXC"]
+[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/DelXC"]
 cast_shadow = 0
 mesh = SubResource( 9 )
 material/0 = SubResource( 16 )
 
-[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/DelXC"]
+[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/DelXC"]
 shape = SubResource( 11 )
 
-[node name="SelectXC" type="StaticBody" parent="GuiSystem/GripMenu"]
+[node name="SelectXC" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
 transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, -0.25, -0.2, 0 )
 collision_layer = 8
 collision_mask = 0
 
-[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/SelectXC"]
+[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/SelectXC"]
 cast_shadow = 0
 mesh = SubResource( 9 )
 material/0 = SubResource( 17 )
 
-[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/SelectXC"]
+[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/SelectXC"]
 shape = SubResource( 11 )
 
-[node name="ghost" type="StaticBody" parent="GuiSystem/GripMenu"]
+[node name="ghost" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
 transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, 0, -0.2, 0 )
 collision_layer = 8
 collision_mask = 0
 
-[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/ghost"]
+[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/ghost"]
 cast_shadow = 0
 mesh = SubResource( 9 )
 material/0 = SubResource( 18 )
 
-[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/ghost"]
+[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/ghost"]
 shape = SubResource( 11 )
 
-[node name="FloorTex" type="StaticBody" parent="GuiSystem/GripMenu"]
+[node name="FloorTex" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
 transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, 0.25, -0.2, 0 )
 collision_layer = 8
 collision_mask = 0
 
-[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/FloorTex"]
+[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/FloorTex"]
 cast_shadow = 0
 mesh = SubResource( 9 )
 material/0 = SubResource( 19 )
 
-[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/FloorTex"]
+[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/FloorTex"]
 shape = SubResource( 11 )
 
-[node name="toSolid" type="StaticBody" parent="GuiSystem/GripMenu"]
+[node name="toSolid" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
 transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, -0.25, -0.2, 0 )
 collision_layer = 8
 collision_mask = 0
 
-[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/toSolid"]
+[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/toSolid"]
 cast_shadow = 0
 mesh = SubResource( 9 )
 material/0 = SubResource( 20 )
 
-[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/toSolid"]
+[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/toSolid"]
 shape = SubResource( 11 )
 
-[node name="toGas" type="StaticBody" parent="GuiSystem/GripMenu"]
+[node name="toGas" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
 transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, -0.25, -0.2, 0 )
 collision_layer = 8
 collision_mask = 0
 
-[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/toGas"]
+[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/toGas"]
 cast_shadow = 0
 mesh = SubResource( 9 )
 material/0 = SubResource( 21 )
 
-[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/toGas"]
+[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/toGas"]
 shape = SubResource( 11 )
 
-[node name="toFloor" type="StaticBody" parent="GuiSystem/GripMenu"]
+[node name="toFloor" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
 transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, 0, -0.2, 0 )
 collision_layer = 8
 collision_mask = 0
 
-[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/toFloor"]
+[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/toFloor"]
 cast_shadow = 0
 mesh = SubResource( 9 )
 material/0 = SubResource( 22 )
 
-[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/toFloor"]
+[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/toFloor"]
 shape = SubResource( 11 )
 
-[node name="toBig" type="StaticBody" parent="GuiSystem/GripMenu"]
+[node name="toBig" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
 transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, 0.25, -0.2, 0 )
 collision_layer = 8
 collision_mask = 0
 
-[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/toBig"]
+[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/toBig"]
 cast_shadow = 0
 mesh = SubResource( 9 )
 material/0 = SubResource( 23 )
 
-[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/toBig"]
+[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/toBig"]
 shape = SubResource( 11 )
 
-[node name="NewXC" type="StaticBody" parent="GuiSystem/GripMenu"]
+[node name="NewXC" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
 transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, -0.25, -0.2, 0 )
 collision_layer = 8
 collision_mask = 0
 
-[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/NewXC"]
+[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/NewXC"]
 cast_shadow = 0
 mesh = SubResource( 9 )
 material/0 = SubResource( 24 )
 
-[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/NewXC"]
+[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/NewXC"]
 shape = SubResource( 11 )
 
-[node name="Record" type="StaticBody" parent="GuiSystem/GripMenu"]
+[node name="Record" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
 transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, 0, -0.2, 0 )
 collision_layer = 8
 collision_mask = 0
 
-[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/Record"]
+[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/Record"]
 cast_shadow = 0
 mesh = SubResource( 9 )
 material/0 = SubResource( 25 )
 
-[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/Record"]
+[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/Record"]
 shape = SubResource( 11 )
 
-[node name="Replay" type="StaticBody" parent="GuiSystem/GripMenu"]
+[node name="Replay" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
 transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, 0.25, -0.2, 0 )
 collision_layer = 8
 collision_mask = 0
 
-[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/Replay"]
+[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/Replay"]
 cast_shadow = 0
 mesh = SubResource( 9 )
 material/0 = SubResource( 26 )
 
-[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/Replay"]
+[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/Replay"]
 shape = SubResource( 11 )
+
+[node name="MaterialButtons" type="Spatial" parent="GuiSystem/GripMenu"]
+
+[node name="FloorMoveTween" type="Tween" parent="GuiSystem/GripMenu"]
 
 [node name="GreenBlob" type="Area" parent="GuiSystem"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0072, -0.266123 )
@@ -1694,6 +1750,11 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.02206 )
 mesh = SubResource( 79 )
 material/0 = ExtResource( 27 )
 
+[node name="name" type="MeshInstance" parent="MaterialSystem/tubematerials/simpledirt"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -3.42955 )
+mesh = SubResource( 152 )
+material/0 = SubResource( 153 )
+
 [node name="partialrock" type="MeshInstance" parent="MaterialSystem/tubematerials"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 2.05663, 0, 0 )
 mesh = SubResource( 80 )
@@ -1703,6 +1764,11 @@ material/0 = SubResource( 81 )
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.08184 )
 mesh = SubResource( 82 )
 material/0 = SubResource( 83 )
+
+[node name="name" type="MeshInstance" parent="MaterialSystem/tubematerials/partialrock"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0610771, 0, -3.42955 )
+mesh = SubResource( 152 )
+material/0 = SubResource( 154 )
 
 [node name="rockwater" type="MeshInstance" parent="MaterialSystem/tubematerials"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 4.21638, -0.00722432, -0.0259323 )
@@ -1714,6 +1780,11 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0123711, 0.00378895, -2.0726
 mesh = SubResource( 84 )
 material/0 = SubResource( 92 )
 
+[node name="name" type="MeshInstance" parent="MaterialSystem/tubematerials/rockwater"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0384512, 0.00722432, -3.40362 )
+mesh = SubResource( 152 )
+material/0 = SubResource( 155 )
+
 [node name="pebbles" type="MeshInstance" parent="MaterialSystem/tubematerials"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 6.40124, 0, 0 )
 mesh = SubResource( 93 )
@@ -1723,6 +1794,11 @@ material/0 = SubResource( 94 )
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.09424 )
 mesh = SubResource( 95 )
 material/0 = SubResource( 96 )
+
+[node name="name" type="MeshInstance" parent="MaterialSystem/tubematerials/pebbles"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0547581, 0, -3.42955 )
+mesh = SubResource( 152 )
+material/0 = SubResource( 156 )
 
 [node name="mediumrock" type="MeshInstance" parent="MaterialSystem/tubematerials"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 8.56555, 0, 0 )
@@ -1734,6 +1810,11 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.14453 )
 mesh = SubResource( 97 )
 material/0 = SubResource( 99 )
 
+[node name="name" type="MeshInstance" parent="MaterialSystem/tubematerials/mediumrock"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.011858, 0, -3.42955 )
+mesh = SubResource( 152 )
+material/0 = SubResource( 157 )
+
 [node name="bluewater" type="MeshInstance" parent="MaterialSystem/tubematerials"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 10.6665, 0, -0.0338955 )
 mesh = SubResource( 100 )
@@ -1743,6 +1824,11 @@ material/0 = SubResource( 105 )
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.09902 )
 mesh = SubResource( 100 )
 material/0 = SubResource( 106 )
+
+[node name="name" type="MeshInstance" parent="MaterialSystem/tubematerials/bluewater"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0163555, 0, -3.39566 )
+mesh = SubResource( 152 )
+material/0 = SubResource( 158 )
 
 [node name="tubematerials2" type="Spatial" parent="MaterialSystem"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 5.17274 )
