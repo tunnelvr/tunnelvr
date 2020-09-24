@@ -440,8 +440,8 @@ func buttonreleased_vrgrip():
 			var pt0 = gripmenu.gripmenupointertargetpoint
 			var eyept0vec = pt0 - headcam.global_transform.origin
 			if gripmenu.gripmenupointertargettype == "XCtubesector":
-				var xcdrawing0 = sketchsystem.xcdrawings.get_node(gripmenu.gripmenupointertargetwall.xcname0)
-				var xcdrawing1 = sketchsystem.xcdrawings.get_node(gripmenu.gripmenupointertargetwall.xcname1)
+				var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(gripmenu.gripmenupointertargetwall.xcname0)
+				var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(gripmenu.gripmenupointertargetwall.xcname1)
 				var tubevec = xcdrawing1.global_transform.origin - xcdrawing0.global_transform.origin
 				eyept0vec = tubevec if eyept0vec.dot(tubevec) > 0 else -tubevec
 			elif gripmenu.gripmenupointertargettype == "Papersheet":

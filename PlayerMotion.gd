@@ -89,19 +89,7 @@ func _physics_process(delta):
 		var rot = Transform().rotated(Vector3(0.0, -1, 0.0), deg2rad(PlayerDirections.nextphysicsrotatestep))
 		playerMe.transform *= t2*rot*t1
 		PlayerDirections.nextphysicsrotatestep = 0.0
-		
-	if PlayerDirections.newgreenblobposition != null:
-		#get_node("/root/Spatial/GuiSystem/GreenBlob").global_transform.origin = PlayerDirections.newgreenblobposition
-		var greenblob = get_node("/root/Spatial/GuiSystem/GreenBlob")
-		var tween = greenblob.get_node("Tween")
-		var endtrans = PlayerDirections.newgreenblobposition - playerMe.global_transform.origin
-		var dist = greenblob.translation.distance_to(endtrans)
-		var dt = min(0.8, 1.1*dist)
-		tween.interpolate_property(greenblob, "translation", greenblob.translation, endtrans, dt, Tween.TRANS_QUART, Tween.EASE_OUT)
-		#tween.interpolate_property(greenblob, "translation", greenblob.translation, PlayerDirections.newgreenblobposition, 1, Tween.TRANS_LINEAR, Tween.EASE_IN_OUT)
-		PlayerDirections.newgreenblobposition = null
-		tween.start()
-		
+				
 	headcentrefromvroriginvector = HeadCentre.global_transform.origin - playerMe.global_transform.origin
 	headcentreabovephysicalfloorheight = max(headcentrefromvroriginvector.y, playerheadbodyradius)
 	playerbodyverticalheight = min(playerbodyabsoluteheight, playerheadbodyradius + headcentreabovephysicalfloorheight)

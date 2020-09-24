@@ -40,9 +40,9 @@ var currentgesture = "none"
 
 var pointermodel = null
 var pointervalid = false
+var pointerposechangeangle = Transform(Basis(Vector3(1,0,0), deg2rad(-65)), Vector3(0,0,0))
 var pointerposearvrorigin = Transform()
 var pointermaterial = null
-var pointerposechangeangle = Transform(Basis(Vector3(1,0,0), deg2rad(-65)), Vector3(0,0,0))
 
 const fadetimevalidity = 1/0.2
 var handtranslucentvalidity = 0.0

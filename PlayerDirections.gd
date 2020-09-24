@@ -10,7 +10,6 @@ onready var GroundSpikePoint = tiptouchray.get_node("GroundSpikePoint")
 
 var flyspeed = 5.0
 var walkspeed = 3.0
-var newgreenblobposition = null
 var nextphysicsrotatestep = 0.0
 var playerdirectedflight = false
 var playerdirectedflightvelocity = Vector3(0,0,0)
@@ -76,16 +75,16 @@ func _physics_process(delta):
 		var dir = Vector3(HeadCam.global_transform.basis.z.x, 0, HeadCam.global_transform.basis.z.z)
 		playerdirectedwalkingvelocity = dir.normalized()*(-joypos.y*walkspeed)
 
-	if tiptouchray.is_colliding() and tiptouchray.get_collider().get_name() == "GreenBlob":
-		var greenblob = tiptouchray.get_collider()
-		var vec = greenblob.get_node("SteeringSphere").global_transform.origin - tiptouchray.get_collision_point()
-		var fvec2 = Vector2(vec.x, vec.z)
-		greenblob.get_node("SteeringSphere/TouchpointOrientation").rotation = Vector3(Vector2(fvec2.length(), vec.y).angle(), -fvec2.angle() - greenblob.get_node("..").rotation.y - deg2rad(90), 0)
+	if HandLeft.triggerbuttonheld and HandLeft.pointervalid:
+		var vec = -(playerMe.global_transform*HandLeft.pointerposearvrorigin).basis.z
 		if playerdirectedflight:
 			playerdirectedflightvelocity = vec.normalized()*flyspeed
 		else:
 			playerdirectedwalkingvelocity = Vector3(vec.x, 0, vec.z).normalized()*walkspeed
-
+			var vang = rad2deg(Vector2(Vector2(vec.x, vec.z).length(), vec.y).angle())
+			if vang > 45:
+				playerdirectedwalkingvelocity = -playerdirectedwalkingvelocity
+				
 	var isgroundspiked = tiptouchray.is_colliding() and tiptouchray.get_collider().get_name() == "XCtubeshell"
 	if isgroundspiked:
 		if clawengageposition == null:
@@ -98,12 +97,10 @@ func _physics_process(delta):
 
 func _on_questhandtracking_button_pressed(p_button):
 	if p_button == BUTTONS.HT_PINCH_MIDDLE_FINGER:
-		newgreenblobposition = MovePointThimble.global_transform.origin
-	elif p_button == BUTTONS.HT_PINCH_INDEX_FINGER:
 		playerdirectedflight = true
 				
 func _on_questhandtracking_button_release(p_button):
-	if p_button == BUTTONS.HT_PINCH_INDEX_FINGER:
+	if p_button == BUTTONS.HT_PINCH_MIDDLE_FINGER:
 		playerdirectedflight = false
 
 func _on_button_pressed(p_button):
@@ -111,9 +108,6 @@ func _on_button_pressed(p_button):
 		var joypos = HandLeft.joypos
 		if abs(joypos.y) < 0.5 and abs(joypos.x) > 0.1:
 			nextphysicsrotatestep += (1 if joypos.x > 0 else -1)*(22.5 if abs(joypos.x) > 0.8 else 90.0)
-
-	if p_button == BUTTONS.VR_BUTTON_BY:
-		newgreenblobposition = MovePointThimble.global_transform.origin
 
 	if p_button == BUTTONS.VR_GRIP:
 		playerdirectedflight = true
