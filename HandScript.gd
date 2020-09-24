@@ -14,6 +14,8 @@ var handarmature = null
 var handskeleton = null
 var meshnode = null
 var handmaterial = null
+var handmaterial_orgtransparency = false
+var handmaterial_orgtranslucency = 1
 var joypos = Vector2(0, 0)
 
 var controllerhandtransform = null
@@ -70,11 +72,12 @@ func _ready():
 		handskeleton.set_bone_rest(i, bone_rest)
 	meshnode = handskeleton.get_node("l_handMeshNode" if islefthand else "r_handMeshNode")
 	#handmaterial = load("res://shinyhandmesh.material").duplicate()
-	handmaterial = load("res://translucenthandmesh.material")
-	if islefthand:
-		handmaterial = handmaterial.duplicate()
-		handmaterial.albedo_color = "#76f6864b"
+	var handmaterials = get_node("/root/Spatial/MaterialSystem/handmaterials")
+	handmaterial = handmaterials.get_node("handleft" if islefthand else "handright").get_surface_material(0)
 	meshnode.set_surface_material(0, handmaterial)
+	handmaterial_orgtransparency = handmaterial.flags_transparent
+	handmaterial_orgtranslucency = handmaterial.albedo_color.a
+	
 	pointermodel = load("res://LaserPointer.tscn").instance()
 	pointermaterial = pointermodel.get_node("Length/MeshInstance").get_surface_material(0).duplicate()
 	pointermodel.get_node("Length/MeshInstance").set_surface_material(0, pointermaterial)
@@ -107,7 +110,6 @@ func initovrhandtracking(lovr_hand_tracking, lhandcontroller):
 	handmodel.visible = false
 	handmaterial.flags_transparent = true
 
-
 func update_handpose(delta):
 	if handvalid:
 		for i in range(hand_bone_mappings.size()):
@@ -120,17 +122,18 @@ func update_fademode(delta, valid, translucentvalidity, model, material):
 		if translucentvalidity < 1:
 			translucentvalidity += delta*fadetimevalidity
 			if translucentvalidity < 1:
-				material.albedo_color.a = translucentvalidity
+				material.albedo_color.a = translucentvalidity*handmaterial_orgtranslucency
 			else:
 				translucentvalidity = 1
-				material.flags_transparent = false
+				material.albedo_color.a = handmaterial_orgtranslucency
+				material.flags_transparent = handmaterial_orgtransparency
 	else:
 		if translucentvalidity == 1:
 			material.flags_transparent = true
 		if translucentvalidity > 0:
 			translucentvalidity -= delta*fadetimevalidity
 			if translucentvalidity > 0:
-				material.albedo_color.a = translucentvalidity
+				material.albedo_color.a = translucentvalidity*handmaterial_orgtranslucency
 			else:
 				translucentvalidity = 0
 				model.visible = false

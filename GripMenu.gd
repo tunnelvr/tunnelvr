@@ -88,7 +88,7 @@ func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointert
 		enablegripmenus(["toFloor", "toBig"])
 		
 	elif gripmenupointertargettype == "XCtubesector":
-		enablegripmenus(["SelectXC", "ghost", "materials"])
+		enablegripmenus(["NewXC", "SelectXC", "materials"])
 
 	elif gripmenupointertargettype == "XCnode":
 		enablegripmenus(["NewXC", "Record", "Replay"])

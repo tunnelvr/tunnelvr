@@ -513,10 +513,6 @@ func buttonreleased_vrgrip():
 			elif pointertarget.get_name() == "DelXC":
 				print("Not implemented")
 				
-			elif pointertarget.get_name() == "ghost":
-				if activetargettube != null:
-					activetargettube.get_node("XCtubesectors").get_child(activetargettube.activesector).get_node("MeshInstance").set_surface_material(0, materialsystem.tubematerialtransparent(false))
-		
 			elif pointertarget.get_name() == "NewSlice" and is_instance_valid(activetargettube):
 				print("Press trigger to action")
 
