@@ -5,7 +5,7 @@
 [ext_resource path="res://lightweighttextures/watersurface.material" type="Material" id=3]
 [ext_resource path="res://utilities/Locomotion_WalkInPlace.gd" type="Script" id=4]
 [ext_resource path="res://pointersystem.gd" type="Script" id=5]
-[ext_resource path="res://Freeze.obj" type="ArrayMesh" id=6]
+[ext_resource path="res://U-shaped.obj" type="ArrayMesh" id=6]
 [ext_resource path="res://lightweighttextures/Ground030_2K_Color_small.jpg" type="Texture" id=7]
 [ext_resource path="res://guimaterials/materialnames.png" type="Texture" id=8]
 [ext_resource path="res://sounds/switch7.wav" type="AudioStream" id=9]
@@ -312,10 +312,6 @@ albedo_color = Color( 0.937255, 0.901961, 0.0431373, 0.67451 )
 material = SubResource( 49 )
 size = Vector3( 0.01, 0.01, 1 )
 
-[sub_resource type="CubeMesh" id=51]
-material = SubResource( 49 )
-size = Vector3( 0.01, 0.01, 1 )
-
 [sub_resource type="CubeMesh" id=52]
 resource_local_to_scene = true
 size = Vector3( 0.002, 0.002, 1 )
@@ -369,6 +365,10 @@ bottom_radius = 0.002
 height = 0.068
 radial_segments = 6
 rings = 1
+
+[sub_resource type="CubeMesh" id=51]
+material = SubResource( 49 )
+size = Vector3( 0.01, 0.01, 1 )
 
 [sub_resource type="QuadMesh" id=62]
 size = Vector2( 1.6, 1 )
@@ -1003,8 +1003,9 @@ shader_param/texture_albedo = SubResource( 148 )
 material = SubResource( 149 )
 size = Vector2( 4, 2 )
 
-[sub_resource type="SpatialMaterial" id=160]
-albedo_color = Color( 0.415686, 0.984314, 0.368627, 1 )
+[sub_resource type="SpatialMaterial" id=165]
+params_cull_mode = 2
+albedo_color = Color( 0.27451, 0.956863, 0.176471, 1 )
 
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
@@ -1616,17 +1617,6 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.5 )
 mesh = SubResource( 50 )
 material/0 = null
 
-[node name="LaserSelectLine" type="Spatial" parent="BodyObjects"]
-transform = Transform( 1, -4.60809e-07, 4.60809e-07, 0, 0.707107, 0.707107, -6.51682e-07, -0.707107, 0.707107, 0.200002, 3.5, 0.11135 )
-visible = false
-
-[node name="Scale" type="Spatial" parent="BodyObjects/LaserSelectLine"]
-
-[node name="Mesh" type="MeshInstance" parent="BodyObjects/LaserSelectLine/Scale"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.5 )
-mesh = SubResource( 51 )
-material/0 = null
-
 [node name="LaserOrient" type="Spatial" parent="BodyObjects"]
 transform = Transform( 1, -4.60809e-07, 4.60809e-07, 0, 0.707107, 0.707107, -6.51682e-07, -0.707107, 0.707107, 0.199998, 3.5, -6.852 )
 
@@ -1642,7 +1632,7 @@ material/0 = SubResource( 53 )
 [node name="RayCast" type="RayCast" parent="BodyObjects/LaserOrient"]
 enabled = true
 cast_to = Vector3( 0, 0, -50 )
-collision_mask = 56
+collision_mask = 120
 
 [node name="LaserSpot" type="MeshInstance" parent="BodyObjects/LaserOrient"]
 transform = Transform( 1, 0, 0, 0, 1, -8.9407e-08, 0, 8.9407e-08, 1, 0, -4.76837e-07, -5.476 )
@@ -1663,6 +1653,17 @@ material/0 = SubResource( 59 )
 [node name="MeshDialArrow" type="MeshInstance" parent="BodyObjects/LaserOrient/MeshDial"]
 transform = Transform( -1.62921e-07, -0.707107, 0.707107, -1, 1.15202e-07, -1.15202e-07, 4.50002e-15, -0.707107, -0.707107, 0, 0.01, 0 )
 mesh = SubResource( 61 )
+material/0 = null
+
+[node name="LaserSelectLine" type="Spatial" parent="BodyObjects"]
+transform = Transform( 1, -4.60809e-07, 4.60809e-07, 0, 0.707107, 0.707107, -6.51682e-07, -0.707107, 0.707107, 0.200002, 3.5, 0.11135 )
+visible = false
+
+[node name="Scale" type="Spatial" parent="BodyObjects/LaserSelectLine"]
+
+[node name="Mesh" type="MeshInstance" parent="BodyObjects/LaserSelectLine/Scale"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.5 )
+mesh = SubResource( 51 )
 material/0 = null
 
 [node name="SketchSystem" type="Spatial" parent="."]
@@ -2138,7 +2139,7 @@ shadow_enabled = true
 shadow_color = Color( 0.388235, 0.0705882, 0.0705882, 1 )
 
 [node name="Freeze" type="MeshInstance" parent="."]
-transform = Transform( 1, 0, 0, 0, -1.62921e-07, 1, 0, -1, -1.62921e-07, -69.6496, 8.15908, -10.8532 )
+transform = Transform( 0.1, 0, 0, 0, 0.0707107, 0.0707107, 0, -0.0707107, 0.0707107, 39.8488, 3.43561, -10.8532 )
 visible = false
 mesh = ExtResource( 6 )
-material/0 = SubResource( 160 )
+material/0 = SubResource( 165 )

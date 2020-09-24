@@ -116,6 +116,7 @@ newboulder={
 3d_physics/layer_4="Pointer"
 3d_physics/layer_5="PointerFloor"
 3d_physics/layer_6="CaveWall"
+3d_physics/layer_7="CaveWallTrans"
 3d_physics/layer_11="PlayerHotspot"
 3d_physics/layer_12="Papersheet"
 

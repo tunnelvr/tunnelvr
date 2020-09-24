@@ -330,8 +330,8 @@ func makexctubeshell(xcdrawings):
 		for u in pi:
 			#surfaceTool.add_vertex($XCnodes.get_node(poly[u]).global_transform.origin)
 			surfaceTool.add_vertex($XCnodes.get_node(poly[u]).transform.origin)
-		surfaceTool.generate_normals()
-		surfaceTool.commit(arraymesh)
+	surfaceTool.generate_normals()
+	surfaceTool.commit(arraymesh)
 	return arraymesh
 	
 func updatexctubeshell(xcdrawings, makevisible):
@@ -344,12 +344,8 @@ func updatexctubeshell(xcdrawings, makevisible):
 				xcflatshell.get_node("CollisionShape").shape = ConcavePolygonShape.new()
 				add_child(xcflatshell)
 			$XCflatshell/MeshInstance.mesh = xctubeshellmesh
-			var flatshellmaterial = get_node("/root/Spatial/MaterialSystem").gettubematerial(xcflatshellmaterial, false)
-			for i in range($XCflatshell/MeshInstance.get_surface_material_count()):
-				$XCflatshell/MeshInstance.set_surface_material(i, flatshellmaterial)
 			$XCflatshell/CollisionShape.shape.set_faces(xctubeshellmesh.get_faces())
-			$XCflatshell.visible = true
-			$XCflatshell/CollisionShape.disabled = false
+			get_node("/root/Spatial/MaterialSystem").updatetubesectormaterial($XCflatshell, xcflatshellmaterial, false)
 		else:
 			if has_node("XCflatshell"):
 				$XCflatshell.queue_free()

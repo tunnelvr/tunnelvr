@@ -105,7 +105,7 @@ func setactivetargetwall(newactivetargetwall):
 				xcnode.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("nodepthtest"))
 		LaserOrient.get_node("RayCast").collision_mask = CollisionLayer.CL_Pointer | CollisionLayer.CL_PointerFloor 
 	else:
-		LaserOrient.get_node("RayCast").collision_mask = CollisionLayer.CL_Pointer | CollisionLayer.CL_PointerFloor | CollisionLayer.CL_CaveWall
+		LaserOrient.get_node("RayCast").collision_mask = CollisionLayer.CL_Pointer | CollisionLayer.CL_PointerFloor | CollisionLayer.CL_CaveWall | CollisionLayer.CL_CaveWallTrans
 	if activetargetwall != null and activetargetwall.drawingtype == DRAWING_TYPE.DT_PAPERTEXTURE:
 		activetargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").get_surface_material(0).albedo_color = Color("#DDFFCC")
 
@@ -240,8 +240,8 @@ func buttonpressed_vrgrip():
 	if pointertargettype == "XCtubesector":
 		activetargettube = pointertargetwall
 		activetargettubesectorindex = pointertarget.get_index()
-		activetargettube.get_node("XCtubesectors").get_child(activetargettubesectorindex).get_node("MeshInstance").set_surface_material(0, materialsystem.gettubematerial(activetargettube.xcsectormaterials[activetargettubesectorindex], true))
-
+		materialsystem.updatetubesectormaterial(activetargettube.get_node("XCtubesectors").get_child(activetargettubesectorindex), activetargettube.xcsectormaterials[activetargettubesectorindex], true)
+			
 	gripmenu.gripmenuon(LaserOrient.global_transform, pointertargetpoint, pointertargetwall, pointertargettype, activetargettube)
 	
 	
@@ -429,8 +429,7 @@ func buttonreleased_vrgrip():
 			if activetargettube != null:
 				var sectormaterialname = pointertarget.get_name()
 				activetargettube.xcsectormaterials[activetargettubesectorindex] = sectormaterialname
-				#activetargettube.get_node("XCtubesectors").get_child(activetargettubesectorindex).set_surface_material(0, get_node("/root/Spatial/MaterialSystem").gettubematerial(sectormaterialname, false))
-		activetargettube.get_node("XCtubesectors").get_child(activetargettubesectorindex).get_node("MeshInstance").set_surface_material(0, materialsystem.gettubematerial(activetargettube.xcsectormaterials[activetargettubesectorindex], false))
+		materialsystem.updatetubesectormaterial(activetargettube.get_node("XCtubesectors").get_child(activetargettubesectorindex), activetargettube.xcsectormaterials[activetargettubesectorindex], false)
 		activetargettube = null
 	
 	if gripbuttonpressused:

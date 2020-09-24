@@ -4,11 +4,14 @@ func tubematerialnamefromnumber(n):
 	var mm = $tubematerials.get_child(n)
 	return mm.get_name()
 
-func gettubematerial(name, highlighted):
+func updatetubesectormaterial(xctubesector, name, highlighted):
+	xctubesector.visible = true
+	xctubesector.get_node("CollisionShape").disabled = false
 	var mm = $tubematerials.get_node(name) if $tubematerials.has_node(name) else $tubematerials.get_child(0)
 	if highlighted:
 		mm = mm.get_node("highlight")
-	return mm.get_surface_material(0)
+	xctubesector.get_node("MeshInstance").set_surface_material(0, mm.get_surface_material(0))
+	xctubesector.collision_layer = CollisionLayer.CL_CaveWallTrans if name == "transparent" else CollisionLayer.CL_CaveWall
 
 func advancetubematerial(name, dir):
 	var mm = $tubematerials.get_node(name) if $tubematerials.has_node(name) else $tubematerials.get_child(0)
