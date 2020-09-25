@@ -5,6 +5,7 @@ func tubematerialnamefromnumber(n):
 	return mm.get_name()
 
 func updatetubesectormaterial(xctubesector, name, highlighted):
+	
 	xctubesector.visible = true
 	xctubesector.get_node("CollisionShape").disabled = false
 	var mm = $tubematerials.get_node(name) if $tubematerials.has_node(name) else $tubematerials.get_child(0)

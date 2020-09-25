@@ -181,6 +181,7 @@ func updatetubelinkpaths(sketchsystem):
 		surfaceTool.add_vertex(pa - arrowfac*perp)
 	surfaceTool.generate_normals()
 	$PathLines.mesh = surfaceTool.commit()
+	$PathLines.set_surface_material(0, get_node("/root/Spatial/MaterialSystem").pathlinematerial("normal"))
 	#print("ususxxxxc ", len($PathLines.mesh.get_faces()), " ", len($PathLines.mesh.get_faces())) #surfaceTool.generate_normals()
 
 func pickpolysindex(polys, meetnodenames):

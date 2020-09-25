@@ -241,7 +241,11 @@ func buttonpressed_vrgrip():
 		activetargettube = pointertargetwall
 		activetargettubesectorindex = pointertarget.get_index()
 		materialsystem.updatetubesectormaterial(activetargettube.get_node("XCtubesectors").get_child(activetargettubesectorindex), activetargettube.xcsectormaterials[activetargettubesectorindex], true)
-			
+		if activetargettube.get_node("PathLines").mesh == null:
+			activetargettube.updatetubelinkpaths(sketchsystem)
+		activetargettube.get_node("PathLines").visible = true
+		activetargettube.get_node("PathLines").set_surface_material(0, materialsystem.pathlinematerial("nodepthtest"))
+		
 	gripmenu.gripmenuon(LaserOrient.global_transform, pointertargetpoint, pointertargetwall, pointertargettype, activetargettube)
 	
 	
@@ -430,6 +434,7 @@ func buttonreleased_vrgrip():
 				var sectormaterialname = pointertarget.get_name()
 				activetargettube.xcsectormaterials[activetargettubesectorindex] = sectormaterialname
 		materialsystem.updatetubesectormaterial(activetargettube.get_node("XCtubesectors").get_child(activetargettubesectorindex), activetargettube.xcsectormaterials[activetargettubesectorindex], false)
+		activetargettube.get_node("PathLines").set_surface_material(0, materialsystem.pathlinematerial("normal"))
 		activetargettube = null
 	
 	if gripbuttonpressused:
@@ -453,6 +458,8 @@ func buttonreleased_vrgrip():
 			elif gripmenu.gripmenupointertargettype == "PlanView":
 				pt0 = null
 			elif gripmenu.gripmenupointertargettype == "XCdrawing" and gripmenu.gripmenupointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
+				pt0 += -eyept0vec/2
+			elif gripmenu.gripmenupointertargettype == "XCflatshell":
 				pt0 += -eyept0vec/2
 			else:
 				print(gripmenu.gripmenupointertargettype)
