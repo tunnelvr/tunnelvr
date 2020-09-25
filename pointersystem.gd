@@ -96,6 +96,7 @@ func setactivetargetwall(newactivetargetwall):
 	activetargetwall = newactivetargetwall
 	activetargetwallgrabbedtransform = null
 	
+	LaserOrient.get_node("RayCast").collision_mask = CollisionLayer.CL_Pointer | CollisionLayer.CL_PointerFloor | CollisionLayer.CL_CaveWall | CollisionLayer.CL_CaveWallTrans
 	if activetargetwall != null and activetargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		activetargetwall.setxcdrawingvisibility(true)
 		activetargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").set_surface_material(0, materialsystem.xcdrawingmaterial("active", null))
@@ -103,13 +104,11 @@ func setactivetargetwall(newactivetargetwall):
 		for xcnode in activetargetwall.get_node("XCnodes").get_children():
 			if xcnode != activetargetnode:
 				xcnode.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("nodepthtest"))
-		LaserOrient.get_node("RayCast").collision_mask = CollisionLayer.CL_Pointer | CollisionLayer.CL_PointerFloor 
-	else:
-		LaserOrient.get_node("RayCast").collision_mask = CollisionLayer.CL_Pointer | CollisionLayer.CL_PointerFloor | CollisionLayer.CL_CaveWall | CollisionLayer.CL_CaveWallTrans
+		if len(activetargetwall.nodepoints) != 0:
+			LaserOrient.get_node("RayCast").collision_mask = CollisionLayer.CL_Pointer | CollisionLayer.CL_PointerFloor 
+
 	if activetargetwall != null and activetargetwall.drawingtype == DRAWING_TYPE.DT_PAPERTEXTURE:
 		activetargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").get_surface_material(0).albedo_color = Color("#DDFFCC")
-
-
 
 func _ready():
 	handrightcontroller.connect("button_pressed", self, "_on_button_pressed")
@@ -211,17 +210,27 @@ func _on_button_pressed(p_button):
 	print("pppp ", pointertargetpoint, " ", [activetargetnode, pointertargettype, " pbutton", p_button])
 	if Tglobal.questhandtracking:
 		gripbuttonheld = handrightcontroller.is_button_pressed(BUTTONS.HT_PINCH_MIDDLE_FINGER)
-		if p_button == BUTTONS.HT_PINCH_INDEX_FINGER:
+		if p_button == BUTTONS.HT_PINCH_RING_FINGER:
+			if handrightcontroller.is_button_pressed(BUTTONS.HT_PINCH_PINKY):
+				buttonpressed_vrby(false)
+		elif p_button == BUTTONS.HT_PINCH_PINKY:
+			if handrightcontroller.is_button_pressed(BUTTONS.HT_PINCH_RING_FINGER):
+				buttonpressed_vrby(false)
+		elif Tglobal.controlslocked:
+			print("Controls locked")	
+		elif p_button == BUTTONS.HT_PINCH_INDEX_FINGER:
 			buttonpressed_vrtrigger(gripbuttonheld)
 		elif p_button == BUTTONS.HT_PINCH_MIDDLE_FINGER:
 			buttonpressed_vrgrip()
-		elif p_button == BUTTONS.HT_PINCH_RING_FINGER:
-			guipanel3d.clickbuttonheadtorch()
-		elif p_button == BUTTONS.HT_PINCH_PINKY:
-			buttonpressed_vrby(gripbuttonheld)
+		#elif p_button == BUTTONS.HT_PINCH_RING_FINGER:
+		#	guipanel3d.clickbuttonheadtorch()
+		#elif p_button == BUTTONS.HT_PINCH_PINKY:
+		#	buttonpressed_vrby(gripbuttonheld)
 	else:
 		if p_button == BUTTONS.VR_BUTTON_BY:
 			buttonpressed_vrby(gripbuttonheld)
+		elif Tglobal.controlslocked:
+			print("Controls locked")	
 		elif p_button == BUTTONS.VR_GRIP:
 			buttonpressed_vrgrip()
 		elif p_button == BUTTONS.VR_TRIGGER:
@@ -246,7 +255,7 @@ func buttonpressed_vrgrip():
 		activetargettube.get_node("PathLines").visible = true
 		activetargettube.get_node("PathLines").set_surface_material(0, materialsystem.pathlinematerial("nodepthtest"))
 		
-	gripmenu.gripmenuon(LaserOrient.global_transform, pointertargetpoint, pointertargetwall, pointertargettype, activetargettube)
+	gripmenu.gripmenuon(LaserOrient.global_transform, pointertargetpoint, pointertargetwall, pointertargettype, activetargettube, activetargetwall)
 	
 	
 func buttonpressed_vrtrigger(gripbuttonheld):
@@ -274,6 +283,8 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 		clearpointertarget()
 		activelaserroot.get_node("LaserSpot").visible = false
 		recselectedtargetwall.removexcnode(recselectedtarget, false, sketchsystem)
+		if len(recselectedtargetwall.nodepoints) == 0:
+			LaserOrient.get_node("RayCast").collision_mask = CollisionLayer.CL_Pointer | CollisionLayer.CL_PointerFloor | CollisionLayer.CL_CaveWall | CollisionLayer.CL_CaveWallTrans
 		Tglobal.soundsystem.quicksound("BlipSound", pointertargetpoint)
 	
 	elif pointertargettype == "Papersheet" or pointertargettype == "PlanView":
@@ -310,6 +321,8 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 			activetargetwallgrabbedpointoffset = alaserspot.global_transform.origin - activetargetwallgrabbed.global_transform.origin
 
 		elif (activetargetnode != null and activetargetnodewall == pointertargetwall) or pointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE or len(pointertargetwall.nodepoints) == 0:
+			if len(pointertargetwall.nodepoints) == 0:
+				LaserOrient.get_node("RayCast").collision_mask = CollisionLayer.CL_Pointer | CollisionLayer.CL_PointerFloor 
 			var newpointertarget = pointertargetwall.newxcnode()
 			pointertargetwall.setxcnpoint(newpointertarget, pointertargetpoint, true)
 			Tglobal.soundsystem.quicksound("ClickSound", pointertargetpoint)
@@ -426,6 +439,7 @@ func buttonreleased_vrgrip():
 	if Tglobal.soundsystem.nowrecording:
 		Tglobal.soundsystem.stopmyvoicerecording()
 	
+	var wasactivetargettube = activetargettube
 	if activetargettube != null:
 		if pointertargettype == "GripMenuItem" and pointertarget.get_parent().get_name() == "MaterialButtons":
 			assert (gripmenu.gripmenupointertargettype == "XCtubesector") 
@@ -528,46 +542,46 @@ func buttonreleased_vrgrip():
 			elif pointertarget.get_name() == "Replay":
 				Tglobal.soundsystem.playmyvoicerecording()
 				
-			elif pointertarget.get_name() == "DoSlice" and is_instance_valid(activetargettube) and is_instance_valid(activetargetwall) and len(activetargetwall.nodepoints) == 0:
-				print(activetargettube, " ", len(activetargetwall.nodepoints))
+			elif pointertarget.get_name() == "DoSlice" and is_instance_valid(wasactivetargettube) and is_instance_valid(activetargetwall) and len(activetargetwall.nodepoints) == 0:
+				print(wasactivetargettube, " ", len(activetargetwall.nodepoints))
 				var xcdrawing = activetargetwall
 				var vang = Vector2(xcdrawing.global_transform.basis.x.x, xcdrawing.global_transform.basis.x.z).angle()
 				xcdrawing.setxcpositionangle(vang)
 				var xcdrawinglink0 = [ ]
 				var xcdrawinglink1 = [ ]
-				activetargettube.slicetubetoxcdrawing(xcdrawing, xcdrawinglink0, xcdrawinglink1)
-				xcdrawing.updatexcpaths()
-				sketchsystem.sharexcdrawingovernetwork(xcdrawing)
-				setactivetargetwall(xcdrawing)
-				clearactivetargetnode()
-				var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(activetargettube.xcname0)
-				var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(activetargettube.xcname1)
-				xcdrawing0.xctubesconn.remove(xcdrawing0.xctubesconn.find(activetargettube))
-				xcdrawing1.xctubesconn.remove(xcdrawing1.xctubesconn.find(activetargettube))
+				if wasactivetargettube.slicetubetoxcdrawing(xcdrawing, xcdrawinglink0, xcdrawinglink1):
+					xcdrawing.updatexcpaths()
+					sketchsystem.sharexcdrawingovernetwork(xcdrawing)
+					setactivetargetwall(xcdrawing)
+					clearactivetargetnode()
+					var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(wasactivetargettube.xcname0)
+					var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(wasactivetargettube.xcname1)
+					xcdrawing0.xctubesconn.remove(xcdrawing0.xctubesconn.find(wasactivetargettube))
+					xcdrawing1.xctubesconn.remove(xcdrawing1.xctubesconn.find(wasactivetargettube))
 
-				var xctube0 = sketchsystem.newXCtube(xcdrawing0, xcdrawing)
-				xctube0.xcdrawinglink = xcdrawinglink0
-				xctube0.xcsectormaterials = activetargettube.xcsectormaterials.duplicate()
-				xctube0.updatetubelinkpaths(sketchsystem)
-				sketchsystem.sharexctubeovernetwork(xctube0)
-				xctube0.updatetubeshell(sketchsystem.get_node("XCdrawings"), Tglobal.tubeshellsvisible)
-			
-				var xctube1 = sketchsystem.newXCtube(xcdrawing, xcdrawing1)
-				xctube1.xcdrawinglink = xcdrawinglink1
-				xctube1.updatetubelinkpaths(sketchsystem)
-				xctube1.xcsectormaterials = activetargettube.xcsectormaterials.duplicate()
+					var xctube0 = sketchsystem.newXCtube(xcdrawing0, xcdrawing)
+					xctube0.xcdrawinglink = xcdrawinglink0
+					xctube0.xcsectormaterials = wasactivetargettube.xcsectormaterials.duplicate()
+					xctube0.updatetubelinkpaths(sketchsystem)
+					sketchsystem.sharexctubeovernetwork(xctube0)
+					xctube0.updatetubeshell(sketchsystem.get_node("XCdrawings"), Tglobal.tubeshellsvisible)
 				
-				#xctube1.xcsectormaterials.push_front(xctube1.xcsectormaterials.pop_back())
-				#xctube1.xcsectormaterials.push_front(xctube1.xcsectormaterials.pop_back())
+					var xctube1 = sketchsystem.newXCtube(xcdrawing, xcdrawing1)
+					xctube1.xcdrawinglink = xcdrawinglink1
+					xctube1.updatetubelinkpaths(sketchsystem)
+					xctube1.xcsectormaterials = wasactivetargettube.xcsectormaterials.duplicate()
+					
+					#xctube1.xcsectormaterials.push_front(xctube1.xcsectormaterials.pop_back())
+					#xctube1.xcsectormaterials.push_front(xctube1.xcsectormaterials.pop_back())
 
-				sketchsystem.sharexctubeovernetwork(xctube0)
-				xctube1.updatetubeshell(sketchsystem.get_node("XCdrawings"), Tglobal.tubeshellsvisible)
+					sketchsystem.sharexctubeovernetwork(xctube0)
+					xctube1.updatetubeshell(sketchsystem.get_node("XCdrawings"), Tglobal.tubeshellsvisible)
 
-				xcdrawing.updatexctubeshell(sketchsystem.get_node("XCdrawings"), Tglobal.tubeshellsvisible)  # not strictly necessary as there won't be any shells in a sliced tube xc
-				clearpointertarget()
-				activetargettube.queue_free()
-				activetargettube = null
-				activelaserroot.get_node("LaserSpot").visible = false
+					xcdrawing.updatexctubeshell(sketchsystem.get_node("XCdrawings"), Tglobal.tubeshellsvisible)  # not strictly necessary as there won't be any shells in a sliced tube xc
+					clearpointertarget()
+					wasactivetargettube.queue_free()
+					wasactivetargettube = null
+					activelaserroot.get_node("LaserSpot").visible = false
 
 		
 	elif pointertargettype == "GUIPanel3D":

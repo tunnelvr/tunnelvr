@@ -61,7 +61,7 @@ func setgripmenupointer(pointertarget):
 		pointertarget.get_node("MeshInstance").get_surface_material(0).albedo_color = Color("#FFCCCC")
 
 
-func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointertargettype, activetargettube):
+func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointertargettype, activetargettube, activetargetwall):
 	gripmenupointertargetpoint = pointertargetpoint if pointertargetpoint != null else controllertrans.origin
 	gripmenupointertargetwall = pointertargetwall
 	gripmenulaservector = -controllertrans.basis.z
@@ -79,8 +79,6 @@ func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointert
 	elif gripmenupointertargettype == "XCdrawing" and gripmenupointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		if is_instance_valid(activetargettube) and ((gripmenupointertargetwall.get_name() == activetargettube.xcname0) or (gripmenupointertargetwall.get_name() == activetargettube.xcname1)):
 			enablegripmenus(["NewSlice", "DelXC"])
-		elif is_instance_valid(activetargettube) and len(gripmenupointertargetwall.nodepoints) == 0:
-			enablegripmenus(["DoSlice", "DelXC"])
 		else:
 			enablegripmenus(["DelXC"])
 
@@ -88,7 +86,12 @@ func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointert
 		enablegripmenus(["toFloor", "toBig"])
 		
 	elif gripmenupointertargettype == "XCtubesector":
-		enablegripmenus(["NewXC", "SelectXC", "materials"])
+		if is_instance_valid(activetargetwall) and len(activetargetwall.nodepoints) == 0:
+			enablegripmenus(["DoSlice", "SelectXC", "materials"])
+		else:
+			enablegripmenus(["NewXC", "SelectXC", "materials"])
+
+
 
 	elif gripmenupointertargettype == "XCnode":
 		enablegripmenus(["NewXC", "Record", "Replay"])

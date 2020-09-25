@@ -1166,6 +1166,21 @@ margin_bottom = 227.177
 rect_pivot_offset = Vector2( 138.61, -8.13628 )
 hint_tooltip = "test tooltip"
 text = "Doppelganger"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ButtonLockControls" type="CheckBox" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
+margin_left = 15.3899
+margin_top = 226.177
+margin_right = 155.39
+margin_bottom = 254.177
+rect_pivot_offset = Vector2( 138.61, -8.13628 )
+hint_tooltip = "test tooltip"
+text = "Lock Controls"
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="ButtonSwapControllers" type="Button" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
 margin_left = 160.4
@@ -1314,7 +1329,7 @@ material/0 = SubResource( 14 )
 shape = SubResource( 11 )
 
 [node name="DoSlice" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
-transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, 0, -0.2, 0 )
+transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, -0.24945, -0.2, 0 )
 collision_layer = 8
 collision_mask = 0
 

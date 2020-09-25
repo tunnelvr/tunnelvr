@@ -38,6 +38,11 @@ func _on_buttondoppelganger_toggled(button_pressed):
 	$Viewport/GUI/Panel/Label.text = "Doppelganger on" if button_pressed else "Doppelganger off"
 	toggleguipanelvisibility(null)
 
+func _on_buttonlockcontrols_toggled(button_pressed):
+	Tglobal.controlslocked = button_pressed
+	$Viewport/GUI/Panel/Label.text = "Controls locked" if button_pressed else "Controls unlocked"
+	#toggleguipanelvisibility(null)
+
 func _on_centrelinevisibility_selected(index):
 	var cvsel = $Viewport/GUI/Panel/CentrelineVisibility.get_item_text(index)
 	if cvsel == "show":
@@ -79,6 +84,7 @@ func _ready():
 	$Viewport/GUI/Panel/ButtonHeadtorch.connect("toggled", self, "_on_buttonheadtorch_toggled")
 	$Viewport/GUI/Panel/ButtonDoppelganger.connect("toggled", self, "_on_buttondoppelganger_toggled")
 	$Viewport/GUI/Panel/ButtonSwapControllers.connect("pressed", self, "_on_buttonswapcontrollers_pressed")
+	$Viewport/GUI/Panel/ButtonLockControls.connect("toggled", self, "_on_buttonlockcontrols_toggled")
 
 	$Viewport/GUI/Panel/CentrelineVisibility.connect("item_selected", self, "_on_centrelinevisibility_selected")
 	$Viewport/GUI/Panel/XCdrawingVisibility.connect("item_selected", self, "_on_xcdrawingvisibility_selected")

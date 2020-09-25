@@ -75,7 +75,7 @@ func _physics_process(delta):
 		var dir = Vector3(HeadCam.global_transform.basis.z.x, 0, HeadCam.global_transform.basis.z.z)
 		playerdirectedwalkingvelocity = dir.normalized()*(-joypos.y*walkspeed)
 
-	if HandLeft.triggerbuttonheld and HandLeft.pointervalid:
+	if HandLeft.triggerbuttonheld and HandLeft.pointervalid and not Tglobal.controlslocked:
 		var vec = -(playerMe.global_transform*HandLeft.pointerposearvrorigin).basis.z
 		if playerdirectedflight:
 			playerdirectedflightvelocity = vec.normalized()*flyspeed
@@ -96,10 +96,14 @@ func _physics_process(delta):
 		endclawengagement()
 
 func _on_questhandtracking_button_pressed(p_button):
-	if p_button == BUTTONS.HT_PINCH_MIDDLE_FINGER:
+	if Tglobal.controlslocked:
+		print("Controls locked")	
+	elif p_button == BUTTONS.HT_PINCH_MIDDLE_FINGER:
 		playerdirectedflight = true
 				
 func _on_questhandtracking_button_release(p_button):
+	if Tglobal.controlslocked:
+		print("Controls locked")	
 	if p_button == BUTTONS.HT_PINCH_MIDDLE_FINGER:
 		playerdirectedflight = false
 
@@ -116,7 +120,6 @@ func _on_button_pressed(p_button):
 func _on_button_release(p_button):
 	if p_button == BUTTONS.VR_BUTTON_BY:
 		pass
-		
 	if p_button == BUTTONS.VR_GRIP:
 		playerdirectedflight = false
 

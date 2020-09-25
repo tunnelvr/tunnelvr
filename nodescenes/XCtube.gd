@@ -330,7 +330,7 @@ func maketubeshell(xcdrawings):
 
 
 func slicetubetoxcdrawing(xcdrawing, xcdrawinglink0, xcdrawinglink1):
-	var xcdrawings = get_node("../../XCdrawings")
+	var xcdrawings = get_node("/root/Spatial/SketchSystem/XCdrawings")
 	var xcdrawing0 = xcdrawings.get_node(xcname0)
 	var xcdrawing1 = xcdrawings.get_node(xcname1)
 	var mtpa = maketubepolyassociation(xcdrawing0, xcdrawing1)
@@ -343,7 +343,8 @@ func slicetubetoxcdrawing(xcdrawing, xcdrawinglink0, xcdrawinglink1):
 	var xcnodes0 = xcdrawing0.get_node("XCnodes")
 	var xcnodes1 = xcdrawing1.get_node("XCnodes")
 	var xcnfirst = null	
-	var xcnlast = null	
+	var xcnlast = null
+	var lamoutofrange = false
 	for i in range(len(ila)):
 		var ila0 = ila[i][0]
 		var ila0N = ila[i+1][0] - ila0  if i < len(ila)-1  else len(poly0) + ila[0][0] - ila0 
@@ -368,6 +369,8 @@ func slicetubetoxcdrawing(xcdrawing, xcdrawinglink0, xcdrawinglink1):
 			# 0 = xcdrawing.global_transform.basis.z.dot(pt0 + lam*(pt1 - pt0) - xcdrawing.global_transform.origin)
 			# lam*xcdrawing.global_transform.basis.z.dot(pt0 - pt1) = xcdrawing.global_transform.basis.z.dot(pt0 - xcdrawing.global_transform.origin)
 			var lam = xcdrawing.global_transform.basis.z.dot(pt0 - xcdrawing.global_transform.origin)/xcdrawing.global_transform.basis.z.dot(pt0 - pt1)
+			if lam < 0.02 or lam > 0.98:
+				lamoutofrange = true
 			xcdrawing.setxcnpoint(xcn, lerp(pt0, pt1, lam), true)
 				
 			assert (i0 <= ila0N and i1 <= ila1N)
@@ -390,6 +393,9 @@ func slicetubetoxcdrawing(xcdrawing, xcdrawinglink0, xcdrawinglink1):
 	# undo mysterious advancing of the sector links
 	#xcdrawinglink1.push_back(xcdrawinglink1.pop_front())
 	#xcdrawinglink1.push_back(xcdrawinglink1.pop_front())
+	if lamoutofrange:
+		xcdrawing.clearallcontents()
+		return false
 	
 	return true
 

@@ -14,5 +14,6 @@ var VRoperating = false
 
 
 var questhandtracking = false
+var controlslocked = false
 
 var soundsystem = null

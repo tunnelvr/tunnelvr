@@ -205,6 +205,13 @@ func newxcnode(name=null):
 	$XCnodes.add_child(xcn)
 	return xcn
 
+func clearallcontents():
+	onepathpairs.clear()
+	for xcn in $XCnodes.get_children():
+		xcn.queue_free()
+	nodepoints.clear()
+	assert (len(xctubesconn) == 0)  # for now
+
 func removexcnode(xcn, brejoinlines, sketchsystem):
 	var nodename = xcn.get_name()
 	nodepoints.erase(nodename)
