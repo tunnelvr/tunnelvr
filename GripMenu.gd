@@ -4,6 +4,7 @@ var gripmenupointertargetpoint = Vector3(0,0,0)
 var gripmenulaservector = Vector3(0,0,1)
 var gripmenupointertargetwall = null
 var gripmenupointertargettype = ""
+var gripmenuactivetargettubesectorindex = 0
 
 var previewtubematerials = { }
 var tubenamematerials = { }
@@ -61,11 +62,12 @@ func setgripmenupointer(pointertarget):
 		pointertarget.get_node("MeshInstance").get_surface_material(0).albedo_color = Color("#FFCCCC")
 
 
-func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointertargettype, activetargettube, activetargetwall):
+func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointertargettype, activetargettube, activetargettubesectorindex, activetargetwall):
 	gripmenupointertargetpoint = pointertargetpoint if pointertargetpoint != null else controllertrans.origin
 	gripmenupointertargetwall = pointertargetwall
 	gripmenulaservector = -controllertrans.basis.z
 	gripmenupointertargettype = pointertargettype
+	gripmenuactivetargettubesectorindex = activetargettubesectorindex
 
 	var paneltrans = global_transform
 	paneltrans.origin = controllertrans.origin - 0.8*ARVRServer.world_scale*(controllertrans.basis.z)
@@ -83,12 +85,13 @@ func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointert
 		enablegripmenus(["toFloor", "toBig"])
 		
 	elif gripmenupointertargettype == "XCtubesector":
+		var tubesectormaterialname = gripmenupointertargetwall.xcsectormaterials[gripmenuactivetargettubesectorindex]
 		if is_instance_valid(activetargetwall) and len(activetargetwall.nodepoints) == 0:
 			enablegripmenus(["DoSlice", "SelectXC", "materials"])
+		elif tubesectormaterialname == "hole":
+			enablegripmenus(["HoleXC", "materials"])
 		else:
 			enablegripmenus(["NewXC", "SelectXC", "materials"])
-
-
 
 	elif gripmenupointertargettype == "XCnode":
 		enablegripmenus(["NewXC", "Record", "Replay"])
@@ -112,11 +115,11 @@ deleteXC
 SelectXC
 floorTex
 ghost
-f14
-f15
-f16
-f17
-f18
+Cut
+NewXC
+Record
+Replay
+HoleXC
 f19
 f20"""
 

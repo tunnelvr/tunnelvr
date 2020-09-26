@@ -31,17 +31,20 @@ func _on_buttonplanview_toggled(button_pressed):
 func _on_buttonheadtorch_toggled(button_pressed):
 	get_node("/root/Spatial").playerMe.setheadtorchlight(button_pressed)
 	$Viewport/GUI/Panel/Label.text = "Headtorch on" if button_pressed else "Headtorch off"
-	toggleguipanelvisibility(null)
+	if not Tglobal.controlslocked:
+		toggleguipanelvisibility(null)
 
 func _on_buttondoppelganger_toggled(button_pressed):
 	get_node("/root/Spatial").playerMe.setdoppelganger(button_pressed)
 	$Viewport/GUI/Panel/Label.text = "Doppelganger on" if button_pressed else "Doppelganger off"
-	toggleguipanelvisibility(null)
+	if not Tglobal.controlslocked:
+		toggleguipanelvisibility(null)
 
 func _on_buttonlockcontrols_toggled(button_pressed):
 	Tglobal.controlslocked = button_pressed
 	$Viewport/GUI/Panel/Label.text = "Controls locked" if button_pressed else "Controls unlocked"
-	#toggleguipanelvisibility(null)
+	if not Tglobal.controlslocked:
+		toggleguipanelvisibility(null)
 
 func _on_centrelinevisibility_selected(index):
 	var cvsel = $Viewport/GUI/Panel/CentrelineVisibility.get_item_text(index)
@@ -198,7 +201,7 @@ func _on_networkstate_selected(index):
 					ipnum = l
 			var kf = k["friendly"] + ": " + ipnum
 			print(kf)
-			if k["friendly"] == "Wi-Fi":
+			if k["friendly"] == "Wi-Fi" or k["friendly"].begins_with("wlan"):
 				$Viewport/GUI/Panel/Label.text = kf
 			elif k["friendly"] == "Ethernet" and $Viewport/GUI/Panel/Label.text == "":
 				$Viewport/GUI/Panel/Label.text = kf

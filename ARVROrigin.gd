@@ -94,9 +94,10 @@ func _process(delta):
 			rotation_degrees.y += $HeadCam.rotation_degrees.y
 			$HeadCam.rotation_degrees.y = 0
 		$HandRight.process_keyboardcontroltracking($HeadCam, Vector2(hx*0.033, 0))
-	if $HandRight.pointervalid and (not Tglobal.controlslocked or guipanel3d.visible):
-		LaserOrient.visible = true
+	if $HandRight.pointervalid:
 		LaserOrient.global_transform = global_transform*$HandRight.pointerposearvrorigin
+		var gg = LaserOrient.get_node("RayCast").get_collider()
+		LaserOrient.visible = (not Tglobal.controlslocked) or (LaserOrient.get_node("RayCast").get_collider() == guipanel3d)
 	else:
 		LaserOrient.visible = false
 
@@ -118,4 +119,4 @@ func initquesthandtrackingnow(lovr_hand_tracking):
 	$HandLeft.initovrhandtracking(ovr_hand_tracking, $HandLeftController)
 	$HandRight.initovrhandtracking(ovr_hand_tracking, $HandRightController)
 	$HandLeft.addremotetransform("middle_null", get_node("/root/Spatial/BodyObjects/MovePointThimble"), Transform())
-	
+	get_node("/root/Spatial/GuiSystem/GUIPanel3D/Viewport/GUI/Panel/ButtonSwapControllers").disabled = true

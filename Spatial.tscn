@@ -208,7 +208,7 @@ flags_do_not_receive_shadows = true
 albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
 albedo_texture = ExtResource( 25 )
 uv1_scale = Vector3( 1, 0.05, 1 )
-uv1_offset = Vector3( -0.2, 0.8, 0 )
+uv1_offset = Vector3( -0.2, 0.85, 0 )
 
 [sub_resource type="CylinderMesh" id=27]
 top_radius = 0.01
@@ -983,7 +983,6 @@ size = Vector2( 4, 2 )
 
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
-enablevr = false
 
 [node name="Players" type="Spatial" parent="."]
 transform = Transform( -1, 0, -3.25841e-07, 0, 1, 0, 3.25841e-07, 0, -1, 0, 0, 0 )
@@ -999,13 +998,13 @@ far = 321.0
 [node name="HeadtorchLight" type="SpotLight" parent="Players/PlayerMe/HeadCam"]
 transform = Transform( 1, 0, 0, 0, 0.939693, 0.34202, 0, -0.34202, 0.939693, 0, 0.24, 0 )
 visible = false
-light_energy = 1.66
-light_indirect_energy = 6.93
+light_energy = 1.06
+light_indirect_energy = 7.26
 shadow_enabled = true
 shadow_color = Color( 0.0823529, 0.0431373, 0.254902, 1 )
 spot_range = 721.6
 spot_attenuation = 0.378929
-spot_angle = 28.9
+spot_angle = 34.3
 spot_angle_attenuation = 1.27456
 
 [node name="ChinHotspot" type="StaticBody" parent="Players/PlayerMe/HeadCam"]
@@ -1497,6 +1496,19 @@ material/0 = SubResource( 26 )
 [node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/Replay"]
 shape = SubResource( 11 )
 
+[node name="HoleXC" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
+transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, -0.126531, -0.2, 0.0230036 )
+collision_layer = 8
+collision_mask = 0
+
+[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/HoleXC"]
+cast_shadow = 0
+mesh = SubResource( 9 )
+material/0 = SubResource( 26 )
+
+[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/HoleXC"]
+shape = SubResource( 11 )
+
 [node name="MaterialButtons" type="Spatial" parent="GuiSystem/GripMenu"]
 
 [node name="FloorMoveTween" type="Tween" parent="GuiSystem/GripMenu"]
@@ -1838,17 +1850,17 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0163555, 0, -3.39566 )
 mesh = SubResource( 75 )
 material/0 = SubResource( 108 )
 
-[node name="transparent" type="MeshInstance" parent="MaterialSystem/tubematerials"]
+[node name="hole" type="MeshInstance" parent="MaterialSystem/tubematerials"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 12.8013, 0, -0.0645695 )
 mesh = SubResource( 73 )
 material/0 = SubResource( 109 )
 
-[node name="highlight" type="MeshInstance" parent="MaterialSystem/tubematerials/transparent"]
+[node name="highlight" type="MeshInstance" parent="MaterialSystem/tubematerials/hole"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.02206 )
 mesh = SubResource( 74 )
 material/0 = SubResource( 110 )
 
-[node name="name" type="MeshInstance" parent="MaterialSystem/tubematerials/transparent"]
+[node name="name" type="MeshInstance" parent="MaterialSystem/tubematerials/hole"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -3.35993 )
 mesh = SubResource( 75 )
 material/0 = SubResource( 111 )

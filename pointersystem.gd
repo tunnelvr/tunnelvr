@@ -202,8 +202,6 @@ func setpointertarget(laserroot):
 			LaserSelectLine.global_transform = laserroot.get_node("LaserSpot").global_transform.looking_at(activetargetnode.global_transform.origin, Vector3(0,1,0))
 		else:
 			LaserSelectLine.visible = false
-		
-		
 
 func _on_button_pressed(p_button):
 	var gripbuttonheld = handright.gripbuttonheld
@@ -239,7 +237,12 @@ func _on_button_pressed(p_button):
 			buttonpressed_vrpad(gripbuttonheld, handright.joypos)
 	
 func buttonpressed_vrby(gripbuttonheld):
-	if pointerplanviewtarget != null:
+	if Tglobal.controlslocked:
+		if not guipanel3d.visible:
+			guipanel3d.toggleguipanelvisibility(LaserOrient.global_transform)
+		else:
+			print("controls locked")
+	elif pointerplanviewtarget != null:
 		pointerplanviewtarget.toggleplanviewactive()
 	else:
 		guipanel3d.toggleguipanelvisibility(LaserOrient.global_transform)
@@ -249,14 +252,13 @@ func buttonpressed_vrgrip():
 	if pointertargettype == "XCtubesector":
 		activetargettube = pointertargetwall
 		activetargettubesectorindex = pointertarget.get_index()
-		materialsystem.updatetubesectormaterial(activetargettube.get_node("XCtubesectors").get_child(activetargettubesectorindex), activetargettube.xcsectormaterials[activetargettubesectorindex], true)
+		var tubesectormaterialname = activetargettube.xcsectormaterials[activetargettubesectorindex]
+		materialsystem.updatetubesectormaterial(activetargettube.get_node("XCtubesectors").get_child(activetargettubesectorindex), tubesectormaterialname, true)
 		if activetargettube.get_node("PathLines").mesh == null:
 			activetargettube.updatetubelinkpaths(sketchsystem)
 		activetargettube.get_node("PathLines").visible = true
 		activetargettube.get_node("PathLines").set_surface_material(0, materialsystem.pathlinematerial("nodepthtest"))
-		
-	gripmenu.gripmenuon(LaserOrient.global_transform, pointertargetpoint, pointertargetwall, pointertargettype, activetargettube, activetargetwall)
-	
+	gripmenu.gripmenuon(LaserOrient.global_transform, pointertargetpoint, pointertargetwall, pointertargettype, activetargettube, activetargettubesectorindex, activetargetwall)	
 	
 func buttonpressed_vrtrigger(gripbuttonheld):
 	var dontdisablegripmenus = false
@@ -392,7 +394,9 @@ func buttonpressed_vrpad(gripbuttonheld, joypos):
 			pointerplanviewtarget.cameraresetcentre(headcam)
 		
 func _on_button_release(p_button):
-	if Tglobal.questhandtracking:
+	if Tglobal.controlslocked:
+		print("Controls locked")
+	elif Tglobal.questhandtracking:
 		if p_button == BUTTONS.HT_PINCH_MIDDLE_FINGER:
 			buttonreleased_vrgrip()
 		elif p_button == BUTTONS.HT_PINCH_INDEX_FINGER:
@@ -500,6 +504,9 @@ func buttonreleased_vrgrip():
 
 			elif pointertarget.get_name() == "DelXC":
 				print("Not implemented")
+
+			elif pointertarget.get_name() == "HoleXC":
+				gripmenu.gripmenupointertargetwall.ConstructHoleXC(gripmenu.gripmenuactivetargettubesectorindex)
 				
 			elif pointertarget.get_name() == "NewSlice" and is_instance_valid(activetargettube):
 				print("Press trigger to action")

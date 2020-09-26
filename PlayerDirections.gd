@@ -60,31 +60,22 @@ func _physics_process(delta):
 		if Input.is_action_pressed("lh_left"):      joypos.x += -1
 		if Input.is_action_pressed("lh_right"):     joypos.x += 1
 
-	if playerdirectedflight and Tglobal.VRoperating and not Tglobal.questhandtracking and HandLeftController.get_is_active():
-		if clawengageposition != null:
-			endclawengagement()
-		if HandLeftController.is_button_pressed(BUTTONS.VR_TRIGGER) or Input.is_action_pressed("lh_forward") or Input.is_action_pressed("lh_backward"):
-			var flydir = HandLeftController.global_transform.basis.z if HandLeftController.get_is_active() else HeadCam.global_transform.basis.z
-			if joypos.y < -0.5:
-				flydir = -flydir
-			playerdirectedflightvelocity = -flydir.normalized()*flyspeed
-			if HandLeftController.is_button_pressed(BUTTONS.VR_PAD):
-				playerdirectedflightvelocity *= 3.0
-
-	if not playerdirectedflight and not Tglobal.questhandtracking:
-		var dir = Vector3(HeadCam.global_transform.basis.z.x, 0, HeadCam.global_transform.basis.z.z)
-		playerdirectedwalkingvelocity = dir.normalized()*(-joypos.y*walkspeed)
-
 	if HandLeft.triggerbuttonheld and HandLeft.pointervalid and not Tglobal.controlslocked:
 		var vec = -(playerMe.global_transform*HandLeft.pointerposearvrorigin).basis.z
 		if playerdirectedflight:
+			if clawengageposition != null:
+				endclawengagement()
 			playerdirectedflightvelocity = vec.normalized()*flyspeed
 		else:
 			playerdirectedwalkingvelocity = Vector3(vec.x, 0, vec.z).normalized()*walkspeed
 			var vang = rad2deg(Vector2(Vector2(vec.x, vec.z).length(), vec.y).angle())
 			if vang > 45:
 				#playerdirectedwalkingvelocity = -playerdirectedwalkingvelocity
-				playerdirectedwalkingvelocity = -Vector3(HeadCam.global_transform.basis.z.x, 0, HeadCam.global_transform.basis.z.z).normalized()*walkspeed
+				playerdirectedwalkingvelocity = Vector3(HeadCam.global_transform.basis.z.x, 0, HeadCam.global_transform.basis.z.z).normalized()*walkspeed
+
+	elif not playerdirectedflight and not Tglobal.questhandtracking and not Tglobal.controlslocked:
+		var dir = Vector3(HeadCam.global_transform.basis.z.x, 0, HeadCam.global_transform.basis.z.z)
+		playerdirectedwalkingvelocity = dir.normalized()*(-HandLeft.joypos.y*walkspeed)
 		
 				
 	var isgroundspiked = tiptouchray.is_colliding() and tiptouchray.get_collider().get_parent().get_name() == "XCtubesectors"

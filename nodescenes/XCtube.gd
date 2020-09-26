@@ -13,10 +13,9 @@ var positioningtube = false
 var pickedpolyindex0 = -1
 var pickedpolyindex1 = -1
 
-const linewidth = 0.02
+var tubesectorptindexlists = [ ]
 
-func _ready():
-	pass
+const linewidth = 0.02
 	
 func xctubeapplyonepath(xcn0, xcn1):
 	print("xcapplyonepathxcapplyonepath-pre", xcn0, xcn1, xcdrawinglink)
@@ -264,70 +263,6 @@ func maketubepolyassociation(xcdrawing0, xcdrawing1):
 		
 	return [poly0, poly1, ila]
 
-func add_uvvertex(surfaceTool, xcnodes, poly, ila, i, floorsize, dfinv):
-	var pt = xcnodes.get_node(poly[(ila+i)%len(poly)]).global_transform.origin
-	if dfinv != null:
-		var afloorpoint = dfinv.xform(pt)
-		var uvpt = Vector2(afloorpoint.x/floorsize.x + 0.5, afloorpoint.z/floorsize.y + 0.5)
-		surfaceTool.add_uv(uvpt)
-	surfaceTool.add_vertex(pt)
-
-func maketubeshell(xcdrawings):
-	var sketchsystem = xcdrawings.get_parent()
-	var floordrawing = null # sketchsystem.getactivefloordrawing()
-	var floorsize = floordrawing.get_node("XCdrawingplane/CollisionShape/MeshInstance").mesh.size if floordrawing != null else null
-	var dfinv = floordrawing.get_node("XCdrawingplane/CollisionShape/MeshInstance").global_transform.affine_inverse() if floordrawing != null else null
-	
-	var xcdrawing0 = xcdrawings.get_node(xcname0)
-	var xcdrawing1 = xcdrawings.get_node(xcname1)
-	var mtpa = maketubepolyassociation(xcdrawing0, xcdrawing1)
-	var poly0 = mtpa[0]
-	var poly1 = mtpa[1]
-	var ila = mtpa[2]
-	if len(ila) == 0:
-		return null
-	
-	#var surfaceTool = SurfaceTool.new()
-	#surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
-	var arraymesh = ArrayMesh.new()
-	#var surfaceTool = SurfaceTool.new()
-
-	var xcnodes0 = xcdrawing0.get_node("XCnodes")
-	var xcnodes1 = xcdrawing1.get_node("XCnodes")
-	for i in range(len(ila)):
-		var ila0 = ila[i][0]
-		var ila0N = ila[i+1][0] - ila0  if i < len(ila)-1  else len(poly0) + ila[0][0] - ila0 
-		var ila1 = ila[i][1]
-		var ila1N = ila[(i+1)%len(ila)][1] - ila1
-		if ila1N < 0 or len(ila) == 1:   # there's a V-shaped case where this isn't good enough
-			ila1N += len(poly1)
-		#print("  iiilla ", [ila0, ila0N, ila1, ila1N])
-		var surfaceTool = SurfaceTool.new()
-		#surfaceTool.set_material(Material.new())
-		surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
-
-		var acc = -ila0N/2.0  if ila0N>=ila1N  else  ila1N/2
-		var i0 = 0
-		var i1 = 0
-		while i0 < ila0N or i1 < ila1N:
-			assert (i0 <= ila0N and i1 <= ila1N)
-			if i0 < ila0N and (acc - ila0N < 0 or i1 == ila1N):
-				acc += ila1N
-				add_uvvertex(surfaceTool, xcnodes0, poly0, ila0, i0, floorsize, dfinv)
-				add_uvvertex(surfaceTool, xcnodes1, poly1, ila1, i1, floorsize, dfinv)
-				i0 += 1
-				add_uvvertex(surfaceTool, xcnodes0, poly0, ila0, i0, floorsize, dfinv)
-			if i1 < ila1N and (acc >= 0 or i0 == ila0N):
-				acc -= ila0N
-				add_uvvertex(surfaceTool, xcnodes0, poly0, ila0, i0, floorsize, dfinv)
-				add_uvvertex(surfaceTool, xcnodes1, poly1, ila1, i1, floorsize, dfinv)
-				i1 += 1
-				add_uvvertex(surfaceTool, xcnodes1, poly1, ila1, i1, floorsize, dfinv)
-		
-		surfaceTool.generate_normals()
-		surfaceTool.commit(arraymesh)
-	return arraymesh
-
 
 func slicetubetoxcdrawing(xcdrawing, xcdrawinglink0, xcdrawinglink1):
 	var xcdrawings = get_node("/root/Spatial/SketchSystem/XCdrawings")
@@ -405,6 +340,53 @@ func slicetubetoxcdrawing(xcdrawing, xcdrawinglink0, xcdrawinglink1):
 	
 	return true
 
+func ConstructHoleXC(i):
+	assert (xcsectormaterials[i] == "hole")
+	var tubesectormesh = $XCtubesectors.get_child(i).get_node("MeshInstance").mesh
+
+	var mdt = MeshDataTool.new()
+	mdt.create_from_surface(tubesectormesh, 0)
+	var sumnormals = Vector3(0, 0, 0)
+	var sumpoints = Vector3(0, 0, 0)
+	for j in range(mdt.get_vertex_count()):
+		sumnormals += mdt.get_vertex_normal(j)
+		sumpoints += mdt.get_vertex(j)
+	var avgnormal = sumnormals/mdt.get_vertex_count()
+	var avgpoint = sumpoints/mdt.get_vertex_count()
+	var sketchsystem = get_node("/root/Spatial/SketchSystem")
+	var xcdrawing = sketchsystem.newXCuniquedrawing(DRAWING_TYPE.DT_XCDRAWING, sketchsystem.uniqueXCname())
+	var drawingwallangle = Vector2(avgnormal.x, avgnormal.z).angle() + deg2rad(90)
+	xcdrawing.setxcpositionangle(drawingwallangle)
+	xcdrawing.setxcpositionorigin(avgpoint)
+	var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(xcname0)
+	var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(xcname1)
+	var xcnodes0 = xcdrawing0.get_node("XCnodes")
+	var xcnodes1 = xcdrawing1.get_node("XCnodes")
+	var xcnlist0 = [ ]
+	for i0 in tubesectorptindexlists[i][0]:
+		var xcn0 = xcdrawing.newxcnode()
+		var pt0 = xcnodes0.get_node(i0).global_transform.origin
+		xcdrawing.setxcnpoint(xcn0, pt0, false)
+		xcnlist0.push_back(xcn0.get_name())
+	var xcnlist1 = [ ]
+	for i1 in tubesectorptindexlists[i][1]:
+		var xcn1 = xcdrawing.newxcnode()
+		var pt1 = xcnodes1.get_node(i1).global_transform.origin
+		xcdrawing.setxcnpoint(xcn1, pt1, false)
+		xcnlist1.push_back(xcn1.get_name())
+	for j in range(1, len(xcnlist0)):
+		xcdrawing.onepathpairs.push_back(xcnlist0[j-1])
+		xcdrawing.onepathpairs.push_back(xcnlist0[j])
+	for j in range(1, len(xcnlist1)):
+		xcdrawing.onepathpairs.push_back(xcnlist1[j-1])
+		xcdrawing.onepathpairs.push_back(xcnlist1[j])
+	xcdrawing.onepathpairs.push_back(xcnlist0[0])
+	xcdrawing.onepathpairs.push_back(xcnlist1[0])
+	xcdrawing.onepathpairs.push_back(xcnlist0[-1])
+	xcdrawing.onepathpairs.push_back(xcnlist1[-1])
+	xcdrawing.updatexcpaths()
+	return xcdrawing
+
 
 func add_vertex(surfaceTool, xcnodes, poly, ila, i):
 	var pt = xcnodes.get_node(poly[(ila+i)%len(poly)]).global_transform.origin
@@ -436,6 +418,7 @@ func updatetubeshell(xcdrawings, makevisible):
 
 	var xcnodes0 = xcdrawing0.get_node("XCnodes")
 	var xcnodes1 = xcdrawing1.get_node("XCnodes")
+	tubesectorptindexlists.clear()
 	for i in range(len(ila)):
 		var ila0 = ila[i][0]
 		var ila0N = ila[i+1][0] - ila0  if i < len(ila)-1  else len(poly0) + ila[0][0] - ila0 
@@ -443,7 +426,14 @@ func updatetubeshell(xcdrawings, makevisible):
 		var ila1N = ila[(i+1)%len(ila)][1] - ila1
 		if ila1N < 0 or len(ila) == 1:   # there's a V-shaped case where this isn't good enough
 			ila1N += len(poly1)
-		#print("  iiilla ", [ila0, ila0N, ila1, ila1N])
+			
+		var tubesectorindexl = [ [ poly0[ila0] ], [ poly1[ila1] ] ]
+		for j0 in range(ila0N):
+			tubesectorindexl[0].push_back(poly0[(ila0+j0+1)%len(poly0)])
+		for j1 in range(ila1N):
+			tubesectorindexl[1].push_back(poly1[(ila1+j1+1)%len(poly1)])
+		tubesectorptindexlists.push_back(tubesectorindexl)
+
 		var surfaceTool = SurfaceTool.new()
 		surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
 

@@ -84,7 +84,6 @@ func mergexcrpcdata(xcdata):
 		xcn.translation = nodepoints[k]
 	updatexcpaths()
 	setxcdrawingvisibility(xcdata["visible"])
-		
 
 func importcentrelinedata(centrelinedata, sketchsystem):
 	$XCdrawingplane.visible = false
