@@ -630,6 +630,10 @@ func _input(event):
 		else:
 			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 
+	elif event is InputEventKey:
+		if event.pressed and event.scancode == KEY_M:
+			buttonpressed_vrby(false)	
+
 	elif Input.get_mouse_mode() != Input.MOUSE_MODE_CAPTURED:
 		pass
 
@@ -658,6 +662,4 @@ func _input(event):
 				handright.gripbuttonheld = event.pressed
 				handright.process_handgesturefromcontrol()
 				
-	elif event is InputEventKey and event.pressed and event.scancode == KEY_M:
-		buttonpressed_vrby(false)	
 	

@@ -72,6 +72,7 @@ func _on_xcdrawingvisibility_selected(index):
 	sketchsystem.updateworkingshell()
 	$Viewport/GUI/Panel/Label.text = "XCdrawings: "+cvsel
 
+
 func _on_buttonswapcontrollers_pressed():
 	get_node("/root/Spatial").playerMe.swapcontrollers()
 	$Viewport/GUI/Panel/Label.text = "Controllers swapped"
@@ -88,9 +89,12 @@ func _ready():
 
 	$Viewport/GUI/Panel/CentrelineVisibility.connect("item_selected", self, "_on_centrelinevisibility_selected")
 	$Viewport/GUI/Panel/XCdrawingVisibility.connect("item_selected", self, "_on_xcdrawingvisibility_selected")
+	$Viewport/GUI/Panel/Networkstate.connect("item_selected", self, "_on_networkstate_selected")
+
+	if $Viewport/GUI/Panel/Networkstate.selected != 0:  # could record saved settings on disk
+		call_deferred("_on_networkstate_selected", $Viewport/GUI/Panel/Networkstate.selected)
 
 
-	
 func clickbuttonheadtorch():
 	$Viewport/GUI/Panel/ButtonHeadtorch.pressed = not $Viewport/GUI/Panel/ButtonHeadtorch.pressed
 	_on_buttonheadtorch_toggled($Viewport/GUI/Panel/ButtonHeadtorch.pressed)
@@ -99,7 +103,8 @@ func toggleguipanelvisibility(controller_global_transform):
 	if not visible and controller_global_transform != null:
 		var paneltrans = global_transform
 		var controllertrans = controller_global_transform
-		paneltrans.origin = controllertrans.origin - 0.8*ARVRServer.world_scale*(controllertrans.basis.z)
+		var paneldistance = 0.8 if Tglobal.VRoperating else 0.2
+		paneltrans.origin = controllertrans.origin - paneldistance*ARVRServer.world_scale*(controllertrans.basis.z)
 		var lookatpos = controllertrans.origin - 1.6*ARVRServer.world_scale*(controllertrans.basis.z)
 		paneltrans = paneltrans.looking_at(lookatpos, Vector3(0, 1, 0))
 		global_transform = paneltrans
@@ -170,5 +175,112 @@ func _input(event):
 			_on_buttondoppelganger_toggled($Viewport/GUI/Panel/ButtonDoppelganger.pressed)	
 		elif event.scancode == KEY_O:
 			_on_buttonswapcontrollers_pressed()
+
+
+
+
+#-------------networking system
+var websocketserver = null
+var websocketclient = null
+var networkedmultiplayerenet = null
+
+func _on_networkstate_selected(index):
+	var nssel = $Viewport/GUI/Panel/Networkstate.get_item_text(index)
+	var selfSpatial = get_node("/root/Spatial")
+	print("Select networkstate: ", nssel)
+	if nssel == "Check IPnum":
+		print("IP local interfaces: ")
+		$Viewport/GUI/Panel/Label.text = ""
+		for k in IP.get_local_interfaces():
+			var ipnum = ""
+			for l in k["addresses"]:
+				if l.find(".") != -1:
+					ipnum = l
+			var kf = k["friendly"] + ": " + ipnum
+			print(kf)
+			if k["friendly"] == "Wi-Fi":
+				$Viewport/GUI/Panel/Label.text = kf
+			elif k["friendly"] == "Ethernet" and $Viewport/GUI/Panel/Label.text == "":
+				$Viewport/GUI/Panel/Label.text = kf
+		websocketclient = null
+		
+	if nssel.begins_with("Network Off"):
+		print("not properly implemented")
+		if websocketserver != null:
+			websocketserver.close()
+			# Note: To achieve a clean close, you will need to keep polling until either WebSocketClient.connection_closed or WebSocketServer.client_disconnected is received.
+			# Note: The HTML5 export might not support all status codes. Please refer to browser-specific documentation for more details.
+			websocketserver = null
+		if websocketclient != null:
+			websocketclient. disconnect_from_host()
+			#websocketclient = null
+		if networkedmultiplayerenet != null:
+			networkedmultiplayerenet.close()
+			networkedmultiplayerenet = null
+		Tglobal.connectiontoserveractive = false
+		get_tree().set_network_peer(null)
+		
+	if nssel.begins_with("As Server"):
+		get_tree().connect("network_peer_connected", selfSpatial, "_player_connected")
+		get_tree().connect("network_peer_disconnected", selfSpatial, "_player_disconnected")
+		Tglobal.connectiontoserveractive = true
+		if selfSpatial.usewebsockets:
+			websocketserver = WebSocketServer.new();
+			var e = websocketserver.listen(selfSpatial.hostportnumber, PoolStringArray(), true)
+			print("Websocketserverclient listen: ", e)
+			get_tree().set_network_peer(websocketserver)
+		else:
+			networkedmultiplayerenet = NetworkedMultiplayerENet.new()
+			var e = networkedmultiplayerenet.create_server(selfSpatial.hostportnumber, 5)
+			print("networkedmultiplayerenet createserver: ", e)
+			get_tree().set_network_peer(networkedmultiplayerenet)
+
+		selfSpatial.networkID = get_tree().get_network_unique_id()
+		print("server networkID: ", selfSpatial.networkID)
+		selfSpatial.playerMe.set_name("NetworkedPlayer"+String(selfSpatial.networkID))
+		selfSpatial.playerMe.set_network_master(selfSpatial.networkID)
+		selfSpatial.playerMe.networkID = selfSpatial.networkID
+		$Viewport/GUI/Panel/Label.text = "networkID: "+str(selfSpatial.networkID)
+				
+	if nssel.begins_with("Client->"):
+		selfSpatial.hostipnumber = nssel.replace("Client->", "")
+		get_tree().connect("network_peer_connected", selfSpatial, "_player_connected")
+		get_tree().connect("network_peer_disconnected", selfSpatial, "_player_disconnected")
+		Tglobal.connectiontoserveractive = false
+		get_tree().connect("connected_to_server", selfSpatial, "_connected_to_server")
+		get_tree().connect("connection_failed", self, "_connection_failed")
+		get_tree().connect("server_disconnected", self, "_server_disconnected")
+		selfSpatial.playerMe.global_transform.origin += 3*Vector3(selfSpatial.playerMe.get_node("HeadCam").global_transform.basis.z.x, 0, selfSpatial.playerMe.get_node("HeadCam").global_transform.basis.z.z).normalized()
+		if selfSpatial.usewebsockets:
+			websocketclient = WebSocketClient.new();
+			var url = "ws://"+selfSpatial.hostipnumber+":" + str(selfSpatial.hostportnumber)
+			var e = websocketclient.connect_to_url(url, PoolStringArray(), true)
+			print("Websocketclient connect to: ", url, " ", e, " <<----ERROR " if e != 0 else "")
+			get_tree().set_network_peer(websocketclient)
+			
+		else:
+			networkedmultiplayerenet = NetworkedMultiplayerENet.new()
+			var e = networkedmultiplayerenet.create_client(selfSpatial.hostipnumber, selfSpatial.hostportnumber)
+			print("networkedmultiplayerenet createclient: ", e)
+			get_tree().set_network_peer(networkedmultiplayerenet)
+		$Viewport/GUI/Panel/Label.text = "connecting "+("websocket" if selfSpatial.usewebsockets else "ENET")
+		
+func _connection_failed():
+	print("_connection_failed ", websocketclient)
+	websocketclient = null
+	Tglobal.connectiontoserveractive = false
+	$Viewport/GUI/Panel/Label.text = "connection_failed"
+	
+func _server_disconnected():
+	print("_server_disconnected ", websocketclient)
+	websocketclient = null
+	Tglobal.connectiontoserveractive = false
+	$Viewport/GUI/Panel/Label.text = "server_disconnected"
+
+func _process(delta):
+	if websocketserver != null and websocketserver.is_listening():
+		websocketserver.poll()
+	if websocketclient != null and (websocketclient.get_connection_status() == NetworkedMultiplayerPeer.CONNECTION_CONNECTED or websocketclient.get_connection_status() == NetworkedMultiplayerPeer.CONNECTION_CONNECTING):
+		websocketclient.poll()
 
 

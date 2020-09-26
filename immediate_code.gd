@@ -21,13 +21,8 @@ func _on_request_completed(result, response_code, headers, body):
 	
 
 func _run():
-	var a = Vector3(1,2,3)
-	print(1*a)
-	var b = true
-	print(int(b))
-
-#		if islefthand:
-#			handmodel.rotation_degrees.y = -90
-#			handmodel.rotation_degrees.z = 180
-#		else:
-#			handmodel.rotation_degrees.y = -90
+	var a = "ip9999"
+	print(a.substr(0, 2))
+	print(a.begins_with("ips"))
+	print(a.replace("ip", ""))
+	print(a.find("9"))
