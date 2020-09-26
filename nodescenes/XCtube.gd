@@ -345,6 +345,9 @@ func slicetubetoxcdrawing(xcdrawing, xcdrawinglink0, xcdrawinglink1):
 	var xcnfirst = null	
 	var xcnlast = null
 	var lamoutofrange = false
+	var xcnormal = xcdrawing.global_transform.basis.z
+	var xcdot = xcnormal.dot(xcdrawing.global_transform.origin)
+	var sliceclearancedist = 0.02
 	for i in range(len(ila)):
 		var ila0 = ila[i][0]
 		var ila0N = ila[i+1][0] - ila0  if i < len(ila)-1  else len(poly0) + ila[0][0] - ila0 
@@ -368,8 +371,11 @@ func slicetubetoxcdrawing(xcdrawing, xcdrawinglink0, xcdrawinglink1):
 			
 			# 0 = xcdrawing.global_transform.basis.z.dot(pt0 + lam*(pt1 - pt0) - xcdrawing.global_transform.origin)
 			# lam*xcdrawing.global_transform.basis.z.dot(pt0 - pt1) = xcdrawing.global_transform.basis.z.dot(pt0 - xcdrawing.global_transform.origin)
-			var lam = xcdrawing.global_transform.basis.z.dot(pt0 - xcdrawing.global_transform.origin)/xcdrawing.global_transform.basis.z.dot(pt0 - pt1)
-			if lam < 0.02 or lam > 0.98:
+			var ptvec = pt0 - pt1
+			var lam = (xcnormal.dot(pt0) - xcdot)/xcnormal.dot(ptvec)
+			var lamfromedge = min(lam, 1 - lam)
+			if lam < 0.0 or lamfromedge*ptvec.length() < sliceclearancedist:
+				print("Slice point out of range ", lam)
 				lamoutofrange = true
 			xcdrawing.setxcnpoint(xcn, lerp(pt0, pt1, lam), true)
 				

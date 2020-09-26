@@ -345,6 +345,7 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 				pointertargetwall.updatexcpaths()
 			else:
 				sketchsystem.xcapplyonepathtube(activetargetnode, activetargetnodewall, pointertarget, pointertargetwall)
+				pointertargetwall.setxcdrawingvisibility(true)
 			Tglobal.soundsystem.quicksound("ClickSound", pointertargetpoint)
 			clearactivetargetnode()
 											
@@ -353,39 +354,6 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 			if pointertargetwall != activetargetwall:
 				setactivetargetwall(pointertargetwall)
 		setactivetargetnode(pointertarget)
-
-	elif pointertargettype == "GripMenuItem" and pointertarget.get_name() == "NewSlice" and gripbuttonheld and is_instance_valid(activetargettube):
-		var xcdrawing = sketchsystem.newXCuniquedrawing(DRAWING_TYPE.DT_XCDRAWING, sketchsystem.uniqueXCname())
-		var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(activetargettube.xcname0)
-		var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(activetargettube.xcname1)
-		xcdrawing.get_node("XCdrawingplane").set_scale(gripmenu.gripmenupointertargetwall.get_node("XCdrawingplane").scale)
-		
-		var sliceinitpoint = lerp(gripmenu.gripmenupointertargetwall.global_transform.origin, playerMe.get_node("HeadCam").global_transform.origin, 0.5)
-		var v0c = sliceinitpoint - xcdrawing0.global_transform.origin
-		var v1c = sliceinitpoint - xcdrawing1.global_transform.origin
-		v0c.y = 0
-		v1c.y = 0
-		var h0c = abs(xcdrawing0.global_transform.basis.z.dot(v0c))
-		var h1c = abs(xcdrawing1.global_transform.basis.z.dot(v1c))
-		var lam = h0c/(h0c+h1c)
-		print(" dd ", v0c, h0c, v1c, h1c, "  ", lam)
-		if 0.05 < lam and lam < 0.95:
-			var va0c = Vector2(xcdrawing0.global_transform.basis.x.x, xcdrawing0.global_transform.basis.x.z)
-			var va1c = Vector2(xcdrawing1.global_transform.basis.x.x, xcdrawing1.global_transform.basis.x.z)
-			if va1c.dot(va0c) < 0:
-				va1c = -va1c
-			var vang = lerp_angle(va0c.angle(), va1c.angle(), lam)
-			var vwallmid = lerp(xcdrawing0.global_transform.origin, xcdrawing1.global_transform.origin, lam)
-			xcdrawing.setxcpositionangle(vang)
-			xcdrawing.setxcpositionorigin(vwallmid)
-			sketchsystem.sharexcdrawingovernetwork(xcdrawing)
-			clearactivetargetnode()
-			setactivetargetwall(xcdrawing)
-		gripmenu.get_node("NewSlice").get_node("MeshInstance").visible = false
-		gripmenu.get_node("NewSlice").get_node("CollisionShape").disabled = true
-		gripmenu.get_node("DoSlice").get_node("MeshInstance").visible = true
-		gripmenu.get_node("DoSlice").get_node("CollisionShape").disabled = false
-		dontdisablegripmenus = true
 
 	elif pointertargettype == "GripMenuItem" and pointertarget.get_name() == "Record" and gripbuttonheld:
 		Tglobal.soundsystem.startmyvoicerecording()
@@ -616,7 +584,7 @@ func buttonreleased_vrtrigger():
 		activetargetwallgrabbedtransform = null
 						
 func _physics_process(_delta):
-	if LaserOrient.visible: # Tglobal.VRstatus != "quest":
+	if LaserOrient.visible: 
 		var firstlasertarget = LaserOrient.get_node("RayCast").get_collider() if LaserOrient.get_node("RayCast").is_colliding() and not LaserOrient.get_node("RayCast").get_collider().is_queued_for_deletion() else null
 		pointerplanviewtarget = planviewsystem if firstlasertarget != null and firstlasertarget.get_name() == "PlanView" and planviewsystem.checkplanviewinfront(LaserOrient) else null
 		if pointerplanviewtarget != null:

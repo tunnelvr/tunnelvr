@@ -6,6 +6,7 @@ var networkID = 0
 var bouncetestnetworkID = 0
 onready var LaserOrient = get_node("/root/Spatial/BodyObjects/LaserOrient")
 var ovr_hand_tracking = null
+onready var guipanel3d = get_node("/root/Spatial/GuiSystem/GUIPanel3D")
 
 func setheadtorchlight(torchon):
 	$HeadCam/HeadtorchLight.visible = torchon
@@ -93,7 +94,11 @@ func _process(delta):
 			rotation_degrees.y += $HeadCam.rotation_degrees.y
 			$HeadCam.rotation_degrees.y = 0
 		$HandRight.process_keyboardcontroltracking($HeadCam, Vector2(hx*0.033, 0))
-	LaserOrient.global_transform = global_transform*$HandRight.pointerposearvrorigin
+	if $HandRight.pointervalid and (not Tglobal.controlslocked or guipanel3d.visible):
+		LaserOrient.visible = true
+		LaserOrient.global_transform = global_transform*$HandRight.pointerposearvrorigin
+	else:
+		LaserOrient.visible = false
 
 func initkeyboardcontroltrackingnow():
 	$HandLeft.initkeyboardtracking()

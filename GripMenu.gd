@@ -77,10 +77,7 @@ func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointert
 		enablegripmenus(["Up5", "Down5", "toPaper"])
 
 	elif gripmenupointertargettype == "XCdrawing" and gripmenupointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
-		if is_instance_valid(activetargettube) and ((gripmenupointertargetwall.get_name() == activetargettube.xcname0) or (gripmenupointertargetwall.get_name() == activetargettube.xcname1)):
-			enablegripmenus(["NewSlice", "DelXC"])
-		else:
-			enablegripmenus(["DelXC"])
+		enablegripmenus(["DelXC"])
 
 	elif gripmenupointertargettype == "Papersheet":
 		enablegripmenus(["toFloor", "toBig"])

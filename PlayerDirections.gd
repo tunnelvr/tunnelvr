@@ -83,9 +83,11 @@ func _physics_process(delta):
 			playerdirectedwalkingvelocity = Vector3(vec.x, 0, vec.z).normalized()*walkspeed
 			var vang = rad2deg(Vector2(Vector2(vec.x, vec.z).length(), vec.y).angle())
 			if vang > 45:
-				playerdirectedwalkingvelocity = -playerdirectedwalkingvelocity
+				#playerdirectedwalkingvelocity = -playerdirectedwalkingvelocity
+				playerdirectedwalkingvelocity = -Vector3(HeadCam.global_transform.basis.z.x, 0, HeadCam.global_transform.basis.z.z).normalized()*walkspeed
+		
 				
-	var isgroundspiked = tiptouchray.is_colliding() and tiptouchray.get_collider().get_name() == "XCtubeshell"
+	var isgroundspiked = tiptouchray.is_colliding() and tiptouchray.get_collider().get_parent().get_name() == "XCtubesectors"
 	if isgroundspiked:
 		if clawengageposition == null:
 			clawengageposition = tiptouchray.get_collision_point()
