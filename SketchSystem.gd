@@ -10,7 +10,9 @@ const linewidth = 0.05
 const defaultfloordrawing = "http://cave-registry.org.uk/svn/NorthernEngland/ThreeCountiesArea/rawscans/Ireby/DukeStResurvey-drawnup-p3.jpg"
 
 func _ready():
-	var floordrawing = newXCuniquedrawingPaper(defaultfloordrawing, DRAWING_TYPE.DT_FLOORTEXTURE)
+	var floordrawingimg = defaultfloordrawing
+	floordrawingimg = "res://surveyscans/greenland/ushapedcave.png"
+	var floordrawing = newXCuniquedrawingPaper(floordrawingimg, DRAWING_TYPE.DT_FLOORTEXTURE)
 	get_node("/root/Spatial/ImageSystem").fetchpaperdrawing(floordrawing)
 		
 

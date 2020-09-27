@@ -211,9 +211,11 @@ func _ready():
 		$SketchSystem.updatecentrelinevisibility()
 		$SketchSystem.changetubedxcsvizmode()
 		$SketchSystem.updateworkingshell()
-	else:
+	elif true:
 		$SketchSystem.loadsketchsystem("res://surveyscans/smallirebysave.res")
 		#loadsketchsystem("res://surveyscans/ireby2save.res")
+	else:
+		pass
 	playerMe.global_transform.origin.y += 5
 
 

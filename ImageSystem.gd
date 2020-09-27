@@ -57,11 +57,43 @@ func _http_request_completed(result, response_code, headers, body, lhttprequest,
 		fetcheddrawing = paperdrawing
 	else:
 		print("http response code bad ", response_code, " for ", paperdrawing.get_name())
+		fetcheddrawing = paperdrawing
+		fetcheddrawingfile = "res://guimaterials/imagefilefailure.png"
 	httprequest = null
 	
 func _process(delta):
 	if imagefetchingcountdowntimer > 0.0:
 		imagefetchingcountdowntimer -= delta
+		return
+	imagefetchingcountdowntimer = imagefetchingcountdowntime
+
+	if fetcheddrawing == null and httprequest == null and len(paperdrawinglist) > 0:
+		var paperdrawing = paperdrawinglist.pop_front()
+		if paperdrawing.xcresource.begins_with("res://"):
+			fetcheddrawingfile = paperdrawing.xcresource
+			fetcheddrawing = paperdrawing
+			if not File.new().file_exists(fetcheddrawingfile):
+				fetcheddrawingfile = "res://guimaterials/imagefilefailure.png"
+		elif paperdrawing.xcresource.begins_with("http"):
+			fetcheddrawingfile = imgdir+getshortimagename(paperdrawing.xcresource, true)
+			print([paperdrawing.xcresource, defaultfloordrawing])
+			print([1, fetcheddrawingfile])
+			#if paperdrawing.xcresource == defaultfloordrawing:
+			#	fetcheddrawingfile = defaultfloordrawingres
+			if not File.new().file_exists(fetcheddrawingfile):
+				if not Directory.new().dir_exists(imgdir):
+					Directory.new().make_dir(imgdir)
+				httprequest = HTTPRequest.new()
+				add_child(httprequest)
+				httprequest.connect("request_completed", self, "_http_request_completed", [httprequest, paperdrawing])
+				httprequest.download_file = fetcheddrawingfile
+				httprequest.request(paperdrawing.xcresource)
+				httprequestduration = 0.0
+			else:
+				fetcheddrawing = paperdrawing
+		else:
+			fetcheddrawingfile = "res://guimaterials/imagefilefailure.png"
+
 	elif fetcheddrawing != null:
 		var img = Image.new()
 		print("FFF", [fetcheddrawing, fetcheddrawingfile])
@@ -74,26 +106,10 @@ func _process(delta):
 		else:
 			print(fetcheddrawing.get_name(), "   has zero width ")
 		fetcheddrawing = null
+
 	elif httprequest != null:
 		httprequestduration += delta
-	elif len(paperdrawinglist) > 0:
-		var paperdrawing = paperdrawinglist.pop_front()
-		fetcheddrawingfile = imgdir+getshortimagename(paperdrawing.xcresource, true)
-		print([paperdrawing.xcresource, defaultfloordrawing])
-		print([1, fetcheddrawingfile])
-		#if paperdrawing.xcresource == defaultfloordrawing:
-		#	fetcheddrawingfile = defaultfloordrawingres
-		if not File.new().file_exists(fetcheddrawingfile):
-			if not Directory.new().dir_exists(imgdir):
-				Directory.new().make_dir(imgdir)
-			httprequest = HTTPRequest.new()
-			add_child(httprequest)
-			httprequest.connect("request_completed", self, "_http_request_completed", [httprequest, paperdrawing])
-			httprequest.download_file = fetcheddrawingfile
-			httprequest.request(paperdrawing.xcresource)
-			httprequestduration = 0.0
-		else:
-			fetcheddrawing = paperdrawing
+
 	else:
 		set_process(false)
 
@@ -120,8 +136,6 @@ func fetchimportpapers():
 		paperdrawinglist.append(paperdrawing)
 		get_node("/root/Spatial/SketchSystem").sharexcdrawingovernetwork(paperdrawing)
 		fetchpaperdrawing(paperdrawing)
-
-
 
 func _input(event):
 	if event is InputEventKey and event.pressed and event.scancode == KEY_V:

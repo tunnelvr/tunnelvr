@@ -342,8 +342,15 @@ func slicetubetoxcdrawing(xcdrawing, xcdrawinglink0, xcdrawinglink1):
 
 func ConstructHoleXC(i):
 	assert (xcsectormaterials[i] == "hole")
+	var sketchsystem = get_node("/root/Spatial/SketchSystem")
+	var xcdrawingholename = "Hole"+("" if i == 0 else ";"+str(i))+";"+xcname0+";"+xcname1
+	var xcdrawinghole = null
+	if sketchsystem.get_node("XCdrawings").has_node(xcdrawingholename):
+		xcdrawinghole = sketchsystem.get_node("XCdrawings").get_node(xcdrawingholename)
+	else:
+		xcdrawinghole = sketchsystem.newXCuniquedrawing(DRAWING_TYPE.DT_XCDRAWING, xcdrawingholename)
+	
 	var tubesectormesh = $XCtubesectors.get_child(i).get_node("MeshInstance").mesh
-
 	var mdt = MeshDataTool.new()
 	mdt.create_from_surface(tubesectormesh, 0)
 	var sumnormals = Vector3(0, 0, 0)
@@ -353,39 +360,40 @@ func ConstructHoleXC(i):
 		sumpoints += mdt.get_vertex(j)
 	var avgnormal = sumnormals/mdt.get_vertex_count()
 	var avgpoint = sumpoints/mdt.get_vertex_count()
-	var sketchsystem = get_node("/root/Spatial/SketchSystem")
-	var xcdrawing = sketchsystem.newXCuniquedrawing(DRAWING_TYPE.DT_XCDRAWING, sketchsystem.uniqueXCname())
 	var drawingwallangle = Vector2(avgnormal.x, avgnormal.z).angle() + deg2rad(90)
-	xcdrawing.setxcpositionangle(drawingwallangle)
-	xcdrawing.setxcpositionorigin(avgpoint)
+	xcdrawinghole.setxcpositionangle(drawingwallangle)
+	xcdrawinghole.setxcpositionorigin(avgpoint)
+	
 	var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(xcname0)
 	var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(xcname1)
-	var xcnodes0 = xcdrawing0.get_node("XCnodes")
-	var xcnodes1 = xcdrawing1.get_node("XCnodes")
-	var xcnlist0 = [ ]
+	var xcnsourcelist = [ ]
 	for i0 in tubesectorptindexlists[i][0]:
-		var xcn0 = xcdrawing.newxcnode()
-		var pt0 = xcnodes0.get_node(i0).global_transform.origin
-		xcdrawing.setxcnpoint(xcn0, pt0, false)
-		xcnlist0.push_back(xcn0.get_name())
-	var xcnlist1 = [ ]
-	for i1 in tubesectorptindexlists[i][1]:
-		var xcn1 = xcdrawing.newxcnode()
-		var pt1 = xcnodes1.get_node(i1).global_transform.origin
-		xcdrawing.setxcnpoint(xcn1, pt1, false)
-		xcnlist1.push_back(xcn1.get_name())
-	for j in range(1, len(xcnlist0)):
-		xcdrawing.onepathpairs.push_back(xcnlist0[j-1])
-		xcdrawing.onepathpairs.push_back(xcnlist0[j])
-	for j in range(1, len(xcnlist1)):
-		xcdrawing.onepathpairs.push_back(xcnlist1[j-1])
-		xcdrawing.onepathpairs.push_back(xcnlist1[j])
-	xcdrawing.onepathpairs.push_back(xcnlist0[0])
-	xcdrawing.onepathpairs.push_back(xcnlist1[0])
-	xcdrawing.onepathpairs.push_back(xcnlist0[-1])
-	xcdrawing.onepathpairs.push_back(xcnlist1[-1])
-	xcdrawing.updatexcpaths()
-	return xcdrawing
+		xcnsourcelist.push_back(xcdrawing0.get_node("XCnodes").get_node(i0))
+	var xir = len(xcnsourcelist)
+	for j in range(len(tubesectorptindexlists[i][1])-1, -1, -1):
+		var i1 = tubesectorptindexlists[i][1][j]
+		xcnsourcelist.push_back(xcdrawing1.get_node("XCnodes").get_node(i1))
+
+	var nodepointsremaining = xcdrawinghole.nodepoints.duplicate()
+	xcdrawinghole.onepathpairs.clear()
+	var prevname = "r"+xcnsourcelist[-1].get_name()
+	for j in range(len(xcnsourcelist)):
+		var xcnsource = xcnsourcelist[j]
+		var name = ("" if j < xir else "r")+xcnsource.get_name()
+		var xcn = null
+		if xcdrawinghole.get_node("XCnodes").has_node(name):
+			xcn = xcdrawinghole.get_node("XCnodes").get_node(name)
+			nodepointsremaining.erase(name)
+		else:
+			xcn = xcdrawinghole.newxcnode(name)
+		xcdrawinghole.setxcnpoint(xcn, xcnsource.global_transform.origin, false)
+		xcdrawinghole.onepathpairs.push_back(prevname)
+		xcdrawinghole.onepathpairs.push_back(name)
+		prevname = name
+	for xcnr in nodepointsremaining:
+		xcdrawinghole.removexcnode(xcnr, false, sketchsystem)
+	xcdrawinghole.updatexcpaths()
+	return xcdrawinghole
 
 
 func add_vertex(surfaceTool, xcnodes, poly, ila, i):

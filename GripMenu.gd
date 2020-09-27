@@ -47,8 +47,6 @@ func enablegripmenus(gmlist):
 			$WordButtons.get_node(g).get_node("MeshInstance").visible = true
 			$WordButtons.get_node(g).get_node("CollisionShape").disabled = false
 
-
-
 func cleargripmenupointer(pointertarget):
 	if pointertarget.get_parent().get_name() == "MaterialButtons":
 		pointertarget.get_node("MeshInstance").set_surface_material(0, previewtubematerials[pointertarget.get_name()])
@@ -76,7 +74,7 @@ func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointert
 	global_transform = paneltrans
 
 	if gripmenupointertargettype == "XCdrawing" and gripmenupointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
-		enablegripmenus(["Up5", "Down5", "toPaper"])
+		enablegripmenus(["NewXC", "Up5", "Down5", "toPaper"])
 
 	elif gripmenupointertargettype == "XCdrawing" and gripmenupointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		enablegripmenus(["DelXC"])
@@ -86,12 +84,18 @@ func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointert
 		
 	elif gripmenupointertargettype == "XCtubesector":
 		var tubesectormaterialname = gripmenupointertargetwall.xcsectormaterials[gripmenuactivetargettubesectorindex]
+		#var xcdrawings = get_node("/root/Spatial/SketchSystem/XCdrawings")
+		#var xcdrawing0 = xcdrawings.get_node(gripmenupointertargetwall.xcname0)
+		#var xcdrawing1 = xcdrawings.get_node(gripmenupointertargetwall.xcname1)
+		#var xcgcomm = "SelectXC"
+		#if xcdrawing0.get_node("XCdrawingplane").visible and xcdrawing1.get_node("XCdrawingplane").visible:
+		#	xcgcomm = "HideXC"
 		if is_instance_valid(activetargetwall) and len(activetargetwall.nodepoints) == 0:
-			enablegripmenus(["DoSlice", "SelectXC", "materials"])
+			enablegripmenus(["DoSlice", "SelectXC", "HideXC", "materials"])
 		elif tubesectormaterialname == "hole":
-			enablegripmenus(["HoleXC", "materials"])
+			enablegripmenus(["HoleXC", "SelectXC", "HideXC", "materials"])
 		else:
-			enablegripmenus(["NewXC", "SelectXC", "materials"])
+			enablegripmenus(["NewXC", "SelectXC", "HideXC", "materials"])
 
 	elif gripmenupointertargettype == "XCnode":
 		enablegripmenus(["NewXC", "Record", "Replay"])

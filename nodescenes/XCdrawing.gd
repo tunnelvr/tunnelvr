@@ -17,26 +17,30 @@ var maxnodepointnumber = 0
 
 var linewidth = 0.05
 
-func setxcdrawingvisibility(makevisible):
+func setxcdrawingvisible():
 	assert ($XCdrawingplane.visible != $XCdrawingplane/CollisionShape.disabled)	
-	if not makevisible:
-		$XCdrawingplane.visible = false
-		$XCdrawingplane/CollisionShape.disabled = true
-		#$XCnodes.visible = Tglobal.tubedxcsvisible or (drawingtype != DRAWING_TYPE.DT_XCDRAWING) or (len(xctubesconn) == 0)
-		#$PathLines.visible = $XCnodes.visible
-	elif makevisible != $XCdrawingplane.visible:
-		$XCdrawingplane.visible = true
-		$XCdrawingplane/CollisionShape.disabled = false
-		$XCnodes.visible = true
-		$PathLines.visible = true
-		if drawingtype == DRAWING_TYPE.DT_XCDRAWING:
-			var sca = 1.0
-			for nodepoint in nodepoints.values():
-				sca = max(sca, abs(nodepoint.x) + 1)
-				sca = max(sca, abs(nodepoint.y) + 1)
-			if sca > $XCdrawingplane.scale.x:
-				$XCdrawingplane.set_scale(Vector3(sca, sca, 1.0))
+	$XCdrawingplane.visible = true
+	$XCdrawingplane/CollisionShape.disabled = false
+	$XCnodes.visible = true
+	$PathLines.visible = true
+	if drawingtype == DRAWING_TYPE.DT_XCDRAWING:
+		var sca = 1.0
+		for nodepoint in nodepoints.values():
+			sca = max(sca, abs(nodepoint.x) + 1)
+			sca = max(sca, abs(nodepoint.y) + 1)
+		if sca > $XCdrawingplane.scale.x:
+			$XCdrawingplane.set_scale(Vector3(sca, sca, 1.0))
 	assert ($XCdrawingplane.visible != $XCdrawingplane/CollisionShape.disabled)
+
+func setxcdrawingvisiblehide(hidenodes):
+	assert ($XCdrawingplane.visible != $XCdrawingplane/CollisionShape.disabled)	
+	$XCdrawingplane.visible = false
+	$XCdrawingplane/CollisionShape.disabled = true
+	if hidenodes:
+		$XCnodes.visible = Tglobal.tubedxcsvisible or (drawingtype != DRAWING_TYPE.DT_XCDRAWING) or (len(xctubesconn) == 0)
+		$PathLines.visible = $XCnodes.visible
+	assert ($XCdrawingplane.visible != $XCdrawingplane/CollisionShape.disabled)
+
 	
 # these transforming operations work in sequence, each correcting the relative position change caused by the other
 func scalexcnodepointspointsxy(scax, scay):
@@ -83,7 +87,10 @@ func mergexcrpcdata(xcdata):
 			$XCnodes.add_child(xcn)
 		xcn.translation = nodepoints[k]
 	updatexcpaths()
-	setxcdrawingvisibility(xcdata["visible"])
+	if xcdata["visible"]:
+		setxcdrawingvisible()
+	else:
+		setxcdrawingvisiblehide(true)
 
 func importcentrelinedata(centrelinedata, sketchsystem):
 	$XCdrawingplane.visible = false

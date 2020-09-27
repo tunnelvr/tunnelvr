@@ -98,7 +98,7 @@ func setactivetargetwall(newactivetargetwall):
 	
 	LaserOrient.get_node("RayCast").collision_mask = CollisionLayer.CL_Pointer | CollisionLayer.CL_PointerFloor | CollisionLayer.CL_CaveWall | CollisionLayer.CL_CaveWallTrans
 	if activetargetwall != null and activetargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
-		activetargetwall.setxcdrawingvisibility(true)
+		activetargetwall.setxcdrawingvisible()
 		activetargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").set_surface_material(0, materialsystem.xcdrawingmaterial("active", null))
 		activetargetwall.get_node("PathLines").set_surface_material(0, materialsystem.pathlinematerial("nodepthtest"))
 		for xcnode in activetargetwall.get_node("XCnodes").get_children():
@@ -347,7 +347,7 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 				pointertargetwall.updatexcpaths()
 			else:
 				sketchsystem.xcapplyonepathtube(activetargetnode, activetargetnodewall, pointertarget, pointertargetwall)
-				pointertargetwall.setxcdrawingvisibility(true)
+				pointertargetwall.setxcdrawingvisible()
 			Tglobal.soundsystem.quicksound("ClickSound", pointertargetpoint)
 			clearactivetargetnode()
 											
@@ -445,11 +445,13 @@ func buttonreleased_vrgrip():
 				pt0 = null
 			elif gripmenu.gripmenupointertargettype == "XCdrawing" and gripmenu.gripmenupointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 				pt0 += -eyept0vec/2
+			elif gripmenu.gripmenupointertargettype == "XCdrawing" and gripmenu.gripmenupointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
+				pass
 			elif gripmenu.gripmenupointertargettype == "XCflatshell":
 				pt0 += -eyept0vec/2
 			else:
 				print(gripmenu.gripmenupointertargettype)
-				assert (gripmenu.gripmenupointertargettype == "none")
+				assert (gripmenu.gripmenupointertargettype == "none" or gripmenu.gripmenupointertargettype == "unknown")
 				eyept0vec = gripmenu.gripmenulaservector
 				pt0 = headcam.global_transform.origin + eyept0vec.normalized()*2.9
 			if pt0 != null:
@@ -494,20 +496,30 @@ func buttonreleased_vrgrip():
 			elif pointertarget.get_name() == "SelectXC":
 				var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(gripmenu.gripmenupointertargetwall.xcname0)
 				var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(gripmenu.gripmenupointertargetwall.xcname1)
-				if xcdrawing0.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
-					xcdrawing0.setxcdrawingvisibility(true)
-					xcdrawing1.setxcdrawingvisibility(true)
-					if xcdrawing0 != activetargetwall:
-						setactivetargetwall(xcdrawing0)
-					elif xcdrawing1 != activetargetwall:
-						setactivetargetwall(xcdrawing1)
+				xcdrawing0.setxcdrawingvisible()
+				xcdrawing1.setxcdrawingvisible()
+				if xcdrawing0 != activetargetwall:
+					setactivetargetwall(xcdrawing0)
+				elif xcdrawing1 != activetargetwall:
+					setactivetargetwall(xcdrawing1)
+						
+			elif pointertarget.get_name() == "HideXC":
+				var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(gripmenu.gripmenupointertargetwall.xcname0)
+				var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(gripmenu.gripmenupointertargetwall.xcname1)
+				if xcdrawing0 == activetargetwall:
+					setactivetargetwall(null)
+				if xcdrawing1 == activetargetwall:
+					setactivetargetwall(null)
+				xcdrawing0.setxcdrawingvisiblehide(true)
+				xcdrawing1.setxcdrawingvisiblehide(true)
 
 			elif pointertarget.get_name() == "DelXC":
 				print("Not implemented")
 
 			elif pointertarget.get_name() == "HoleXC":
-				gripmenu.gripmenupointertargetwall.ConstructHoleXC(gripmenu.gripmenuactivetargettubesectorindex)
-				
+				var xcdrawinghole = gripmenu.gripmenupointertargetwall.ConstructHoleXC(gripmenu.gripmenuactivetargettubesectorindex)
+				setactivetargetwall(xcdrawinghole)
+									
 			elif pointertarget.get_name() == "NewSlice" and is_instance_valid(activetargettube):
 				print("Press trigger to action")
 
@@ -565,7 +577,7 @@ func buttonreleased_vrgrip():
 
 	elif pointertargettype == "XCdrawing" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		clearpointertargetmaterial()
-		pointertargetwall.setxcdrawingvisibility(false)
+		pointertargetwall.setxcdrawingvisiblehide(false)
 		sketchsystem.sharexcdrawingovernetwork(pointertargetwall)
 		setactivetargetwall(null)
 		clearpointertarget()

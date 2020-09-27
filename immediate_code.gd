@@ -21,8 +21,8 @@ func _on_request_completed(result, response_code, headers, body):
 	
 
 func _run():
-	var a = "ip9999"
-	print(a.substr(0, 2))
-	print(a.begins_with("ips"))
-	print(a.replace("ip", ""))
-	print(a.find("9"))
+	var a = {"a":9, "b":10}
+	a.erase("ac")
+	for i in a:
+		print(i)
+	print(a)
