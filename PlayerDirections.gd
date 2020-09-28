@@ -55,7 +55,8 @@ func _physics_process(delta):
 
 	var joypos = HandLeft.joypos
 	if not Input.is_action_pressed("lh_shift"):
-		if Input.is_action_pressed("lh_forward"):   joypos.y += 1
+		if Input.is_action_pressed("lh_forward"):
+			joypos.y += 1
 		if Input.is_action_pressed("lh_backward"):  joypos.y += -1
 		if Input.is_action_pressed("lh_left"):      joypos.x += -1
 		if Input.is_action_pressed("lh_right"):     joypos.x += 1
@@ -75,7 +76,7 @@ func _physics_process(delta):
 
 	elif not playerdirectedflight and not Tglobal.questhandtracking and not Tglobal.controlslocked:
 		var dir = Vector3(HeadCam.global_transform.basis.z.x, 0, HeadCam.global_transform.basis.z.z)
-		playerdirectedwalkingvelocity = dir.normalized()*(-HandLeft.joypos.y*walkspeed)
+		playerdirectedwalkingvelocity = dir.normalized()*(-joypos.y*walkspeed)
 		
 				
 	var isgroundspiked = tiptouchray.is_colliding() and tiptouchray.get_collider().get_parent().get_name() == "XCtubesectors"
