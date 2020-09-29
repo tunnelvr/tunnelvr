@@ -145,7 +145,7 @@ func sharexcdrawingovernetwork(xcdrawing):
 remote func xcdrawingfromdata(xcdata):
 	var xcdrawing = $XCdrawings.get_node(xcdata["name"])
 	if xcdrawing == null:
-		if xcdata["drawingtype"] == DRAWING_TYPE.DT_FLOORTEXTURE or xcdata["drawingtype"].drawingtype == DRAWING_TYPE.DT_PAPERTEXTURE:
+		if xcdata["drawingtype"] == DRAWING_TYPE.DT_FLOORTEXTURE or xcdata["drawingtype"] == DRAWING_TYPE.DT_PAPERTEXTURE:
 			xcdrawing = newXCuniquedrawingPaper(xcdata["xcresource"], xcdata["drawingtype"])
 			assert (xcdrawing["name"] == xcdrawing.get_name())
 		else:

@@ -211,7 +211,7 @@ func initnormalvrtracking(lhandcontroller):
 	handcontroller = lhandcontroller
 
 func initpuppetracking(lplayerishandtracked):
-	print("initpuppetracking: ", lplayerishandtracked, " ", islefthand)
+	print("initpuppetracking hand: ", lplayerishandtracked, " left: ", islefthand)
 	handpositionstack = [ ]
 	playerishandtracked = lplayerishandtracked
 

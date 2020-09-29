@@ -261,8 +261,6 @@ func buttonpressed_vrgrip():
 	gripmenu.gripmenuon(LaserOrient.global_transform, pointertargetpoint, pointertargetwall, pointertargettype, activetargettube, activetargettubesectorindex, activetargetwall)	
 	
 func buttonpressed_vrtrigger(gripbuttonheld):
-	var dontdisablegripmenus = false
-	
 	if not is_instance_valid(pointertarget):
 		pass
 		
@@ -356,12 +354,8 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 			if pointertargetwall != activetargetwall:
 				setactivetargetwall(pointertargetwall)
 		setactivetargetnode(pointertarget)
-
-	elif pointertargettype == "GripMenuItem" and pointertarget.get_name() == "Record" and gripbuttonheld:
-		Tglobal.soundsystem.startmyvoicerecording()
-		dontdisablegripmenus = true
 		
-	if gripbuttonheld and not dontdisablegripmenus:
+	if gripbuttonheld:
 		gripbuttonpressused = true
 		gripmenu.disableallgripmenus()
 
@@ -408,9 +402,6 @@ func _on_button_release(p_button):
 			buttonreleased_vrtrigger()
 
 func buttonreleased_vrgrip():
-	if Tglobal.soundsystem.nowrecording:
-		Tglobal.soundsystem.stopmyvoicerecording()
-	
 	var wasactivetargettube = activetargettube
 	if activetargettube != null:
 		if pointertargettype == "GripMenuItem" and pointertarget.get_parent().get_name() == "MaterialButtons":
@@ -522,12 +513,6 @@ func buttonreleased_vrgrip():
 									
 			elif pointertarget.get_name() == "NewSlice" and is_instance_valid(activetargettube):
 				print("Press trigger to action")
-
-			elif pointertarget.get_name() == "Record":
-				print("Press trigger to action (record from mic)")
-				
-			elif pointertarget.get_name() == "Replay":
-				Tglobal.soundsystem.playmyvoicerecording()
 				
 			elif pointertarget.get_name() == "DoSlice" and is_instance_valid(wasactivetargettube) and is_instance_valid(activetargetwall) and len(activetargetwall.nodepoints) == 0:
 				print(wasactivetargettube, " ", len(activetargetwall.nodepoints))
@@ -595,8 +580,6 @@ func buttonreleased_vrgrip():
 
 		
 func buttonreleased_vrtrigger():
-	if Tglobal.soundsystem.nowrecording:
-		Tglobal.soundsystem.stopmyvoicerecording()
 	if activetargetwallgrabbedtransform != null:
 		if Tglobal.connectiontoserveractive:
 			activetargetwallgrabbed.rpc("setxcdrawingposition", activetargetwallgrabbed.global_transform)
@@ -624,7 +607,7 @@ func _physics_process(_delta):
 		setpointertarget(activelaserroot)
 		
 	if activetargetwallgrabbedtransform != null:
-		if activetargetwallgrabbed.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
+		if activetargetwallgrabbed.get_name() != "PlanView" and activetargetwallgrabbed.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 			var laserrelvec = activelaserroot.global_transform.basis.inverse()*activetargetwallgrabbedlaserroottrans.basis.z
 			var angy = -Vector2(laserrelvec.z, laserrelvec.x).angle()
 			var angpush =-(activetargetwallgrabbedlaserroottrans.origin.y - activelaserroot.global_transform.origin.y)

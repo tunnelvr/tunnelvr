@@ -43,7 +43,9 @@ func stopmyvoicerecording():
 		#print("COMPRESSION_DEFLATE ", recording.get_data().compress(File.COMPRESSION_DEFLATE).size())
 		#print("COMPRESSION_ZSTD ", recording.get_data().compress(File.COMPRESSION_ZSTD).size())
 		#print("COMPRESSION_GZIP ", recording.get_data().compress(File.COMPRESSION_GZIP).size())
-
+		return recording.get_data().size()
+	return 0
+	
 func playmyvoicerecording():
 	var playerMe = get_node("/root/Spatial").playerMe
 	if recording:

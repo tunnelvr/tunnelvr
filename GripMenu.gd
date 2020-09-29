@@ -98,7 +98,7 @@ func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointert
 			enablegripmenus(["NewXC", "SelectXC", "HideXC", "materials"])
 
 	elif gripmenupointertargettype == "XCnode":
-		enablegripmenus(["NewXC", "Record", "Replay"])
+		enablegripmenus(["NewXC"])
 
 	else:
 		enablegripmenus(["NewXC", "", ""])

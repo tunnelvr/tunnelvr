@@ -79,6 +79,18 @@ func _on_xcdrawingvisibility_selected(index):
 func _on_buttonswapcontrollers_pressed():
 	get_node("/root/Spatial").playerMe.swapcontrollers()
 	$Viewport/GUI/Panel/Label.text = "Controllers swapped"
+
+func _on_buttonrecord_down():
+	$Viewport/GUI/Panel/Label.text = "Recording ***"
+	Tglobal.soundsystem.startmyvoicerecording()
+
+func _on_buttonrecord_up():
+	var rleng = Tglobal.soundsystem.stopmyvoicerecording()
+	$Viewport/GUI/Panel/Label.text = "Recorded  %.0fKb" % (rleng/1000)
+
+func _on_buttonplay_pressed():
+	Tglobal.soundsystem.playmyvoicerecording()
+	$Viewport/GUI/Panel/Label.text = "Play voice"
 	
 func _ready():
 	$Viewport/GUI/Panel/ButtonLoad.connect("pressed", self, "_on_buttonload_pressed")
@@ -89,6 +101,9 @@ func _ready():
 	$Viewport/GUI/Panel/ButtonDoppelganger.connect("toggled", self, "_on_buttondoppelganger_toggled")
 	$Viewport/GUI/Panel/ButtonSwapControllers.connect("pressed", self, "_on_buttonswapcontrollers_pressed")
 	$Viewport/GUI/Panel/ButtonLockControls.connect("toggled", self, "_on_buttonlockcontrols_toggled")
+	$Viewport/GUI/Panel/ButtonRecord.connect("button_down", self, "_on_buttonrecord_down")
+	$Viewport/GUI/Panel/ButtonRecord.connect("button_up", self, "_on_buttonrecord_up")
+	$Viewport/GUI/Panel/ButtonPlay.connect("pressed", self, "_on_buttonplay_pressed")
 
 	$Viewport/GUI/Panel/CentrelineVisibility.connect("item_selected", self, "_on_centrelinevisibility_selected")
 	$Viewport/GUI/Panel/XCdrawingVisibility.connect("item_selected", self, "_on_xcdrawingvisibility_selected")

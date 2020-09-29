@@ -1,4 +1,4 @@
-[gd_scene load_steps=200 format=2]
+[gd_scene load_steps=202 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/default_env.tres" type="Environment" id=2]
@@ -193,14 +193,6 @@ albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
 albedo_texture = ExtResource( 25 )
 uv1_scale = Vector3( 1, 0.05, 1 )
 uv1_offset = Vector3( -0.2, 0.7, 0 )
-
-[sub_resource type="SpatialMaterial" id=25]
-flags_unshaded = true
-flags_do_not_receive_shadows = true
-albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
-albedo_texture = ExtResource( 25 )
-uv1_scale = Vector3( 1, 0.05, 1 )
-uv1_offset = Vector3( -0.2, 0.75, 0 )
 
 [sub_resource type="SpatialMaterial" id=26]
 flags_unshaded = true
@@ -989,9 +981,17 @@ shader_param/texture_albedo = SubResource( 155 )
 material = SubResource( 156 )
 size = Vector2( 4, 2 )
 
+[sub_resource type="SpatialMaterial" id=158]
+albedo_color = Color( 0.964706, 0.498039, 0.498039, 1 )
+
+[sub_resource type="CubeMesh" id=159]
+size = Vector3( 4, 2.6, 4.3 )
+
+[sub_resource type="CubeMesh" id=160]
+size = Vector3( 3.6, 2, 3.8 )
+
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
-enablevr = false
 
 [node name="Players" type="Spatial" parent="."]
 transform = Transform( -1, 0, -3.25841e-07, 0, 1, 0, 3.25841e-07, 0, -1, 0, 0, 0 )
@@ -1106,19 +1106,19 @@ text = "GUI Controls"
 
 [node name="ButtonLoad" type="Button" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
 margin_left = 14.0
-margin_top = 42.757
-margin_right = 154.0
-margin_bottom = 70.757
+margin_top = 43.0
+margin_right = 71.0
+margin_bottom = 71.0
 text = "Load"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="ButtonSave" type="Button" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 14.9266
-margin_top = 77.0405
-margin_right = 154.926
-margin_bottom = 105.041
+margin_left = 231.0
+margin_top = 43.0
+margin_right = 285.0
+margin_bottom = 71.0
 rect_pivot_offset = Vector2( 111.073, 28.0005 )
 text = "Save"
 __meta__ = {
@@ -1126,10 +1126,10 @@ __meta__ = {
 }
 
 [node name="Savegamefilename" type="OptionButton" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 162.0
-margin_top = 44.0
-margin_right = 279.0
-margin_bottom = 71.0
+margin_left = 79.0
+margin_top = 43.0
+margin_right = 196.0
+margin_bottom = 70.0
 text = "savegame.res"
 items = [ "savegame.res", null, false, 0, null, "savegame2.res", null, false, 1, null, "savegame3.res", null, false, 2, null, "savegame4.res", null, false, 3, null, "savegame5.res", null, false, 4, null ]
 selected = 0
@@ -1144,7 +1144,7 @@ margin_right = 286.0
 margin_bottom = 201.0
 hint_tooltip = "Network state"
 text = "Network Off"
-items = [ "Network Off", null, false, 0, null, "Check IPnum", null, false, 1, null, "As Server", null, false, 2, null, "Client->192.168.1.127", null, false, 3, null ]
+items = [ "Network Off", null, false, 0, null, "Check IPnum", null, false, 1, null, "As Server", null, false, 2, null, "Client->192.168.1.127", null, false, 3, null, "Client->192.168.1.89", null, false, 4, null, "Client->172.27.9.245", null, false, 5, null ]
 selected = 0
 __meta__ = {
 "_edit_use_anchors_": false
@@ -1160,12 +1160,34 @@ hint_tooltip = "test tooltip"
 text = "Plan View"
 
 [node name="ButtonFetchImages" type="Button" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 13.9266
-margin_top = 109.461
-margin_right = 153.926
-margin_bottom = 137.461
+margin_left = 17.0
+margin_top = 77.0
+margin_right = 129.0
+margin_bottom = 105.0
 rect_pivot_offset = Vector2( 111.073, 28.0005 )
 text = "FetchImages"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ButtonRecord" type="Button" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
+margin_left = 158.0
+margin_top = 215.0
+margin_right = 217.0
+margin_bottom = 243.0
+rect_pivot_offset = Vector2( 111.073, 28.0005 )
+text = "Record"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ButtonPlay" type="Button" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
+margin_left = 224.0
+margin_top = 215.0
+margin_right = 283.0
+margin_bottom = 243.0
+rect_pivot_offset = Vector2( 111.073, 28.0005 )
+text = "Play"
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -1204,10 +1226,10 @@ __meta__ = {
 }
 
 [node name="ButtonSwapControllers" type="Button" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 162.4
-margin_top = 75.6836
-margin_right = 302.4
-margin_bottom = 103.684
+margin_left = 168.0
+margin_top = 77.0
+margin_right = 286.0
+margin_bottom = 105.0
 rect_pivot_offset = Vector2( 138.61, -8.13628 )
 hint_tooltip = "test tooltip"
 text = "Swap Controllers"
@@ -1248,10 +1270,10 @@ __meta__ = {
 }
 
 [node name="XCdrawingVisibility" type="OptionButton" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 235.0
-margin_top = 141.0
-margin_right = 292.0
-margin_bottom = 168.0
+margin_left = 232.0
+margin_top = 142.0
+margin_right = 289.0
+margin_bottom = 169.0
 text = "hide"
 items = [ "hide", null, false, 0, null, "hide2", null, false, 1, null, "show", null, false, 2, null, "only", null, false, 3, null ]
 selected = 0
@@ -1477,32 +1499,6 @@ mesh = SubResource( 9 )
 material/0 = SubResource( 24 )
 
 [node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/NewXC"]
-shape = SubResource( 11 )
-
-[node name="Record" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
-transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, 0, -0.2, 0 )
-collision_layer = 8
-collision_mask = 0
-
-[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/Record"]
-cast_shadow = 0
-mesh = SubResource( 9 )
-material/0 = SubResource( 25 )
-
-[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/Record"]
-shape = SubResource( 11 )
-
-[node name="Replay" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
-transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, 0.25, -0.2, 0 )
-collision_layer = 8
-collision_mask = 0
-
-[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/Replay"]
-cast_shadow = 0
-mesh = SubResource( 9 )
-material/0 = SubResource( 26 )
-
-[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/Replay"]
 shape = SubResource( 11 )
 
 [node name="HoleXC" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
@@ -2153,3 +2149,29 @@ transform = Transform( -1, 2.66913e-07, -1.86895e-07, 0, 0.573576, 0.819152, 3.2
 light_energy = 0.6
 shadow_enabled = true
 shadow_color = Color( 0.388235, 0.0705882, 0.0705882, 1 )
+
+[node name="Kitchen" type="Spatial" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 1.6299, 1.51691, -31.8123 )
+
+[node name="CSGMesh" type="CSGMesh" parent="Kitchen"]
+material_override = SubResource( 158 )
+mesh = SubResource( 159 )
+
+[node name="CSGMesh" type="CSGMesh" parent="Kitchen/CSGMesh"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.461556, 0 )
+operation = 2
+mesh = SubResource( 160 )
+
+[node name="CSGBox" type="CSGBox" parent="Kitchen/CSGMesh"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 2.0093, 0.288218, 0 )
+operation = 2
+width = 1.6
+height = 1.27689
+depth = 0.734507
+
+[node name="CSGBox2" type="CSGBox" parent="Kitchen/CSGMesh"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 2.0093, 0.288218, 1.42887 )
+operation = 2
+width = 1.6
+height = 1.27689
+depth = 0.734507
