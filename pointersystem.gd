@@ -260,7 +260,11 @@ func buttonpressed_vrgrip():
 		activetargettube.get_node("PathLines").set_surface_material(0, materialsystem.pathlinematerial("nodepthtest"))
 	gripmenu.gripmenuon(LaserOrient.global_transform, pointertargetpoint, pointertargetwall, pointertargettype, activetargettube, activetargettubesectorindex, activetargetwall)	
 	
+var initialsequencenodename = null
+var initialsequencenodenameP = null
 func buttonpressed_vrtrigger(gripbuttonheld):
+	initialsequencenodenameP = initialsequencenodename
+	initialsequencenodename = null
 	if not is_instance_valid(pointertarget):
 		pass
 		
@@ -328,9 +332,10 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 			Tglobal.soundsystem.quicksound("ClickSound", pointertargetpoint)
 			if activetargetnode != null:
 				if activetargetnodewall == pointertargetwall:
-					pointertargetwall.xcotapplyonepath(activetargetnode.get_name(), newpointertarget.get_name())
+					pointertargetwall.xcotapplyonepath(activetargetnode.get_name(), newpointertarget.get_name(), true)
 					pointertargetwall.updatexcpaths()
 			setactivetargetnode(newpointertarget)
+			initialsequencenodename = initialsequencenodenameP
 	
 									
 	# reselection clears selection
@@ -341,7 +346,9 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 	elif activetargetnode != null and pointertargettype == "XCnode":
 		if not ((activetargetnodewall.drawingtype == DRAWING_TYPE.DT_CENTRELINE and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING) or (activetargetnodewall.drawingtype == DRAWING_TYPE.DT_XCDRAWING and pointertargetwall.drawingtype == DRAWING_TYPE.DT_CENTRELINE)):
 			if activetargetnodewall == pointertargetwall:
-				pointertargetwall.xcotapplyonepath(activetargetnode.get_name(), pointertarget.get_name())
+				pointertargetwall.xcotapplyonepath(activetargetnode.get_name(), pointertarget.get_name(), true)
+				if initialsequencenodenameP != null and initialsequencenodenameP != activetargetnode.get_name():
+					pointertargetwall.xcotapplyonepath(initialsequencenodenameP, pointertarget.get_name(), false)
 				pointertargetwall.updatexcpaths()
 			else:
 				sketchsystem.xcapplyonepathtube(activetargetnode, activetargetnodewall, pointertarget, pointertargetwall)
@@ -354,6 +361,7 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 			if pointertargetwall != activetargetwall:
 				setactivetargetwall(pointertargetwall)
 		setactivetargetnode(pointertarget)
+		initialsequencenodename = pointertarget.get_name()
 		
 	if gripbuttonheld:
 		gripbuttonpressused = true
@@ -510,10 +518,7 @@ func buttonreleased_vrgrip():
 			elif pointertarget.get_name() == "HoleXC":
 				var xcdrawinghole = gripmenu.gripmenupointertargetwall.ConstructHoleXC(gripmenu.gripmenuactivetargettubesectorindex)
 				setactivetargetwall(xcdrawinghole)
-									
-			elif pointertarget.get_name() == "NewSlice" and is_instance_valid(activetargettube):
-				print("Press trigger to action")
-				
+													
 			elif pointertarget.get_name() == "DoSlice" and is_instance_valid(wasactivetargettube) and is_instance_valid(activetargetwall) and len(activetargetwall.nodepoints) == 0:
 				print(wasactivetargettube, " ", len(activetargetwall.nodepoints))
 				var xcdrawing = activetargetwall

@@ -184,12 +184,13 @@ func setxcnpoint(xcn, pt, planar):
 		nodepoints[xcn.get_name()].z = 0
 		xcn.translation = nodepoints[xcn.get_name()]
 		
-func xcotapplyonepath(i0, i1):
+func xcotapplyonepath(i0, i1, addifnotthere):
 	for j in range(len(onepathpairs)-2, -3, -2):
 		if j == -2:
-			print("addingonepath ", len(onepathpairs), " ", i0, " ", i1)
-			onepathpairs.push_back(i0)
-			onepathpairs.push_back(i1)
+			if addifnotthere:
+				print("addingonepath ", len(onepathpairs), " ", i0, " ", i1)
+				onepathpairs.push_back(i0)
+				onepathpairs.push_back(i1)
 		elif (onepathpairs[j] == i0 and onepathpairs[j+1] == i1) or (onepathpairs[j] == i1 and onepathpairs[j+1] == i0):
 			onepathpairs[j] = onepathpairs[-2]
 			onepathpairs[j+1] = onepathpairs[-1]
