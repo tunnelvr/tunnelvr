@@ -13,11 +13,6 @@ extents = Vector3( 0.5, 0.5, 0.5 )
 albedo_color = Color( 0.984314, 0.537255, 0.0588235, 1 )
 metallic = 0.38
 roughness = 0.66
-emission_enabled = true
-emission = Color( 0.886275, 0.027451, 0.027451, 1 )
-emission_energy = 7.85
-emission_operator = 0
-emission_on_uv2 = false
 
 [sub_resource type="CubeMesh" id=4]
 material = SubResource( 3 )

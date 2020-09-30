@@ -395,3 +395,23 @@ func process_shareplayerposition():
 					if positiondict.has("handleft"):
 						positiondict["handleft"] = positiondict["handleft"].duplicate(true)
 					doppelganger.setavatarposition(positiondict)
+
+var bouldercount = 0
+var bouldertimecountdown = 0
+func _process(delta):
+	if bouldercount > 0:
+		bouldertimecountdown -= delta
+		if bouldertimecountdown <= 0:
+			bouldercount -= 1
+			bouldertimecountdown = 0.1
+			var HandRight = playerMe.get_node("HandRight")
+			if HandRight.pointervalid:
+				var handrightpointertrans = playerMe.global_transform*HandRight.pointerposearvrorigin
+				var markernode = preload("res://nodescenes/MarkerNode.tscn").instance()
+				var boulderclutter = get_node("/root/Spatial/BoulderClutter")
+				var nc = boulderclutter.get_child_count()
+				markernode.get_node("CollisionShape").scale = Vector3(0.4, 0.6, 0.4) if ((nc%2) == 0) else Vector3(0.2, 0.4, 0.2)
+				markernode.global_transform.origin = handrightpointertrans.origin - 0.9*handrightpointertrans.basis.z
+				markernode.linear_velocity = -5.1*handrightpointertrans.basis.z
+				boulderclutter.add_child(markernode)
+

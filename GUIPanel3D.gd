@@ -92,6 +92,11 @@ func _on_buttonplay_pressed():
 	Tglobal.soundsystem.playmyvoicerecording()
 	$Viewport/GUI/Panel/Label.text = "Play voice"
 	
+func _on_buttonload_choke():
+	get_node("/root/Spatial/BodyObjects/PlayerMotion").bouldercount = 50
+	$Viewport/GUI/Panel/Label.text = "Boulder choke!"
+	toggleguipanelvisibility(null)
+		
 func _ready():
 	$Viewport/GUI/Panel/ButtonLoad.connect("pressed", self, "_on_buttonload_pressed")
 	$Viewport/GUI/Panel/ButtonSave.connect("pressed", self, "_on_buttonsave_pressed")
@@ -104,7 +109,8 @@ func _ready():
 	$Viewport/GUI/Panel/ButtonRecord.connect("button_down", self, "_on_buttonrecord_down")
 	$Viewport/GUI/Panel/ButtonRecord.connect("button_up", self, "_on_buttonrecord_up")
 	$Viewport/GUI/Panel/ButtonPlay.connect("pressed", self, "_on_buttonplay_pressed")
-
+	$Viewport/GUI/Panel/ButtonChoke.connect("pressed", self, "_on_buttonload_choke")
+	
 	$Viewport/GUI/Panel/CentrelineVisibility.connect("item_selected", self, "_on_centrelinevisibility_selected")
 	$Viewport/GUI/Panel/XCdrawingVisibility.connect("item_selected", self, "_on_xcdrawingvisibility_selected")
 	$Viewport/GUI/Panel/Networkstate.connect("item_selected", self, "_on_networkstate_selected")

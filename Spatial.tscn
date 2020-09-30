@@ -1151,10 +1151,10 @@ __meta__ = {
 }
 
 [node name="ButtonPlanView" type="CheckBox" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 14.3899
-margin_top = 143.177
-margin_right = 154.39
-margin_bottom = 171.177
+margin_left = 17.0
+margin_top = 109.0
+margin_right = 124.0
+margin_bottom = 137.0
 rect_pivot_offset = Vector2( 138.61, -8.13628 )
 hint_tooltip = "test tooltip"
 text = "Plan View"
@@ -1181,6 +1181,17 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="ButtonChoke" type="Button" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
+margin_left = 88.0
+margin_top = 214.0
+margin_right = 147.0
+margin_bottom = 242.0
+rect_pivot_offset = Vector2( 111.073, 28.0005 )
+text = "Choke"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [node name="ButtonPlay" type="Button" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
 margin_left = 224.0
 margin_top = 215.0
@@ -1193,19 +1204,19 @@ __meta__ = {
 }
 
 [node name="ButtonHeadtorch" type="CheckBox" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 14.3899
-margin_top = 164.177
-margin_right = 160.39
-margin_bottom = 204.177
+margin_left = 17.0
+margin_top = 127.0
+margin_right = 130.0
+margin_bottom = 167.0
 rect_pivot_offset = Vector2( 138.61, -8.13628 )
 hint_tooltip = "test tooltip"
 text = "Headtorch"
 
 [node name="ButtonDoppelganger" type="CheckBox" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 14.3899
-margin_top = 199.177
-margin_right = 154.39
-margin_bottom = 227.177
+margin_left = 15.0
+margin_top = 162.0
+margin_right = 141.0
+margin_bottom = 190.0
 rect_pivot_offset = Vector2( 138.61, -8.13628 )
 hint_tooltip = "test tooltip"
 text = "Doppelganger"
@@ -1214,10 +1225,10 @@ __meta__ = {
 }
 
 [node name="ButtonLockControls" type="CheckBox" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 15.3899
-margin_top = 226.177
-margin_right = 155.39
-margin_bottom = 254.177
+margin_left = 16.0
+margin_top = 187.0
+margin_right = 140.0
+margin_bottom = 215.0
 rect_pivot_offset = Vector2( 138.61, -8.13628 )
 hint_tooltip = "test tooltip"
 text = "Lock Controls"

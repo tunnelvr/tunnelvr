@@ -36,6 +36,7 @@ func endclawengagement():
 	GroundSpikePoint.visible = false
 	clawengageposition = null
 
+
 var prevgait = ""
 func _process(delta):
 	return
@@ -121,16 +122,3 @@ var laserangleadjustmode = false
 var laserangleoriginal = 0
 var laserhandanglevector = Vector2(0,0)
 var prevlaserangleoffset = 0
-
-
-func DMakeNewBoulder(event):
-	#if event is InputEventKey and event.pressed and event.is_action_pressed("newboulder"):
-	print("making new boulder")
-	var HandRight = playerMe.get_node("HandRight")
-	var markernode = preload("res://nodescenes/MarkerNode.tscn").instance()
-	var boulderclutter = get_node("/root/Spatial/BoulderClutter")
-	var nc = boulderclutter.get_child_count()
-	markernode.get_node("CollisionShape").scale = Vector3(0.4, 0.6, 0.4) if ((nc%2) == 0) else Vector3(0.2, 0.4, 0.2)
-	markernode.global_transform.origin = HandRight.global_transform.origin - 0.9*HandRight.global_transform.basis.z
-	markernode.linear_velocity = -5.1*HandRight.global_transform.basis.z
-	boulderclutter.add_child(markernode)
