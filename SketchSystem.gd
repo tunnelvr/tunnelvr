@@ -215,7 +215,10 @@ func loadsketchsystem(fname):
 func uniqueXCname():
 	var largestxcdrawingnumber = 0
 	for xcdrawing in get_node("XCdrawings").get_children():
-		largestxcdrawingnumber = max(largestxcdrawingnumber, int(xcdrawing.get_name()))
+		var xcname = xcdrawing.get_name()
+		var ns = xcname.find_last("s")
+		if ns != -1:
+			largestxcdrawingnumber = max(largestxcdrawingnumber, int(xcname.right(ns + 1)))
 	var sname = "s%d" % (largestxcdrawingnumber+1)
 	return sname
 	

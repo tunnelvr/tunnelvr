@@ -517,7 +517,13 @@ func buttonreleased_vrgrip():
 
 			elif pointertarget.get_name() == "HoleXC":
 				var xcdrawinghole = gripmenu.gripmenupointertargetwall.ConstructHoleXC(gripmenu.gripmenuactivetargettubesectorindex)
+				xcdrawinghole.setxcdrawingvisiblehide(false)
 				setactivetargetwall(xcdrawinghole)
+				var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(gripmenu.gripmenupointertargetwall.xcname0)
+				var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(gripmenu.gripmenupointertargetwall.xcname1)
+				xcdrawing0.setxcdrawingvisiblehide(true)
+				xcdrawing1.setxcdrawingvisiblehide(true)
+
 													
 			elif pointertarget.get_name() == "DoSlice" and is_instance_valid(wasactivetargettube) and is_instance_valid(activetargetwall) and len(activetargetwall.nodepoints) == 0:
 				print(wasactivetargettube, " ", len(activetargetwall.nodepoints))

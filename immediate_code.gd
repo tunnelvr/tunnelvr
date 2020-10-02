@@ -21,9 +21,7 @@ func _on_request_completed(result, response_code, headers, body):
 	
 
 func _run():
-	print(" %.0f " % 10.9)
-	var a = {"a":9, "b":10}
-	a.erase("ac")
-	for i in a:
-		print(i)
-	print(a)
+	var a = "a1s3"
+	print(a.find_last("s"))
+	print(a.right(2))
+	

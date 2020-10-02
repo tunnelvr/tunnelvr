@@ -4,7 +4,6 @@ const XCnode = preload("res://nodescenes/XCnode.tscn")
 const XCnode_centreline = preload("res://nodescenes/XCnode_centreline.tscn")
 
 # primary data
-var xcname = ""         # must match what is in the godot and used for the names in xctube
 var xcresource = ""     # source file
 var nodepoints = { }    # { nodename:Vector3 }
 var onepathpairs = [ ]  # [ Anodename0, Anodename1, Bnodename0, Bnodename1, ... ]
@@ -19,15 +18,16 @@ var linewidth = 0.05
 
 func setxcdrawingvisible():
 	assert ($XCdrawingplane.visible != $XCdrawingplane/CollisionShape.disabled)	
-	$XCdrawingplane.visible = true
-	$XCdrawingplane/CollisionShape.disabled = false
+	if not get_name().begins_with("Hole"):
+		$XCdrawingplane.visible = true
+		$XCdrawingplane/CollisionShape.disabled = false
 	$XCnodes.visible = true
 	$PathLines.visible = true
 	if drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		var sca = 1.0
 		for nodepoint in nodepoints.values():
-			sca = max(sca, abs(nodepoint.x) + 1)
-			sca = max(sca, abs(nodepoint.y) + 1)
+			sca = max(sca, abs(nodepoint.x) + 2)
+			sca = max(sca, abs(nodepoint.y) + 2)
 		if sca > $XCdrawingplane.scale.x:
 			$XCdrawingplane.set_scale(Vector3(sca, sca, 1.0))
 	assert ($XCdrawingplane.visible != $XCdrawingplane/CollisionShape.disabled)

@@ -44,6 +44,7 @@ func adjustmaterialtotorchlight(torchon):
 	$xcdrawingmaterials/normal.get_surface_material(0).albedo_color.a = 0.33 if torchon else 0.43
 	$xcdrawingmaterials/active.get_surface_material(0).albedo_color.a = 0.33 if torchon else 0.43
 	$xcdrawingmaterials/highlight.get_surface_material(0).albedo_color.a = 0.33 if torchon else 0.43
+	$tubematerials/hole.get_surface_material(0).albedo_color.a = 0.11 if torchon else 0.18
 
 	
 	
