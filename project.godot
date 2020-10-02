@@ -40,6 +40,7 @@ _global_script_class_icons={
 
 config/name="tunnelvr3"
 run/main_scene="res://Spatial.tscn"
+boot_splash/image="res://screenshot.png"
 config/icon="res://icon.png"
 
 [audio]
@@ -122,6 +123,7 @@ newboulder={
 
 [rendering]
 
+quality/driver/driver_name="GLES2"
 vram_compression/import_etc=true
 quality/directional_shadow/size=8192
 quality/directional_shadow/size.mobile=512

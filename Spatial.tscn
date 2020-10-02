@@ -1,4 +1,4 @@
-[gd_scene load_steps=202 format=2]
+[gd_scene load_steps=203 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/default_env.tres" type="Environment" id=2]
@@ -61,6 +61,10 @@ emission = Color( 0.980392, 0.898039, 0.0431373, 1 )
 emission_energy = 1.0
 emission_operator = 0
 emission_on_uv2 = false
+
+[sub_resource type="SpatialMaterial" id=160]
+resource_local_to_scene = true
+albedo_color = Color( 0.105882, 0.188235, 0.509804, 1 )
 
 [sub_resource type="BoxShape" id=5]
 extents = Vector3( 0.3, 0.2, 0.01 )
@@ -991,6 +995,7 @@ size = Vector3( 3.6, 2, 3.8 )
 
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
+enablevr = false
 
 [node name="Players" type="Spatial" parent="."]
 transform = Transform( -1, 0, -3.25841e-07, 0, 1, 0, 3.25841e-07, 0, -1, 0, 0, 0 )
@@ -1038,6 +1043,7 @@ mesh = SubResource( 3 )
 material/0 = SubResource( 4 )
 
 [node name="csgheadmesh" parent="Players/PlayerMe/HeadCam" instance=ExtResource( 12 )]
+material = SubResource( 160 )
 
 [node name="HandLeftController" type="ARVRController" parent="Players/PlayerMe"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.2, 1.5, -0.5 )
@@ -2164,6 +2170,7 @@ shadow_color = Color( 0.388235, 0.0705882, 0.0705882, 1 )
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 1.6299, 1.51691, -31.8123 )
 
 [node name="CSGMesh" type="CSGMesh" parent="Kitchen"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -1.29078, -0.278551, -0.246248 )
 material_override = SubResource( 157 )
 mesh = SubResource( 158 )
 

@@ -21,7 +21,8 @@ func _on_request_completed(result, response_code, headers, body):
 	
 
 func _run():
-	var a = "a1s3"
-	print(a.find_last("s"))
-	print(a.right(2))
+	var networkID = 61636234
+	var a = Color.from_hsv((networkID%10000)/10000.0, 0.2 + (networkID%2222)/6666.0, 0.76)
+	print(a)
+	print(a.r, " ", a.g, " ", a.b)
 	

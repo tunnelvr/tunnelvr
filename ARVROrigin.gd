@@ -20,6 +20,7 @@ func setdoppelganger(doppelgangeron):
 		if doppelganger == null:
 			doppelganger = load("res://nodescenes/PlayerPuppet.tscn").instance()
 			doppelganger.set_name("Doppelganger")
+			doppelganger.get_node("HeadCam/csgheadmesh/skullcomponent").material.albedo_color = get_node("HeadCam/csgheadmesh/skullcomponent").material.albedo_color
 			get_parent().add_child(doppelganger)
 			doppelganger.initplayerpuppet(ovr_hand_tracking != null)
 		doppelganger.visible = true

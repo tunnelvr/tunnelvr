@@ -73,7 +73,7 @@ func _ready():
 	meshnode = handskeleton.get_node("l_handMeshNode" if islefthand else "r_handMeshNode")
 	#handmaterial = load("res://shinyhandmesh.material").duplicate()
 	var handmaterials = get_node("/root/Spatial/MaterialSystem/handmaterials")
-	handmaterial = handmaterials.get_node("handleft" if islefthand else "handright").get_surface_material(0)
+	handmaterial = handmaterials.get_node("handleft" if islefthand else "handright").get_surface_material(0).duplicate()
 	meshnode.set_surface_material(0, handmaterial)
 	handmaterial_orgtransparency = handmaterial.flags_transparent
 	handmaterial_orgtranslucency = handmaterial.albedo_color.a

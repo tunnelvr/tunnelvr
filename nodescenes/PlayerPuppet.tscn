@@ -1,9 +1,13 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=8 format=2]
 
 [ext_resource path="res://nodescenes/PlayerPuppet.gd" type="Script" id=1]
 [ext_resource path="res://HandScript.gd" type="Script" id=2]
 [ext_resource path="res://guimeshes/headmesh.tscn" type="PackedScene" id=3]
 [ext_resource path="res://guimeshes/headtorchmesh.tscn" type="PackedScene" id=6]
+
+[sub_resource type="SpatialMaterial" id=3]
+resource_local_to_scene = true
+albedo_color = Color( 0.105882, 0.188235, 0.509804, 1 )
 
 [sub_resource type="CubeMesh" id=1]
 size = Vector3( 0.002, 0.002, 1 )
@@ -19,6 +23,7 @@ script = ExtResource( 1 )
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.691634, 0 )
 
 [node name="csgheadmesh" parent="HeadCam" instance=ExtResource( 3 )]
+material = SubResource( 3 )
 
 [node name="headtorch" parent="HeadCam" instance=ExtResource( 6 )]
 transform = Transform( 1, 0, 0, 0, 0.939693, 0.34202, 0, -0.34202, 0.939693, 0, 0.24, 0 )

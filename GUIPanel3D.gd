@@ -259,12 +259,10 @@ func _on_networkstate_selected(index):
 			print("networkedmultiplayerenet createserver: ", e)
 			get_tree().set_network_peer(networkedmultiplayerenet)
 
-		selfSpatial.networkID = get_tree().get_network_unique_id()
-		print("server networkID: ", selfSpatial.networkID)
-		selfSpatial.playerMe.set_name("NetworkedPlayer"+String(selfSpatial.networkID))
-		selfSpatial.playerMe.set_network_master(selfSpatial.networkID)
-		selfSpatial.playerMe.networkID = selfSpatial.networkID
-		$Viewport/GUI/Panel/Label.text = "networkID: "+str(selfSpatial.networkID)
+		var lnetworkID = get_tree().get_network_unique_id()
+		selfSpatial.setnetworkidnamecolour(selfSpatial.playerMe, lnetworkID)
+		print("server networkID: ", selfSpatial.playerMe.networkID)
+		$Viewport/GUI/Panel/Label.text = "networkID: "+str(selfSpatial.playerMe.networkID)
 				
 	if nssel.begins_with("Client->"):
 		selfSpatial.hostipnumber = nssel.replace("Client->", "")

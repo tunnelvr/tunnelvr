@@ -114,7 +114,6 @@ var perform_runtime_config = true
 var ovr_init_config = null
 var ovr_performance = null
 var ovr_hand_tracking = null
-var networkID = 0
 
 onready var playerMe = $Players/PlayerMe
 
@@ -128,8 +127,16 @@ func checkloadinterface(larvrinterfacename):
 				print("Found VR interface ", x)
 				return true
 	return false
-	
 
+func setnetworkidnamecolour(player, networkID):
+	player.networkID = networkID
+	player.set_network_master(networkID)
+	player.set_name("NetworkedPlayer"+String(networkID))
+	var x = player.get_node("HeadCam/csgheadmesh/skullcomponent")
+	var headcolour = Color.from_hsv((networkID%10000)/10000.0, 0.5 + (networkID%2222)/6666.0, 0.75)
+	print("Head color ", headcolour)
+	player.get_node("HeadCam/csgheadmesh/skullcomponent").material.albedo_color = headcolour
+	
 func _ready():
 	print("  Available Interfaces are %s: " % str(ARVRServer.get_interfaces()));
 	print("Initializing VR" if enablevr else "VR disabled");
@@ -202,6 +209,9 @@ func _ready():
 		print("*** VR not working")
 		
 	print("*-*-*-*  requesting permissions: ", OS.request_permissions())
+	# this relates to Android permissions: 	change_wifi_multicast_state, internet, 
+	#										read_external_storage, write_external_storage, 
+	#										capture_audio_output
 	var perm = OS.get_granted_permissions()
 	print("Granted permissions: ", perm)
 
@@ -231,16 +241,13 @@ func nextplayernetworkidinringskippingdoppelganger(deletedid):
 # Also there's another setting change to allow pings
 func _player_connected(id):
 	print("_player_connected ", id)
-	playerMe.set_name("NetworkedPlayer"+String(networkID))
+	playerMe.set_name("NetworkedPlayer"+String(playerMe.networkID))
 	var playerothername = "NetworkedPlayer"+String(id)
 	if not $Players.has_node(playerothername):
 		var playerOther = load("res://nodescenes/PlayerPuppet.tscn").instance()
-		playerOther.set_network_master(id)
-		playerOther.set_name(playerothername)
-		playerOther.networkID = id
+		setnetworkidnamecolour(playerOther, id)
 		$Players.add_child(playerOther)
-	if networkID == 1:
-		$SketchSystem.rpc_id(id, "sketchsystemfromdict", $SketchSystem.sketchsystemtodict())
+	$SketchSystem.rpc_id(id, "sketchsystemfromdict", $SketchSystem.sketchsystemtodict())
 	playerMe.bouncetestnetworkID = nextplayernetworkidinringskippingdoppelganger(0)
 	Tglobal.morethanoneplayer = $Players.get_child_count() >= 2
 	playerMe.rpc("initplayerpuppet", (ovr_hand_tracking != null))
@@ -260,13 +267,10 @@ func _player_disconnected(id):
 func _connected_to_server():
 	print("_connected_to_server")
 	var newnetworkID = get_tree().get_network_unique_id()
-	if networkID != newnetworkID:
+	if playerMe.networkID != newnetworkID:
 		print("setting the newnetworkID: ", newnetworkID)
-		networkID = newnetworkID
-		playerMe.set_network_master(networkID)
-		playerMe.networkID = networkID
-		playerMe.set_name("NetworkedPlayer"+String(networkID))
-	$GuiSystem/GUIPanel3D/Viewport/GUI/Panel/Label.text = "connected as "+String(networkID)
+		setnetworkidnamecolour(playerMe, newnetworkID)
+	$GuiSystem/GUIPanel3D/Viewport/GUI/Panel/Label.text = "connected as "+String(playerMe.networkID)
 
 	print("SETTING connectiontoserveractive true now")
 	Tglobal.connectiontoserveractive = true
