@@ -47,6 +47,23 @@ func expandxcdrawingscale(nodepointglobal):
 		$XCdrawingplane.scale.y = ascay
 	updateformetresquaresscaletexture()
 
+func expandxcdrawingfitxcdrawing(xcdrawing):
+	var scax = 0.0
+	var scay = 0.0
+	for xcn in xcdrawing.get_node("XCnodes").get_children():
+		var nodepointlocal = global_transform.xform_inv(xcn.global_transform.origin)
+		scax = max(scax, abs(nodepointlocal.x))
+		scay = max(scay, abs(nodepointlocal.y))
+	var ascax = scax + 2.0
+	var ascay = scay + 2.0
+	if ascax > $XCdrawingplane.scale.x:
+		$XCdrawingplane.scale.x = ascax
+	if ascay > $XCdrawingplane.scale.y:
+		$XCdrawingplane.scale.y = ascay
+	updateformetresquaresscaletexture()
+
+
+
 func setxcdrawingvisiblehide(hidenodes):
 	assert ($XCdrawingplane.visible != $XCdrawingplane/CollisionShape.disabled)	
 	$XCdrawingplane.visible = false

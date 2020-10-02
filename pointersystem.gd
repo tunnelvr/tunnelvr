@@ -470,6 +470,11 @@ func buttonreleased_vrgrip():
 				xcdrawing.setxcpositionorigin(pt0)
 				clearactivetargetnode()
 				setactivetargetwall(xcdrawing)
+				if gripmenu.gripmenupointertargettype == "XCtubesector":
+					var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(gripmenu.gripmenupointertargetwall.xcname0)
+					var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(gripmenu.gripmenupointertargetwall.xcname1)
+					xcdrawing.expandxcdrawingfitxcdrawing(xcdrawing0)
+					xcdrawing.expandxcdrawingfitxcdrawing(xcdrawing1)
 				sketchsystem.sharexcdrawingovernetwork(xcdrawing)
 
 		elif is_instance_valid(gripmenu.gripmenupointertargetwall):
