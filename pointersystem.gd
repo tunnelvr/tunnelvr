@@ -48,9 +48,10 @@ func clearpointertargetmaterial():
 		pointertarget.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("selected" if pointertarget == activetargetnode else ("nodepthtest" if pointertargetwall == activetargetwall else "normal")))
 	if (pointertargettype == "XCdrawing" or pointertargettype == "XCnode") and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		if pointertargetwall == activetargetwall:
-			pointertargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").set_surface_material(0, materialsystem.xcdrawingmaterial("active", pointertargetwall.get_node("XCdrawingplane").get_scale()))
+			pointertargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").set_surface_material(0, materialsystem.xcdrawingmaterial("active"))
+			pointertargetwall.updateformetresquaresscaletexture()
 		else:
-			pointertargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").set_surface_material(0, materialsystem.xcdrawingmaterial("normal", null))
+			pointertargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").set_surface_material(0, materialsystem.xcdrawingmaterial("normal"))
 	if pointertargettype == "GripMenuItem":
 		gripmenu.cleargripmenupointer(pointertarget)
 
@@ -59,7 +60,8 @@ func setpointertargetmaterial():
 	if pointertargettype == "XCnode":
 		pointertarget.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("selected_highlight" if pointertarget == activetargetnode else "highlight"))
 	if (pointertargettype == "XCdrawing" or pointertargettype == "XCnode") and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
-		pointertargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").set_surface_material(0, materialsystem.xcdrawingmaterial("highlight", pointertargetwall.get_node("XCdrawingplane").get_scale()))
+		pointertargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").set_surface_material(0, materialsystem.xcdrawingmaterial("highlight"))
+		pointertargetwall.updateformetresquaresscaletexture()
 	if pointertargettype == "GripMenuItem":
 		gripmenu.setgripmenupointer(pointertarget)
 
@@ -82,7 +84,7 @@ func setactivetargetnode(newactivetargetnode):
 
 func setactivetargetwall(newactivetargetwall):
 	if activetargetwall != null and activetargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
-		activetargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").set_surface_material(0, materialsystem.xcdrawingmaterial("normal", null))
+		activetargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").set_surface_material(0, materialsystem.xcdrawingmaterial("normal"))
 		activetargetwall.get_node("PathLines").set_surface_material(0, materialsystem.pathlinematerial("normal"))
 		for xcnode in activetargetwall.get_node("XCnodes").get_children():
 			xcnode.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("selected" if xcnode == activetargetnode else "normal"))
@@ -99,7 +101,7 @@ func setactivetargetwall(newactivetargetwall):
 	LaserOrient.get_node("RayCast").collision_mask = CollisionLayer.CL_Pointer | CollisionLayer.CL_PointerFloor | CollisionLayer.CL_CaveWall | CollisionLayer.CL_CaveWallTrans
 	if activetargetwall != null and activetargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		activetargetwall.setxcdrawingvisible()
-		activetargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").set_surface_material(0, materialsystem.xcdrawingmaterial("active", null))
+		activetargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").set_surface_material(0, materialsystem.xcdrawingmaterial("active"))
 		activetargetwall.get_node("PathLines").set_surface_material(0, materialsystem.pathlinematerial("nodepthtest"))
 		for xcnode in activetargetwall.get_node("XCnodes").get_children():
 			if xcnode != activetargetnode:
@@ -277,6 +279,7 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 	# grip click moves node on xcwall
 	elif gripbuttonheld and activetargetnode != null and pointertargettype == "XCdrawing" and pointertargetwall == activetargetnodewall:
 		activetargetnodewall.movexcnode(activetargetnode, pointertargetpoint, sketchsystem)
+		activetargetnodewall.expandxcdrawingscale(pointertargetpoint)
 		clearactivetargetnode()
 		
 	# reselection when selected on grip deletes the node		
@@ -311,24 +314,28 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 		if pointertargetwall != activetargetwall:
 			setactivetargetwall(pointertargetwall)
 			
-		if gripbuttonheld and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING and len(pointertargetwall.nodepoints) == 0:
-			clearactivetargetnode()
-			var alaserspot = activelaserroot.get_node("LaserSpot")
-			alaserspot.global_transform.origin = pointertargetpoint
-			activetargetwallgrabbed = activetargetwall
-			activetargetwallgrabbedlaserroottrans = activelaserroot.global_transform
-			activetargetwallgrabbedtransform = alaserspot.global_transform.affine_inverse() * activetargetwallgrabbed.global_transform
-			activetargetwallgrabbedorgtransform = activetargetwallgrabbed.global_transform
-			activetargetwallgrabbeddispvector = alaserspot.global_transform.origin - activelaserroot.global_transform.origin
-			activetargetwallgrabbedpoint = alaserspot.global_transform.origin
-			activetargetwallgrabbedlocalpoint = activetargetwallgrabbed.global_transform.affine_inverse() * alaserspot.global_transform.origin
-			activetargetwallgrabbedpointoffset = alaserspot.global_transform.origin - activetargetwallgrabbed.global_transform.origin
+		if gripbuttonheld and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
+			pointertargetwall.expandxcdrawingscale(pointertargetpoint)
+			if len(pointertargetwall.nodepoints) == 0:
+				clearactivetargetnode()
+				var alaserspot = activelaserroot.get_node("LaserSpot")
+				alaserspot.global_transform.origin = pointertargetpoint
+				activetargetwallgrabbed = activetargetwall
+				activetargetwallgrabbedlaserroottrans = activelaserroot.global_transform
+				activetargetwallgrabbedtransform = alaserspot.global_transform.affine_inverse() * activetargetwallgrabbed.global_transform
+				activetargetwallgrabbedorgtransform = activetargetwallgrabbed.global_transform
+				activetargetwallgrabbeddispvector = alaserspot.global_transform.origin - activelaserroot.global_transform.origin
+				activetargetwallgrabbedpoint = alaserspot.global_transform.origin
+				activetargetwallgrabbedlocalpoint = activetargetwallgrabbed.global_transform.affine_inverse() * alaserspot.global_transform.origin
+				activetargetwallgrabbedpointoffset = alaserspot.global_transform.origin - activetargetwallgrabbed.global_transform.origin
 
 		elif (activetargetnode != null and activetargetnodewall == pointertargetwall) or pointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE or len(pointertargetwall.nodepoints) == 0:
 			if len(pointertargetwall.nodepoints) == 0:
 				LaserOrient.get_node("RayCast").collision_mask = CollisionLayer.CL_Pointer | CollisionLayer.CL_PointerFloor 
 			var newpointertarget = pointertargetwall.newxcnode()
 			pointertargetwall.setxcnpoint(newpointertarget, pointertargetpoint, true)
+			if pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
+				pointertargetwall.expandxcdrawingscale(pointertargetpoint)
 			Tglobal.soundsystem.quicksound("ClickSound", pointertargetpoint)
 			if activetargetnode != null:
 				if activetargetnodewall == pointertargetwall:
@@ -337,6 +344,9 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 			setactivetargetnode(newpointertarget)
 			initialsequencenodename = initialsequencenodenameP
 	
+		elif pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
+			pointertargetwall.expandxcdrawingscale(pointertargetpoint)
+
 									
 	# reselection clears selection
 	elif activetargetnode != null and pointertarget == activetargetnode:
@@ -374,7 +384,7 @@ func buttonpressed_vrpad(gripbuttonheld, joypos):
 			var dy = (1 if joypos.x > 0 else -1)*(1.0 if abs(joypos.x) < 0.8 else 0.1)
 			pointertargetwall.get_node("XCdrawingplane").scale.x = max(1, pointertargetwall.get_node("XCdrawingplane").scale.x + dy)
 			pointertargetwall.get_node("XCdrawingplane").scale.y = max(1, pointertargetwall.get_node("XCdrawingplane").scale.y + dy)
-			pointertargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").set_surface_material(0, materialsystem.xcdrawingmaterial("highlight", pointertargetwall.get_node("XCdrawingplane").get_scale()))
+			pointertargetwall.updateformetresquaresscaletexture()
 				
 	elif pointertargettype == "Papersheet":
 		if abs(joypos.y) > 0.5:

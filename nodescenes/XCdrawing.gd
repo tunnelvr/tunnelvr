@@ -18,19 +18,34 @@ var linewidth = 0.05
 
 func setxcdrawingvisible():
 	assert ($XCdrawingplane.visible != $XCdrawingplane/CollisionShape.disabled)	
+	if not $XCdrawingplane.visible and drawingtype == DRAWING_TYPE.DT_XCDRAWING:
+		var scax = 0.0
+		var scay = 0.0
+		for nodepoint in nodepoints.values():
+			scax = max(scax, abs(nodepoint.x))
+			scay = max(scay, abs(nodepoint.y))
+		$XCdrawingplane.set_scale(Vector3(scax + 2, scay + 2, 1.0))
 	if not get_name().begins_with("Hole"):
 		$XCdrawingplane.visible = true
 		$XCdrawingplane/CollisionShape.disabled = false
 	$XCnodes.visible = true
 	$PathLines.visible = true
-	if drawingtype == DRAWING_TYPE.DT_XCDRAWING:
-		var sca = 1.0
-		for nodepoint in nodepoints.values():
-			sca = max(sca, abs(nodepoint.x) + 2)
-			sca = max(sca, abs(nodepoint.y) + 2)
-		if sca > $XCdrawingplane.scale.x:
-			$XCdrawingplane.set_scale(Vector3(sca, sca, 1.0))
 	assert ($XCdrawingplane.visible != $XCdrawingplane/CollisionShape.disabled)
+
+func updateformetresquaresscaletexture():
+	var mat = $XCdrawingplane/CollisionShape/MeshInstance.get_surface_material(0)
+	mat.uv1_scale = $XCdrawingplane.get_scale()
+	mat.uv1_offset = -$XCdrawingplane.get_scale()/2
+
+func expandxcdrawingscale(nodepointglobal):
+	var nodepointlocal = global_transform.xform_inv(nodepointglobal)
+	var ascax = abs(nodepointlocal.x) + 2
+	var ascay = abs(nodepointlocal.y) + 2
+	if ascax > $XCdrawingplane.scale.x:
+		$XCdrawingplane.scale.x = ascax
+	if ascay > $XCdrawingplane.scale.y:
+		$XCdrawingplane.scale.y = ascay
+	updateformetresquaresscaletexture()
 
 func setxcdrawingvisiblehide(hidenodes):
 	assert ($XCdrawingplane.visible != $XCdrawingplane/CollisionShape.disabled)	
