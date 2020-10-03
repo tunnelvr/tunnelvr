@@ -25,8 +25,10 @@ func setdoppelganger(doppelgangeron):
 			doppelganger.initplayerpuppet(ovr_hand_tracking != null)
 		doppelganger.visible = true
 		doppelganger.global_transform.origin = $HeadCam.global_transform.origin - 3*Vector3($HeadCam.global_transform.basis.z.x, 0, $HeadCam.global_transform.basis.z.z).normalized()
+		Tglobal.soundsystem.quicksound("PlayerArrive", doppelganger.global_transform.origin)
 		
 	elif not doppelgangeron and doppelganger != null:
+		Tglobal.soundsystem.quicksound("PlayerDepart", doppelganger.global_transform.origin)
 		doppelganger.queue_free()
 		doppelganger = null	
 

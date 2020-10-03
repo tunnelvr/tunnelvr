@@ -1,10 +1,11 @@
-[gd_scene load_steps=203 format=2]
+[gd_scene load_steps=207 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/default_env.tres" type="Environment" id=2]
 [ext_resource path="res://lightweighttextures/watersurface.material" type="Material" id=3]
 [ext_resource path="res://utilities/Locomotion_WalkInPlace.gd" type="Script" id=4]
 [ext_resource path="res://pointersystem.gd" type="Script" id=5]
+[ext_resource path="res://sounds/weaponfire13.wav" type="AudioStream" id=6]
 [ext_resource path="res://lightweighttextures/Ground030_2K_Color_small.jpg" type="Texture" id=7]
 [ext_resource path="res://guimaterials/materialnames.png" type="Texture" id=8]
 [ext_resource path="res://sounds/switch7.wav" type="AudioStream" id=9]
@@ -42,6 +43,9 @@
 [ext_resource path="res://PlayerDirections.gd" type="Script" id=41]
 [ext_resource path="res://sounds/Moving Metal Hits.wav" type="AudioStream" id=42]
 [ext_resource path="res://HandScript.gd" type="Script" id=43]
+[ext_resource path="res://sounds/weaponfire17.wav" type="AudioStream" id=44]
+[ext_resource path="res://sounds/Flashpoint001b.wav" type="AudioStream" id=45]
+[ext_resource path="res://sounds/menu_click.wav" type="AudioStream" id=46]
 
 [sub_resource type="CylinderShape" id=1]
 radius = 0.1
@@ -2078,6 +2082,22 @@ bus = "Record"
 
 [node name="ClickSound" type="AudioStreamPlayer3D" parent="SoundSystem/quicksounds"]
 stream = ExtResource( 9 )
+unit_db = 9.032
+
+[node name="MenuClick" type="AudioStreamPlayer3D" parent="SoundSystem/quicksounds"]
+stream = ExtResource( 46 )
+unit_db = 9.032
+
+[node name="ShowGui" type="AudioStreamPlayer3D" parent="SoundSystem/quicksounds"]
+stream = ExtResource( 45 )
+unit_db = 9.032
+
+[node name="PlayerArrive" type="AudioStreamPlayer3D" parent="SoundSystem/quicksounds"]
+stream = ExtResource( 6 )
+unit_db = 9.032
+
+[node name="PlayerDepart" type="AudioStreamPlayer3D" parent="SoundSystem/quicksounds"]
+stream = ExtResource( 44 )
 unit_db = 9.032
 
 [node name="GentleCollide" type="AudioStreamPlayer3D" parent="SoundSystem/quicksounds"]

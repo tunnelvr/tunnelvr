@@ -1,6 +1,7 @@
 extends StaticBody
 
 
+var collision_point := Vector3(0, 0, 0)
 var viewport_point := Vector2(0, 0)
 var viewport_mousedown := false
 onready var sketchsystem = get_node("/root/Spatial/SketchSystem")
@@ -13,20 +14,24 @@ func _on_buttonload_pressed():
 		return
 	sketchsystem.loadsketchsystem(savegamefilename)
 	$Viewport/GUI/Panel/Label.text = "Sketch Loaded"
+	Tglobal.soundsystem.quicksound("MenuClick", collision_point)
 	
 func _on_buttonsave_pressed():
 	var savegamefileid = $Viewport/GUI/Panel/Savegamefilename.get_selected_id()
 	var savegamefilename = "user://"+$Viewport/GUI/Panel/Savegamefilename.get_item_text(savegamefileid)
 	sketchsystem.savesketchsystem(savegamefilename)
 	$Viewport/GUI/Panel/Label.text = "Sketch Saved"
+	Tglobal.soundsystem.quicksound("MenuClick", collision_point)
 
 func _on_buttonfetchimages_pressed():
 	get_node("/root/Spatial/ImageSystem").fetchimportpapers()
 	$Viewport/GUI/Panel/Label.text = "Papers fetching"
+	Tglobal.soundsystem.quicksound("MenuClick", collision_point)
 
 func _on_buttonplanview_toggled(button_pressed):
 	get_node("/root/Spatial/PlanViewSystem").setplanviewvisible(button_pressed, global_transform, $Quad.mesh.size)
 	$Viewport/GUI/Panel/Label.text = "Planview on" if button_pressed else "Planview off"
+	Tglobal.soundsystem.quicksound("MenuClick", collision_point)
 	
 func _on_buttonheadtorch_toggled(button_pressed):
 	get_node("/root/Spatial").playerMe.setheadtorchlight(button_pressed)
@@ -45,6 +50,7 @@ func _on_buttonlockcontrols_toggled(button_pressed):
 	$Viewport/GUI/Panel/Label.text = "Controls locked" if button_pressed else "Controls unlocked"
 	if not Tglobal.controlslocked:
 		toggleguipanelvisibility(null)
+	Tglobal.soundsystem.quicksound("MenuClick", collision_point)
 
 func _on_centrelinevisibility_selected(index):
 	var cvsel = $Viewport/GUI/Panel/CentrelineVisibility.get_item_text(index)
@@ -79,6 +85,7 @@ func _on_xcdrawingvisibility_selected(index):
 func _on_buttonswapcontrollers_pressed():
 	get_node("/root/Spatial").playerMe.swapcontrollers()
 	$Viewport/GUI/Panel/Label.text = "Controllers swapped"
+	Tglobal.soundsystem.quicksound("MenuClick", collision_point)
 
 func _on_buttonrecord_down():
 	$Viewport/GUI/Panel/Label.text = "Recording ***"
@@ -118,7 +125,6 @@ func _ready():
 	if $Viewport/GUI/Panel/Networkstate.selected != 0:  # could record saved settings on disk
 		call_deferred("_on_networkstate_selected", $Viewport/GUI/Panel/Networkstate.selected)
 
-
 func clickbuttonheadtorch():
 	$Viewport/GUI/Panel/ButtonHeadtorch.pressed = not $Viewport/GUI/Panel/ButtonHeadtorch.pressed
 	_on_buttonheadtorch_toggled($Viewport/GUI/Panel/ButtonHeadtorch.pressed)
@@ -135,11 +141,13 @@ func toggleguipanelvisibility(controller_global_transform):
 		$Viewport/GUI/Panel/Label.text = "Control panel"
 		visible = true
 		$CollisionShape.disabled = false
+		Tglobal.soundsystem.quicksound("ShowGui", global_transform.origin)
 	else:
 		visible = false	
 		$CollisionShape.disabled = true
 	
-func guipanelsendmousemotion(collision_point, controller_global_transform, controller_trigger):
+func guipanelsendmousemotion(lcollision_point, controller_global_transform, controller_trigger):
+	collision_point = lcollision_point
 	var collider_transform = global_transform
 	if collider_transform.xform_inv(controller_global_transform.origin).z < 0:
 		return # Don't allow pressing if we're behind the GUI.
