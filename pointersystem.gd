@@ -260,7 +260,7 @@ func buttonpressed_vrgrip():
 			activetargettube.updatetubelinkpaths(sketchsystem)
 		activetargettube.get_node("PathLines").visible = true
 		activetargettube.get_node("PathLines").set_surface_material(0, materialsystem.pathlinematerial("nodepthtest"))
-	gripmenu.gripmenuon(LaserOrient.global_transform, pointertargetpoint, pointertargetwall, pointertargettype, activetargettube, activetargettubesectorindex, activetargetwall)	
+	gripmenu.gripmenuon(LaserOrient.global_transform, pointertargetpoint, pointertargetwall, pointertargettype, activetargettube, activetargettubesectorindex, activetargetwall, activetargetnode)
 	
 var initialsequencenodename = null
 var initialsequencenodenameP = null
@@ -530,6 +530,10 @@ func buttonreleased_vrgrip():
 
 			elif pointertarget.get_name() == "DelXC":
 				print("Not implemented")
+
+			elif pointertarget.get_name() == "DragXC" and is_instance_valid(activetargetnode):
+				var dragvec = gripmenu.gripmenupointertargetpoint - activetargetnode.global_transform.origin
+				activetargetnodewall.dragxcnodes(dragvec, sketchsystem)
 
 			elif pointertarget.get_name() == "HoleXC":
 				var xcdrawinghole = gripmenu.gripmenupointertargetwall.ConstructHoleXC(gripmenu.gripmenuactivetargettubesectorindex)

@@ -281,6 +281,11 @@ func movexcnode(xcn, pt, sketchsystem):
 			xctubesconnupdated.append(xctube)
 	updatelinksandtubesafterchange(xctubesconnupdated, sketchsystem)
 
+func dragxcnodes(dragvec, sketchsystem):
+	for xcn in get_node("XCnodes").get_children():
+		setxcnpoint(xcn, xcn.global_transform.origin + dragvec, true)
+	updatelinksandtubesafterchange(xctubesconn, sketchsystem)
+
 func updatelinksandtubesafterchange(xctubesconnupdated, sketchsystem):
 	updatexcpaths()
 	var	xcdrawingnamesmoved = [ get_name() ]

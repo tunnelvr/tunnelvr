@@ -1,4 +1,4 @@
-[gd_scene load_steps=207 format=2]
+[gd_scene load_steps=208 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/default_env.tres" type="Environment" id=2]
@@ -201,6 +201,14 @@ albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
 albedo_texture = ExtResource( 25 )
 uv1_scale = Vector3( 1, 0.05, 1 )
 uv1_offset = Vector3( -0.2, 0.7, 0 )
+
+[sub_resource type="SpatialMaterial" id=161]
+flags_unshaded = true
+flags_do_not_receive_shadows = true
+albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
+albedo_texture = ExtResource( 25 )
+uv1_scale = Vector3( 1, 0.05, 1 )
+uv1_offset = Vector3( -0.2, 0.75, 0 )
 
 [sub_resource type="SpatialMaterial" id=26]
 flags_unshaded = true
@@ -1518,6 +1526,19 @@ mesh = SubResource( 10 )
 material/0 = SubResource( 25 )
 
 [node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/NewXC"]
+shape = SubResource( 12 )
+
+[node name="DragXC" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
+transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, -0.25, -0.2, 0 )
+collision_layer = 8
+collision_mask = 0
+
+[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/DragXC"]
+cast_shadow = 0
+mesh = SubResource( 10 )
+material/0 = SubResource( 161 )
+
+[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/DragXC"]
 shape = SubResource( 12 )
 
 [node name="HoleXC" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]

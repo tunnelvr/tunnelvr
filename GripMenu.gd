@@ -5,6 +5,7 @@ var gripmenulaservector = Vector3(0,0,1)
 var gripmenupointertargetwall = null
 var gripmenupointertargettype = ""
 var gripmenuactivetargettubesectorindex = 0
+var gripmenuactivetargetnode = null
 
 var previewtubematerials = { }
 var tubenamematerials = { }
@@ -60,12 +61,13 @@ func setgripmenupointer(pointertarget):
 		pointertarget.get_node("MeshInstance").get_surface_material(0).albedo_color = Color("#FFCCCC")
 
 
-func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointertargettype, activetargettube, activetargettubesectorindex, activetargetwall):
+func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointertargettype, activetargettube, activetargettubesectorindex, activetargetwall, activetargetnode):
 	gripmenupointertargetpoint = pointertargetpoint if pointertargetpoint != null else controllertrans.origin
 	gripmenupointertargetwall = pointertargetwall
 	gripmenulaservector = -controllertrans.basis.z
 	gripmenupointertargettype = pointertargettype
 	gripmenuactivetargettubesectorindex = activetargettubesectorindex
+	gripmenuactivetargetnode = activetargetnode
 
 	var paneltrans = global_transform
 	paneltrans.origin = controllertrans.origin - 0.8*ARVRServer.world_scale*(controllertrans.basis.z)
@@ -77,7 +79,8 @@ func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointert
 		enablegripmenus(["NewXC", "Up5", "Down5", "toPaper"])
 
 	elif gripmenupointertargettype == "XCdrawing" and gripmenupointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
-		enablegripmenus(["DelXC"])
+		var dragable = (gripmenuactivetargetnode != null) and (activetargetwall == pointertargetwall)
+		enablegripmenus(["DragXC" if dragable else "", "DelXC"])
 
 	elif gripmenupointertargettype == "Papersheet":
 		enablegripmenus(["toFloor", "toBig"])
