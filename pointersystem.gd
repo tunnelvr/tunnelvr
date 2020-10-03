@@ -279,7 +279,8 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 	# grip click moves node on xcwall
 	elif gripbuttonheld and activetargetnode != null and pointertargettype == "XCdrawing" and pointertargetwall == activetargetnodewall:
 		activetargetnodewall.movexcnode(activetargetnode, pointertargetpoint, sketchsystem)
-		activetargetnodewall.expandxcdrawingscale(pointertargetpoint)
+		if activetargetnodewall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
+			activetargetnodewall.expandxcdrawingscale(pointertargetpoint)
 		clearactivetargetnode()
 		
 	# reselection when selected on grip deletes the node		
@@ -357,7 +358,7 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 		if not ((activetargetnodewall.drawingtype == DRAWING_TYPE.DT_CENTRELINE and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING) or (activetargetnodewall.drawingtype == DRAWING_TYPE.DT_XCDRAWING and pointertargetwall.drawingtype == DRAWING_TYPE.DT_CENTRELINE)):
 			if activetargetnodewall == pointertargetwall:
 				pointertargetwall.xcotapplyonepath(activetargetnode.get_name(), pointertarget.get_name(), true)
-				if initialsequencenodenameP != null and initialsequencenodenameP != activetargetnode.get_name():
+				if initialsequencenodenameP != null and initialsequencenodenameP != activetargetnode.get_name() and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 					pointertargetwall.xcotapplyonepath(initialsequencenodenameP, pointertarget.get_name(), false)
 				pointertargetwall.updatexcpaths()
 			else:

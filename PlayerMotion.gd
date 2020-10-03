@@ -303,7 +303,7 @@ const headpositionchange = 0.01
 const pointeranglechange = cos(deg2rad(3))
 const pointerpositionchange = 0.015
 const dtmin = 0.05
-const dtmax = 0.8
+const dtmax = 1.2
 var prevpositiondict = null
 func transformwithinrange(trans0, trans1, poschange, cosangchange):
 	var distorigin = trans0.origin.distance_to(trans1.origin)
@@ -330,12 +330,11 @@ func filter_playerhand_bandwidth(prevhand, hand):
 		if hand.has("boneorientations"):
 			hand.erase("boneorientations")
 	else:
-		prevhand = hand.duplicate(true)
-		#prevhand["transform"] = hand["transform"]
-		#if hand.has("boneorientations"):
-		#	prevhand["boneorientations"] = hand["boneorientations"].duplicate(true)
-		#prevhand["timestamp"] = hand["timestamp"]
-		#prevhand["valid"] = hand["valid"]
+		prevhand["transform"] = hand["transform"]
+		if hand.has("boneorientations"):
+			prevhand["boneorientations"] = hand["boneorientations"].duplicate(true)
+		prevhand["timestamp"] = hand["timestamp"]
+		prevhand["valid"] = hand["valid"]
 		return false
 	return true
 		
