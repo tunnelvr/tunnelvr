@@ -183,7 +183,7 @@ func setpointertarget(laserroot):
 		pointertargetwall = targetwall(pointertarget, pointertargettype)
 		setpointertargetmaterial()
 		
-		print("ppp  ", activetargetnode, " ", pointertargettype)
+		#print("ppp  ", activetargetnode, " ", pointertargettype)
 		laserroot.get_node("LaserSpot").visible = ((pointertargettype == "XCdrawing") or (pointertargettype == "XCtubesector"))
 		LaserSelectLine.visible = (activetargetnode != null) and not handright.gripbuttonheld and ((pointertargettype == "XCdrawing") or (activetargetnode != null))
 			
@@ -660,8 +660,11 @@ func _input(event):
 			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 
 	elif event is InputEventKey:
-		if event.pressed and event.scancode == KEY_M:
-			buttonpressed_vrby(false)	
+		if event.scancode == KEY_M:
+			if not Tglobal.VRoperating:
+				handright.vrbybuttonheld = event.pressed
+			if event.pressed:
+				buttonpressed_vrby(false)	
 
 	elif Input.get_mouse_mode() != Input.MOUSE_MODE_CAPTURED:
 		pass
