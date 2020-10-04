@@ -3,15 +3,17 @@ extends Spatial
 # Stuff to do:
 
 
-# * Make XCdrawing on floor node grip menu
+# Approaching the networking (also to do with undo function)
+# sketchsystem.sharexcdrawingovernetwork
+# sketchsystem.sharexctubeovernetwork(xctube)
+
+		
 # * implement deleteXC
 
 # * should give the other player a position near to me:  $SketchSystem.rpc_id(id, "sketchsystemfromdict", $SketchSystem.sketchsystemtodict())
 		
 # * xctubesconn) == 0 should be a count of the tube types excluding connections to floor
 # * DelXC would delete XC and join between the tubes
-# * Ghost a wall (or unghost) so we can see through it
-# * Cut hole in wall is a different thing -- a proper type and recalculation
 
 # * update tubes whenever a connection is made, not just on deselection
 

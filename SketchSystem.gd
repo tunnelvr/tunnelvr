@@ -5,6 +5,11 @@ const XCtube = preload("res://nodescenes/XCtube.tscn")
 
 const linewidth = 0.05
 
+# all commands go through here and are used to update across the network
+# [
+
+
+var undostack = [ ]  # list of lists of commands
 
 
 const defaultfloordrawing = "http://cave-registry.org.uk/svn/NorthernEngland/ThreeCountiesArea/rawscans/Ireby/DukeStResurvey-drawnup-p3.jpg"
@@ -137,13 +142,39 @@ func loadcentrelinefile(centrelinefile):
 	get_node("/root/Spatial/LabelGenerator").makenodelabelstask(centrelinedrawing, true)
 	print("default lllloaded")
 
+# to abolish
 func sharexcdrawingovernetwork(xcdrawing):
 	if Tglobal.connectiontoserveractive:
 		rpc("xcdrawingfromdata", xcdrawing.exportxcrpcdata())
 
+func actsketchchange(xcdatalist):
+	actsketchchangeL(xcdatalist)
+	if Tglobal.connectiontoserveractive:
+		rpc("xcdrawingfromdataL", xcdatalist)
+	
+func actsketchchangeL(xcdatalist):
+	# append to undo stack here
+	var xcdrawingstoupdate = [ ]
+	var xctubestoupdate = [ ]
+	for i in range(len(xcdatalist)):
+		var xcdata = xcdatalist[i]
+		if "tubename" in xcdata:
+			pass
+		else:
+			var xcdrawing = xcdrawingfromdata(xcdata)
+			xcdrawingstoupdate.push_back(xcdrawing)
+			if len(xcdata.get("prevnodepoints", [])) != 0:
+				for xctube in xcdrawing.xctubesconn:
+					xctubestoupdate.push_back(xctube)
 
+	for xcdrawing in xcdrawingstoupdate:
+		xcdrawing.updatexcpaths()
+	for xctube in xctubestoupdate:
+		xctube.updatetubelinkpaths(self)
+	#xctube0.updatetubeshell(sketchsystem.get_node("XCdrawings"), Tglobal.tubeshellsvisible)
+	
 remote func xcdrawingfromdata(xcdata):
-	var xcdrawing = $XCdrawings.get_node(xcdata["name"])
+	var xcdrawing = $XCdrawings.get_node_or_null(xcdata["name"])
 	if xcdrawing == null:
 		if xcdata["drawingtype"] == DRAWING_TYPE.DT_FLOORTEXTURE or xcdata["drawingtype"] == DRAWING_TYPE.DT_PAPERTEXTURE:
 			xcdrawing = newXCuniquedrawingPaper(xcdata["xcresource"], xcdata["drawingtype"])
@@ -156,6 +187,7 @@ remote func xcdrawingfromdata(xcdata):
 	if xcdrawing.drawingtype == DRAWING_TYPE.DT_CENTRELINE:
 		assert (false)   # shouldn't happen, not to be updated!
 		get_node("/root/Spatial/LabelGenerator").makenodelabelstask(xcdrawing, true)
+	return xcdrawing
 	
 remote func sketchsystemfromdict(sketchdatadict):
 	get_node("/root/Spatial").clearallprocessactivityforreload()

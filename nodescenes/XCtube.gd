@@ -53,7 +53,7 @@ func checknodelinkedto(xcname, nodename):
 	return false
 
 func exportxctrpcdata():   # read by xctubefromdata()
-	return { "name":get_name(), 
+	return { "name":get_name(),
 			 "xcname0":xcname0, 
 			 "xcname1":xcname1, 
 			 "xcdrawinglink":xcdrawinglink, 

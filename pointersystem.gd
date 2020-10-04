@@ -278,7 +278,14 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 
 	# grip click moves node on xcwall
 	elif gripbuttonheld and activetargetnode != null and pointertargettype == "XCdrawing" and pointertargetwall == activetargetnodewall:
-		activetargetnodewall.movexcnode(activetargetnode, pointertargetpoint, sketchsystem)
+		var movetopoint = activetargetnodewall.global_transform.xform_inv(pointertargetpoint)
+		movetopoint.z = 0.0
+		sketchsystem.actsketchchange([{
+					"name":activetargetnodewall.get_name(), 
+					"prevnodepoints":{activetargetnode.get_name():activetargetnode.translation}, 
+					"nextnodepoints":{activetargetnode.get_name():movetopoint} 
+				}])
+		#activetargetnodewall.movexcnode(activetargetnode, pointertargetpoint, sketchsystem)
 		if activetargetnodewall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 			activetargetnodewall.expandxcdrawingscale(pointertargetpoint)
 		clearactivetargetnode()
@@ -333,16 +340,25 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 		elif (activetargetnode != null and activetargetnodewall == pointertargetwall) or pointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE or len(pointertargetwall.nodepoints) == 0:
 			if len(pointertargetwall.nodepoints) == 0:
 				LaserOrient.get_node("RayCast").collision_mask = CollisionLayer.CL_Pointer | CollisionLayer.CL_PointerFloor 
-			var newpointertarget = pointertargetwall.newxcnode()
-			pointertargetwall.setxcnpoint(newpointertarget, pointertargetpoint, true)
+				
+			#var newpointertarget = pointertargetwall.newxcnode()
+			#pointertargetwall.setxcnpoint(newpointertarget, pointertargetpoint, true)
+			var newnodename = pointertargetwall.newuniquexcnodename()
+			var newnodepoint = pointertargetwall.global_transform.xform_inv(pointertargetpoint)
+			newnodepoint.z = 0.0
+			var xcdata = { "name":pointertargetwall.get_name(), 
+						   "prevnodepoints":{ }, 
+						   "nextnodepoints":{ newnodename:newnodepoint } 
+						 }
+			if activetargetnode != null and activetargetnodewall == pointertargetwall:
+				xcdata["prevonepathpairs"] = []
+				xcdata["newonepathpairs"] = [activetargetnode.get_name(), newnodename]
+			sketchsystem.actsketchchange([xcdata])
+			#pointertargetwall.updatexcpaths()
+			setactivetargetnode(pointertargetwall.get_node("XCnodes").get_node(newnodename))
 			if pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 				pointertargetwall.expandxcdrawingscale(pointertargetpoint)
 			Tglobal.soundsystem.quicksound("ClickSound", pointertargetpoint)
-			if activetargetnode != null:
-				if activetargetnodewall == pointertargetwall:
-					pointertargetwall.xcotapplyonepath(activetargetnode.get_name(), newpointertarget.get_name(), true)
-					pointertargetwall.updatexcpaths()
-			setactivetargetnode(newpointertarget)
 			initialsequencenodename = initialsequencenodenameP
 	
 		elif pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
@@ -357,10 +373,19 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 	elif activetargetnode != null and pointertargettype == "XCnode":
 		if not ((activetargetnodewall.drawingtype == DRAWING_TYPE.DT_CENTRELINE and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING) or (activetargetnodewall.drawingtype == DRAWING_TYPE.DT_XCDRAWING and pointertargetwall.drawingtype == DRAWING_TYPE.DT_CENTRELINE)):
 			if activetargetnodewall == pointertargetwall:
-				pointertargetwall.xcotapplyonepath(activetargetnode.get_name(), pointertarget.get_name(), true)
-				if initialsequencenodenameP != null and initialsequencenodenameP != activetargetnode.get_name() and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
-					pointertargetwall.xcotapplyonepath(initialsequencenodenameP, pointertarget.get_name(), false)
-				pointertargetwall.updatexcpaths()
+				var xcdata = { "name":pointertargetwall.get_name() }
+				var i0 = activetargetnode.get_name()
+				var i1 = pointertarget.get_name()
+				if pointertargetwall.pairpresentindex(i0, i1) != -1:
+					xcdata["prevonepathpairs"] = [i0, i1]
+					xcdata["newonepathpairs"] = [ ]
+				else:
+					xcdata["newonepathpairs"] = [i0, i1]
+					if initialsequencenodenameP != null and initialsequencenodenameP != activetargetnode.get_name() and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
+						xcdata["prevonepathpairs"] = [ initialsequencenodenameP, pointertarget.get_name() ]
+					else:
+						xcdata["prevonepathpairs"] = [ ]
+				sketchsystem.actsketchchange([xcdata])
 			else:
 				sketchsystem.xcapplyonepathtube(activetargetnode, activetargetnodewall, pointertarget, pointertargetwall)
 				pointertargetwall.setxcdrawingvisible()

@@ -5,7 +5,7 @@ const XCnode_centreline = preload("res://nodescenes/XCnode_centreline.tscn")
 
 # primary data
 var xcresource = ""     # source file
-var nodepoints = { }    # { nodename:Vector3 }
+var nodepoints = { }    # { nodename:Vector3 } in local coordinate system
 var onepathpairs = [ ]  # [ Anodename0, Anodename1, Bnodename0, Bnodename1, ... ]
 var drawingtype = DRAWING_TYPE.DT_XCDRAWING
 var xcflatshellmaterial = "simpledirt"
@@ -16,7 +16,7 @@ var maxnodepointnumber = 0
 
 var linewidth = 0.05
 
-func setxcdrawingvisible():
+remote func setxcdrawingvisible():
 	assert ($XCdrawingplane.visible != $XCdrawingplane/CollisionShape.disabled)	
 	if not $XCdrawingplane.visible and drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		var scax = 0.0
@@ -31,7 +31,9 @@ func setxcdrawingvisible():
 	$XCnodes.visible = true
 	$PathLines.visible = true
 	assert ($XCdrawingplane.visible != $XCdrawingplane/CollisionShape.disabled)
-
+	if Tglobal.connectiontoserveractive and get_tree().get_rpc_sender_id() == 0:
+		rpc("setxcdrawingvisible")
+		
 func updateformetresquaresscaletexture():
 	var mat = $XCdrawingplane/CollisionShape/MeshInstance.get_surface_material(0)
 	mat.uv1_scale = $XCdrawingplane.get_scale()
@@ -61,8 +63,6 @@ func expandxcdrawingfitxcdrawing(xcdrawing):
 	if ascay > $XCdrawingplane.scale.y:
 		$XCdrawingplane.scale.y = ascay
 	updateformetresquaresscaletexture()
-
-
 
 func setxcdrawingvisiblehide(hidenodes):
 	assert ($XCdrawingplane.visible != $XCdrawingplane/CollisionShape.disabled)	
@@ -94,35 +94,79 @@ func exportxcrpcdata():
 			 "xcresource":xcresource,
 			 "drawingtype":drawingtype,
 			 "transformpos":global_transform,
-			 "shapeimage":[$XCdrawingplane.scale.x, $XCdrawingplane.scale.y],
+			 #"prevtransformpos":
 			 "nodepoints": nodepoints, 
+			 # "prevnodepoints":
+			 # "newnodepoints":
 			 "onepathpairs":onepathpairs,
+			 # "prevonepathpairs":
+			 # "newonepathpairs"
 			 "maxnodepointnumber":maxnodepointnumber,
 			 "visible":$XCdrawingplane.visible 
 		   }
 
 func mergexcrpcdata(xcdata):
-	assert ((get_name() == xcdata["name"]) and (drawingtype == xcdata["drawingtype"]))
-	global_transform = xcdata["transformpos"]
-	nodepoints = xcdata["nodepoints"]
-	maxnodepointnumber = xcdata["maxnodepointnumber"]
-	onepathpairs = xcdata["onepathpairs"]
-	$XCdrawingplane.set_scale(Vector3(xcdata["shapeimage"][0], xcdata["shapeimage"][1], 1.0))
-	for xcn in $XCnodes.get_children():
-		if not nodepoints.has(xcn.get_name()):
-			xcn.queue_free()
-	for k in nodepoints:
-		var xcn = $XCnodes.get_node(k) if $XCnodes.has_node(k) else null
-		if xcn == null:
-			xcn = XCnode_centreline.instance() if drawingtype == DRAWING_TYPE.DT_CENTRELINE else XCnode.instance()
-			xcn.set_name(k)
-			$XCnodes.add_child(xcn)
-		xcn.translation = nodepoints[k]
+	assert ((get_name() == xcdata["name"]) and (not ("drawingtype" in xcdata) or drawingtype == xcdata["drawingtype"]))
+	if "transformpos" in xcdata:
+		global_transform = xcdata["transformpos"]
+	if "nodepoints" in xcdata:
+		nodepoints = xcdata["nodepoints"]
+		for xcn in $XCnodes.get_children():
+			if not nodepoints.has(xcn.get_name()):
+				xcn.queue_free()
+		for k in nodepoints:
+			var xcn = $XCnodes.get_node(k) if $XCnodes.has_node(k) else null
+			if xcn == null:
+				xcn = XCnode_centreline.instance() if drawingtype == DRAWING_TYPE.DT_CENTRELINE else XCnode.instance()
+				xcn.set_name(k)
+				$XCnodes.add_child(xcn)
+			xcn.translation = nodepoints[k]
+			
+	if "prevnodepoints" in xcdata:
+		var nodepointsErase = xcdata["prevnodepoints"]
+		var nodepointsAdd = xcdata["nextnodepoints"]
+		for nE in nodepointsErase:
+			nodepoints.erase(nE)
+			if $XCnodes.has_node(nE) and not (nE in nodepointsAdd):
+				var xcn = $XCnodes.get_node(nE)
+				xcn.queue_free()
+				$XCnodes.remove_child(xcn)
+		for nA in nodepointsAdd:
+			nodepoints[nA] = nodepointsAdd[nA]
+			var xcn = $XCnodes.get_node_or_null(nA)
+			if xcn == null:
+				xcn = XCnode.instance()
+				xcn.set_name(nA)
+				$XCnodes.add_child(xcn)
+			xcn.translation = nodepointsAdd[nA]
+			
+	if "maxnodepointnumber" in xcdata:
+		maxnodepointnumber = xcdata["maxnodepointnumber"]
+
+	if "onepathpairs" in xcdata:
+		onepathpairs = xcdata["onepathpairs"]
+	
+	if "prevonepathpairs" in xcdata:
+		var onepathpairsErase = xcdata["prevonepathpairs"]
+		var onepathpairsAdd = xcdata["newonepathpairs"]
+		for i in range(0, len(onepathpairsErase), 2):
+			var j = pairpresentindex(onepathpairsErase[i], onepathpairsErase[i+1])
+			if j != -1:
+				onepathpairs[j] = onepathpairs[-2]
+				onepathpairs[j+1] = onepathpairs[-1]
+				onepathpairs.resize(len(onepathpairs) - 2)
+		for i in range(0, len(onepathpairsAdd), 2):
+			var j = pairpresentindex(onepathpairsAdd[i], onepathpairsAdd[i+1])
+			if j == -1:
+				onepathpairs.push_back(onepathpairsAdd[i])
+				onepathpairs.push_back(onepathpairsAdd[i+1])
+
 	updatexcpaths()
-	if xcdata["visible"]:
-		setxcdrawingvisible()
-	else:
-		setxcdrawingvisiblehide(true)
+	if "visible" in xcdata:
+		if xcdata["visible"]:
+			setxcdrawingvisible()
+		else:
+			setxcdrawingvisiblehide(true)
 
 func importcentrelinedata(centrelinedata, sketchsystem):
 	$XCdrawingplane.visible = false
@@ -198,10 +242,8 @@ func importcentrelinedata(centrelinedata, sketchsystem):
 			assert (xcdrawingSect1.get_name() == sname)
 			var xcdata = { "name":xcdrawingSect1.get_name(), "xcresource":"station_"+sname, "drawingtype":DRAWING_TYPE.DT_XCDRAWING, 
 						   "transformpos":Transform(Basis().rotated(Vector3(0,-1,0), ang), p), "maxnodepointnumber":0, 
-						   "shapeimage":[max(xsectlruds[i*4], xsectlruds[i*4+1])+1, max(xsectlruds[i*4+2], xsectlruds[i*4+3])+1], 
 						   "nodepoints":hexnodepoints, "onepathpairs":hexonepathpairs.duplicate(), "visible":false 
 						 }
-
 			xcdrawingSect1.mergexcrpcdata(xcdata)
 			if xcdrawingSect != null:
 				var xctube = sketchsystem.newXCtube(xcdrawingSect, xcdrawingSect1)
@@ -229,6 +271,16 @@ func xcotapplyonepath(i0, i1, addifnotthere):
 			onepathpairs.resize(len(onepathpairs) - 2)
 			print("deletedonepath ", j)
 			break
+
+func pairpresentindex(i0, i1):
+	for j in range(0, len(onepathpairs), 2):
+		if (onepathpairs[j] == i0 and onepathpairs[j+1] == i1) or (onepathpairs[j] == i1 and onepathpairs[j+1] == i0):
+			return j
+	return -1
+
+func newuniquexcnodename():
+	maxnodepointnumber += 1
+	return "p"+String(maxnodepointnumber)
 
 func newxcnode(name=null):
 	var xcn = XCnode.instance()

@@ -125,6 +125,7 @@ func _ready():
 	if $Viewport/GUI/Panel/Networkstate.selected != 0:  # could record saved settings on disk
 		call_deferred("_on_networkstate_selected", $Viewport/GUI/Panel/Networkstate.selected)
 
+
 func clickbuttonheadtorch():
 	$Viewport/GUI/Panel/ButtonHeadtorch.pressed = not $Viewport/GUI/Panel/ButtonHeadtorch.pressed
 	_on_buttonheadtorch_toggled($Viewport/GUI/Panel/ButtonHeadtorch.pressed)
