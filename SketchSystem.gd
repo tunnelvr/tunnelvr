@@ -5,12 +5,7 @@ const XCtube = preload("res://nodescenes/XCtube.tscn")
 
 const linewidth = 0.05
 
-# all commands go through here and are used to update across the network
-# [
-
-
-var undostack = [ ]  # list of lists of commands
-
+var actsketchchangeundostack = [ ]
 
 const defaultfloordrawing = "http://cave-registry.org.uk/svn/NorthernEngland/ThreeCountiesArea/rawscans/Ireby/DukeStResurvey-drawnup-p3.jpg"
 
@@ -56,6 +51,7 @@ func xcapplyonepathtube(xcn0, xcdrawing0, xcn1, xcdrawing1):
 	xctube.updatetubelinkpaths(self)
 	sharexctubeovernetwork(xctube)
 
+# to abolish
 func sharexctubeovernetwork(xctube):
 	if Tglobal.connectiontoserveractive:
 		rpc("xctubefromdata", xctube.exportxctrpcdata())
@@ -99,8 +95,6 @@ func changetubedxcsvizmode():
 			xcdrawing.get_node("PathLines").visible = xcsvisible
 			assert (xcdrawing.get_node("XCdrawingplane").visible != xcdrawing.get_node("XCdrawingplane/CollisionShape").disabled)
 
-# Quick saving and loading of shape.  It goes to 
-# C:\Users\ViveOne\AppData\Roaming\Godot\app_userdata\digtunnel
 func sketchsystemtodict():
 	var xcdrawingsData = [ ]
 	for xcdrawing in $XCdrawings.get_children():
@@ -119,7 +113,7 @@ func savesketchsystem(fname):
 	sketchdatafile.open(fname, File.WRITE)
 	sketchdatafile.store_var(sketchdatadict)
 	sketchdatafile.close()
-	print("sssssaved")
+	print("sssssaved in C:/Users/ViveOne/AppData/Roaming/Godot/app_userdata/tunnelvr")
 
 
 func getactivefloordrawing():
@@ -146,26 +140,52 @@ func loadcentrelinefile(centrelinefile):
 func sharexcdrawingovernetwork(xcdrawing):
 	if Tglobal.connectiontoserveractive:
 		rpc("xcdrawingfromdata", xcdrawing.exportxcrpcdata())
+		print(xcdrawing.exportxcrpcdata())
+
 
 func actsketchchange(xcdatalist):
 	actsketchchangeL(xcdatalist)
 	if Tglobal.connectiontoserveractive:
-		rpc("xcdrawingfromdataL", xcdatalist)
+		rpc("actsketchchangeL", xcdatalist)
 	
-func actsketchchangeL(xcdatalist):
+remote func actsketchchangeL(xcdatalist):
 	# append to undo stack here
 	var xcdrawingstoupdate = [ ]
 	var xctubestoupdate = [ ]
 	for i in range(len(xcdatalist)):
 		var xcdata = xcdatalist[i]
 		if "tubename" in xcdata:
-			pass
+			print("notimplemented")
+		elif "xcvizstates" in xcdata:
+			xcdata["prevxcvizstates"] = { }
+			for xcdrawingname in xcdata["xcvizstates"]:
+				var xcdrawing = $XCdrawings.get_node_or_null(xcdrawingname)
+				if xcdrawing != null:
+					var drawingplanevisible = xcdrawing.get_node("XCdrawingplane").visible
+					var drawingnodesvisible = xcdrawing.get_node("XCnodes").visible
+					xcdata["prevxcvizstates"][xcdrawingname] = (1 if drawingplanevisible else 0) + (1 if drawingnodesvisible else 0)
+					var drawingvisiblecode = xcdata["xcvizstates"][xcdrawingname]
+					if (drawingvisiblecode & 1) != 0:
+						xcdrawing.setxcdrawingvisible()
+					else:
+						xcdrawing.setxcdrawingvisiblehide((drawingvisiblecode & 2) == 0)
+			if "updatetubeshells" in xcdata:
+				for xctubename in xcdata["updatetubeshells"]:
+					var xctube = $XCtubes.get_node_or_null(xctubename)
+					if xctube != null:
+						xctube.updatetubeshell($XCdrawings, Tglobal.tubeshellsvisible)
+			if "updatexcshells" in xcdata:
+				for xcdrawingname in xcdata["updatexcshells"]:
+					var xcdrawing = $XCdrawings.get_node_or_null(xcdrawingname)
+					if xcdrawing != null:
+						xcdrawing.updatexctubeshell($XCdrawings, Tglobal.tubeshellsvisible)
 		else:
 			var xcdrawing = xcdrawingfromdata(xcdata)
 			xcdrawingstoupdate.push_back(xcdrawing)
 			if len(xcdata.get("prevnodepoints", [])) != 0:
 				for xctube in xcdrawing.xctubesconn:
 					xctubestoupdate.push_back(xctube)
+			print("\nx\n", xcdrawing.exportxcrpcdata())
 
 	for xcdrawing in xcdrawingstoupdate:
 		xcdrawing.updatexcpaths()

@@ -88,10 +88,10 @@ func setactivetargetwall(newactivetargetwall):
 		activetargetwall.get_node("PathLines").set_surface_material(0, materialsystem.pathlinematerial("normal"))
 		for xcnode in activetargetwall.get_node("XCnodes").get_children():
 			xcnode.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("selected" if xcnode == activetargetnode else "normal"))
-		for xctube in activetargetwall.xctubesconn:
-			if not xctube.positioningtube:
-				xctube.updatetubeshell(sketchsystem.get_node("XCdrawings"), Tglobal.tubeshellsvisible)
-		activetargetwall.updatexctubeshell(sketchsystem.get_node("XCdrawings"), Tglobal.tubeshellsvisible)
+		#for xctube in activetargetwall.xctubesconn:
+		#	if not xctube.positioningtube:
+		#		xctube.updatetubeshell(sketchsystem.get_node("XCdrawings"), Tglobal.tubeshellsvisible)
+		#activetargetwall.updatexctubeshell(sketchsystem.get_node("XCdrawings"), Tglobal.tubeshellsvisible)
 	if activetargetwall != null and activetargetwall.drawingtype == DRAWING_TYPE.DT_PAPERTEXTURE:
 		activetargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").get_surface_material(0).albedo_color = Color("#FEF4D5")
 	
@@ -100,7 +100,7 @@ func setactivetargetwall(newactivetargetwall):
 	
 	LaserOrient.get_node("RayCast").collision_mask = CollisionLayer.CL_Pointer | CollisionLayer.CL_PointerFloor | CollisionLayer.CL_CaveWall | CollisionLayer.CL_CaveWallTrans
 	if activetargetwall != null and activetargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
-		activetargetwall.setxcdrawingvisible()
+		sketchsystem.actsketchchange([{"xcvizstates":{activetargetwall.get_name():3}}])
 		activetargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").set_surface_material(0, materialsystem.xcdrawingmaterial("active"))
 		activetargetwall.get_node("PathLines").set_surface_material(0, materialsystem.pathlinematerial("nodepthtest"))
 		for xcnode in activetargetwall.get_node("XCnodes").get_children():
@@ -292,15 +292,48 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 		
 	# reselection when selected on grip deletes the node		
 	elif gripbuttonheld and activetargetnode != null and pointertarget == activetargetnode and (activetargetnodewall.drawingtype != DRAWING_TYPE.DT_CENTRELINE):
-		var recselectedtarget = activetargetnode
-		var recselectedtargetwall = activetargetnodewall
+		if len(activetargetnodewall.nodepoints) == 1:
+			LaserOrient.get_node("RayCast").collision_mask = CollisionLayer.CL_Pointer | CollisionLayer.CL_PointerFloor | CollisionLayer.CL_CaveWall | CollisionLayer.CL_CaveWallTrans
+		var xcname = activetargetnodewall.get_name()
+		var nodename = activetargetnode.get_name()
+		var xcdata = { "name":xcname, 
+					   "prevnodepoints":{ nodename:activetargetnode.translation }, 
+					   "nextnodepoints":{ } 
+					 }
+		var prevonepathpairs = [ ]
+		for j in range(0, len(activetargetnodewall.onepathpairs), 2):
+			if (activetargetnodewall.onepathpairs[j] == nodename) or (activetargetnodewall.onepathpairs[j+1] == nodename):
+				prevonepathpairs.push_back(activetargetnodewall.onepathpairs[j])
+				prevonepathpairs.push_back(activetargetnodewall.onepathpairs[j+1])
+		if len(prevonepathpairs) != 0:
+			xcdata["prevonepathpairs"] = prevonepathpairs
+			xcdata["newonepathpairs"] = [ ]
+		var xcdatalist = [ xcdata ]
+		
+		for xctube in activetargetnodewall.xctubesconn:
+			var prevdrawinglinks = [ ]
+			var m = 0 if xcname == xctube.xcname0 else 1
+			for j in range(0, len(xctube.xcdrawinglink), 2):
+				if xctube.xcdrawinglink[j+m] == nodename:
+					prevdrawinglinks.push_back(xctube.xcdrawinglink[j])
+					prevdrawinglinks.push_back(xctube.xcdrawinglink[j+1])
+					prevdrawinglinks.push_back(xctube.xcsectormaterials[j/2])
+			if len(prevdrawinglinks) != 0:
+				var xctdata = { "tubename":xctube.get_name(), 
+								"xcname0":xctube.xcname0, 
+								"xcname1":xctube.xcname1,
+								"prevdrawinglinks":prevdrawinglinks,
+								"newdrawinglinks":[ ] 
+							  }
+				xcdatalist.push_back(xctdata)
+
 		clearactivetargetnode()
 		clearpointertarget()
 		activelaserroot.get_node("LaserSpot").visible = false
-		recselectedtargetwall.removexcnode(recselectedtarget, false, sketchsystem)
-		if len(recselectedtargetwall.nodepoints) == 0:
-			LaserOrient.get_node("RayCast").collision_mask = CollisionLayer.CL_Pointer | CollisionLayer.CL_PointerFloor | CollisionLayer.CL_CaveWall | CollisionLayer.CL_CaveWallTrans
+		#recselectedtargetwall.removexcnode(recselectedtarget, false, sketchsystem)
+		sketchsystem.actsketchchange(xcdatalist)
 		Tglobal.soundsystem.quicksound("BlipSound", pointertargetpoint)
+
 	
 	elif pointertargettype == "Papersheet" or pointertargettype == "PlanView":
 		clearactivetargetnode()
@@ -351,8 +384,8 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 						   "nextnodepoints":{ newnodename:newnodepoint } 
 						 }
 			if activetargetnode != null and activetargetnodewall == pointertargetwall:
-				xcdata["prevonepathpairs"] = []
-				xcdata["newonepathpairs"] = [activetargetnode.get_name(), newnodename]
+				xcdata["prevonepathpairs"] = [ ]
+				xcdata["newonepathpairs"] = [ activetargetnode.get_name(), newnodename]
 			sketchsystem.actsketchchange([xcdata])
 			#pointertargetwall.updatexcpaths()
 			setactivetargetnode(pointertargetwall.get_node("XCnodes").get_node(newnodename))
@@ -388,7 +421,7 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 				sketchsystem.actsketchchange([xcdata])
 			else:
 				sketchsystem.xcapplyonepathtube(activetargetnode, activetargetnodewall, pointertarget, pointertargetwall)
-				pointertargetwall.setxcdrawingvisible()
+				sketchsystem.actsketchchange([{"xcvizstates":{pointertargetwall.get_name():3}}])
 			Tglobal.soundsystem.quicksound("ClickSound", pointertargetpoint)
 			clearactivetargetnode()
 											
@@ -534,24 +567,22 @@ func buttonreleased_vrgrip():
 				gripmenu.gripmenupointertargetwall.get_node("XCdrawingplane").collision_layer = CollisionLayer.CL_Environment | CollisionLayer.CL_PointerFloor
 		
 			elif pointertarget.get_name() == "SelectXC":
+				sketchsystem.actsketchchange([{"xcvizstates":{gripmenu.gripmenupointertargetwall.xcname0:3, gripmenu.gripmenupointertargetwall.xcname1:3}}])
 				var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(gripmenu.gripmenupointertargetwall.xcname0)
 				var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(gripmenu.gripmenupointertargetwall.xcname1)
-				xcdrawing0.setxcdrawingvisible()
-				xcdrawing1.setxcdrawingvisible()
 				if xcdrawing0 != activetargetwall:
 					setactivetargetwall(xcdrawing0)
 				elif xcdrawing1 != activetargetwall:
 					setactivetargetwall(xcdrawing1)
 						
 			elif pointertarget.get_name() == "HideXC":
+				sketchsystem.actsketchchange([{"xcvizstates":{gripmenu.gripmenupointertargetwall.xcname0:0, gripmenu.gripmenupointertargetwall.xcname1:0}}])
 				var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(gripmenu.gripmenupointertargetwall.xcname0)
 				var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(gripmenu.gripmenupointertargetwall.xcname1)
 				if xcdrawing0 == activetargetwall:
 					setactivetargetwall(null)
 				if xcdrawing1 == activetargetwall:
 					setactivetargetwall(null)
-				xcdrawing0.setxcdrawingvisiblehide(true)
-				xcdrawing1.setxcdrawingvisiblehide(true)
 
 			elif pointertarget.get_name() == "DelXC":
 				print("Not implemented")
@@ -562,13 +593,10 @@ func buttonreleased_vrgrip():
 
 			elif pointertarget.get_name() == "HoleXC":
 				var xcdrawinghole = gripmenu.gripmenupointertargetwall.ConstructHoleXC(gripmenu.gripmenuactivetargettubesectorindex)
-				xcdrawinghole.setxcdrawingvisiblehide(false)
+				sketchsystem.actsketchchange([{"xcvizstates":{ gripmenu.gripmenupointertargetwall.xcname0:0, 
+															  gripmenu.gripmenupointertargetwall.xcname1:0,
+															  xcdrawinghole.get_name():2 }}])
 				setactivetargetwall(xcdrawinghole)
-				var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(gripmenu.gripmenupointertargetwall.xcname0)
-				var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(gripmenu.gripmenupointertargetwall.xcname1)
-				xcdrawing0.setxcdrawingvisiblehide(true)
-				xcdrawing1.setxcdrawingvisiblehide(true)
-
 													
 			elif pointertarget.get_name() == "DoSlice" and is_instance_valid(wasactivetargettube) and is_instance_valid(activetargetwall) and len(activetargetwall.nodepoints) == 0:
 				print(wasactivetargettube, " ", len(activetargetwall.nodepoints))
@@ -618,8 +646,13 @@ func buttonreleased_vrgrip():
 
 	elif pointertargettype == "XCdrawing" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		clearpointertargetmaterial()
-		pointertargetwall.setxcdrawingvisiblehide(false)
-		sketchsystem.sharexcdrawingovernetwork(pointertargetwall)
+		var updatexcshells = [ pointertargetwall.get_name() ]
+		var updatetubeshells = [ ]
+		for xctube in pointertargetwall.xctubesconn:
+			if not xctube.positioningtube:
+				updatetubeshells.push_back(xctube.get_name())
+		sketchsystem.actsketchchange([{"xcvizstates":{ pointertargetwall.get_name():2 }, "updatetubeshells":updatetubeshells, "updatexcshells":updatexcshells }])
+		#sketchsystem.sharexcdrawingovernetwork(pointertargetwall)
 		setactivetargetwall(null)
 		clearpointertarget()
 		activelaserroot.get_node("LaserSpot").visible = false

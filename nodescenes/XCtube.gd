@@ -32,6 +32,7 @@ func xctubeapplyonepath(xcn0, xcn1):
 	print("xcapplyonepathxcapplyonepath-post", xcdrawinglink)
 	assert ((len(xcdrawinglink)%2) == 0)
 
+# to abolish
 func removetubenodepoint(xcname, nodename):
 	assert ((xcname == xcname0) or (xcname == xcname1))
 	var m = 0 if xcname == xcname0 else 1
@@ -44,6 +45,7 @@ func removetubenodepoint(xcname, nodename):
 			nodelinkedto = true
 	return nodelinkedto
 
+# to abolish
 func checknodelinkedto(xcname, nodename):
 	assert ((xcname == xcname0) or (xcname == xcname1))
 	var m = 0 if xcname == xcname0 else 1
@@ -53,11 +55,13 @@ func checknodelinkedto(xcname, nodename):
 	return false
 
 func exportxctrpcdata():   # read by xctubefromdata()
-	return { "name":get_name(),
+	return { "name":get_name(),  # tubename
 			 "xcname0":xcname0, 
 			 "xcname1":xcname1, 
 			 "xcdrawinglink":xcdrawinglink, 
 			 "xcsectormaterials":xcsectormaterials 
+			 # "prevdrawinglinks": [ node0, node1, material, ... ] ]
+			 # "newdrawinglinks":
 		   }
 
 func shiftxcdrawingposition(sketchsystem):

@@ -16,7 +16,16 @@ var maxnodepointnumber = 0
 
 var linewidth = 0.05
 
-remote func setxcdrawingvisible():
+func setxcdrawingvisiblehide(hidenodes):
+	assert ($XCdrawingplane.visible != $XCdrawingplane/CollisionShape.disabled)	
+	$XCdrawingplane.visible = false
+	$XCdrawingplane/CollisionShape.disabled = true
+	if hidenodes:
+		$XCnodes.visible = Tglobal.tubedxcsvisible or (drawingtype != DRAWING_TYPE.DT_XCDRAWING) or (len(xctubesconn) == 0)
+		$PathLines.visible = $XCnodes.visible
+	assert ($XCdrawingplane.visible != $XCdrawingplane/CollisionShape.disabled)
+
+func setxcdrawingvisible():
 	assert ($XCdrawingplane.visible != $XCdrawingplane/CollisionShape.disabled)	
 	if not $XCdrawingplane.visible and drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		var scax = 0.0
@@ -31,8 +40,6 @@ remote func setxcdrawingvisible():
 	$XCnodes.visible = true
 	$PathLines.visible = true
 	assert ($XCdrawingplane.visible != $XCdrawingplane/CollisionShape.disabled)
-	if Tglobal.connectiontoserveractive and get_tree().get_rpc_sender_id() == 0:
-		rpc("setxcdrawingvisible")
 		
 func updateformetresquaresscaletexture():
 	var mat = $XCdrawingplane/CollisionShape/MeshInstance.get_surface_material(0)
@@ -63,16 +70,6 @@ func expandxcdrawingfitxcdrawing(xcdrawing):
 	if ascay > $XCdrawingplane.scale.y:
 		$XCdrawingplane.scale.y = ascay
 	updateformetresquaresscaletexture()
-
-func setxcdrawingvisiblehide(hidenodes):
-	assert ($XCdrawingplane.visible != $XCdrawingplane/CollisionShape.disabled)	
-	$XCdrawingplane.visible = false
-	$XCdrawingplane/CollisionShape.disabled = true
-	if hidenodes:
-		$XCnodes.visible = Tglobal.tubedxcsvisible or (drawingtype != DRAWING_TYPE.DT_XCDRAWING) or (len(xctubesconn) == 0)
-		$PathLines.visible = $XCnodes.visible
-	assert ($XCdrawingplane.visible != $XCdrawingplane/CollisionShape.disabled)
-
 	
 # these transforming operations work in sequence, each correcting the relative position change caused by the other
 func scalexcnodepointspointsxy(scax, scay):
@@ -258,19 +255,6 @@ func setxcnpoint(xcn, pt, planar):
 		nodepoints[xcn.get_name()].z = 0
 		xcn.translation = nodepoints[xcn.get_name()]
 		
-func xcotapplyonepath(i0, i1, addifnotthere):
-	for j in range(len(onepathpairs)-2, -3, -2):
-		if j == -2:
-			if addifnotthere:
-				print("addingonepath ", len(onepathpairs), " ", i0, " ", i1)
-				onepathpairs.push_back(i0)
-				onepathpairs.push_back(i1)
-		elif (onepathpairs[j] == i0 and onepathpairs[j+1] == i1) or (onepathpairs[j] == i1 and onepathpairs[j+1] == i0):
-			onepathpairs[j] = onepathpairs[-2]
-			onepathpairs[j+1] = onepathpairs[-1]
-			onepathpairs.resize(len(onepathpairs) - 2)
-			print("deletedonepath ", j)
-			break
 
 func pairpresentindex(i0, i1):
 	for j in range(0, len(onepathpairs), 2):
@@ -303,6 +287,7 @@ func clearallcontents():
 	nodepoints.clear()
 	assert (len(xctubesconn) == 0)  # for now
 
+# to abolish
 func removexcnode(xcn, brejoinlines, sketchsystem):
 	var nodename = xcn.get_name()
 	nodepoints.erase(nodename)
@@ -324,6 +309,7 @@ func removexcnode(xcn, brejoinlines, sketchsystem):
 			xctubesconnupdated.append(xctube)
 	updatelinksandtubesafterchange(xctubesconnupdated, sketchsystem)
 
+# to abolish
 func movexcnode(xcn, pt, sketchsystem):
 	print("m,mmmmxmxmxm ", xcn.global_transform.origin, pt)
 	setxcnpoint(xcn, pt, true)
@@ -333,6 +319,7 @@ func movexcnode(xcn, pt, sketchsystem):
 			xctubesconnupdated.append(xctube)
 	updatelinksandtubesafterchange(xctubesconnupdated, sketchsystem)
 
+# to abolish
 func dragxcnodes(dragvec, sketchsystem):
 	for xcn in get_node("XCnodes").get_children():
 		setxcnpoint(xcn, xcn.global_transform.origin + dragvec, true)

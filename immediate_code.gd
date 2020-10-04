@@ -25,5 +25,5 @@ func _run():
 	var a = {"r":909, "bb":10}
 	print(a.get("s"))
 	print(a.erase("r"))
-	print(a.)
+	print(1 & 2)
 	
