@@ -16,6 +16,7 @@ func _ready():
 	get_node("/root/Spatial/ImageSystem").fetchpaperdrawing(floordrawing)
 		
 
+# to abolish
 func xcapplyonepathtube(xcn0, xcdrawing0, xcn1, xcdrawing1): 
 	assert (xcdrawing0 == xcn0.get_parent().get_parent())
 	assert (xcdrawing1 == xcn1.get_parent().get_parent())
@@ -56,22 +57,32 @@ func sharexctubeovernetwork(xctube):
 	if Tglobal.connectiontoserveractive:
 		rpc("xctubefromdata", xctube.exportxctrpcdata())
 
+
+func findxctube(xcname0, xcname1):
+	var xcdrawing0 = get_node("XCdrawings").get_node(xcname0)	
+	for xctube in xcdrawing0.xctubesconn:
+		assert (xctube.xcname0 == xcname0 or xctube.xcname1 == xcname0)
+		if xctube.xcname1 == xcname1:
+			return xctube
+		if xctube.xcname0 == xcname1:
+			return xctube
+	return null
+	
 remote func xctubefromdata(xctdata):
-	# exportxctrpcdata():  return [ get_name(), xcname0, xcname1, xcdrawinglink ]
-	var xcdrawing0 = get_node("XCdrawings").get_node(xctdata["xcname0"])
-	var xctube = null
-	for lxctube in xcdrawing0.xctubesconn:
-		if lxctube.xcname1 == xctdata["xcname1"]:
-			assert (lxctube.xcname0 == xctdata["xcname0"])
-			xctube = lxctube
-			break
-		assert (lxctube.xcname0 != xctdata["xcname1"])
+	var tubename = xctdata["tubename" if "tubename" in xctdata else "name"]
+	var xctube = findxctube(xctdata["xcname0"], xctdata["xcname1"])
 	if xctube == null:
-		assert (not $XCtubes.has_node(xctdata["name"]))
-		xctube = newXCtube(xcdrawing0, get_node("XCdrawings").get_node(xctdata["xcname1"]))
-	assert (xctube.get_name() == xctdata["name"])
-	xctube.xcdrawinglink = xctdata["xcdrawinglink"]
-	xctube.xcsectormaterials = xctdata["xcsectormaterials"]
+		var xcdrawing0 = get_node("XCdrawings").get_node(xctdata["xcname0"])
+		var xcdrawing1 = get_node("XCdrawings").get_node(xctdata["xcname1"])
+		xctdata["m0"] = 1 if xcdrawing1.drawingtype == DRAWING_TYPE.DT_CENTRELINE else 0
+		if xctdata["m0"] == 0:
+			xctube = newXCtube(xcdrawing0, xcdrawing1)
+		else:
+			xctube = newXCtube(xcdrawing1, xcdrawing0)
+	else:
+		xctdata["m0"] = 1 if xctube.xcname0 == xctdata["xcname1"] else 0
+	xctube.mergexctrpcdata(xctdata)
+	return xctube
 
 func updateworkingshell():
 	for xctube in $XCtubes.get_children():
@@ -150,12 +161,15 @@ func actsketchchange(xcdatalist):
 	
 remote func actsketchchangeL(xcdatalist):
 	# append to undo stack here
-	var xcdrawingstoupdate = [ ]
-	var xctubestoupdate = [ ]
+	var xcdrawingstoupdate = { }
+	var xctubestoupdate = { }
 	for i in range(len(xcdatalist)):
 		var xcdata = xcdatalist[i]
+		
 		if "tubename" in xcdata:
-			print("notimplemented")
+			var xctube = xctubefromdata(xcdata)
+			xctubestoupdate[xctube.get_name()] = xctube
+			
 		elif "xcvizstates" in xcdata:
 			xcdata["prevxcvizstates"] = { }
 			for xcdrawingname in xcdata["xcvizstates"]:
@@ -179,17 +193,23 @@ remote func actsketchchangeL(xcdatalist):
 					var xcdrawing = $XCdrawings.get_node_or_null(xcdrawingname)
 					if xcdrawing != null:
 						xcdrawing.updatexctubeshell($XCdrawings, Tglobal.tubeshellsvisible)
-		else:
+						
+		else:  # xcdrawing
+			assert ("name" in xcdata)
+			if "transformpos" in xcdata and not ("prevtransformpos" in xcdata):
+				var lxcdrawing = $XCdrawings.get_node_or_null(xcdata["name"])
+				if lxcdrawing != null:
+					xcdata["prevtransformpos"] = lxcdrawing.global_transform
 			var xcdrawing = xcdrawingfromdata(xcdata)
-			xcdrawingstoupdate.push_back(xcdrawing)
-			if len(xcdata.get("prevnodepoints", [])) != 0:
-				for xctube in xcdrawing.xctubesconn:
-					xctubestoupdate.push_back(xctube)
-			print("\nx\n", xcdrawing.exportxcrpcdata())
+			if "nodepoints" in xcdata or "prevnodepoints" in xcdata or "prevnodepoints" in xcdata:
+				xcdrawingstoupdate[xcdrawing.get_name()] = xcdrawing
+				if len(xcdata.get("prevnodepoints", [])) != 0:
+					for xctube in xcdrawing.xctubesconn:
+						xctubestoupdate[xctube.get_name()] = xctube
 
-	for xcdrawing in xcdrawingstoupdate:
+	for xcdrawing in xcdrawingstoupdate.values():
 		xcdrawing.updatexcpaths()
-	for xctube in xctubestoupdate:
+	for xctube in xctubestoupdate.values():
 		xctube.updatetubelinkpaths(self)
 	#xctube0.updatetubeshell(sketchsystem.get_node("XCdrawings"), Tglobal.tubeshellsvisible)
 	

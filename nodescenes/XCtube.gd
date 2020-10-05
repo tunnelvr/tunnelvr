@@ -17,6 +17,7 @@ var tubesectorptindexlists = [ ]
 
 const linewidth = 0.02
 	
+# to abolish
 func xctubeapplyonepath(xcn0, xcn1):
 	print("xcapplyonepathxcapplyonepath-pre", xcn0, xcn1, xcdrawinglink)
 	assert (xcn0.get_parent().get_parent().get_name() == xcname0 and xcn1.get_parent().get_parent().get_name() == xcname1)
@@ -63,6 +64,49 @@ func exportxctrpcdata():   # read by xctubefromdata()
 			 # "prevdrawinglinks": [ node0, node1, material, ... ] ]
 			 # "newdrawinglinks":
 		   }
+
+func linkspresentindex(nodename0, nodename1):
+	for j in range(int(len(xcdrawinglink)/2)):
+		if xcdrawinglink[j*2] == nodename0 and xcdrawinglink[j*2+1] == nodename1:
+			return j
+	return -1
+
+func mergexctrpcdata(xctdata):
+	if "xcdrawinglink" in xctdata:
+		xcdrawinglink = xctdata["xcdrawinglink"]
+		xcsectormaterials = xctdata["xcsectormaterials"]
+	if "prevdrawinglinks" in xctdata:
+			 # "prevdrawinglinks": [ node0, node1, material, ... ] ]
+			 # "newdrawinglinks":
+		assert (len(xcsectormaterials)*2 == len(xcdrawinglink))
+		var drawinglinksErase = xctdata["prevdrawinglinks"]
+		var drawinglinksAdd = xctdata["newdrawinglinks"]
+		var nE = int(len(drawinglinksErase)/3)
+		var nA = int(len(drawinglinksAdd)/3)
+		var iA = 0
+		var m0 = xctdata["m0"]
+		var m1 = 1-m0
+		for iE in range(nE):
+			var j = linkspresentindex(drawinglinksErase[iE*3+m0], drawinglinksErase[iE*3+m1])
+			if j != -1:
+				if iA < nA and drawinglinksAdd[iA*3] == drawinglinksErase[iE*3] and drawinglinksAdd[iA*3+1] == drawinglinksErase[iE*3+1]:
+					xcsectormaterials[j] = drawinglinksAdd[iA*3+2]
+					iA += 1
+				else:
+					xcdrawinglink.remove(j*2+1)
+					xcdrawinglink.remove(j*2)
+					xcsectormaterials.remove(j)
+		while iA < nA:
+			var j = linkspresentindex(drawinglinksAdd[iA*3+m0], drawinglinksAdd[iA*3+m1])
+			if j == -1:
+				xcdrawinglink.push_back(drawinglinksAdd[iA*3+m0])
+				xcdrawinglink.push_back(drawinglinksAdd[iA*3+m1])
+				xcsectormaterials.push_back(xcsectormaterials[iA])	
+			else:
+				print("wrong: sector already here")
+				xcsectormaterials[j] = drawinglinksAdd[iA*3+2]
+		assert (len(xcsectormaterials)*2 == len(xcdrawinglink))
+
 
 func shiftxcdrawingposition(sketchsystem):
 	if len(xcdrawinglink) == 0:

@@ -100,7 +100,8 @@ func setactivetargetwall(newactivetargetwall):
 	
 	LaserOrient.get_node("RayCast").collision_mask = CollisionLayer.CL_Pointer | CollisionLayer.CL_PointerFloor | CollisionLayer.CL_CaveWall | CollisionLayer.CL_CaveWallTrans
 	if activetargetwall != null and activetargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
-		sketchsystem.actsketchchange([{"xcvizstates":{activetargetwall.get_name():3}}])
+		if not activetargetwall.get_node("XCdrawingplane").visible:
+			sketchsystem.actsketchchange([{"xcvizstates":{activetargetwall.get_name():3}}])
 		activetargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").set_surface_material(0, materialsystem.xcdrawingmaterial("active"))
 		activetargetwall.get_node("PathLines").set_surface_material(0, materialsystem.pathlinematerial("nodepthtest"))
 		for xcnode in activetargetwall.get_node("XCnodes").get_children():
@@ -254,12 +255,15 @@ func buttonpressed_vrgrip():
 	if pointertargettype == "XCtubesector":
 		activetargettube = pointertargetwall
 		activetargettubesectorindex = pointertarget.get_index()
-		var tubesectormaterialname = activetargettube.xcsectormaterials[activetargettubesectorindex]
-		materialsystem.updatetubesectormaterial(activetargettube.get_node("XCtubesectors").get_child(activetargettubesectorindex), tubesectormaterialname, true)
-		if activetargettube.get_node("PathLines").mesh == null:
-			activetargettube.updatetubelinkpaths(sketchsystem)
-		activetargettube.get_node("PathLines").visible = true
-		activetargettube.get_node("PathLines").set_surface_material(0, materialsystem.pathlinematerial("nodepthtest"))
+		if activetargettubesectorindex < len(activetargettube.xcsectormaterials):
+			var tubesectormaterialname = activetargettube.xcsectormaterials[activetargettubesectorindex]
+			materialsystem.updatetubesectormaterial(activetargettube.get_node("XCtubesectors").get_child(activetargettubesectorindex), tubesectormaterialname, true)
+			if activetargettube.get_node("PathLines").mesh == null:
+				activetargettube.updatetubelinkpaths(sketchsystem)
+			activetargettube.get_node("PathLines").visible = true
+			activetargettube.get_node("PathLines").set_surface_material(0, materialsystem.pathlinematerial("nodepthtest"))
+		else:
+			print("Wrong: sector index not match sectors in tubedata")
 	gripmenu.gripmenuon(LaserOrient.global_transform, pointertargetpoint, pointertargetwall, pointertargettype, activetargettube, activetargettubesectorindex, activetargetwall, activetargetnode)
 	
 var initialsequencenodename = null
@@ -487,7 +491,10 @@ func buttonreleased_vrgrip():
 			if activetargettube != null:
 				var sectormaterialname = pointertarget.get_name()
 				activetargettube.xcsectormaterials[activetargettubesectorindex] = sectormaterialname
-		materialsystem.updatetubesectormaterial(activetargettube.get_node("XCtubesectors").get_child(activetargettubesectorindex), activetargettube.xcsectormaterials[activetargettubesectorindex], false)
+		if activetargettubesectorindex < len(activetargettube.xcsectormaterials):
+			materialsystem.updatetubesectormaterial(activetargettube.get_node("XCtubesectors").get_child(activetargettubesectorindex), activetargettube.xcsectormaterials[activetargettubesectorindex], false)
+		else:
+			print("Wrong: activetargettubesectorindex >= activetargettube.xcsectormaterials ")
 		activetargettube.get_node("PathLines").set_surface_material(0, materialsystem.pathlinematerial("normal"))
 		activetargettube = null
 	
@@ -523,11 +530,15 @@ func buttonreleased_vrgrip():
 				eyept0vec = gripmenu.gripmenulaservector
 				pt0 = headcam.global_transform.origin + eyept0vec.normalized()*2.9
 			if pt0 != null:
-				var xcdrawing = sketchsystem.newXCuniquedrawing(DRAWING_TYPE.DT_XCDRAWING, sketchsystem.uniqueXCname())
 				var drawingwallangle = Vector2(eyept0vec.x, eyept0vec.z).angle() + deg2rad(90)					
-				xcdrawing.setxcpositionangle(drawingwallangle)
-				xcdrawing.setxcpositionorigin(pt0)
+				var xcdata = { "name":sketchsystem.uniqueXCname(), 
+							   "xcresource":"",
+							   "drawingtype":DRAWING_TYPE.DT_XCDRAWING,
+							   "transformpos":Transform(Basis().rotated(Vector3(0,-1,0), drawingwallangle), pt0) }
+				var xcviz = { "xcvizstates": { xcdata["name"]:3 } }
+				sketchsystem.actsketchchange([xcdata, xcviz])
 				clearactivetargetnode()
+				var xcdrawing = sketchsystem.get_node("XCdrawings").get_node(xcdata["name"])
 				setactivetargetwall(xcdrawing)
 				if gripmenu.gripmenupointertargettype == "XCtubesector":
 					var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(gripmenu.gripmenupointertargetwall.xcname0)
@@ -700,17 +711,19 @@ func _physics_process(_delta):
 			var laserrelvec = activelaserroot.global_transform.basis.inverse()*activetargetwallgrabbedlaserroottrans.basis.z
 			var angy = -Vector2(laserrelvec.z, laserrelvec.x).angle()
 			var angpush =-(activetargetwallgrabbedlaserroottrans.origin.y - activelaserroot.global_transform.origin.y)
-			activetargetwallgrabbed.global_transform = activetargetwallgrabbedorgtransform.rotated(Vector3(0,1,0), angy)
+			var transformpos = activetargetwallgrabbedorgtransform.rotated(Vector3(0,1,0), angy)
 			var activetargetwallgrabbedpointmoved = activetargetwallgrabbedpoint + 20*angpush*activetargetwallgrabbeddispvector.normalized()
-			activetargetwallgrabbed.global_transform.origin += activetargetwallgrabbedpointmoved - activetargetwallgrabbed.global_transform*activetargetwallgrabbedlocalpoint
-
+			transformpos.origin += activetargetwallgrabbedpointmoved - transformpos*activetargetwallgrabbedlocalpoint
+			sketchsystem.actsketchchange([{"name":activetargetwallgrabbed.get_name(), 
+										   "prevtransformpos":activetargetwallgrabbed.global_transform,
+										   "transformpos":transformpos}])
 		elif activetargetwallgrabbedpoint != null:
 			activetargetwallgrabbed.global_transform = activelaserroot.get_node("LaserSpot").global_transform * activetargetwallgrabbedtransform
 			activetargetwallgrabbed.global_transform.origin += activetargetwallgrabbedpoint - activetargetwallgrabbed.global_transform * activetargetwallgrabbedlocalpoint
 		else:
 			activetargetwallgrabbed.global_transform = activelaserroot.get_node("LaserSpot").global_transform * activetargetwallgrabbedtransform
-		if Tglobal.connectiontoserveractive:
-			activetargetwallgrabbed.rpc_unreliable("setxcdrawingposition", activetargetwallgrabbed.global_transform)
+		#if Tglobal.connectiontoserveractive:
+		#	activetargetwallgrabbed.rpc_unreliable("setxcdrawingposition", activetargetwallgrabbed.global_transform)
 
 
 var rightmousebuttonheld = false
