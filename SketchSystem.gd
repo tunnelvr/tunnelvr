@@ -169,6 +169,10 @@ remote func actsketchchangeL(xcdatalist):
 		if "tubename" in xcdata:
 			var xctube = xctubefromdata(xcdata)
 			xctubestoupdate[xctube.get_name()] = xctube
+			if "materialsectorschanged" in xcdata:
+				for j in xcdata["materialsectorschanged"]:
+					if j < len(xctube.xcsectormaterials) and j < xctube.get_node("XCtubesectors").get_child_count():
+						get_node("/root/Spatial/MaterialSystem").updatetubesectormaterial(xctube.get_node("XCtubesectors").get_child(j), xctube.xcsectormaterials[j], false)
 			
 		elif "xcvizstates" in xcdata:
 			xcdata["prevxcvizstates"] = { }

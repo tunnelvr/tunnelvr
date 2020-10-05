@@ -487,10 +487,20 @@ func buttonreleased_vrgrip():
 	if activetargettube != null:
 		if pointertargettype == "GripMenuItem" and pointertarget.get_parent().get_name() == "MaterialButtons":
 			assert (gripmenu.gripmenupointertargettype == "XCtubesector") 
-			assert (activetargettube != null)
-			if activetargettube != null:
-				var sectormaterialname = pointertarget.get_name()
-				activetargettube.xcsectormaterials[activetargettubesectorindex] = sectormaterialname
+			var sectormaterialname = pointertarget.get_name()
+			if activetargettubesectorindex < len(activetargettube.xcsectormaterials):
+				sketchsystem.actsketchchange([{ "tubename":activetargettube.get_name(), 
+												"xcname0":activetargettube.xcname0, 
+												"xcname1":activetargettube.xcname1,
+												"prevdrawinglinks":[activetargettube.xcdrawinglink[activetargettubesectorindex*2], activetargettube.xcdrawinglink[activetargettubesectorindex*2+1], activetargettube.xcsectormaterials[activetargettubesectorindex]],
+												"newdrawinglinks":[activetargettube.xcdrawinglink[activetargettubesectorindex*2], activetargettube.xcdrawinglink[activetargettubesectorindex*2+1], sectormaterialname]
+											 }])
+				gripmenu.disableallgripmenus()
+				return
+			else:
+				materialsystem.updatetubesectormaterial(activetargettube.get_node("XCtubesectors").get_child(activetargettubesectorindex), activetargettube.xcsectormaterials[activetargettubesectorindex], false)
+			return
+
 		if activetargettubesectorindex < len(activetargettube.xcsectormaterials):
 			materialsystem.updatetubesectormaterial(activetargettube.get_node("XCtubesectors").get_child(activetargettubesectorindex), activetargettube.xcsectormaterials[activetargettubesectorindex], false)
 		else:

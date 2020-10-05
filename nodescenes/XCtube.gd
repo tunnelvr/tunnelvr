@@ -86,12 +86,14 @@ func mergexctrpcdata(xctdata):
 		var iA = 0
 		var m0 = xctdata["m0"]
 		var m1 = 1-m0
+		var materialsectorschanged = [ ]
 		for iE in range(nE):
 			var j = linkspresentindex(drawinglinksErase[iE*3+m0], drawinglinksErase[iE*3+m1])
 			if j != -1:
 				if iA < nA and drawinglinksAdd[iA*3] == drawinglinksErase[iE*3] and drawinglinksAdd[iA*3+1] == drawinglinksErase[iE*3+1]:
 					xcsectormaterials[j] = drawinglinksAdd[iA*3+2]
 					iA += 1
+					materialsectorschanged.push_back(j)
 				else:
 					xcdrawinglink.remove(j*2+1)
 					xcdrawinglink.remove(j*2)
@@ -105,6 +107,9 @@ func mergexctrpcdata(xctdata):
 			else:
 				print("wrong: sector already here")
 				xcsectormaterials[j] = drawinglinksAdd[iA*3+2]
+		if len(materialsectorschanged) != 0:
+			xctdata["materialsectorschanged"] = materialsectorschanged
+			
 		assert (len(xcsectormaterials)*2 == len(xcdrawinglink))
 
 
