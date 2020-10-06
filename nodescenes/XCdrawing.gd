@@ -23,6 +23,8 @@ func setxcdrawingvisiblehide(hidenodes):
 	if hidenodes:
 		$XCnodes.visible = Tglobal.tubedxcsvisible or (drawingtype != DRAWING_TYPE.DT_XCDRAWING) or (len(xctubesconn) == 0)
 		$PathLines.visible = $XCnodes.visible
+		for xcn in $XCnodes.get_children():
+			xcn.get_node("CollisionShape").disabled = true
 	assert ($XCdrawingplane.visible != $XCdrawingplane/CollisionShape.disabled)
 
 func setxcdrawingvisible():
@@ -39,6 +41,8 @@ func setxcdrawingvisible():
 		$XCdrawingplane/CollisionShape.disabled = false
 	$XCnodes.visible = true
 	$PathLines.visible = true
+	for xcn in $XCnodes.get_children():
+		xcn.get_node("CollisionShape").disabled = false
 	assert ($XCdrawingplane.visible != $XCdrawingplane/CollisionShape.disabled)
 		
 func updateformetresquaresscaletexture():

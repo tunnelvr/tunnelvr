@@ -134,7 +134,6 @@ func setnetworkidnamecolour(player, networkID):
 	player.networkID = networkID
 	player.set_network_master(networkID)
 	player.set_name("NetworkedPlayer"+String(networkID))
-	var x = player.get_node("HeadCam/csgheadmesh/skullcomponent")
 	var headcolour = Color.from_hsv((networkID%10000)/10000.0, 0.5 + (networkID%2222)/6666.0, 0.75)
 	print("Head color ", headcolour)
 	player.get_node("HeadCam/csgheadmesh/skullcomponent").material.albedo_color = headcolour

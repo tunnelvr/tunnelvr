@@ -29,7 +29,6 @@ func findxctube(xcname0, xcname1):
 	return null
 	
 remote func xctubefromdata(xctdata):
-	var tubename = xctdata["tubename" if "tubename" in xctdata else "name"]
 	var xctube = findxctube(xctdata["xcname0"], xctdata["xcname1"])
 	if xctube == null:
 		var xcdrawing0 = get_node("XCdrawings").get_node(xctdata["xcname0"])
@@ -117,7 +116,8 @@ func sharexcdrawingovernetwork(xcdrawing):
 func actsketchchange(xcdatalist):
 	actsketchchangeL(xcdatalist)
 	if Tglobal.connectiontoserveractive:
-		rpc("actsketchchangeL", xcdatalist)
+		if not (len(xcdatalist) == 1 and "rpcoptional" in xcdatalist[0]):
+			rpc("actsketchchangeL", xcdatalist)
 	
 remote func actsketchchangeL(xcdatalist):
 	# append to undo stack here
@@ -237,7 +237,7 @@ remote func sketchsystemfromdict(sketchdatadict):
 
 	
 	for xctdata in sketchdatadict["xctubes"]:
-		var xctube = xctubefromdata(xctdata)
+		xctubefromdata(xctdata)
 	updatecentrelinevisibility()
 	changetubedxcsvizmode()
 	updateworkingshell()

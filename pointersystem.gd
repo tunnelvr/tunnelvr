@@ -650,8 +650,6 @@ func buttonreleased_vrgrip():
 			elif pointertarget.get_name() == "DoSlice" and is_instance_valid(wasactivetargettube) and is_instance_valid(activetargetwall) and len(activetargetwall.nodepoints) == 0:
 				print(wasactivetargettube, " ", len(activetargetwall.nodepoints))
 				var xcdrawing = activetargetwall
-				var xcdrawinglink0 = [ ]
-				var xcdrawinglink1 = [ ]
 				var xcdata = { "name":xcdrawing.get_name(), "prevnodepoints":{}, "nextnodepoints":{}, "prevonepathpairs":[], "newonepathpairs":[] }
 				var xctdatadel = { "tubename":wasactivetargettube.get_name(), 
 								   "xcname0":wasactivetargettube.xcname0,
@@ -708,6 +706,17 @@ func buttonreleased_vrgrip():
 
 	gripmenu.disableallgripmenus()
 
+func targetwalltransformpos():
+	var laserrelvec = activelaserroot.global_transform.basis.inverse()*activetargetwallgrabbedlaserroottrans.basis.z
+	var angy = -Vector2(laserrelvec.z, laserrelvec.x).angle()
+	var angpush =-(activetargetwallgrabbedlaserroottrans.origin.y - activelaserroot.global_transform.origin.y)
+	var transformpos = activetargetwallgrabbedorgtransform.rotated(Vector3(0,1,0), angy)
+	var activetargetwallgrabbedpointmoved = activetargetwallgrabbedpoint + 20*angpush*activetargetwallgrabbeddispvector.normalized()
+	transformpos.origin += activetargetwallgrabbedpointmoved - transformpos*activetargetwallgrabbedlocalpoint
+	return { "name":activetargetwallgrabbed.get_name(), 
+			 "prevtransformpos":activetargetwallgrabbed.global_transform,
+			 "transformpos":transformpos }
+
 		
 func buttonreleased_vrtrigger():
 	if activetargetwallgrabbedtransform != null:
@@ -715,13 +724,13 @@ func buttonreleased_vrtrigger():
 			activetargetwallgrabbed.rpc("setxcdrawingposition", activetargetwallgrabbed.global_transform)
 		activetargetwallgrabbedtransform = null
 						
-func _physics_process(_delta):
+var grabbedrpctimecount = 0
+func _physics_process(delta):
 	if LaserOrient.visible: 
 		var firstlasertarget = LaserOrient.get_node("RayCast").get_collider() if LaserOrient.get_node("RayCast").is_colliding() and not LaserOrient.get_node("RayCast").get_collider().is_queued_for_deletion() else null
 		pointerplanviewtarget = planviewsystem if firstlasertarget != null and firstlasertarget.get_name() == "PlanView" and planviewsystem.checkplanviewinfront(LaserOrient) else null
 		if pointerplanviewtarget != null:
-			var handright = playerMe.get_node("HandRight")
-			pointerplanviewtarget.processplanviewsliding(handright.joypos, handright.gripbuttonheld, _delta)
+			pointerplanviewtarget.processplanviewsliding(handright.joypos, handright.gripbuttonheld, delta)
 		if pointerplanviewtarget != null and pointerplanviewtarget.planviewactive:
 			var planviewcontactpoint = LaserOrient.get_node("RayCast").get_collision_point()
 			LaserOrient.get_node("LaserSpot").global_transform.origin = planviewcontactpoint
@@ -738,15 +747,13 @@ func _physics_process(_delta):
 		
 	if activetargetwallgrabbedtransform != null:
 		if activetargetwallgrabbed.get_name() != "PlanView" and activetargetwallgrabbed.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
-			var laserrelvec = activelaserroot.global_transform.basis.inverse()*activetargetwallgrabbedlaserroottrans.basis.z
-			var angy = -Vector2(laserrelvec.z, laserrelvec.x).angle()
-			var angpush =-(activetargetwallgrabbedlaserroottrans.origin.y - activelaserroot.global_transform.origin.y)
-			var transformpos = activetargetwallgrabbedorgtransform.rotated(Vector3(0,1,0), angy)
-			var activetargetwallgrabbedpointmoved = activetargetwallgrabbedpoint + 20*angpush*activetargetwallgrabbeddispvector.normalized()
-			transformpos.origin += activetargetwallgrabbedpointmoved - transformpos*activetargetwallgrabbedlocalpoint
-			sketchsystem.actsketchchange([{"name":activetargetwallgrabbed.get_name(), 
-										   "prevtransformpos":activetargetwallgrabbed.global_transform,
-										   "transformpos":transformpos}])
+			var txcdata = targetwalltransformpos()
+			grabbedrpctimecount += delta
+			if grabbedrpctimecount > 0.25:
+				txcdata["rpcoptional"] = 1
+				grabbedrpctimecount = 0
+			sketchsystem.actsketchchange([txcdata])
+
 		elif activetargetwallgrabbedpoint != null:
 			activetargetwallgrabbed.global_transform = activelaserroot.get_node("LaserSpot").global_transform * activetargetwallgrabbedtransform
 			activetargetwallgrabbed.global_transform.origin += activetargetwallgrabbedpoint - activetargetwallgrabbed.global_transform * activetargetwallgrabbedlocalpoint
