@@ -307,7 +307,7 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 				prevonepathpairs.push_back(activetargetnodewall.onepathpairs[j+1])
 		if len(prevonepathpairs) != 0:
 			xcdata["prevonepathpairs"] = prevonepathpairs
-			xcdata["nextonepathpairs"] = [ ]
+			xcdata["newonepathpairs"] = [ ]
 		var xcdatalist = [ xcdata ]
 		
 		for xctube in activetargetnodewall.xctubesconn:
@@ -331,7 +331,7 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 		clearpointertarget()
 		activelaserroot.get_node("LaserSpot").visible = false
 		sketchsystem.actsketchchange(xcdatalist)
-		Tglobal.soundsystem.quicksound("BlipSound", pointertargetpoint)
+		#Tglobal.soundsystem.quicksound("BlipSound", pointertargetpoint)
 
 	
 	elif pointertargettype == "Papersheet" or pointertargettype == "PlanView":
@@ -389,7 +389,7 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 			setactivetargetnode(pointertargetwall.get_node("XCnodes").get_node(newnodename))
 			if pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 				pointertargetwall.expandxcdrawingscale(pointertargetpoint)
-			Tglobal.soundsystem.quicksound("ClickSound", pointertargetpoint)
+			#Tglobal.soundsystem.quicksound("ClickSound", pointertargetpoint)
 			initialsequencenodename = initialsequencenodenameP
 	
 		elif pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
@@ -440,7 +440,7 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 						xctdata["newdrawinglinks"] = [ ]
 				var xcvdata = { "xcvizstates":{ pointertargetwall.get_name():3 } }
 				sketchsystem.actsketchchange([xctdata, xcvdata])
-			Tglobal.soundsystem.quicksound("ClickSound", pointertargetpoint)
+			#Tglobal.soundsystem.quicksound("ClickSound", pointertargetpoint)
 			clearactivetargetnode()
 											
 	elif activetargetnode == null and pointertargettype == "XCnode":

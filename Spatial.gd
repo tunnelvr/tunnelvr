@@ -258,10 +258,10 @@ func _player_disconnected(id):
 	print("_player_disconnected ", id)
 	var playerothername = "NetworkedPlayer"+String(id)
 	Tglobal.morethanoneplayer = $Players.get_child_count() >= 2
-	print("Number of players before queuefree ", $Players.get_child_count())
-	if $Players.has_node(playerothername):
-		$Players.get_node(playerothername).queue_free()
-	print("Number of players after queuefree ", $Players.get_child_count())
+	var playerOther = $Players.get_node_or_null(playerothername)
+	if playerOther != null:
+		Tglobal.soundsystem.quicksound("PlayerDepart", playerOther.get_node("HeadCam").global_transform.origin)
+		playerOther.queue_free()
 	playerMe.bouncetestnetworkID = nextplayernetworkidinringskippingdoppelganger(id)
 	$GuiSystem/GUIPanel3D/Viewport/GUI/Panel/Label.text = "player "+String(id)+" disconnected"
 		

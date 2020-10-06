@@ -187,11 +187,30 @@ remote func actsketchchangeL(xcdatalist):
 				if lxcdrawing != null:
 					xcdata["prevtransformpos"] = lxcdrawing.global_transform
 			var xcdrawing = xcdrawingfromdata(xcdata)
-			if "nodepoints" in xcdata or "prevnodepoints" in xcdata or "prevnodepoints" in xcdata:
+			if "nodepoints" in xcdata or "nextnodepoints" in xcdata or "onepathpairs" in xcdata or "newonepathpairs" in xcdata:
 				xcdrawingstoupdate[xcdrawing.get_name()] = xcdrawing
 				if len(xcdata.get("prevnodepoints", [])) != 0:
 					for xctube in xcdrawing.xctubesconn:
 						xctubestoupdate[xctube.get_name()] = xctube
+
+			var tpos = null
+			var xcname = null
+			var sname = "ClickSound"
+			if len(xcdata.get("nextnodepoints", [])) != 0:
+				tpos = xcdata["nextnodepoints"].values()[0]
+			elif len(xcdata.get("prevnodepoints", [])) != 0:
+				tpos = xcdata["prevnodepoints"].values()[0]
+				sname = "BlipSound"
+			elif len(xcdata.get("newonepathpairs", [])) != 0:
+				xcname = xcdata["newonepathpairs"][0]
+			elif len(xcdata.get("prevonepathpairs", [])) != 0:
+				xcname = xcdata["prevonepathpairs"][0]
+			if xcname != null:
+				var xcn = xcdrawing.get_node("XCnodes").get_node_or_null(xcname)
+				if xcn != null:
+					tpos = xcn.translation
+			if tpos != null:
+				Tglobal.soundsystem.quicksound(sname, xcdrawing.global_transform*tpos)
 
 	for xcdrawing in xcdrawingstoupdate.values():
 		xcdrawing.updatexcpaths()

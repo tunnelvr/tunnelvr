@@ -2225,11 +2225,11 @@ environment = ExtResource( 2 )
 [node name="DirectionalLight" type="DirectionalLight" parent="WorldEnvironment"]
 transform = Transform( -1, 2.66913e-07, -1.86895e-07, 0, 0.573576, 0.819152, 3.25841e-07, 0.819152, -0.573576, 0, 50, 0 )
 light_energy = 0.6
-shadow_enabled = true
 shadow_color = Color( 0.388235, 0.0705882, 0.0705882, 1 )
 
 [node name="Kitchen" type="Spatial" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 1.6299, 1.51691, -31.8123 )
+visible = false
 
 [node name="CSGMesh" type="CSGMesh" parent="Kitchen"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -1.29078, -0.278551, -0.246248 )
