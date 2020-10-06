@@ -5,7 +5,7 @@ extends Spatial
 
 # Approaching the networking (also to do with undo function)
 # sketchsystem.sharexcdrawingovernetwork
-# sketchsystem.sharexctubeovernetwork(xctube)
+
 
 		
 # * implement deleteXC

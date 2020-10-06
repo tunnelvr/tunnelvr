@@ -286,10 +286,9 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 		movetopoint.z = 0.0
 		sketchsystem.actsketchchange([{
 					"name":activetargetnodewall.get_name(), 
-					"prevnodepoints":{activetargetnode.get_name():activetargetnode.translation}, 
-					"nextnodepoints":{activetargetnode.get_name():movetopoint} 
+					"prevnodepoints":{ activetargetnode.get_name():activetargetnode.translation }, 
+					"nextnodepoints":{ activetargetnode.get_name():movetopoint } 
 				}])
-		#activetargetnodewall.movexcnode(activetargetnode, pointertargetpoint, sketchsystem)
 		if activetargetnodewall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 			activetargetnodewall.expandxcdrawingscale(pointertargetpoint)
 		clearactivetargetnode()
@@ -311,7 +310,7 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 				prevonepathpairs.push_back(activetargetnodewall.onepathpairs[j+1])
 		if len(prevonepathpairs) != 0:
 			xcdata["prevonepathpairs"] = prevonepathpairs
-			xcdata["newonepathpairs"] = [ ]
+			xcdata["nextonepathpairs"] = [ ]
 		var xcdatalist = [ xcdata ]
 		
 		for xctube in activetargetnodewall.xctubesconn:
@@ -334,7 +333,6 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 		clearactivetargetnode()
 		clearpointertarget()
 		activelaserroot.get_node("LaserSpot").visible = false
-		#recselectedtargetwall.removexcnode(recselectedtarget, false, sketchsystem)
 		sketchsystem.actsketchchange(xcdatalist)
 		Tglobal.soundsystem.quicksound("BlipSound", pointertargetpoint)
 
@@ -391,7 +389,6 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 				xcdata["prevonepathpairs"] = [ ]
 				xcdata["newonepathpairs"] = [ activetargetnode.get_name(), newnodename]
 			sketchsystem.actsketchchange([xcdata])
-			#pointertargetwall.updatexcpaths()
 			setactivetargetnode(pointertargetwall.get_node("XCnodes").get_node(newnodename))
 			if pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 				pointertargetwall.expandxcdrawingscale(pointertargetpoint)
@@ -423,9 +420,29 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 					else:
 						xcdata["prevonepathpairs"] = [ ]
 				sketchsystem.actsketchchange([xcdata])
+
 			else:
-				sketchsystem.xcapplyonepathtube(activetargetnode, activetargetnodewall, pointertarget, pointertargetwall)
-				sketchsystem.actsketchchange([{"xcvizstates":{pointertargetwall.get_name():3}}])
+				var xcname0 = activetargetnodewall.get_name()
+				var nodename0 = activetargetnode.get_name()
+				var xcname1 = pointertargetwall.get_name()
+				var nodename1 = pointertarget.get_name()
+				var xctube = sketchsystem.findxctube(xcname0, xcname1)
+				var xctdata = { "xcname0": xcname0, "xcname1":xcname1 }
+				if xctube == null:
+					xctdata["tubename"] = "**notset"
+					xctdata["prevdrawinglinks"] = [ ]
+					xctdata["newdrawinglinks"] = [ nodename0, nodename1, "simpledirt" ]
+				else:
+					xctdata["tubename"] = xctube.get_name()
+					var j = xctube.linkspresentindex(nodename0, nodename1) if xctube.xcname0 == xcname0 else xctube.linkspresentindex(nodename1, nodename0)
+					if j == -1:
+						xctdata["prevdrawinglinks"] = [ ]
+						xctdata["newdrawinglinks"] = [ nodename0, nodename1, "simpledirt" ]
+					else:
+						xctdata["prevdrawinglinks"] = [ nodename0, nodename1, xctube.xcsectormaterials[j] ]
+						xctdata["newdrawinglinks"] = [ ]
+				var xcvdata = { "xcvizstates":{ pointertargetwall.get_name():3 } }
+				sketchsystem.actsketchchange([xctdata, xcvdata])
 			Tglobal.soundsystem.quicksound("ClickSound", pointertargetpoint)
 			clearactivetargetnode()
 											
@@ -609,54 +626,56 @@ func buttonreleased_vrgrip():
 				print("Not implemented")
 
 			elif pointertarget.get_name() == "DragXC" and is_instance_valid(activetargetnode):
-				var dragvec = gripmenu.gripmenupointertargetpoint - activetargetnode.global_transform.origin
-				activetargetnodewall.dragxcnodes(dragvec, sketchsystem)
+				var dragvec = activetargetnodewall.global_transform.xform_inv(gripmenu.gripmenupointertargetpoint) - activetargetnode.translation
+				dragvec.z = 0.0
+				var prevnodepoints = { }
+				var nextnodepoints = { }
+				#activetargetnodewall.dragxcnodes(dragvec, sketchsystem)
+				for nodename in activetargetnodewall.nodepoints:
+					prevnodepoints[nodename] = activetargetnodewall.nodepoints[nodename]
+					nextnodepoints[nodename] = activetargetnodewall.nodepoints[nodename] + dragvec
+				sketchsystem.actsketchchange([{ "name":activetargetnodewall.get_name(), 
+												"prevnodepoints":prevnodepoints,
+												"nextnodepoints":nextnodepoints
+											}])
 
 			elif pointertarget.get_name() == "HoleXC":
-				var xcdrawinghole = gripmenu.gripmenupointertargetwall.ConstructHoleXC(gripmenu.gripmenuactivetargettubesectorindex)
-				sketchsystem.actsketchchange([{"xcvizstates":{ gripmenu.gripmenupointertargetwall.xcname0:0, 
-															  gripmenu.gripmenupointertargetwall.xcname1:0,
-															  xcdrawinghole.get_name():2 }}])
-				setactivetargetwall(xcdrawinghole)
+				var xcdata = gripmenu.gripmenupointertargetwall.ConstructHoleXC(gripmenu.gripmenuactivetargettubesectorindex, sketchsystem)
+				sketchsystem.actsketchchange([xcdata, 
+						{"xcvizstates":{ gripmenu.gripmenupointertargetwall.xcname0:0, 
+										 gripmenu.gripmenupointertargetwall.xcname1:0,
+										 xcdata["name"]:2 }}])
+				setactivetargetwall(sketchsystem.get_node("XCdrawings").get_node(xcdata["name"]))
 													
 			elif pointertarget.get_name() == "DoSlice" and is_instance_valid(wasactivetargettube) and is_instance_valid(activetargetwall) and len(activetargetwall.nodepoints) == 0:
 				print(wasactivetargettube, " ", len(activetargetwall.nodepoints))
 				var xcdrawing = activetargetwall
-				var vang = Vector2(xcdrawing.global_transform.basis.x.x, xcdrawing.global_transform.basis.x.z).angle()
-				xcdrawing.setxcpositionangle(vang)
 				var xcdrawinglink0 = [ ]
 				var xcdrawinglink1 = [ ]
-				if wasactivetargettube.slicetubetoxcdrawing(xcdrawing, xcdrawinglink0, xcdrawinglink1):
-					xcdrawing.updatexcpaths()
-					sketchsystem.sharexcdrawingovernetwork(xcdrawing)
-					setactivetargetwall(xcdrawing)
+				var xcdata = { "name":xcdrawing.get_name(), "prevnodepoints":{}, "nextnodepoints":{}, "prevonepathpairs":[], "newonepathpairs":[] }
+				var xctdatadel = { "tubename":wasactivetargettube.get_name(), 
+								   "xcname0":wasactivetargettube.xcname0,
+								   "xcname1":wasactivetargettube.xcname1,
+								   "prevdrawinglinks":[], "newdrawinglinks":[] }
+				var xctdata0 = { "tubename":"**notset", 
+								 "xcname0":wasactivetargettube.xcname0,
+								 "xcname1":xcdrawing.get_name(),
+								 "prevdrawinglinks":[], "newdrawinglinks":[] }
+				var xctdata1 = { "tubename":"**notset", 
+								 "xcname0":xcdrawing.get_name(),
+								 "xcname1":wasactivetargettube.xcname1,
+								 "prevdrawinglinks":[], "newdrawinglinks":[] }
+				if wasactivetargettube.slicetubetoxcdrawing(xcdrawing, xcdata, xctdatadel, xctdata0, xctdata1):
 					clearactivetargetnode()
-					var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(wasactivetargettube.xcname0)
-					var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(wasactivetargettube.xcname1)
-					xcdrawing0.xctubesconn.remove(xcdrawing0.xctubesconn.find(wasactivetargettube))
-					xcdrawing1.xctubesconn.remove(xcdrawing1.xctubesconn.find(wasactivetargettube))
-
-					var xctube0 = sketchsystem.newXCtube(xcdrawing0, xcdrawing)
-					xctube0.xcdrawinglink = xcdrawinglink0
-					xctube0.xcsectormaterials = wasactivetargettube.xcsectormaterials.duplicate()
-					xctube0.updatetubelinkpaths(sketchsystem)
-					sketchsystem.sharexctubeovernetwork(xctube0)
-					xctube0.updatetubeshell(sketchsystem.get_node("XCdrawings"), Tglobal.tubeshellsvisible)
-				
-					var xctube1 = sketchsystem.newXCtube(xcdrawing, xcdrawing1)
-					xctube1.xcdrawinglink = xcdrawinglink1
-					xctube1.updatetubelinkpaths(sketchsystem)
-					xctube1.xcsectormaterials = wasactivetargettube.xcsectormaterials.duplicate()
-					
-					#xctube1.xcsectormaterials.push_front(xctube1.xcsectormaterials.pop_back())
-					#xctube1.xcsectormaterials.push_front(xctube1.xcsectormaterials.pop_back())
-
-					sketchsystem.sharexctubeovernetwork(xctube0)
-					xctube1.updatetubeshell(sketchsystem.get_node("XCdrawings"), Tglobal.tubeshellsvisible)
-
-					xcdrawing.updatexctubeshell(sketchsystem.get_node("XCdrawings"), Tglobal.tubeshellsvisible)  # not strictly necessary as there won't be any shells in a sliced tube xc
 					clearpointertarget()
-					wasactivetargettube.queue_free()
+					var xctdataviz = {"xcvizstates":{ xcdrawing.get_name():3 }, 
+						"updatetubeshells":[
+							{ "tubename":xctdatadel["tubename"], "xcname0":xctdatadel["xcname0"], "xcname1":xctdatadel["xcname1"] },
+							{ "tubename":xctdata0["tubename"], "xcname0":xctdata0["xcname0"], "xcname1":xctdata0["xcname1"] },
+							{ "tubename":xctdata1["tubename"], "xcname0":xctdata1["xcname0"], "xcname1":xctdata1["xcname1"] } 
+						]}
+					sketchsystem.actsketchchange([xcdata, xctdatadel, xctdata0, xctdata1, xctdataviz])
+					setactivetargetwall(xcdrawing)
 					wasactivetargettube = null
 					activelaserroot.get_node("LaserSpot").visible = false
 
@@ -671,7 +690,8 @@ func buttonreleased_vrgrip():
 		var updatetubeshells = [ ]
 		for xctube in pointertargetwall.xctubesconn:
 			if not xctube.positioningtube:
-				updatetubeshells.push_back(xctube.get_name())
+				updatetubeshells.push_back({ "tubename":xctube.get_name(), "xcname0":xctube.xcname0, "xcname1":xctube.xcname1 })
+
 		sketchsystem.actsketchchange([{"xcvizstates":{ pointertargetwall.get_name():2 }, "updatetubeshells":updatetubeshells, "updatexcshells":updatexcshells }])
 		#sketchsystem.sharexcdrawingovernetwork(pointertargetwall)
 		setactivetargetwall(null)

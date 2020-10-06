@@ -94,7 +94,7 @@ func exportxcrpcdata():
 			 #"prevtransformpos":
 			 "nodepoints": nodepoints, 
 			 # "prevnodepoints":
-			 # "newnodepoints":
+			 # "nextnodepoints":
 			 "onepathpairs":onepathpairs,
 			 # "prevonepathpairs":
 			 # "newonepathpairs"
@@ -287,58 +287,6 @@ func clearallcontents():
 	nodepoints.clear()
 	assert (len(xctubesconn) == 0)  # for now
 
-# to abolish
-func removexcnode(xcn, brejoinlines, sketchsystem):
-	var nodename = xcn.get_name()
-	nodepoints.erase(nodename)
-	var rejoinnodes = [ ]
-	for j in range(len(onepathpairs) - 2, -1, -2):
-		if (onepathpairs[j] == nodename) or (onepathpairs[j+1] == nodename):
-			rejoinnodes.append(onepathpairs[j+1]  if onepathpairs[j] == nodename  else onepathpairs[j])
-			onepathpairs[j] = onepathpairs[-2]
-			onepathpairs[j+1] = onepathpairs[-1]
-			onepathpairs.resize(len(onepathpairs) - 2)
-	print("brejoinlinesbrejoinlinesbrejoinlinesbrejoinlines ", brejoinlines, " ", rejoinnodes)
-	if brejoinlines and len(rejoinnodes) >= 2:
-		onepathpairs.append(rejoinnodes[0])
-		onepathpairs.append(rejoinnodes[1])
-	xcn.queue_free()
-	var	xctubesconnupdated = [ ]
-	for xctube in xctubesconn:
-		if xctube.removetubenodepoint(get_name(), nodename):  # might extend to a batch operation when sequence of points deleted at once (though sequence terminates at one of these junctions anyway)
-			xctubesconnupdated.append(xctube)
-	updatelinksandtubesafterchange(xctubesconnupdated, sketchsystem)
-
-# to abolish
-func movexcnode(xcn, pt, sketchsystem):
-	print("m,mmmmxmxmxm ", xcn.global_transform.origin, pt)
-	setxcnpoint(xcn, pt, true)
-	var	xctubesconnupdated = [ ]
-	for xctube in xctubesconn:
-		if xctube.checknodelinkedto(get_name(), xcn.get_name()):
-			xctubesconnupdated.append(xctube)
-	updatelinksandtubesafterchange(xctubesconnupdated, sketchsystem)
-
-# to abolish
-func dragxcnodes(dragvec, sketchsystem):
-	for xcn in get_node("XCnodes").get_children():
-		setxcnpoint(xcn, xcn.global_transform.origin + dragvec, true)
-	updatelinksandtubesafterchange(xctubesconn, sketchsystem)
-
-func updatelinksandtubesafterchange(xctubesconnupdated, sketchsystem):
-	updatexcpaths()
-	var	xcdrawingnamesmoved = [ get_name() ]
-	for xctube in xctubesconnupdated:
-		if xctube.positioningtube:
-			xctube.positionfromtubelinkpaths(sketchsystem)
-			if not xcdrawingnamesmoved.has(xctube.xcname1):
-				xcdrawingnamesmoved.append(xctube.xcname1)
-		
-	for xcdrawingname in xcdrawingnamesmoved:
-		sketchsystem.sharexcdrawingovernetwork(sketchsystem.get_node("XCdrawings").get_node(xcdrawingname))
-	for xctube in xctubesconnupdated:
-		xctube.updatetubelinkpaths(sketchsystem)
-		sketchsystem.sharexctubeovernetwork(xctube)
 
 func updatexcpaths():
 	if drawingtype == DRAWING_TYPE.DT_PAPERTEXTURE:

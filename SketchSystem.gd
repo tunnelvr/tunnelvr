@@ -16,46 +16,6 @@ func _ready():
 	get_node("/root/Spatial/ImageSystem").fetchpaperdrawing(floordrawing)
 		
 
-# to abolish
-func xcapplyonepathtube(xcn0, xcdrawing0, xcn1, xcdrawing1): 
-	assert (xcdrawing0 == xcn0.get_parent().get_parent())
-	assert (xcdrawing1 == xcn1.get_parent().get_parent())
-	assert (xcdrawing0 != xcdrawing1)
-	
-	var xctube = null
-	var xctubeRev = null
-	for lxctube in xcdrawing0.xctubesconn:
-		assert (lxctube.xcname0 == xcdrawing0.get_name() or lxctube.xcname1 == xcdrawing0.get_name())
-		if lxctube.xcname1 == xcdrawing1.get_name():
-			xctube = lxctube
-			break
-		if lxctube.xcname0 == xcdrawing1.get_name():
-			xctubeRev = lxctube
-			break
-
-	if xctube == null and xctubeRev == null:
-		if xcdrawing0.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE and xcdrawing1.drawingtype == DRAWING_TYPE.DT_CENTRELINE:
-			xctubeRev = newXCtube(xcdrawing1, xcdrawing0)
-		elif xcdrawing0.drawingtype == DRAWING_TYPE.DT_XCDRAWING and xcdrawing1.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
-			xctubeRev = newXCtube(xcdrawing1, xcdrawing0)
-		else:
-			xctube = newXCtube(xcdrawing0, xcdrawing1)
-	if xctube != null:
-		xctube.xctubeapplyonepath(xcn0, xcn1)
-	else:
-		xctubeRev.xctubeapplyonepath(xcn1, xcn0)
-		xctube = xctubeRev
-		
-	if xctube.positioningtube:
-		xctube.positionfromtubelinkpaths(self)
-		sharexcdrawingovernetwork(xcdrawing1.exportxcrpcdata())
-	xctube.updatetubelinkpaths(self)
-	sharexctubeovernetwork(xctube)
-
-# to abolish
-func sharexctubeovernetwork(xctube):
-	if Tglobal.connectiontoserveractive:
-		rpc("xctubefromdata", xctube.exportxctrpcdata())
 
 
 func findxctube(xcname0, xcname1):
@@ -167,12 +127,18 @@ remote func actsketchchangeL(xcdatalist):
 		var xcdata = xcdatalist[i]
 		
 		if "tubename" in xcdata:
+			if xcdata["tubename"] == "**notset":
+				xcdata["tubename"] = "XCtube_"+xcdata["xcname0"]+"_"+xcdata["xcname1"]
 			var xctube = xctubefromdata(xcdata)
-			xctubestoupdate[xctube.get_name()] = xctube
-			if "materialsectorschanged" in xcdata:
-				for j in xcdata["materialsectorschanged"]:
-					if j < len(xctube.xcsectormaterials) and j < xctube.get_node("XCtubesectors").get_child_count():
-						get_node("/root/Spatial/MaterialSystem").updatetubesectormaterial(xctube.get_node("XCtubesectors").get_child(j), xctube.xcsectormaterials[j], false)
+			if len(xctube.xcdrawinglink) == 0 and len(xctube.xcsectormaterials) == 0:
+				removeXCtube(xctube)
+				xctube.queue_free() 
+			else:
+				xctubestoupdate[xctube.get_name()] = xctube
+				if "materialsectorschanged" in xcdata:
+					for j in xcdata["materialsectorschanged"]:
+						if j < len(xctube.xcsectormaterials) and j < xctube.get_node("XCtubesectors").get_child_count():
+							get_node("/root/Spatial/MaterialSystem").updatetubesectormaterial(xctube.get_node("XCtubesectors").get_child(j), xctube.xcsectormaterials[j], false)
 			
 		elif "xcvizstates" in xcdata:
 			xcdata["prevxcvizstates"] = { }
@@ -188,8 +154,9 @@ remote func actsketchchangeL(xcdatalist):
 					else:
 						xcdrawing.setxcdrawingvisiblehide((drawingvisiblecode & 2) == 0)
 			if "updatetubeshells" in xcdata:
-				for xctubename in xcdata["updatetubeshells"]:
-					var xctube = $XCtubes.get_node_or_null(xctubename)
+				for xct in xcdata["updatetubeshells"]:
+					var xctube = findxctube(xct["xcname0"], xct["xcname1"])
+					#var xctube = $XCtubes.get_node_or_null(xct["xctubename"])
 					if xctube != null:
 						xctube.updatetubeshell($XCdrawings, Tglobal.tubeshellsvisible)
 			if "updatexcshells" in xcdata:
@@ -360,3 +327,14 @@ func newXCtube(xcdrawing0, xcdrawing1):
 	xctube.add_to_group("gpnoncentrelinegeo")
 	return xctube
 	
+func removeXCtube(xctube):
+	var xcdrawing0 = $XCdrawings.get_node_or_null(xctube.xcname0)
+	var xcdrawing1 = $XCdrawings.get_node_or_null(xctube.xcname1)
+	if xcdrawing0 != null:
+		var i = xcdrawing0.xctubesconn.find(xctube)
+		if i != -1:
+			xcdrawing0.xctubesconn.remove(i)
+	if xcdrawing1 != null:
+		var i = xcdrawing1.xctubesconn.find(xctube)
+		if i != -1:
+			xcdrawing1.xctubesconn.remove(i)

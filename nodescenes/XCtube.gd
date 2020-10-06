@@ -17,43 +17,7 @@ var tubesectorptindexlists = [ ]
 
 const linewidth = 0.02
 	
-# to abolish
-func xctubeapplyonepath(xcn0, xcn1):
-	print("xcapplyonepathxcapplyonepath-pre", xcn0, xcn1, xcdrawinglink)
-	assert (xcn0.get_parent().get_parent().get_name() == xcname0 and xcn1.get_parent().get_parent().get_name() == xcname1)
-	for j in range(0, len(xcdrawinglink), 2):
-		if xcdrawinglink[j] == xcn0.get_name() and xcdrawinglink[j+1] == xcn1.get_name():
-			xcdrawinglink.remove(j+1)
-			xcdrawinglink.remove(j)
-			xcn0 = null
-			break
-	if xcn0 != null:
-		xcdrawinglink.append(xcn0.get_name())
-		xcdrawinglink.append(xcn1.get_name())
-	print("xcapplyonepathxcapplyonepath-post", xcdrawinglink)
-	assert ((len(xcdrawinglink)%2) == 0)
 
-# to abolish
-func removetubenodepoint(xcname, nodename):
-	assert ((xcname == xcname0) or (xcname == xcname1))
-	var m = 0 if xcname == xcname0 else 1
-	var nodelinkedto = false
-	for j in range(len(xcdrawinglink) - 2, -1, -2):
-		if xcdrawinglink[j+m] == nodename:
-			xcdrawinglink[j] = xcdrawinglink[-2]
-			xcdrawinglink[j+1] = xcdrawinglink[-1]
-			xcdrawinglink.resize(len(xcdrawinglink) - 2)
-			nodelinkedto = true
-	return nodelinkedto
-
-# to abolish
-func checknodelinkedto(xcname, nodename):
-	assert ((xcname == xcname0) or (xcname == xcname1))
-	var m = 0 if xcname == xcname0 else 1
-	for j in range(len(xcdrawinglink) - 2, -1, -2):
-		if xcdrawinglink[j+m] == nodename:
-			return true
-	return false
 
 func exportxctrpcdata():   # read by xctubefromdata()
 	return { "name":get_name(),  # tubename
@@ -103,13 +67,13 @@ func mergexctrpcdata(xctdata):
 			if j == -1:
 				xcdrawinglink.push_back(drawinglinksAdd[iA*3+m0])
 				xcdrawinglink.push_back(drawinglinksAdd[iA*3+m1])
-				xcsectormaterials.push_back(xcsectormaterials[iA])	
+				xcsectormaterials.push_back(drawinglinksAdd[iA*3+2])	
 			else:
 				print("wrong: sector already here")
 				xcsectormaterials[j] = drawinglinksAdd[iA*3+2]
+			iA += 1
 		if len(materialsectorschanged) != 0:
 			xctdata["materialsectorschanged"] = materialsectorschanged
-			
 		assert (len(xcsectormaterials)*2 == len(xcdrawinglink))
 
 
@@ -145,11 +109,12 @@ func shiftxcdrawingposition(sketchsystem):
 		xcdrawingXC.setxcpositionorigin(Vector3(xco.x, xcdrawingXC.global_transform.origin.y, xco.z))
 		xcdrawingXC.updatexcpaths()
 		
-	sketchsystem.sharexcdrawingovernetwork(xcdrawingXC)
+	#sketchsystem.sharexcdrawingovernetwork(xcdrawingXC)
+	print("Not sharing xcdrawing position -- use actsketchchange technology")
 	for xctube in xcdrawingXC.xctubesconn:
 		if sketchsystem.get_node("XCdrawings").get_node(xctube.xcname0).drawingtype == DRAWING_TYPE.DT_XCDRAWING:  # not other floor types pointing in
 			xctube.updatetubelinkpaths(sketchsystem)
-			sketchsystem.sharexctubeovernetwork(xctube)
+			#sketchsystem.sharexctubeovernetwork(xctube)
 
 func shiftfloorfromdrawnstations(sketchsystem):
 	if len(xcdrawinglink) == 0:
@@ -250,7 +215,7 @@ func pickpolysindex(polys, meetnodenames):
 func fa(a, b):
 	return a[0] < b[0] or (a[0] == b[0] and a[1] < b[1])
 
-func maketubepolyassociation(xcdrawing0, xcdrawing1):
+func maketubepolyassociation_andreorder(xcdrawing0, xcdrawing1):
 	assert ((xcdrawing0.get_name() == xcname0) and (xcdrawing1.get_name() == xcname1))
 	var polys0 = Polynets.makexcdpolys(xcdrawing0.nodepoints, xcdrawing0.onepathpairs, true)
 	var polys1 = Polynets.makexcdpolys(xcdrawing1.nodepoints, xcdrawing1.onepathpairs, true)
@@ -317,11 +282,11 @@ func maketubepolyassociation(xcdrawing0, xcdrawing1):
 	return [poly0, poly1, ila]
 
 
-func slicetubetoxcdrawing(xcdrawing, xcdrawinglink0, xcdrawinglink1):
+func slicetubetoxcdrawing(xcdrawing, xcdata, xctdatadel, xctdata0, xctdata1):
 	var xcdrawings = get_node("/root/Spatial/SketchSystem/XCdrawings")
 	var xcdrawing0 = xcdrawings.get_node(xcname0)
 	var xcdrawing1 = xcdrawings.get_node(xcname1)
-	var mtpa = maketubepolyassociation(xcdrawing0, xcdrawing1)
+	var mtpa = maketubepolyassociation_andreorder(xcdrawing0, xcdrawing1)
 	var poly0 = mtpa[0]
 	var poly1 = mtpa[1]
 	var ila = mtpa[2]
@@ -330,8 +295,8 @@ func slicetubetoxcdrawing(xcdrawing, xcdrawinglink0, xcdrawinglink1):
 	
 	var xcnodes0 = xcdrawing0.get_node("XCnodes")
 	var xcnodes1 = xcdrawing1.get_node("XCnodes")
-	var xcnfirst = null	
-	var xcnlast = null
+	var xcnamefirst = null	
+	var xcnamelast = null
 	var lamoutofrange = false
 	var xcnormal = xcdrawing.global_transform.basis.z
 	var xcdot = xcnormal.dot(xcdrawing.global_transform.origin)
@@ -350,12 +315,19 @@ func slicetubetoxcdrawing(xcdrawing, xcdrawinglink0, xcdrawinglink1):
 		while i0 < ila0N or i1 < ila1N:
 			var pt0 = xcnodes0.get_node(poly0[(ila0+i0)%len(poly0)]).global_transform.origin
 			var pt1 = xcnodes1.get_node(poly1[(ila1+i1)%len(poly1)]).global_transform.origin
-			var xcn = xcdrawing.newxcnode()
+			var xcname = xcdrawing.newuniquexcnodename()
 			if i0 == 0 and i1 == 0:
-				xcdrawinglink0.append(poly0[ila0])
-				xcdrawinglink0.append(xcn.get_name())
-				xcdrawinglink1.append(xcn.get_name())
-				xcdrawinglink1.append(poly1[ila1])
+				xctdatadel["prevdrawinglinks"].push_back(poly0[ila0])
+				xctdatadel["prevdrawinglinks"].push_back(poly1[ila1])
+				xctdatadel["prevdrawinglinks"].push_back(xcsectormaterials[i])
+
+				xctdata0["newdrawinglinks"].push_back(poly0[ila0])
+				xctdata0["newdrawinglinks"].push_back(xcname)
+				xctdata0["newdrawinglinks"].push_back(xcsectormaterials[i])
+
+				xctdata1["newdrawinglinks"].push_back(xcname)
+				xctdata1["newdrawinglinks"].push_back(poly1[ila1])
+				xctdata1["newdrawinglinks"].push_back(xcsectormaterials[i])
 			
 			# 0 = xcdrawing.global_transform.basis.z.dot(pt0 + lam*(pt1 - pt0) - xcdrawing.global_transform.origin)
 			# lam*xcdrawing.global_transform.basis.z.dot(pt0 - pt1) = xcdrawing.global_transform.basis.z.dot(pt0 - xcdrawing.global_transform.origin)
@@ -365,8 +337,9 @@ func slicetubetoxcdrawing(xcdrawing, xcdrawinglink0, xcdrawinglink1):
 			if lam < 0.0 or lamfromedge*ptvec.length() < sliceclearancedist:
 				print("Slice point out of range ", lam)
 				lamoutofrange = true
-			xcdrawing.setxcnpoint(xcn, lerp(pt0, pt1, lam), true)
-				
+			var xcpoint = xcdrawing.global_transform.xform_inv(lerp(pt0, pt1, lam))
+			xcpoint.z = 0.0
+			xcdata["nextnodepoints"][xcname] = xcpoint
 			assert (i0 <= ila0N and i1 <= ila1N)
 			if i0 < ila0N and (acc - ila0N < 0 or i1 == ila1N):
 				acc += ila1N
@@ -374,35 +347,32 @@ func slicetubetoxcdrawing(xcdrawing, xcdrawinglink0, xcdrawinglink1):
 			if i1 < ila1N and (acc >= 0 or i0 == ila0N):
 				acc -= ila0N
 				i1 += 1
-			if xcnlast != null:
-				xcdrawing.onepathpairs.append(xcnlast.get_name())
-				xcdrawing.onepathpairs.append(xcn.get_name())
-			xcnlast = xcn
-			if xcnfirst == null:
-				xcnfirst = xcn
+			if xcnamelast != null:
+				xcdata["newonepathpairs"].push_back(xcnamelast)
+				xcdata["newonepathpairs"].push_back(xcname)
+			xcnamelast = xcname
+			if xcnamefirst == null:
+				xcnamefirst = xcname
 
-	xcdrawing.onepathpairs.append(xcnlast.get_name())
-	xcdrawing.onepathpairs.append(xcnfirst.get_name())
-	
+	xcdata["newonepathpairs"].push_back(xcnamelast)
+	xcdata["newonepathpairs"].push_back(xcnamefirst)
 	# undo mysterious advancing of the sector links
 	#xcdrawinglink1.push_back(xcdrawinglink1.pop_front())
 	#xcdrawinglink1.push_back(xcdrawinglink1.pop_front())
 	if lamoutofrange:
-		xcdrawing.clearallcontents()
 		return false
-	
 	return true
 
-func ConstructHoleXC(i):
+func ConstructHoleXC(i, sketchsystem):
 	assert (xcsectormaterials[i] == "hole")
-	var sketchsystem = get_node("/root/Spatial/SketchSystem")
 	var xcdrawingholename = "Hole"+("" if i == 0 else ";"+str(i))+";"+xcname0+";"+xcname1
-	var xcdrawinghole = null
-	if sketchsystem.get_node("XCdrawings").has_node(xcdrawingholename):
-		xcdrawinghole = sketchsystem.get_node("XCdrawings").get_node(xcdrawingholename)
-	else:
-		xcdrawinghole = sketchsystem.newXCuniquedrawing(DRAWING_TYPE.DT_XCDRAWING, xcdrawingholename)
-	
+	var xcdrawinghole = sketchsystem.get_node_or_null("XCdrawings").get_node(xcdrawingholename)
+	var xcdata = { "name":xcdrawingholename, 
+				   "xcresource":"",
+				   "drawingtype":DRAWING_TYPE.DT_XCDRAWING,
+				   "prevnodepoints":{}, "nextnodepoints":{}, 
+				   "prevonepathpairs":[], "newonepathpairs":[] }
+
 	var tubesectormesh = $XCtubesectors.get_child(i).get_node("MeshInstance").mesh
 	var mdt = MeshDataTool.new()
 	mdt.create_from_surface(tubesectormesh, 0)
@@ -414,9 +384,8 @@ func ConstructHoleXC(i):
 	var avgnormal = sumnormals/mdt.get_vertex_count()
 	var avgpoint = sumpoints/mdt.get_vertex_count()
 	var drawingwallangle = Vector2(avgnormal.x, avgnormal.z).angle() + deg2rad(90)
-	xcdrawinghole.setxcpositionangle(drawingwallangle)
-	xcdrawinghole.setxcpositionorigin(avgpoint)
-	
+	xcdata["transformpos"] = Transform(Basis().rotated(Vector3(0,-1,0), drawingwallangle), avgpoint) 
+
 	var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(xcname0)
 	var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(xcname1)
 	var xcnsourcelist = [ ]
@@ -427,26 +396,19 @@ func ConstructHoleXC(i):
 		var i1 = tubesectorptindexlists[i][1][j]
 		xcnsourcelist.push_back(xcdrawing1.get_node("XCnodes").get_node(i1))
 
-	var nodepointsremaining = xcdrawinghole.nodepoints.duplicate()
-	xcdrawinghole.onepathpairs.clear()
+	if xcdrawinghole != null:
+		xcdata["prevonepathpairs"] = xcdrawinghole.onepathpairs.duplicate()
+		xcdata["prevnodepoints"][name] = xcdrawinghole.nodepoints.duplicate()
+		
 	var prevname = "r"+xcnsourcelist[-1].get_name()
 	for j in range(len(xcnsourcelist)):
 		var xcnsource = xcnsourcelist[j]
 		var name = ("" if j < xir else "r")+xcnsource.get_name()
-		var xcn = null
-		if xcdrawinghole.get_node("XCnodes").has_node(name):
-			xcn = xcdrawinghole.get_node("XCnodes").get_node(name)
-			nodepointsremaining.erase(name)
-		else:
-			xcn = xcdrawinghole.newxcnode(name)
-		xcdrawinghole.setxcnpoint(xcn, xcnsource.global_transform.origin, false)
-		xcdrawinghole.onepathpairs.push_back(prevname)
-		xcdrawinghole.onepathpairs.push_back(name)
+		xcdata["nextnodepoints"][name] = xcdata["transformpos"].xform_inv(xcnsource.global_transform.origin)
+		xcdata["newonepathpairs"].push_back(prevname)
+		xcdata["newonepathpairs"].push_back(name)
 		prevname = name
-	for xcnr in nodepointsremaining:
-		xcdrawinghole.removexcnode(xcnr, false, sketchsystem)
-	xcdrawinghole.updatexcpaths()
-	return xcdrawinghole
+	return xcdata
 
 
 func add_vertex(surfaceTool, xcnodes, poly, ila, i):
@@ -472,7 +434,7 @@ func updatetubeshell(xcdrawings, makevisible):
 		
 	var xcdrawing0 = xcdrawings.get_node(xcname0)
 	var xcdrawing1 = xcdrawings.get_node(xcname1)
-	var mtpa = maketubepolyassociation(xcdrawing0, xcdrawing1)
+	var mtpa = maketubepolyassociation_andreorder(xcdrawing0, xcdrawing1)
 	var poly0 = mtpa[0]
 	var poly1 = mtpa[1]
 	var ila = mtpa[2]

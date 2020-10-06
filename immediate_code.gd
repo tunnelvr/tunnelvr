@@ -26,4 +26,6 @@ func _run():
 	print(a.get("s"))
 	print(a.erase("r"))
 	print(1 & 2)
+	var b = [6,7,87]
+	print(b.find(0))
 	
