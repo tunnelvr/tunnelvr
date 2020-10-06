@@ -104,7 +104,7 @@ func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointert
 		enablegripmenus(["NewXC"])
 
 	else:
-		enablegripmenus(["NewXC", "", ""])
+		enablegripmenus(["NewXC", "Undo"])
 				
 
 # Calibri Fontsize 20: height 664 width 159

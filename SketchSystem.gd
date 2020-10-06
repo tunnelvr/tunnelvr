@@ -120,6 +120,21 @@ func actsketchchange(xcdatalist):
 			rpc("actsketchchangeL", xcdatalist)
 	
 remote func actsketchchangeL(xcdatalist):
+	if "undoact" in xcdatalist[0]:
+		if len(actsketchchangeundostack) != 0:
+			# check this matches
+			actsketchchangeundostack.pop_back()
+	else:
+		if len(actsketchchangeundostack) > 0 and len(actsketchchangeundostack[-1]) == 1 and len(xcdatalist) == 1 \
+			and "transformpos" in actsketchchangeundostack[-1][0] and "transformpos" in xcdatalist[0] \
+			and actsketchchangeundostack[-1][0].get("name", "*1") == xcdatalist[0].get("name", "*2"):
+				actsketchchangeundostack[-1][0]["transformpos"] = xcdatalist[0]["transformpos"]
+				actsketchchangeundostack[-1][0].erase("rpcoptional")
+		else:
+			while len(actsketchchangeundostack) >= 10:
+				actsketchchangeundostack.pop_front()
+			actsketchchangeundostack.push_back(xcdatalist)
+			
 	# append to undo stack here
 	var xcdrawingstoupdate = { }
 	var xctubestoupdate = { }
@@ -147,7 +162,7 @@ remote func actsketchchangeL(xcdatalist):
 				if xcdrawing != null:
 					var drawingplanevisible = xcdrawing.get_node("XCdrawingplane").visible
 					var drawingnodesvisible = xcdrawing.get_node("XCnodes").visible
-					xcdata["prevxcvizstates"][xcdrawingname] = (1 if drawingplanevisible else 0) + (1 if drawingnodesvisible else 0)
+					xcdata["prevxcvizstates"][xcdrawingname] = (1 if drawingplanevisible else 0) + (2 if drawingnodesvisible else 0)
 					var drawingvisiblecode = xcdata["xcvizstates"][xcdrawingname]
 					if (drawingvisiblecode & 1) != 0:
 						xcdrawing.setxcdrawingvisible()

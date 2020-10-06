@@ -16,9 +16,6 @@ onready var LaserSelectLine = get_node("/root/Spatial/BodyObjects/LaserSelectLin
 
 var viewport_point = null
 
-
-
-
 onready var activelaserroot = LaserOrient
 var pointerplanviewtarget = null
 var pointertarget = null
@@ -499,6 +496,12 @@ func _on_button_release(p_button):
 		elif p_button == BUTTONS.VR_TRIGGER:
 			buttonreleased_vrtrigger()
 
+func exchdictptrs(xcdata, e0, e1):
+	if e0 in xcdata:
+		var e0d = xcdata[e0]
+		xcdata[e0] = xcdata[e1]
+		xcdata[e1] = e0d
+
 func buttonreleased_vrgrip():
 	var wasactivetargettube = activetargettube
 	if activetargettube != null:
@@ -573,6 +576,19 @@ func buttonreleased_vrgrip():
 					xcdrawing.expandxcdrawingfitxcdrawing(xcdrawing0)
 					xcdrawing.expandxcdrawingfitxcdrawing(xcdrawing1)
 				sketchsystem.sharexcdrawingovernetwork(xcdrawing)
+
+		elif pointertarget.get_name() == "Undo":
+			if len(sketchsystem.actsketchchangeundostack) != 0:
+				var xcdatalist = sketchsystem.actsketchchangeundostack[-1].duplicate()
+				xcdatalist.invert()  # should keep the vizstates at the end
+				for xcdata in xcdatalist:
+					exchdictptrs(xcdata, "prevnodepoints", "nextnodepoints")
+					exchdictptrs(xcdata, "prevonepathpairs", "newonepathpairs")
+					exchdictptrs(xcdata, "prevtransformpos", "transformpos")
+					exchdictptrs(xcdata, "prevdrawinglinks", "newdrawinglinks")
+					exchdictptrs(xcdata, "prevxcvizstates", "xcvizstates")
+				xcdatalist[0]["undoact"] = 1
+				sketchsystem.actsketchchange(xcdatalist)
 
 		elif is_instance_valid(gripmenu.gripmenupointertargetwall):
 			print("executing ", pointertarget.get_name(), " on ", gripmenu.gripmenupointertargetwall.get_name())
@@ -691,15 +707,15 @@ func buttonreleased_vrgrip():
 				updatetubeshells.push_back({ "tubename":xctube.get_name(), "xcname0":xctube.xcname0, "xcname1":xctube.xcname1 })
 
 		sketchsystem.actsketchchange([{"xcvizstates":{ pointertargetwall.get_name():2 }, "updatetubeshells":updatetubeshells, "updatexcshells":updatexcshells }])
-		#sketchsystem.sharexcdrawingovernetwork(pointertargetwall)
+		#if pointertargettype == activetargetwall:
 		setactivetargetwall(null)
 		clearpointertarget()
 		activelaserroot.get_node("LaserSpot").visible = false
 		# keep nodes visible???
 		
-	elif activetargetwall != null:
-		sketchsystem.sharexcdrawingovernetwork(activetargetwall)
-		setactivetargetwall(null)
+	#elif activetargetwall != null:
+	#	sketchsystem.sharexcdrawingovernetwork(activetargetwall)
+	#	setactivetargetwall(null)
 
 	elif activetargetnode != null:
 		clearactivetargetnode()
