@@ -580,7 +580,6 @@ func buttonreleased_vrgrip():
 					var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(gripmenu.gripmenupointertargetwall.xcname1)
 					xcdrawing.expandxcdrawingfitxcdrawing(xcdrawing0)
 					xcdrawing.expandxcdrawingfitxcdrawing(xcdrawing1)
-				sketchsystem.sharexcdrawingovernetwork(xcdrawing)
 
 		elif pointertarget.get_name() == "Undo":
 			if len(sketchsystem.actsketchchangeundostack) != 0:

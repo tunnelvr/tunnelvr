@@ -1200,10 +1200,10 @@ __meta__ = {
 }
 
 [node name="ButtonChoke" type="Button" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 88.0
-margin_top = 214.0
-margin_right = 147.0
-margin_bottom = 242.0
+margin_left = 290.0
+margin_top = 216.0
+margin_right = 349.0
+margin_bottom = 244.0
 rect_pivot_offset = Vector2( 111.073, 28.0005 )
 text = "Choke"
 __meta__ = {
@@ -1250,6 +1250,19 @@ margin_bottom = 215.0
 rect_pivot_offset = Vector2( 138.61, -8.13628 )
 hint_tooltip = "test tooltip"
 text = "Lock Controls"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ButtonGravity" type="CheckBox" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
+margin_left = 17.0
+margin_top = 214.0
+margin_right = 141.0
+margin_bottom = 242.0
+rect_pivot_offset = Vector2( 138.61, -8.13628 )
+hint_tooltip = "test tooltip"
+pressed = true
+text = "Gravity"
 __meta__ = {
 "_edit_use_anchors_": false
 }

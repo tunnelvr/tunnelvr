@@ -6,33 +6,20 @@ extends Spatial
 # Approaching the networking (also to do with undo function)
 # sketchsystem.sharexcdrawingovernetwork
 
-
-		
 # * implement deleteXC
-
 # * should give the other player a position near to me:  $SketchSystem.rpc_id(id, "sketchsystemfromdict", $SketchSystem.sketchsystemtodict())
 		
 # * xctubesconn) == 0 should be a count of the tube types excluding connections to floor
-# * DelXC would delete XC and join between the tubes
-
-# * update tubes whenever a connection is made, not just on deselection
 
 # * optional cross section based on floor node
 # * pointertargettype as an enum
-# * sort out the setopnpos junk
-
-# * updatetubeshells to be cleared up 
 
 # * How is it going to work from planview?
 # * a gripclick inserts a new XC in the tube that we can orient and move before applying the slice
 #   -- this can be done from the plan view too, 
 #   -- plot with front-culling so as to see inside the shapes, and plot with image textures on
 
-# * XC in mode where it cannot take new nodes, only as continuation
-# * and automatically deletes connective bits -- and reconnects tubes
-
 # * tube has easy clicky ways to add in connecting lines between them (advancing the selected node after starting at a join)
-
 # * confusion between papersheet and floordrawing being XCtype
 
 # * getactivefloordrawing is duff.  we should record floor we are working with relative to an object, by connection

@@ -21,6 +21,7 @@ var freefallsurfaceslidedragfactor = 1.1
 var freefallairdragfactor = 0.8
 var flyingkinematicenlargement = 0.03
 var clawengagementmaxpulldistance = 0.18
+var gravityenabled = true
 
 onready var psqparams = PhysicsShapeQueryParameters.new()
 onready var psqparamshead = PhysicsShapeQueryParameters.new()
@@ -193,7 +194,7 @@ func process_feet_on_floor(delta, playerdirectedwalkmovement):
 			var dropcollision = get_world().direct_space_state.cast_motion(psqparams, Vector3(0, -downcastdistance, 0))
 			if len(dropcollision) != 0 and dropcollision[0] != 0.0:
 				if dropcollision[0] == 1.0:
-					playerstartsfreefall = true
+					playerstartsfreefall = gravityenabled
 					stepupdistance = 0.0
 				else:
 					var downcastlam = dropcollision[0] # (dropcollision[0]+dropcollision[1])/2
@@ -383,9 +384,6 @@ func process_shareplayerposition():
 			if Tglobal.morethanoneplayer:
 				playerMe.rpc_unreliable("setavatarposition", positiondict)
 			if is_instance_valid(playerMe.doppelganger):
-				if "laserpointer" in positiondict:
-					print("laserpointer ", positiondict["laserpointer"]["orient"].basis.z)
-
 				if positiondict.has("playertransform"):
 					positiondict["playertransform"] = Transform(Basis(-positiondict["playertransform"].basis.x, positiondict["playertransform"].basis.y, -positiondict["playertransform"].basis.z), 
 																Vector3(doppelganger.global_transform.origin.x, positiondict["playertransform"].origin.y, doppelganger.global_transform.origin.z))
