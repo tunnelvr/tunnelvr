@@ -383,8 +383,12 @@ func ConstructHoleXC(i, sketchsystem):
 		sumpoints += mdt.get_vertex(j)
 	var avgnormal = sumnormals/mdt.get_vertex_count()
 	var avgpoint = sumpoints/mdt.get_vertex_count()
-	var drawingwallangle = Vector2(avgnormal.x, avgnormal.z).angle() + deg2rad(90)
-	xcdata["transformpos"] = Transform(Basis().rotated(Vector3(0,-1,0), drawingwallangle), avgpoint) 
+	var drawingwallhangle = Vector2(Vector2(avgnormal.x, avgnormal.z).length(), avgnormal.y).angle()
+	if abs(drawingwallhangle) < deg2rad(45):
+		var drawingwallangle = Vector2(avgnormal.x, avgnormal.z).angle() + deg2rad(90)
+		xcdata["transformpos"] = Transform(Basis().rotated(Vector3(0,-1,0), drawingwallangle), avgpoint) 
+	else:
+		xcdata["transformpos"] = Transform(Vector3(1,0,0), Vector3(0,0,-1), Vector3(0,1,0), avgpoint)
 
 	var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(xcname0)
 	var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(xcname1)

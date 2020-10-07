@@ -21,13 +21,9 @@ func _on_request_completed(result, response_code, headers, body):
 	
 
 func _run():
-	var networkID = 61636234
-	var a = {"r":909, "bb":10}
-	print(a.get("s"))
-	print(a.erase("r"))
-	print(1 & 2)
-	var b = [6,7,87]
-	b.invert()
+	var a = Transform().rotated(Vector3(1,0,0), deg2rad(-90))	
+	print(a)
+	var b = Transform(Vector3(1,0,0), Vector3(0,0,-1), Vector3(0,1,0), Vector3(0,0,0))
 	print(b)
-	
-	
+	a = a.rotated(Vector3(0,1,0), 0.1)
+	print(a.basis.z)

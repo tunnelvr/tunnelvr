@@ -123,7 +123,6 @@ newboulder={
 
 [rendering]
 
-quality/driver/driver_name="GLES2"
 vram_compression/import_etc=true
 quality/directional_shadow/size=8192
 quality/directional_shadow/size.mobile=512

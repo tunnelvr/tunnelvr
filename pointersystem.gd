@@ -148,11 +148,7 @@ func targetwall(target, targettype):
 	if targettype == "PlanView":
 		return target.get_parent()
 	return null
-	
-func setopnpos(opn, p):
-	opn.global_transform.origin = p
-
-		
+			
 func clearpointertarget():
 	if pointertarget == guipanel3d:
 		guipanel3d.guipanelreleasemouse()
@@ -535,21 +531,28 @@ func buttonreleased_vrgrip():
 		if pointertarget.get_name() == "NewXC":
 			var pt0 = gripmenu.gripmenupointertargetpoint
 			var eyept0vec = pt0 - headcam.global_transform.origin
+			var newxcvertplane = true
 			if gripmenu.gripmenupointertargettype == "XCtubesector":
 				var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(gripmenu.gripmenupointertargetwall.xcname0)
 				var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(gripmenu.gripmenupointertargetwall.xcname1)
 				var tubevec = xcdrawing1.global_transform.origin - xcdrawing0.global_transform.origin
 				eyept0vec = tubevec if eyept0vec.dot(tubevec) > 0 else -tubevec
+				if abs(xcdrawing0.global_transform.basis.z.y) > 0.3 and abs(xcdrawing1.global_transform.basis.z.y) > 0.3:
+					newxcvertplane = false
 			elif gripmenu.gripmenupointertargettype == "Papersheet":
 				pass
 			elif gripmenu.gripmenupointertargettype == "XCnode":
 				if gripmenu.gripmenupointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 					pt0 += -eyept0vec/2
 				eyept0vec = gripmenu.gripmenulaservector
+				if abs(gripmenu.gripmenupointertargetwall.global_transform.basis.z.y) > 0.3:
+					newxcvertplane = false
 			elif gripmenu.gripmenupointertargettype == "PlanView":
 				pt0 = null
 			elif gripmenu.gripmenupointertargettype == "XCdrawing" and gripmenu.gripmenupointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 				pt0 += -eyept0vec/2
+				if abs(gripmenu.gripmenupointertargetwall.global_transform.basis.z.y) > 0.3:
+					newxcvertplane = false
 			elif gripmenu.gripmenupointertargettype == "XCdrawing" and gripmenu.gripmenupointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
 				pass
 			elif gripmenu.gripmenupointertargettype == "XCflatshell":
@@ -565,6 +568,8 @@ func buttonreleased_vrgrip():
 							   "xcresource":"",
 							   "drawingtype":DRAWING_TYPE.DT_XCDRAWING,
 							   "transformpos":Transform(Basis().rotated(Vector3(0,-1,0), drawingwallangle), pt0) }
+				if not newxcvertplane:
+					xcdata["transformpos"] = Transform(Vector3(1,0,0), Vector3(0,0,-1), Vector3(0,1,0), pt0)
 				var xcviz = { "xcvizstates": { xcdata["name"]:3 } }
 				sketchsystem.actsketchchange([xcdata, xcviz])
 				clearactivetargetnode()
@@ -713,25 +718,55 @@ func buttonreleased_vrgrip():
 		activelaserroot.get_node("LaserSpot").visible = false
 		# keep nodes visible???
 		
-	#elif activetargetwall != null:
-	#	sketchsystem.sharexcdrawingovernetwork(activetargetwall)
-	#	setactivetargetwall(null)
+	elif activetargetwall != null:
+		var updatexcshells = [ activetargetwall.get_name() ]
+		var updatetubeshells = [ ]
+		for xctube in activetargetwall.xctubesconn:
+			if not xctube.positioningtube:
+				updatetubeshells.push_back({ "tubename":xctube.get_name(), "xcname0":xctube.xcname0, "xcname1":xctube.xcname1 })
+		sketchsystem.actsketchchange([{"xcvizstates":{ }, "updatetubeshells":updatetubeshells, "updatexcshells":updatexcshells }])
+		setactivetargetwall(null)
 
 	elif activetargetnode != null:
 		clearactivetargetnode()
 
 	gripmenu.disableallgripmenus()
 
+var targetwallvertplane = true
+var prevactivetargetwallgrabbedorgtransform = null
 func targetwalltransformpos():
-	var laserrelvec = activelaserroot.global_transform.basis.inverse()*activetargetwallgrabbedlaserroottrans.basis.z
-	var angy = -Vector2(laserrelvec.z, laserrelvec.x).angle()
-	var angpush =-(activetargetwallgrabbedlaserroottrans.origin.y - activelaserroot.global_transform.origin.y)
-	var transformpos = activetargetwallgrabbedorgtransform.rotated(Vector3(0,1,0), angy)
-	var activetargetwallgrabbedpointmoved = activetargetwallgrabbedpoint + 20*angpush*activetargetwallgrabbeddispvector.normalized()
-	transformpos.origin += activetargetwallgrabbedpointmoved - transformpos*activetargetwallgrabbedlocalpoint
-	return { "name":activetargetwallgrabbed.get_name(), 
-			 "prevtransformpos":activetargetwallgrabbed.global_transform,
-			 "transformpos":transformpos }
+	var txcdata = { "name":activetargetwallgrabbed.get_name(), 
+					"prevtransformpos":activetargetwallgrabbed.global_transform }
+	if prevactivetargetwallgrabbedorgtransform == null or prevactivetargetwallgrabbedorgtransform != activetargetwallgrabbedorgtransform:
+		targetwallvertplane = abs(activetargetwallgrabbedorgtransform.basis.z.y) < 0.3
+		prevactivetargetwallgrabbedorgtransform = activetargetwallgrabbedorgtransform
+	var laserrelvec = activelaserroot.global_transform.basis.xform_inv(activetargetwallgrabbedlaserroottrans.basis.z)
+	var angh = asin(activelaserroot.global_transform.basis.z.y)
+	if targetwallvertplane and abs(angh) > deg2rad(60):
+		targetwallvertplane = false
+	elif (not targetwallvertplane) and abs(angh) < deg2rad(20):
+		targetwallvertplane = true
+	
+	if targetwallvertplane:
+		var angy = -Vector2(laserrelvec.z, laserrelvec.x).angle()
+		if abs(activetargetwallgrabbedorgtransform.basis.z.y) < 0.3:  # should be 0 or 1 for vertical or horiz
+			txcdata["transformpos"] = activetargetwallgrabbedorgtransform.rotated(Vector3(0,1,0), angy)
+			var angpush =-(activetargetwallgrabbedlaserroottrans.origin.y - activelaserroot.global_transform.origin.y)
+			var activetargetwallgrabbedpointmoved = activetargetwallgrabbedpoint + 20*angpush*activetargetwallgrabbeddispvector.normalized()
+			txcdata["transformpos"].origin += activetargetwallgrabbedpointmoved - txcdata["transformpos"]*activetargetwallgrabbedlocalpoint
+		else:
+			var angt = Vector2(activetargetwallgrabbeddispvector.x, activetargetwallgrabbeddispvector.z).angle() + deg2rad(90) - angy
+			txcdata["transformpos"] = Transform(Basis().rotated(Vector3(0,-1,0), angt), activetargetwallgrabbedorgtransform.origin)
+			var angpush =-(activetargetwallgrabbedlaserroottrans.origin.y - activelaserroot.global_transform.origin.y)
+			var activetargetwallgrabbedpointmoved = activetargetwallgrabbedpoint + 20*angpush*Vector3(activetargetwallgrabbeddispvector.x, 0, activetargetwallgrabbeddispvector.z).normalized()
+			txcdata["transformpos"].origin += activetargetwallgrabbedpointmoved - txcdata["transformpos"]*activetargetwallgrabbedlocalpoint
+	else:
+		var angy = -Vector2(laserrelvec.z, laserrelvec.x).angle()
+		#txcdata["transformpos"] = Transform().rotated(Vector3(1,0,0), deg2rad(-90)).rotated(Vector3(0,1,0), angy)
+		txcdata["transformpos"] = Transform(Vector3(1,0,0), Vector3(0,0,-1), Vector3(0,1,0), Vector3(0,0,0)).rotated(Vector3(0,1,0), angy)
+		var angpush =-(activetargetwallgrabbedlaserroottrans.origin.y - activelaserroot.global_transform.origin.y)
+		txcdata["transformpos"].origin = activetargetwallgrabbedpoint + Vector3(0, 20*angpush, 0)
+	return txcdata
 
 		
 func buttonreleased_vrtrigger():

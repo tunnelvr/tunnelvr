@@ -300,10 +300,10 @@ const handanglechange = cos(deg2rad(2))
 const handpositionchange = 0.01
 const headanglechange = cos(deg2rad(4))
 const headpositionchange = 0.01
-const pointeranglechange = cos(deg2rad(3))
+const pointeranglechange = cos(deg2rad(1.2))
 const pointerpositionchange = 0.015
 const dtmin = 0.05
-const dtmax = 1.2
+const dtmax = 0.8  # remotetimegap_dtmax?
 var prevpositiondict = null
 func transformwithinrange(trans0, trans1, poschange, cosangchange):
 	var distorigin = trans0.origin.distance_to(trans1.origin)
@@ -370,7 +370,7 @@ func filter_playerposition_bandwidth(positiondict):
 	
 	if not positiondict.has("playertransform") and not positiondict.has("headcamtransform") and not positiondict.has("handleft") and not positiondict.has("handright"):
 		return null
-	prevpositiondict["timestamp"] = positiondict["timestamp"]
+	#prevpositiondict["timestamp"] = positiondict["timestamp"]
 	return positiondict
 
 
@@ -383,6 +383,9 @@ func process_shareplayerposition():
 			if Tglobal.morethanoneplayer:
 				playerMe.rpc_unreliable("setavatarposition", positiondict)
 			if is_instance_valid(playerMe.doppelganger):
+				if "laserpointer" in positiondict:
+					print("laserpointer ", positiondict["laserpointer"]["orient"].basis.z)
+
 				if positiondict.has("playertransform"):
 					positiondict["playertransform"] = Transform(Basis(-positiondict["playertransform"].basis.x, positiondict["playertransform"].basis.y, -positiondict["playertransform"].basis.z), 
 																Vector3(doppelganger.global_transform.origin.x, positiondict["playertransform"].origin.y, doppelganger.global_transform.origin.z))
