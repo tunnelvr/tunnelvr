@@ -73,12 +73,14 @@ func sketchsystemtodict():
 	for xctube in $XCtubes.get_children():
 		xctubesData.append(xctube.exportxctrpcdata())
 	var sketchdatadict = { "xcdrawings":xcdrawingsData,
-						   "xctubes":xctubesData }
+						   "xctubes":xctubesData
+						 }
+	var playerMe = get_node("/root/Spatial").playerMe
+	sketchdatadict["playerMe"] = { "transformpos":playerMe.global_transform, "headtrans":playerMe.get_node("HeadCam").global_transform }
 	return sketchdatadict
 	
 func savesketchsystem(fname):
 	var sketchdatadict = sketchsystemtodict()
-	sketchdatadict["playerMe"] = { "transformpos":get_node("/root/Spatial").playerMe.global_transform }
 	var sketchdatafile = File.new()
 	sketchdatafile.open(fname, File.WRITE)
 	sketchdatafile.store_var(sketchdatadict)
@@ -268,13 +270,29 @@ remote func sketchsystemfromdict(sketchdatadict):
 			if xcdrawing.drawingtype == DRAWING_TYPE.DT_CENTRELINE:
 				get_node("/root/Spatial/LabelGenerator").makenodelabelstask(xcdrawing, true)
 		assert (xcdrawing.get_name() == xcdrawingData["name"])
-
-	
+		
 	for xctdata in sketchdatadict["xctubes"]:
 		xctubefromdata(xctdata)
 	updatecentrelinevisibility()
 	changetubedxcsvizmode()
 	updateworkingshell()
+	
+	if "playerMe" in sketchdatadict:
+		var playerMe = get_node("/root/Spatial").playerMe if get_node("/root/Spatial").playerMe != null else get_node("/root/Spatial/Players/PlayerMe")
+		if "headtrans" in sketchdatadict["playerMe"]:
+			var playerlam = (playerMe.networkID%10000)/10000.0
+			var headtrans = sketchdatadict["playerMe"]["headtrans"]
+			var vecahead = Vector3(headtrans.basis.z.x, 0, headtrans.basis.z.z).normalized()
+			if playerMe.networkID > 1: 
+				headtrans = Transform(headtrans.basis.rotated(Vector3(0,1,0), deg2rad(180)), headtrans.origin - 3.5*vecahead + Vector3(vecahead.z, 0, -vecahead.x)*(playerlam-0.5)*2)
+			#  Solve: headtrans = playerMe.global_transform * playerMe.get_node("HeadCam").transform 
+			var backrelorigintrans = headtrans * playerMe.get_node("HeadCam").transform.inverse()
+			var angvec = Vector2(playerMe.global_transform.basis.x.dot(backrelorigintrans.basis.x), playerMe.global_transform.basis.z.dot(backrelorigintrans.basis.x))
+			var relang = angvec.angle()
+			playerMe.global_transform = Transform(playerMe.global_transform.basis.rotated(Vector3(0,1,0), -relang), backrelorigintrans.origin)
+		else:
+			playerMe.global_transform = sketchdatadict["playerMe"]["transformpos"]
+	
 	print("lllloaded")
 
 func loadsketchsystem(fname):
@@ -285,9 +303,6 @@ func loadsketchsystem(fname):
 	if Tglobal.connectiontoserveractive:
 		rpc("sketchsystemfromdict", sketchdatadict)
 	sketchsystemfromdict(sketchdatadict)
-	if sketchdatadict.has("playerMe"):
-		var playerMe = get_node("/root/Spatial").playerMe if get_node("/root/Spatial").playerMe != null else get_node("/root/Spatial/Players/PlayerMe")
-		playerMe.global_transform = sketchdatadict["playerMe"]["transformpos"]
 			
 func uniqueXCname():
 	var largestxcdrawingnumber = 0

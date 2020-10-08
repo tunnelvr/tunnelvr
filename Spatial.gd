@@ -234,8 +234,11 @@ func _player_connected(id):
 	if not $Players.has_node(playerothername):
 		var playerOther = load("res://nodescenes/PlayerPuppet.tscn").instance()
 		setnetworkidnamecolour(playerOther, id)
+		playerOther.visible = false
 		$Players.add_child(playerOther)
-	$SketchSystem.rpc_id(id, "sketchsystemfromdict", $SketchSystem.sketchsystemtodict())
+	if playerMe.networkID == 1:
+		var sketchdatadict = $SketchSystem.sketchsystemtodict()
+		$SketchSystem.rpc_id(id, "sketchsystemfromdict", sketchdatadict)
 	playerMe.bouncetestnetworkID = nextplayernetworkidinringskippingdoppelganger(0)
 	Tglobal.morethanoneplayer = $Players.get_child_count() >= 2
 	playerMe.rpc("initplayerpuppet", (ovr_hand_tracking != null))

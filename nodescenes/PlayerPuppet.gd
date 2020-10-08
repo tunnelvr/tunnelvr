@@ -18,7 +18,16 @@ var reltimebatchcount = 0
 var remotetimegapmin = 0
 var relativetimemax = 0
 var remotetimegap_dtmax = 0.8  # copied from PlayerMotion.gd
+const maxstacklength = 80
+
 remote func setavatarposition(positiondict):
+	if not visible:
+		if "playertransform" in positiondict and "headcamtransform" in positiondict:
+			global_transform = positiondict["playertransform"]
+			$HeadCam.transform = positiondict["headcamtransform"]
+			visible = true
+			Tglobal.soundsystem.quicksound("PlayerArrive", global_transform.origin)
+
 	var t0 = OS.get_ticks_msec()*0.001
 	var reltime = t0 - positiondict["timestamp"]
 	if reltimebatchcount == 0 or reltime > relativetimemax:
@@ -50,7 +59,7 @@ remote func setavatarposition(positiondict):
 	if positiondict.has("headcamtransform"):
 		puppetbody["headcamtransform"] = positiondict["headcamtransform"]
 	if puppetbody.has("playertransform") or puppetbody.has("headcamtransform"):
-		while len(puppetpositionstack) > 20:
+		while len(puppetpositionstack) > maxstacklength:
 			puppetpositionstack.pop_front()
 		puppetpositionstack.push_back(puppetbody)
 
@@ -58,21 +67,21 @@ remote func setavatarposition(positiondict):
 		var puppetpointerposition = positiondict["laserpointer"]
 		puppetpointerposition["timestamp"] = positiondict["timestamp"]
 		puppetpointerposition["Ltimestamp"] = Ltimestamp
-		while len(puppetpointerpositionstack) > 20:
+		while len(puppetpointerpositionstack) > maxstacklength:
 			puppetpointerpositionstack.pop_front()
 		puppetpointerpositionstack.push_back(puppetpointerposition)
 
 	if positiondict.has("handleft"):
 		var handleftposition = positiondict["handleft"]
 		handleftposition["Ltimestamp"] = Ltimestamp
-		while len($HandLeft.handpositionstack) > 20:
+		while len($HandLeft.handpositionstack) > maxstacklength:
 			$HandLeft.handpositionstack.pop_front()
 		$HandLeft.handpositionstack.push_back(handleftposition)
 
 	if positiondict.has("handright"):
 		var handrightposition = positiondict["handright"]
 		handrightposition["Ltimestamp"] = Ltimestamp
-		while len($HandRight.handpositionstack) > 20:
+		while len($HandRight.handpositionstack) > maxstacklength:
 			$HandRight.handpositionstack.pop_front()
 		$HandRight.handpositionstack.push_back(handrightposition)
 

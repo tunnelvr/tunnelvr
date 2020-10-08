@@ -335,6 +335,8 @@ func filter_playerhand_bandwidth(prevhand, hand):
 		if hand.has("boneorientations"):
 			prevhand["boneorientations"] = hand["boneorientations"].duplicate(true)
 		prevhand["timestamp"] = hand["timestamp"]
+		prevhand["triggerbuttonheld"] = hand["triggerbuttonheld"]
+		prevhand["gripbuttonheld"] = hand["gripbuttonheld"]
 		prevhand["valid"] = hand["valid"]
 		return false
 	return true

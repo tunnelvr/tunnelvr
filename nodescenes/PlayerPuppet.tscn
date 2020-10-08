@@ -5,14 +5,14 @@
 [ext_resource path="res://guimeshes/headmesh.tscn" type="PackedScene" id=3]
 [ext_resource path="res://guimeshes/headtorchmesh.tscn" type="PackedScene" id=6]
 
-[sub_resource type="SpatialMaterial" id=3]
+[sub_resource type="SpatialMaterial" id=1]
 resource_local_to_scene = true
 albedo_color = Color( 0.105882, 0.188235, 0.509804, 1 )
 
-[sub_resource type="CubeMesh" id=1]
+[sub_resource type="CubeMesh" id=2]
 size = Vector3( 0.002, 0.002, 1 )
 
-[sub_resource type="SpatialMaterial" id=2]
+[sub_resource type="SpatialMaterial" id=3]
 albedo_color = Color( 0.976471, 0.552941, 0.0117647, 1 )
 
 [node name="PlayerPuppet" type="Spatial"]
@@ -23,7 +23,7 @@ script = ExtResource( 1 )
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.691634, 0 )
 
 [node name="csgheadmesh" parent="HeadCam" instance=ExtResource( 3 )]
-material = SubResource( 3 )
+material = SubResource( 1 )
 
 [node name="headtorch" parent="HeadCam" instance=ExtResource( 6 )]
 transform = Transform( 1, 0, 0, 0, 0.939693, 0.34202, 0, -0.34202, 0.939693, 0, 0.24, 0 )
@@ -45,5 +45,5 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.336952, 0.251003, 0 )
 
 [node name="MeshInstance" type="MeshInstance" parent="LaserOrient/Length"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.5 )
-mesh = SubResource( 1 )
-material/0 = SubResource( 2 )
+mesh = SubResource( 2 )
+material/0 = SubResource( 3 )
