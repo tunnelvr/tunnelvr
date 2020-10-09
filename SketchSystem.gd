@@ -127,7 +127,7 @@ remote func actsketchchangeL(xcdatalist):
 		var playerMe = get_node("/root/Spatial").playerMe
 		if "networkIDsource" in xcdatalist[0]:
 			if xcdatalist[0]["networkIDsource"] != playerMe.networkID:
-				var playerOther = get_node("/root/Spatial/Players").get_node_or_null("NewtworkedPlayer"+String(xcdatalist[0]["networkIDsource"]))
+				var playerOther = get_node("/root/Spatial/Players").get_node_or_null("NetworkedPlayer"+String(xcdatalist[0]["networkIDsource"]))
 				if playerOther != null:
 					playerOther.get_node("AnimationPlayer_actsketchchange").play("actsketchchange_flash")
 			if xcdatalist[0]["networkIDsource"] == playerMe.networkID and playerMe.doppelganger != null:
