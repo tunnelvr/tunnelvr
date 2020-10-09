@@ -1162,7 +1162,7 @@ margin_right = 286.0
 margin_bottom = 201.0
 hint_tooltip = "Network state"
 text = "Network Off"
-items = [ "Network Off", null, false, 0, null, "Check IPnum", null, false, 1, null, "As Server", null, false, 2, null, "Client->192.168.1.127", null, false, 3, null, "Client->192.168.1.89", null, false, 4, null, "Client->172.27.9.245", null, false, 5, null ]
+items = [ "Network Off", null, false, 0, null, "Check IPnum", null, false, 1, null, "As Server", null, false, 2, null ]
 selected = 0
 __meta__ = {
 "_edit_use_anchors_": false

@@ -108,14 +108,11 @@ func loadcentrelinefile(centrelinefile):
 	get_node("/root/Spatial/LabelGenerator").makenodelabelstask(centrelinedrawing, true)
 	print("default lllloaded")
 
-# to abolish
-func sharexcdrawingovernetwork(xcdrawing):
-	if Tglobal.connectiontoserveractive:
-		rpc("xcdrawingfromdata", xcdrawing.exportxcrpcdata())
-		print(xcdrawing.exportxcrpcdata())
-
 
 func actsketchchange(xcdatalist):
+	var playerMe = get_node("/root/Spatial").playerMe
+	xcdatalist[0]["networkIDsource"] = playerMe.networkID
+	xcdatalist[0]["datetime"] = OS.get_datetime()
 	actsketchchangeL(xcdatalist)
 	if Tglobal.connectiontoserveractive:
 		if not (len(xcdatalist) == 1 and "rpcoptional" in xcdatalist[0]):
@@ -127,6 +124,14 @@ remote func actsketchchangeL(xcdatalist):
 			# check this matches
 			actsketchchangeundostack.pop_back()
 	else:
+		var playerMe = get_node("/root/Spatial").playerMe
+		if "networkIDsource" in xcdatalist[0]:
+			if xcdatalist[0]["networkIDsource"] != playerMe.networkID:
+				var playerOther = get_node("/root/Spatial/Players").get_node_or_null("NewtworkedPlayer"+String(xcdatalist[0]["networkIDsource"]))
+				if playerOther != null:
+					playerOther.get_node("AnimationPlayer_actsketchchange").play("actsketchchange_flash")
+			if xcdatalist[0]["networkIDsource"] == playerMe.networkID and playerMe.doppelganger != null:
+				playerMe.doppelganger.get_node("AnimationPlayer_actsketchchange").play("actsketchchange_flash")
 		if len(actsketchchangeundostack) > 0 and len(actsketchchangeundostack[-1]) == 1 and len(xcdatalist) == 1 \
 			and "transformpos" in actsketchchangeundostack[-1][0] and "transformpos" in xcdatalist[0] \
 			and actsketchchangeundostack[-1][0].get("name", "*1") == xcdatalist[0].get("name", "*2"):
@@ -137,7 +142,6 @@ remote func actsketchchangeL(xcdatalist):
 				actsketchchangeundostack.pop_front()
 			actsketchchangeundostack.push_back(xcdatalist)
 			
-	# append to undo stack here
 	var xcdrawingstoupdate = { }
 	var xctubestoupdate = { }
 	for i in range(len(xcdatalist)):
@@ -220,7 +224,7 @@ remote func actsketchchangeL(xcdatalist):
 		xctube.updatetubelinkpaths(self)
 	#xctube0.updatetubeshell(sketchsystem.get_node("XCdrawings"), Tglobal.tubeshellsvisible)
 	
-remote func xcdrawingfromdata(xcdata):
+func xcdrawingfromdata(xcdata):
 	var xcdrawing = $XCdrawings.get_node_or_null(xcdata["name"])
 	if xcdrawing == null:
 		if xcdata["drawingtype"] == DRAWING_TYPE.DT_FLOORTEXTURE or xcdata["drawingtype"] == DRAWING_TYPE.DT_PAPERTEXTURE:
@@ -263,7 +267,7 @@ remote func sketchsystemfromdict(sketchdatadict):
 			get_node("/root/Spatial/ImageSystem").fetchpaperdrawing(xcdrawing)
 		else:
 			xcdrawing = newXCuniquedrawing(xcdrawingData["drawingtype"], xcdrawingData["name"])
-			xcdrawing.xcresource = xcdrawingData["xcresource"]
+			xcdrawing.xcresource = xcdrawingData.get("xcresource", "")
 			xcdrawing.get_node("XCdrawingplane").visible = false
 			xcdrawing.get_node("XCdrawingplane/CollisionShape").disabled = true
 			xcdrawing.mergexcrpcdata(xcdrawingData)

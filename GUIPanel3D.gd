@@ -110,8 +110,12 @@ func _on_buttonload_choke():
 	get_node("/root/Spatial/BodyObjects/PlayerMotion").bouldercount = 50
 	$Viewport/GUI/Panel/Label.text = "Boulder choke!"
 	toggleguipanelvisibility(null)
-		
+
+const clientips = [ "192.168.1.127", "192.168.1.89", "172.27.9.245", "192.168.43.172" ]
 func _ready():
+	for clientip in clientips:
+		$Viewport/GUI/Panel/Networkstate.add_item("Client->"+clientip)
+	
 	$Viewport/GUI/Panel/ButtonLoad.connect("pressed", self, "_on_buttonload_pressed")
 	$Viewport/GUI/Panel/ButtonSave.connect("pressed", self, "_on_buttonsave_pressed")
 	$Viewport/GUI/Panel/ButtonPlanView.connect("toggled", self, "_on_buttonplanview_toggled")

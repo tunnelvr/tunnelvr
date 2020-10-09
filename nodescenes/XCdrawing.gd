@@ -162,6 +162,15 @@ func mergexcrpcdata(xcdata):
 				onepathpairs.push_back(onepathpairsAdd[i])
 				onepathpairs.push_back(onepathpairsAdd[i+1])
 
+	for j in range(len(onepathpairs)-2, -1, -2):
+		var p0 = nodepoints.get(onepathpairs[j])
+		var p1 = nodepoints.get(onepathpairs[j+1])
+		if p0 == null or p1 == null:
+			print("Deleting unknown point from onepathpairs ", (onepathpairs[j] if p0 == null else ""), "  ", (onepathpairs[j+1] if p1 == null else ""))
+			assert (false)
+			onepathpairs[j] = onepathpairs[-2]
+			onepathpairs[j+1] = onepathpairs[-1]
+
 	updatexcpaths()
 	if "visible" in xcdata:
 		if xcdata["visible"]:
@@ -283,13 +292,6 @@ func newxcnode(name=null):
 	assert (not $XCnodes.has_node(xcn.get_name()))
 	$XCnodes.add_child(xcn)
 	return xcn
-
-func clearallcontents():
-	onepathpairs.clear()
-	for xcn in $XCnodes.get_children():
-		xcn.queue_free()
-	nodepoints.clear()
-	assert (len(xctubesconn) == 0)  # for now
 
 
 func updatexcpaths():

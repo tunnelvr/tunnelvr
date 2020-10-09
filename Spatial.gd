@@ -2,7 +2,6 @@ extends Spatial
 
 # Stuff to do:
 
-
 # Approaching the networking (also to do with undo function)
 # sketchsystem.sharexcdrawingovernetwork
 
@@ -11,11 +10,9 @@ extends Spatial
 		
 # * xctubesconn) == 0 should be a count of the tube types excluding connections to floor
 
-# * optional cross section based on floor node
 # * pointertargettype as an enum
 
 # * How is it going to work from planview?
-# * a gripclick inserts a new XC in the tube that we can orient and move before applying the slice
 #   -- this can be done from the plan view too, 
 #   -- plot with front-culling so as to see inside the shapes, and plot with image textures on
 
@@ -44,8 +41,6 @@ extends Spatial
 
 # * can set the type of the material (including invisible and no collision, so open on side)
 
-# * Position of the avatar other player is queued in its own object by the rpc and only updated on the physics process (and can be delayed and tweened)
-
 # * grip on XCshape then click gets into rotate mode like with papersheets (but preserving upwardness)
 
 # * godot docs.  assert returns null from the function it's in when you ignore it
@@ -54,8 +49,6 @@ extends Spatial
 # * pointertargettypes should be an enum for itself
 # * duplicate floor trimming out and place at different Z-levels
 #			sketchsystem.rpc("xcdrawingfromdict", xcdrawing.exportxcrpcdata())
-# * all XCdrawing repositions should communicate.  
-#			sketchsystem.rpc("xcdrawingfromdata", xcdrawing.exportxcrpcdata())
 # * formalize the exact order of updates of positions of things so we don't get race conditions
 # * transmit rpc_reliable when trigger released on the positioning of a papersheet
 
@@ -81,8 +74,6 @@ extends Spatial
 # * Load and move the floor on load
 
 # * clear up the laser pointer logic and materials
-# * automatically make the xcplane big enough as you draw close to its edge
-# * shift pick connection to delete nodes up to next junction
 # * scan through other drawings on back of hand
 # * check stationdrawnnode moves the ground up
 
@@ -91,7 +82,6 @@ extends Spatial
 # *   And explain how meshes can have their own materials, that are copied into material/0, and the material reappears if material/0 set to null
 # * CSG mesh with multiple materials group should have material0, material1 etc
 
-# * and loading (remembering the transforms) so it starts exactly where it left off
 # * redo shiftfloorfromdrawnstations with nodes in the area of some kind (decide what to do about the scale)
 	
 export var hostipnumber: String = ""

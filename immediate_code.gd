@@ -21,9 +21,6 @@ func _on_request_completed(result, response_code, headers, body):
 	
 
 func _run():
-	var a = Transform().rotated(Vector3(1,0,0), deg2rad(-90))	
-	print(a)
-	var b = Transform(Vector3(1,0,0), Vector3(0,0,-1), Vector3(0,1,0), Vector3(0,0,0))
-	print(b)
-	a = a.rotated(Vector3(0,1,0), 0.1)
-	print(a.basis.z)
+	for j in range(10 - 2, -1, -2):
+		print(j)
+	print(OS.get_datetime())

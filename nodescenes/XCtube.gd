@@ -368,7 +368,6 @@ func ConstructHoleXC(i, sketchsystem):
 	var xcdrawingholename = "Hole"+("" if i == 0 else ";"+str(i))+";"+xcname0+";"+xcname1
 	var xcdrawinghole = sketchsystem.get_node_or_null("XCdrawings").get_node(xcdrawingholename)
 	var xcdata = { "name":xcdrawingholename, 
-				   "xcresource":"",
 				   "drawingtype":DRAWING_TYPE.DT_XCDRAWING,
 				   "prevnodepoints":{}, "nextnodepoints":{}, 
 				   "prevonepathpairs":[], "newonepathpairs":[] }

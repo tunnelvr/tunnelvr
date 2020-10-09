@@ -110,6 +110,9 @@ func setactivetargetwall(newactivetargetwall):
 	if activetargetwall != null and activetargetwall.drawingtype == DRAWING_TYPE.DT_PAPERTEXTURE:
 		activetargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").get_surface_material(0).albedo_color = Color("#DDFFCC")
 
+	if activetargetwall != null and activetargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
+		assert (false)
+		
 func _ready():
 	handrightcontroller.connect("button_pressed", self, "_on_button_pressed")
 	handrightcontroller.connect("button_release", self, "_on_button_release")
@@ -348,7 +351,8 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 			
 	elif pointertargettype == "XCdrawing":
 		if pointertargetwall != activetargetwall:
-			setactivetargetwall(pointertargetwall)
+			if pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
+				setactivetargetwall(pointertargetwall)
 			
 		if gripbuttonheld and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 			pointertargetwall.expandxcdrawingscale(pointertargetpoint)
@@ -365,7 +369,9 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 				activetargetwallgrabbedlocalpoint = activetargetwallgrabbed.global_transform.affine_inverse() * alaserspot.global_transform.origin
 				activetargetwallgrabbedpointoffset = alaserspot.global_transform.origin - activetargetwallgrabbed.global_transform.origin
 
-		elif (activetargetnode != null and activetargetnodewall == pointertargetwall) or pointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE or len(pointertargetwall.nodepoints) == 0:
+		elif (activetargetnode != null and activetargetnodewall == pointertargetwall) or \
+				pointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE or \
+				len(pointertargetwall.nodepoints) == 0:
 			if len(pointertargetwall.nodepoints) == 0:
 				LaserOrient.get_node("RayCast").collision_mask = CollisionLayer.CL_Pointer | CollisionLayer.CL_PointerFloor 
 				
@@ -398,46 +404,48 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 
 	# connecting lines between xctype nodes
 	elif activetargetnode != null and pointertargettype == "XCnode":
-		if not ((activetargetnodewall.drawingtype == DRAWING_TYPE.DT_CENTRELINE and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING) or (activetargetnodewall.drawingtype == DRAWING_TYPE.DT_XCDRAWING and pointertargetwall.drawingtype == DRAWING_TYPE.DT_CENTRELINE)):
-			if activetargetnodewall == pointertargetwall:
-				var xcdata = { "name":pointertargetwall.get_name() }
-				var i0 = activetargetnode.get_name()
-				var i1 = pointertarget.get_name()
-				if pointertargetwall.pairpresentindex(i0, i1) != -1:
-					xcdata["prevonepathpairs"] = [i0, i1]
-					xcdata["newonepathpairs"] = [ ]
-				else:
-					xcdata["newonepathpairs"] = [i0, i1]
-					if initialsequencenodenameP != null and initialsequencenodenameP != activetargetnode.get_name() and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
-						xcdata["prevonepathpairs"] = [ initialsequencenodenameP, pointertarget.get_name() ]
-					else:
-						xcdata["prevonepathpairs"] = [ ]
-				sketchsystem.actsketchchange([xcdata])
-
+		if activetargetnodewall == pointertargetwall and \
+				(activetargetnodewall.drawingtype == DRAWING_TYPE.DT_XCDRAWING or \
+				 activetargetnodewall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE):
+			var xcdata = { "name":pointertargetwall.get_name() }
+			var i0 = activetargetnode.get_name()
+			var i1 = pointertarget.get_name()
+			if pointertargetwall.pairpresentindex(i0, i1) != -1:
+				xcdata["prevonepathpairs"] = [i0, i1]
+				xcdata["newonepathpairs"] = [ ]
 			else:
-				var xcname0 = activetargetnodewall.get_name()
-				var nodename0 = activetargetnode.get_name()
-				var xcname1 = pointertargetwall.get_name()
-				var nodename1 = pointertarget.get_name()
-				var xctube = sketchsystem.findxctube(xcname0, xcname1)
-				var xctdata = { "xcname0": xcname0, "xcname1":xcname1 }
-				if xctube == null:
-					xctdata["tubename"] = "**notset"
+				xcdata["newonepathpairs"] = [i0, i1]
+				if initialsequencenodenameP != null and initialsequencenodenameP != activetargetnode.get_name() and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
+					xcdata["prevonepathpairs"] = [ initialsequencenodenameP, pointertarget.get_name() ]
+				else:
+					xcdata["prevonepathpairs"] = [ ]
+			sketchsystem.actsketchchange([xcdata])
+
+		elif activetargetnodewall != pointertargetwall and ( \
+				(activetargetnodewall.drawingtype == DRAWING_TYPE.DT_XCDRAWING and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING) or \
+				(activetargetnodewall.drawingtype == DRAWING_TYPE.DT_CENTRELINE and pointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE)):
+			var xcname0 = activetargetnodewall.get_name()
+			var nodename0 = activetargetnode.get_name()
+			var xcname1 = pointertargetwall.get_name()
+			var nodename1 = pointertarget.get_name()
+			var xctube = sketchsystem.findxctube(xcname0, xcname1)
+			var xctdata = { "xcname0": xcname0, "xcname1":xcname1 }
+			if xctube == null:
+				xctdata["tubename"] = "**notset"
+				xctdata["prevdrawinglinks"] = [ ]
+				xctdata["newdrawinglinks"] = [ nodename0, nodename1, "simpledirt" ]
+			else:
+				xctdata["tubename"] = xctube.get_name()
+				var j = xctube.linkspresentindex(nodename0, nodename1) if xctube.xcname0 == xcname0 else xctube.linkspresentindex(nodename1, nodename0)
+				if j == -1:
 					xctdata["prevdrawinglinks"] = [ ]
 					xctdata["newdrawinglinks"] = [ nodename0, nodename1, "simpledirt" ]
 				else:
-					xctdata["tubename"] = xctube.get_name()
-					var j = xctube.linkspresentindex(nodename0, nodename1) if xctube.xcname0 == xcname0 else xctube.linkspresentindex(nodename1, nodename0)
-					if j == -1:
-						xctdata["prevdrawinglinks"] = [ ]
-						xctdata["newdrawinglinks"] = [ nodename0, nodename1, "simpledirt" ]
-					else:
-						xctdata["prevdrawinglinks"] = [ nodename0, nodename1, xctube.xcsectormaterials[j] ]
-						xctdata["newdrawinglinks"] = [ ]
-				var xcvdata = { "xcvizstates":{ pointertargetwall.get_name():3 } }
-				sketchsystem.actsketchchange([xctdata, xcvdata])
-			#Tglobal.soundsystem.quicksound("ClickSound", pointertargetpoint)
-			clearactivetargetnode()
+					xctdata["prevdrawinglinks"] = [ nodename0, nodename1, xctube.xcsectormaterials[j] ]
+					xctdata["newdrawinglinks"] = [ ]
+			var xcvdata = { "xcvizstates":{ pointertargetwall.get_name():3 } }
+			sketchsystem.actsketchchange([xctdata, xcvdata])
+		clearactivetargetnode()
 											
 	elif activetargetnode == null and pointertargettype == "XCnode":
 		if pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
@@ -565,7 +573,6 @@ func buttonreleased_vrgrip():
 			if pt0 != null:
 				var drawingwallangle = Vector2(eyept0vec.x, eyept0vec.z).angle() + deg2rad(90)					
 				var xcdata = { "name":sketchsystem.uniqueXCname(), 
-							   "xcresource":"",
 							   "drawingtype":DRAWING_TYPE.DT_XCDRAWING,
 							   "transformpos":Transform(Basis().rotated(Vector3(0,-1,0), drawingwallangle), pt0) }
 				if not newxcvertplane:
