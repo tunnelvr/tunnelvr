@@ -1009,7 +1009,6 @@ size = Vector3( 3.6, 2, 3.8 )
 
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
-enablevr = false
 usewebsockets = false
 
 [node name="Players" type="Spatial" parent="."]
@@ -2197,7 +2196,6 @@ __meta__ = {
 
 [node name="ViewportForceRender" type="MeshInstance" parent="LabelGenerator"]
 transform = Transform( 1, 0, 0, 0, 0.655202, -0.755453, 0, 0.755453, 0.655202, 0, -3.44091, -4.59181 )
-visible = false
 mesh = SubResource( 150 )
 material/0 = SubResource( 152 )
 

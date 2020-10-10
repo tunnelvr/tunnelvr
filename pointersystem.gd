@@ -425,6 +425,12 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 			else:
 				xctdata["prevdrawinglinks"] = [ ]
 		sketchsystem.actsketchchange([xcndata, xctdata])
+		if xctube == null:
+			xctube = sketchsystem.findxctube(xcname0_centreline, xcname1_floor)
+		if len(xctube.xcdrawinglink) != 0:
+			var floormovedata = xctube.centrelineconnectionfloortransformpos(sketchsystem)
+			if floormovedata != null:
+				sketchsystem.actsketchchange(floormovedata)
 		clearactivetargetnode()
 
 	elif activetargetnode != null and pointertarget == activetargetnode:
@@ -620,6 +626,7 @@ func buttonreleased_vrgrip():
 					exchdictptrs(xcdata, "prevnodepoints", "nextnodepoints")
 					exchdictptrs(xcdata, "prevonepathpairs", "newonepathpairs")
 					exchdictptrs(xcdata, "prevtransformpos", "transformpos")
+					exchdictptrs(xcdata, "prevdrawingplanescale", "drawingplanescale")
 					exchdictptrs(xcdata, "prevdrawinglinks", "newdrawinglinks")
 					exchdictptrs(xcdata, "prevxcvizstates", "xcvizstates")
 				xcdatalist[0]["undoact"] = 1
@@ -801,8 +808,9 @@ func targetwalltransformpos():
 		
 func buttonreleased_vrtrigger():
 	if activetargetwallgrabbedtransform != null:
-		if Tglobal.connectiontoserveractive:
-			activetargetwallgrabbed.rpc("setxcdrawingposition", activetargetwallgrabbed.global_transform)
+		if activetargetwallgrabbed.get_name() != "PlanView" and activetargetwallgrabbed.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
+			var txcdata = targetwalltransformpos()
+			sketchsystem.actsketchchange([txcdata])
 		activetargetwallgrabbedtransform = null
 						
 var grabbedrpctimecount = 0
@@ -840,8 +848,6 @@ func _physics_process(delta):
 			activetargetwallgrabbed.global_transform.origin += activetargetwallgrabbedpoint - activetargetwallgrabbed.global_transform * activetargetwallgrabbedlocalpoint
 		else:
 			activetargetwallgrabbed.global_transform = activelaserroot.get_node("LaserSpot").global_transform * activetargetwallgrabbedtransform
-		#if Tglobal.connectiontoserveractive:
-		#	activetargetwallgrabbed.rpc_unreliable("setxcdrawingposition", activetargetwallgrabbed.global_transform)
 
 
 var rightmousebuttonheld = false

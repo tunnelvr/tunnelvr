@@ -82,7 +82,6 @@ extends Spatial
 # *   And explain how meshes can have their own materials, that are copied into material/0, and the material reappears if material/0 set to null
 # * CSG mesh with multiple materials group should have material0, material1 etc
 
-# * redo shiftfloorfromdrawnstations with nodes in the area of some kind (decide what to do about the scale)
 	
 export var hostipnumber: String = ""
 export var hostportnumber: int = 8002

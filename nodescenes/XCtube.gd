@@ -77,60 +77,22 @@ func mergexctrpcdata(xctdata):
 		assert (len(xcsectormaterials)*2 == len(xcdrawinglink))
 
 
-func shiftxcdrawingposition(sketchsystem):
-	if len(xcdrawinglink) == 0:
-		return
-	print("...shiftxcdrawingposition")
-	var xcdrawingFloor = sketchsystem.get_node("XCdrawings").get_node(xcname0)
-	var xcdrawingXC = sketchsystem.get_node("XCdrawings").get_node(xcname1)
-	assert (xcdrawingFloor.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE and xcdrawingXC.drawingtype == DRAWING_TYPE.DT_XCDRAWING)
-	var bsingledrag = len(xcdrawinglink) == 2
-	var opn0 = xcdrawingFloor.get_node("XCnodes").get_node(xcdrawinglink[-2 if bsingledrag else -4])
-	var xcn0 = xcdrawingXC.get_node("XCnodes").get_node(xcdrawinglink[-1 if bsingledrag else -3])
-	if bsingledrag:
-		var xcn0rel = xcn0.global_transform.origin - xcdrawingXC.global_transform.origin
-		var pt0 = opn0.global_transform.origin - xcn0rel
-		xcdrawingXC.setxcpositionorigin(Vector3(pt0.x, xcdrawingXC.global_transform.origin.y, pt0.z))
-
-	else:
-		var opn1 = xcdrawingFloor.get_node("XCnodes").get_node(xcdrawinglink[-2])
-		var xcn1 = xcdrawingXC.get_node("XCnodes").get_node(xcdrawinglink[-1])
-		var vx = opn1.global_transform.origin - opn0.global_transform.origin
-		var vx2 = Vector2(vx.x, vx.z)
-		xcdrawingXC.setxcpositionangle((-vx2).angle())
-		var vxc = xcn1.global_transform.origin - xcn0.global_transform.origin
-		var vxc2 = Vector2(vxc.x, vxc.z)
-		var vx2len = vx2.length()
-		var vxc2len = vxc2.length()
-		var vdot = vx2.dot(vxc2) # should be colinear
-		if vdot != 0:
-			xcdrawingXC.scalexcnodepointspointsxy(vx2len/vxc2len*(sign(vdot)), 1)
-		var xco = opn0.global_transform.origin - xcn0.global_transform.origin + xcdrawingXC.global_transform.origin
-		xcdrawingXC.setxcpositionorigin(Vector3(xco.x, xcdrawingXC.global_transform.origin.y, xco.z))
-		xcdrawingXC.updatexcpaths()
-		
-	#sketchsystem.sharexcdrawingovernetwork(xcdrawingXC)
-	print("Not sharing xcdrawing position -- use actsketchchange technology")
-	for xctube in xcdrawingXC.xctubesconn:
-		if sketchsystem.get_node("XCdrawings").get_node(xctube.xcname0).drawingtype == DRAWING_TYPE.DT_XCDRAWING:  # not other floor types pointing in
-			xctube.updatetubelinkpaths(sketchsystem)
-			#sketchsystem.sharexctubeovernetwork(xctube)
-
-func shiftfloorfromdrawnstations(sketchsystem):
-	if len(xcdrawinglink) == 0:
-		return
+# targetwalltransformpos
+func centrelineconnectionfloortransformpos(sketchsystem):
+	assert (len(xcdrawinglink) != 0)
 	var xcdrawingCentreline = sketchsystem.get_node("XCdrawings").get_node(xcname0)
 	var xcdrawingFloor = sketchsystem.get_node("XCdrawings").get_node(xcname1)
 	assert (xcdrawingCentreline.drawingtype == DRAWING_TYPE.DT_CENTRELINE and xcdrawingFloor.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE)
-	print("...shiftdrawingfloorposition")
+	var xcdatalist = null
 	var bsingledrag = len(xcdrawinglink) == 2
 	var opn0 = xcdrawingCentreline.get_node("XCnodes").get_node(xcdrawinglink[-2 if bsingledrag else -4])
 	var xcn0 = xcdrawingFloor.get_node("XCnodes").get_node(xcdrawinglink[-1 if bsingledrag else -3])
 	if bsingledrag:
-		var xcn0rel = xcn0.global_transform.origin - xcdrawingFloor.global_transform.origin
-		var pt0 = opn0.global_transform.origin - Vector3(xcn0rel.x, 0, xcn0rel.z)
-		xcdrawingFloor.setxcpositionorigin(pt0)   # global_transform.origin = Vector3(pt0.x, 0, pt0.z)
-
+		var pt0 = xcdrawingFloor.global_transform.origin + opn0.global_transform.origin - xcn0.global_transform.origin
+		xcdatalist = [{ "name":xcname1, 
+						"prevtransformpos":xcdrawingFloor.global_transform, 
+						"transformpos":Transform(xcdrawingFloor.global_transform.basis, Vector3(pt0.x, xcdrawingFloor.global_transform.origin.y, pt0.z)) 
+					 }]
 	else:
 		var opn1 = xcdrawingCentreline.get_node("XCnodes").get_node(xcdrawinglink[-2])
 		var xcn1 = xcdrawingFloor.get_node("XCnodes").get_node(xcdrawinglink[-1])
@@ -145,20 +107,26 @@ func shiftfloorfromdrawnstations(sketchsystem):
 		var vxclen = vxc.length()
 		if vxlen != 0 and vxclen != 0:
 			var sca = vxlen/vxclen
-			xcdrawingFloor.get_node("XCdrawingplane").scale *= Vector3(sca, sca, 1)
-			xcdrawingFloor.scalexcnodepointspointsxy(sca, sca)
-		#xcdrawingFloor.rotation.y += vxcang - vxang
-		xcdrawingFloor.rotation = Vector3(-deg2rad(90), vxclang - vxang, 0)  # should be in setxcpositionangle
-		var xco = opn0.global_transform.origin - xcn0.global_transform.origin + xcdrawingFloor.global_transform.origin
-		xcdrawingFloor.setxcpositionorigin(xco)
-		
+			var transformpos = Transform(Vector3(1,0,0), Vector3(0,0,-1), Vector3(0,1,0), Vector3(0,0,0)).rotated(Vector3(0,1,0), vxclang - vxang)
+			var pt0 = opn0.global_transform.origin - transformpos*(xcn0.transform.origin*Vector3(sca, sca, 1))
+			transformpos.origin = Vector3(pt0.x, xcdrawingFloor.global_transform.origin.y, pt0.z)
+			var xcndata = { "name":xcname1, 
+							"prevnodepoints":xcdrawingFloor.nodepoints.duplicate(),
+							"nextnodepoints":{ }
+						  }
+			for floornodename in xcdrawingFloor.nodepoints:
+				xcndata["nextnodepoints"][floornodename] = xcdrawingFloor.nodepoints[floornodename]*Vector3(sca, sca, 1)
+			var prevdrawingplanescale = xcdrawingFloor.get_node("XCdrawingplane").scale
+			var txcdata = { "name":xcname1, 
+							"prevtransformpos":xcdrawingFloor.global_transform, 
+							"transformpos":transformpos, 
+							"prevdrawingplanescale":prevdrawingplanescale,
+							"drawingplanescale":prevdrawingplanescale*Vector3(sca, sca, 1)
+						  }
+			xcdatalist = [ xcndata, txcdata ]
 
-func positionfromtubelinkpaths(sketchsystem):
-	if positioningtube:
-		if sketchsystem.get_node("XCdrawings").get_node(xcname1).drawingtype == DRAWING_TYPE.DT_XCDRAWING:
-			shiftxcdrawingposition(sketchsystem)
-		elif sketchsystem.get_node("XCdrawings").get_node(xcname0).drawingtype == DRAWING_TYPE.DT_CENTRELINE:
-			shiftfloorfromdrawnstations(sketchsystem)	
+	return xcdatalist
+		
 		
 func updatetubelinkpaths(sketchsystem):
 	var surfaceTool = SurfaceTool.new()

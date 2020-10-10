@@ -75,20 +75,6 @@ func expandxcdrawingfitxcdrawing(xcdrawing):
 		$XCdrawingplane.scale.y = ascay
 	updateformetresquaresscaletexture()
 	
-# these transforming operations work in sequence, each correcting the relative position change caused by the other
-func scalexcnodepointspointsxy(scax, scay):
-	for i in nodepoints.keys():
-		nodepoints[i] = Vector3(nodepoints[i].x*scax, nodepoints[i].y*scay, nodepoints[i].z)
-		$XCnodes.get_node(i).translation = nodepoints[i]
-	
-func setxcpositionangle(drawingwallangle):
-	global_transform = Transform(Basis().rotated(Vector3(0,-1,0), drawingwallangle), global_transform.origin)
-
-func setxcpositionorigin(pt0):
-	global_transform.origin = pt0
-	
-remote func setxcdrawingposition(lglobal_transform):
-	global_transform = lglobal_transform
 
 func exportxcrpcdata():
 	return { "name":get_name(), 
@@ -96,6 +82,8 @@ func exportxcrpcdata():
 			 "drawingtype":drawingtype,
 			 "transformpos":global_transform,
 			 #"prevtransformpos":
+			 #"drawingplanescale":
+			 #"prevdrawingplanescale":
 			 "nodepoints": nodepoints, 
 			 # "prevnodepoints":
 			 # "nextnodepoints":
@@ -110,6 +98,9 @@ func mergexcrpcdata(xcdata):
 	assert ((get_name() == xcdata["name"]) and (not ("drawingtype" in xcdata) or drawingtype == xcdata["drawingtype"]))
 	if "transformpos" in xcdata:
 		global_transform = xcdata["transformpos"]
+	if "drawingplanescale" in xcdata:
+		get_node("XCdrawingplane").scale = xcdata["drawingplanescale"]
+					
 	if "nodepoints" in xcdata:
 		nodepoints = xcdata["nodepoints"]
 		for xcn in $XCnodes.get_children():

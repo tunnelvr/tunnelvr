@@ -138,10 +138,10 @@ remote func actsketchchangeL(xcdatalist):
 			if xcdatalist[0]["networkIDsource"] == playerMe.networkID and playerMe.doppelganger != null:
 				playerMe.doppelganger.get_node("AnimationPlayer_actsketchchange").play("actsketchchange_flash")
 		if len(actsketchchangeundostack) > 0 and len(actsketchchangeundostack[-1]) == 1 and len(xcdatalist) == 1 \
-			and "transformpos" in actsketchchangeundostack[-1][0] and "transformpos" in xcdatalist[0] \
-			and actsketchchangeundostack[-1][0].get("name", "*1") == xcdatalist[0].get("name", "*2"):
-				actsketchchangeundostack[-1][0]["transformpos"] = xcdatalist[0]["transformpos"]
-				actsketchchangeundostack[-1][0].erase("rpcoptional")
+				and "transformpos" in actsketchchangeundostack[-1][0] and "transformpos" in xcdatalist[0] \
+				and actsketchchangeundostack[-1][0].get("name", "*1") == xcdatalist[0].get("name", "*2"):
+			actsketchchangeundostack[-1][0].erase("rpcoptional")
+			actsketchchangeundostack[-1][0]["transformpos"] = xcdatalist[0]["transformpos"]
 		else:
 			while len(actsketchchangeundostack) >= 10:
 				actsketchchangeundostack.pop_front()
@@ -151,7 +151,6 @@ remote func actsketchchangeL(xcdatalist):
 	var xctubestoupdate = { }
 	for i in range(len(xcdatalist)):
 		var xcdata = xcdatalist[i]
-		
 		if "tubename" in xcdata:
 			if xcdata["tubename"] == "**notset":
 				xcdata["tubename"] = "XCtube_"+xcdata["xcname0"]+"_"+xcdata["xcname1"]
@@ -203,6 +202,9 @@ remote func actsketchchangeL(xcdatalist):
 				if len(xcdata.get("prevnodepoints", [])) != 0:
 					for xctube in xcdrawing.xctubesconn:
 						xctubestoupdate[xctube.get_name()] = xctube
+			elif "transformpos" in xcdata and len(xcdrawing.xctubesconn) != 0:
+				for xctube in xcdrawing.xctubesconn:
+					xctubestoupdate[xctube.get_name()] = xctube
 
 			var tpos = null
 			var xcname = null

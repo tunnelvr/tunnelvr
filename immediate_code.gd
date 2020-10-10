@@ -21,6 +21,5 @@ func _on_request_completed(result, response_code, headers, body):
 	
 
 func _run():
-	for j in range(10 - 2, -1, -2):
-		print(j)
-	print(OS.get_datetime())
+	var a = Vector3(1,2,3)
+	print(a*Vector3(10,10,1))
