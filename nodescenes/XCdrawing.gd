@@ -400,11 +400,17 @@ func updatexctubeshell(xcdrawings, makevisible):
 
 func xcdfullsetvisibilitycollision(bvisible):
 	visible = bvisible
-	if visible:
-		$XCdrawingplane/CollisionShape.disabled = not $XCdrawingplane.visible
-		if has_node("XCflatshell"):
-			$XCflatshell/CollisionShape.disabled = not $XCflatshell.visible
+	if drawingtype == DRAWING_TYPE.DT_CENTRELINE:
+		$PathLines.visible = bvisible
+		$XCnodes.visible = bvisible
+		for xcn in get_node("XCnodes").get_children():
+			xcn.get_node("CollisionShape").disabled = not bvisible
 	else:
-		$XCdrawingplane/CollisionShape.disabled = true
-		if has_node("XCflatshell"):
-			$XCflatshell/CollisionShape.disabled = true
+		if visible:
+			$XCdrawingplane/CollisionShape.disabled = not $XCdrawingplane.visible
+			if has_node("XCflatshell"):
+				$XCflatshell/CollisionShape.disabled = not $XCflatshell.visible
+		else:
+			$XCdrawingplane/CollisionShape.disabled = true
+			if has_node("XCflatshell"):
+				$XCflatshell/CollisionShape.disabled = true

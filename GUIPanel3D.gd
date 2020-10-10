@@ -111,7 +111,7 @@ func _on_buttonload_choke():
 	$Viewport/GUI/Panel/Label.text = "Boulder choke!"
 	toggleguipanelvisibility(null)
 
-const clientips = [ "192.168.1.127", "192.168.1.89", "172.27.9.245", "192.168.43.172" ]
+const clientips = [ "192.168.1.127", "192.168.1.89", "172.27.9.245", "192.168.43.172", "192.168.43.118" ]
 func _ready():
 	for clientip in clientips:
 		$Viewport/GUI/Panel/Networkstate.add_item("Client->"+clientip)
@@ -260,7 +260,7 @@ func _on_networkstate_selected(index):
 			websocketclient. disconnect_from_host()
 			#websocketclient = null
 		if networkedmultiplayerenet != null:
-			networkedmultiplayerenet.close()
+			networkedmultiplayerenet.close_connection()
 			networkedmultiplayerenet = null
 		Tglobal.connectiontoserveractive = false
 		get_tree().set_network_peer(null)

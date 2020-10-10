@@ -36,7 +36,6 @@ func endclawengagement():
 	GroundSpikePoint.visible = false
 	clawengageposition = null
 
-
 var prevgait = ""
 func _process(delta):
 	return
@@ -81,6 +80,7 @@ func _physics_process(delta):
 		
 				
 	var isgroundspiked = tiptouchray.is_colliding() and tiptouchray.get_collider().get_parent().get_name() == "XCtubesectors"
+	# ^^ disabled
 	if isgroundspiked:
 		if clawengageposition == null:
 			clawengageposition = tiptouchray.get_collision_point()

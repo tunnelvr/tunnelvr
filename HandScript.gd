@@ -63,6 +63,7 @@ func _ready():
 		print("Please download the Godol Oculus Mobile Plugin: https://github.com/GodotVR/godot-oculus-mobile-asset")
 	handmodel = handmodelres.instance()
 	add_child(handmodel)
+	handmodel.visible = false
 	#handmodel.translation = Vector3(-0.2 if islefthand else 0.2, 0.8, 0)
 	handarmature = handmodel.get_child(0)
 	handskeleton = handarmature.get_node("Skeleton")
@@ -84,6 +85,7 @@ func _ready():
 	pointermaterial = pointermodel.get_node("Length/MeshInstance").get_surface_material(0).duplicate()
 	pointermodel.get_node("Length/MeshInstance").set_surface_material(0, pointermaterial)
 	add_child(pointermodel)
+	pointermodel.visible = false
 	indexfingerpinchbutton = addfingerpinchbutton("index_null")
 	middlefingerpinchbutton = addfingerpinchbutton("middle_null")
 

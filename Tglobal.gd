@@ -11,8 +11,6 @@ var arvrinterfacename = "none"  # OVRMobile, Oculus, OpenVR
 var arvrinterface = null
 var VRoperating = false
 
-
-
 var questhandtracking = false
 var controlslocked = false
 

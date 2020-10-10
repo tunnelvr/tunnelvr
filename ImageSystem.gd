@@ -100,7 +100,8 @@ func _process(delta):
 		img.load(fetcheddrawingfile)
 		var papertexture = ImageTexture.new()
 		papertexture.create_from_image(img)
-		fetcheddrawing.get_node("XCdrawingplane/CollisionShape/MeshInstance").get_surface_material(0).albedo_texture = papertexture
+		var fetcheddrawingmaterial = fetcheddrawing.get_node("XCdrawingplane/CollisionShape/MeshInstance").get_surface_material(0)
+		fetcheddrawingmaterial.albedo_texture = papertexture
 		if papertexture.get_width() != 0:
 			fetcheddrawing.get_node("XCdrawingplane").scale.y = fetcheddrawing.get_node("XCdrawingplane").scale.x*papertexture.get_height()/papertexture.get_width()
 		else:

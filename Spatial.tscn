@@ -1009,6 +1009,8 @@ size = Vector3( 3.6, 2, 3.8 )
 
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
+enablevr = false
+usewebsockets = false
 
 [node name="Players" type="Spatial" parent="."]
 transform = Transform( -1, 0, -3.25841e-07, 0, 1, 0, 3.25841e-07, 0, -1, 0, 0, 0 )
@@ -1612,7 +1614,6 @@ material/0 = SubResource( 31 )
 
 [node name="TipTouchRay" type="RayCast" parent="BodyObjects/MovePointThimble"]
 transform = Transform( -1.62921e-07, 0, -1, 0, 1, 0, 1, 0, -1.62921e-07, -0.0429029, 0, -0.000141606 )
-enabled = true
 cast_to = Vector3( 0, 0, -0.1 )
 collision_mask = 3104
 collide_with_areas = true
@@ -2172,7 +2173,6 @@ unit_db = 9.032
 
 [node name="LabelGenerator" type="Spatial" parent="."]
 transform = Transform( 1, 0, 6.51682e-07, 0, 1, 0, -6.51682e-07, 0, 1, -2.08929e-06, 3.81351, -6.67332 )
-visible = false
 script = ExtResource( 38 )
 
 [node name="Viewport" type="Viewport" parent="LabelGenerator"]
@@ -2197,6 +2197,7 @@ __meta__ = {
 
 [node name="ViewportForceRender" type="MeshInstance" parent="LabelGenerator"]
 transform = Transform( 1, 0, 0, 0, 0.655202, -0.755453, 0, 0.755453, 0.655202, 0, -3.44091, -4.59181 )
+visible = false
 mesh = SubResource( 150 )
 material/0 = SubResource( 152 )
 

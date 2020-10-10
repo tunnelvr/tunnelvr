@@ -31,7 +31,7 @@ func exportxctrpcdata():   # read by xctubefromdata()
 
 func linkspresentindex(nodename0, nodename1):
 	for j in range(int(len(xcdrawinglink)/2)):
-		if xcdrawinglink[j*2] == nodename0 and xcdrawinglink[j*2+1] == nodename1:
+		if xcdrawinglink[j*2] == nodename0 and (nodename1 == null or xcdrawinglink[j*2+1] == nodename1):
 			return j
 	return -1
 

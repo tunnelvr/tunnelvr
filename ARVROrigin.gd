@@ -105,7 +105,7 @@ func _process(delta):
 		LaserOrient.visible = false
 
 func initkeyboardcontroltrackingnow():
-	$HandLeft.initkeyboardtracking()
+	#$HandLeft.initkeyboardtracking()
 	$HandRight.initkeyboardtracking()
 	$HandLeft.addremotetransform("middle_null", get_node("/root/Spatial/BodyObjects/MovePointThimble"), Transform())
 	

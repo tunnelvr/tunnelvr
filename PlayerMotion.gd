@@ -90,7 +90,7 @@ func _physics_process(delta):
 		var rot = Transform().rotated(Vector3(0.0, -1, 0.0), deg2rad(PlayerDirections.nextphysicsrotatestep))
 		playerMe.transform *= t2*rot*t1
 		PlayerDirections.nextphysicsrotatestep = 0.0
-				
+
 	headcentrefromvroriginvector = HeadCentre.global_transform.origin - playerMe.global_transform.origin
 	headcentreabovephysicalfloorheight = max(headcentrefromvroriginvector.y, playerheadbodyradius)
 	playerbodyverticalheight = min(playerbodyabsoluteheight, playerheadbodyradius + headcentreabovephysicalfloorheight)
@@ -101,7 +101,9 @@ func _physics_process(delta):
 
 	var capsuleshaftheight = playerbodyverticalheight - 2*playerheadbodyradius
 	$PlayerKinematicBody/PlayerBodyCapsule.shape.height = capsuleshaftheight
-	$PlayerKinematicBody/PlayerBodyCapsule/CapsuleShapePreview.mesh.mid_height = capsuleshaftheight
+
+	if $PlayerKinematicBody/PlayerBodyCapsule/CapsuleShapePreview.visible:  # VVV this consumes 15ms!!!
+		$PlayerKinematicBody/PlayerBodyCapsule/CapsuleShapePreview.mesh.mid_height = capsuleshaftheight
 	
 	if PlayerDirections.clawengageposition != null:
 		var clawengagementrelativedisplacement = PlayerDirections.clawengageposition - PlayerDirections.GroundSpikePoint.global_transform.origin
@@ -127,6 +129,7 @@ func _physics_process(delta):
 		$MotionVectorPreview/Scale.scale.z = playercentrevelocitylength
 		if playercentrevelocitylength > 0.01:
 			$MotionVectorPreview.global_transform = Transform(Basis(), playerbodycentre).looking_at(playerbodycentre - playercentrevelocity, Vector3(0,1,0) if abs(playercentrevelocity.y) < 0.8*playercentrevelocitylength else Vector3(1,0,0))
+
 
 func process_clawengagement(delta, clawengagementrelativedisplacement):
 	playerbodycentre = HeadCentre.global_transform.origin - Vector3(0, playerheadcentreabovebodycentreheight, 0) + Ddebugvisualoffset

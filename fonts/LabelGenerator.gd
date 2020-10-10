@@ -11,30 +11,23 @@ var sortdfunctorigin = Vector3(0,0,0)
 func sortdfunc(a, b):
 	return sortdfunctorigin.distance_squared_to(a.global_transform.origin) > sortdfunctorigin.distance_squared_to(b.global_transform.origin)
 
-func makenodelabelstask(centrelinedrawing, addtolabelgeneratingtask):
+func addnodestolabeltask(centrelinedrawing):
 	for xcn in centrelinedrawing.get_node("XCnodes").get_children():
-		#xcn.get_node("Quad").visible = centrelinevisible
-		xcn.visible = Tglobal.centrelinevisible
-		xcn.get_node("CollisionShape").disabled = not Tglobal.centrelinevisible
-		if addtolabelgeneratingtask:
-			remainingxcnodes.append(xcn)
-	centrelinedrawing.get_node("PathLines").visible = Tglobal.centrelinevisible
-	centrelinedrawing.get_node("PathLines").visible = Tglobal.centrelinevisible
-	$ViewportForceRender.visible = Tglobal.centrelinevisible
-	if Tglobal.centrelinevisible and len(remainingxcnodes) != 0:
+		remainingxcnodes.append(xcn)
+	
 		sortdfunctorigin = get_node("/root/Spatial").playerMe.get_node("HeadCam").global_transform.origin
+	
+func restartlabelmakingprocess(sortdfunctorigin):
+	if len(remainingxcnodes) != 0:
 		remainingxcnodes.sort_custom(self, "sortdfunc")
-	set_process(Tglobal.centrelinevisible)
+		set_process(true)
 
 func _process(delta):
-	if not Tglobal.centrelinevisible:
+	if workingxcnode == null and (len(remainingxcnodes) == 0 or not Tglobal.centrelinevisible):
+		$ViewportForceRender.visible = false
 		set_process(false)
-		return
-	if workingxcnode == null:
-		if len(remainingxcnodes) == 0:
-			set_process(false)
-			$ViewportForceRender.visible = false
-			return
+	elif workingxcnode == null:
+		$ViewportForceRender.visible = true
 		workingxcnode = remainingxcnodes.pop_back()
 		var labeltext = workingxcnode.get_name()
 		var numchars = len(labeltext)
@@ -50,9 +43,9 @@ func _process(delta):
 		var tex = ImageTexture.new()
 		tex.create_from_image(img)
 		var xcnodelabelpanel = workingxcnode.get_node("Quad")
-		#xcnodelabelpanel.get_surface_material(0).albedo_texture = tex
 		xcnodelabelpanel.mesh.size.x = tex.get_width()*(xcnodelabelpanel.mesh.size.y/tex.get_height())
 		xcnodelabelpanel.get_surface_material(0).set_shader_param("texture_albedo", tex)
+		#xcnodelabelpanel.get_surface_material(0).albedo_texture = tex
 		xcnodelabelpanel.get_surface_material(0).set_shader_param("vertex_offset", Vector3(xcnodelabelpanel.mesh.size.x*0.5 + 0.3, xcnodelabelpanel.mesh.size.y*0.5, 0))
 		xcnodelabelpanel.get_surface_material(0).set_shader_param("vertex_scale", 1.0)
 		xcnodelabelpanel.visible = true

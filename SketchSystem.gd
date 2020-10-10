@@ -11,12 +11,11 @@ const defaultfloordrawing = "http://cave-registry.org.uk/svn/NorthernEngland/Thr
 
 func _ready():
 	var floordrawingimg = defaultfloordrawing
-	floordrawingimg = "res://surveyscans/greenland/ushapedcave.png"
+	#floordrawingimg = "res://surveyscans/greenland/ushapedcave.png"
+	floordrawingimg = defaultfloordrawing
 	var floordrawing = newXCuniquedrawingPaper(floordrawingimg, DRAWING_TYPE.DT_FLOORTEXTURE)
 	get_node("/root/Spatial/ImageSystem").fetchpaperdrawing(floordrawing)
 		
-
-
 
 func findxctube(xcname0, xcname1):
 	var xcdrawing0 = get_node("XCdrawings").get_node(xcname0)	
@@ -54,16 +53,18 @@ func updateworkingshell():
 func updatecentrelinevisibility():
 	get_tree().call_group("gpnoncentrelinegeo", "xcdfullsetvisibilitycollision", not Tglobal.centrelineonly)
 	get_node("/root/Spatial/PlanViewSystem").updatecentrelinesizes()
-	for centrelinexcdrawing in get_tree().get_nodes_in_group("gpcentrelinegeo"):
-		get_node("/root/Spatial/LabelGenerator").makenodelabelstask(centrelinexcdrawing, false)
-
+	get_tree().call_group("gpcentrelinegeo", "xcdfullsetvisibilitycollision", Tglobal.centrelinevisible)
+	if Tglobal.centrelinevisible:
+		var playerMe = get_node("/root/Spatial").playerMe
+		get_node("/root/Spatial/LabelGenerator").restartlabelmakingprocess(playerMe.get_node("HeadCam").global_transform.origin)
+	
 func changetubedxcsvizmode():
 	for xcdrawing in $XCdrawings.get_children():
 		if xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
+			assert (xcdrawing.get_node("XCdrawingplane").visible != xcdrawing.get_node("XCdrawingplane/CollisionShape").disabled)
 			var xcsvisible = xcdrawing.get_node("XCdrawingplane").visible or Tglobal.tubedxcsvisible or len(xcdrawing.xctubesconn) == 0
 			xcdrawing.get_node("XCnodes").visible = xcsvisible
 			xcdrawing.get_node("PathLines").visible = xcsvisible
-			assert (xcdrawing.get_node("XCdrawingplane").visible != xcdrawing.get_node("XCdrawingplane/CollisionShape").disabled)
 
 func sketchsystemtodict():
 	var xcdrawingsData = [ ]
@@ -105,7 +106,11 @@ func loadcentrelinefile(centrelinefile):
 	var centrelinedata = parse_json(centrelinedatafile.get_line())
 	centrelinedrawing.importcentrelinedata(centrelinedata, self)
 	#var xsectgps = centrelinedata.xsectgps
-	get_node("/root/Spatial/LabelGenerator").makenodelabelstask(centrelinedrawing, true)
+	var LabelGenerator = get_node("/root/Spatial/LabelGenerator")
+	LabelGenerator.addnodestolabeltask(centrelinedrawing)
+	if Tglobal.centrelinevisible:
+		var playerMe = get_node("/root/Spatial").playerMe		
+		LabelGenerator.restartlabelmakingprocess(playerMe.get_node("HeadCam").global_transform.origin)
 	print("default lllloaded")
 
 
@@ -234,10 +239,15 @@ func xcdrawingfromdata(xcdata):
 			xcdrawing = newXCuniquedrawing(xcdata["drawingtype"], xcdata["name"])
 	xcdrawing.mergexcrpcdata(xcdata)
 	if xcdrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE or xcdrawing.drawingtype == DRAWING_TYPE.DT_PAPERTEXTURE:
-		get_node("/root/Spatial/ImageSystem").fetchpaperdrawing(xcdrawing)
+		if "xcresource" in xcdata:
+			get_node("/root/Spatial/ImageSystem").fetchpaperdrawing(xcdrawing)
 	if xcdrawing.drawingtype == DRAWING_TYPE.DT_CENTRELINE:
 		assert (false)   # shouldn't happen, not to be updated!
-		get_node("/root/Spatial/LabelGenerator").makenodelabelstask(xcdrawing, true)
+		var LabelGenerator = get_node("/root/Spatial/LabelGenerator")
+		LabelGenerator.addnodestolabeltask(xcdrawing)
+		if Tglobal.centrelinevisible:
+			var playerMe = get_node("/root/Spatial").playerMe
+			LabelGenerator.restartlabelmakingprocess(playerMe.get_node("HeadCam").global_transform.origin)
 	return xcdrawing
 	
 remote func sketchsystemfromdict(sketchdatadict):
@@ -272,7 +282,11 @@ remote func sketchsystemfromdict(sketchdatadict):
 			xcdrawing.get_node("XCdrawingplane/CollisionShape").disabled = true
 			xcdrawing.mergexcrpcdata(xcdrawingData)
 			if xcdrawing.drawingtype == DRAWING_TYPE.DT_CENTRELINE:
-				get_node("/root/Spatial/LabelGenerator").makenodelabelstask(xcdrawing, true)
+				var LabelGenerator = get_node("/root/Spatial/LabelGenerator")
+				LabelGenerator.addnodestolabeltask(xcdrawing)
+				if Tglobal.centrelinevisible:
+					var playerMe = get_node("/root/Spatial").playerMe
+					LabelGenerator.restartlabelmakingprocess(playerMe.get_node("HeadCam").global_transform.origin)
 		assert (xcdrawing.get_name() == xcdrawingData["name"])
 		
 	for xctdata in sketchdatadict["xctubes"]:
@@ -287,13 +301,13 @@ remote func sketchsystemfromdict(sketchdatadict):
 			var playerlam = (playerMe.networkID%10000)/10000.0
 			var headtrans = sketchdatadict["playerMe"]["headtrans"]
 			var vecahead = Vector3(headtrans.basis.z.x, 0, headtrans.basis.z.z).normalized()
-			if playerMe.networkID > 1: 
+			if playerMe.networkID > 1:
 				headtrans = Transform(headtrans.basis.rotated(Vector3(0,1,0), deg2rad(180)), headtrans.origin - 3.5*vecahead + Vector3(vecahead.z, 0, -vecahead.x)*(playerlam-0.5)*2)
 			#  Solve: headtrans = playerMe.global_transform * playerMe.get_node("HeadCam").transform 
 			var backrelorigintrans = headtrans * playerMe.get_node("HeadCam").transform.inverse()
 			var angvec = Vector2(playerMe.global_transform.basis.x.dot(backrelorigintrans.basis.x), playerMe.global_transform.basis.z.dot(backrelorigintrans.basis.x))
 			var relang = angvec.angle()
-			playerMe.global_transform = Transform(playerMe.global_transform.basis.rotated(Vector3(0,1,0), -relang), backrelorigintrans.origin)
+			playerMe.global_transform = Transform(playerMe.global_transform.basis.rotated(Vector3(0,1,0), -relang), backrelorigintrans.origin + Vector3(0,2,0))
 		else:
 			playerMe.global_transform = sketchdatadict["playerMe"]["transformpos"]
 	
@@ -304,9 +318,9 @@ func loadsketchsystem(fname):
 	sketchdatafile.open(fname, File.READ)
 	var sketchdatadict = sketchdatafile.get_var()
 	sketchdatafile.close()
+	sketchsystemfromdict(sketchdatadict)
 	if Tglobal.connectiontoserveractive:
 		rpc("sketchsystemfromdict", sketchdatadict)
-	sketchsystemfromdict(sketchdatadict)
 			
 func uniqueXCname():
 	var largestxcdrawingnumber = 0
