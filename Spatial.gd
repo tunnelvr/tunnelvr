@@ -216,6 +216,7 @@ func nextplayernetworkidinringskippingdoppelganger(deletedid):
 	
 # May need to use Windows Defender Firewall -> Inboard rules -> New Rule and ports
 # Also there's another setting change to allow pings
+# If there is judder, then it could be the realtime virus and threat protection settings.  https://forum.unity.com/threads/performance-problems-with-vive-and-vr-regular-vr-waitforgpu-spikes.521849/
 func _player_connected(id):
 	print("_player_connected ", id)
 	playerMe.set_name("NetworkedPlayer"+String(playerMe.networkID))

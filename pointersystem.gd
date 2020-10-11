@@ -825,7 +825,7 @@ func _physics_process(delta):
 			LaserOrient.get_node("LaserSpot").global_transform.origin = planviewcontactpoint
 			LaserOrient.get_node("Length").scale.z = -LaserOrient.get_node("LaserSpot").translation.z
 			LaserOrient.get_node("LaserSpot").visible = false
-			pointerplanviewtarget.processplanviewpointing(planviewcontactpoint)
+			pointerplanviewtarget.processplanviewpointing(planviewcontactpoint, (handrightcontroller.is_button_pressed(BUTTONS.HT_PINCH_INDEX_FINGER) if Tglobal.questhandtracking else handrightcontroller.is_button_pressed(BUTTONS.VR_TRIGGER)) or Input.is_mouse_button_pressed(BUTTON_LEFT))
 			activelaserroot = planviewsystem.get_node("RealPlanCamera/LaserScope/LaserOrient")
 			activelaserroot.get_node("LaserSpot").global_transform.basis = LaserOrient.global_transform.basis
 		else:

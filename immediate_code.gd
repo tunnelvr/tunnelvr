@@ -21,5 +21,5 @@ func _on_request_completed(result, response_code, headers, body):
 	
 
 func _run():
-	var a = Vector3(1,2,3)
-	print(a*Vector3(10,10,1))
+	var a = Vector2(-1,1)
+	print(a > Vector2(0,0))
