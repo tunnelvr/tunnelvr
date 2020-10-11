@@ -508,14 +508,7 @@ func buttonpressed_vrpad(gripbuttonheld, joypos):
 				fs = 1/fs
 			pointertargetwall.get_node("XCdrawingplane").scale.x *= fs
 			pointertargetwall.get_node("XCdrawingplane").scale.y *= fs
-			
-	#elif pointertargettype == "PlanView":
-	elif pointerplanviewtarget != null and not pointerplanviewtarget.planviewactive:
-		if abs(joypos.x) > 0.65:
-			pointerplanviewtarget.camerascalechange(1.5 if joypos.x < 0 else 0.6667)
-		elif abs(joypos.x) < 0.2 and abs(joypos.y) < 0.2:
-			pointerplanviewtarget.cameraresetcentre(headcam)
-		
+					
 func _on_button_release(p_button):
 	if Tglobal.controlslocked:
 		print("Controls locked")
@@ -815,25 +808,26 @@ func buttonreleased_vrtrigger():
 						
 var grabbedrpctimecount = 0
 func _physics_process(delta):
+	var planviewnothit = true
 	if LaserOrient.visible: 
 		var firstlasertarget = LaserOrient.get_node("RayCast").get_collider() if LaserOrient.get_node("RayCast").is_colliding() and not LaserOrient.get_node("RayCast").get_collider().is_queued_for_deletion() else null
 		pointerplanviewtarget = planviewsystem if firstlasertarget != null and firstlasertarget.get_name() == "PlanView" and planviewsystem.checkplanviewinfront(LaserOrient) else null
-		if pointerplanviewtarget != null:
-			pointerplanviewtarget.processplanviewsliding(handright.joypos, handright.gripbuttonheld, delta)
 		if pointerplanviewtarget != null and pointerplanviewtarget.planviewactive:
 			var planviewcontactpoint = LaserOrient.get_node("RayCast").get_collision_point()
 			LaserOrient.get_node("LaserSpot").global_transform.origin = planviewcontactpoint
 			LaserOrient.get_node("Length").scale.z = -LaserOrient.get_node("LaserSpot").translation.z
 			LaserOrient.get_node("LaserSpot").visible = false
 			pointerplanviewtarget.processplanviewpointing(planviewcontactpoint, (handrightcontroller.is_button_pressed(BUTTONS.HT_PINCH_INDEX_FINGER) if Tglobal.questhandtracking else handrightcontroller.is_button_pressed(BUTTONS.VR_TRIGGER)) or Input.is_mouse_button_pressed(BUTTON_LEFT))
+			planviewnothit = false
 			activelaserroot = planviewsystem.get_node("RealPlanCamera/LaserScope/LaserOrient")
 			activelaserroot.get_node("LaserSpot").global_transform.basis = LaserOrient.global_transform.basis
 		else:
 			planviewsystem.get_node("RealPlanCamera/LaserScope").visible = false
 			activelaserroot = LaserOrient
-
 		setpointertarget(activelaserroot)
-		
+	if planviewnothit and planviewsystem.viewport_mousedown:
+		planviewsystem.planviewguipanelreleasemouse()
+	
 	if activetargetwallgrabbedtransform != null:
 		if activetargetwallgrabbed.get_name() != "PlanView" and activetargetwallgrabbed.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 			var txcdata = targetwalltransformpos()

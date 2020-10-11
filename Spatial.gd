@@ -2,13 +2,17 @@ extends Spatial
 
 # Stuff to do:
 
-# Approaching the networking (also to do with undo function)
-# sketchsystem.sharexcdrawingovernetwork
+# Planview camerascalechange and cameraresetcentre to be buttons
+# Ability to change planview size (in both dimensions)
+# scalebar on planview
+# Treeview of paper images extracted from the notes
+# Treeview to show which are downloaded
+# record zooming trimming position on each and a programmable scalebar
+# copy active view into the active xcdrawing and turn it into a floor
+# overlay a drawing onto the camera plan view
 
 # * implement deleteXC
 # * should give the other player a position near to me:  $SketchSystem.rpc_id(id, "sketchsystemfromdict", $SketchSystem.sketchsystemtodict())
-		
-# * xctubesconn) == 0 should be a count of the tube types excluding connections to floor
 
 # * pointertargettype as an enum
 
@@ -48,7 +52,7 @@ extends Spatial
 
 # * pointertargettypes should be an enum for itself
 # * duplicate floor trimming out and place at different Z-levels
-#			sketchsystem.rpc("xcdrawingfromdict", xcdrawing.exportxcrpcdata())
+
 # * formalize the exact order of updates of positions of things so we don't get race conditions
 # * transmit rpc_reliable when trigger released on the positioning of a papersheet
 
