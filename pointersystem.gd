@@ -186,7 +186,7 @@ func setpointertarget(laserroot):
 			
 	pointertargetpoint = newpointertargetpoint
 	if is_instance_valid(pointertarget) and pointertarget == guipanel3d:
-		guipanel3d.guipanelsendmousemotion(pointertargetpoint, LaserOrient.global_transform, (handrightcontroller.is_button_pressed(BUTTONS.HT_PINCH_INDEX_FINGER) if Tglobal.questhandtracking else handrightcontroller.is_button_pressed(BUTTONS.VR_TRIGGER)) or Input.is_mouse_button_pressed(BUTTON_LEFT))
+		guipanel3d.guipanelsendmousemotion(pointertargetpoint, LaserOrient.global_transform, (handrightcontroller.is_button_pressed(BUTTONS.HT_PINCH_INDEX_FINGER) if Tglobal.questhandtrackingactive else handrightcontroller.is_button_pressed(BUTTONS.VR_TRIGGER)) or Input.is_mouse_button_pressed(BUTTON_LEFT))
 
 	if pointertargetpoint != null:
 		laserroot.get_node("LaserSpot").global_transform.origin = pointertargetpoint
@@ -205,7 +205,7 @@ func setpointertarget(laserroot):
 func _on_button_pressed(p_button):
 	var gripbuttonheld = handright.gripbuttonheld
 	print("pppp ", pointertargetpoint, " ", [activetargetnode, pointertargettype, " pbutton", p_button])
-	if Tglobal.questhandtracking:
+	if Tglobal.questhandtrackingactive:
 		gripbuttonheld = handrightcontroller.is_button_pressed(BUTTONS.HT_PINCH_MIDDLE_FINGER)
 		if p_button == BUTTONS.HT_PINCH_RING_FINGER:
 			if handrightcontroller.is_button_pressed(BUTTONS.HT_PINCH_PINKY):
@@ -512,7 +512,7 @@ func buttonpressed_vrpad(gripbuttonheld, joypos):
 func _on_button_release(p_button):
 	if Tglobal.controlslocked:
 		print("Controls locked")
-	elif Tglobal.questhandtracking:
+	elif Tglobal.questhandtrackingactive:
 		if p_button == BUTTONS.HT_PINCH_MIDDLE_FINGER:
 			buttonreleased_vrgrip()
 		elif p_button == BUTTONS.HT_PINCH_INDEX_FINGER:
@@ -817,7 +817,7 @@ func _physics_process(delta):
 			LaserOrient.get_node("LaserSpot").global_transform.origin = planviewcontactpoint
 			LaserOrient.get_node("Length").scale.z = -LaserOrient.get_node("LaserSpot").translation.z
 			LaserOrient.get_node("LaserSpot").visible = false
-			pointerplanviewtarget.processplanviewpointing(planviewcontactpoint, (handrightcontroller.is_button_pressed(BUTTONS.HT_PINCH_INDEX_FINGER) if Tglobal.questhandtracking else handrightcontroller.is_button_pressed(BUTTONS.VR_TRIGGER)) or Input.is_mouse_button_pressed(BUTTON_LEFT))
+			pointerplanviewtarget.processplanviewpointing(planviewcontactpoint, (handrightcontroller.is_button_pressed(BUTTONS.HT_PINCH_INDEX_FINGER) if Tglobal.questhandtrackingactive else handrightcontroller.is_button_pressed(BUTTONS.VR_TRIGGER)) or Input.is_mouse_button_pressed(BUTTON_LEFT))
 			planviewnothit = false
 			activelaserroot = planviewsystem.get_node("RealPlanCamera/LaserScope/LaserOrient")
 			activelaserroot.get_node("LaserSpot").global_transform.basis = LaserOrient.global_transform.basis

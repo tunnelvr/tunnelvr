@@ -36,7 +36,8 @@ func _ready():
 	pass
 
 func _physics_process(_delta):
-	pass
+	$HandLeft.middleringbutton.get_node("MeshInstance").get_surface_material(0).emission_energy = 1 if $HandLeft/RayCast.is_colliding() else 0
+	$HandRight.middleringbutton.get_node("MeshInstance").get_surface_material(0).emission_energy = 1 if $HandRight/RayCast.is_colliding() else 0
 
 remote func setavatarposition(positiondict):
 	print("ppt nope not master ", positiondict)
@@ -75,10 +76,30 @@ func playerpositiondict():
 							   "spotvisible": LaserOrient.get_node("LaserSpot").visible }
 			}
 
+var Dleftquesthandcontrollername = "unknown"
+var Drightquesthandcontrollername = "unknown"
 func _process(delta):
 	if Tglobal.questhandtracking:
-		$HandLeft.process_ovrhandtracking(delta)
-		$HandRight.process_ovrhandtracking(delta)
+		var rightquesthandcontrollername = $HandRightController.get_controller_name()
+		if rightquesthandcontrollername != Drightquesthandcontrollername:
+			print("Controller change: ", rightquesthandcontrollername)
+			Drightquesthandcontrollername = rightquesthandcontrollername
+		var leftquesthandcontrollername = $HandLeftController.get_controller_name()
+		if leftquesthandcontrollername != Dleftquesthandcontrollername:
+			print("Controller change: ", leftquesthandcontrollername)
+			Dleftquesthandcontrollername = leftquesthandcontrollername
+
+		if rightquesthandcontrollername == "Oculus Tracked Right Hand":
+			$HandRight.process_ovrhandtracking(delta)
+			Tglobal.questhandtrackingactive = true
+		else:
+			$HandRight.process_normalvrtracking(delta)
+			Tglobal.questhandtrackingactive = false
+		if leftquesthandcontrollername == "Oculus Tracked Left Hand":
+			$HandLeft.process_ovrhandtracking(delta)
+		else:
+			$HandLeft.process_normalvrtracking(delta)
+
 	elif Tglobal.VRoperating:
 		$HandLeft.process_normalvrtracking(delta)
 		$HandRight.process_normalvrtracking(delta)
@@ -103,6 +124,7 @@ func _process(delta):
 		LaserOrient.visible = (not Tglobal.controlslocked) or (LaserOrient.get_node("RayCast").get_collider() == guipanel3d)
 	else:
 		LaserOrient.visible = false
+
 
 func initkeyboardcontroltrackingnow():
 	#$HandLeft.initkeyboardtracking()

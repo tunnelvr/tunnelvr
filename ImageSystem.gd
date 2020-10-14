@@ -4,7 +4,30 @@ const defaultfloordrawing = "http://cave-registry.org.uk/svn/NorthernEngland/Thr
 const defaultfloordrawingres = "res://surveyscans/DukeStResurvey-drawnup-p3.jpg"
 
 var imgdir = "user://northernimages/"
+var nonimagedir = "user://nonimagewebpages/"
 var urldir = "http://cave-registry.org.uk/svn/NorthernEngland/ThreeCountiesArea/rawscans/Ireby/"
+
+func fillIrebytree(tree):
+	var root = tree.create_item()
+	var child1 = tree.create_item(root)
+	var child2 = tree.create_item(root)
+	var subchild1 = tree.create_item(child1)
+	subchild1.set_text(0, "Subchild1")
+
+	var regex = RegEx.new()
+	regex.compile('<li><a href="([^"]*)">') # Negated whitespace character class.
+	var results = [ ]
+	#for m in regex.search_all(xxx):
+	#	print(m.get_string(1))
+
+	var httprequest = HTTPRequest.new()
+	add_child(httprequest)
+	#httprequest.connect("request_completed", self, "_http_request_completed", [httprequest, paperdrawing])
+	#httprequest.request(urldir)
+	httprequestduration = 0.0
+
+
+
 var imglistD = [ "BoltonExtensionsResurvey-DrawnUpSketch-1.jpg", 
 				"DukeStResurvey-drawnup-p1.jpg", 
 				"DukeStResurvey-drawnup-p2.jpg", 
@@ -26,39 +49,55 @@ var imglist = [ "DukeSt2sanddig.jpg",
 			  ]
 var paperwidth = 0.4
 
-func getshortimagename(xcresource, withextension):
+func getshortimagename(xcresource, withextension, md5nameleng):
 	var fname = xcresource.substr(xcresource.find_last("/")+1)
 	var ext = xcresource.get_extension()
-	if ext != null:  
+	if ext != null:
 		ext = "."+ext
 	fname = fname.get_basename()
 	fname = fname.replace(".", "").replace("@", "").replace("%", "")
-	var md5name = xcresource.md5_text().substr(0, 6)
+	var md5name = xcresource.md5_text().substr(0, md5nameleng)
 	if len(fname) > 8:
 		fname = fname.substr(0,4)+md5name+fname.substr(len(fname)-4)
 	else:
 		fname = fname+md5name
 	return fname+ext if withextension else fname
 
+var imgregex = RegEx.new()
+var listregex = RegEx.new()
 
+func _ready():
+	imgregex.compile('(?i)\\.(png|jpg|jpeg)$')
+	listregex.compile('<li><a href="([^"]*)">')
+	
 var paperdrawinglist = [ ]
+var nonimagepageslist = [ ]
 
 var imagefetchingcountdowntimer = 0.0
 var imagefetchingcountdowntime = 0.15
 var fetcheddrawing = null
+var fetchednonimagedataobject = null
 var httprequest = null
 var httprequestduration = 0.0
 var fetcheddrawingfile = null
+var fetchednonimagedataobjectfile = null
 
-func _http_request_completed(result, response_code, headers, body, lhttprequest, paperdrawing):
-	assert (lhttprequest == httprequest)
-	lhttprequest.queue_free()
+func _http_request_completed(result, response_code, headers, body, httprequestdataobject):
+	assert (httprequestdataobject["httprequest"] == httprequest)
+	httprequestdataobject["httprequest"].queue_free()
 	if response_code == 200:
-		fetcheddrawing = paperdrawing
+		if "paperdrawing" in httprequestdataobject:
+			fetcheddrawing = httprequestdataobject["paperdrawing"]
+		else:
+			fetchednonimagedataobject = httprequestdataobject
 	else:
-		print("http response code bad ", response_code, " for ", paperdrawing.get_name())
-		fetcheddrawing = paperdrawing
-		fetcheddrawingfile = "res://guimaterials/imagefilefailure.png"
+		print("http response code bad ", response_code, " for ", httprequestdataobject)
+		if "paperdrawing" in httprequestdataobject:
+			fetcheddrawing = httprequestdataobject["paperdrawing"]
+			fetcheddrawingfile = "res://guimaterials/imagefilefailure.png"
+		else:
+			fetchednonimagedataobject = httprequestdataobject
+			fetchednonimagedataobject["bad_response_code"] = response_code
 	httprequest = null
 	
 func _process(delta):
@@ -67,7 +106,22 @@ func _process(delta):
 		return
 	imagefetchingcountdowntimer = imagefetchingcountdowntime
 
-	if fetcheddrawing == null and httprequest == null and len(paperdrawinglist) > 0:
+	if fetcheddrawing == null and fetchednonimagedataobject == null and httprequest == null and len(nonimagepageslist) > 0:
+		var nonimagepage = nonimagepageslist.pop_front()
+		nonimagepage["fetchednonimagedataobjectfile"] = nonimagedir+getshortimagename(nonimagepage["url"], true, 20)
+		if not File.new().file_exists(nonimagepage["fetchednonimagedataobjectfile"]):
+			if not Directory.new().dir_exists(nonimagedir):
+				Directory.new().make_dir(nonimagedir)
+			nonimagepage["httprequest"] = HTTPRequest.new()
+			add_child(nonimagepage["httprequest"])
+			nonimagepage["httprequest"].connect("request_completed", self, "_http_request_completed", [nonimagepage])
+			nonimagepage["httprequest"].download_file = nonimagepage["fetchednonimagedataobjectfile"]
+			nonimagepage["httprequest"].request(nonimagepage["url"])
+			httprequestduration = 0.0
+		else:
+			fetchednonimagedataobject = nonimagepage
+
+	if fetcheddrawing == null and fetchednonimagedataobject == null and httprequest == null and len(paperdrawinglist) > 0:
 		var paperdrawing = paperdrawinglist.pop_front()
 		if paperdrawing.xcresource.begins_with("res://"):
 			fetcheddrawingfile = paperdrawing.xcresource
@@ -75,7 +129,7 @@ func _process(delta):
 			if not File.new().file_exists(fetcheddrawingfile):
 				fetcheddrawingfile = "res://guimaterials/imagefilefailure.png"
 		elif paperdrawing.xcresource.begins_with("http"):
-			fetcheddrawingfile = imgdir+getshortimagename(paperdrawing.xcresource, true)
+			fetcheddrawingfile = imgdir+getshortimagename(paperdrawing.xcresource, true, 6)
 			print([paperdrawing.xcresource, defaultfloordrawing])
 			print([1, fetcheddrawingfile])
 			#if paperdrawing.xcresource == defaultfloordrawing:
@@ -85,7 +139,7 @@ func _process(delta):
 					Directory.new().make_dir(imgdir)
 				httprequest = HTTPRequest.new()
 				add_child(httprequest)
-				httprequest.connect("request_completed", self, "_http_request_completed", [httprequest, paperdrawing])
+				httprequest.connect("request_completed", self, "_http_request_completed", [{"httprequest":httprequest, "paperdrawing":paperdrawing, "objectname":paperdrawing.get_name()}])
 				httprequest.download_file = fetcheddrawingfile
 				httprequest.request(paperdrawing.xcresource)
 				httprequestduration = 0.0
@@ -108,11 +162,35 @@ func _process(delta):
 			print(fetcheddrawing.get_name(), "   has zero width ")
 		fetcheddrawing = null
 
+	elif fetchednonimagedataobject != null:
+		print("FFF", fetchednonimagedataobject)
+		if "tree" in fetchednonimagedataobject:
+			var tree = $PlanView/Viewport/PlanGUI/PlanViewControls/Tree
+			var root = tree.create_item()
+			var htmllistfile = File.new()
+			htmllistfile.open(fetchednonimagedataobject["fetchednonimagedataobjectfile"], File.READ)
+			var htmllist = htmllistfile.get_as_text()
+			htmllistfile.close()
+			var dirurl = fetchednonimagedataobject["url"] + ("" if fetchednonimagedataobject["url"].ends_with("/") else "/")
+			for m in listregex.search_all(htmllist):
+				var lk = m.get_string()
+				if not lk.begins_with("."):
+					var newurl = dirurl + lk
+					var branch = tree.create_item(root)
+					branch.set_text(0, lk)
+					branch.set_tooltip(0, dirurl + lk)
+		fetchednonimagedataobject = null
+
 	elif httprequest != null:
 		httprequestduration += delta
 
 	else:
 		set_process(false)
+
+#func fetchunrolltree(tree, root, branch):
+#	paperdrawinglist.append(paperdrawing)
+#	set_process(true)
+
 
 func fetchpaperdrawing(paperdrawing):
 	paperdrawinglist.append(paperdrawing)

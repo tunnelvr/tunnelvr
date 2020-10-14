@@ -113,6 +113,11 @@ func _on_buttonload_choke():
 
 const clientips = [ "192.168.1.127", "192.168.1.89", "172.27.9.245", "192.168.43.172", "192.168.43.118" ]
 func _ready():
+	var fgui = $ViewportFake.get_node_or_null("GUI")
+	if fgui != null:
+		$ViewportFake.remove_child(fgui)
+		$Viewport.add_child(fgui)
+	
 	for clientip in clientips:
 		$Viewport/GUI/Panel/Networkstate.add_item("Client->"+clientip)
 	
@@ -146,7 +151,7 @@ func toggleguipanelvisibility(controller_global_transform):
 	if not visible and controller_global_transform != null:
 		var paneltrans = global_transform
 		var controllertrans = controller_global_transform
-		var paneldistance = 0.8 if Tglobal.VRoperating else 0.2
+		var paneldistance = 0.6 if Tglobal.VRoperating else 0.2
 		paneltrans.origin = controllertrans.origin - paneldistance*ARVRServer.world_scale*(controllertrans.basis.z)
 		var lookatpos = controllertrans.origin - 1.6*ARVRServer.world_scale*(controllertrans.basis.z)
 		paneltrans = paneltrans.looking_at(lookatpos, Vector3(0, 1, 0))

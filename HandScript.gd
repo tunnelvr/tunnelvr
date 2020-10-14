@@ -18,6 +18,8 @@ var handmaterial_orgtransparency = false
 var handmaterial_orgtranslucency = 1
 var joypos = Vector2(0, 0)
 
+var controllerhandtransformleft = Transform(Basis(Vector3(0,0,1), deg2rad(45)), Vector3(0,0,0))*Transform(Vector3(0,0,-1), Vector3(0,-1,0), Vector3(-1,0,0), Vector3(0,0,0.1))
+var controllerhandtransformright = Transform(Basis(Vector3(0,0,1), deg2rad(-45)), Vector3(0,0,0))*Transform(Vector3(0,0,1), Vector3(0,1,0), Vector3(-1,0,0), Vector3(0,0,0.1))
 var controllerhandtransform = null
 var mousecontrollermotioncumulative = Vector2(0, 0)
 var gripbuttonheld = false
@@ -25,6 +27,7 @@ var triggerbuttonheld = false
 var vrbybuttonheld = false
 var indexfingerpinchbutton = null
 var middlefingerpinchbutton = null
+var middleringbutton = null
 
 var handscale = 0.0
 var handconfidence = 0
@@ -42,9 +45,13 @@ var currentgesture = "none"
 
 var pointermodel = null
 var pointervalid = false
-var pointerposechangeangle = Transform(Basis(Vector3(1,0,0), deg2rad(-65)), Vector3(0,0,0))
+var controllerpointerposetransform = Transform(Basis(Vector3(1,0,0), deg2rad(-65)), Vector3(0,0,0))
 var pointerposearvrorigin = Transform()
 var pointermaterial = null
+
+var internalhandray = null
+var boneattachmentwrist = null
+var boneattachmentmiddletip = null
 
 const fadetimevalidity = 1/0.2
 var handtranslucentvalidity = 0.0
@@ -54,13 +61,12 @@ var handpositionstack = [ ]  # [ { "Ltimestamp", "valid", "transform", "boneorie
 
 func _ready():
 	islefthand = (get_name() == "HandLeft")
-	controllerhandtransform = Transform(Vector3(0,0,-1), Vector3(0,-1,0), Vector3(-1,0,0), Vector3(0,0,0.1)) if islefthand else \
-							  Transform(Vector3(0,0,1), Vector3(0,1,0), Vector3(-1,0,0), Vector3(0,0,0.1))
+	controllerhandtransform = controllerhandtransformleft if islefthand else controllerhandtransformright
 	transform = controllerhandtransform
 	var handmodelfile = handmodelfile1 if islefthand else handmodelfile2
 	var handmodelres = load(handmodelfile)
 	if handmodelres == null:
-		print("Please download the Godol Oculus Mobile Plugin: https://github.com/GodotVR/godot-oculus-mobile-asset")
+		print("Please download the Godot Oculus Mobile Plugin: https://github.com/GodotVR/godot-oculus-mobile-asset")
 	handmodel = handmodelres.instance()
 	add_child(handmodel)
 	handmodel.visible = false
@@ -88,11 +94,15 @@ func _ready():
 	pointermodel.visible = false
 	indexfingerpinchbutton = addfingerpinchbutton("index_null")
 	middlefingerpinchbutton = addfingerpinchbutton("middle_null")
+	middleringbutton = addfingerpinchbutton("middle_1")
+	middleringbutton.get_node("MeshInstance").transform.origin.y *= -2
+
+	if has_node("RayCast"):
+		internalhandray = $RayCast
+		boneattachmentmiddletip = addboneattachment("middle_null")
 
 func addfingerpinchbutton(bname):
-	var boneattachment = BoneAttachment.new()
-	boneattachment.bone_name = ("b_l_" if islefthand else "b_r_") + bname
-	handskeleton.add_child(boneattachment)
+	var boneattachment = addboneattachment(bname)
 	var fingerpinchbutton = load("res://nodescenes/FingerPinchButton.tscn").instance()
 	var handmodelscale = meshnode.global_transform.basis.get_scale()
 	fingerpinchbutton.scale = Vector3(1/handmodelscale.x, 1/handmodelscale.y, 1/handmodelscale.z)
@@ -103,7 +113,7 @@ func addfingerpinchbutton(bname):
 	return fingerpinchbutton
 	
 func initovrhandtracking(lovr_hand_tracking, lhandcontroller):
-	handpositionstack = null
+	controllerpointerposetransform = Transform(Basis(Vector3(1,0,0), deg2rad(-65)), Vector3(0,0,0))
 	ovr_hand_tracking = lovr_hand_tracking
 	handcontroller = lhandcontroller
 	controller_id = handcontroller.controller_id
@@ -118,6 +128,15 @@ func update_handpose(delta):
 	if handvalid:
 		for i in range(hand_bone_mappings.size()):
 			handskeleton.set_bone_pose(hand_bone_mappings[i], Transform(hand_boneorientations[i]))
+		if internalhandray != null:
+			var tipfinger = boneattachmentmiddletip.global_transform*Vector3(-1, 0, 0) # factored up with handmodelscale=0.01
+			var wristpos = global_transform
+			internalhandray.global_transform = wristpos.looking_at(tipfinger, Vector3(0,1,0))
+			internalhandray.cast_to.z = -wristpos.origin.distance_to(tipfinger)
+			internalhandray.enabled = true
+	else:
+		if internalhandray != null:
+			internalhandray.enabled = false
 
 func update_fademode(delta, valid, translucentvalidity, model, material):
 	if valid:
@@ -143,10 +162,14 @@ func update_fademode(delta, valid, translucentvalidity, model, material):
 				model.visible = false
 	return translucentvalidity
 	
-func addremotetransform(bname, node, rtransform):
+func addboneattachment(bname):
 	var boneattachment = BoneAttachment.new()
 	boneattachment.bone_name = ("b_l_" if islefthand else "b_r_") + bname
 	handskeleton.add_child(boneattachment)
+	return boneattachment
+
+func addremotetransform(bname, node, rtransform):
+	var boneattachment =  addboneattachment(bname)
 	var remotetransform = RemoteTransform.new()
 	remotetransform.update_scale = false
 	remotetransform.transform = rtransform
@@ -207,20 +230,17 @@ func handposeimmediate(boneorientations, dt):
 	handpositionstack.push_back({"Ltimestamp":t0+dt, "valid":true, "boneorientations":boneorientations })
 
 func initkeyboardtracking():
-	handpositionstack = [ ]
 	handcontroller = null
-	process_handgesturefromcontrol()
-
+			
 func initnormalvrtracking(lhandcontroller):
-	handpositionstack = [ ]
 	handcontroller = lhandcontroller
 
 func initpuppetracking(lplayerishandtracked):
 	print("initpuppetracking hand: ", lplayerishandtracked, " left: ", islefthand)
-	handpositionstack = [ ]
 	playerishandtracked = lplayerishandtracked
 
 func process_ovrhandtracking(delta):
+	handpositionstack.clear()
 	handconfidence = ovr_hand_tracking.get_hand_pose(controller_id, hand_boneorientations)
 	handvalid = handconfidence != null and handconfidence == 1
 	if handvalid:
@@ -232,7 +252,7 @@ func process_ovrhandtracking(delta):
 	update_handpose(delta)
 	pointervalid = handvalid and ovr_hand_tracking.is_pointer_pose_valid(controller_id)
 	if pointervalid:
-		pointerposearvrorigin = ovr_hand_tracking.get_pointer_pose(controller_id)  # should this be inverted
+		pointerposearvrorigin = ovr_hand_tracking.get_pointer_pose(controller_id)
 		
 func process_normalvrtracking(delta):
 	joypos = Vector2(handcontroller.get_joystick_axis(0), handcontroller.get_joystick_axis(1))
@@ -241,7 +261,7 @@ func process_normalvrtracking(delta):
 	vrbybuttonheld = handcontroller.is_button_pressed(BUTTONS.VR_BUTTON_BY)
 	transform = handcontroller.transform*controllerhandtransform
 	pointervalid = true
-	pointerposearvrorigin = handcontroller.transform*pointerposechangeangle
+	pointerposearvrorigin = handcontroller.transform*controllerpointerposetransform
 	indexfingerpinchbutton.get_node("MeshInstance").get_surface_material(0).emission_energy = 1 if triggerbuttonheld else 0
 	middlefingerpinchbutton.get_node("MeshInstance").get_surface_material(0).emission_energy = 1 if gripbuttonheld else 0
 	process_handgesturefromcontrol()
@@ -255,7 +275,7 @@ func process_keyboardcontroltracking(headcam, dmousecontrollermotioncumulative):
 	pointervalid = true
 	ht = ht*Transform().rotated(Vector3(1,0,0), deg2rad(45))*Transform().rotated(Vector3(0,1,0), deg2rad(30))
 	transform = ht*controllerhandtransform
-	pointerposearvrorigin = ht*pointerposechangeangle # *Transform().rotated(Vector3(0,1,0), deg2rad(90))
+	pointerposearvrorigin = ht*controllerpointerposetransform
 	indexfingerpinchbutton.get_node("MeshInstance").get_surface_material(0).emission_energy = 1 if triggerbuttonheld else 0
 	middlefingerpinchbutton.get_node("MeshInstance").get_surface_material(0).emission_energy = 1 if gripbuttonheld else 0
 	process_handgesturefromcontrol()	

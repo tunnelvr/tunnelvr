@@ -6,8 +6,20 @@ var drawingtype = DRAWING_TYPE.DT_PLANVIEW
 
 func _ready():
 	$RealPlanCamera.set_as_toplevel(true)
+	var fplangui = $PlanView/ViewportFake.get_node_or_null("PlanGUI")
+	if fplangui != null:
+		$PlanView/ViewportFake.remove_child(fplangui)
+		$PlanView/Viewport.add_child(fplangui)
 	$PlanView/Viewport/PlanGUI/PlanViewControls/ZoomView/ButtonCentre.connect("pressed", self, "buttoncentre_pressed")
 	set_process(false)
+
+	get_node("/root/Spatial/ImageSystem").fillIrebytree($PlanView/Viewport/PlanGUI/PlanViewControls/Tree)
+	var tree = $PlanView/Viewport/PlanGUI/PlanViewControls/Tree
+	var root = tree.create_item()
+	var child1 = tree.create_item(root)
+	var child2 = tree.create_item(root)
+	var subchild1 = tree.create_item(child1)
+	subchild1.set_text(0, "Subchild1")
 
 func toggleplanviewactive():
 	planviewactive = not planviewactive

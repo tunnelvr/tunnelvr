@@ -19,11 +19,9 @@ var clawengageposition = null
 
 func initcontrollersignalconnections():
 	HandLeftController.connect("button_pressed", self, "_on_button_pressed")
-	HandLeftController.connect("button_release", self, "_on_button_release")
 
 func initquesthandcontrollersignalconnections():
-	HandLeftController.connect("button_pressed", self, "_on_questhandtracking_button_pressed")
-	HandLeftController.connect("button_release", self, "_on_questhandtracking_button_release")
+	pass
 
 
 func _input(event):
@@ -50,6 +48,7 @@ func _process(delta):
 		print("WIP step_high_just_detected")
 
 func _physics_process(delta):
+	playerdirectedflight = HandLeft.gripbuttonheld
 	playerdirectedflightvelocity = Vector3(0,0,0)
 	playerdirectedwalkingvelocity = Vector3(0,0,0)
 
@@ -74,7 +73,7 @@ func _physics_process(delta):
 				#playerdirectedwalkingvelocity = -playerdirectedwalkingvelocity
 				playerdirectedwalkingvelocity = Vector3(HeadCam.global_transform.basis.z.x, 0, HeadCam.global_transform.basis.z.z).normalized()*walkspeed
 
-	elif not playerdirectedflight and not Tglobal.questhandtracking and not Tglobal.controlslocked:
+	elif not playerdirectedflight and not Tglobal.questhandtrackingactive and not Tglobal.controlslocked:
 		var dir = Vector3(HeadCam.global_transform.basis.z.x, 0, HeadCam.global_transform.basis.z.z)
 		playerdirectedwalkingvelocity = dir.normalized()*(-joypos.y*walkspeed)
 		
@@ -90,33 +89,12 @@ func _physics_process(delta):
 	elif clawengageposition != null:
 		endclawengagement()
 
-func _on_questhandtracking_button_pressed(p_button):
-	if Tglobal.controlslocked:
-		print("Controls locked")	
-	elif p_button == BUTTONS.HT_PINCH_MIDDLE_FINGER:
-		playerdirectedflight = true
-				
-func _on_questhandtracking_button_release(p_button):
-	if Tglobal.controlslocked:
-		print("Controls locked")	
-	if p_button == BUTTONS.HT_PINCH_MIDDLE_FINGER:
-		playerdirectedflight = false
 
 func _on_button_pressed(p_button):
 	if p_button == BUTTONS.VR_PAD:
 		var joypos = HandLeft.joypos
 		if abs(joypos.y) < 0.5 and abs(joypos.x) > 0.1:
 			nextphysicsrotatestep += (1 if joypos.x > 0 else -1)*(22.5 if abs(joypos.x) > 0.8 else 90.0)
-
-	if p_button == BUTTONS.VR_GRIP:
-		playerdirectedflight = true
-
-		
-func _on_button_release(p_button):
-	if p_button == BUTTONS.VR_BUTTON_BY:
-		pass
-	if p_button == BUTTONS.VR_GRIP:
-		playerdirectedflight = false
 
 var laserangleadjustmode = false
 var laserangleoriginal = 0
