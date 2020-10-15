@@ -2,6 +2,8 @@ extends Spatial
 
 # Stuff to do:
 
+# A grey mesh sphere over the head with a hole in it that we turn on when walking or flying
+
 # Planview camerascalechange and cameraresetcentre to be buttons
 # Ability to change planview size (in both dimensions)
 # scalebar on planview

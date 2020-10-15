@@ -1822,9 +1822,12 @@ __meta__ = {
 }
 
 [node name="Tree" type="Tree" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls"]
-margin_left = 600.0
+margin_left = 431.0
 margin_right = 800.0
 margin_bottom = 100.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="ViewSlide" type="Control" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls"]
 material = SubResource( 60 )

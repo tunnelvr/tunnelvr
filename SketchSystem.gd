@@ -14,6 +14,9 @@ func _ready():
 	#floordrawingimg = "res://surveyscans/greenland/ushapedcave.png"
 	floordrawingimg = defaultfloordrawing
 	var floordrawing = newXCuniquedrawingPaper(floordrawingimg, DRAWING_TYPE.DT_FLOORTEXTURE)
+	floordrawing.rotation_degrees = Vector3(-90, 0, 0)
+	floordrawing.get_node("XCdrawingplane").scale = Vector3(50, 50, 1)
+
 	get_node("/root/Spatial/ImageSystem").fetchpaperdrawing(floordrawing)
 		
 
@@ -366,13 +369,18 @@ func newXCuniquedrawingPaper(xcresource, drawingtype):
 	$XCdrawings.add_child(xcdrawing)
 	assert (sname == xcdrawing.get_name())
 	
-	xcdrawing.get_node("XCdrawingplane").collision_layer = CollisionLayer.CL_Environment | CollisionLayer.CL_PointerFloor if xcdrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE else CollisionLayer.CL_Pointer
+	if xcdrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
+		xcdrawing.get_node("XCdrawingplane").collision_layer = CollisionLayer.CL_Environment | CollisionLayer.CL_PointerFloor
+	else:
+		 xcdrawing.get_node("XCdrawingplane").collision_layer = CollisionLayer.CL_Pointer
 
 	xcdrawing.get_node("XCdrawingplane").visible = true
 	xcdrawing.get_node("XCdrawingplane/CollisionShape").disabled = false
 	var m = preload("res://surveyscans/scanimagefloor.material").duplicate()
 	m.albedo_texture = ImageTexture.new() 
 	xcdrawing.get_node("XCdrawingplane/CollisionShape/MeshInstance").set_surface_material(0, m)
+
+	# to abolish
 	if xcdrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
 		xcdrawing.rotation_degrees = Vector3(-90, 0, 0)
 		xcdrawing.get_node("XCdrawingplane").scale = Vector3(50, 50, 1)

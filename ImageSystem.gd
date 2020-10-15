@@ -7,26 +7,6 @@ var imgdir = "user://northernimages/"
 var nonimagedir = "user://nonimagewebpages/"
 var urldir = "http://cave-registry.org.uk/svn/NorthernEngland/ThreeCountiesArea/rawscans/Ireby/"
 
-func fillIrebytree(tree):
-	var root = tree.create_item()
-	var child1 = tree.create_item(root)
-	var child2 = tree.create_item(root)
-	var subchild1 = tree.create_item(child1)
-	subchild1.set_text(0, "Subchild1")
-
-	var regex = RegEx.new()
-	regex.compile('<li><a href="([^"]*)">') # Negated whitespace character class.
-	var results = [ ]
-	#for m in regex.search_all(xxx):
-	#	print(m.get_string(1))
-
-	var httprequest = HTTPRequest.new()
-	add_child(httprequest)
-	#httprequest.connect("request_completed", self, "_http_request_completed", [httprequest, paperdrawing])
-	#httprequest.request(urldir)
-	httprequestduration = 0.0
-
-
 
 var imglistD = [ "BoltonExtensionsResurvey-DrawnUpSketch-1.jpg", 
 				"DukeStResurvey-drawnup-p1.jpg", 
@@ -52,7 +32,7 @@ var paperwidth = 0.4
 func getshortimagename(xcresource, withextension, md5nameleng):
 	var fname = xcresource.substr(xcresource.find_last("/")+1)
 	var ext = xcresource.get_extension()
-	if ext != null:
+	if ext != null and ext != "":
 		ext = "."+ext
 	fname = fname.get_basename()
 	fname = fname.replace(".", "").replace("@", "").replace("%", "")
@@ -63,13 +43,7 @@ func getshortimagename(xcresource, withextension, md5nameleng):
 		fname = fname+md5name
 	return fname+ext if withextension else fname
 
-var imgregex = RegEx.new()
-var listregex = RegEx.new()
 
-func _ready():
-	imgregex.compile('(?i)\\.(png|jpg|jpeg)$')
-	listregex.compile('<li><a href="([^"]*)">')
-	
 var paperdrawinglist = [ ]
 var nonimagepageslist = [ ]
 
@@ -165,20 +139,11 @@ func _process(delta):
 	elif fetchednonimagedataobject != null:
 		print("FFF", fetchednonimagedataobject)
 		if "tree" in fetchednonimagedataobject:
-			var tree = $PlanView/Viewport/PlanGUI/PlanViewControls/Tree
-			var root = tree.create_item()
-			var htmllistfile = File.new()
-			htmllistfile.open(fetchednonimagedataobject["fetchednonimagedataobjectfile"], File.READ)
-			var htmllist = htmllistfile.get_as_text()
-			htmllistfile.close()
-			var dirurl = fetchednonimagedataobject["url"] + ("" if fetchednonimagedataobject["url"].ends_with("/") else "/")
-			for m in listregex.search_all(htmllist):
-				var lk = m.get_string()
-				if not lk.begins_with("."):
-					var newurl = dirurl + lk
-					var branch = tree.create_item(root)
-					branch.set_text(0, lk)
-					branch.set_tooltip(0, dirurl + lk)
+			var htmltextfile = File.new()
+			htmltextfile.open(fetchednonimagedataobject["fetchednonimagedataobjectfile"], File.READ)
+			var htmltext = htmltextfile.get_as_text()
+			htmltextfile.close()
+			get_node("/root/Spatial/PlanViewSystem").openlinklistpage(fetchednonimagedataobject["item"], htmltext)
 		fetchednonimagedataobject = null
 
 	elif httprequest != null:
@@ -187,10 +152,10 @@ func _process(delta):
 	else:
 		set_process(false)
 
-#func fetchunrolltree(tree, root, branch):
-#	paperdrawinglist.append(paperdrawing)
-#	set_process(true)
-
+func fetchunrolltree(tree, item, url):
+	var nonimagedataobject = { "url":url, "tree":tree, "item":item }
+	nonimagepageslist.append(nonimagedataobject)
+	set_process(true)
 
 func fetchpaperdrawing(paperdrawing):
 	paperdrawinglist.append(paperdrawing)
@@ -212,10 +177,9 @@ func fetchimportpapers():
 		var paperdrawing = get_node("/root/Spatial/SketchSystem").newXCuniquedrawingPaper(urldir+imglist[i], DRAWING_TYPE.DT_PAPERTEXTURE)
 		paperdrawing.global_transform = papertrans
 		paperdrawing.get_node("XCdrawingplane").scale = Vector3(paperwidth/2, paperwidth/2, 1)
-		paperdrawinglist.append(paperdrawing)
 		#get_node("/root/Spatial/SketchSystem").sharexcdrawingovernetwork(paperdrawing)
 		fetchpaperdrawing(paperdrawing)
 
-func _input(event):
-	if event is InputEventKey and event.pressed and event.scancode == KEY_V:
-		fetchimportpapers()
+#func _input(event):
+#	if event is InputEventKey and event.pressed and event.scancode == KEY_V:
+#		fetchimportpapers()

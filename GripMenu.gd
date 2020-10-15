@@ -93,7 +93,9 @@ func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointert
 		#var xcgcomm = "SelectXC"
 		#if xcdrawing0.get_node("XCdrawingplane").visible and xcdrawing1.get_node("XCdrawingplane").visible:
 		#	xcgcomm = "HideXC"
-		if is_instance_valid(activetargetwall) and len(activetargetwall.nodepoints) == 0:
+		if activetargetwall == get_node("/root/Spatial/PlanViewSystem"):
+			pass
+		elif is_instance_valid(activetargetwall) and len(activetargetwall.nodepoints) == 0:
 			enablegripmenus(["DoSlice", "SelectXC", "HideXC", "materials"])
 		elif tubesectormaterialname == "hole":
 			enablegripmenus(["HoleXC", "SelectXC", "HideXC", "materials"])

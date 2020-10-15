@@ -18,8 +18,8 @@ var handmaterial_orgtransparency = false
 var handmaterial_orgtranslucency = 1
 var joypos = Vector2(0, 0)
 
-var controllerhandtransformleft = Transform(Basis(Vector3(0,0,1), deg2rad(45)), Vector3(0,0,0))*Transform(Vector3(0,0,-1), Vector3(0,-1,0), Vector3(-1,0,0), Vector3(0,0,0.1))
-var controllerhandtransformright = Transform(Basis(Vector3(0,0,1), deg2rad(-45)), Vector3(0,0,0))*Transform(Vector3(0,0,1), Vector3(0,1,0), Vector3(-1,0,0), Vector3(0,0,0.1))
+var controllerhandtransformleft = Transform(Basis(Vector3(0,0,1), deg2rad(45*0)), Vector3(0,0,0))*Transform(Vector3(0,0,-1), Vector3(0,-1,0), Vector3(-1,0,0), Vector3(0,0,0.1))
+var controllerhandtransformright = Transform(Basis(Vector3(0,0,1), deg2rad(-45*0)), Vector3(0,0,0))*Transform(Vector3(0,0,1), Vector3(0,1,0), Vector3(-1,0,0), Vector3(0,0,0.1))
 var controllerhandtransform = null
 var mousecontrollermotioncumulative = Vector2(0, 0)
 var gripbuttonheld = false
@@ -94,10 +94,9 @@ func _ready():
 	pointermodel.visible = false
 	indexfingerpinchbutton = addfingerpinchbutton("index_null")
 	middlefingerpinchbutton = addfingerpinchbutton("middle_null")
-	middleringbutton = addfingerpinchbutton("middle_1")
-	middleringbutton.get_node("MeshInstance").transform.origin.y *= -2
-
 	if has_node("RayCast"):
+		middleringbutton = addfingerpinchbutton("middle_1")
+		middleringbutton.get_node("MeshInstance").transform.origin.y *= -2
 		internalhandray = $RayCast
 		boneattachmentmiddletip = addboneattachment("middle_null")
 

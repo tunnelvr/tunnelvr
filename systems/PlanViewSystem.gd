@@ -2,24 +2,76 @@ extends Spatial
 
 var planviewactive = false
 var drawingtype = DRAWING_TYPE.DT_PLANVIEW
+onready var ImageSystem = get_node("/root/Spatial/ImageSystem")
 
+var buttonidxtoitem = { }
+var tree = null
+var imgregex = RegEx.new()
+var listregex = RegEx.new()
+
+func fetchbuttonpressed(item, column, idx):
+	print("iii ", item, " ", column, "  ", idx)
+	if item == null:
+		print("fetchbuttonpressed item is null problem")
+		item = buttonidxtoitem.get(idx)
+	var url = item.get_tooltip(0)
+	var name = item.get_text(0)
+	print("url to fetch: ", url)
+	if imgregex.search(name):
+		var paperdrawing = get_node("/root/Spatial/SketchSystem").newXCuniquedrawingPaper(url, DRAWING_TYPE.DT_FLOORTEXTURE)
+		var pt0 = $PlanView.global_transform.origin
+		pt0.y = min($RealPlanCamera.global_transform.origin.y - 2, pt0.y + 20)
+		paperdrawing.global_transform = Transform(Vector3(1,0,0), Vector3(0,0,-1), Vector3(0,1,0), pt0)
+		paperdrawing.get_node("XCdrawingplane").scale = Vector3(10, 10, 1)
+		#get_node("/root/Spatial/SketchSystem").sharexcdrawingovernetwork(paperdrawing)
+		ImageSystem.fetchpaperdrawing(paperdrawing)
+		
+	else:
+		item.set_button_disabled(column, idx, true)
+		#item.erase_button(column, idx)
+		#buttonidxtoitem.erase(idx)
+		item.set_custom_bg_color(0, Color("#ff0099"))
+		ImageSystem.fetchunrolltree(tree, item, item.get_tooltip(0))
+
+func addsubitem(upperitem, name, url):
+	var item = tree.create_item(upperitem)
+	item.set_text(0, name)
+	item.set_tooltip(0, url)
+	var img = Image.new()
+	img.load("res://guimaterials/installbuttonimg.png" if imgregex.search(name) else "res://guimaterials/fetchbuttonimg.png")
+	var tex = ImageTexture.new()
+	tex.create_from_image(img)
+	var idx = item.get_button_count(0)
+	item.add_button(0, tex, idx)
+	buttonidxtoitem[idx] = item
+
+func openlinklistpage(item, htmltext):
+	item.clear_custom_bg_color(0)
+	var dirurl = item.get_tooltip(0)
+	if not dirurl.ends_with("/"):
+		dirurl += "/"
+	var tree = $PlanView/Viewport/PlanGUI/PlanViewControls/Tree
+	for m in listregex.search_all(htmltext):
+		var lk = m.get_string(1)
+		if not lk.begins_with("."):
+			addsubitem(item, lk, dirurl + lk)
 
 func _ready():
+	listregex.compile('<li><a href="([^"]*)">')
+	imgregex.compile('(?i)\\.(png|jpg|jpeg)$')
+
 	$RealPlanCamera.set_as_toplevel(true)
 	var fplangui = $PlanView/ViewportFake.get_node_or_null("PlanGUI")
 	if fplangui != null:
 		$PlanView/ViewportFake.remove_child(fplangui)
 		$PlanView/Viewport.add_child(fplangui)
 	$PlanView/Viewport/PlanGUI/PlanViewControls/ZoomView/ButtonCentre.connect("pressed", self, "buttoncentre_pressed")
+	tree = $PlanView/Viewport/PlanGUI/PlanViewControls/Tree
+	tree.connect("button_pressed", self, "fetchbuttonpressed")
 	set_process(false)
-
-	get_node("/root/Spatial/ImageSystem").fillIrebytree($PlanView/Viewport/PlanGUI/PlanViewControls/Tree)
-	var tree = $PlanView/Viewport/PlanGUI/PlanViewControls/Tree
 	var root = tree.create_item()
-	var child1 = tree.create_item(root)
-	var child2 = tree.create_item(root)
-	var subchild1 = tree.create_item(child1)
-	subchild1.set_text(0, "Subchild1")
+	root.set_text(0, "Root of tree")
+	addsubitem(root, "Ireby", "http://cave-registry.org.uk/svn/NorthernEngland/ThreeCountiesArea/rawscans/Ireby/")
 
 func toggleplanviewactive():
 	planviewactive = not planviewactive
