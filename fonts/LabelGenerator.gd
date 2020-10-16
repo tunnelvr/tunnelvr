@@ -42,7 +42,7 @@ func _process(delta):
 		var img = $Viewport.get_texture().get_data()
 		var tex = ImageTexture.new()
 		tex.create_from_image(img)
-		var xcnodelabelpanel = workingxcnode.get_node("Quad")
+		var xcnodelabelpanel = workingxcnode.get_node("StationLabel")
 		xcnodelabelpanel.mesh.size.x = tex.get_width()*(xcnodelabelpanel.mesh.size.y/tex.get_height())
 		xcnodelabelpanel.get_surface_material(0).set_shader_param("texture_albedo", tex)
 		#xcnodelabelpanel.get_surface_material(0).albedo_texture = tex

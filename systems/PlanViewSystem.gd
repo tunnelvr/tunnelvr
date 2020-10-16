@@ -160,10 +160,12 @@ func planviewguipanelreleasemouse():
 	viewport_mousedown = false
 
 func updatecentrelinesizes():
-	var sca = $PlanView/Viewport/PlanGUI/Camera.size/70.0*2.5 if Tglobal.centrelineonly else 1.0
+	var sca = 1
+	if Tglobal.centrelineonly:
+		sca = $PlanView/Viewport/PlanGUI/Camera.size/70.0*2.5
 	for xcdrawing in get_tree().get_nodes_in_group("gpcentrelinegeo"):
 		for xcn in xcdrawing.get_node("XCnodes").get_children():
-			xcn.get_node("Quad").get_surface_material(0).set_shader_param("vertex_scale", sca)
+			xcn.get_node("StationLabel").get_surface_material(0).set_shader_param("vertex_scale", sca)
 			xcn.get_node("CollisionShape").scale = Vector3(sca*2, sca*2, sca*2)
 		xcdrawing.linewidth = 0.035*sca
 		xcdrawing.updatexcpaths()
