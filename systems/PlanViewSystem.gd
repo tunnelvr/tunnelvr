@@ -3,13 +3,29 @@ extends Spatial
 var planviewactive = false
 var drawingtype = DRAWING_TYPE.DT_PLANVIEW
 onready var ImageSystem = get_node("/root/Spatial/ImageSystem")
+var activetargetfloor = null
 
 var buttonidxtoitem = { }
 var tree = null
 var imgregex = RegEx.new()
 var listregex = RegEx.new()
 
+var installbuttontex = null
+var imagebuttontex = null
+
+func setactivetargetfloor(newactivetargetfloor, gripbuttonheld):
+	if activetargetfloor != null:
+		activetargetfloor.get_node("XCdrawingplane/CollisionShape/MeshInstance").get_surface_material(0).albedo_color = Color("#FEF4D5")
+	if gripbuttonheld and activetargetfloor == newactivetargetfloor:
+		activetargetfloor = null
+	else:
+		activetargetfloor = newactivetargetfloor
+	if activetargetfloor != null:
+		activetargetfloor.get_node("XCdrawingplane/CollisionShape/MeshInstance").get_surface_material(0).albedo_color = Color("#DDFFCC")
+
+
 func fetchbuttonpressed(item, column, idx):
+	var sketchsystem = get_node("/root/Spatial/SketchSystem")
 	print("iii ", item, " ", column, "  ", idx)
 	if item == null:
 		print("fetchbuttonpressed item is null problem")
@@ -18,13 +34,19 @@ func fetchbuttonpressed(item, column, idx):
 	var name = item.get_text(0)
 	print("url to fetch: ", url)
 	if imgregex.search(name):
-		var paperdrawing = get_node("/root/Spatial/SketchSystem").newXCuniquedrawingPaper(url, DRAWING_TYPE.DT_FLOORTEXTURE)
-		var pt0 = $PlanView.global_transform.origin
-		pt0.y = min($RealPlanCamera.global_transform.origin.y - 2, pt0.y + 20)
+		var pt0 = $RealPlanCamera.global_transform.origin - Vector3(0,100,0)
+		for xcdrawing in sketchsystem.get_node("XCdrawings").get_children():
+			if xcdrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
+				var floory = xcdrawing.global_transform.origin.y
+				if pt0.y <= floory:
+					pt0.y = floory + 0.1
+		var paperdrawing = sketchsystem.newXCuniquedrawingPaper(url, DRAWING_TYPE.DT_FLOORTEXTURE)
+		#var pt0 = $PlanView.global_transform.origin
 		paperdrawing.global_transform = Transform(Vector3(1,0,0), Vector3(0,0,-1), Vector3(0,1,0), pt0)
 		paperdrawing.get_node("XCdrawingplane").scale = Vector3(10, 10, 1)
 		#get_node("/root/Spatial/SketchSystem").sharexcdrawingovernetwork(paperdrawing)
 		ImageSystem.fetchpaperdrawing(paperdrawing)
+		setactivetargetfloor(paperdrawing, false)
 		
 	else:
 		item.set_button_disabled(column, idx, true)
@@ -37,12 +59,11 @@ func addsubitem(upperitem, name, url):
 	var item = tree.create_item(upperitem)
 	item.set_text(0, name)
 	item.set_tooltip(0, url)
-	var img = Image.new()
-	img.load("res://guimaterials/installbuttonimg.png" if imgregex.search(name) else "res://guimaterials/fetchbuttonimg.png")
-	var tex = ImageTexture.new()
-	tex.create_from_image(img)
-	var idx = item.get_button_count(0)
+	var tex = installbuttontex if imgregex.search(name) else imagebuttontex
+	#var idx = item.get_button_count(0)
+	var idx = len(buttonidxtoitem)
 	item.add_button(0, tex, idx)
+	print("Adding button ", idx, " for name ", name)
 	buttonidxtoitem[idx] = item
 
 func openlinklistpage(item, htmltext):
@@ -54,11 +75,22 @@ func openlinklistpage(item, htmltext):
 	for m in listregex.search_all(htmltext):
 		var lk = m.get_string(1)
 		if not lk.begins_with("."):
+			lk = lk.replace("&amp;", "&")
 			addsubitem(item, lk, dirurl + lk)
 
 func _ready():
 	listregex.compile('<li><a href="([^"]*)">')
 	imgregex.compile('(?i)\\.(png|jpg|jpeg)$')
+
+	var installbuttonimg = Image.new()
+	installbuttonimg.load("res://guimaterials/installbuttonimg.png")
+	installbuttontex = ImageTexture.new()
+	installbuttontex.create_from_image(installbuttonimg)
+
+	var imagebuttonimg = Image.new()
+	imagebuttonimg.load("res://guimaterials/fetchbuttonimg.png")
+	imagebuttontex = ImageTexture.new()
+	imagebuttontex.create_from_image(imagebuttonimg)
 
 	$RealPlanCamera.set_as_toplevel(true)
 	var fplangui = $PlanView/ViewportFake.get_node_or_null("PlanGUI")
@@ -75,8 +107,13 @@ func _ready():
 
 func toggleplanviewactive():
 	planviewactive = not planviewactive
-	$PlanView/ProjectionScreen/ImageFrame.mesh.surface_get_material(0).emission_enabled = planviewactive
-	set_process(planviewactive)
+	if planviewactive:
+		$PlanView/ProjectionScreen/ImageFrame.mesh.surface_get_material(0).emission_enabled = true
+		set_process(true)
+	else:
+		$PlanView/ProjectionScreen/ImageFrame.mesh.surface_get_material(0).emission_enabled = false
+		set_process(false)
+		setactivetargetfloor(null, false)
 
 func setplanviewvisible(planviewvisible, guidpaneltransform, guidpanelsize):
 	if planviewvisible:
@@ -106,6 +143,33 @@ func _process(delta):
 		var zoomfac = 1/(1 + 0.5*delta) if bzoomin else 1 + 0.5*delta
 		$PlanView/Viewport/PlanGUI/Camera.size *= zoomfac
 		$RealPlanCamera/RealCameraBox.scale = Vector3($PlanView/Viewport/PlanGUI/Camera.size, 1.0, $PlanView/Viewport/PlanGUI/Camera.size)
+
+	if activetargetfloor != null:
+		var floortrim = $PlanView/Viewport/PlanGUI/PlanViewControls/FloorTrim
+		var joypostrimld = Vector2((-1 if floortrim.get_node("ButtonTrimLeftLeft").is_pressed() else 0) + (1 if floortrim.get_node("ButtonTrimLeftRight").is_pressed() else 0), 
+								   (-1 if floortrim.get_node("ButtonTrimDownDown").is_pressed() else 0) + (1 if floortrim.get_node("ButtonTrimDownUp").is_pressed() else 0))
+		var joypostrimru = Vector2((-1 if floortrim.get_node("ButtonTrimRightLeft").is_pressed() else 0) + (1 if floortrim.get_node("ButtonTrimRightRight").is_pressed() else 0), 
+								   (-1 if floortrim.get_node("ButtonTrimUpDown").is_pressed() else 0) + (1 if floortrim.get_node("ButtonTrimUpUp").is_pressed() else 0))
+		if joypostrimld != Vector2(0,0) or joypostrimru != Vector2(0,0):
+			var d = activetargetfloor
+			var drawingplane = d.get_node("XCdrawingplane")
+			var m = d.get_node("XCdrawingplane/CollisionShape/MeshInstance").get_surface_material(0)
+			#var m = preload("res://surveyscans/scanimagefloor.material").duplicate()
+			var imgheight = d.imgwidth*d.imgheightwidthratio
+			var sfac = delta*8
+			d.imgtrimleftdown = Vector2(clamp(d.imgtrimleftdown.x + joypostrimld.x*sfac, -d.imgwidth*0.5, d.imgtrimrightup.x-0.1), 
+										clamp(d.imgtrimleftdown.y + joypostrimld.y*sfac, -imgheight*0.5, d.imgtrimrightup.y-0.1))
+			d.imgtrimrightup = Vector2(clamp(d.imgtrimrightup.x + joypostrimru.x*sfac, d.imgtrimleftdown.x+0.1, d.imgwidth*0.5), 
+									   clamp(d.imgtrimrightup.y + joypostrimru.y*sfac, d.imgtrimleftdown.y+0.1, imgheight*0.5))
+			drawingplane.transform.origin = Vector3((d.imgtrimleftdown.x + d.imgtrimrightup.x)*0.5, (d.imgtrimleftdown.y + d.imgtrimrightup.y)*0.5, 0)
+			drawingplane.scale = Vector3((d.imgtrimrightup.x - d.imgtrimleftdown.x)*0.5, (d.imgtrimrightup.y - d.imgtrimleftdown.y)*0.5, 1)
+
+			m.uv1_scale = Vector3((d.imgtrimrightup.x - d.imgtrimleftdown.x)/d.imgwidth, (d.imgtrimrightup.y - d.imgtrimleftdown.y)/imgheight, 1)
+			m.uv1_offset = Vector3((d.imgtrimleftdown.x - (-d.imgwidth*0.5))/d.imgwidth, -(d.imgtrimrightup.y - (imgheight*0.5))/imgheight, 0)
+			#m.detail_uv_layer = SpatialMaterial.DETAIL_UV_1 if m.detail_uv_layer == SpatialMaterial.DETAIL_UV_2 else SpatialMaterial.DETAIL_UV_2
+			#m.uv2_scale = Vector3(1,1,1)
+			#m.uv2_offset = Vector3(0,0,0)
+
 	
 func buttoncentre_pressed():
 	var headcam = get_node("/root/Spatial").playerMe.get_node("HeadCam")
@@ -131,7 +195,8 @@ func processplanviewpointing(raycastcollisionpoint, controller_trigger):
 	viewport_point = Vector2(local_point.x, -local_point.y) * $PlanView/Viewport.size
 
 	var rectrel = viewport_point - $PlanView/Viewport/PlanGUI/PlanViewControls.rect_position
-	if rectrel.x > 0 and rectrel.y > 0 and rectrel.x < $PlanView/Viewport/PlanGUI/PlanViewControls.rect_size.x and rectrel.y < $PlanView/Viewport/PlanGUI/PlanViewControls.rect_size.y:
+	var inguipanel = (rectrel.x > 0 and rectrel.y > 0 and rectrel.x < $PlanView/Viewport/PlanGUI/PlanViewControls.rect_size.x and rectrel.y < $PlanView/Viewport/PlanGUI/PlanViewControls.rect_size.y)
+	if inguipanel:
 		var event = InputEventMouseMotion.new()
 		event.position = viewport_point
 		$PlanView/Viewport.input(event)
@@ -150,7 +215,8 @@ func processplanviewpointing(raycastcollisionpoint, controller_trigger):
 		planviewsystem.get_node("RealPlanCamera/LaserScope").global_transform.origin = laspt
 		planviewsystem.get_node("RealPlanCamera/LaserScope").visible = true
 		planviewsystem.get_node("RealPlanCamera/LaserScope/LaserOrient/RayCast").force_raycast_update()
-
+	return inguipanel
+	
 func planviewguipanelreleasemouse():
 	assert (viewport_mousedown)
 	var event = InputEventMouseButton.new()

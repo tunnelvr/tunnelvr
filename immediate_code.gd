@@ -49,14 +49,7 @@ class A:
 	pass
 
 func _run():
-	var regex = RegEx.new()
-	regex.compile('<li><a href="([^"]*)">') # Negated whitespace character class.
-	var results = []
-	#for m in regex.search_all(xxx):
-	#	print(m.get_string(1))
-# The `results` array now contains "One", "Two", "Three".
-	var imgregex = RegEx.new()
-	imgregex.compile('(?i)\\.(png|jpg|jpeg)$')
-	print(imgregex.search("hj i.PiNG") == null)
-	#print(xxx)
+	var a = "sdfsdf&amp; fg&ampdfg"
+	a = a.replace("&amp;", "&")
+	print(a)
 	

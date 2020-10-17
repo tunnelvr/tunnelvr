@@ -111,7 +111,7 @@ func _on_buttonload_choke():
 	$Viewport/GUI/Panel/Label.text = "Boulder choke!"
 	toggleguipanelvisibility(null)
 
-const clientips = [ "192.168.1.127", "192.168.1.89", "172.27.9.245", "192.168.43.172", "192.168.43.118" ]
+const clientips = [ "144.76.167.54", "192.168.1.127", "192.168.1.89", "172.27.9.245", "192.168.43.172", "192.168.43.118" ]
 func _ready():
 	var fgui = $ViewportFake.get_node_or_null("GUI")
 	if fgui != null:
@@ -141,7 +141,6 @@ func _ready():
 
 	if $Viewport/GUI/Panel/Networkstate.selected != 0:  # could record saved settings on disk
 		call_deferred("_on_networkstate_selected", $Viewport/GUI/Panel/Networkstate.selected)
-
 
 func clickbuttonheadtorch():
 	$Viewport/GUI/Panel/ButtonHeadtorch.pressed = not $Viewport/GUI/Panel/ButtonHeadtorch.pressed
@@ -271,23 +270,7 @@ func _on_networkstate_selected(index):
 		get_tree().set_network_peer(null)
 		
 	if nssel.begins_with("As Server"):
-		get_tree().connect("network_peer_connected", selfSpatial, "_player_connected")
-		get_tree().connect("network_peer_disconnected", selfSpatial, "_player_disconnected")
-		Tglobal.connectiontoserveractive = true
-		if selfSpatial.usewebsockets:
-			websocketserver = WebSocketServer.new();
-			var e = websocketserver.listen(selfSpatial.hostportnumber, PoolStringArray(), true)
-			print("Websocketserverclient listen: ", e)
-			get_tree().set_network_peer(websocketserver)
-		else:
-			networkedmultiplayerenet = NetworkedMultiplayerENet.new()
-			var e = networkedmultiplayerenet.create_server(selfSpatial.hostportnumber, 5)
-			print("networkedmultiplayerenet createserver: ", e)
-			get_tree().set_network_peer(networkedmultiplayerenet)
-
-		var lnetworkID = get_tree().get_network_unique_id()
-		selfSpatial.setnetworkidnamecolour(selfSpatial.playerMe, lnetworkID)
-		print("server networkID: ", selfSpatial.playerMe.networkID)
+		networkstartasserver(true)
 		$Viewport/GUI/Panel/Label.text = "networkID: "+str(selfSpatial.playerMe.networkID)
 				
 	if nssel.begins_with("Client->"):
@@ -312,6 +295,35 @@ func _on_networkstate_selected(index):
 			print("networkedmultiplayerenet createclient: ", e)
 			get_tree().set_network_peer(networkedmultiplayerenet)
 		$Viewport/GUI/Panel/Label.text = "connecting "+("websocket" if selfSpatial.usewebsockets else "ENET")
+
+func networkstartasserver(fromgui):
+	print("Starting as server, ipnumber list:")
+	for k in IP.get_local_interfaces():
+		var ipnum = ""
+		for l in k["addresses"]:
+			if l.find(".") != -1:
+				ipnum = l
+		print(k["friendly"] + ": " + ipnum)
+	
+	var selfSpatial = get_node("/root/Spatial")	
+	get_tree().connect("network_peer_connected", selfSpatial, "_player_connected")
+	get_tree().connect("network_peer_disconnected", selfSpatial, "_player_disconnected")
+	Tglobal.connectiontoserveractive = true
+	if selfSpatial.usewebsockets:
+		websocketserver = WebSocketServer.new();
+		var e = websocketserver.listen(selfSpatial.hostportnumber, PoolStringArray(), true)
+		print("Websocketserverclient listen: ", e)
+		get_tree().set_network_peer(websocketserver)
+	else:
+		networkedmultiplayerenet = NetworkedMultiplayerENet.new()
+		var e = networkedmultiplayerenet.create_server(selfSpatial.hostportnumber, 5)
+		print("networkedmultiplayerenet createserver: ", e)
+		get_tree().set_network_peer(networkedmultiplayerenet)
+
+	var lnetworkID = get_tree().get_network_unique_id()
+	selfSpatial.setnetworkidnamecolour(selfSpatial.playerMe, lnetworkID)
+	print("server networkID: ", selfSpatial.playerMe.networkID)
+
 		
 func _connection_failed():
 	print("_connection_failed ", websocketclient)

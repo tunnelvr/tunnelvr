@@ -10,6 +10,11 @@ var onepathpairs = [ ]  # [ Anodename0, Anodename1, Bnodename0, Bnodename1, ... 
 var drawingtype = DRAWING_TYPE.DT_XCDRAWING
 var xcflatshellmaterial = "simpledirt"
 
+var imgwidth = 0
+var imgheightwidthratio = 0
+var imgtrimleftdown = Vector2(0,0)
+var imgtrimrightup = Vector2(0,0)
+
 # derived data
 var xctubesconn = [ ]   # references to xctubes that connect to here (could use their names instead)
 var maxnodepointnumber = 0

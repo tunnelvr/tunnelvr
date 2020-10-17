@@ -160,8 +160,8 @@ func clearpointertarget():
 	pointertargettype = "none"
 	pointertargetwall = null
 
-func setpointertarget(laserroot):
-	var newpointertarget = laserroot.get_node("RayCast").get_collider()
+func setpointertarget(laserroot, raycast):
+	var newpointertarget = raycast.get_collider() if raycast != null else null
 	if newpointertarget != null:
 		if newpointertarget.is_queued_for_deletion():
 			newpointertarget = null
@@ -169,7 +169,7 @@ func setpointertarget(laserroot):
 			newpointertarget = null
 		elif newpointertarget.get_parent().get_parent().is_queued_for_deletion():
 			newpointertarget = null
-	var newpointertargetpoint = laserroot.get_node("RayCast").get_collision_point() if newpointertarget != null else null
+	var newpointertargetpoint = raycast.get_collision_point() if newpointertarget != null else null
 	if newpointertarget != pointertarget:
 		if pointertarget == guipanel3d:
 			guipanel3d.guipanelreleasemouse()
@@ -432,6 +432,10 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 			if floormovedata != null:
 				sketchsystem.actsketchchange(floormovedata)
 		clearactivetargetnode()
+
+	elif pointertargettype == "XCdrawing" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE and \
+			planviewsystem.planviewactive and activelaserroot != LaserOrient: 
+		planviewsystem.setactivetargetfloor(pointertargetwall, gripbuttonheld)
 
 	elif activetargetnode != null and pointertarget == activetargetnode:
 		clearactivetargetnode()
@@ -817,14 +821,19 @@ func _physics_process(delta):
 			LaserOrient.get_node("LaserSpot").global_transform.origin = planviewcontactpoint
 			LaserOrient.get_node("Length").scale.z = -LaserOrient.get_node("LaserSpot").translation.z
 			LaserOrient.get_node("LaserSpot").visible = false
-			pointerplanviewtarget.processplanviewpointing(planviewcontactpoint, (handrightcontroller.is_button_pressed(BUTTONS.HT_PINCH_INDEX_FINGER) if Tglobal.questhandtrackingactive else handrightcontroller.is_button_pressed(BUTTONS.VR_TRIGGER)) or Input.is_mouse_button_pressed(BUTTON_LEFT))
+			var inguipanel = pointerplanviewtarget.processplanviewpointing(planviewcontactpoint, (handrightcontroller.is_button_pressed(BUTTONS.HT_PINCH_INDEX_FINGER) if Tglobal.questhandtrackingactive else handrightcontroller.is_button_pressed(BUTTONS.VR_TRIGGER)) or Input.is_mouse_button_pressed(BUTTON_LEFT))
 			planviewnothit = false
 			activelaserroot = planviewsystem.get_node("RealPlanCamera/LaserScope/LaserOrient")
 			activelaserroot.get_node("LaserSpot").global_transform.basis = LaserOrient.global_transform.basis
+			if inguipanel:
+				setpointertarget(activelaserroot, null)
+			else:
+				activelaserroot.get_node("RayCast").force_raycast_update()
+				setpointertarget(activelaserroot, activelaserroot.get_node("RayCast"))
 		else:
 			planviewsystem.get_node("RealPlanCamera/LaserScope").visible = false
 			activelaserroot = LaserOrient
-		setpointertarget(activelaserroot)
+			setpointertarget(activelaserroot, activelaserroot.get_node("RayCast"))
 	if planviewnothit and planviewsystem.viewport_mousedown:
 		planviewsystem.planviewguipanelreleasemouse()
 	

@@ -131,9 +131,21 @@ func _process(delta):
 		var fetcheddrawingmaterial = fetcheddrawing.get_node("XCdrawingplane/CollisionShape/MeshInstance").get_surface_material(0)
 		fetcheddrawingmaterial.albedo_texture = papertexture
 		if papertexture.get_width() != 0:
-			fetcheddrawing.get_node("XCdrawingplane").scale.y = fetcheddrawing.get_node("XCdrawingplane").scale.x*papertexture.get_height()/papertexture.get_width()
+			fetcheddrawing.imgheightwidthratio = papertexture.get_height()*1.0/papertexture.get_width()
+			print("fff  ", fetcheddrawing.imgheightwidthratio)
+			if fetcheddrawing.imgwidth == 0:
+				var drawingplane = fetcheddrawing.get_node("XCdrawingplane")
+				fetcheddrawing.imgwidth = drawingplane.scale.x*2
+				drawingplane.scale.y = (fetcheddrawing.imgwidth*0.5)*fetcheddrawing.imgheightwidthratio
+				fetcheddrawing.imgtrimleftdown = Vector2(-drawingplane.scale.x, -drawingplane.scale.y)
+				fetcheddrawing.imgtrimrightup = Vector2(drawingplane.scale.x, drawingplane.scale.y)
+				fetcheddrawingmaterial.uv1_scale = Vector3(1,1,1)
+				fetcheddrawingmaterial.uv1_offset = Vector3(0,0,0)
+				
 		else:
-			print(fetcheddrawing.get_name(), "   has zero width ")
+			print(fetcheddrawingfile, "   has zero width, deleting")
+			Directory.new().remove(fetcheddrawingfile)
+			
 		fetcheddrawing = null
 
 	elif fetchednonimagedataobject != null:

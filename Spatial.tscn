@@ -1,4 +1,4 @@
-[gd_scene load_steps=211 format=2]
+[gd_scene load_steps=215 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/default_env.tres" type="Environment" id=2]
@@ -47,6 +47,8 @@
 [ext_resource path="res://sounds/Flashpoint001b.wav" type="AudioStream" id=45]
 [ext_resource path="res://sounds/menu_click.wav" type="AudioStream" id=46]
 [ext_resource path="res://guimaterials/vrgui.theme" type="Theme" id=47]
+[ext_resource path="res://guimaterials/bluealphaborder.png" type="Texture" id=48]
+[ext_resource path="res://surveyscans/DukeStResurvey-drawnup-p3.jpg" type="Texture" id=49]
 
 [sub_resource type="CylinderShape" id=1]
 radius = 0.1
@@ -1010,6 +1012,64 @@ size = Vector3( 4, 2.6, 4.3 )
 [sub_resource type="CubeMesh" id=163]
 size = Vector3( 3.6, 2, 3.8 )
 
+[sub_resource type="Shader" id=164]
+code = "shader_type spatial;
+render_mode blend_mix,depth_draw_opaque,cull_disabled,diffuse_burley,specular_schlick_ggx;
+uniform vec4 albedo : hint_color;
+uniform sampler2D texture_albedo : hint_albedo;
+uniform float specular;
+uniform float metallic;
+uniform float roughness : hint_range(0,1);
+uniform float point_size : hint_range(0,128);
+uniform sampler2D texture_detail_albedo : hint_albedo;
+uniform sampler2D texture_detail_normal : hint_normal;
+uniform sampler2D texture_detail_mask : hint_white;
+uniform vec3 uv1_scale;
+uniform vec3 uv1_offset;
+uniform vec3 uv2_scale;
+uniform vec3 uv2_offset;
+
+
+void vertex() {
+	UV=UV*uv1_scale.xy+uv1_offset.xy;
+	UV2=UV2*uv2_scale.xy+uv2_offset.xy;
+}
+
+
+
+
+void fragment() {
+	vec2 base_uv = UV;
+	vec2 base_uv2 = UV2;
+	vec4 albedo_tex = texture(texture_albedo,base_uv);
+	ALBEDO = albedo.rgb * albedo_tex.rgb;
+	METALLIC = metallic;
+	ROUGHNESS = roughness;
+	SPECULAR = specular;
+	vec4 detail_tex = texture(texture_detail_albedo,base_uv2);
+	vec4 detail_norm_tex = texture(texture_detail_normal,base_uv2);
+	vec4 detail_mask_tex = texture(texture_detail_mask,base_uv);
+	vec3 detail = mix(ALBEDO.rgb,detail_tex.rgb,detail_tex.a);
+	vec3 detail_norm = mix(NORMALMAP,detail_norm_tex.rgb,detail_tex.a);
+	NORMALMAP = mix(NORMALMAP,detail_norm,detail_mask_tex.r);
+	ALBEDO.rgb = mix(ALBEDO.rgb,detail,detail_mask_tex.r);
+}
+"
+
+[sub_resource type="ShaderMaterial" id=165]
+shader = SubResource( 164 )
+shader_param/albedo = Color( 0.996078, 0.956863, 0.835294, 1 )
+shader_param/specular = 0.5
+shader_param/metallic = 0.38
+shader_param/roughness = 0.36
+shader_param/point_size = 1.0
+shader_param/uv1_scale = Vector3( 1, 1, 1 )
+shader_param/uv1_offset = Vector3( 0, 0, 0 )
+shader_param/uv2_scale = Vector3( 1, 1, 1 )
+shader_param/uv2_offset = Vector3( 0, 0, 0 )
+shader_param/texture_albedo = ExtResource( 49 )
+shader_param/texture_detail_albedo = ExtResource( 48 )
+
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
 enablevr = false
@@ -1890,6 +1950,106 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="FloorTrim" type="Control" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls"]
+material = SubResource( 60 )
+margin_left = 137.921
+margin_top = 3.25989
+margin_right = 243.921
+margin_bottom = 98.2599
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls/FloorTrim"]
+margin_left = 5.40929
+margin_top = 6.44543
+margin_right = 42.4093
+margin_bottom = 28.4454
+text = "Trim"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ButtonTrimDownDown" type="Button" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls/FloorTrim"]
+margin_left = 47.1001
+margin_top = 73.3364
+margin_right = 67.1001
+margin_bottom = 95.3364
+text = "V"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ButtonTrimDownUp" type="Button" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls/FloorTrim"]
+margin_left = 47.082
+margin_top = 49.8728
+margin_right = 67.082
+margin_bottom = 71.8728
+text = "^"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ButtonTrimLeftRight" type="Button" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls/FloorTrim"]
+margin_left = 26.4635
+margin_top = 38.7818
+margin_right = 46.4635
+margin_bottom = 60.7818
+text = ">"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ButtonTrimLeftLeft" type="Button" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls/FloorTrim"]
+margin_left = 5.5274
+margin_top = 38.8909
+margin_right = 25.5274
+margin_bottom = 60.8909
+text = "<"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ButtonTrimRightRight" type="Button" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls/FloorTrim"]
+margin_left = 91.2725
+margin_top = 37.2273
+margin_right = 111.272
+margin_bottom = 59.2273
+text = ">"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ButtonTrimRightLeft" type="Button" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls/FloorTrim"]
+margin_left = 69.4454
+margin_top = 37.2273
+margin_right = 89.4454
+margin_bottom = 59.2273
+text = "<"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ButtonTrimUpUp" type="Button" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls/FloorTrim"]
+margin_left = 48.2272
+margin_top = 1.99091
+margin_right = 67.2272
+margin_bottom = 23.9909
+text = "^"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ButtonTrimUpDown" type="Button" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls/FloorTrim"]
+margin_left = 46.8909
+margin_top = 26.0452
+margin_right = 66.8909
+margin_bottom = 48.0452
+text = "V"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [node name="ZoomView" type="Control" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls"]
 material = SubResource( 60 )
 margin_left = 272.611
@@ -2412,6 +2572,7 @@ mesh = SubResource( 162 )
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.461556, 0 )
 operation = 2
 mesh = SubResource( 163 )
+material = SubResource( 165 )
 
 [node name="CSGBox" type="CSGBox" parent="Kitchen/CSGMesh"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 2.0093, 0.288218, 0 )

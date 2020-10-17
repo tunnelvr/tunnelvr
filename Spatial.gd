@@ -90,7 +90,7 @@ extends Spatial
 
 	
 export var hostipnumber: String = ""
-export var hostportnumber: int = 8002
+export var hostportnumber: int = 4546
 export var enablevr: = true
 export var usewebsockets: = true
 
@@ -124,7 +124,14 @@ func _ready():
 	print("  Available Interfaces are %s: " % str(ARVRServer.get_interfaces()));
 	print("Initializing VR" if enablevr else "VR disabled");
 
-	if checkloadinterface("OVRMobile"):
+	if OS.has_feature("Server"):
+		print("On server mode, autostart server connection")
+		$GuiSystem/GUIPanel3D.call_deferred("networkstartasserver", false)
+		# export Linux/X11 runable, go into directory and run
+		# ../../Godot_v3.2.3-stable_linux_server.64 --main-pack linuxserverversion.pck	
+		# Using Ubuntu App on Windows to get the command line
+		
+	elif checkloadinterface("OVRMobile"):  # ignores enablevr flag on quest platform
 		print("found quest, initializing")
 		ovr_init_config = load("res://addons/godot_ovrmobile/OvrInitConfig.gdns").new()
 		ovr_performance = load("res://addons/godot_ovrmobile/OvrPerformance.gdns").new()
@@ -139,7 +146,7 @@ func _ready():
 		else:
 			Tglobal.arvrinterface = null
 
-	if enablevr and checkloadinterface("Oculus"):
+	elif enablevr and checkloadinterface("Oculus"):
 		print("  Found Oculus Interface.");
 		if Tglobal.arvrinterface.initialize():
 			get_viewport().arvr = true;
@@ -151,7 +158,7 @@ func _ready():
 		else:
 			Tglobal.arvrinterface = null
 				
-	if enablevr and checkloadinterface("OpenVR"):
+	elif enablevr and checkloadinterface("OpenVR"):
 		print("found openvr, initializing")
 		if Tglobal.arvrinterface.initialize():
 			var viewport = get_viewport()
@@ -166,7 +173,7 @@ func _ready():
 		else:
 			Tglobal.arvrinterface = null
 				
-	if enablevr and false and checkloadinterface("Native mobile"):
+	elif enablevr and false and checkloadinterface("Native mobile"):
 		print("found nativemobile, initializing")
 		if Tglobal.arvrinterface.initialize():
 			var viewport = get_viewport()
