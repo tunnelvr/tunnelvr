@@ -376,8 +376,10 @@ func newXCuniquedrawingPaper(xcresource, drawingtype):
 
 	xcdrawing.get_node("XCdrawingplane").visible = true
 	xcdrawing.get_node("XCdrawingplane/CollisionShape").disabled = false
-	var m = preload("res://surveyscans/scanimagefloor.material").duplicate()
-	m.albedo_texture = ImageTexture.new() 
+	#var m = preload("res://surveyscans/scanimagefloor.material").duplicate()
+	#m.albedo_texture = ImageTexture.new()
+	var m = preload("res://guimaterials/borderedfloor.material").duplicate()
+	m.set_shader_param("texture_albedo", ImageTexture.new())
 	xcdrawing.get_node("XCdrawingplane/CollisionShape/MeshInstance").set_surface_material(0, m)
 
 	# to abolish

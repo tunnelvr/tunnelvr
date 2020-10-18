@@ -15,13 +15,13 @@ var imagebuttontex = null
 
 func setactivetargetfloor(newactivetargetfloor, gripbuttonheld):
 	if activetargetfloor != null:
-		activetargetfloor.get_node("XCdrawingplane/CollisionShape/MeshInstance").get_surface_material(0).albedo_color = Color("#FEF4D5")
+		activetargetfloor.get_node("XCdrawingplane/CollisionShape/MeshInstance").get_surface_material(0).set_shader_param("albedo", Color("#FEF4D5"))
 	if gripbuttonheld and activetargetfloor == newactivetargetfloor:
 		activetargetfloor = null
 	else:
 		activetargetfloor = newactivetargetfloor
 	if activetargetfloor != null:
-		activetargetfloor.get_node("XCdrawingplane/CollisionShape/MeshInstance").get_surface_material(0).albedo_color = Color("#DDFFCC")
+		activetargetfloor.get_node("XCdrawingplane/CollisionShape/MeshInstance").get_surface_material(0).set_shader_param("albedo", Color("#DDFFCC"))
 
 
 func fetchbuttonpressed(item, column, idx):
@@ -164,12 +164,8 @@ func _process(delta):
 			drawingplane.transform.origin = Vector3((d.imgtrimleftdown.x + d.imgtrimrightup.x)*0.5, (d.imgtrimleftdown.y + d.imgtrimrightup.y)*0.5, 0)
 			drawingplane.scale = Vector3((d.imgtrimrightup.x - d.imgtrimleftdown.x)*0.5, (d.imgtrimrightup.y - d.imgtrimleftdown.y)*0.5, 1)
 
-			m.uv1_scale = Vector3((d.imgtrimrightup.x - d.imgtrimleftdown.x)/d.imgwidth, (d.imgtrimrightup.y - d.imgtrimleftdown.y)/imgheight, 1)
-			m.uv1_offset = Vector3((d.imgtrimleftdown.x - (-d.imgwidth*0.5))/d.imgwidth, -(d.imgtrimrightup.y - (imgheight*0.5))/imgheight, 0)
-			#m.detail_uv_layer = SpatialMaterial.DETAIL_UV_1 if m.detail_uv_layer == SpatialMaterial.DETAIL_UV_2 else SpatialMaterial.DETAIL_UV_2
-			#m.uv2_scale = Vector3(1,1,1)
-			#m.uv2_offset = Vector3(0,0,0)
-
+			m.set_shader_param("uv1_scale", Vector3((d.imgtrimrightup.x - d.imgtrimleftdown.x)/d.imgwidth, (d.imgtrimrightup.y - d.imgtrimleftdown.y)/imgheight, 1))
+			m.set_shader_param("uv1_offset", Vector3((d.imgtrimleftdown.x - (-d.imgwidth*0.5))/d.imgwidth, -(d.imgtrimrightup.y - (imgheight*0.5))/imgheight, 0))
 	
 func buttoncentre_pressed():
 	var headcam = get_node("/root/Spatial").playerMe.get_node("HeadCam")
@@ -206,7 +202,6 @@ func processplanviewpointing(raycastcollisionpoint, controller_trigger):
 			event.pressed = viewport_mousedown
 			event.button_index = BUTTON_LEFT
 			event.position = viewport_point
-			print("vppv viewport_point ", viewport_point)
 			$PlanView/Viewport.input(event)
 	else:
 		if viewport_mousedown:

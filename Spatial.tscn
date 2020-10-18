@@ -1,4 +1,4 @@
-[gd_scene load_steps=215 format=2]
+[gd_scene load_steps=214 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/default_env.tres" type="Environment" id=2]
@@ -47,7 +47,6 @@
 [ext_resource path="res://sounds/Flashpoint001b.wav" type="AudioStream" id=45]
 [ext_resource path="res://sounds/menu_click.wav" type="AudioStream" id=46]
 [ext_resource path="res://guimaterials/vrgui.theme" type="Theme" id=47]
-[ext_resource path="res://guimaterials/bluealphaborder.png" type="Texture" id=48]
 [ext_resource path="res://surveyscans/DukeStResurvey-drawnup-p3.jpg" type="Texture" id=49]
 
 [sub_resource type="CylinderShape" id=1]
@@ -1012,7 +1011,7 @@ size = Vector3( 4, 2.6, 4.3 )
 [sub_resource type="CubeMesh" id=163]
 size = Vector3( 3.6, 2, 3.8 )
 
-[sub_resource type="Shader" id=164]
+[sub_resource type="Shader" id=165]
 code = "shader_type spatial;
 render_mode blend_mix,depth_draw_opaque,cull_disabled,diffuse_burley,specular_schlick_ggx;
 uniform vec4 albedo : hint_color;
@@ -1021,9 +1020,6 @@ uniform float specular;
 uniform float metallic;
 uniform float roughness : hint_range(0,1);
 uniform float point_size : hint_range(0,128);
-uniform sampler2D texture_detail_albedo : hint_albedo;
-uniform sampler2D texture_detail_normal : hint_normal;
-uniform sampler2D texture_detail_mask : hint_white;
 uniform vec3 uv1_scale;
 uniform vec3 uv1_offset;
 uniform vec3 uv2_scale;
@@ -1032,7 +1028,6 @@ uniform vec3 uv2_offset;
 
 void vertex() {
 	UV=UV*uv1_scale.xy+uv1_offset.xy;
-	UV2=UV2*uv2_scale.xy+uv2_offset.xy;
 }
 
 
@@ -1040,24 +1035,16 @@ void vertex() {
 
 void fragment() {
 	vec2 base_uv = UV;
-	vec2 base_uv2 = UV2;
 	vec4 albedo_tex = texture(texture_albedo,base_uv);
 	ALBEDO = albedo.rgb * albedo_tex.rgb;
 	METALLIC = metallic;
 	ROUGHNESS = roughness;
 	SPECULAR = specular;
-	vec4 detail_tex = texture(texture_detail_albedo,base_uv2);
-	vec4 detail_norm_tex = texture(texture_detail_normal,base_uv2);
-	vec4 detail_mask_tex = texture(texture_detail_mask,base_uv);
-	vec3 detail = mix(ALBEDO.rgb,detail_tex.rgb,detail_tex.a);
-	vec3 detail_norm = mix(NORMALMAP,detail_norm_tex.rgb,detail_tex.a);
-	NORMALMAP = mix(NORMALMAP,detail_norm,detail_mask_tex.r);
-	ALBEDO.rgb = mix(ALBEDO.rgb,detail,detail_mask_tex.r);
 }
 "
 
-[sub_resource type="ShaderMaterial" id=165]
-shader = SubResource( 164 )
+[sub_resource type="ShaderMaterial" id=164]
+shader = SubResource( 165 )
 shader_param/albedo = Color( 0.996078, 0.956863, 0.835294, 1 )
 shader_param/specular = 0.5
 shader_param/metallic = 0.38
@@ -1068,7 +1055,6 @@ shader_param/uv1_offset = Vector3( 0, 0, 0 )
 shader_param/uv2_scale = Vector3( 1, 1, 1 )
 shader_param/uv2_offset = Vector3( 0, 0, 0 )
 shader_param/texture_albedo = ExtResource( 49 )
-shader_param/texture_detail_albedo = ExtResource( 48 )
 
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
@@ -2572,7 +2558,7 @@ mesh = SubResource( 162 )
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.461556, 0 )
 operation = 2
 mesh = SubResource( 163 )
-material = SubResource( 165 )
+material = SubResource( 164 )
 
 [node name="CSGBox" type="CSGBox" parent="Kitchen/CSGMesh"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 2.0093, 0.288218, 0 )
