@@ -11,13 +11,13 @@ var drawingtype = DRAWING_TYPE.DT_XCDRAWING
 var xcflatshellmaterial = "simpledirt"
 
 var imgwidth = 0
-var imgheightwidthratio = 0
 var imgtrimleftdown = Vector2(0,0)
 var imgtrimrightup = Vector2(0,0)
 
 # derived data
 var xctubesconn = [ ]   # references to xctubes that connect to here (could use their names instead)
 var maxnodepointnumber = 0
+var imgheightwidthratio = 0  # known from the xcresource image (though could be cached)
 
 var linewidth = 0.05
 
@@ -81,6 +81,17 @@ func expandxcdrawingfitxcdrawing(xcdrawing):
 	updateformetresquaresscaletexture()
 	
 func exportxcrpcdata():
+	if drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
+		return { "name":get_name(), 
+				 "xcresource":xcresource,
+				 "drawingtype":drawingtype,
+				 "transformpos":global_transform,
+				 "nodepoints": nodepoints, 
+				 "maxnodepointnumber":maxnodepointnumber,
+				 "imgtrim":{ "imgwidth":imgwidth, "imgtrimleftdown":imgtrimleftdown, "imgtrimrightup":imgtrimrightup, "imgheightwidthratio":imgheightwidthratio },
+				 "visible":true 
+			   }
+		
 	return { "name":get_name(), 
 			 "xcresource":xcresource,
 			 "drawingtype":drawingtype,
@@ -99,6 +110,7 @@ func exportxcrpcdata():
 			 "maxnodepointnumber":maxnodepointnumber,
 			 "visible":$XCdrawingplane.visible 
 		   }
+		
 
 func mergexcrpcdata(xcdata):
 	assert ((get_name() == xcdata["name"]) and (not ("drawingtype" in xcdata) or drawingtype == xcdata["drawingtype"]))
@@ -111,6 +123,8 @@ func mergexcrpcdata(xcdata):
 		imgwidth = imgtrim["imgwidth"]
 		imgtrimleftdown = imgtrim["imgtrimleftdown"]
 		imgtrimrightup = imgtrim["imgtrimrightup"]
+		if imgheightwidthratio == 0 and "imgheightwidthratio" in imgtrim:
+			imgheightwidthratio = imgtrim["imgheightwidthratio"]
 		
 		get_node("XCdrawingplane").transform.origin = Vector3((imgtrimleftdown.x + imgtrimrightup.x)*0.5, (imgtrimleftdown.y + imgtrimrightup.y)*0.5, 0)
 		get_node("XCdrawingplane").scale = Vector3((imgtrimrightup.x - imgtrimleftdown.x)*0.5, (imgtrimrightup.y - imgtrimleftdown.y)*0.5, 1)

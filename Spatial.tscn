@@ -1,4 +1,4 @@
-[gd_scene load_steps=216 format=2]
+[gd_scene load_steps=210 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/default_env.tres" type="Environment" id=2]
@@ -48,7 +48,6 @@
 [ext_resource path="res://sounds/menu_click.wav" type="AudioStream" id=46]
 [ext_resource path="res://guimaterials/vrgui.theme" type="Theme" id=47]
 [ext_resource path="res://systems/mqtt.gd" type="Script" id=48]
-[ext_resource path="res://surveyscans/DukeStResurvey-drawnup-p3.jpg" type="Texture" id=49]
 [ext_resource path="res://systems/testmqtt.gd" type="Script" id=50]
 
 [sub_resource type="CylinderShape" id=1]
@@ -912,8 +911,8 @@ mid_height = 0.5
 
 [sub_resource type="SpatialMaterial" id=146]
 albedo_color = Color( 0.980392, 0.47451, 0.435294, 1 )
-metallic = 0.32
-roughness = 0.62
+metallic = 0.14
+roughness = 0.33
 transmission_enabled = true
 transmission = Color( 0.113725, 0.164706, 0.968627, 1 )
 
@@ -949,6 +948,7 @@ albedo_texture = SubResource( 152 )
 [sub_resource type="SpatialMaterial" id=155]
 params_cull_mode = 2
 albedo_texture = ExtResource( 7 )
+roughness = 0.43
 uv1_scale = Vector3( 20, 20, 1 )
 
 [sub_resource type="PlaneMesh" id=156]
@@ -1003,60 +1003,6 @@ shader_param/texture_albedo = SubResource( 158 )
 [sub_resource type="PlaneMesh" id=160]
 material = SubResource( 159 )
 size = Vector2( 4, 2 )
-
-[sub_resource type="SpatialMaterial" id=161]
-albedo_color = Color( 0.964706, 0.498039, 0.498039, 1 )
-
-[sub_resource type="CubeMesh" id=162]
-size = Vector3( 4, 2.6, 4.3 )
-
-[sub_resource type="CubeMesh" id=163]
-size = Vector3( 3.6, 2, 3.8 )
-
-[sub_resource type="Shader" id=164]
-code = "shader_type spatial;
-render_mode blend_mix,depth_draw_opaque,cull_disabled,diffuse_burley,specular_schlick_ggx;
-uniform vec4 albedo : hint_color;
-uniform sampler2D texture_albedo : hint_albedo;
-uniform float specular;
-uniform float metallic;
-uniform float roughness : hint_range(0,1);
-uniform float point_size : hint_range(0,128);
-uniform vec3 uv1_scale;
-uniform vec3 uv1_offset;
-uniform vec3 uv2_scale;
-uniform vec3 uv2_offset;
-
-
-void vertex() {
-	UV=UV*uv1_scale.xy+uv1_offset.xy;
-}
-
-
-
-
-void fragment() {
-	vec2 base_uv = UV;
-	vec4 albedo_tex = texture(texture_albedo,base_uv);
-	ALBEDO = albedo.rgb * albedo_tex.rgb;
-	METALLIC = metallic;
-	ROUGHNESS = roughness;
-	SPECULAR = specular;
-}
-"
-
-[sub_resource type="ShaderMaterial" id=165]
-shader = SubResource( 164 )
-shader_param/albedo = Color( 0.996078, 0.956863, 0.835294, 1 )
-shader_param/specular = 0.5
-shader_param/metallic = 0.38
-shader_param/roughness = 0.36
-shader_param/point_size = 1.0
-shader_param/uv1_scale = Vector3( 1, 1, 1 )
-shader_param/uv1_offset = Vector3( 0, 0, 0 )
-shader_param/uv2_scale = Vector3( 1, 1, 1 )
-shader_param/uv2_offset = Vector3( 0, 0, 0 )
-shader_param/texture_albedo = ExtResource( 49 )
 
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
@@ -2664,37 +2610,24 @@ environment = ExtResource( 2 )
 
 [node name="DirectionalLight" type="DirectionalLight" parent="WorldEnvironment"]
 transform = Transform( -1, 2.66913e-07, -1.86895e-07, 0, 0.573576, 0.819152, 3.25841e-07, 0.819152, -0.573576, 0, 50, 0 )
-light_energy = 0.6
+light_color = Color( 0.584314, 0.584314, 0.584314, 1 )
 shadow_color = Color( 0.388235, 0.0705882, 0.0705882, 1 )
 
-[node name="Kitchen" type="Spatial" parent="."]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 1.6299, 1.51691, -31.8123 )
+[node name="DirectionalLight2" type="DirectionalLight" parent="WorldEnvironment"]
+transform = Transform( -1, -3.25841e-07, 5.30863e-14, 0, -1.62921e-07, -1, 3.25841e-07, -1, 1.62921e-07, 0, -50, 0 )
+light_color = Color( 0.666667, 0.568627, 0.462745, 1 )
+light_energy = 0.91
+light_indirect_energy = 0.0
+shadow_color = Color( 0.388235, 0.0705882, 0.0705882, 1 )
+__meta__ = {
+"_editor_description_": ""
+}
+
+[node name="OmniLight" type="OmniLight" parent="WorldEnvironment"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -58.0686, -101.36, 0 )
 visible = false
-
-[node name="CSGMesh" type="CSGMesh" parent="Kitchen"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -1.29078, -0.278551, -0.246248 )
-material_override = SubResource( 161 )
-mesh = SubResource( 162 )
-
-[node name="CSGMesh" type="CSGMesh" parent="Kitchen/CSGMesh"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.461556, 0 )
-operation = 2
-mesh = SubResource( 163 )
-material = SubResource( 165 )
-
-[node name="CSGBox" type="CSGBox" parent="Kitchen/CSGMesh"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 2.0093, 0.288218, 0 )
-operation = 2
-width = 1.6
-height = 1.27689
-depth = 0.734507
-
-[node name="CSGBox2" type="CSGBox" parent="Kitchen/CSGMesh"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 2.0093, 0.288218, 1.42887 )
-operation = 2
-width = 1.6
-height = 1.27689
-depth = 0.734507
+light_color = Color( 0.552941, 0.478431, 0.376471, 1 )
+omni_range = 443.1
 
 [node name="MQTTExperiment" type="Node" parent="."]
 script = ExtResource( 50 )

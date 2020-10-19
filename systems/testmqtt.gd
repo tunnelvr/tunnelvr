@@ -8,8 +8,8 @@ extends Node
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	set_process(false)
-	return
+	#set_process(false)
+	#return
 	$mqttnode.connect_to_server()
 	$mqttnode.subscribe("doesliverpool/coffeedesc")
 	$mqttnode.connect("received_message", self, "received_message")

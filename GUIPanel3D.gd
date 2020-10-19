@@ -111,7 +111,12 @@ func _on_buttonload_choke():
 	$Viewport/GUI/Panel/Label.text = "Boulder choke!"
 	toggleguipanelvisibility(null)
 
-const clientips = [ "144.76.167.54", "192.168.1.127", "192.168.1.89", "172.27.9.245", "192.168.43.172", "192.168.43.118" ]
+const clientips = [ "144.76.167.54",  # alex server
+					"192.168.43.186",  # quest on j's phone
+					"192.168.1.89", 
+					"172.27.9.245", 
+					"192.168.43.172", 
+					"192.168.43.118" ]
 func _ready():
 	var fgui = $ViewportFake.get_node_or_null("GUI")
 	if fgui != null:

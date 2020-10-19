@@ -12,6 +12,9 @@ func setheadtorchlight(torchon):
 	$HeadCam/HeadtorchLight.visible = torchon
 	get_node("/root/Spatial/WorldEnvironment").environment = preload("res://environments/underground_env.tres") if torchon else preload("res://environments/default_env.tres")
 	get_node("/root/Spatial/WorldEnvironment/DirectionalLight").visible = not torchon
+	var dl = get_node_or_null("/root/Spatial/WorldEnvironment/DirectionalLight2")
+	if dl != null:
+		dl.shadow_enabled = not torchon
 	get_node("/root/Spatial/MaterialSystem").adjustmaterialtotorchlight(torchon)
 	get_node("/root/Spatial/SoundSystem").quicksound("ClickSound", $HeadCam.global_transform.origin + $HeadCam.global_transform.basis.y * 0.2)
 
