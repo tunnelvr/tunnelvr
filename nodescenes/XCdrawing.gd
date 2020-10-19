@@ -80,7 +80,6 @@ func expandxcdrawingfitxcdrawing(xcdrawing):
 		$XCdrawingplane.scale.y = ascay
 	updateformetresquaresscaletexture()
 	
-
 func exportxcrpcdata():
 	return { "name":get_name(), 
 			 "xcresource":xcresource,
@@ -89,6 +88,8 @@ func exportxcrpcdata():
 			 #"prevtransformpos":
 			 #"drawingplanescale":
 			 #"prevdrawingplanescale":
+			 #"imgtrim":{imgwidth,imgtrimleftdown,imgtrimrightup,(heightwidthratio of xcresource)}
+			 #"previmgtrim":{imgwidth,imgtrimleftdown,imgtrimrightup}
 			 "nodepoints": nodepoints, 
 			 # "prevnodepoints":
 			 # "nextnodepoints":
@@ -102,10 +103,22 @@ func exportxcrpcdata():
 func mergexcrpcdata(xcdata):
 	assert ((get_name() == xcdata["name"]) and (not ("drawingtype" in xcdata) or drawingtype == xcdata["drawingtype"]))
 	if "transformpos" in xcdata:
-		global_transform = xcdata["transformpos"]
+		transform = xcdata["transformpos"]
 	if "drawingplanescale" in xcdata:
 		get_node("XCdrawingplane").scale = xcdata["drawingplanescale"]
-					
+	if "imgtrim" in xcdata:
+		var imgtrim = xcdata["imgtrim"]
+		imgwidth = imgtrim["imgwidth"]
+		imgtrimleftdown = imgtrim["imgtrimleftdown"]
+		imgtrimrightup = imgtrim["imgtrimrightup"]
+		
+		get_node("XCdrawingplane").transform.origin = Vector3((imgtrimleftdown.x + imgtrimrightup.x)*0.5, (imgtrimleftdown.y + imgtrimrightup.y)*0.5, 0)
+		get_node("XCdrawingplane").scale = Vector3((imgtrimrightup.x - imgtrimleftdown.x)*0.5, (imgtrimrightup.y - imgtrimleftdown.y)*0.5, 1)
+		var m = get_node("XCdrawingplane/CollisionShape/MeshInstance").get_surface_material(0)
+		var imgheight = imgwidth*imgheightwidthratio
+		m.set_shader_param("uv1_scale", Vector3((imgtrimrightup.x - imgtrimleftdown.x)/imgwidth, (imgtrimrightup.y - imgtrimleftdown.y)/imgheight, 1))
+		m.set_shader_param("uv1_offset", Vector3((imgtrimleftdown.x - (-imgwidth*0.5))/imgwidth, -(imgtrimrightup.y - (imgheight*0.5))/imgheight, 0))
+		
 	if "nodepoints" in xcdata:
 		nodepoints = xcdata["nodepoints"]
 		for xcn in $XCnodes.get_children():

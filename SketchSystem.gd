@@ -117,15 +117,33 @@ func loadcentrelinefile(centrelinefile):
 	print("default lllloaded")
 
 
+func combinabletransformposchange(xcdatalist):
+	if len(actsketchchangeundostack) > 0 and len(actsketchchangeundostack[-1]) == 1 and len(xcdatalist) == 1:
+		var xcdataprev = actsketchchangeundostack[-1][0]
+		var xcdata = xcdatalist[0]
+		if ("transformpos" in xcdataprev and "transformpos" in xcdata) or ("imgtrim" in xcdataprev and "imgtrim" in xcdata):
+			if xcdataprev.get("name", "*1") == xcdata.get("name", "*2"):
+				return true
+	return false
+	
+var prevcombinabletransformposchangetimestamp = 0
+const sendrpctransformthinningdelta = 0.25
 func actsketchchange(xcdatalist):
 	var playerMe = get_node("/root/Spatial").playerMe
 	xcdatalist[0]["networkIDsource"] = playerMe.networkID
 	xcdatalist[0]["datetime"] = OS.get_datetime()
 	actsketchchangeL(xcdatalist)
-	if Tglobal.connectiontoserveractive:
-		if not (len(xcdatalist) == 1 and "rpcoptional" in xcdatalist[0]):
-			rpc("actsketchchangeL", xcdatalist)
-	
+	if true or Tglobal.connectiontoserveractive:
+		var sendrpc = true
+		if combinabletransformposchange(xcdatalist):  # made from targetwalltransformpos()
+			if xcdatalist[0].get("rpcoptional", 0) == 1:
+				if xcdatalist[0].get("timestamp", 0) - prevcombinabletransformposchangetimestamp < sendrpctransformthinningdelta:
+					sendrpc = false
+				else:
+					prevcombinabletransformposchangetimestamp = xcdatalist[0].get("timestamp", 0)
+			if sendrpc and Tglobal.connectiontoserveractive:
+				rpc("actsketchchangeL", xcdatalist)
+			
 remote func actsketchchangeL(xcdatalist):
 	if "undoact" in xcdatalist[0]:
 		if len(actsketchchangeundostack) != 0:
@@ -140,11 +158,12 @@ remote func actsketchchangeL(xcdatalist):
 					playerOther.get_node("AnimationPlayer_actsketchchange").play("actsketchchange_flash")
 			if xcdatalist[0]["networkIDsource"] == playerMe.networkID and playerMe.doppelganger != null:
 				playerMe.doppelganger.get_node("AnimationPlayer_actsketchchange").play("actsketchchange_flash")
-		if len(actsketchchangeundostack) > 0 and len(actsketchchangeundostack[-1]) == 1 and len(xcdatalist) == 1 \
-				and "transformpos" in actsketchchangeundostack[-1][0] and "transformpos" in xcdatalist[0] \
-				and actsketchchangeundostack[-1][0].get("name", "*1") == xcdatalist[0].get("name", "*2"):
+		if combinabletransformposchange(xcdatalist):
 			actsketchchangeundostack[-1][0].erase("rpcoptional")
-			actsketchchangeundostack[-1][0]["transformpos"] = xcdatalist[0]["transformpos"]
+			if "transformpos" in xcdatalist[0]:
+				actsketchchangeundostack[-1][0]["transformpos"] = xcdatalist[0]["transformpos"]
+			if "imgtrim" in xcdatalist[0]:
+				actsketchchangeundostack[-1][0]["imgtrim"] = xcdatalist[0]["imgtrim"]
 		else:
 			while len(actsketchchangeundostack) >= 10:
 				actsketchchangeundostack.pop_front()
@@ -198,7 +217,8 @@ remote func actsketchchangeL(xcdatalist):
 			if "transformpos" in xcdata and not ("prevtransformpos" in xcdata):
 				var lxcdrawing = $XCdrawings.get_node_or_null(xcdata["name"])
 				if lxcdrawing != null:
-					xcdata["prevtransformpos"] = lxcdrawing.global_transform
+					xcdata["prevtransformpos"] = lxcdrawing.transform
+					
 			var xcdrawing = xcdrawingfromdata(xcdata)
 			if "nodepoints" in xcdata or "nextnodepoints" in xcdata or "onepathpairs" in xcdata or "newonepathpairs" in xcdata:
 				xcdrawingstoupdate[xcdrawing.get_name()] = xcdrawing
@@ -208,6 +228,7 @@ remote func actsketchchangeL(xcdatalist):
 			elif "transformpos" in xcdata and len(xcdrawing.xctubesconn) != 0:
 				for xctube in xcdrawing.xctubesconn:
 					xctubestoupdate[xctube.get_name()] = xctube
+
 
 			var tpos = null
 			var xcname = null

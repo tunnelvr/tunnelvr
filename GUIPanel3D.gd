@@ -155,7 +155,12 @@ func toggleguipanelvisibility(controller_global_transform):
 		var lookatpos = controllertrans.origin - 1.6*ARVRServer.world_scale*(controllertrans.basis.z)
 		paneltrans = paneltrans.looking_at(lookatpos, Vector3(0, 1, 0))
 		global_transform = paneltrans
+
 		$Viewport/GUI/Panel/Label.text = "Control panel"
+		var MQTTExperiment = get_node_or_null("/root/Spatial/MQTTExperiment")
+		if MQTTExperiment != null and MQTTExperiment.msg != "":
+			$Viewport/GUI/Panel/Label.text = MQTTExperiment.msg
+
 		visible = true
 		$CollisionShape.disabled = false
 		Tglobal.soundsystem.quicksound("ShowGui", global_transform.origin)

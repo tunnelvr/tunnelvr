@@ -1,4 +1,4 @@
-[gd_scene load_steps=214 format=2]
+[gd_scene load_steps=216 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/default_env.tres" type="Environment" id=2]
@@ -47,7 +47,9 @@
 [ext_resource path="res://sounds/Flashpoint001b.wav" type="AudioStream" id=45]
 [ext_resource path="res://sounds/menu_click.wav" type="AudioStream" id=46]
 [ext_resource path="res://guimaterials/vrgui.theme" type="Theme" id=47]
+[ext_resource path="res://systems/mqtt.gd" type="Script" id=48]
 [ext_resource path="res://surveyscans/DukeStResurvey-drawnup-p3.jpg" type="Texture" id=49]
+[ext_resource path="res://systems/testmqtt.gd" type="Script" id=50]
 
 [sub_resource type="CylinderShape" id=1]
 radius = 0.1
@@ -1011,7 +1013,7 @@ size = Vector3( 4, 2.6, 4.3 )
 [sub_resource type="CubeMesh" id=163]
 size = Vector3( 3.6, 2, 3.8 )
 
-[sub_resource type="Shader" id=165]
+[sub_resource type="Shader" id=164]
 code = "shader_type spatial;
 render_mode blend_mix,depth_draw_opaque,cull_disabled,diffuse_burley,specular_schlick_ggx;
 uniform vec4 albedo : hint_color;
@@ -1043,8 +1045,8 @@ void fragment() {
 }
 "
 
-[sub_resource type="ShaderMaterial" id=164]
-shader = SubResource( 165 )
+[sub_resource type="ShaderMaterial" id=165]
+shader = SubResource( 164 )
 shader_param/albedo = Color( 0.996078, 0.956863, 0.835294, 1 )
 shader_param/specular = 0.5
 shader_param/metallic = 0.38
@@ -1878,38 +1880,38 @@ __meta__ = {
 
 [node name="ViewSlide" type="Control" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls"]
 material = SubResource( 60 )
-margin_left = 13.1885
-margin_top = 2.0
-margin_right = 119.189
-margin_bottom = 97.0
+margin_left = 2.59387
+margin_top = 3.05945
+margin_right = 108.594
+margin_bottom = 98.0594
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="Label" type="Label" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls/ViewSlide"]
-margin_left = 20.6342
-margin_top = 6.29535
-margin_right = 89.6342
-margin_bottom = 28.2953
+margin_left = 13.2179
+margin_top = 12.6522
+margin_right = 82.2179
+margin_bottom = 34.6522
 text = "ViewSlide"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="ButtonSlideDown" type="Button" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls/ViewSlide"]
-margin_left = 43.2558
-margin_top = 59.7974
-margin_right = 66.2558
-margin_bottom = 85.7974
+margin_left = 36.899
+margin_top = 58.7379
+margin_right = 59.899
+margin_bottom = 84.7379
 text = "V"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="ButtonSlideLeft" type="Button" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls/ViewSlide"]
-margin_left = 5.82156
+margin_left = 4.7621
 margin_top = 58.713
-margin_right = 35.8216
+margin_right = 34.7621
 margin_bottom = 84.713
 text = "<<"
 __meta__ = {
@@ -1917,31 +1919,81 @@ __meta__ = {
 }
 
 [node name="ButtonSlideRight" type="Button" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls/ViewSlide"]
-margin_left = 71.478
-margin_top = 60.3951
-margin_right = 101.478
-margin_bottom = 86.3951
+margin_left = 61.9428
+margin_top = 59.3356
+margin_right = 91.9428
+margin_bottom = 85.3356
 text = ">>"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="ButtonSlideUp" type="Button" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls/ViewSlide"]
-margin_left = 43.1473
-margin_top = 27.9042
-margin_right = 66.1473
-margin_bottom = 53.9042
+margin_left = 36.7905
+margin_top = 31.0826
+margin_right = 59.7905
+margin_bottom = 57.0826
 text = "^"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ZoomView" type="Control" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls"]
+material = SubResource( 60 )
+margin_left = 100.0
+margin_top = 4.0
+margin_right = 176.0
+margin_bottom = 99.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls/ZoomView"]
+margin_left = 16.0486
+margin_top = 8.23785
+margin_right = 62.0486
+margin_bottom = 30.2379
+text = "Zoom"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ButtonZoomOut" type="Button" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls/ZoomView"]
+margin_left = 4.74051
+margin_top = 31.1992
+margin_right = 34.7405
+margin_bottom = 57.1992
+text = "<<"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ButtonCentre" type="Button" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls/ZoomView"]
+margin_left = 10.0306
+margin_top = 59.2411
+margin_right = 64.0306
+margin_bottom = 85.2411
+text = "Centre"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ButtonZoomIn" type="Button" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls/ZoomView"]
+margin_left = 38.0
+margin_top = 29.7621
+margin_right = 68.0
+margin_bottom = 55.7621
+text = ">>"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="FloorTrim" type="Control" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls"]
 material = SubResource( 60 )
-margin_left = 137.921
-margin_top = 3.25989
-margin_right = 243.921
-margin_bottom = 98.2599
+margin_left = 179.691
+margin_top = 6.1189
+margin_right = 295.691
+margin_bottom = 101.119
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -1951,6 +2003,16 @@ margin_left = 5.40929
 margin_top = 6.44543
 margin_right = 42.4093
 margin_bottom = 28.4454
+text = "Floor:"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label2" type="Label" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls/FloorTrim"]
+margin_left = 9.64716
+margin_top = 70.0133
+margin_right = 46.6472
+margin_bottom = 92.0133
 text = "Trim"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -2036,52 +2098,112 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ZoomView" type="Control" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls"]
+[node name="FloorMove" type="Control" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls"]
 material = SubResource( 60 )
-margin_left = 272.611
-margin_top = 2.7937
-margin_right = 378.611
-margin_bottom = 97.7937
+margin_left = 303.508
+margin_top = 7.11896
+margin_right = 421.508
+margin_bottom = 97.119
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Label" type="Label" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls/ZoomView"]
-margin_left = 33.0
-margin_top = 4.0
-margin_right = 79.0
-margin_bottom = 26.0
-text = "Zoom"
+[node name="Label" type="Label" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls/FloorMove"]
+margin_left = 2.0
+margin_top = 7.0
+margin_right = 47.0
+margin_bottom = 29.0
+text = "Grow"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ButtonZoomOut" type="Button" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls/ZoomView"]
-margin_left = 24.8703
-margin_top = 30.1398
-margin_right = 54.8703
-margin_bottom = 56.1398
+[node name="Label2" type="Label" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls/FloorMove"]
+margin_left = -37.6165
+margin_top = 67.2705
+margin_right = 6.38354
+margin_bottom = 89.2705
+text = "Move"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ButtonShrink" type="Button" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls/FloorMove"]
+margin_left = 55.6724
+margin_top = 5.4433
+margin_right = 83.6724
+margin_bottom = 27.4433
 text = "<<"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ButtonCentre" type="Button" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls/ZoomView"]
-margin_left = 31.2199
-margin_top = 60.3005
-margin_right = 85.2199
-margin_bottom = 86.3005
-text = "Centre"
+[node name="ButtonGrow" type="Button" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls/FloorMove"]
+margin_left = 85.7935
+margin_top = 2.76001
+margin_right = 113.793
+margin_bottom = 24.76
+text = ">>"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ButtonZoomIn" type="Button" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls/ZoomView"]
-margin_left = 59.5724
-margin_top = 30.2345
-margin_right = 89.5724
-margin_bottom = 56.2345
-text = ">>"
+[node name="ButtonMoveLeft" type="Button" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls/FloorMove"]
+margin_left = 9.76519
+margin_top = 66.437
+margin_right = 29.7652
+margin_bottom = 88.437
+text = "<"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ButtonMoveRight" type="Button" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls/FloorMove"]
+margin_left = 56.0
+margin_top = 65.0
+margin_right = 76.0
+margin_bottom = 87.0
+text = ">"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ButtonMoveUp" type="Button" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls/FloorMove"]
+margin_left = 33.3947
+margin_top = 40.1316
+margin_right = 52.3947
+margin_bottom = 62.1316
+text = "^"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ButtonMoveDown" type="Button" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls/FloorMove"]
+margin_left = 35.2368
+margin_top = 66.3048
+margin_right = 55.2368
+margin_bottom = 88.3048
+text = "V"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ButtonMoveRise" type="Button" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls/FloorMove"]
+margin_left = 85.2227
+margin_top = 41.3972
+margin_right = 105.223
+margin_bottom = 63.3972
+text = "^"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ButtonMoveFall" type="Button" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls/FloorMove"]
+margin_left = 84.1813
+margin_top = 65.9201
+margin_right = 104.181
+margin_bottom = 87.9201
+text = "V"
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -2558,7 +2680,7 @@ mesh = SubResource( 162 )
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.461556, 0 )
 operation = 2
 mesh = SubResource( 163 )
-material = SubResource( 164 )
+material = SubResource( 165 )
 
 [node name="CSGBox" type="CSGBox" parent="Kitchen/CSGMesh"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 2.0093, 0.288218, 0 )
@@ -2573,3 +2695,9 @@ operation = 2
 width = 1.6
 height = 1.27689
 depth = 0.734507
+
+[node name="MQTTExperiment" type="Node" parent="."]
+script = ExtResource( 50 )
+
+[node name="mqttnode" type="Node" parent="MQTTExperiment"]
+script = ExtResource( 48 )

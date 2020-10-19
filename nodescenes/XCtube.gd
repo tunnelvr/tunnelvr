@@ -90,8 +90,8 @@ func centrelineconnectionfloortransformpos(sketchsystem):
 	if bsingledrag:
 		var pt0 = xcdrawingFloor.global_transform.origin + opn0.global_transform.origin - xcn0.global_transform.origin
 		xcdatalist = [{ "name":xcname1, 
-						"prevtransformpos":xcdrawingFloor.global_transform, 
-						"transformpos":Transform(xcdrawingFloor.global_transform.basis, Vector3(pt0.x, xcdrawingFloor.global_transform.origin.y, pt0.z)) 
+						"prevtransformpos":xcdrawingFloor.transform, 
+						"transformpos":Transform(xcdrawingFloor.transform.basis, Vector3(pt0.x, xcdrawingFloor.transform.origin.y, pt0.z)) 
 					 }]
 	else:
 		var opn1 = xcdrawingCentreline.get_node("XCnodes").get_node(xcdrawinglink[-2])
@@ -118,7 +118,7 @@ func centrelineconnectionfloortransformpos(sketchsystem):
 				xcndata["nextnodepoints"][floornodename] = xcdrawingFloor.nodepoints[floornodename]*Vector3(sca, sca, 1)
 			var prevdrawingplanescale = xcdrawingFloor.get_node("XCdrawingplane").scale
 			var txcdata = { "name":xcname1, 
-							"prevtransformpos":xcdrawingFloor.global_transform, 
+							"prevtransformpos":xcdrawingFloor.transform, 
 							"transformpos":transformpos, 
 							"prevdrawingplanescale":prevdrawingplanescale,
 							"drawingplanescale":prevdrawingplanescale*Vector3(sca, sca, 1)

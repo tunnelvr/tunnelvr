@@ -4,6 +4,8 @@ var planviewactive = false
 var drawingtype = DRAWING_TYPE.DT_PLANVIEW
 onready var ImageSystem = get_node("/root/Spatial/ImageSystem")
 var activetargetfloor = null
+var activetargetfloortransformpos = null
+var activetargetfloorimgtrim = null
 
 var buttonidxtoitem = { }
 var tree = null
@@ -22,6 +24,14 @@ func setactivetargetfloor(newactivetargetfloor, gripbuttonheld):
 		activetargetfloor = newactivetargetfloor
 	if activetargetfloor != null:
 		activetargetfloor.get_node("XCdrawingplane/CollisionShape/MeshInstance").get_surface_material(0).set_shader_param("albedo", Color("#DDFFCC"))
+		#activetargetfloortransformpos = activetargetfloor.transform
+		#activetargetfloorimgtrim = { "imgwidth":activetargetfloor.imgwidth, 
+		#							 "imgtrimleftdown":activetargetfloor.imgtrimleftdown,
+		#							 "imgtrimrightup":activetargetfloor.imgtrimrightup }
+
+			 #"imgtrim":{imgwidth,imgtrimleftdown,imgtrimrightup,(heightwidthratio of xcresource)}
+			 #"previmgtrim":{imgwidth,imgtrimleftdown,imgtrimrightup}
+
 
 
 func fetchbuttonpressed(item, column, idx):
@@ -144,28 +154,54 @@ func _process(delta):
 		$PlanView/Viewport/PlanGUI/Camera.size *= zoomfac
 		$RealPlanCamera/RealCameraBox.scale = Vector3($PlanView/Viewport/PlanGUI/Camera.size, 1.0, $PlanView/Viewport/PlanGUI/Camera.size)
 
-	if activetargetfloor != null:
+	if activetargetfloor != null and len(activetargetfloor.nodepoints) == 0:
 		var floortrim = $PlanView/Viewport/PlanGUI/PlanViewControls/FloorTrim
 		var joypostrimld = Vector2((-1 if floortrim.get_node("ButtonTrimLeftLeft").is_pressed() else 0) + (1 if floortrim.get_node("ButtonTrimLeftRight").is_pressed() else 0), 
 								   (-1 if floortrim.get_node("ButtonTrimDownDown").is_pressed() else 0) + (1 if floortrim.get_node("ButtonTrimDownUp").is_pressed() else 0))
 		var joypostrimru = Vector2((-1 if floortrim.get_node("ButtonTrimRightLeft").is_pressed() else 0) + (1 if floortrim.get_node("ButtonTrimRightRight").is_pressed() else 0), 
 								   (-1 if floortrim.get_node("ButtonTrimUpDown").is_pressed() else 0) + (1 if floortrim.get_node("ButtonTrimUpUp").is_pressed() else 0))
-		if joypostrimld != Vector2(0,0) or joypostrimru != Vector2(0,0):
+		var floormove = $PlanView/Viewport/PlanGUI/PlanViewControls/FloorMove
+		var joyposmove = Vector3((-1 if floormove.get_node("ButtonMoveLeft").is_pressed() else 0) + (1 if floormove.get_node("ButtonMoveRight").is_pressed() else 0), 
+								 (-1 if floormove.get_node("ButtonMoveDown").is_pressed() else 0) + (1 if floormove.get_node("ButtonMoveUp").is_pressed() else 0), 
+								 (-0.5 if floormove.get_node("ButtonMoveFall").is_pressed() else 0) + (0.5 if floormove.get_node("ButtonMoveRise").is_pressed() else 0))
+		var joygrow = (-1 if floormove.get_node("ButtonShrink").is_pressed() else 0) + (1 if floormove.get_node("ButtonGrow").is_pressed() else 0)
+		if joypostrimld != Vector2(0,0) or joypostrimru != Vector2(0,0) or joyposmove != Vector3(0,0,0) or joygrow != 0:
+			var txcdata = { "name":activetargetfloor.get_name(), 
+							"rpcoptional":1,
+							"timestamp":OS.get_ticks_msec()*0.001 }
 			var d = activetargetfloor
 			var drawingplane = d.get_node("XCdrawingplane")
-			var m = d.get_node("XCdrawingplane/CollisionShape/MeshInstance").get_surface_material(0)
-			#var m = preload("res://surveyscans/scanimagefloor.material").duplicate()
-			var imgheight = d.imgwidth*d.imgheightwidthratio
 			var sfac = delta*8
-			d.imgtrimleftdown = Vector2(clamp(d.imgtrimleftdown.x + joypostrimld.x*sfac, -d.imgwidth*0.5, d.imgtrimrightup.x-0.1), 
-										clamp(d.imgtrimleftdown.y + joypostrimld.y*sfac, -imgheight*0.5, d.imgtrimrightup.y-0.1))
-			d.imgtrimrightup = Vector2(clamp(d.imgtrimrightup.x + joypostrimru.x*sfac, d.imgtrimleftdown.x+0.1, d.imgwidth*0.5), 
-									   clamp(d.imgtrimrightup.y + joypostrimru.y*sfac, d.imgtrimleftdown.y+0.1, imgheight*0.5))
-			drawingplane.transform.origin = Vector3((d.imgtrimleftdown.x + d.imgtrimrightup.x)*0.5, (d.imgtrimleftdown.y + d.imgtrimrightup.y)*0.5, 0)
-			drawingplane.scale = Vector3((d.imgtrimrightup.x - d.imgtrimleftdown.x)*0.5, (d.imgtrimrightup.y - d.imgtrimleftdown.y)*0.5, 1)
+			if joyposmove != Vector3(0,0,0):
+				txcdata["prevtransformpos"] = d.transform
+				txcdata["transformpos"] = Transform(d.transform.basis, d.transform.origin + d.transform.basis*joyposmove*delta*8)
 
-			m.set_shader_param("uv1_scale", Vector3((d.imgtrimrightup.x - d.imgtrimleftdown.x)/d.imgwidth, (d.imgtrimrightup.y - d.imgtrimleftdown.y)/imgheight, 1))
-			m.set_shader_param("uv1_offset", Vector3((d.imgtrimleftdown.x - (-d.imgwidth*0.5))/d.imgwidth, -(d.imgtrimrightup.y - (imgheight*0.5))/imgheight, 0))
+			if joypostrimld != Vector2(0,0) or joypostrimru != Vector2(0,0) or joygrow != 0:
+				txcdata["previmgtrim"] = { "imgwidth":d.imgwidth, "imgtrimleftdown":d.imgtrimleftdown, "imgtrimrightup":d.imgtrimrightup }
+				var gfac = 1 + joygrow*delta*0.2
+				var imgtrim = { "imgwidth":d.imgwidth*gfac, "imgtrimleftdown":d.imgtrimleftdown*gfac, "imgtrimrightup":d.imgtrimrightup*gfac }
+				txcdata["imgtrim"] = imgtrim
+				var imgheight = imgtrim["imgwidth"]*d.imgheightwidthratio
+				imgtrim["imgtrimleftdown"] = Vector2(clamp(imgtrim["imgtrimleftdown"].x + joypostrimld.x*sfac, -imgtrim["imgwidth"]*0.5, imgtrim["imgtrimrightup"].x-0.1), 
+													 clamp(imgtrim["imgtrimleftdown"].y + joypostrimld.y*sfac, -imgheight*0.5, imgtrim["imgtrimrightup"].y-0.1))
+				imgtrim["imgtrimrightup"] = Vector2(clamp(imgtrim["imgtrimrightup"].x + joypostrimru.x*sfac, imgtrim["imgtrimleftdown"].x+0.1, imgtrim["imgwidth"]*0.5), 
+													clamp(imgtrim["imgtrimrightup"].y + joypostrimru.y*sfac, imgtrim["imgtrimleftdown"].y+0.1, imgheight*0.5))
+									
+				#d.imgtrimleftdown = Vector2(clamp(d.imgtrimleftdown.x + joypostrimld.x*sfac, -d.imgwidth*0.5, d.imgtrimrightup.x-0.1), 
+				#							clamp(d.imgtrimleftdown.y + joypostrimld.y*sfac, -imgheight*0.5, d.imgtrimrightup.y-0.1))
+				#d.imgtrimrightup = Vector2(clamp(d.imgtrimrightup.x + joypostrimru.x*sfac, d.imgtrimleftdown.x+0.1, d.imgwidth*0.5), 
+				#						   clamp(d.imgtrimrightup.y + joypostrimru.y*sfac, d.imgtrimleftdown.y+0.1, imgheight*0.5))
+				# move these into the actsketchchange function
+				#drawingplane.transform.origin = Vector3((d.imgtrimleftdown.x + d.imgtrimrightup.x)*0.5, (d.imgtrimleftdown.y + d.imgtrimrightup.y)*0.5, 0)
+				#drawingplane.scale = Vector3((d.imgtrimrightup.x - d.imgtrimleftdown.x)*0.5, (d.imgtrimrightup.y - d.imgtrimleftdown.y)*0.5, 1)
+				#var m = d.get_node("XCdrawingplane/CollisionShape/MeshInstance").get_surface_material(0)
+				#m.set_shader_param("uv1_scale", Vector3((d.imgtrimrightup.x - d.imgtrimleftdown.x)/d.imgwidth, (d.imgtrimrightup.y - d.imgtrimleftdown.y)/imgheight, 1))
+				#m.set_shader_param("uv1_offset", Vector3((d.imgtrimleftdown.x - (-d.imgwidth*0.5))/d.imgwidth, -(d.imgtrimrightup.y - (imgheight*0.5))/imgheight, 0))
+
+			var sketchsystem = get_node("/root/Spatial/SketchSystem")
+			sketchsystem.actsketchchange([txcdata])  # step through this and make the 
+
+
 	
 func buttoncentre_pressed():
 	var headcam = get_node("/root/Spatial").playerMe.get_node("HeadCam")

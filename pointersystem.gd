@@ -768,9 +768,11 @@ func buttonreleased_vrgrip():
 
 var targetwallvertplane = true
 var prevactivetargetwallgrabbedorgtransform = null
-func targetwalltransformpos():
+func targetwalltransformpos(rpcoptional):
 	var txcdata = { "name":activetargetwallgrabbed.get_name(), 
-					"prevtransformpos":activetargetwallgrabbed.global_transform }
+					"rpcoptional":rpcoptional,
+					"timestamp":OS.get_ticks_msec()*0.001,
+					"prevtransformpos":activetargetwallgrabbed.transform, }
 	if prevactivetargetwallgrabbedorgtransform == null or prevactivetargetwallgrabbedorgtransform != activetargetwallgrabbedorgtransform:
 		targetwallvertplane = abs(activetargetwallgrabbedorgtransform.basis.z.y) < 0.3
 		prevactivetargetwallgrabbedorgtransform = activetargetwallgrabbedorgtransform
@@ -806,11 +808,10 @@ func targetwalltransformpos():
 func buttonreleased_vrtrigger():
 	if activetargetwallgrabbedtransform != null:
 		if activetargetwallgrabbed.get_name() != "PlanView" and activetargetwallgrabbed.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
-			var txcdata = targetwalltransformpos()
-			sketchsystem.actsketchchange([txcdata])
+			sketchsystem.actsketchchange([ targetwalltransformpos(0) ])
 		activetargetwallgrabbedtransform = null
 						
-var grabbedrpctimecount = 0
+
 func _physics_process(delta):
 	var planviewnothit = true
 	if LaserOrient.visible: 
@@ -839,12 +840,7 @@ func _physics_process(delta):
 	
 	if activetargetwallgrabbedtransform != null:
 		if activetargetwallgrabbed.get_name() != "PlanView" and activetargetwallgrabbed.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
-			var txcdata = targetwalltransformpos()
-			grabbedrpctimecount += delta
-			if grabbedrpctimecount > 0.25:
-				txcdata["rpcoptional"] = 1
-				grabbedrpctimecount = 0
-			sketchsystem.actsketchchange([txcdata])
+			sketchsystem.actsketchchange([ targetwalltransformpos(1) ])
 
 		elif activetargetwallgrabbedpoint != null:
 			activetargetwallgrabbed.global_transform = activelaserroot.get_node("LaserSpot").global_transform * activetargetwallgrabbedtransform
