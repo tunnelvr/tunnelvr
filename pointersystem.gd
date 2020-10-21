@@ -204,7 +204,7 @@ func setpointertarget(laserroot, raycast):
 
 func _on_button_pressed(p_button):
 	var gripbuttonheld = handright.gripbuttonheld
-	print("pppp ", pointertargetpoint, " ", [activetargetnode, pointertargettype, " pbutton", p_button])
+	#print("pppp ", pointertargetpoint, " ", [activetargetnode, pointertargettype, " pbutton", p_button])
 	if Tglobal.questhandtrackingactive:
 		gripbuttonheld = handrightcontroller.is_button_pressed(BUTTONS.HT_PINCH_MIDDLE_FINGER)
 		if p_button == BUTTONS.HT_PINCH_RING_FINGER:

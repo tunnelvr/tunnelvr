@@ -24,15 +24,6 @@ func setactivetargetfloor(newactivetargetfloor, gripbuttonheld):
 		activetargetfloor = newactivetargetfloor
 	if activetargetfloor != null:
 		activetargetfloor.get_node("XCdrawingplane/CollisionShape/MeshInstance").get_surface_material(0).set_shader_param("albedo", Color("#DDFFCC"))
-		#activetargetfloortransformpos = activetargetfloor.transform
-		#activetargetfloorimgtrim = { "imgwidth":activetargetfloor.imgwidth, 
-		#							 "imgtrimleftdown":activetargetfloor.imgtrimleftdown,
-		#							 "imgtrimrightup":activetargetfloor.imgtrimrightup }
-
-			 #"imgtrim":{imgwidth,imgtrimleftdown,imgtrimrightup,(heightwidthratio of xcresource)}
-			 #"previmgtrim":{imgwidth,imgtrimleftdown,imgtrimrightup}
-
-
 
 func fetchbuttonpressed(item, column, idx):
 	var sketchsystem = get_node("/root/Spatial/SketchSystem")
@@ -57,6 +48,10 @@ func fetchbuttonpressed(item, column, idx):
 		#get_node("/root/Spatial/SketchSystem").sharexcdrawingovernetwork(paperdrawing)
 		ImageSystem.fetchpaperdrawing(paperdrawing)
 		setactivetargetfloor(paperdrawing, false)
+		#activetargetfloorimgtrim = { "imgwidth":activetargetfloor.imgwidth, 
+		#							 "imgtrimleftdown":activetargetfloor.imgtrimleftdown,
+		#							 "imgtrimrightup":activetargetfloor.imgtrimrightup }
+		# send to actsketchchange once it's here
 		
 	else:
 		item.set_button_disabled(column, idx, true)
@@ -66,14 +61,15 @@ func fetchbuttonpressed(item, column, idx):
 		ImageSystem.fetchunrolltree(tree, item, item.get_tooltip(0))
 
 func addsubitem(upperitem, name, url):
+	print("**** ", upperitem, name, url)
 	var item = tree.create_item(upperitem)
 	item.set_text(0, name)
 	item.set_tooltip(0, url)
 	var tex = installbuttontex if imgregex.search(name) else imagebuttontex
 	#var idx = item.get_button_count(0)
 	var idx = len(buttonidxtoitem)
-	item.add_button(0, tex, idx)
-	print("Adding button ", idx, " for name ", name)
+	item.add_button(0, tex)
+	print("Adding button ", idx, " for name ", name, " tex ", tex)
 	buttonidxtoitem[idx] = item
 
 func openlinklistpage(item, htmltext):
@@ -98,7 +94,7 @@ func _ready():
 	installbuttontex.create_from_image(installbuttonimg)
 
 	var imagebuttonimg = Image.new()
-	imagebuttonimg.load("res://guimaterials/fetchbuttonimg.png")
+	imagebuttonimg.load("res://guimaterials/fetchbuttonimg.jpg")
 	imagebuttontex = ImageTexture.new()
 	imagebuttontex.create_from_image(imagebuttonimg)
 
@@ -108,12 +104,32 @@ func _ready():
 		$PlanView/ViewportFake.remove_child(fplangui)
 		$PlanView/Viewport.add_child(fplangui)
 	$PlanView/Viewport/PlanGUI/PlanViewControls/ZoomView/ButtonCentre.connect("pressed", self, "buttoncentre_pressed")
+	call_deferred("readydeferred")
+	
+func readydeferred():
+	print("readydeferredreadydeferredreadydeferred")
 	tree = $PlanView/Viewport/PlanGUI/PlanViewControls/Tree
 	tree.connect("button_pressed", self, "fetchbuttonpressed")
-	set_process(false)
 	var root = tree.create_item()
-	root.set_text(0, "Root of tree")
+	root.set_text(0, "Root of treee")
+	print("calling addsubitemaddsubitemaddsubitem")
 	addsubitem(root, "Ireby", "http://cave-registry.org.uk/svn/NorthernEngland/ThreeCountiesArea/rawscans/Ireby/")
+	
+	#var tmpdir = "user://test.txt"
+	var tmpfile = "user://test.txt"
+	#			if not Directory.new().dir_exists(nonimagedir):
+	#			var err = Directory.new().make_dir(nonimagedir)
+	var tmpfileexists = File.new().file_exists(tmpfile)
+	print("  tmpfileexists ", tmpfileexists)
+	var fout = File.new()
+	fout.open(tmpfile, File.WRITE)
+	fout.store_line("Hi there")
+	fout.close()
+	var tmpfileexists1 = File.new().file_exists(tmpfile)
+	print("  tmpfileexists1 ", tmpfileexists1)
+	set_process(false)
+	
+	
 
 func toggleplanviewactive():
 	planviewactive = not planviewactive

@@ -382,9 +382,26 @@ func ConstructHoleXC(i, sketchsystem):
 	return xcdata
 
 
+func get_pt(xcnodes, poly, ila, i):
+	return xcnodes.get_node(poly[(ila+i)%len(poly)]).global_transform.origin
+
 func add_vertex(surfaceTool, xcnodes, poly, ila, i):
 	var pt = xcnodes.get_node(poly[(ila+i)%len(poly)]).global_transform.origin
 	surfaceTool.add_vertex(pt)
+
+func advanceuvFar(uvFixed, ptFixed, uvFar, ptFar, ptFarNew, bclockwise):
+	var uvvec = uvFar - uvFixed
+	var uvperpvec = Vector2(uvvec.y, -uvvec.x) if bclockwise else Vector2(-uvvec.y, uvvec.x)
+	var uvvecleng = uvvec.length()
+	var vecFar = ptFar - ptFixed
+	var vecFarNew = ptFarNew - ptFixed
+	var vecFarFarNewprod = vecFar.length()*vecFarNew.length()
+	if vecFarFarNewprod == 0:
+		return uvFar
+	var vecFarNewCos = vecFar.dot(vecFarNew)/vecFarFarNewprod
+	var vecFarNewSin = vecFar.cross(vecFarNew).length()/vecFarFarNewprod
+	var uvvecnew = uvvec*vecFarNewCos + uvperpvec*vecFarNewSin
+	return uvFixed + uvvecnew
 
 func updatetubeshell(xcdrawings, makevisible):
 	if not makevisible:
@@ -434,20 +451,45 @@ func updatetubeshell(xcdrawings, makevisible):
 		var acc = -ila0N/2.0  if ila0N>=ila1N  else  ila1N/2
 		var i0 = 0
 		var i1 = 0
+
+		var pti0 = get_pt(xcnodes0, poly0, ila0, i0)
+		var pti1 = get_pt(xcnodes1, poly1, ila1, i1)
+		var uvi0 = Vector2(0, 0)
+		var uvi1 = Vector2(pti0.distance_to(pti1),0)
+
 		while i0 < ila0N or i1 < ila1N:
 			assert (i0 <= ila0N and i1 <= ila1N)
 			if i0 < ila0N and (acc - ila0N < 0 or i1 == ila1N):
 				acc += ila1N
-				add_vertex(surfaceTool, xcnodes0, poly0, ila0, i0)
-				add_vertex(surfaceTool, xcnodes1, poly1, ila1, i1)
+				surfaceTool.add_uv(uvi0)
+				surfaceTool.add_uv2(uvi0)
+				surfaceTool.add_vertex(pti0)
+				surfaceTool.add_uv(uvi1)
+				surfaceTool.add_uv2(uvi1)
+				surfaceTool.add_vertex(pti1)
 				i0 += 1
-				add_vertex(surfaceTool, xcnodes0, poly0, ila0, i0)
+				var pti0next = get_pt(xcnodes0, poly0, ila0, i0)
+				uvi0 = advanceuvFar(uvi1, pti1, uvi0, pti0, pti0next, true)
+				pti0 = pti0next
+				surfaceTool.add_uv(uvi0)
+				surfaceTool.add_uv2(uvi0)
+				surfaceTool.add_vertex(pti0)
+				
 			if i1 < ila1N and (acc >= 0 or i0 == ila0N):
 				acc -= ila0N
-				add_vertex(surfaceTool, xcnodes0, poly0, ila0, i0)
-				add_vertex(surfaceTool, xcnodes1, poly1, ila1, i1)
+				surfaceTool.add_uv(uvi0)
+				surfaceTool.add_uv2(uvi0)
+				surfaceTool.add_vertex(pti0)
+				surfaceTool.add_uv(uvi1)
+				surfaceTool.add_uv2(uvi1)
+				surfaceTool.add_vertex(pti1)
 				i1 += 1
-				add_vertex(surfaceTool, xcnodes1, poly1, ila1, i1)
+				var pti1next = get_pt(xcnodes1, poly1, ila1, i1)
+				uvi1 = advanceuvFar(uvi0, pti0, uvi1, pti1, pti1next, false)
+				pti1 = pti1next
+				surfaceTool.add_uv(uvi1)
+				surfaceTool.add_uv2(uvi1)
+				surfaceTool.add_vertex(pti1)
 		
 		surfaceTool.generate_normals()
 		var tubesectormesh = surfaceTool.commit()

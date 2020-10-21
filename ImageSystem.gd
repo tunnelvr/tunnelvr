@@ -85,7 +85,8 @@ func _process(delta):
 		nonimagepage["fetchednonimagedataobjectfile"] = nonimagedir+getshortimagename(nonimagepage["url"], true, 20)
 		if not File.new().file_exists(nonimagepage["fetchednonimagedataobjectfile"]):
 			if not Directory.new().dir_exists(nonimagedir):
-				Directory.new().make_dir(nonimagedir)
+				var err = Directory.new().make_dir(nonimagedir)
+				print("Making directory ", nonimagedir, " err code: ", err)
 			nonimagepage["httprequest"] = HTTPRequest.new()
 			add_child(nonimagepage["httprequest"])
 			nonimagepage["httprequest"].connect("request_completed", self, "_http_request_completed", [nonimagepage])
@@ -110,7 +111,8 @@ func _process(delta):
 			#	fetcheddrawingfile = defaultfloordrawingres
 			if not File.new().file_exists(fetcheddrawingfile):
 				if not Directory.new().dir_exists(imgdir):
-					Directory.new().make_dir(imgdir)
+					var err = Directory.new().make_dir(imgdir)
+					print("Making directory ", imgdir, " err code: ", err)
 				httprequest = HTTPRequest.new()
 				add_child(httprequest)
 				httprequest.connect("request_completed", self, "_http_request_completed", [{"httprequest":httprequest, "paperdrawing":paperdrawing, "objectname":paperdrawing.get_name()}])
@@ -152,7 +154,7 @@ func _process(delta):
 		fetcheddrawing = null
 
 	elif fetchednonimagedataobject != null:
-		print("FFF", fetchednonimagedataobject)
+		print("FFFN ", fetchednonimagedataobject)
 		if "tree" in fetchednonimagedataobject:
 			var htmltextfile = File.new()
 			htmltextfile.open(fetchednonimagedataobject["fetchednonimagedataobjectfile"], File.READ)

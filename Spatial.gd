@@ -88,6 +88,7 @@ extends Spatial
 # *   And explain how meshes can have their own materials, that are copied into material/0, and the material reappears if material/0 set to null
 # * CSG mesh with multiple materials group should have material0, material1 etc
 
+# use this to sniff out waiting for godot performances https://www.concordtheatricals.co.uk/p/7476/waiting-for-godot
 	
 export var hostipnumber: String = ""
 export var hostportnumber: int = 4546
