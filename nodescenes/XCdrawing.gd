@@ -396,6 +396,9 @@ func makexctubeshell(xcdrawings):
 		var pi = Geometry.triangulate_polygon(pv)
 		for u in pi:
 			#surfaceTool.add_vertex($XCnodes.get_node(poly[u]).global_transform.origin)
+			var uvp = Vector2(nodepoints[poly[u]].x, nodepoints[poly[u]].y)
+			surfaceTool.add_uv(uvp)
+			surfaceTool.add_uv2(uvp)
 			surfaceTool.add_vertex($XCnodes.get_node(poly[u]).transform.origin)
 	surfaceTool.generate_normals()
 	surfaceTool.commit(arraymesh)
