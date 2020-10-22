@@ -13,7 +13,7 @@ var imgregex = RegEx.new()
 var listregex = RegEx.new()
 
 var installbuttontex = null
-var imagebuttontex = null
+var fetchbuttontex = null
 
 func setactivetargetfloor(newactivetargetfloor, gripbuttonheld):
 	if activetargetfloor != null:
@@ -61,15 +61,20 @@ func fetchbuttonpressed(item, column, idx):
 		ImageSystem.fetchunrolltree(tree, item, item.get_tooltip(0))
 
 func addsubitem(upperitem, name, url):
-	print("**** ", upperitem, name, url)
 	var item = tree.create_item(upperitem)
 	item.set_text(0, name)
 	item.set_tooltip(0, url)
-	var tex = installbuttontex if imgregex.search(name) else imagebuttontex
+	var tex = null
+	if imgregex.search(name):
+		tex = installbuttontex.duplicate()
+	elif url.ends_with("/"):
+		tex = fetchbuttontex.duplicate()
+	else:
+		print("unknown file ignored: ", name)
+		return
 	#var idx = item.get_button_count(0)
 	var idx = len(buttonidxtoitem)
 	item.add_button(0, tex)
-	print("Adding button ", idx, " for name ", name, " tex ", tex)
 	buttonidxtoitem[idx] = item
 
 func openlinklistpage(item, htmltext):
@@ -92,11 +97,9 @@ func _ready():
 	installbuttonimg.load("res://guimaterials/installbuttonimg.png")
 	installbuttontex = ImageTexture.new()
 	installbuttontex.create_from_image(installbuttonimg)
-
-	var imagebuttonimg = Image.new()
-	imagebuttonimg.load("res://guimaterials/fetchbuttonimg.jpg")
-	imagebuttontex = ImageTexture.new()
-	imagebuttontex.create_from_image(imagebuttonimg)
+	#installbuttontex = get_node("/root/Spatial/MaterialSystem/buttonmaterials/InstallButton").get_surface_material(0).albedo_texture
+		
+	fetchbuttontex = get_node("/root/Spatial/MaterialSystem/buttonmaterials/FetchButton").get_surface_material(0).albedo_texture
 
 	$RealPlanCamera.set_as_toplevel(true)
 	var fplangui = $PlanView/ViewportFake.get_node_or_null("PlanGUI")
@@ -115,10 +118,15 @@ func readydeferred():
 	print("calling addsubitemaddsubitemaddsubitem")
 	addsubitem(root, "Ireby", "http://cave-registry.org.uk/svn/NorthernEngland/ThreeCountiesArea/rawscans/Ireby/")
 	
-	#var tmpdir = "user://test.txt"
-	var tmpfile = "user://test.txt"
-	#			if not Directory.new().dir_exists(nonimagedir):
-	#			var err = Directory.new().make_dir(nonimagedir)
+	var tmpdir = "user://testdir"
+	var tmpfile = "user://testdir/test.txt"
+	var tmpdirexists = Directory.new().dir_exists(tmpdir)
+	print("  tmpdirexists ", tmpdirexists)
+	if not tmpdirexists:
+		var err = Directory.new().make_dir(tmpdir)
+		print(" dir new err: ", err)
+	var tmpdirexists1 = Directory.new().dir_exists(tmpdir)
+	print("  tmpdirexists1 ", tmpdirexists1)
 	var tmpfileexists = File.new().file_exists(tmpfile)
 	print("  tmpfileexists ", tmpfileexists)
 	var fout = File.new()
@@ -127,6 +135,12 @@ func readydeferred():
 	fout.close()
 	var tmpfileexists1 = File.new().file_exists(tmpfile)
 	print("  tmpfileexists1 ", tmpfileexists1)
+
+	var chimgs = ["res://guimaterials/fetchbuttonimg.jpg", "res://guimaterials/fetchbuttonimg.png", 
+				  "screenshot.png", "shinyhandmesh.material", "res://guimaterials/grip_commands.png",
+				  "res://surveyscans/smallirebysave.res", "res://surveyscans/Ireby/Ireby2/Ireby2.json"]
+	for chimg in chimgs:
+		print(" chimg ", chimg, " ", File.new().file_exists(chimg))
 	set_process(false)
 	
 	

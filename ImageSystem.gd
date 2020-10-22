@@ -57,7 +57,8 @@ var fetcheddrawingfile = null
 var fetchednonimagedataobjectfile = null
 
 func _http_request_completed(result, response_code, headers, body, httprequestdataobject):
-	assert (httprequestdataobject["httprequest"] == httprequest)
+	if httprequestdataobject["httprequest"] != httprequest:
+		print("_http_request_completed ")
 	httprequestdataobject["httprequest"].queue_free()
 	if response_code == 200:
 		if "paperdrawing" in httprequestdataobject:
@@ -87,11 +88,12 @@ func _process(delta):
 			if not Directory.new().dir_exists(nonimagedir):
 				var err = Directory.new().make_dir(nonimagedir)
 				print("Making directory ", nonimagedir, " err code: ", err)
-			nonimagepage["httprequest"] = HTTPRequest.new()
+			httprequest = HTTPRequest.new()
 			add_child(nonimagepage["httprequest"])
-			nonimagepage["httprequest"].connect("request_completed", self, "_http_request_completed", [nonimagepage])
-			nonimagepage["httprequest"].download_file = nonimagepage["fetchednonimagedataobjectfile"]
-			nonimagepage["httprequest"].request(nonimagepage["url"])
+			nonimagepage["httprequest"] = httprequest
+			httprequest.connect("request_completed", self, "_http_request_completed", [nonimagepage])
+			httprequest.download_file = nonimagepage["fetchednonimagedataobjectfile"]
+			httprequest.request(nonimagepage["url"])
 			httprequestduration = 0.0
 		else:
 			fetchednonimagedataobject = nonimagepage

@@ -181,7 +181,7 @@ func _ready():
 			viewport.arvr = true
 			viewport.render_target_v_flip = true # <---- for your upside down screens
 			viewport.transparent_bg = true       # <--- For the AR
-			Tglobal.arvrinterface.k1 = 0.2          # Lens distortion constants
+			Tglobal.arvrinterface.k1 = 0.2       # Lens distortion constants
 			Tglobal.arvrinterface.k2 = 0.23
 	
 	Tglobal.VRoperating = (Tglobal.arvrinterfacename != "none")
