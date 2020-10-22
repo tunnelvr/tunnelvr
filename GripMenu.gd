@@ -80,7 +80,11 @@ func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointert
 
 	elif gripmenupointertargettype == "XCdrawing" and gripmenupointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		var dragable = (gripmenuactivetargetnode != null) and (activetargetwall == pointertargetwall)
-		enablegripmenus(["DragXC" if dragable else "", "DelXC"])
+		var delxcable = true # (activetargetwall == pointertargetwall)
+		for xctube in pointertargetwall.xctubesconn:
+			if len(xctube.xcdrawinglink) != 0:
+				delxcable = false
+		enablegripmenus(["DragXC" if dragable else "", "DelXC" if delxcable else ""])
 
 	elif gripmenupointertargettype == "Papersheet":
 		enablegripmenus(["toFloor", "toBig"])
@@ -100,7 +104,7 @@ func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointert
 		elif tubesectormaterialname == "hole":
 			enablegripmenus(["HoleXC", "SelectXC", "HideXC", "materials"])
 		else:
-			enablegripmenus(["NewXC", "SelectXC", "HideXC", "materials"])
+			enablegripmenus(["DelTube", "NewXC", "SelectXC", "HideXC", "materials"])
 
 	elif gripmenupointertargettype == "XCnode":
 		enablegripmenus(["NewXC"])

@@ -180,6 +180,7 @@ remote func actsketchchangeL(xcdatalist):
 			if len(xctube.xcdrawinglink) == 0 and len(xctube.xcsectormaterials) == 0:
 				removeXCtube(xctube)
 				xctube.queue_free() 
+				#Tglobal.soundsystem.quicksound("BlipSound", xcdrawing.global_transform*tpos)
 			else:
 				xctubestoupdate[xctube.get_name()] = xctube
 				if "materialsectorschanged" in xcdata:

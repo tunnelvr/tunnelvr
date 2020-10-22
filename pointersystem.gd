@@ -446,14 +446,14 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 			var xcdata = { "name":pointertargetwall.get_name() }
 			var i0 = activetargetnode.get_name()
 			var i1 = pointertarget.get_name()
-			if pointertargetwall.pairpresentindex(i0, i1) != -1:
+			if pointertargetwall.pairpresentindex(i0, i1) != -1:  # add line
 				xcdata["prevonepathpairs"] = [i0, i1]
 				xcdata["newonepathpairs"] = [ ]
-			else:
+			else:   # delete line
 				xcdata["newonepathpairs"] = [i0, i1]
 				if initialsequencenodenameP != null and initialsequencenodenameP != activetargetnode.get_name() and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 					xcdata["prevonepathpairs"] = [ initialsequencenodenameP, pointertarget.get_name() ]
-				else:
+				else:   # ^^ rejoin and delete straight line
 					xcdata["prevonepathpairs"] = [ ]
 			sketchsystem.actsketchchange([xcdata])
 
@@ -678,7 +678,45 @@ func buttonreleased_vrgrip():
 					setactivetargetwall(null)
 
 			elif pointertarget.get_name() == "DelXC":
+				var xcdrawing = gripmenu.gripmenupointertargetwall
+				if xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
+					var delxcable = true
+					for xctube in xcdrawing.xctubesconn:
+						if len(xctube.xcdrawinglink) != 0:
+							delxcable = false
+					if delxcable:
+						var xcname = xcdrawing.get_name()
+						var nodename = xcdrawing.get_name()
+						var xcv = { "xcvizstates":{ xcdrawing.get_name():0 } }
+						var xcdata = { "name":xcdrawing.get_name(), 
+									   "prevnodepoints":xcdrawing.nodepoints.duplicate(),
+									   "nextnodepoints":{ }, 
+									   "prevonepathpairs":xcdrawing.onepathpairs.duplicate(),
+									   "newonepathpairs": [ ]
+									 }
+						sketchsystem.actsketchchange([xcv, xcdata])
+									
+					else:
+						print("not deleted xc nodes")
+				
+				
+			elif pointertarget.get_name() == "DelTube":
 				print("Not implemented")
+				if gripmenu.gripmenupointertargettype == "XCtubesector":
+					var xctube = gripmenu.gripmenupointertargetwall
+					var xcv = { "xcvizstates":{ xctube.xcname0:3, xctube.xcname1:3 } }
+					var prevdrawinglinks = [ ]
+					for j in range(0, len(xctube.xcdrawinglink), 2):
+						prevdrawinglinks.push_back(xctube.xcdrawinglink[j])
+						prevdrawinglinks.push_back(xctube.xcdrawinglink[j+1])
+						prevdrawinglinks.push_back(xctube.xcsectormaterials[j/2])
+					var xctdata = { "tubename":xctube.get_name(), 
+									"xcname0":xctube.xcname0, 
+									"xcname1":xctube.xcname1,
+									"prevdrawinglinks":prevdrawinglinks,
+									"newdrawinglinks":[ ] 
+								  }
+					sketchsystem.actsketchchange([xcv, xctdata])
 
 			elif pointertarget.get_name() == "DragXC" and is_instance_valid(activetargetnode):
 				var dragvec = activetargetnodewall.global_transform.xform_inv(gripmenu.gripmenupointertargetpoint) - activetargetnode.translation

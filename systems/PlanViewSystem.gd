@@ -74,7 +74,7 @@ func addsubitem(upperitem, name, url):
 		return
 	#var idx = item.get_button_count(0)
 	var idx = len(buttonidxtoitem)
-	item.add_button(0, tex)
+	item.add_button(0, tex, idx)
 	buttonidxtoitem[idx] = item
 
 func openlinklistpage(item, htmltext):
