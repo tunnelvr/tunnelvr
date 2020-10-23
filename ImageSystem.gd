@@ -89,7 +89,7 @@ func _process(delta):
 				var err = Directory.new().make_dir(nonimagedir)
 				print("Making directory ", nonimagedir, " err code: ", err)
 			httprequest = HTTPRequest.new()
-			add_child(nonimagepage["httprequest"])
+			add_child(httprequest)
 			nonimagepage["httprequest"] = httprequest
 			httprequest.connect("request_completed", self, "_http_request_completed", [nonimagepage])
 			httprequest.download_file = nonimagepage["fetchednonimagedataobjectfile"]

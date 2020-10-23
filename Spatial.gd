@@ -206,7 +206,7 @@ func _ready():
 	var perm = OS.get_granted_permissions()
 	print("Granted permissions: ", perm)
 
-	if true:
+	if false:
 		#$SketchSystem.loadcentrelinefile("res://surveyscans/dukest1resurvey2009json.res")
 		$SketchSystem.loadcentrelinefile("res://surveyscans/Ireby/Ireby2/Ireby2.json")
 		$SketchSystem.updatecentrelinevisibility()

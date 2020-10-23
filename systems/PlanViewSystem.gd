@@ -93,12 +93,7 @@ func _ready():
 	listregex.compile('<li><a href="([^"]*)">')
 	imgregex.compile('(?i)\\.(png|jpg|jpeg)$')
 
-	var installbuttonimg = Image.new()
-	installbuttonimg.load("res://guimaterials/installbuttonimg.png")
-	installbuttontex = ImageTexture.new()
-	installbuttontex.create_from_image(installbuttonimg)
-	#installbuttontex = get_node("/root/Spatial/MaterialSystem/buttonmaterials/InstallButton").get_surface_material(0).albedo_texture
-		
+	installbuttontex = get_node("/root/Spatial/MaterialSystem/buttonmaterials/InstallButton").get_surface_material(0).albedo_texture
 	fetchbuttontex = get_node("/root/Spatial/MaterialSystem/buttonmaterials/FetchButton").get_surface_material(0).albedo_texture
 
 	$RealPlanCamera.set_as_toplevel(true)

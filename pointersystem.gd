@@ -41,8 +41,8 @@ var activetargetwallgrabbedlaserroottrans = null
 
 
 func clearpointertargetmaterial():
-	if pointertargettype == "XCnode":  
-		pointertarget.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("selected" if pointertarget == activetargetnode else ("nodepthtest" if pointertargetwall == activetargetwall else "normal")))
+	if pointertargettype == "XCnode":
+		pointertarget.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("selected" if pointertarget == activetargetnode else clearednodematerialtype(pointertarget, pointertargetwall == activetargetwall)))
 	if (pointertargettype == "XCdrawing" or pointertargettype == "XCnode") and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		if pointertargetwall == activetargetwall:
 			pointertargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").set_surface_material(0, materialsystem.xcdrawingmaterial("active"))
@@ -62,9 +62,21 @@ func setpointertargetmaterial():
 	if pointertargettype == "GripMenuItem":
 		gripmenu.setgripmenupointer(pointertarget)
 
+func clearednodematerialtype(xcn, bwallactive):
+	var bholetype = xcn.get_name().begins_with("r")
+	if bwallactive:
+		if bholetype:
+			return "nodepthtesthole"
+		else:
+			return "nodepthtest"
+	if bholetype:
+		return "normalhole"
+	else:
+		return "normal"
+
 func clearactivetargetnode():
 	if activetargetnode != null:
-		activetargetnode.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("nodepthtest" if activetargetnodewall == activetargetwall else "normal"))
+		activetargetnode.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial(clearednodematerialtype(activetargetnode, activetargetnodewall == activetargetwall)))
 	activetargetnode = null
 	activetargetnodewall = null
 	activelaserroot.get_node("LaserSpot").set_surface_material(0, materialsystem.lasermaterial("spot"))
@@ -84,7 +96,7 @@ func setactivetargetwall(newactivetargetwall):
 		activetargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").set_surface_material(0, materialsystem.xcdrawingmaterial("normal"))
 		activetargetwall.get_node("PathLines").set_surface_material(0, materialsystem.pathlinematerial("normal"))
 		for xcnode in activetargetwall.get_node("XCnodes").get_children():
-			xcnode.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("selected" if xcnode == activetargetnode else "normal"))
+			xcnode.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("selected" if xcnode == activetargetnode else clearednodematerialtype(xcnode, false)))
 		#for xctube in activetargetwall.xctubesconn:
 		#	if not xctube.positioningtube:
 		#		xctube.updatetubeshell(sketchsystem.get_node("XCdrawings"), Tglobal.tubeshellsvisible)
@@ -103,7 +115,7 @@ func setactivetargetwall(newactivetargetwall):
 		activetargetwall.get_node("PathLines").set_surface_material(0, materialsystem.pathlinematerial("nodepthtest"))
 		for xcnode in activetargetwall.get_node("XCnodes").get_children():
 			if xcnode != activetargetnode:
-				xcnode.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("nodepthtest"))
+				xcnode.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial(clearednodematerialtype(xcnode, true)))
 		if len(activetargetwall.nodepoints) != 0:
 			LaserOrient.get_node("RayCast").collision_mask = CollisionLayer.CL_Pointer | CollisionLayer.CL_PointerFloor 
 

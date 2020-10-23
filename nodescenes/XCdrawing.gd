@@ -141,7 +141,13 @@ func mergexcrpcdata(xcdata):
 		for k in nodepoints:
 			var xcn = $XCnodes.get_node(k) if $XCnodes.has_node(k) else null
 			if xcn == null:
-				xcn = XCnode_centreline.instance() if drawingtype == DRAWING_TYPE.DT_CENTRELINE else XCnode.instance()
+				if drawingtype == DRAWING_TYPE.DT_CENTRELINE:
+					xcn = XCnode_centreline.instance()
+				else:
+					xcn = XCnode.instance()
+					if k.begins_with("r"):
+						var materialsystem = get_node("/root/Spatial/MaterialSystem")
+						xcn.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("normalhole"))
 				xcn.set_name(k)
 				$XCnodes.add_child(xcn)
 			xcn.translation = nodepoints[k]

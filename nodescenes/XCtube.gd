@@ -369,12 +369,12 @@ func ConstructHoleXC(i, sketchsystem):
 
 	if xcdrawinghole != null:
 		xcdata["prevonepathpairs"] = xcdrawinghole.onepathpairs.duplicate()
-		xcdata["prevnodepoints"][name] = xcdrawinghole.nodepoints.duplicate()
+		xcdata["prevnodepoints"] = xcdrawinghole.nodepoints.duplicate()
 		
-	var prevname = "r"+xcnsourcelist[-1].get_name()
+	var prevname = "r1"+xcnsourcelist[-1].get_name()
 	for j in range(len(xcnsourcelist)):
 		var xcnsource = xcnsourcelist[j]
-		var name = ("" if j < xir else "r")+xcnsource.get_name()
+		var name = ("r0" if j < xir else "r1")+xcnsource.get_name()
 		xcdata["nextnodepoints"][name] = xcdata["transformpos"].xform_inv(xcnsource.global_transform.origin)
 		xcdata["newonepathpairs"].push_back(prevname)
 		xcdata["newonepathpairs"].push_back(name)
@@ -396,12 +396,14 @@ func advanceuvFar(uvFixed, ptFixed, uvFar, ptFar, ptFarNew, bclockwise):
 	var vecFar = ptFar - ptFixed
 	var vecFarNew = ptFarNew - ptFixed
 	var vecFarFarNewprod = vecFar.length()*vecFarNew.length()
+	var vecFarFarNewRatio = vecFarNew.length()/vecFar.length()
 	if vecFarFarNewprod == 0:
 		return uvFar
 	var vecFarNewCos = vecFar.dot(vecFarNew)/vecFarFarNewprod
 	var vecFarNewSin = vecFar.cross(vecFarNew).length()/vecFarFarNewprod
 	var uvvecnew = uvvec*vecFarNewCos + uvperpvec*vecFarNewSin
-	return uvFixed + uvvecnew
+	var uvvecnewR = uvvecnew*vecFarFarNewRatio
+	return uvFixed + uvvecnewR
 
 func updatetubeshell(xcdrawings, makevisible):
 	if not makevisible:
