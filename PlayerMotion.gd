@@ -20,7 +20,6 @@ var playerstepdownbump = 0.05
 var freefallsurfaceslidedragfactor = 1.1
 var freefallairdragfactor = 0.8
 var flyingkinematicenlargement = 0.03
-var clawengagementmaxpulldistance = 0.18
 var gravityenabled = true
 
 onready var psqparams = PhysicsShapeQueryParameters.new()
@@ -105,12 +104,7 @@ func _physics_process(delta):
 	if $PlayerKinematicBody/PlayerBodyCapsule/CapsuleShapePreview.visible:  # VVV this consumes 15ms!!!
 		$PlayerKinematicBody/PlayerBodyCapsule/CapsuleShapePreview.mesh.mid_height = capsuleshaftheight
 	
-	if PlayerDirections.clawengageposition != null:
-		var clawengagementrelativedisplacement = PlayerDirections.clawengageposition - PlayerDirections.GroundSpikePoint.global_transform.origin
-		if playerinfreefall:
-			endfreefallmode()
-		process_clawengagement(delta, clawengagementrelativedisplacement)
-	elif PlayerDirections.playerdirectedflight:
+	if PlayerDirections.playerdirectedflight:
 		process_directedflight(delta, PlayerDirections.playerdirectedflightvelocity)
 	elif playerinfreefall:
 		process_freefall(delta)
@@ -130,20 +124,6 @@ func _physics_process(delta):
 		if playercentrevelocitylength > 0.01:
 			$MotionVectorPreview.global_transform = Transform(Basis(), playerbodycentre).looking_at(playerbodycentre - playercentrevelocity, Vector3(0,1,0) if abs(playercentrevelocity.y) < 0.8*playercentrevelocitylength else Vector3(1,0,0))
 
-
-func process_clawengagement(delta, clawengagementrelativedisplacement):
-	playerbodycentre = HeadCentre.global_transform.origin - Vector3(0, playerheadcentreabovebodycentreheight, 0) + Ddebugvisualoffset
-	var playerbodycapsulebasis = $PlayerKinematicBody/PlayerBodyCapsule.global_transform.basis
-	var playerbodycentrewithdirectedmotion = playerbodycentre + clawengagementrelativedisplacement
-	psqparams.transform = Transform(playerbodycapsulebasis, playerbodycentrewithdirectedmotion + Vector3(0,0.05,0))
-	if len(get_world().direct_space_state.intersect_shape(psqparams, 1)) == 0:
-		playerMe.global_transform.origin += clawengagementrelativedisplacement
-		playerbodycentre = playerbodycentrewithdirectedmotion
-	else:
-		PlayerDirections.endclawengagement()
-	addplayervelocitystack((playerbodycentre - playerbodycentre_prev)/delta)
-	playerbodycentre_prev = playerbodycentre
-	$PlayerKinematicBody.global_transform.origin = playerbodycentre
 		
 
 func process_feet_on_floor(delta, playerdirectedwalkmovement):

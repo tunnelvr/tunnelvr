@@ -1,4 +1,4 @@
-[gd_scene load_steps=226 format=2]
+[gd_scene load_steps=220 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/default_env.tres" type="Environment" id=2]
@@ -246,35 +246,6 @@ albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
 albedo_texture = ExtResource( 25 )
 uv1_scale = Vector3( 1, 0.05, 1 )
 uv1_offset = Vector3( -0.2, 0.9, 0 )
-
-[sub_resource type="CylinderMesh" id=31]
-top_radius = 0.01
-bottom_radius = 0.001
-height = 0.03
-radial_segments = 12
-rings = 1
-
-[sub_resource type="SpatialMaterial" id=32]
-albedo_color = Color( 0.968627, 0.0392157, 0.0392157, 1 )
-
-[sub_resource type="CubeMesh" id=33]
-size = Vector3( 0.002, 0.002, 0.1 )
-
-[sub_resource type="SpatialMaterial" id=34]
-albedo_color = Color( 0.988235, 0.0235294, 0.0235294, 1 )
-
-[sub_resource type="CylinderMesh" id=35]
-top_radius = 0.01
-bottom_radius = 0.01
-height = 0.005
-radial_segments = 6
-rings = 1
-
-[sub_resource type="SpatialMaterial" id=36]
-albedo_color = Color( 0.807843, 0.470588, 0.223529, 1 )
-metallic = 0.55
-metallic_specular = 0.49
-roughness = 0.36
 
 [sub_resource type="CapsuleShape" id=37]
 margin = 0.01
@@ -1678,30 +1649,6 @@ shape = SubResource( 12 )
 [node name="FloorMoveTween" type="Tween" parent="GuiSystem/GripMenu"]
 
 [node name="BodyObjects" type="Spatial" parent="."]
-
-[node name="MovePointThimble" type="Spatial" parent="BodyObjects"]
-transform = Transform( -7.58967e-07, 0, 1, 0, 1, 0, -1, 0, -7.58967e-07, -0.226002, 3.493, -7.024 )
-
-[node name="MeshInstance" type="MeshInstance" parent="BodyObjects/MovePointThimble"]
-transform = Transform( -1.62921e-07, -1, 0, 1, -1.62921e-07, 0, 0, 0, 1, 0, 0, 0 )
-mesh = SubResource( 31 )
-material/0 = SubResource( 32 )
-
-[node name="TipTouchRay" type="RayCast" parent="BodyObjects/MovePointThimble"]
-transform = Transform( -1.62921e-07, 0, -1, 0, 1, 0, 1, 0, -1.62921e-07, -0.0429029, 0, -0.000141606 )
-cast_to = Vector3( 0, 0, -0.1 )
-collision_mask = 3104
-collide_with_areas = true
-
-[node name="MeshInstance" type="MeshInstance" parent="BodyObjects/MovePointThimble/TipTouchRay"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.000141606, 0, -0.0429029 )
-mesh = SubResource( 33 )
-material/0 = SubResource( 34 )
-
-[node name="GroundSpikePoint" type="MeshInstance" parent="BodyObjects/MovePointThimble/TipTouchRay"]
-transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, 0, 0, -0.0477982 )
-mesh = SubResource( 35 )
-material/0 = SubResource( 36 )
 
 [node name="Locomotion_WalkInPlace" type="Node" parent="BodyObjects"]
 script = ExtResource( 4 )

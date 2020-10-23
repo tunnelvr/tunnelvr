@@ -4,9 +4,6 @@ onready var playerMe = get_node("/root/Spatial/Players/PlayerMe")
 onready var HeadCam = playerMe.get_node("HeadCam")
 onready var HandLeft = playerMe.get_node("HandLeft")
 onready var HandLeftController = playerMe.get_node("HandLeftController")
-onready var MovePointThimble = get_node("../MovePointThimble")
-onready var tiptouchray = MovePointThimble.get_node("TipTouchRay")
-onready var GroundSpikePoint = tiptouchray.get_node("GroundSpikePoint")
 
 var flyspeed = 5.0
 var walkspeed = 3.0
@@ -14,8 +11,6 @@ var nextphysicsrotatestep = 0.0
 var playerdirectedflight = false
 var playerdirectedflightvelocity = Vector3(0,0,0)
 var playerdirectedwalkingvelocity = Vector3(0,0,0)
-var clawengageposition = null
-
 
 func initcontrollersignalconnections():
 	HandLeftController.connect("button_pressed", self, "_on_button_pressed")
@@ -23,16 +18,11 @@ func initcontrollersignalconnections():
 func initquesthandcontrollersignalconnections():
 	pass
 
-
 func _input(event):
 	if event is InputEventKey and event.pressed and not Input.is_action_pressed("lh_shift"):
 		if event.is_action_pressed("lh_left"):  nextphysicsrotatestep += -22.5
 		if event.is_action_pressed("lh_right"): nextphysicsrotatestep += 22.5
 
-func endclawengagement():
-	Tglobal.soundsystem.quicksound("ClawReleaseSound", GroundSpikePoint.global_transform.origin)
-	GroundSpikePoint.visible = false
-	clawengageposition = null
 
 var prevgait = ""
 func _process(delta):
@@ -63,8 +53,6 @@ func _physics_process(delta):
 	if HandLeft.triggerbuttonheld and HandLeft.pointervalid and not Tglobal.controlslocked:
 		var vec = -(playerMe.global_transform*HandLeft.pointerposearvrorigin).basis.z
 		if playerdirectedflight:
-			if clawengageposition != null:
-				endclawengagement()
 			playerdirectedflightvelocity = vec.normalized()*flyspeed
 		else:
 			playerdirectedwalkingvelocity = Vector3(vec.x, 0, vec.z).normalized()*walkspeed
@@ -78,17 +66,6 @@ func _physics_process(delta):
 		playerdirectedwalkingvelocity = dir.normalized()*(-joypos.y*walkspeed)
 		
 				
-	var isgroundspiked = tiptouchray.is_colliding() and tiptouchray.get_collider().get_parent().get_name() == "XCtubesectors"
-	# ^^ disabled
-	if isgroundspiked:
-		if clawengageposition == null:
-			clawengageposition = tiptouchray.get_collision_point()
-			GroundSpikePoint.global_transform.origin = clawengageposition
-			GroundSpikePoint.visible = true
-			Tglobal.soundsystem.quicksound("ClawGripSound", clawengageposition)
-	elif clawengageposition != null:
-		endclawengagement()
-
 
 func _on_button_pressed(p_button):
 	if p_button == BUTTONS.VR_PAD:

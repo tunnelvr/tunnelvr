@@ -132,12 +132,12 @@ func _process(delta):
 func initkeyboardcontroltrackingnow():
 	#$HandLeft.initkeyboardtracking()
 	$HandRight.initkeyboardtracking()
-	$HandLeft.addremotetransform("middle_null", get_node("/root/Spatial/BodyObjects/MovePointThimble"), Transform())
+
 	
 func initnormalvrtrackingnow():
 	$HandLeft.initnormalvrtracking($HandLeftController)
 	$HandRight.initnormalvrtracking($HandRightController)
-	$HandLeft.addremotetransform("middle_null", get_node("/root/Spatial/BodyObjects/MovePointThimble"), Transform())
+
 
 func initquesthandtrackingnow(lovr_hand_tracking):
 	Tglobal.questhandtracking = true
@@ -146,5 +146,4 @@ func initquesthandtrackingnow(lovr_hand_tracking):
 	ovr_hand_tracking = lovr_hand_tracking
 	$HandLeft.initovrhandtracking(ovr_hand_tracking, $HandLeftController)
 	$HandRight.initovrhandtracking(ovr_hand_tracking, $HandRightController)
-	$HandLeft.addremotetransform("middle_null", get_node("/root/Spatial/BodyObjects/MovePointThimble"), Transform())
 	get_node("/root/Spatial/GuiSystem/GUIPanel3D/Viewport/GUI/Panel/ButtonSwapControllers").disabled = true

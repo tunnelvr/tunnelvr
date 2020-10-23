@@ -21,8 +21,8 @@ var remotetimegap_dtmax = 0.8  # copied from PlayerMotion.gd
 const maxstacklength = 80
 
 remote func setavatarposition(positiondict):
-	$AnimationPlayer_setavatarposition.stop()
-	$AnimationPlayer_setavatarposition.play("setavatarposition_flash")
+	$AnimationPlayer_setavatarposition_flash.stop()
+	$AnimationPlayer_setavatarposition_flash.play("setavatarposition_flash")
 	if not visible:
 		if "playertransform" in positiondict and "headcamtransform" in positiondict:
 			global_transform = positiondict["playertransform"]
