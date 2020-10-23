@@ -118,6 +118,13 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.5 )
 mesh = SubResource( 5 )
 material/0 = SubResource( 6 )
 
+[node name="FakeGuiSystem" type="Spatial" parent="."]
+
+[node name="GripMenu" type="Spatial" parent="FakeGuiSystem"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, -2.617 )
+
+[node name="WordButtons" type="Spatial" parent="FakeGuiSystem/GripMenu"]
+
 [node name="AnimationPlayer_setavatarposition_flash" type="AnimationPlayer" parent="."]
 anims/setavatarposition_flash = SubResource( 7 )
 

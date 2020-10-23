@@ -45,6 +45,9 @@ func _physics_process(_delta):
 remote func setavatarposition(positiondict):
 	print("ppt nope not master ", positiondict)
 
+remote func puppetenablegripmenus(gmlist, gmtransform):
+	print("puppetenablegripmenus nope not master ", gmlist)
+
 puppet func bouncedoppelgangerposition(bouncebackID, positiondict):
 	rpc_unreliable_id(bouncebackID, "setdoppelgangerposition", positiondict)
 
@@ -132,12 +135,10 @@ func _process(delta):
 func initkeyboardcontroltrackingnow():
 	#$HandLeft.initkeyboardtracking()
 	$HandRight.initkeyboardtracking()
-
 	
 func initnormalvrtrackingnow():
 	$HandLeft.initnormalvrtracking($HandLeftController)
 	$HandRight.initnormalvrtracking($HandRightController)
-
 
 func initquesthandtrackingnow(lovr_hand_tracking):
 	Tglobal.questhandtracking = true

@@ -90,6 +90,35 @@ remote func setavatarposition(positiondict):
 func _ready():
 	$HandLeft/LaserPointer.visible = false
 	$HandRight/LaserPointer.visible = false
+	call_deferred("copyfakeguisystem")
+
+func copyfakeguisystem():
+	var realgripmenu = get_node("/root/Spatial/GuiSystem/GripMenu")
+	for wordbutton in realgripmenu.get_node("WordButtons").get_children():
+		var fakestaticbody = Spatial.new()
+		fakestaticbody.transform = wordbutton.transform
+		fakestaticbody.set_name(wordbutton.get_name())
+		var wordmesh = wordbutton.get_node("MeshInstance")
+		var fakewordmesh = wordmesh.duplicate()
+		fakewordmesh.visible = true
+		fakestaticbody.add_child(fakewordmesh)
+		$FakeGuiSystem/GripMenu/WordButtons.add_child(fakestaticbody)
+	puppetenablegripmenus(null, null)
+
+remote func puppetenablegripmenus(gmlist, gmtransform):
+	if gmlist != null:
+		$FakeGuiSystem/GripMenu.transform = gmtransform
+		for g in gmlist:
+			if g == "materials":
+				pass
+				#for s in $MaterialButtons.get_children():
+				#	s.get_node("MeshInstance").visible = true
+			elif g != "":
+				$FakeGuiSystem/GripMenu/WordButtons.get_node(g).get_node("MeshInstance").visible = true
+	else:
+		for s in $FakeGuiSystem/GripMenu/WordButtons.get_children():
+			s.get_node("MeshInstance").visible = false
+
 
 func _process(delta):
 	process_puppetpositionstack(delta)

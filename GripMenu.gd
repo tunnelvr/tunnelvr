@@ -26,7 +26,7 @@ func _ready():
 		materialbutton.get_node("MeshInstance").set_surface_material(0, material)
 		$MaterialButtons.add_child(materialbutton)
 		materialbutton.transform.origin = Vector3(0.25, 0.15 - i*0.11, 0)
-	disableallgripmenus()
+	call_deferred("disableallgripmenus")
 	
 func disableallgripmenus():
 	for s in $WordButtons.get_children():
@@ -38,15 +38,13 @@ func disableallgripmenus():
 		s.get_node("MeshInstance").visible = false
 		s.get_node("CollisionShape").disabled = true
 
-func enablegripmenus(gmlist):
-	for g in gmlist:
-		if g == "materials":
-			for s in $MaterialButtons.get_children():
-				s.get_node("MeshInstance").visible = true
-				s.get_node("CollisionShape").disabled = false
-		elif g != "":
-			$WordButtons.get_node(g).get_node("MeshInstance").visible = true
-			$WordButtons.get_node(g).get_node("CollisionShape").disabled = false
+	var playerMe = get_node("/root/Spatial").playerMe
+	if playerMe != null:
+		if Tglobal.connectiontoserveractive:
+			playerMe.rpc("puppetenablegripmenus", null, null)
+		if is_instance_valid(playerMe.doppelganger):
+			playerMe.doppelganger.puppetenablegripmenus(null, null)
+
 
 func cleargripmenupointer(pointertarget):
 	if pointertarget.get_parent().get_name() == "MaterialButtons":
@@ -75,8 +73,9 @@ func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointert
 	paneltrans = paneltrans.looking_at(lookatpos, Vector3(0, 1, 0))
 	global_transform = paneltrans
 
+	var gmlist = [ ]
 	if gripmenupointertargettype == "XCdrawing" and gripmenupointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
-		enablegripmenus(["NewXC", "Up5", "Down5", "toPaper"])
+		gmlist = ["NewXC", "Up5", "Down5", "toPaper"]
 
 	elif gripmenupointertargettype == "XCdrawing" and gripmenupointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		var dragable = (gripmenuactivetargetnode != null) and (activetargetwall == pointertargetwall)
@@ -84,10 +83,10 @@ func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointert
 		for xctube in pointertargetwall.xctubesconn:
 			if len(xctube.xcdrawinglink) != 0:
 				delxcable = false
-		enablegripmenus(["DragXC" if dragable else "", "DelXC" if delxcable else ""])
+		gmlist = ["DragXC" if dragable else "", "DelXC" if delxcable else ""]
 
 	elif gripmenupointertargettype == "Papersheet":
-		enablegripmenus(["toFloor", "toBig"])
+		gmlist = ["toFloor", "toBig"]
 		
 	elif gripmenupointertargettype == "XCtubesector":
 		var tubesectormaterialname = gripmenupointertargetwall.xcsectormaterials[gripmenuactivetargettubesectorindex]
@@ -100,18 +99,31 @@ func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointert
 		if activetargetwall == get_node("/root/Spatial/PlanViewSystem"):
 			pass
 		elif is_instance_valid(activetargetwall) and len(activetargetwall.nodepoints) == 0:
-			enablegripmenus(["DoSlice", "SelectXC", "HideXC", "materials"])
+			gmlist = ["DoSlice", "SelectXC", "HideXC", "materials"]
 		elif tubesectormaterialname == "hole":
-			enablegripmenus(["HoleXC", "SelectXC", "HideXC", "materials"])
+			gmlist = ["HoleXC", "SelectXC", "HideXC", "materials"]
 		else:
-			enablegripmenus(["DelTube", "NewXC", "SelectXC", "HideXC", "materials"])
+			gmlist = ["DelTube", "NewXC", "SelectXC", "HideXC", "materials"]
 
 	elif gripmenupointertargettype == "XCnode":
-		enablegripmenus(["NewXC"])
+		gmlist = ["NewXC"]
 
 	else:
-		enablegripmenus(["NewXC", "Undo"])
+		gmlist = ["NewXC", "Undo"]
 				
+	for g in gmlist:
+		if g == "materials":
+			for s in $MaterialButtons.get_children():
+				s.get_node("MeshInstance").visible = true
+				s.get_node("CollisionShape").disabled = false
+		elif g != "":
+			$WordButtons.get_node(g).get_node("MeshInstance").visible = true
+			$WordButtons.get_node(g).get_node("CollisionShape").disabled = false
+	var playerMe = get_node("/root/Spatial").playerMe
+	if Tglobal.connectiontoserveractive:
+		playerMe.rpc("puppetenablegripmenus", gmlist, transform)
+	if is_instance_valid(playerMe.doppelganger):
+		playerMe.doppelganger.puppetenablegripmenus(gmlist, transform)
 
 # Calibri Fontsize 20: height 664 width 159
 var grip_commands_text = """
