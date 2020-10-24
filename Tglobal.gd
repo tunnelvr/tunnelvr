@@ -6,6 +6,7 @@ var centrelinevisible = false
 var centrelineonly = false
 var connectiontoserveractive = false
 var morethanoneplayer = false
+var printxcdrawingfromdatamessages = true
 
 var arvrinterfacename = "none"  # OVRMobile, Oculus, OpenVR
 var arvrinterface = null

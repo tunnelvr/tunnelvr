@@ -27,6 +27,7 @@ remote func setavatarposition(positiondict):
 		if "playertransform" in positiondict and "headcamtransform" in positiondict:
 			global_transform = positiondict["playertransform"]
 			$HeadCam.transform = positiondict["headcamtransform"]
+			$headlocator.transform.origin = $HeadCam.transform.origin
 			visible = true
 			Tglobal.soundsystem.quicksound("PlayerArrive", global_transform.origin)
 
@@ -119,6 +120,12 @@ remote func puppetenablegripmenus(gmlist, gmtransform):
 		for s in $FakeGuiSystem/GripMenu/WordButtons.get_children():
 			s.get_node("MeshInstance").visible = false
 
+remote func puppetenableguipanel(guitransform):
+	if guitransform != null:
+		$FakeGuiSystem/GUIPanel3D.transform = guitransform
+		$FakeGuiSystem/GUIPanel3D.visible = true
+	else:
+		$FakeGuiSystem/GUIPanel3D.visible = false
 
 func _process(delta):
 	process_puppetpositionstack(delta)
@@ -136,6 +143,7 @@ func process_puppetpositionstack(delta):
 			global_transform = pp["playertransform"]
 		if pp.has("headcamtransform"):
 			$HeadCam.transform = pp["headcamtransform"]
+			$headlocator.transform.origin = $HeadCam.transform.origin
 		puppetpositionstack.pop_front()
 		
 	else:
@@ -145,6 +153,7 @@ func process_puppetpositionstack(delta):
 			global_transform = Transform(pp["playertransform"].basis.slerp(pp1["playertransform"].basis, lam), lerp(pp["playertransform"].origin, pp1["playertransform"].origin, lam))
 		if pp.has("headcamtransform") and pp1.has("headcamtransform"):
 			$HeadCam.transform = Transform(pp["headcamtransform"].basis.slerp(pp1["headcamtransform"].basis, lam), lerp(pp["headcamtransform"].origin, pp1["headcamtransform"].origin, lam))
+			$headlocator.transform.origin = $HeadCam.transform.origin
 
 func process_puppetpointerpositionstack(delta):
 	var t = OS.get_ticks_msec()*0.001

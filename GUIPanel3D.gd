@@ -161,10 +161,12 @@ func toggleguipanelvisibility(controller_global_transform):
 		paneltrans = paneltrans.looking_at(lookatpos, Vector3(0, 1, 0))
 		global_transform = paneltrans
 
-		$Viewport/GUI/Panel/Label.text = "Control panel"
+		$Viewport/GUI/Panel/Label.text = ""
 		var MQTTExperiment = get_node_or_null("/root/Spatial/MQTTExperiment")
 		if MQTTExperiment != null and MQTTExperiment.msg != "":
 			$Viewport/GUI/Panel/Label.text = MQTTExperiment.msg
+		elif Tglobal.connectiontoserveractive:
+			Tglobal.connectiontoserveractive
 
 		visible = true
 		$CollisionShape.disabled = false
@@ -172,6 +174,24 @@ func toggleguipanelvisibility(controller_global_transform):
 	else:
 		visible = false	
 		$CollisionShape.disabled = true
+		var MQTTExperiment = get_node_or_null("/root/Spatial/MQTTExperiment")
+		if MQTTExperiment != null and MQTTExperiment.msg != "":
+			$Viewport/GUI/Panel/Label.text = MQTTExperiment.msg
+
+	var selfSpatial = get_node("/root/Spatial")
+	if Tglobal.connectiontoserveractive:
+		assert(selfSpatial.playerMe.networkID != 0)
+		selfSpatial.playerMe.rpc("puppetenableguipanel", transform if visible else null)
+		if visible and $Viewport/GUI/Panel/Label.text == "":
+			var msg = "NetIDs "+str(selfSpatial.playerMe.networkID)+":"
+			for id in selfSpatial.players_connected_list:
+				msg += " "+str(id)
+			print(msg)
+			$Viewport/GUI/Panel/Label.text = msg
+			
+	if is_instance_valid(selfSpatial.playerMe.doppelganger):
+		selfSpatial.playerMe.doppelganger.puppetenableguipanel(transform if visible else null)
+
 	
 func guipanelsendmousemotion(lcollision_point, controller_global_transform, controller_trigger):
 	collision_point = lcollision_point
@@ -210,7 +230,7 @@ func guipanelsendmousemotion(lcollision_point, controller_global_transform, cont
 		event.pressed = new_viewport_mousedown
 		event.button_index = BUTTON_LEFT
 		event.position = viewport_point
-		print("vvvv viewport_point ", viewport_point)
+		#print("vvvv viewport_point ", viewport_point)
 		$Viewport.input(event)
 		viewport_mousedown = new_viewport_mousedown
 
@@ -333,20 +353,28 @@ func networkstartasserver(fromgui):
 	var lnetworkID = get_tree().get_network_unique_id()
 	selfSpatial.setnetworkidnamecolour(selfSpatial.playerMe, lnetworkID)
 	print("server networkID: ", selfSpatial.playerMe.networkID)
-
 		
 func _connection_failed():
 	print("_connection_failed ", websocketclient)
 	websocketclient = null
 	Tglobal.connectiontoserveractive = false
+	var selfSpatial = get_node("/root/Spatial")	
+	assert (len(selfSpatial.deferred_player_connected_list) == 0)
+	assert (len(selfSpatial.players_connected_list) == 0)
 	$Viewport/GUI/Panel/Label.text = "connection_failed"
 	
 func _server_disconnected():
 	print("_server_disconnected ", websocketclient)
 	websocketclient = null
 	Tglobal.connectiontoserveractive = false
+	var selfSpatial = get_node("/root/Spatial")	
+	selfSpatial.deferred_player_connected_list.clear()
 	$Viewport/GUI/Panel/Label.text = "server_disconnected"
+	for id in selfSpatial.players_connected_list:
+		print("server_disconnected, calling _player_disconnected on ", id)
+		selfSpatial.call_deferred("_player_disconnected", id)
 
+	
 func _process(delta):
 	if websocketserver != null and websocketserver.is_listening():
 		websocketserver.poll()

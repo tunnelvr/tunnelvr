@@ -41,6 +41,7 @@ func disableallgripmenus():
 	var playerMe = get_node("/root/Spatial").playerMe
 	if playerMe != null:
 		if Tglobal.connectiontoserveractive:
+			assert(playerMe.networkID != 0)
 			playerMe.rpc("puppetenablegripmenus", null, null)
 		if is_instance_valid(playerMe.doppelganger):
 			playerMe.doppelganger.puppetenablegripmenus(null, null)
@@ -121,6 +122,7 @@ func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointert
 			$WordButtons.get_node(g).get_node("CollisionShape").disabled = false
 	var playerMe = get_node("/root/Spatial").playerMe
 	if Tglobal.connectiontoserveractive:
+		assert(playerMe.networkID != 0)
 		playerMe.rpc("puppetenablegripmenus", gmlist, transform)
 	if is_instance_valid(playerMe.doppelganger):
 		playerMe.doppelganger.puppetenablegripmenus(gmlist, transform)

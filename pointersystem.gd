@@ -713,7 +713,6 @@ func buttonreleased_vrgrip():
 				
 				
 			elif pointertarget.get_name() == "DelTube":
-				print("Not implemented")
 				if gripmenu.gripmenupointertargettype == "XCtubesector":
 					var xctube = gripmenu.gripmenupointertargetwall
 					var xcv = { "xcvizstates":{ xctube.xcname0:3, xctube.xcname1:3 } }

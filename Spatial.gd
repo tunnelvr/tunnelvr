@@ -231,8 +231,15 @@ func nextplayernetworkidinringskippingdoppelganger(deletedid):
 # May need to use Windows Defender Firewall -> Inboard rules -> New Rule and ports
 # Also there's another setting change to allow pings
 # If there is judder, then it could be the realtime virus and threat protection settings.  https://forum.unity.com/threads/performance-problems-with-vive-and-vr-regular-vr-waitforgpu-spikes.521849/
+
+var deferred_player_connected_list = [ ]
+var players_connected_list = [ ]
 func _player_connected(id):
 	print("_player_connected ", id)
+	if not Tglobal.connectiontoserveractive:
+		print("deferring playerconnect to after _connected_to_server() call: ", id)
+		deferred_player_connected_list.push_back(id)
+		return
 	playerMe.set_name("NetworkedPlayer"+String(playerMe.networkID))
 	var playerothername = "NetworkedPlayer"+String(id)
 	if not $Players.has_node(playerothername):
@@ -242,14 +249,24 @@ func _player_connected(id):
 		$Players.add_child(playerOther)
 	if playerMe.networkID == 1:
 		var sketchdatadict = $SketchSystem.sketchsystemtodict()
+		assert(playerMe.networkID != 0)			
 		$SketchSystem.rpc_id(id, "sketchsystemfromdict", sketchdatadict)
 	playerMe.bouncetestnetworkID = nextplayernetworkidinringskippingdoppelganger(0)
 	Tglobal.morethanoneplayer = $Players.get_child_count() >= 2
-	playerMe.rpc("initplayerpuppet", (ovr_hand_tracking != null))
+	print(" playerMe networkID ", playerMe.networkID, " ", get_tree().get_network_unique_id())
+	assert(playerMe.networkID != 0)
+	playerMe.rpc_id(id, "initplayerpuppet", (ovr_hand_tracking != null))
 	$GuiSystem/GUIPanel3D/Viewport/GUI/Panel/Label.text = "player "+String(id)+" connected"
+	players_connected_list.push_back(id)
 	
 func _player_disconnected(id):
 	print("_player_disconnected ", id)
+	if id in deferred_player_connected_list:
+		print(" _player_disconnected id still in  deferred_player_connected_list")
+		deferred_player_connected_list.erase(id)
+		return
+	assert (id in players_connected_list)
+	players_connected_list.erase(id)
 	var playerothername = "NetworkedPlayer"+String(id)
 	Tglobal.morethanoneplayer = $Players.get_child_count() >= 2
 	var playerOther = $Players.get_node_or_null(playerothername)
@@ -269,8 +286,13 @@ func _connected_to_server():
 
 	print("SETTING connectiontoserveractive true now")
 	Tglobal.connectiontoserveractive = true
+	assert(playerMe.networkID != 0)
 	playerMe.rpc("initplayerpuppet", (ovr_hand_tracking != null))
-		
+
+	while len(deferred_player_connected_list) != 0:
+		var id = deferred_player_connected_list.pop_front()
+		print("Now calling deferred _player_connected on id ", id)
+		call_deferred("_player_connected", id)
 	
 func _process(_delta):
 	if !perform_runtime_config:

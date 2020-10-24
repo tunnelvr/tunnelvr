@@ -105,12 +105,10 @@ func _ready():
 	call_deferred("readydeferred")
 	
 func readydeferred():
-	print("readydeferredreadydeferredreadydeferred")
 	tree = $PlanView/Viewport/PlanGUI/PlanViewControls/Tree
 	tree.connect("button_pressed", self, "fetchbuttonpressed")
 	var root = tree.create_item()
 	root.set_text(0, "Root of treee")
-	print("calling addsubitemaddsubitemaddsubitem")
 	addsubitem(root, "Ireby", "http://cave-registry.org.uk/svn/NorthernEngland/ThreeCountiesArea/rawscans/Ireby/")
 	
 	var tmpdir = "user://testdir"

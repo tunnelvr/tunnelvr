@@ -48,6 +48,9 @@ remote func setavatarposition(positiondict):
 remote func puppetenablegripmenus(gmlist, gmtransform):
 	print("puppetenablegripmenus nope not master ", gmlist)
 
+remote func puppetenableguipanel(guitransform):
+	print("puppetenableguipanel nope not master ", guitransform)
+	
 puppet func bouncedoppelgangerposition(bouncebackID, positiondict):
 	rpc_unreliable_id(bouncebackID, "setdoppelgangerposition", positiondict)
 

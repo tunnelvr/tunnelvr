@@ -51,6 +51,7 @@ func playmyvoicerecording():
 	if recording:
 		playerMe.playvoicerecording(recording.get_data())
 		if Tglobal.connectiontoserveractive:
+			assert(playerMe.networkID != 0)			
 			playerMe.rpc("playvoicerecording", recording.get_data())
 
 

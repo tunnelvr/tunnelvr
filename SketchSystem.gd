@@ -141,8 +141,9 @@ func actsketchchange(xcdatalist):
 					sendrpc = false
 				else:
 					prevcombinabletransformposchangetimestamp = xcdatalist[0].get("timestamp", 0)
-			if sendrpc and Tglobal.connectiontoserveractive:
-				rpc("actsketchchangeL", xcdatalist)
+		if sendrpc and Tglobal.connectiontoserveractive:
+			assert(playerMe.networkID != 0)
+			rpc("actsketchchangeL", xcdatalist)
 			
 remote func actsketchchangeL(xcdatalist):
 	if "undoact" in xcdatalist[0]:
@@ -174,6 +175,8 @@ remote func actsketchchangeL(xcdatalist):
 	for i in range(len(xcdatalist)):
 		var xcdata = xcdatalist[i]
 		if "tubename" in xcdata:
+			if Tglobal.printxcdrawingfromdatamessages:
+				print("update tube ", xcdata["tubename"])
 			if xcdata["tubename"] == "**notset":
 				xcdata["tubename"] = "XCtube_"+xcdata["xcname0"]+"_"+xcdata["xcname1"]
 			var xctube = xctubefromdata(xcdata)
@@ -189,6 +192,8 @@ remote func actsketchchangeL(xcdatalist):
 							get_node("/root/Spatial/MaterialSystem").updatetubesectormaterial(xctube.get_node("XCtubesectors").get_child(j), xctube.xcsectormaterials[j], false)
 			
 		elif "xcvizstates" in xcdata:
+			if Tglobal.printxcdrawingfromdatamessages:
+				print("update vizstate ")
 			xcdata["prevxcvizstates"] = { }
 			for xcdrawingname in xcdata["xcvizstates"]:
 				var xcdrawing = $XCdrawings.get_node_or_null(xcdrawingname)
@@ -221,7 +226,9 @@ remote func actsketchchangeL(xcdatalist):
 					xcdata["prevtransformpos"] = lxcdrawing.transform
 					
 			var xcdrawing = xcdrawingfromdata(xcdata)
-			if "nodepoints" in xcdata or "nextnodepoints" in xcdata or "onepathpairs" in xcdata or "newonepathpairs" in xcdata:
+			if xcdrawing == null:
+				print("new XC drawing from data missing drawingtype!!! ", xcdata)
+			elif "nodepoints" in xcdata or "nextnodepoints" in xcdata or "onepathpairs" in xcdata or "newonepathpairs" in xcdata:
 				xcdrawingstoupdate[xcdrawing.get_name()] = xcdrawing
 				if len(xcdata.get("prevnodepoints", [])) != 0:
 					for xctube in xcdrawing.xctubesconn:
@@ -259,11 +266,20 @@ remote func actsketchchangeL(xcdatalist):
 func xcdrawingfromdata(xcdata):
 	var xcdrawing = $XCdrawings.get_node_or_null(xcdata["name"])
 	if xcdrawing == null:
-		if xcdata["drawingtype"] == DRAWING_TYPE.DT_FLOORTEXTURE or xcdata["drawingtype"] == DRAWING_TYPE.DT_PAPERTEXTURE:
+		if Tglobal.printxcdrawingfromdatamessages:
+			print("New xcdrawing ", xcdata.get("name"), " type: ", xcdata.get("drawingtype"))
+		if not ("drawingtype" in xcdata):
+			print("BAD new xcdrawingfromdata missing drawingtype ", xcdata)
+			assert(false)
+			return null
+		elif xcdata["drawingtype"] == DRAWING_TYPE.DT_FLOORTEXTURE or xcdata["drawingtype"] == DRAWING_TYPE.DT_PAPERTEXTURE:
 			xcdrawing = newXCuniquedrawingPaper(xcdata["xcresource"], xcdata["drawingtype"])
 			assert (xcdrawing["name"] == xcdrawing.get_name())
 		else:
 			xcdrawing = newXCuniquedrawing(xcdata["drawingtype"], xcdata["name"])
+
+	elif Tglobal.printxcdrawingfromdatamessages:
+		print("update xcdrawing ", xcdata.get("name"))
 	xcdrawing.mergexcrpcdata(xcdata)
 	if xcdrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE or xcdrawing.drawingtype == DRAWING_TYPE.DT_PAPERTEXTURE:
 		if "xcresource" in xcdata:
@@ -278,6 +294,7 @@ func xcdrawingfromdata(xcdata):
 	return xcdrawing
 	
 remote func sketchsystemfromdict(sketchdatadict):
+	print("Running sketchsystemfromdict %d drawings  %d tubes " % [len(sketchdatadict["xcdrawings"]), len(sketchdatadict["xctubes"])])
 	get_node("/root/Spatial").clearallprocessactivityforreload()
 	var xcdrawings_old = $XCdrawings
 	xcdrawings_old.set_name("XCdrawings_old")
@@ -296,6 +313,7 @@ remote func sketchsystemfromdict(sketchdatadict):
 	xctubes_new.set_name("XCtubes")
 	add_child(xctubes_new)
 	
+	Tglobal.printxcdrawingfromdatamessages = false
 	for xcdrawingData in sketchdatadict["xcdrawings"]:
 		var xcdrawing = null
 		if xcdrawingData["drawingtype"] == DRAWING_TYPE.DT_FLOORTEXTURE or xcdrawingData["drawingtype"] == DRAWING_TYPE.DT_PAPERTEXTURE:
@@ -321,6 +339,7 @@ remote func sketchsystemfromdict(sketchdatadict):
 	updatecentrelinevisibility()
 	changetubedxcsvizmode()
 	updateworkingshell()
+	Tglobal.printxcdrawingfromdatamessages = true
 	
 	if "playerMe" in sketchdatadict:
 		var playerMe = get_node("/root/Spatial").playerMe if get_node("/root/Spatial").playerMe != null else get_node("/root/Spatial/Players/PlayerMe")
@@ -347,6 +366,9 @@ func loadsketchsystem(fname):
 	sketchdatafile.close()
 	sketchsystemfromdict(sketchdatadict)
 	if Tglobal.connectiontoserveractive:
+		var playerMe = get_node("/root/Spatial").playerMe
+		print(" playerMe networkID ", playerMe.networkID, get_tree().get_network_unique_id())
+		assert(playerMe.networkID != 0)
 		rpc("sketchsystemfromdict", sketchdatadict)
 			
 func uniqueXCname():
