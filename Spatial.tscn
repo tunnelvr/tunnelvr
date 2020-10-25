@@ -1728,6 +1728,7 @@ shape = SubResource( 39 )
 
 [node name="FloorOriginMarker" type="MeshInstance" parent="BodyObjects/PlayerMotion"]
 transform = Transform( -1.62921e-07, 0, 1, 0, 1, 0, -1, 0, -1.62921e-07, 1.78533, 0, -4.96781 )
+visible = false
 mesh = SubResource( 40 )
 material/0 = SubResource( 41 )
 

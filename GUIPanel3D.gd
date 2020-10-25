@@ -355,12 +355,14 @@ func networkstartasserver(fromgui):
 	print("server networkID: ", selfSpatial.playerMe.networkID)
 		
 func _connection_failed():
-	print("_connection_failed ", websocketclient)
-	websocketclient = null
-	Tglobal.connectiontoserveractive = false
 	var selfSpatial = get_node("/root/Spatial")	
-	assert (len(selfSpatial.deferred_player_connected_list) == 0)
-	assert (len(selfSpatial.players_connected_list) == 0)
+	print("_connection_failed ", Tglobal.connectiontoserveractive, " ", websocketclient, " ", selfSpatial.players_connected_list)
+	websocketclient = null
+	if Tglobal.connectiontoserveractive:
+		_server_disconnected()
+	else:
+		assert (len(selfSpatial.deferred_player_connected_list) == 0)
+		assert (len(selfSpatial.players_connected_list) == 0)
 	$Viewport/GUI/Panel/Label.text = "connection_failed"
 	
 func _server_disconnected():

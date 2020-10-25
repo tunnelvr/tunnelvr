@@ -25,30 +25,30 @@ emission_energy = 1.0
 emission_operator = 0
 emission_on_uv2 = false
 
-[sub_resource type="CubeMesh" id=11]
+[sub_resource type="CubeMesh" id=5]
 size = Vector3( 0.1, 50, 0.1 )
 
-[sub_resource type="SpatialMaterial" id=12]
+[sub_resource type="SpatialMaterial" id=6]
 flags_unshaded = true
 flags_do_not_receive_shadows = true
 albedo_color = Color( 0.956863, 0.835294, 0.0509804, 1 )
 
-[sub_resource type="CubeMesh" id=5]
+[sub_resource type="CubeMesh" id=7]
 size = Vector3( 0.002, 0.002, 1 )
 
-[sub_resource type="SpatialMaterial" id=6]
+[sub_resource type="SpatialMaterial" id=8]
 albedo_color = Color( 0.976471, 0.552941, 0.0117647, 1 )
 
-[sub_resource type="QuadMesh" id=7]
+[sub_resource type="QuadMesh" id=9]
 size = Vector2( 0.6, 0.4 )
 
-[sub_resource type="SpatialMaterial" id=8]
+[sub_resource type="SpatialMaterial" id=10]
 params_cull_mode = 2
 albedo_color = Color( 0.0705882, 0.0862745, 0.0980392, 1 )
 metallic = 0.43
 roughness = 0.66
 
-[sub_resource type="Animation" id=9]
+[sub_resource type="Animation" id=11]
 length = 0.3
 tracks/0/type = "value"
 tracks/0/path = NodePath("HeadCam/headtorchcone/Inset:material/0:emission")
@@ -63,7 +63,7 @@ tracks/0/keys = {
 "values": [ Color( 0.0509804, 0.14902, 0.960784, 1 ), Color( 0.945098, 0.898039, 0.203922, 1 ) ]
 }
 
-[sub_resource type="Animation" id=10]
+[sub_resource type="Animation" id=12]
 length = 0.3
 tracks/0/type = "value"
 tracks/0/path = NodePath("HeadCam/headtorchcone:material:albedo_color")
@@ -118,8 +118,8 @@ material/0 = SubResource( 4 )
 [node name="locatorline" type="MeshInstance" parent="headlocator"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 30, 0 )
 cast_shadow = 0
-mesh = SubResource( 11 )
-material/0 = SubResource( 12 )
+mesh = SubResource( 5 )
+material/0 = SubResource( 6 )
 
 [node name="HandLeft" type="Spatial" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.149729, 0.251003, 0 )
@@ -139,8 +139,8 @@ script = ExtResource( 4 )
 
 [node name="MeshInstance" type="MeshInstance" parent="LaserOrient/Length"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.5 )
-mesh = SubResource( 5 )
-material/0 = SubResource( 6 )
+mesh = SubResource( 7 )
+material/0 = SubResource( 8 )
 
 [node name="FakeGuiSystem" type="Spatial" parent="."]
 
@@ -154,11 +154,11 @@ transform = Transform( 1, 1.54407e-07, 3.89076e-08, -1.54407e-07, 0.880593, 0.47
 visible = false
 
 [node name="Quad" type="MeshInstance" parent="FakeGuiSystem/GUIPanel3D"]
-mesh = SubResource( 7 )
-material/0 = SubResource( 8 )
+mesh = SubResource( 9 )
+material/0 = SubResource( 10 )
 
 [node name="AnimationPlayer_setavatarposition_flash" type="AnimationPlayer" parent="."]
-anims/setavatarposition_flash = SubResource( 9 )
+anims/setavatarposition_flash = SubResource( 11 )
 
 [node name="AnimationPlayer_actsketchchange" type="AnimationPlayer" parent="."]
-anims/actsketchchange_flash = SubResource( 10 )
+anims/actsketchchange_flash = SubResource( 12 )

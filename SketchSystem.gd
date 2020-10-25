@@ -13,7 +13,8 @@ func _ready():
 	var floordrawingimg = defaultfloordrawing
 	#floordrawingimg = "res://surveyscans/greenland/ushapedcave.png"
 	floordrawingimg = defaultfloordrawing
-	var floordrawing = newXCuniquedrawingPaper(floordrawingimg, DRAWING_TYPE.DT_FLOORTEXTURE)
+	var sname = uniqueXCdrawingPapername(floordrawingimg)
+	var floordrawing = newXCuniquedrawingPaperN(floordrawingimg, sname, DRAWING_TYPE.DT_FLOORTEXTURE)
 	floordrawing.rotation_degrees = Vector3(-90, 0, 0)
 	floordrawing.get_node("XCdrawingplane").scale = Vector3(50, 50, 1)
 
@@ -194,18 +195,30 @@ remote func actsketchchangeL(xcdatalist):
 		elif "xcvizstates" in xcdata:
 			if Tglobal.printxcdrawingfromdatamessages:
 				print("update vizstate ")
-			xcdata["prevxcvizstates"] = { }
 			for xcdrawingname in xcdata["xcvizstates"]:
 				var xcdrawing = $XCdrawings.get_node_or_null(xcdrawingname)
 				if xcdrawing != null:
-					var drawingplanevisible = xcdrawing.get_node("XCdrawingplane").visible
-					var drawingnodesvisible = xcdrawing.get_node("XCnodes").visible
-					xcdata["prevxcvizstates"][xcdrawingname] = (1 if drawingplanevisible else 0) + (2 if drawingnodesvisible else 0)
-					var drawingvisiblecode = xcdata["xcvizstates"][xcdrawingname]
-					if (drawingvisiblecode & 1) != 0:
-						xcdrawing.setxcdrawingvisible()
-					else:
-						xcdrawing.setxcdrawingvisiblehide((drawingvisiblecode & 2) == 0)
+					if xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
+						if not ("prevxcvizstates" in xcdata):
+							xcdata["prevxcvizstates"] = { }
+						var drawingplanevisible = xcdrawing.get_node("XCdrawingplane").visible
+						var drawingnodesvisible = xcdrawing.get_node("XCnodes").visible
+						xcdata["prevxcvizstates"][xcdrawingname] = (DRAWING_TYPE.VIZ_XCD_PLANE_VISIBLE if drawingplanevisible else 0) + (DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE if drawingnodesvisible else 0)
+						var drawingvisiblecode = xcdata["xcvizstates"][xcdrawingname]
+						if (drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_PLANE_VISIBLE) != 0:
+							xcdrawing.setxcdrawingvisible()
+						else:
+							xcdrawing.setxcdrawingvisiblehide((drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE) == 0)
+					elif xcdrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
+						var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
+						if xcdata["xcvizstates"][xcdrawingname] == DRAWING_TYPE.VIZ_XCD_FLOOR_NORMAL:
+							xcdrawing.get_node("XCdrawingplane/CollisionShape/MeshInstance").get_surface_material(0).set_shader_param("albedo", Color("#FEF4D5"))
+							if planviewsystem.activetargetfloor == xcdrawing:
+								 planviewsystem.activetargetfloor = null
+						elif xcdata["xcvizstates"][xcdrawingname] == DRAWING_TYPE.VIZ_XCD_FLOOR_ACTIVE:
+							xcdrawing.get_node("XCdrawingplane/CollisionShape/MeshInstance").get_surface_material(0).set_shader_param("albedo", Color("#DDFFCC"))
+							planviewsystem.activetargetfloor = xcdrawing
+						
 			if "updatetubeshells" in xcdata:
 				for xct in xcdata["updatetubeshells"]:
 					var xctube = findxctube(xct["xcname0"], xct["xcname1"])
@@ -273,8 +286,7 @@ func xcdrawingfromdata(xcdata):
 			assert(false)
 			return null
 		elif xcdata["drawingtype"] == DRAWING_TYPE.DT_FLOORTEXTURE or xcdata["drawingtype"] == DRAWING_TYPE.DT_PAPERTEXTURE:
-			xcdrawing = newXCuniquedrawingPaper(xcdata["xcresource"], xcdata["drawingtype"])
-			assert (xcdrawing["name"] == xcdrawing.get_name())
+			xcdrawing = newXCuniquedrawingPaperN(xcdata["xcresource"], xcdata["name"], xcdata["drawingtype"])
 		else:
 			xcdrawing = newXCuniquedrawing(xcdata["drawingtype"], xcdata["name"])
 
@@ -317,7 +329,7 @@ remote func sketchsystemfromdict(sketchdatadict):
 	for xcdrawingData in sketchdatadict["xcdrawings"]:
 		var xcdrawing = null
 		if xcdrawingData["drawingtype"] == DRAWING_TYPE.DT_FLOORTEXTURE or xcdrawingData["drawingtype"] == DRAWING_TYPE.DT_PAPERTEXTURE:
-			xcdrawing = newXCuniquedrawingPaper(xcdrawingData["xcresource"], xcdrawingData["drawingtype"])
+			xcdrawing = newXCuniquedrawingPaperN(xcdrawingData["xcresource"], xcdrawingData["name"], xcdrawingData["drawingtype"])
 			xcdrawing.mergexcrpcdata(xcdrawingData)
 			get_node("/root/Spatial/ImageSystem").fetchpaperdrawing(xcdrawing)
 		else:
@@ -367,7 +379,7 @@ func loadsketchsystem(fname):
 	sketchsystemfromdict(sketchdatadict)
 	if Tglobal.connectiontoserveractive:
 		var playerMe = get_node("/root/Spatial").playerMe
-		print(" playerMe networkID ", playerMe.networkID, get_tree().get_network_unique_id())
+		print(" playerMe networkID ", playerMe.networkID, " , ", get_tree().get_network_unique_id())
 		assert(playerMe.networkID != 0)
 		rpc("sketchsystemfromdict", sketchdatadict)
 			
@@ -398,14 +410,16 @@ func newXCuniquedrawing(drawingtype, sname):
 	return xcdrawing
 	
 
-func newXCuniquedrawingPaper(xcresource, drawingtype):
+func uniqueXCdrawingPapername(xcresource):
 	var fname = get_node("/root/Spatial/ImageSystem").getshortimagename(xcresource, false, 6)
 	var sname = fname+","
 	for i in range($XCdrawings.get_child_count()+1):
 		sname = fname+","+String(i)
 		if not $XCdrawings.has_node(sname):
 			break
-			
+	return sname
+
+func newXCuniquedrawingPaperN(xcresource, sname, drawingtype):
 	var xcdrawing = XCdrawing.instance()
 	xcdrawing.drawingtype = drawingtype
 	xcdrawing.xcresource = xcresource

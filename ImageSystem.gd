@@ -193,7 +193,8 @@ func fetchimportpapers():
 									+ papertransorg.basis.z*(i%2)*(paperwidth*0.2) 
 									+ Vector3(0, int(i/5+1)*(paperwidth*0.6+0.05), 0))
 
-		var paperdrawing = get_node("/root/Spatial/SketchSystem").newXCuniquedrawingPaper(urldir+imglist[i], DRAWING_TYPE.DT_PAPERTEXTURE)
+		var sname = get_node("/root/Spatial/SketchSystem").uniqueXCdrawingPapername(urldir+imglist[i])
+		var paperdrawing = get_node("/root/Spatial/SketchSystem").newXCuniquedrawingPaperN(urldir+imglist[i], sname, DRAWING_TYPE.DT_PAPERTEXTURE)
 		paperdrawing.global_transform = papertrans
 		paperdrawing.get_node("XCdrawingplane").scale = Vector3(paperwidth/2, paperwidth/2, 1)
 		#get_node("/root/Spatial/SketchSystem").sharexcdrawingovernetwork(paperdrawing)

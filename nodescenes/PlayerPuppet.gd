@@ -61,6 +61,8 @@ remote func setavatarposition(positiondict):
 		puppetbody["playertransform"] = positiondict["playertransform"]
 	if positiondict.has("headcamtransform"):
 		puppetbody["headcamtransform"] = positiondict["headcamtransform"]
+	if positiondict.has("footstepcount"):
+		puppetbody["footstepcount"] = positiondict["footstepcount"]
 	if puppetbody.has("playertransform") or puppetbody.has("headcamtransform"):
 		while len(puppetpositionstack) > maxstacklength:
 			puppetpositionstack.pop_front()
@@ -130,7 +132,9 @@ remote func puppetenableguipanel(guitransform):
 func _process(delta):
 	process_puppetpositionstack(delta)
 	process_puppetpointerpositionstack(delta)
+	# process_handpositionstack done per hand because system is also used to make gestures from controllers
 
+var prevfootstepcount = 0
 func process_puppetpositionstack(delta):
 	var t = OS.get_ticks_msec()*0.001
 	while len(puppetpositionstack) >= 2 and puppetpositionstack[1]["Ltimestamp"] <= t:
@@ -154,7 +158,10 @@ func process_puppetpositionstack(delta):
 		if pp.has("headcamtransform") and pp1.has("headcamtransform"):
 			$HeadCam.transform = Transform(pp["headcamtransform"].basis.slerp(pp1["headcamtransform"].basis, lam), lerp(pp["headcamtransform"].origin, pp1["headcamtransform"].origin, lam))
 			$headlocator.transform.origin = $HeadCam.transform.origin
-
+		if pp1.has("footstepcount") and pp1["footstepcount"] != prevfootstepcount:
+			Tglobal.soundsystem.quicksound("TapSound", $HeadCam.global_transform.origin - Vector3(0, 1.5, 0))
+			prevfootstepcount = pp1["footstepcount"]
+				
 func process_puppetpointerpositionstack(delta):
 	var t = OS.get_ticks_msec()*0.001
 	while len(puppetpointerpositionstack) >= 2 and puppetpointerpositionstack[1]["Ltimestamp"] <= t:

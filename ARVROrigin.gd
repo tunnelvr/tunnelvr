@@ -72,7 +72,6 @@ remotesync func playvoicerecording(wavrecording):
 	$HandRight/AudioStreamPlayer3D.stream = stream
 	$HandRight/AudioStreamPlayer3D.play()
 
-
 func playerpositiondict():
 	var t0 = OS.get_ticks_msec()*0.001
 	return { "timestamp":t0, 

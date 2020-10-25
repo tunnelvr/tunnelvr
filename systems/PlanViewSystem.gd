@@ -15,15 +15,18 @@ var listregex = RegEx.new()
 var installbuttontex = null
 var fetchbuttontex = null
 
-func setactivetargetfloor(newactivetargetfloor, gripbuttonheld):
-	if activetargetfloor != null:
-		activetargetfloor.get_node("XCdrawingplane/CollisionShape/MeshInstance").get_surface_material(0).set_shader_param("albedo", Color("#FEF4D5"))
-	if gripbuttonheld and activetargetfloor == newactivetargetfloor:
-		activetargetfloor = null
-	else:
-		activetargetfloor = newactivetargetfloor
-	if activetargetfloor != null:
-		activetargetfloor.get_node("XCdrawingplane/CollisionShape/MeshInstance").get_surface_material(0).set_shader_param("albedo", Color("#DDFFCC"))
+func getactivetargetfloorViz(newactivetargetfloorname: String):
+	var xcviz = { "prevxcvizstates":{ }, "xcvizstates":{ } }
+	if activetargetfloor != null and newactivetargetfloorname != activetargetfloor.get_name():
+		xcviz["prevxcvizstates"][activetargetfloor.get_name()] = DRAWING_TYPE.VIZ_XCD_FLOOR_ACTIVE
+		xcviz["xcvizstates"][activetargetfloor.get_name()] = DRAWING_TYPE.VIZ_XCD_FLOOR_NORMAL
+	if newactivetargetfloorname != "":
+		if activetargetfloor != null and newactivetargetfloorname == activetargetfloor.get_name():
+			xcviz["prevxcvizstates"][newactivetargetfloorname] = DRAWING_TYPE.VIZ_XCD_FLOOR_ACTIVE
+		else:
+			xcviz["prevxcvizstates"][newactivetargetfloorname] = DRAWING_TYPE.VIZ_XCD_FLOOR_NORMAL
+		xcviz["xcvizstates"][newactivetargetfloorname] = DRAWING_TYPE.VIZ_XCD_FLOOR_ACTIVE
+	return xcviz
 
 func fetchbuttonpressed(item, column, idx):
 	var sketchsystem = get_node("/root/Spatial/SketchSystem")
@@ -41,17 +44,19 @@ func fetchbuttonpressed(item, column, idx):
 				var floory = xcdrawing.global_transform.origin.y
 				if pt0.y <= floory:
 					pt0.y = floory + 0.1
-		var paperdrawing = sketchsystem.newXCuniquedrawingPaper(url, DRAWING_TYPE.DT_FLOORTEXTURE)
-		#var pt0 = $PlanView.global_transform.origin
-		paperdrawing.global_transform = Transform(Vector3(1,0,0), Vector3(0,0,-1), Vector3(0,1,0), pt0)
-		paperdrawing.get_node("XCdrawingplane").scale = Vector3(10, 10, 1)
-		#get_node("/root/Spatial/SketchSystem").sharexcdrawingovernetwork(paperdrawing)
-		ImageSystem.fetchpaperdrawing(paperdrawing)
-		setactivetargetfloor(paperdrawing, false)
-		#activetargetfloorimgtrim = { "imgwidth":activetargetfloor.imgwidth, 
-		#							 "imgtrimleftdown":activetargetfloor.imgtrimleftdown,
-		#							 "imgtrimrightup":activetargetfloor.imgtrimrightup }
-		# send to actsketchchange once it's here
+					
+		var sname = sketchsystem.uniqueXCdrawingPapername(url)
+		activetargetfloorimgtrim = { "name":sname, 
+									 "drawingtype":DRAWING_TYPE.DT_FLOORTEXTURE,
+									 "xcresource":url,
+									 "imgwidth":10, 
+									 "imgtrimleftdown":Vector2(0, 0),
+									 "imgtrimrightup":Vector2(10, 10),
+									 "transformpos":Transform(Vector3(1,0,0), Vector3(0,0,-1), Vector3(0,1,0), pt0),
+									 "drawingplanescale":Vector3(10, 10, 1)
+								   }
+		var floorviz = getactivetargetfloorViz(sname)
+		sketchsystem.actsketchchange([activetargetfloorimgtrim, floorviz])
 		
 	else:
 		item.set_button_disabled(column, idx, true)
@@ -146,7 +151,9 @@ func toggleplanviewactive():
 	else:
 		$PlanView/ProjectionScreen/ImageFrame.mesh.surface_get_material(0).emission_enabled = false
 		set_process(false)
-		setactivetargetfloor(null, false)
+		if activetargetfloor != null:
+			var sketchsystem = get_node("/root/Spatial/SketchSystem")
+			sketchsystem.actsketchchange([getactivetargetfloorViz("")])
 
 func setplanviewvisible(planviewvisible, guidpaneltransform, guidpanelsize):
 	if planviewvisible:

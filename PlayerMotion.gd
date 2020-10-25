@@ -74,6 +74,11 @@ func _ready():
 
 	$PlayerEnlargedKinematicBody/PlayerBodyCapsule.shape.radius = playerheadbodyradius + flyingkinematicenlargement
 
+var footstepcount = 0
+const footsteplength = 0.4
+const footstepduration = 0.5
+var prevfootsteptimestamp = 0
+var prevfootstepposition = Vector3(0, 0, 0)
 var physicsprocessTimeStamp = 0
 func _physics_process(delta):
 	physicsprocessTimeStamp += delta
@@ -89,11 +94,19 @@ func _physics_process(delta):
 		var rot = Transform().rotated(Vector3(0.0, -1, 0.0), deg2rad(PlayerDirections.nextphysicsrotatestep))
 		playerMe.transform *= t2*rot*t1
 		PlayerDirections.nextphysicsrotatestep = 0.0
-
+		# could add footstep count here
+		
 	headcentrefromvroriginvector = HeadCentre.global_transform.origin - playerMe.global_transform.origin
 	headcentreabovephysicalfloorheight = max(headcentrefromvroriginvector.y, playerheadbodyradius)
 	playerbodyverticalheight = min(playerbodyabsoluteheight, playerheadbodyradius + headcentreabovephysicalfloorheight)
 	playerheadcentreabovebodycentreheight = playerbodyverticalheight/2 - playerheadbodyradius
+
+	if physicsprocessTimeStamp - prevfootsteptimestamp > footstepduration:
+		var footstepposition = HeadCentre.global_transform.origin - Vector3(0, playerbodyverticalheight - playerheadbodyradius, 0)
+		if prevfootstepposition.distance_to(footstepposition) > footsteplength:
+			footstepcount += 1
+			prevfootsteptimestamp = physicsprocessTimeStamp
+			prevfootstepposition = footstepposition
 
 	var Dgo = playerMe.global_transform.origin
 	var Dplayerbodycentre = HeadCentre.global_transform.origin - Vector3(0, playerheadcentreabovebodycentreheight, 0) + Ddebugvisualoffset
@@ -364,6 +377,7 @@ func process_shareplayerposition():
 	var doppelganger = playerMe.doppelganger
 	if is_instance_valid(playerMe.doppelganger) or Tglobal.morethanoneplayer:
 		var positiondict = playerMe.playerpositiondict()
+		positiondict["footstepcount"] = footstepcount
 		positiondict = filter_playerposition_bandwidth(positiondict)
 		if positiondict != null:
 			if Tglobal.morethanoneplayer:
