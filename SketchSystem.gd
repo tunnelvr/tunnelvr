@@ -209,6 +209,7 @@ remote func actsketchchangeL(xcdatalist):
 				spawnplayerme(xcdatalist[0]["playerMe"])
 			caveworldchunking_networkIDsource = xcdatalist[0]["networkIDsource"]
 			xcdatalistReceivedDuringChunking = [ ]
+			get_node("/root/Spatial/BodyObjects/PlayerMotion").gravityenabled = false
 		elif xcdatalist[0]["networkIDsource"] != caveworldchunking_networkIDsource:
 			return caveworldreceivechunkingfailed("mismatch in world chunk id source")
 		elif xcdatalist[0]["caveworldchunk"] != caveworldchunkI + 1:
@@ -363,6 +364,7 @@ remote func actsketchchangeL(xcdatalist):
 			xcdatalistReceivedDuringChunking = null
 			Tglobal.printxcdrawingfromdatamessages = true
 			updatecentrelinevisibility()
+			get_node("/root/Spatial/BodyObjects/PlayerMotion").gravityenabled = get_node("/root/Spatial/GuiSystem/GUIPanel3D/Viewport/GUI/Panel/ButtonGravity").pressed
 			for xcdatalistR in xcdatalistReceivedDuringChunkingL:
 				actsketchchangeL(xcdatalistR)
 
@@ -525,9 +527,11 @@ func sketchdicttochunks(sketchdatadict):
 				assert (xctubesDmaphalfstaged.get(i) == null)
 				xctubesDmaphalfstaged[i] = xctubesarrayD[i]
 				xctubesarrayD[i] = null
-				
+
+	var playerMe = get_node("/root/Spatial").playerMe				
 	for i in range(len(xcdatachunks)):
 		xcdatachunks[i][0]["caveworldchunkLast"] = xcdatachunks[-1][0]["caveworldchunk"]
+		xcdatachunks[i][0]["networkIDsource"] = playerMe.networkID
 	return xcdatachunks
 	
 func loadsketchsystemL(fname):

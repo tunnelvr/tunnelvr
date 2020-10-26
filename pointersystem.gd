@@ -646,35 +646,7 @@ func buttonreleased_vrgrip():
 
 		elif is_instance_valid(gripmenu.gripmenupointertargetwall):
 			print("executing ", pointertarget.get_name(), " on ", gripmenu.gripmenupointertargetwall.get_name())
-			if pointertarget.get_name() == "Up5":
-				#gripmenu.gripmenupointertargetwall.global_transform.origin.y += 1
-				#playerMe.global_transform.origin.y = max(playerMe.global_transform.origin.y, gripmenu.gripmenupointertargetwall.global_transform.origin.y)
-				var floortween = gripmenu.get_node("FloorMoveTween")
-				floortween.interpolate_property(gripmenu.gripmenupointertargetwall, "translation:y", gripmenu.gripmenupointertargetwall.translation.y, gripmenu.gripmenupointertargetwall.translation.y + 1, 0.5, Tween.TRANS_QUART, Tween.EASE_IN_OUT)
-				floortween.start()
-			elif pointertarget.get_name() == "Down5":
-				#gripmenu.gripmenupointertargetwall.global_transform.origin.y -= 1
-				#gripmenu.gripmenupointertargetwall.global_transform.origin.y = max(gripmenu.gripmenupointertargetwall.global_transform.origin.y - 1, get_node("/root/Spatial/underfloor").global_transform.origin.y + 0.5)
-				var floortween = gripmenu.get_node("FloorMoveTween")
-				floortween.interpolate_property(gripmenu.gripmenupointertargetwall, "translation:y", gripmenu.gripmenupointertargetwall.translation.y, max(gripmenu.gripmenupointertargetwall.global_transform.origin.y - 1, get_node("/root/Spatial/underfloor").global_transform.origin.y + 0.5), 0.5, Tween.TRANS_QUART, Tween.EASE_IN_OUT)
-				floortween.start()
-			elif pointertarget.get_name() == "toPaper":
-				gripmenu.gripmenupointertargetwall.drawingtype = DRAWING_TYPE.DT_PAPERTEXTURE
-				gripmenu.gripmenupointertargetwall.get_node("XCdrawingplane").collision_layer = CollisionLayer.CL_Pointer
-
-			elif pointertarget.get_name() == "toFloor" or pointertarget.get_name() == "toBig":
-				if pointertarget.get_name() == "toBig":
-					var fs = max(1.1, 50/gripmenu.gripmenupointertargetwall.get_node("XCdrawingplane").scale.x)
-					gripmenu.gripmenupointertargetwall.get_node("XCdrawingplane").scale.x *= fs
-					gripmenu.gripmenupointertargetwall.get_node("XCdrawingplane").scale.y *= fs
-				gripmenu.gripmenupointertargetwall.rotation_degrees.x = -90
-				gripmenu.gripmenupointertargetwall.rotation_degrees.z = 0
-				playerMe.global_transform.origin.y += 1
-				gripmenu.gripmenupointertargetwall.global_transform.origin.y = playerMe.global_transform.origin.y
-				gripmenu.gripmenupointertargetwall.drawingtype = DRAWING_TYPE.DT_FLOORTEXTURE
-				gripmenu.gripmenupointertargetwall.get_node("XCdrawingplane").collision_layer = CollisionLayer.CL_Environment | CollisionLayer.CL_PointerFloor
-		
-			elif pointertarget.get_name() == "SelectXC":
+			if pointertarget.get_name() == "SelectXC":
 				sketchsystem.actsketchchange([{"xcvizstates":{gripmenu.gripmenupointertargetwall.xcname0:3, gripmenu.gripmenupointertargetwall.xcname1:3}}])
 				var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(gripmenu.gripmenupointertargetwall.xcname0)
 				var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(gripmenu.gripmenupointertargetwall.xcname1)

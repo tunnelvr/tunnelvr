@@ -76,7 +76,7 @@ func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointert
 
 	var gmlist = [ ]
 	if gripmenupointertargettype == "XCdrawing" and gripmenupointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
-		gmlist = ["NewXC", "Up5", "Down5", "toPaper"]
+		gmlist = ["NewXC"]
 
 	elif gripmenupointertargettype == "XCdrawing" and gripmenupointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		var dragable = (gripmenuactivetargetnode != null) and (activetargetwall == pointertargetwall)
@@ -87,7 +87,7 @@ func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointert
 		gmlist = ["DragXC" if dragable else "", "DelXC" if delxcable else ""]
 
 	elif gripmenupointertargettype == "Papersheet":
-		gmlist = ["toFloor", "toBig"]
+		gmlist = [ ]
 		
 	elif gripmenupointertargettype == "XCtubesector":
 		var tubesectormaterialname = gripmenupointertargetwall.xcsectormaterials[gripmenuactivetargettubesectorindex]

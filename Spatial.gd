@@ -247,10 +247,7 @@ func _player_connected(id):
 		setnetworkidnamecolour(playerOther, id)
 		playerOther.visible = false
 		$Players.add_child(playerOther)
-	if playerMe.networkID == 1:
-		var sketchdatadict = $SketchSystem.sketchsystemtodict()
-		assert(playerMe.networkID != 0)			
-		$SketchSystem.rpc_id(id, "sketchsystemfromdict", sketchdatadict)
+		
 	playerMe.bouncetestnetworkID = nextplayernetworkidinringskippingdoppelganger(0)
 	Tglobal.morethanoneplayer = $Players.get_child_count() >= 2
 	print(" playerMe networkID ", playerMe.networkID, " ", get_tree().get_network_unique_id())
@@ -258,6 +255,16 @@ func _player_connected(id):
 	playerMe.rpc_id(id, "initplayerpuppet", (ovr_hand_tracking != null))
 	$GuiSystem/GUIPanel3D/Viewport/GUI/Panel/Label.text = "player "+String(id)+" connected"
 	players_connected_list.push_back(id)
+
+	if playerMe.networkID == 1:
+		var sketchdatadict = $SketchSystem.sketchsystemtodict()
+		assert(playerMe.networkID != 0)
+		#$SketchSystem.rpc_id(id, "sketchsystemfromdict", sketchdatadict)
+		var xcdatachunks = $SketchSystem.sketchdicttochunks(sketchdatadict)
+		for xcdatachunk in xcdatachunks:
+			$SketchSystem.rpc_id(id, "actsketchchangeL", xcdatachunk)
+			yield(get_tree().create_timer(0.2), "timeout")
+
 	
 func _player_disconnected(id):
 	print("_player_disconnected ", id)

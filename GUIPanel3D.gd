@@ -375,7 +375,8 @@ func _server_disconnected():
 	for id in selfSpatial.players_connected_list:
 		print("server_disconnected, calling _player_disconnected on ", id)
 		selfSpatial.call_deferred("_player_disconnected", id)
-
+	if $Viewport/GUI/Panel/Networkstate.selected != 0:
+		$Viewport/GUI/Panel/Networkstate.selected = 0
 	
 func _process(delta):
 	if websocketserver != null and websocketserver.is_listening():
