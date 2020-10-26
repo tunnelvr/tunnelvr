@@ -62,8 +62,10 @@ func updatecentrelinevisibility():
 		var playerMe = get_node("/root/Spatial").playerMe
 		get_node("/root/Spatial/LabelGenerator").restartlabelmakingprocess(playerMe.get_node("HeadCam").global_transform.origin)
 	
-func changetubedxcsvizmode():
-	for xcdrawing in $XCdrawings.get_children():
+func changetubedxcsvizmode(xcdrawings=null):
+	if xcdrawings == null:
+		xcdrawings = $XCdrawings.get_children()
+	for xcdrawing in xcdrawings:
 		if xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 			assert (xcdrawing.get_node("XCdrawingplane").visible != xcdrawing.get_node("XCdrawingplane/CollisionShape").disabled)
 			var xcsvisible = xcdrawing.get_node("XCdrawingplane").visible or Tglobal.tubedxcsvisible or len(xcdrawing.xctubesconn) == 0
@@ -145,9 +147,78 @@ func actsketchchange(xcdatalist):
 		if sendrpc and Tglobal.connectiontoserveractive:
 			assert(playerMe.networkID != 0)
 			rpc("actsketchchangeL", xcdatalist)
-			
+
+func clearentirecaveworld():
+	get_node("/root/Spatial").clearallprocessactivityforreload()
+	var xcdrawings_old = $XCdrawings
+	xcdrawings_old.set_name("XCdrawings_old")
+	for x in xcdrawings_old.get_children():
+		x.queue_free()   # because it's not transitive (should file a ticket)
+	xcdrawings_old.queue_free()
+	var xcdrawings_new = Spatial.new()
+	xcdrawings_new.set_name("XCdrawings")
+	add_child(xcdrawings_new)
+	var xctubes_old = $XCtubes
+	xctubes_old.set_name("XCtubes_old")
+	for x in xctubes_old.get_children():
+		x.queue_free()
+	xctubes_old.queue_free()
+	var xctubes_new = Spatial.new()
+	xctubes_new.set_name("XCtubes")
+	add_child(xctubes_new)
+
+func spawnplayerme(playerMeD):
+	var playerMe = get_node("/root/Spatial").playerMe
+	if "headtrans" in playerMeD:
+		var playerlam = (playerMe.networkID%10000)/10000.0
+		var headtrans = playerMeD["headtrans"]
+		var vecahead = Vector3(headtrans.basis.z.x, 0, headtrans.basis.z.z).normalized()
+		if playerMe.networkID > 1:
+			headtrans = Transform(headtrans.basis.rotated(Vector3(0,1,0), deg2rad(180)), headtrans.origin - 3.5*vecahead + Vector3(vecahead.z, 0, -vecahead.x)*(playerlam-0.5)*2)
+		#  Solve: headtrans = playerMe.global_transform * playerMe.get_node("HeadCam").transform 
+		var backrelorigintrans = headtrans * playerMe.get_node("HeadCam").transform.inverse()
+		var angvec = Vector2(playerMe.global_transform.basis.x.dot(backrelorigintrans.basis.x), playerMe.global_transform.basis.z.dot(backrelorigintrans.basis.x))
+		var relang = angvec.angle()
+		playerMe.global_transform = Transform(playerMe.global_transform.basis.rotated(Vector3(0,1,0), -relang), backrelorigintrans.origin + Vector3(0,2,0))
+	else:
+		playerMe.global_transform = playerMeD["transformpos"]
+
+var caveworldchunkI = -1
+var caveworldchunking_networkIDsource = -1
+var xcdatalistReceivedDuringChunking = null
+func caveworldreceivechunkingfailed(msg):
+	print("caveworldreceivechunkingfailed ", msg, " ", caveworldchunking_networkIDsource)
+	caveworldchunkI = -1
+	caveworldchunking_networkIDsource = -1
+	xcdatalistReceivedDuringChunking = null
+	return null
+	
 remote func actsketchchangeL(xcdatalist):
-	if "undoact" in xcdatalist[0]:
+	var xcdatalistReceivedFinalChunk = false
+	if caveworldchunkI != -1 and not ("caveworldchunk" in xcdatalist[0]):
+		if xcdatalist[0]["networkIDsource"] == caveworldchunking_networkIDsource:
+			return caveworldreceivechunkingfailed("non world chunk xcdata received from chunking source")
+		xcdatalistReceivedDuringChunking.push_back(xcdatalist)	
+		return
+	
+	if "caveworldchunk" in xcdatalist[0]:
+		if xcdatalist[0]["caveworldchunk"] == 0:
+			Tglobal.printxcdrawingfromdatamessages = false
+			clearentirecaveworld()
+			if "playerMe" in xcdatalist[0]:
+				spawnplayerme(xcdatalist[0]["playerMe"])
+			caveworldchunking_networkIDsource = xcdatalist[0]["networkIDsource"]
+			xcdatalistReceivedDuringChunking = [ ]
+		elif xcdatalist[0]["networkIDsource"] != caveworldchunking_networkIDsource:
+			return caveworldreceivechunkingfailed("mismatch in world chunk id source")
+		elif xcdatalist[0]["caveworldchunk"] != caveworldchunkI + 1:
+			return caveworldreceivechunkingfailed("mismatch in world chunk sequence")
+		caveworldchunkI = xcdatalist[0]["caveworldchunk"]
+		if xcdatalist[0]["caveworldchunk"] == xcdatalist[0]["caveworldchunkLast"]:
+			xcdatalistReceivedFinalChunk = true
+		xcdatalist.pop_front()
+
+	elif "undoact" in xcdatalist[0]:
 		if len(actsketchchangeundostack) != 0:
 			# check this matches
 			actsketchchangeundostack.pop_back()
@@ -274,8 +345,29 @@ remote func actsketchchangeL(xcdatalist):
 		xcdrawing.updatexcpaths()
 	for xctube in xctubestoupdate.values():
 		xctube.updatetubelinkpaths(self)
-	#xctube0.updatetubeshell(sketchsystem.get_node("XCdrawings"), Tglobal.tubeshellsvisible)
-	
+
+	if caveworldchunkI != -1:
+		changetubedxcsvizmode(xcdrawingstoupdate.values())
+		# updateworkingshell()
+		for xctube in xctubestoupdate.values():
+			if not xctube.positioningtube:
+				xctube.updatetubeshell($XCdrawings, Tglobal.tubeshellsvisible)
+		for xcdrawing in xcdrawingstoupdate.values():
+			if xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
+				xcdrawing.updatexctubeshell($XCdrawings, Tglobal.tubeshellsvisible)
+		
+		if xcdatalistReceivedFinalChunk:
+			caveworldchunkI = -1
+			caveworldchunking_networkIDsource = -1
+			var xcdatalistReceivedDuringChunkingL = xcdatalistReceivedDuringChunking
+			xcdatalistReceivedDuringChunking = null
+			Tglobal.printxcdrawingfromdatamessages = true
+			updatecentrelinevisibility()
+			for xcdatalistR in xcdatalistReceivedDuringChunkingL:
+				actsketchchangeL(xcdatalistR)
+
+	return null
+		
 func xcdrawingfromdata(xcdata):
 	var xcdrawing = $XCdrawings.get_node_or_null(xcdata["name"])
 	if xcdrawing == null:
@@ -297,7 +389,7 @@ func xcdrawingfromdata(xcdata):
 		if "xcresource" in xcdata:
 			get_node("/root/Spatial/ImageSystem").fetchpaperdrawing(xcdrawing)
 	if xcdrawing.drawingtype == DRAWING_TYPE.DT_CENTRELINE:
-		assert (false)   # shouldn't happen, not to be updated!
+		#assert (false)   # shouldn't happen, not to be updated!
 		var LabelGenerator = get_node("/root/Spatial/LabelGenerator")
 		LabelGenerator.addnodestolabeltask(xcdrawing)
 		if Tglobal.centrelinevisible:
@@ -382,6 +474,71 @@ func loadsketchsystem(fname):
 		print(" playerMe networkID ", playerMe.networkID, " , ", get_tree().get_network_unique_id())
 		assert(playerMe.networkID != 0)
 		rpc("sketchsystemfromdict", sketchdatadict)
+			
+
+
+var playeroriginXCSorter = Vector3(0, 0, 0)
+func xcsorterfunc(a, b):
+	return playeroriginXCSorter.distance_to(a.transformpos.origin) < playeroriginXCSorter.distance_to(b.transformpos.origin)
+	
+func sketchdicttochunks(sketchdatadict):
+	var xcdatachunkL = [ { "caveworldchunk":0 } ]
+	playeroriginXCSorter = Vector3(0, 0, 0)
+	if "playerMe" in sketchdatadict:
+		xcdatachunkL[0]["playerMe"] = sketchdatadict["playerMe"]
+		playeroriginXCSorter = sketchdatadict["playerMe"]["headtrans"].origin
+	var xcdrawingsD = sketchdatadict["xcdrawings"]
+	xcdrawingsD.sort_custom(self, "xcsorterfunc")
+	var xctubesarrayD = sketchdatadict["xctubes"]
+	var xcdrawingnamemapItubes = { }
+	for i in range(len(xctubesarrayD)):
+		var xctubeD = xctubesarrayD[i]
+		if not (xctubeD.xcname0 in xcdrawingnamemapItubes):
+			xcdrawingnamemapItubes[xctubeD.xcname0] = [ ]
+		xcdrawingnamemapItubes[xctubeD.xcname0].push_back(i)
+		if not (xctubeD.xcname1 in xcdrawingnamemapItubes):
+			xcdrawingnamemapItubes[xctubeD.xcname1] = [ ]
+		xcdrawingnamemapItubes[xctubeD.xcname1].push_back(i)
+
+	var xcdatachunks = [ xcdatachunkL ]
+	var nnodesL = 0
+	var xctubesDmaphalfstaged = { }
+	for j in range(len(xcdrawingsD)):
+		var xcdrawingD = xcdrawingsD[j]
+		if len(xcdatachunkL) > 50 or nnodesL > 400 and j < len(xcdrawingsD) - 10:
+			xcdatachunkL = [ { "caveworldchunk":len(xcdatachunks) } ]
+			xcdatachunks.push_back(xcdatachunkL)
+			nnodesL = 0
+		if xcdrawingD["drawingtype"] == DRAWING_TYPE.DT_XCDRAWING and len(xcdrawingD.nodepoints) == 0:
+			continue
+		xcdatachunkL.push_back(xcdrawingD)
+		nnodesL += len(xcdrawingD.nodepoints)
+		for i in xcdrawingnamemapItubes.get(xcdrawingD["name"], []):
+			var xctubeD = xctubesDmaphalfstaged.get(i)
+			if xctubeD != null:
+				if "name" in xctubeD:
+					xctubeD["tubename"] = xctubeD["name"]
+					xctubeD.erase("name")
+				xcdatachunkL.push_back(xctubeD)
+				xctubesDmaphalfstaged.erase(i)
+			if xctubesarrayD[i] != null:
+				assert (xctubesDmaphalfstaged.get(i) == null)
+				xctubesDmaphalfstaged[i] = xctubesarrayD[i]
+				xctubesarrayD[i] = null
+				
+	for i in range(len(xcdatachunks)):
+		xcdatachunks[i][0]["caveworldchunkLast"] = xcdatachunks[-1][0]["caveworldchunk"]
+	return xcdatachunks
+	
+func loadsketchsystemL(fname):
+	var sketchdatafile = File.new()
+	sketchdatafile.open(fname, File.READ)
+	var sketchdatadict = sketchdatafile.get_var()
+	sketchdatafile.close()
+	var xcdatachunks = sketchdicttochunks(sketchdatadict)
+	for xcdatachunk in xcdatachunks:
+		actsketchchange(xcdatachunk)
+		yield(get_tree().create_timer(0.2), "timeout")
 			
 func uniqueXCname():
 	var largestxcdrawingnumber = 0

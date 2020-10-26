@@ -12,7 +12,7 @@ func _on_buttonload_pressed():
 	if not File.new().file_exists(savegamefilename):
 		$Viewport/GUI/Panel/Label.text = savegamefilename + " does not exist"
 		return
-	sketchsystem.loadsketchsystem(savegamefilename)
+	sketchsystem.loadsketchsystemL(savegamefilename)
 	$Viewport/GUI/Panel/Label.text = "Sketch Loaded"
 	Tglobal.soundsystem.quicksound("MenuClick", collision_point)
 	

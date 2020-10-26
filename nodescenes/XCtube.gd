@@ -16,8 +16,6 @@ var pickedpolyindex1 = -1
 var tubesectorptindexlists = [ ]
 
 const linewidth = 0.02
-	
-
 
 func exportxctrpcdata():   # read by xctubefromdata()
 	return { "name":get_name(),  # tubename
