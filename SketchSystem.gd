@@ -191,15 +191,14 @@ func caveworldreceivechunkingfailed(msg):
 	caveworldchunkI = -1
 	caveworldchunking_networkIDsource = -1
 	xcdatalistReceivedDuringChunking = null
+	var guipanel3d = get_node("/root/Spatial/GuiSystem/GUIPanel3D")
+	if guipanel3d.websocketclient != null:
+		guipanel3d.websocketclient. disconnect_from_host()
+	if guipanel3d.networkedmultiplayerenet != null:
+		guipanel3d.networkedmultiplayerenet.close_connection()
 	return null
 	
 remote func actsketchchangeL(xcdatalist):
-	var xcdatalistReceivedFinalChunk = false
-	if caveworldchunkI != -1 and not ("caveworldchunk" in xcdatalist[0]):
-		if xcdatalist[0]["networkIDsource"] == caveworldchunking_networkIDsource:
-			return caveworldreceivechunkingfailed("non world chunk xcdata received from chunking source")
-		xcdatalistReceivedDuringChunking.push_back(xcdatalist)	
-		return
 	
 	if "caveworldchunk" in xcdatalist[0]:
 		if xcdatalist[0]["caveworldchunk"] == 0:
@@ -215,9 +214,12 @@ remote func actsketchchangeL(xcdatalist):
 		elif xcdatalist[0]["caveworldchunk"] != caveworldchunkI + 1:
 			return caveworldreceivechunkingfailed("mismatch in world chunk sequence")
 		caveworldchunkI = xcdatalist[0]["caveworldchunk"]
-		if xcdatalist[0]["caveworldchunk"] == xcdatalist[0]["caveworldchunkLast"]:
-			xcdatalistReceivedFinalChunk = true
-		xcdatalist.pop_front()
+
+	elif caveworldchunkI != -1:
+		if xcdatalist[0]["networkIDsource"] == caveworldchunking_networkIDsource:
+			return caveworldreceivechunkingfailed("non world chunk xcdata received from chunking source")
+		xcdatalistReceivedDuringChunking.push_back(xcdatalist)	
+		return
 
 	elif "undoact" in xcdatalist[0]:
 		if len(actsketchchangeundostack) != 0:
@@ -247,7 +249,9 @@ remote func actsketchchangeL(xcdatalist):
 	var xctubestoupdate = { }
 	for i in range(len(xcdatalist)):
 		var xcdata = xcdatalist[i]
-		if "tubename" in xcdata:
+		if "caveworldchunk" in xcdata:
+			pass
+		elif "tubename" in xcdata:
 			if Tglobal.printxcdrawingfromdatamessages:
 				print("update tube ", xcdata["tubename"])
 			if xcdata["tubename"] == "**notset":
@@ -321,26 +325,26 @@ remote func actsketchchangeL(xcdatalist):
 			elif "transformpos" in xcdata and len(xcdrawing.xctubesconn) != 0:
 				for xctube in xcdrawing.xctubesconn:
 					xctubestoupdate[xctube.get_name()] = xctube
-
-
-			var tpos = null
-			var xcname = null
-			var sname = "ClickSound"
-			if len(xcdata.get("nextnodepoints", [])) != 0:
-				tpos = xcdata["nextnodepoints"].values()[0]
-			elif len(xcdata.get("prevnodepoints", [])) != 0:
-				tpos = xcdata["prevnodepoints"].values()[0]
-				sname = "BlipSound"
-			elif len(xcdata.get("newonepathpairs", [])) != 0:
-				xcname = xcdata["newonepathpairs"][0]
-			elif len(xcdata.get("prevonepathpairs", [])) != 0:
-				xcname = xcdata["prevonepathpairs"][0]
-			if xcname != null:
-				var xcn = xcdrawing.get_node("XCnodes").get_node_or_null(xcname)
-				if xcn != null:
-					tpos = xcn.translation
-			if tpos != null:
-				Tglobal.soundsystem.quicksound(sname, xcdrawing.global_transform*tpos)
+					
+			if caveworldchunkI == -1:
+				var tpos = null
+				var xcname = null
+				var sname = "ClickSound"
+				if len(xcdata.get("nextnodepoints", [])) != 0:
+					tpos = xcdata["nextnodepoints"].values()[0]
+				elif len(xcdata.get("prevnodepoints", [])) != 0:
+					tpos = xcdata["prevnodepoints"].values()[0]
+					sname = "BlipSound"
+				elif len(xcdata.get("newonepathpairs", [])) != 0:
+					xcname = xcdata["newonepathpairs"][0]
+				elif len(xcdata.get("prevonepathpairs", [])) != 0:
+					xcname = xcdata["prevonepathpairs"][0]
+				if xcname != null:
+					var xcn = xcdrawing.get_node("XCnodes").get_node_or_null(xcname)
+					if xcn != null:
+						tpos = xcn.translation
+				if tpos != null:
+					Tglobal.soundsystem.quicksound(sname, xcdrawing.global_transform*tpos)
 
 	for xcdrawing in xcdrawingstoupdate.values():
 		xcdrawing.updatexcpaths()
@@ -356,8 +360,8 @@ remote func actsketchchangeL(xcdatalist):
 		for xcdrawing in xcdrawingstoupdate.values():
 			if xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 				xcdrawing.updatexctubeshell($XCdrawings, Tglobal.tubeshellsvisible)
-		
-		if xcdatalistReceivedFinalChunk:
+				
+		if xcdatalist[0]["caveworldchunk"] == xcdatalist[0]["caveworldchunkLast"]:
 			caveworldchunkI = -1
 			caveworldchunking_networkIDsource = -1
 			var xcdatalistReceivedDuringChunkingL = xcdatalistReceivedDuringChunking
@@ -534,15 +538,16 @@ func sketchdicttochunks(sketchdatadict):
 		xcdatachunks[i][0]["networkIDsource"] = playerMe.networkID
 	return xcdatachunks
 	
-func loadsketchsystemL(fname):
+remote func loadsketchsystemL(fname):
 	var sketchdatafile = File.new()
-	sketchdatafile.open(fname, File.READ)
-	var sketchdatadict = sketchdatafile.get_var()
-	sketchdatafile.close()
-	var xcdatachunks = sketchdicttochunks(sketchdatadict)
-	for xcdatachunk in xcdatachunks:
-		actsketchchange(xcdatachunk)
-		yield(get_tree().create_timer(0.2), "timeout")
+	if sketchdatafile.file_exists(fname):
+		sketchdatafile.open(fname, File.READ)
+		var sketchdatadict = sketchdatafile.get_var()
+		sketchdatafile.close()
+		var xcdatachunks = sketchdicttochunks(sketchdatadict)
+		for xcdatachunk in xcdatachunks:
+			actsketchchange(xcdatachunk)
+			yield(get_tree().create_timer(0.2), "timeout")
 			
 func uniqueXCname():
 	var largestxcdrawingnumber = 0

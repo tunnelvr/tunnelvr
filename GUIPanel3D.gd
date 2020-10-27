@@ -8,18 +8,32 @@ onready var sketchsystem = get_node("/root/Spatial/SketchSystem")
 
 func _on_buttonload_pressed():
 	var savegamefileid = $Viewport/GUI/Panel/Savegamefilename.get_selected_id()
-	var savegamefilename = "user://"+$Viewport/GUI/Panel/Savegamefilename.get_item_text(savegamefileid)
-	if not File.new().file_exists(savegamefilename):
+	var savegamefilename = $Viewport/GUI/Panel/Savegamefilename.get_item_text(savegamefileid)
+	if savegamefilename.begins_with("server/"):
+		savegamefilename = savegamefilename.replace("server/", "")
+		if Tglobal.connectiontoserveractive and get_node("/root/Spatial").playerMe.networkID != 1:
+			sketchsystem.rpc_id(1, "loadsketchsystemL", "user://"+savegamefilename)
+			$Viewport/GUI/Panel/Label.text = "Loading server sketch"
+			return
+	var savegamefilenameU = "user://"+savegamefilename
+	if File.new().file_exists(savegamefilenameU):
+		sketchsystem.loadsketchsystemL(savegamefilenameU)
+		$Viewport/GUI/Panel/Label.text = "Sketch Loaded"
+	else:
 		$Viewport/GUI/Panel/Label.text = savegamefilename + " does not exist"
-		return
-	sketchsystem.loadsketchsystemL(savegamefilename)
-	$Viewport/GUI/Panel/Label.text = "Sketch Loaded"
 	Tglobal.soundsystem.quicksound("MenuClick", collision_point)
 	
 func _on_buttonsave_pressed():
 	var savegamefileid = $Viewport/GUI/Panel/Savegamefilename.get_selected_id()
-	var savegamefilename = "user://"+$Viewport/GUI/Panel/Savegamefilename.get_item_text(savegamefileid)
-	sketchsystem.savesketchsystem(savegamefilename)
+	var savegamefilename = $Viewport/GUI/Panel/Savegamefilename.get_item_text(savegamefileid)
+	if savegamefilename.begins_with("server/"):
+		savegamefilename = savegamefilename.replace("server/", "")
+		if Tglobal.connectiontoserveractive and get_node("/root/Spatial").playerMe.networkID != 1:
+			sketchsystem.rpc_id(1, "savesketchsystem", "user://"+savegamefilename)
+			$Viewport/GUI/Panel/Label.text = "Saving server sketch"
+			return
+	var savegamefilenameU = "user://"+savegamefilename
+	sketchsystem.savesketchsystem(savegamefilenameU)
 	$Viewport/GUI/Panel/Label.text = "Sketch Saved"
 	Tglobal.soundsystem.quicksound("MenuClick", collision_point)
 
@@ -284,7 +298,6 @@ func _on_networkstate_selected(index):
 		websocketclient = null
 		
 	if nssel.begins_with("Network Off"):
-		print("not properly implemented")
 		if websocketserver != null:
 			websocketserver.close()
 			# Note: To achieve a clean close, you will need to keep polling until either WebSocketClient.connection_closed or WebSocketServer.client_disconnected is received.
@@ -368,6 +381,7 @@ func _connection_failed():
 func _server_disconnected():
 	print("_server_disconnected ", websocketclient)
 	websocketclient = null
+	networkedmultiplayerenet = null
 	Tglobal.connectiontoserveractive = false
 	var selfSpatial = get_node("/root/Spatial")	
 	selfSpatial.deferred_player_connected_list.clear()

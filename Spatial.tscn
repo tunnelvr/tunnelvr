@@ -1179,20 +1179,20 @@ margin_bottom = 41.0
 text = "GUI Controls"
 
 [node name="ButtonLoad" type="Button" parent="GuiSystem/GUIPanel3D/ViewportFake/GUI/Panel"]
-margin_left = 14.0
-margin_top = 43.0
-margin_right = 71.0
-margin_bottom = 71.0
+margin_left = 22.4949
+margin_top = 43.9439
+margin_right = 79.4949
+margin_bottom = 71.9439
 text = "Load"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="ButtonSave" type="Button" parent="GuiSystem/GUIPanel3D/ViewportFake/GUI/Panel"]
-margin_left = 231.0
-margin_top = 43.0
-margin_right = 285.0
-margin_bottom = 71.0
+margin_left = 230.056
+margin_top = 42.0561
+margin_right = 284.056
+margin_bottom = 70.0561
 rect_pivot_offset = Vector2( 111.073, 28.0005 )
 text = "Save"
 __meta__ = {
@@ -1205,7 +1205,7 @@ margin_top = 43.0
 margin_right = 196.0
 margin_bottom = 70.0
 text = "savegame.res"
-items = [ "savegame.res", null, false, 0, null, "savegame2.res", null, false, 1, null, "savegame3.res", null, false, 2, null, "savegame4.res", null, false, 3, null, "savegame5.res", null, false, 4, null ]
+items = [ "savegame.res", null, false, 0, null, "savegame2.res", null, false, 1, null, "savegame3.res", null, false, 2, null, "server/savegame.res", null, false, 3, null, "server/savegame2.res", null, false, 4, null, "server/savegame3.res", null, false, 5, null ]
 selected = 0
 __meta__ = {
 "_edit_use_anchors_": false
@@ -1336,20 +1336,20 @@ __meta__ = {
 }
 
 [node name="Centreline" type="Label" parent="GuiSystem/GUIPanel3D/ViewportFake/GUI/Panel"]
-margin_left = 161.0
-margin_top = 118.0
-margin_right = 231.0
-margin_bottom = 132.0
+margin_left = 160.056
+margin_top = 110.449
+margin_right = 238.056
+margin_bottom = 132.449
 text = "Centreline:"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="XCdrawing" type="Label" parent="GuiSystem/GUIPanel3D/ViewportFake/GUI/Panel"]
-margin_left = 174.0
-margin_top = 147.0
-margin_right = 229.0
-margin_bottom = 161.0
+margin_left = 176.832
+margin_top = 144.168
+margin_right = 234.832
+margin_bottom = 166.168
 text = "XCdraw:"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -1380,10 +1380,10 @@ __meta__ = {
 }
 
 [node name="ColorRect" type="ColorRect" parent="GuiSystem/GUIPanel3D/ViewportFake/GUI/Panel"]
-margin_left = 306.873
-margin_top = 47.008
-margin_right = 370.873
-margin_bottom = 111.008
+margin_left = 126.965
+margin_top = 215.801
+margin_right = 151.965
+margin_bottom = 240.801
 color = Color( 1, 0, 0, 1 )
 
 [node name="TextureRect" type="TextureRect" parent="GuiSystem/GUIPanel3D/ViewportFake/GUI/Panel"]
@@ -1391,10 +1391,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-margin_left = 119.0
-margin_top = -90.0
-margin_right = 177.0
-margin_bottom = -32.0
+margin_left = -58.5962
+margin_top = 77.6783
+margin_right = -39.5962
+margin_bottom = 98.6783
 texture = ExtResource( 11 )
 expand = true
 __meta__ = {
@@ -1800,7 +1800,6 @@ script = ExtResource( 10 )
 
 [node name="PlanViewSystem" type="Spatial" parent="."]
 transform = Transform( 1, 0, 6.51682e-07, 0, 1, 0, -6.51682e-07, 0, 1, -2.08929e-06, 2, -6.412 )
-visible = false
 script = ExtResource( 24 )
 
 [node name="PlanView" type="StaticBody" parent="PlanViewSystem"]
@@ -1808,6 +1807,7 @@ transform = Transform( 1, 0, 0, 0, 0.819152, 0.573577, 0, -0.573577, 0.819152, -
 collision_layer = 8
 
 [node name="ViewportFake" type="Control" parent="PlanViewSystem/PlanView"]
+visible = false
 margin_right = 40.0
 margin_bottom = 40.0
 __meta__ = {
