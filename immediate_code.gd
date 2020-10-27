@@ -9,9 +9,8 @@ extends EditorScript
 
 
 func _ready():
-	print("KKK", h)
-	h.connect("request_completed", self, "_on_request_completed")
-
+	pass
+	
 func _on_request_completed(result, response_code, headers, body):
 	print(result, response_code, headers)
 	#var r = JSON.parse(body.get_string_from_utf8())
@@ -23,6 +22,9 @@ class A:
 
 func _run():
 	var a = "sdfsdf&amp; fg&ampdfg"
-	a = a.replace("&amp;", "&")
-	print(a)
+	if a.find(" ") != -1:
+		a = a.left(a.find(" "))
+	print([a])
+	print(a.is_valid_ip_address())
+
 	

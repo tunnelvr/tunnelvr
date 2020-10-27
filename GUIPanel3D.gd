@@ -37,11 +37,6 @@ func _on_buttonsave_pressed():
 	$Viewport/GUI/Panel/Label.text = "Sketch Saved"
 	Tglobal.soundsystem.quicksound("MenuClick", collision_point)
 
-func _on_buttonfetchimages_pressed():
-	get_node("/root/Spatial/ImageSystem").fetchimportpapers()
-	$Viewport/GUI/Panel/Label.text = "Papers fetching"
-	Tglobal.soundsystem.quicksound("MenuClick", collision_point)
-
 func _on_buttonplanview_toggled(button_pressed):
 	get_node("/root/Spatial/PlanViewSystem").setplanviewvisible(button_pressed, global_transform, $Quad.mesh.size)
 	$Viewport/GUI/Panel/Label.text = "Planview on" if button_pressed else "Planview off"
@@ -125,11 +120,9 @@ func _on_buttonload_choke():
 	$Viewport/GUI/Panel/Label.text = "Boulder choke!"
 	toggleguipanelvisibility(null)
 
-const clientips = [ "144.76.167.54",  # alex server
-					"192.168.43.186",  # quest on j's phone
-					"192.168.1.89", 
-					"172.27.9.245", 
-					"192.168.43.172", 
+const clientips = [ "144.76.167.54 Alex",  # alex server
+					"192.168.43.186 Quest2",  # quest on j's phone
+					"192.168.43.172 JGT", 
 					"192.168.43.118" ]
 func _ready():
 	var fgui = $ViewportFake.get_node_or_null("GUI")
@@ -143,7 +136,6 @@ func _ready():
 	$Viewport/GUI/Panel/ButtonLoad.connect("pressed", self, "_on_buttonload_pressed")
 	$Viewport/GUI/Panel/ButtonSave.connect("pressed", self, "_on_buttonsave_pressed")
 	$Viewport/GUI/Panel/ButtonPlanView.connect("toggled", self, "_on_buttonplanview_toggled")
-	$Viewport/GUI/Panel/ButtonFetchImages.connect("pressed", self, "_on_buttonfetchimages_pressed")
 	$Viewport/GUI/Panel/ButtonHeadtorch.connect("toggled", self, "_on_buttonheadtorch_toggled")
 	$Viewport/GUI/Panel/ButtonDoppelganger.connect("toggled", self, "_on_buttondoppelganger_toggled")
 	$Viewport/GUI/Panel/ButtonSwapControllers.connect("pressed", self, "_on_buttonswapcontrollers_pressed")
@@ -318,6 +310,10 @@ func _on_networkstate_selected(index):
 				
 	if nssel.begins_with("Client->"):
 		selfSpatial.hostipnumber = nssel.replace("Client->", "")
+		if selfSpatial.hostipnumber.find(" "):
+			selfSpatial.hostipnumber = selfSpatial.hostipnumber.left(selfSpatial.hostipnumber.find(" "))
+		print(selfSpatial.hostipnumber.is_valid_ip_address())
+		
 		get_tree().connect("network_peer_connected", selfSpatial, "_player_connected")
 		get_tree().connect("network_peer_disconnected", selfSpatial, "_player_disconnected")
 		Tglobal.connectiontoserveractive = false

@@ -257,10 +257,13 @@ func _player_connected(id):
 	players_connected_list.push_back(id)
 
 	if playerMe.networkID == 1:
+		print("Converting sketchsystemtodict")
 		var sketchdatadict = $SketchSystem.sketchsystemtodict()
 		assert(playerMe.networkID != 0)
 		#$SketchSystem.rpc_id(id, "sketchsystemfromdict", sketchdatadict)
+		print("Generating sketchdicttochunks")
 		var xcdatachunks = $SketchSystem.sketchdicttochunks(sketchdatadict)
+		print("Generated ", len(xcdatachunks), " chunks")
 		for xcdatachunk in xcdatachunks:
 			$SketchSystem.rpc_id(id, "actsketchchangeL", xcdatachunk)
 			yield(get_tree().create_timer(0.2), "timeout")

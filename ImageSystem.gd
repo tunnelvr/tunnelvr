@@ -180,26 +180,3 @@ func fetchpaperdrawing(paperdrawing):
 	paperdrawinglist.append(paperdrawing)
 	set_process(true)
 	
-func fetchimportpapers():
-	var player = get_node("/root/Spatial").playerMe
-	var playerhead = player.get_node("HeadCam")
-	var playerhgaze = Vector3(playerhead.global_transform.basis.z.x, 0, playerhead.global_transform.basis.z.z).normalized()
-	var paperorg = Vector3(player.global_transform.origin) + Vector3(0, 0.2, 0) - playerhgaze*2.3
-	var lookvec = paperorg - (playerhead.global_transform.origin + Vector3(0,0.9,0))
-	var papertransorg = Transform(Basis(), paperorg).looking_at(paperorg + lookvec, Vector3(0,1,0))
-	for i in range(len(imglist)):
-		var papertrans = Transform(papertransorg.basis, papertransorg.origin 
-									+ papertransorg.basis.x*((i%5)-2)*(paperwidth + 0.05) 
-									+ papertransorg.basis.z*(i%2)*(paperwidth*0.2) 
-									+ Vector3(0, int(i/5+1)*(paperwidth*0.6+0.05), 0))
-
-		var sname = get_node("/root/Spatial/SketchSystem").uniqueXCdrawingPapername(urldir+imglist[i])
-		var paperdrawing = get_node("/root/Spatial/SketchSystem").newXCuniquedrawingPaperN(urldir+imglist[i], sname, DRAWING_TYPE.DT_PAPERTEXTURE)
-		paperdrawing.global_transform = papertrans
-		paperdrawing.get_node("XCdrawingplane").scale = Vector3(paperwidth/2, paperwidth/2, 1)
-		#get_node("/root/Spatial/SketchSystem").sharexcdrawingovernetwork(paperdrawing)
-		fetchpaperdrawing(paperdrawing)
-
-#func _input(event):
-#	if event is InputEventKey and event.pressed and event.scancode == KEY_V:
-#		fetchimportpapers()

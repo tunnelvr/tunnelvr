@@ -86,14 +86,13 @@ func sketchsystemtodict():
 	sketchdatadict["playerMe"] = { "transformpos":playerMe.global_transform, "headtrans":playerMe.get_node("HeadCam").global_transform }
 	return sketchdatadict
 	
-func savesketchsystem(fname):
+remote func savesketchsystem(fname):
 	var sketchdatadict = sketchsystemtodict()
 	var sketchdatafile = File.new()
 	sketchdatafile.open(fname, File.WRITE)
 	sketchdatafile.store_var(sketchdatadict)
 	sketchdatafile.close()
 	print("sssssaved in C:/Users/ViveOne/AppData/Roaming/Godot/app_userdata/tunnelvr")
-
 
 func getactivefloordrawing():
 	var floordrawing = $XCdrawings.get_child(0)  # only one here for now
@@ -214,6 +213,7 @@ remote func actsketchchangeL(xcdatalist):
 		elif xcdatalist[0]["caveworldchunk"] != caveworldchunkI + 1:
 			return caveworldreceivechunkingfailed("mismatch in world chunk sequence")
 		caveworldchunkI = xcdatalist[0]["caveworldchunk"]
+		print("Loading caveworldchunk ", caveworldchunkI, " of ",  xcdatalist[0]["caveworldchunkLast"])
 
 	elif caveworldchunkI != -1:
 		if xcdatalist[0]["networkIDsource"] == caveworldchunking_networkIDsource:
@@ -541,10 +541,13 @@ func sketchdicttochunks(sketchdatadict):
 remote func loadsketchsystemL(fname):
 	var sketchdatafile = File.new()
 	if sketchdatafile.file_exists(fname):
+		print("Loading sketchsystemtodict from ", fname)
 		sketchdatafile.open(fname, File.READ)
 		var sketchdatadict = sketchdatafile.get_var()
 		sketchdatafile.close()
+		print("Generating sketchdicttochunks")
 		var xcdatachunks = sketchdicttochunks(sketchdatadict)
+		print("Generated ", len(xcdatachunks), " chunks")
 		for xcdatachunk in xcdatachunks:
 			actsketchchange(xcdatachunk)
 			yield(get_tree().create_timer(0.2), "timeout")
