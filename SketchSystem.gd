@@ -609,11 +609,6 @@ func newXCuniquedrawingPaperN(xcresource, sname, drawingtype):
 	m.set_shader_param("texture_albedo", ImageTexture.new())
 	xcdrawing.get_node("XCdrawingplane/CollisionShape/MeshInstance").set_surface_material(0, m)
 
-	# to abolish
-	if xcdrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
-		xcdrawing.rotation_degrees = Vector3(-90, 0, 0)
-		xcdrawing.get_node("XCdrawingplane").scale = Vector3(50, 50, 1)
-
 	return xcdrawing
 
 func newXCtube(xcdrawing0, xcdrawing1):

@@ -638,7 +638,7 @@ func buttonreleased_vrgrip():
 					exchdictptrs(xcdata, "prevnodepoints", "nextnodepoints")
 					exchdictptrs(xcdata, "prevonepathpairs", "newonepathpairs")
 					exchdictptrs(xcdata, "prevtransformpos", "transformpos")
-					exchdictptrs(xcdata, "prevdrawingplanescale", "drawingplanescale")
+					exchdictptrs(xcdata, "previmgtrim", "imgtrim")
 					exchdictptrs(xcdata, "prevdrawinglinks", "newdrawinglinks")
 					exchdictptrs(xcdata, "prevxcvizstates", "xcvizstates")
 				xcdatalist[0]["undoact"] = 1

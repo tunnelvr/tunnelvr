@@ -114,12 +114,12 @@ func centrelineconnectionfloortransformpos(sketchsystem):
 						  }
 			for floornodename in xcdrawingFloor.nodepoints:
 				xcndata["nextnodepoints"][floornodename] = xcdrawingFloor.nodepoints[floornodename]*Vector3(sca, sca, 1)
-			var prevdrawingplanescale = xcdrawingFloor.get_node("XCdrawingplane").scale
+			var d = xcdrawingFloor
 			var txcdata = { "name":xcname1, 
 							"prevtransformpos":xcdrawingFloor.transform, 
 							"transformpos":transformpos, 
-							"prevdrawingplanescale":prevdrawingplanescale,
-							"drawingplanescale":prevdrawingplanescale*Vector3(sca, sca, 1)
+							"previmgtrim": { "imgwidth":d.imgwidth, "imgtrimleftdown":d.imgtrimleftdown, "imgtrimrightup":d.imgtrimrightup },
+							"imgtrim": { "imgwidth":d.imgwidth*sca, "imgtrimleftdown":d.imgtrimleftdown*sca, "imgtrimrightup":d.imgtrimrightup*sca }
 						  }
 			xcdatalist = [ xcndata, txcdata ]
 
@@ -394,9 +394,9 @@ func advanceuvFar(uvFixed, ptFixed, uvFar, ptFar, ptFarNew, bclockwise):
 	var vecFar = ptFar - ptFixed
 	var vecFarNew = ptFarNew - ptFixed
 	var vecFarFarNewprod = vecFar.length()*vecFarNew.length()
-	var vecFarFarNewRatio = vecFarNew.length()/vecFar.length()
 	if vecFarFarNewprod == 0:
 		return uvFar
+	var vecFarFarNewRatio = vecFarNew.length()/vecFar.length()
 	var vecFarNewCos = vecFar.dot(vecFarNew)/vecFarFarNewprod
 	var vecFarNewSin = vecFar.cross(vecFarNew).length()/vecFarFarNewprod
 	var uvvecnew = uvvec*vecFarNewCos + uvperpvec*vecFarNewSin

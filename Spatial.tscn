@@ -1,4 +1,4 @@
-[gd_scene load_steps=221 format=2]
+[gd_scene load_steps=222 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/default_env.tres" type="Environment" id=2]
@@ -52,6 +52,7 @@
 [ext_resource path="res://systems/testmqtt.gd" type="Script" id=50]
 [ext_resource path="res://guimaterials/installbuttonimg.png" type="Texture" id=51]
 [ext_resource path="res://sounds/menu_taping.wav" type="AudioStream" id=52]
+[ext_resource path="res://test.gd" type="Script" id=53]
 
 [sub_resource type="CylinderShape" id=1]
 radius = 0.1
@@ -1043,7 +1044,6 @@ albedo_color = Color( 0.168627, 0.972549, 0.027451, 1 )
 
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
-enablevr = false
 usewebsockets = false
 
 [node name="Players" type="Spatial" parent="."]
@@ -2722,3 +2722,6 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.409035, 2.78001, -15.0808 )
 use_in_baked_light = true
 mesh = SubResource( 166 )
 material/0 = SubResource( 168 )
+
+[node name="test" type="Spatial" parent="."]
+script = ExtResource( 53 )

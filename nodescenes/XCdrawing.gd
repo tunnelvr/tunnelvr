@@ -85,7 +85,7 @@ func exportxcrpcdata():
 		return { "name":get_name(), 
 				 "xcresource":xcresource,
 				 "drawingtype":drawingtype,
-				 "transformpos":global_transform,
+				 "transformpos":transform,
 				 "nodepoints": nodepoints, 
 				 "maxnodepointnumber":maxnodepointnumber,
 				 "imgtrim":{ "imgwidth":imgwidth, "imgtrimleftdown":imgtrimleftdown, "imgtrimrightup":imgtrimrightup, "imgheightwidthratio":imgheightwidthratio },
@@ -95,10 +95,8 @@ func exportxcrpcdata():
 	return { "name":get_name(), 
 			 "xcresource":xcresource,
 			 "drawingtype":drawingtype,
-			 "transformpos":global_transform,
 			 #"prevtransformpos":
-			 #"drawingplanescale":
-			 #"prevdrawingplanescale":
+			 "transformpos":transform,
 			 #"imgtrim":{imgwidth,imgtrimleftdown,imgtrimrightup,(heightwidthratio of xcresource)}
 			 #"previmgtrim":{imgwidth,imgtrimleftdown,imgtrimrightup}
 			 "nodepoints": nodepoints, 
@@ -111,13 +109,21 @@ func exportxcrpcdata():
 			 "visible":$XCdrawingplane.visible 
 		   }
 		
+func applytrimmedpaperuvscale():
+	get_node("XCdrawingplane").transform.origin = Vector3((imgtrimleftdown.x + imgtrimrightup.x)*0.5, (imgtrimleftdown.y + imgtrimrightup.y)*0.5, 0)
+	get_node("XCdrawingplane").scale = Vector3((imgtrimrightup.x - imgtrimleftdown.x)*0.5, (imgtrimrightup.y - imgtrimleftdown.y)*0.5, 1)
+	var m = get_node("XCdrawingplane/CollisionShape/MeshInstance").get_surface_material(0)
+	var imgheight = imgwidth*imgheightwidthratio
+	if imgheightwidthratio == 0:
+		imgheight = imgwidth
+	m.set_shader_param("uv1_scale", Vector3((imgtrimrightup.x - imgtrimleftdown.x)/imgwidth, (imgtrimrightup.y - imgtrimleftdown.y)/imgheight, 1))
+	m.set_shader_param("uv1_offset", Vector3((imgtrimleftdown.x - (-imgwidth*0.5))/imgwidth, -(imgtrimrightup.y - (imgheight*0.5))/imgheight, 0))
 
 func mergexcrpcdata(xcdata):
 	assert ((get_name() == xcdata["name"]) and (not ("drawingtype" in xcdata) or drawingtype == xcdata["drawingtype"]))
 	if "transformpos" in xcdata:
-		transform = xcdata["transformpos"]
-	if "drawingplanescale" in xcdata:
-		get_node("XCdrawingplane").scale = xcdata["drawingplanescale"]
+		set_transform(xcdata["transformpos"])
+
 	if "imgtrim" in xcdata:
 		var imgtrim = xcdata["imgtrim"]
 		imgwidth = imgtrim["imgwidth"]
@@ -125,13 +131,7 @@ func mergexcrpcdata(xcdata):
 		imgtrimrightup = imgtrim["imgtrimrightup"]
 		if imgheightwidthratio == 0 and "imgheightwidthratio" in imgtrim:
 			imgheightwidthratio = imgtrim["imgheightwidthratio"]
-		
-		get_node("XCdrawingplane").transform.origin = Vector3((imgtrimleftdown.x + imgtrimrightup.x)*0.5, (imgtrimleftdown.y + imgtrimrightup.y)*0.5, 0)
-		get_node("XCdrawingplane").scale = Vector3((imgtrimrightup.x - imgtrimleftdown.x)*0.5, (imgtrimrightup.y - imgtrimleftdown.y)*0.5, 1)
-		var m = get_node("XCdrawingplane/CollisionShape/MeshInstance").get_surface_material(0)
-		var imgheight = imgwidth*imgheightwidthratio
-		m.set_shader_param("uv1_scale", Vector3((imgtrimrightup.x - imgtrimleftdown.x)/imgwidth, (imgtrimrightup.y - imgtrimleftdown.y)/imgheight, 1))
-		m.set_shader_param("uv1_offset", Vector3((imgtrimleftdown.x - (-imgwidth*0.5))/imgwidth, -(imgtrimrightup.y - (imgheight*0.5))/imgheight, 0))
+		applytrimmedpaperuvscale()
 		
 	if "nodepoints" in xcdata:
 		nodepoints = xcdata["nodepoints"]

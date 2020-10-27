@@ -75,6 +75,11 @@ func _http_request_completed(result, response_code, headers, body, httprequestda
 			fetchednonimagedataobject["bad_response_code"] = response_code
 	httprequest = null
 	
+func correctdefaultimgtrimtofull(d):
+	var imgheight = d.imgwidth*d.imgheightwidthratio
+	d.imgtrimleftdown = Vector2(-d.imgwidth*0.5, -imgheight*0.5)
+	d.imgtrimrightup = Vector2(d.imgwidth*0.5, imgheight*0.5)
+
 func _process(delta):
 	if imagefetchingcountdowntimer > 0.0:
 		imagefetchingcountdowntimer -= delta
@@ -136,18 +141,13 @@ func _process(delta):
 		#fetcheddrawingmaterial.albedo_texture = papertexture
 		fetcheddrawingmaterial.set_shader_param("texture_albedo", papertexture)
 		if papertexture.get_width() != 0:
+			var previmgheightwidthratio = fetcheddrawing.imgheightwidthratio
 			fetcheddrawing.imgheightwidthratio = papertexture.get_height()*1.0/papertexture.get_width()
 			print("fff  ", fetcheddrawing.imgheightwidthratio)
-			if fetcheddrawing.imgwidth == 0:
-				var drawingplane = fetcheddrawing.get_node("XCdrawingplane")
-				fetcheddrawing.imgwidth = drawingplane.scale.x*2
-				drawingplane.scale.y = (fetcheddrawing.imgwidth*0.5)*fetcheddrawing.imgheightwidthratio
-				fetcheddrawing.imgtrimleftdown = Vector2(-drawingplane.scale.x, -drawingplane.scale.y)
-				fetcheddrawing.imgtrimrightup = Vector2(drawingplane.scale.x, drawingplane.scale.y)
-				#fetcheddrawingmaterial.uv1_scale = Vector3(1,1,1)
-				#fetcheddrawingmaterial.uv1_offset = Vector3(0,0,0)
-				fetcheddrawingmaterial.set_shader_param("uv1_scale", Vector3(1,1,1))
-				fetcheddrawingmaterial.set_shader_param("uv1_offset", Vector3(0,0,0))
+			if previmgheightwidthratio == 0:
+				correctdefaultimgtrimtofull(fetcheddrawing)				
+			if fetcheddrawing.imgwidth != 0:
+				fetcheddrawing.applytrimmedpaperuvscale()
 				
 		else:
 			print(fetcheddrawingfile, "   has zero width, deleting")
