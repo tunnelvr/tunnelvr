@@ -2,9 +2,11 @@ from parse3ddmp import DMP3d
 import os
 
 dump3dexe = '"C:\\Program Files (x86)\\Survex\\dump3d.exe"'
-dump3dexe = 'dump3d'
-fname = "Ireby/Ireby2/Ireby2.3d"
-outputfile = "Ireby/Ireby2/Ireby2.json"
+#dump3dexe = 'dump3d'
+#fname = "Ireby/Ireby2/Ireby2.3d"
+#outputfile = "Ireby/Ireby2/Ireby2.json"
+fname = "LambTrap1.3d"
+outputfile = "LambTrap1.json"
 
 dstream = os.popen("%s -d %s" % (dump3dexe, fname))
 lines = dstream.readlines()

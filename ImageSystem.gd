@@ -1,32 +1,14 @@
 extends Node
 
-const defaultfloordrawing = "http://cave-registry.org.uk/svn/NorthernEngland/ThreeCountiesArea/rawscans/Ireby/DukeStResurvey-drawnup-p3.jpg"
-const defaultfloordrawingres = "res://surveyscans/DukeStResurvey-drawnup-p3.jpg"
+#const defaultfloordrawing = "http://cave-registry.org.uk/svn/NorthernEngland/ThreeCountiesArea/rawscans/Ireby/DukeStResurvey-drawnup-p3.jpg"
+#const defaultfloordrawingres = "res://surveyscans/DukeStResurvey-drawnup-p3.jpg"
+const defaultfloordrawing = "http://cave-registry.org.uk/svn/NorthernEngland/rawscans/LambTrap/LambTrap-drawnup-1.png"
+const defaultfloordrawingres = "res://surveyscans/LambTrap-drawnup-1.png"
 
 var imgdir = "user://northernimages/"
 var nonimagedir = "user://nonimagewebpages/"
 var urldir = "http://cave-registry.org.uk/svn/NorthernEngland/ThreeCountiesArea/rawscans/Ireby/"
 
-
-var imglistD = [ "BoltonExtensionsResurvey-DrawnUpSketch-1.jpg", 
-				"DukeStResurvey-drawnup-p1.jpg", 
-				"DukeStResurvey-drawnup-p2.jpg", 
-				"DukeStResurvey-drawnup-p3.jpg", 
-				"DukeStParallelSidePassage-DrawnUp1.jpg",
-				"DukeStParallelSidePassage-DrawnUp2.jpg"
-			   ]
-				
-var imglist = [ "DukeSt2sanddig.jpg",
-				"Canal2-drawnup.jpg",
-				"dukest2tocanal-drawnup.jpg",
-				"WhirlpoolCrawl-drawnup-p1.jpg",
-				"escalatorclimb-drawnup-1.jpg",
-				"DukeSt2inletsump.jpg",
-				"IrebyII.jpg",
-				"DukeSt2-TidyUp-P3.jpg",
-				"jupiter2irebyone_5.jpg",
-				"jupiter2irebyone_4.jpg"
-			  ]
 var paperwidth = 0.4
 
 func getshortimagename(xcresource, withextension, md5nameleng):
@@ -113,9 +95,9 @@ func _process(delta):
 		elif paperdrawing.xcresource.begins_with("http"):
 			fetcheddrawingfile = imgdir+getshortimagename(paperdrawing.xcresource, true, 6)
 			print([paperdrawing.xcresource, defaultfloordrawing])
-			print([1, fetcheddrawingfile])
-			#if paperdrawing.xcresource == defaultfloordrawing:
-			#	fetcheddrawingfile = defaultfloordrawingres
+			print([1, fetcheddrawingfile, defaultfloordrawingres])
+			if paperdrawing.xcresource == defaultfloordrawing:
+				fetcheddrawingfile = defaultfloordrawingres
 			if not File.new().file_exists(fetcheddrawingfile):
 				if not Directory.new().dir_exists(imgdir):
 					var err = Directory.new().make_dir(imgdir)
@@ -133,8 +115,11 @@ func _process(delta):
 
 	elif fetcheddrawing != null:
 		var img = Image.new()
-		print("FFF", [fetcheddrawing, fetcheddrawingfile])
-		img.load(fetcheddrawingfile)
+		if fetcheddrawingfile.begins_with("res://"):
+			img = ResourceLoader.load(fetcheddrawingfile)  # imported as an Image, could be something else
+		else:
+			img.load(fetcheddrawingfile)
+		print("FFF", [img, fetcheddrawing, fetcheddrawingfile])
 		var papertexture = ImageTexture.new()
 		papertexture.create_from_image(img)
 		var fetcheddrawingmaterial = fetcheddrawing.get_node("XCdrawingplane/CollisionShape/MeshInstance").get_surface_material(0)

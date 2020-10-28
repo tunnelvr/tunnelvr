@@ -116,33 +116,8 @@ func readydeferred():
 	tree.connect("button_pressed", self, "fetchbuttonpressed")
 	var root = tree.create_item()
 	root.set_text(0, "Root of treee")
-	addsubitem(root, "Ireby", "http://cave-registry.org.uk/svn/NorthernEngland/ThreeCountiesArea/rawscans/Ireby/")
-	
-	var tmpdir = "user://testdir"
-	var tmpfile = "user://testdir/test.txt"
-	var tmpdirexists = Directory.new().dir_exists(tmpdir)
-	print("  tmpdirexists ", tmpdirexists)
-	if not tmpdirexists:
-		var err = Directory.new().make_dir(tmpdir)
-		print(" dir new err: ", err)
-	var tmpdirexists1 = Directory.new().dir_exists(tmpdir)
-	print("  tmpdirexists1 ", tmpdirexists1)
-	var tmpfileexists = File.new().file_exists(tmpfile)
-	print("  tmpfileexists ", tmpfileexists)
-	var fout = File.new()
-	fout.open(tmpfile, File.WRITE)
-	fout.store_line("Hi there")
-	fout.close()
-	var tmpfileexists1 = File.new().file_exists(tmpfile)
-	print("  tmpfileexists1 ", tmpfileexists1)
-
-	var chimgs = ["res://guimaterials/fetchbuttonimg.jpg", "res://guimaterials/fetchbuttonimg.png", 
-				  "screenshot.png", "shinyhandmesh.material", "res://guimaterials/grip_commands.png",
-				  "res://surveyscans/smallirebysave.res", "res://surveyscans/Ireby/Ireby2/Ireby2.json"]
-	for chimg in chimgs:
-		print(" chimg ", chimg, " ", File.new().file_exists(chimg))
-	set_process(false)
-	
+	#addsubitem(root, "Ireby", "http://cave-registry.org.uk/svn/NorthernEngland/ThreeCountiesArea/rawscans/Ireby/")
+	addsubitem(root, "Ireby", "http://cave-registry.org.uk/svn/NorthernEngland/ThreeCountiesArea/rawscans/")
 	
 func toggleplanviewactive():
 	planviewactive = not planviewactive

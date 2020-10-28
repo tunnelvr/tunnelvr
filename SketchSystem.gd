@@ -7,7 +7,8 @@ const linewidth = 0.05
 
 var actsketchchangeundostack = [ ]
 
-const defaultfloordrawing = "http://cave-registry.org.uk/svn/NorthernEngland/ThreeCountiesArea/rawscans/Ireby/DukeStResurvey-drawnup-p3.jpg"
+#const defaultfloordrawing = "http://cave-registry.org.uk/svn/NorthernEngland/ThreeCountiesArea/rawscans/Ireby/DukeStResurvey-drawnup-p3.jpg"
+const defaultfloordrawing = "http://cave-registry.org.uk/svn/NorthernEngland/rawscans/LambTrap/LambTrap-drawnup-1.png"
 
 func _ready():
 	var floordrawingimg = defaultfloordrawing
@@ -15,9 +16,11 @@ func _ready():
 	floordrawingimg = defaultfloordrawing
 	var sname = uniqueXCdrawingPapername(floordrawingimg)
 	var floordrawing = newXCuniquedrawingPaperN(floordrawingimg, sname, DRAWING_TYPE.DT_FLOORTEXTURE)
-	floordrawing.rotation_degrees = Vector3(-90, 0, 0)
-	floordrawing.get_node("XCdrawingplane").scale = Vector3(50, 50, 1)
-
+	floordrawing.transform = Transform(Vector3(1,0,0), Vector3(0,0,-1), Vector3(0,1,0), Vector3(0,0,0))
+	floordrawing.imgwidth = 50
+	floordrawing.imgtrimleftdown = Vector2(-25, -25)
+	floordrawing.imgtrimrightup = Vector2(25, 25)
+	#floordrawing.get_node("XCdrawingplane").scale = Vector3(50, 50, 1)
 	get_node("/root/Spatial/ImageSystem").fetchpaperdrawing(floordrawing)
 		
 

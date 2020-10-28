@@ -207,6 +207,9 @@ func mergexcrpcdata(xcdata):
 		else:
 			setxcdrawingvisiblehide(true)
 
+
+# "C:\Program Files (x86)\Survex\aven.exe" Ireby\Ireby2\Ireby2.svx
+# python surveyscans\convertdmptojson.py (after editing it for the input and output files)
 func importcentrelinedata(centrelinedata, sketchsystem):
 	$XCdrawingplane.visible = false
 	$XCdrawingplane/CollisionShape.disabled = true
@@ -237,14 +240,18 @@ func importcentrelinedata(centrelinedata, sketchsystem):
 		var stationpoint = Vector3(stationpointscoords[i*3] - (bb[0]+bb[3])/2, 
 								   stationpointscoords[i*3+2] - bb[2] + 1, 
 								   -(stationpointscoords[i*3+1] - (bb[1]+bb[4])/2))
-		nodepoints[stationpointname] = stationpoint
 		stationpoints.append(stationpoint)
+		if stationpointname == "":
+			continue
+		nodepoints[stationpointname] = stationpoint
 		var xcn = XCnode_centreline.instance()
 		$XCnodes.add_child(xcn)
 		xcn.set_name(stationpointname)
 		xcn.translation = nodepoints[stationpointname]
 		maxnodepointnumber = max(maxnodepointnumber, int(stationpointname))
 	for i in range(len(legsstyles)):
+		if stationpointsnames[legsconnections[i*2]] == "" or stationpointsnames[legsconnections[i*2+1]] == "":
+			continue
 		onepathpairs.append(stationpointsnames[legsconnections[i*2]])
 		onepathpairs.append(stationpointsnames[legsconnections[i*2+1]])
 	updatexcpaths()

@@ -4,75 +4,34 @@ extends Spatial
 
 # A grey mesh sphere over the head with a hole in it that we turn on when walking or flying
 
-# Planview camerascalechange and cameraresetcentre to be buttons
-# Ability to change planview size (in both dimensions)
+# rationalize the ResourceLoader.load(fetcheddrawingfile)  # imported as an Image, could be something else
+
+# * getactivefloordrawing is duff.  we should record floor we are working with relative to an object, by connection
+
 # scalebar on planview
-# Treeview of paper images extracted from the notes
 # Treeview to show which are downloaded
 # record zooming trimming position on each and a programmable scalebar
-# copy active view into the active xcdrawing and turn it into a floor
-# overlay a drawing onto the camera plan view
-
-# * implement deleteXC
-# * should give the other player a position near to me:  $SketchSystem.rpc_id(id, "sketchsystemfromdict", $SketchSystem.sketchsystemtodict())
-
-# * pointertargettype as an enum
 
 # * How is it going to work from planview?
 #   -- this can be done from the plan view too, 
 #   -- plot with front-culling so as to see inside the shapes, and plot with image textures on
 
-# * tube has easy clicky ways to add in connecting lines between them (advancing the selected node after starting at a join)
-# * confusion between papersheet and floordrawing being XCtype
-
-# * getactivefloordrawing is duff.  we should record floor we are working with relative to an object, by connection
-
-# * deal with positioning papersheet underlay
-# * deal with connecting to the papersheet (bigger connectivities needed)
-# * deal with seeing the paper drawing when you are inside 
-# * active floor papersheet which we used for drawn texture (maybe on the ceiling)
-
-# * check at loading gets the new paper bits in the right place
-
-# * Make a consistent bit of cave in Ireby2
-
-# * papertype should not be environment collision (just pointer collisions)
-# * paper to be carried (nailed to same spot on the laser) when we move
-
-# * remove reliance on rpc sync (a sync call in sketch system) connectiontoserveractive
-
-# * refraction sphere for accurate pointing -- you hit the sphere and it then goes aligned with your eyes
-
 # * highlight nodes under pointer system so it's global and simplifies colouring code (active node to be an overlay)
 
 # * can set the type of the material (including invisible and no collision, so open on side)
-
-# * grip on XCshape then click gets into rotate mode like with papersheets (but preserving upwardness)
 
 # * godot docs.  assert returns null from the function it's in when you ignore it
 # * check out HDR example https://godotengine.org/asset-library/asset/110
 
 # * pointertargettypes should be an enum for itself
-# * duplicate floor trimming out and place at different Z-levels
-
-# * formalize the exact order of updates of positions of things so we don't get race conditions
-# * transmit rpc_reliable when trigger released on the positioning of a papersheet
 
 # https://developer.oculus.com/learn/hands-design-interactions/
 # https://developer.oculus.com/learn/hands-design-ui/
 # https://learn.unity.com/tutorial/unit-5-hand-presence-and-interaction?uv=2018.4&courseId=5d955b5dedbc2a319caab9a0#5d96924dedbc2a6236bc1191
 # https://www.youtube.com/watch?v=gpQePH-Ffbw
 
-# * moving floor up and down (also transmitted)
-# *  XCpositions and new ones going through rsync?  
-# * regexp option button to download all the files into the user directory.  
 # * VR leads@skydeas1  and @brainonsilicon in Leeds (can do a trip there)
 
-# * copy in more drawings as bits of paper size that can be picked up and looked at
-# * think on how to remap the controls somehow.  Maybe some twist menus
-# * CSG avatar head to have headtorch light that goes on or off and doesn't hit ceiling (gets moved down)
-
-# * delete a tube that has no connections on it
 # * systematically do the updatetubelinkpaths and updatetubelinkpaths recursion properly 
 
 # * Bring in XCdrawings that are hooked to the centreline that will highlight when they get it
@@ -80,8 +39,6 @@ extends Spatial
 # * Load and move the floor on load
 
 # * clear up the laser pointer logic and materials
-# * scan through other drawings on back of hand
-# * check stationdrawnnode moves the ground up
 
 # * Need to ask to improve the documentation on https://docs.godotengine.org/en/latest/classes/class_meshinstance.html#class-meshinstance-method-set-surface-material
 # *   See also https://godotengine.org/qa/3488/how-to-generate-a-mesh-with-multiple-materials
@@ -206,9 +163,10 @@ func _ready():
 	var perm = OS.get_granted_permissions()
 	print("Granted permissions: ", perm)
 
-	if false:
+	if true:
 		#$SketchSystem.loadcentrelinefile("res://surveyscans/dukest1resurvey2009json.res")
-		$SketchSystem.loadcentrelinefile("res://surveyscans/Ireby/Ireby2/Ireby2.json")
+		#$SketchSystem.loadcentrelinefile("res://surveyscans/Ireby/Ireby2/Ireby2.json")
+		$SketchSystem.loadcentrelinefile("res://surveyscans/LambTrap1.json")
 		$SketchSystem.updatecentrelinevisibility()
 		$SketchSystem.changetubedxcsvizmode()
 		$SketchSystem.updateworkingshell()
