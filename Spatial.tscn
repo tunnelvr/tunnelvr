@@ -1046,7 +1046,6 @@ albedo_color = Color( 0.168627, 0.972549, 0.027451, 1 )
 script = ExtResource( 1 )
 enablevr = false
 usewebsockets = false
-planviewonly = true
 
 [node name="Players" type="Spatial" parent="."]
 transform = Transform( -1, 0, -3.25841e-07, 0, 1, 0, 3.25841e-07, 0, -1, 0, 0, 0 )
@@ -2610,14 +2609,15 @@ custom_fonts/mono_font = SubResource( 148 )
 custom_fonts/normal_font = SubResource( 149 )
 bbcode_enabled = true
 bbcode_text = "testing"
-text = "testing"
+text = "label test"
 scroll_active = false
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ViewportForceRender" type="MeshInstance" parent="LabelGenerator"]
+[node name="ViewportLabelPreview" type="MeshInstance" parent="LabelGenerator"]
 transform = Transform( 1, 0, 0, 0, 0.655202, -0.755453, 0, 0.755453, 0.655202, 2.27374e-13, -2.8247, -4.59181 )
+visible = false
 mesh = SubResource( 150 )
 material/0 = SubResource( 152 )
 

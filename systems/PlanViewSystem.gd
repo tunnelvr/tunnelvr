@@ -120,7 +120,6 @@ func _ready():
 	planviewcontrols.get_node("ZoomView/ButtonCentre").connect("pressed", self, "buttoncentre_pressed")
 	call_deferred("readydeferred")
 
-	
 func readydeferred():
 	tree.connect("button_pressed", self, "fetchbuttonpressed")
 	var root = tree.create_item()
@@ -153,7 +152,14 @@ func setplanviewvisible(planviewvisible, guidpaneltransform, guidpanelsize):
 		visible = false	
 		$PlanView/CollisionShape.disabled = true
 
+var slowviewportframeratecountdown = 1
 func _process(delta):
+	if Tglobal.arvrinterfacename == "OVRMobile":
+		slowviewportframeratecountdown -= delta
+		if slowviewportframeratecountdown < 0:
+			slowviewportframeratecountdown = 1
+			$PlanView/Viewport.render_target_update_mode = Viewport.UPDATE_ONCE
+	
 	var viewslide = planviewcontrols.get_node("ViewSlide")
 	var joypos = Vector2((-1 if viewslide.get_node("ButtonSlideLeft").is_pressed() else 0) + (1 if viewslide.get_node("ButtonSlideRight").is_pressed() else 0), 
 						 (-1 if viewslide.get_node("ButtonSlideDown").is_pressed() else 0) + (1 if viewslide.get_node("ButtonSlideUp").is_pressed() else 0))

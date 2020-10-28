@@ -11,31 +11,40 @@ var sortdfunctorigin = Vector3(0,0,0)
 func sortdfunc(a, b):
 	return sortdfunctorigin.distance_squared_to(a.global_transform.origin) > sortdfunctorigin.distance_squared_to(b.global_transform.origin)
 
+var commonroot = null
 func addnodestolabeltask(centrelinedrawing):
 	for xcn in centrelinedrawing.get_node("XCnodes").get_children():
 		remainingxcnodes.append(xcn)
-	
 		sortdfunctorigin = get_node("/root/Spatial").playerMe.get_node("HeadCam").global_transform.origin
+		if commonroot == null:
+			commonroot = xcn.get_name()
+		else:
+			while commonroot != "" and not xcn.get_name().begins_with(commonroot):
+				commonroot = commonroot.left(len(commonroot)-1)
+	commonroot = commonroot.left(commonroot.find_last(",")+1)
 	
-func restartlabelmakingprocess(sortdfunctorigin):
+func restartlabelmakingprocess(lsortdfunctorigin):
+	sortdfunctorigin = lsortdfunctorigin
 	if len(remainingxcnodes) != 0:
 		remainingxcnodes.sort_custom(self, "sortdfunc")
 		set_process(true)
 
 func _process(delta):
 	if workingxcnode == null and (len(remainingxcnodes) == 0 or not Tglobal.centrelinevisible):
-		$ViewportForceRender.visible = false
 		set_process(false)
 	elif workingxcnode == null:
-		$ViewportForceRender.visible = true
 		workingxcnode = remainingxcnodes.pop_back()
 		var labeltext = workingxcnode.get_name()
+		if commonroot != "":
+			labeltext = labeltext.right(len(commonroot))
+		labeltext = labeltext.replace(",", ".")
 		var numchars = len(labeltext)
 		var labelwidth = numchars*charwidth  # monospace font
 		$Viewport/RichTextLabel.bbcode_text = labeltext
 		$Viewport/RichTextLabel.rect_size.x = labelwidth
 		$Viewport.size.x = labelwidth
 		textlabelcountdowntimer = textlabelcountdowntime
+		$Viewport.render_target_update_mode = Viewport.UPDATE_ONCE
 	elif textlabelcountdowntimer > 0.0:
 		textlabelcountdowntimer -= delta
 	else:
