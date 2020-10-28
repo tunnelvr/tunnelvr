@@ -210,7 +210,7 @@ remote func actsketchchangeL(xcdatalist):
 				spawnplayerme(xcdatalist[0]["playerMe"])
 			caveworldchunking_networkIDsource = xcdatalist[0]["networkIDsource"]
 			xcdatalistReceivedDuringChunking = [ ]
-			get_node("/root/Spatial/BodyObjects/PlayerMotion").gravityenabled = false
+			get_node("/root/Spatial/BodyObjects/PlayerDirection").flywalkreversed = false
 		elif xcdatalist[0]["networkIDsource"] != caveworldchunking_networkIDsource:
 			return caveworldreceivechunkingfailed("mismatch in world chunk id source")
 		elif xcdatalist[0]["caveworldchunk"] != caveworldchunkI + 1:
@@ -371,7 +371,7 @@ remote func actsketchchangeL(xcdatalist):
 			xcdatalistReceivedDuringChunking = null
 			Tglobal.printxcdrawingfromdatamessages = true
 			updatecentrelinevisibility()
-			get_node("/root/Spatial/BodyObjects/PlayerMotion").gravityenabled = get_node("/root/Spatial/GuiSystem/GUIPanel3D/Viewport/GUI/Panel/ButtonGravity").pressed
+			get_node("/root/Spatial/BodyObjects/PlayerDirections").flywalkreversed = get_node("/root/Spatial/GuiSystem/GUIPanel3D/Viewport/GUI/Panel/FlyWalkReversed").pressed
 			for xcdatalistR in xcdatalistReceivedDuringChunkingL:
 				actsketchchangeL(xcdatalistR)
 

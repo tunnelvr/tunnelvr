@@ -1044,7 +1044,6 @@ albedo_color = Color( 0.168627, 0.972549, 0.027451, 1 )
 
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
-enablevr = false
 usewebsockets = false
 
 [node name="Players" type="Spatial" parent="."]
@@ -1300,15 +1299,14 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ButtonGravity" type="CheckBox" parent="GuiSystem/GUIPanel3D/ViewportFake/GUI/Panel"]
+[node name="FlyWalkReversed" type="CheckBox" parent="GuiSystem/GUIPanel3D/ViewportFake/GUI/Panel"]
 margin_left = 17.0
 margin_top = 214.0
-margin_right = 141.0
+margin_right = 120.0
 margin_bottom = 242.0
 rect_pivot_offset = Vector2( 138.61, -8.13628 )
 hint_tooltip = "test tooltip"
-pressed = true
-text = "Gravity"
+text = "Fly/Walk"
 __meta__ = {
 "_edit_use_anchors_": false
 }

@@ -61,9 +61,9 @@ func _on_buttonlockcontrols_toggled(button_pressed):
 		toggleguipanelvisibility(null)
 	Tglobal.soundsystem.quicksound("MenuClick", collision_point)
 
-func _on_buttongravity_toggled(button_pressed):
-	get_node("/root/Spatial/BodyObjects/PlayerMotion").gravityenabled = button_pressed
-	$Viewport/GUI/Panel/Label.text = "Gravity on" if button_pressed else "Gravity off"
+func _on_buttonflywalkreversed_toggled(button_pressed):
+	get_node("/root/Spatial/BodyObjects/PlayerDirections").flywalkreversed = button_pressed
+	$Viewport/GUI/Panel/Label.text = "Fly/Walk reversed" if button_pressed else "Fly/Walk normal"
 	if not Tglobal.controlslocked:
 		toggleguipanelvisibility(null)
 
@@ -140,7 +140,7 @@ func _ready():
 	$Viewport/GUI/Panel/ButtonDoppelganger.connect("toggled", self, "_on_buttondoppelganger_toggled")
 	$Viewport/GUI/Panel/ButtonSwapControllers.connect("pressed", self, "_on_buttonswapcontrollers_pressed")
 	$Viewport/GUI/Panel/ButtonLockControls.connect("toggled", self, "_on_buttonlockcontrols_toggled")
-	$Viewport/GUI/Panel/ButtonGravity.connect("toggled", self, "_on_buttongravity_toggled")
+	$Viewport/GUI/Panel/FlyWalkReversed.connect("toggled", self, "_on_buttonflywalkreversed_toggled")
 	$Viewport/GUI/Panel/ButtonRecord.connect("button_down", self, "_on_buttonrecord_down")
 	$Viewport/GUI/Panel/ButtonRecord.connect("button_up", self, "_on_buttonrecord_up")
 	$Viewport/GUI/Panel/ButtonPlay.connect("pressed", self, "_on_buttonplay_pressed")
