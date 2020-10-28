@@ -74,6 +74,10 @@ func mergexctrpcdata(xctdata):
 			xctdata["materialsectorschanged"] = materialsectorschanged
 		assert (len(xcsectormaterials)*2 == len(xcdrawinglink))
 
+func setxctubepathlinevisibility(sketchsystem):
+	var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(xcname0)
+	var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(xcname1)
+	$PathLines.visible = xcdrawing0.get_node("PathLines").visible or xcdrawing1.get_node("PathLines").visible
 
 # targetwalltransformpos
 func centrelineconnectionfloortransformpos(sketchsystem):

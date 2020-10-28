@@ -656,7 +656,7 @@ func buttonreleased_vrgrip():
 					setactivetargetwall(xcdrawing1)
 						
 			elif pointertarget.get_name() == "HideXC":
-				sketchsystem.actsketchchange([{"xcvizstates":{gripmenu.gripmenupointertargetwall.xcname0:0, gripmenu.gripmenupointertargetwall.xcname1:0}}])
+				sketchsystem.actsketchchange([{ "xcvizstates":{gripmenu.gripmenupointertargetwall.xcname0:0, gripmenu.gripmenupointertargetwall.xcname1:0}} ])
 				var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(gripmenu.gripmenupointertargetwall.xcname0)
 				var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(gripmenu.gripmenupointertargetwall.xcname1)
 				if xcdrawing0 == activetargetwall:

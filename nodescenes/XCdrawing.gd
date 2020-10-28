@@ -49,6 +49,7 @@ func setxcdrawingvisible():
 	for xcn in $XCnodes.get_children():
 		xcn.get_node("CollisionShape").disabled = false
 	assert ($XCdrawingplane.visible != $XCdrawingplane/CollisionShape.disabled)
+
 		
 func updateformetresquaresscaletexture():
 	var mat = $XCdrawingplane/CollisionShape/MeshInstance.get_surface_material(0)

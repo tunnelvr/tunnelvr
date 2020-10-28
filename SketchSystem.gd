@@ -210,7 +210,7 @@ remote func actsketchchangeL(xcdatalist):
 				spawnplayerme(xcdatalist[0]["playerMe"])
 			caveworldchunking_networkIDsource = xcdatalist[0]["networkIDsource"]
 			xcdatalistReceivedDuringChunking = [ ]
-			get_node("/root/Spatial/BodyObjects/PlayerDirection").flywalkreversed = false
+			get_node("/root/Spatial/BodyObjects/PlayerDirections").flywalkreversed = false
 		elif xcdatalist[0]["networkIDsource"] != caveworldchunking_networkIDsource:
 			return caveworldreceivechunkingfailed("mismatch in world chunk id source")
 		elif xcdatalist[0]["caveworldchunk"] != caveworldchunkI + 1:
@@ -288,6 +288,9 @@ remote func actsketchchangeL(xcdatalist):
 							xcdrawing.setxcdrawingvisible()
 						else:
 							xcdrawing.setxcdrawingvisiblehide((drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE) == 0)
+						for xctube in xcdrawing.xctubesconn:
+							xctube.setxctubepathlinevisibility(self)
+
 					elif xcdrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
 						var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
 						if xcdata["xcvizstates"][xcdrawingname] == DRAWING_TYPE.VIZ_XCD_FLOOR_NORMAL:
