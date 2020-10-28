@@ -382,7 +382,7 @@ size = Vector3( 0.01, 0.01, 1 )
 size = Vector2( 1.6, 1 )
 
 [sub_resource type="ViewportTexture" id=57]
-viewport_path = NodePath("PlanViewSystem/PlanView/Viewport")
+viewport_path = NodePath("PlanViewSystem/PlanView/ViewportReal")
 
 [sub_resource type="SpatialMaterial" id=58]
 resource_local_to_scene = true
@@ -1046,6 +1046,7 @@ albedo_color = Color( 0.168627, 0.972549, 0.027451, 1 )
 script = ExtResource( 1 )
 enablevr = false
 usewebsockets = false
+planviewonly = true
 
 [node name="Players" type="Spatial" parent="."]
 transform = Transform( -1, 0, -3.25841e-07, 0, 1, 0, 3.25841e-07, 0, -1, 0, 0, 0 )
@@ -1796,15 +1797,14 @@ script = ExtResource( 24 )
 transform = Transform( 1, 0, 0, 0, 0.819152, 0.573577, 0, -0.573577, 0.819152, -3.5665, 0.449535, -13.3568 )
 collision_layer = 8
 
-[node name="ViewportFake" type="Control" parent="PlanViewSystem/PlanView"]
-visible = false
+[node name="Viewport" type="Control" parent="PlanViewSystem/PlanView"]
 margin_right = 40.0
 margin_bottom = 40.0
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="PlanGUI" type="Control" parent="PlanViewSystem/PlanView/ViewportFake"]
+[node name="PlanGUI" type="Control" parent="PlanViewSystem/PlanView/Viewport"]
 margin_right = 800.0
 margin_bottom = 800.0
 theme = ExtResource( 47 )
@@ -1812,28 +1812,27 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Camera" type="Camera" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI"]
+[node name="Camera" type="Camera" parent="PlanViewSystem/PlanView/Viewport/PlanGUI"]
 transform = Transform( 1, 0, 0, 0, -1.62921e-07, 1, 0, -1, -1.62921e-07, -1, 50, -12 )
 environment = ExtResource( 20 )
 projection = 1
 fov = 87.5304
 size = 70.0
 
-[node name="toRealPlanCamera" type="RemoteTransform" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/Camera"]
+[node name="toRealPlanCamera" type="RemoteTransform" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/Camera"]
 transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, 0, 0, 0 )
 remote_path = NodePath("../../../../../RealPlanCamera")
 update_scale = false
 
-[node name="PlanViewControls" type="Panel" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI"]
-margin_left = 1.6837
+[node name="PlanViewControls" type="Panel" parent="PlanViewSystem/PlanView/Viewport/PlanGUI"]
 margin_top = 700.0
-margin_right = 801.684
+margin_right = 800.0
 margin_bottom = 800.0
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Tree" type="Tree" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls"]
+[node name="Tree" type="Tree" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
 margin_left = 431.0
 margin_right = 768.0
 margin_bottom = 100.0
@@ -1841,7 +1840,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ViewSlide" type="Control" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls"]
+[node name="ViewSlide" type="Control" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
 material = SubResource( 55 )
 margin_left = 2.59387
 margin_top = 3.05945
@@ -1851,7 +1850,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Label" type="Label" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls/ViewSlide"]
+[node name="Label" type="Label" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ViewSlide"]
 margin_left = 13.2179
 margin_top = 12.6522
 margin_right = 82.2179
@@ -1861,7 +1860,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ButtonSlideDown" type="Button" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls/ViewSlide"]
+[node name="ButtonSlideDown" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ViewSlide"]
 margin_left = 36.899
 margin_top = 58.7379
 margin_right = 59.899
@@ -1871,7 +1870,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ButtonSlideLeft" type="Button" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls/ViewSlide"]
+[node name="ButtonSlideLeft" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ViewSlide"]
 margin_left = 4.7621
 margin_top = 58.713
 margin_right = 34.7621
@@ -1881,7 +1880,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ButtonSlideRight" type="Button" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls/ViewSlide"]
+[node name="ButtonSlideRight" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ViewSlide"]
 margin_left = 61.9428
 margin_top = 59.3356
 margin_right = 91.9428
@@ -1891,7 +1890,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ButtonSlideUp" type="Button" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls/ViewSlide"]
+[node name="ButtonSlideUp" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ViewSlide"]
 margin_left = 36.7905
 margin_top = 31.0826
 margin_right = 59.7905
@@ -1901,7 +1900,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ZoomView" type="Control" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls"]
+[node name="ZoomView" type="Control" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
 material = SubResource( 55 )
 margin_left = 100.0
 margin_top = 4.0
@@ -1911,7 +1910,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Label" type="Label" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls/ZoomView"]
+[node name="Label" type="Label" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ZoomView"]
 margin_left = 16.0486
 margin_top = 8.23785
 margin_right = 62.0486
@@ -1921,7 +1920,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ButtonZoomOut" type="Button" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls/ZoomView"]
+[node name="ButtonZoomOut" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ZoomView"]
 margin_left = 4.74051
 margin_top = 31.1992
 margin_right = 34.7405
@@ -1931,7 +1930,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ButtonCentre" type="Button" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls/ZoomView"]
+[node name="ButtonCentre" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ZoomView"]
 margin_left = 10.0306
 margin_top = 59.2411
 margin_right = 64.0306
@@ -1941,7 +1940,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ButtonZoomIn" type="Button" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls/ZoomView"]
+[node name="ButtonZoomIn" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ZoomView"]
 margin_left = 38.0
 margin_top = 29.7621
 margin_right = 68.0
@@ -1951,7 +1950,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="FloorTrim" type="Control" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls"]
+[node name="FloorTrim" type="Control" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
 material = SubResource( 55 )
 margin_left = 179.691
 margin_top = 6.1189
@@ -1961,7 +1960,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Label" type="Label" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls/FloorTrim"]
+[node name="Label" type="Label" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorTrim"]
 margin_left = 5.40929
 margin_top = 6.44543
 margin_right = 42.4093
@@ -1971,7 +1970,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Label2" type="Label" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls/FloorTrim"]
+[node name="Label2" type="Label" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorTrim"]
 margin_left = 9.64716
 margin_top = 70.0133
 margin_right = 46.6472
@@ -1981,7 +1980,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ButtonTrimDownDown" type="Button" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls/FloorTrim"]
+[node name="ButtonTrimDownDown" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorTrim"]
 margin_left = 47.1001
 margin_top = 73.3364
 margin_right = 67.1001
@@ -1991,7 +1990,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ButtonTrimDownUp" type="Button" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls/FloorTrim"]
+[node name="ButtonTrimDownUp" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorTrim"]
 margin_left = 47.082
 margin_top = 49.8728
 margin_right = 67.082
@@ -2001,7 +2000,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ButtonTrimLeftRight" type="Button" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls/FloorTrim"]
+[node name="ButtonTrimLeftRight" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorTrim"]
 margin_left = 26.4635
 margin_top = 38.7818
 margin_right = 46.4635
@@ -2011,7 +2010,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ButtonTrimLeftLeft" type="Button" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls/FloorTrim"]
+[node name="ButtonTrimLeftLeft" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorTrim"]
 margin_left = 5.5274
 margin_top = 38.8909
 margin_right = 25.5274
@@ -2021,7 +2020,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ButtonTrimRightRight" type="Button" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls/FloorTrim"]
+[node name="ButtonTrimRightRight" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorTrim"]
 margin_left = 91.2725
 margin_top = 37.2273
 margin_right = 111.272
@@ -2031,7 +2030,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ButtonTrimRightLeft" type="Button" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls/FloorTrim"]
+[node name="ButtonTrimRightLeft" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorTrim"]
 margin_left = 69.4454
 margin_top = 37.2273
 margin_right = 89.4454
@@ -2041,7 +2040,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ButtonTrimUpUp" type="Button" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls/FloorTrim"]
+[node name="ButtonTrimUpUp" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorTrim"]
 margin_left = 48.2272
 margin_top = 1.99091
 margin_right = 67.2272
@@ -2051,7 +2050,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ButtonTrimUpDown" type="Button" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls/FloorTrim"]
+[node name="ButtonTrimUpDown" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorTrim"]
 margin_left = 46.8909
 margin_top = 26.0452
 margin_right = 66.8909
@@ -2061,7 +2060,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="FloorMove" type="Control" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls"]
+[node name="FloorMove" type="Control" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
 material = SubResource( 55 )
 margin_left = 303.508
 margin_top = 7.11896
@@ -2071,7 +2070,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Label" type="Label" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls/FloorMove"]
+[node name="Label" type="Label" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorMove"]
 margin_left = 2.0
 margin_top = 7.0
 margin_right = 47.0
@@ -2081,7 +2080,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Label2" type="Label" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls/FloorMove"]
+[node name="Label2" type="Label" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorMove"]
 margin_left = -37.6165
 margin_top = 67.2705
 margin_right = 6.38354
@@ -2091,7 +2090,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ButtonShrink" type="Button" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls/FloorMove"]
+[node name="ButtonShrink" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorMove"]
 margin_left = 55.6724
 margin_top = 5.4433
 margin_right = 83.6724
@@ -2101,7 +2100,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ButtonGrow" type="Button" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls/FloorMove"]
+[node name="ButtonGrow" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorMove"]
 margin_left = 85.7935
 margin_top = 2.76001
 margin_right = 113.793
@@ -2111,7 +2110,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ButtonMoveLeft" type="Button" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls/FloorMove"]
+[node name="ButtonMoveLeft" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorMove"]
 margin_left = 9.76519
 margin_top = 66.437
 margin_right = 29.7652
@@ -2121,7 +2120,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ButtonMoveRight" type="Button" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls/FloorMove"]
+[node name="ButtonMoveRight" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorMove"]
 margin_left = 56.0
 margin_top = 65.0
 margin_right = 76.0
@@ -2131,7 +2130,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ButtonMoveUp" type="Button" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls/FloorMove"]
+[node name="ButtonMoveUp" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorMove"]
 margin_left = 33.3947
 margin_top = 40.1316
 margin_right = 52.3947
@@ -2141,7 +2140,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ButtonMoveDown" type="Button" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls/FloorMove"]
+[node name="ButtonMoveDown" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorMove"]
 margin_left = 35.2368
 margin_top = 66.3048
 margin_right = 55.2368
@@ -2151,7 +2150,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ButtonMoveRise" type="Button" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls/FloorMove"]
+[node name="ButtonMoveRise" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorMove"]
 margin_left = 85.2227
 margin_top = 41.3972
 margin_right = 105.223
@@ -2161,7 +2160,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ButtonMoveFall" type="Button" parent="PlanViewSystem/PlanView/ViewportFake/PlanGUI/PlanViewControls/FloorMove"]
+[node name="ButtonMoveFall" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorMove"]
 margin_left = 84.1813
 margin_top = 65.9201
 margin_right = 104.181
@@ -2171,7 +2170,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Viewport" type="Viewport" parent="PlanViewSystem/PlanView"]
+[node name="ViewportReal" type="Viewport" parent="PlanViewSystem/PlanView"]
 size = Vector2( 800, 800 )
 render_target_v_flip = true
 

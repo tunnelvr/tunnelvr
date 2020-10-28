@@ -8,7 +8,8 @@ var activetargetfloortransformpos = null
 var activetargetfloorimgtrim = null
 
 var buttonidxtoitem = { }
-var tree = null
+onready var tree = $PlanView/Viewport/PlanGUI/PlanViewControls/Tree
+onready var planviewcontrols = $PlanView/Viewport/PlanGUI/PlanViewControls
 var imgregex = RegEx.new()
 var listregex = RegEx.new()
 
@@ -89,30 +90,38 @@ func openlinklistpage(item, htmltext):
 	var dirurl = item.get_tooltip(0)
 	if not dirurl.ends_with("/"):
 		dirurl += "/"
-	var tree = $PlanView/Viewport/PlanGUI/PlanViewControls/Tree
 	for m in listregex.search_all(htmltext):
 		var lk = m.get_string(1)
 		if not lk.begins_with("."):
 			lk = lk.replace("&amp;", "&")
 			addsubitem(item, lk, dirurl + lk)
 
+func transferintorealviewport(setascurrentcamera):
+	if setascurrentcamera:
+		$PlanView/Viewport/PlanGUI/Camera.current = true
+		$PlanView/Viewport/PlanGUI.remove_child(planviewcontrols)
+		get_node("/root/Spatial").add_child(planviewcontrols)
+		planviewcontrols.rect_position.y = 0
+
+	elif $PlanView.has_node("ViewportReal"):
+		var fplangui = $PlanView/Viewport/PlanGUI
+		$PlanView/Viewport.remove_child(fplangui)
+		$PlanView/ViewportReal.add_child(fplangui)
+		$PlanView/Viewport.set_name("ViewportFake")
+		$PlanView/ViewportReal.set_name("Viewport")
+		$PlanView/ProjectionScreen.get_surface_material(0).albedo_texture = $PlanView/Viewport.get_texture()
+		
 func _ready():
 	listregex.compile('<li><a href="([^"]*)">')
 	imgregex.compile('(?i)\\.(png|jpg|jpeg)$')
-
 	installbuttontex = get_node("/root/Spatial/MaterialSystem/buttonmaterials/InstallButton").get_surface_material(0).albedo_texture
 	fetchbuttontex = get_node("/root/Spatial/MaterialSystem/buttonmaterials/FetchButton").get_surface_material(0).albedo_texture
-
 	$RealPlanCamera.set_as_toplevel(true)
-	var fplangui = $PlanView/ViewportFake.get_node_or_null("PlanGUI")
-	if fplangui != null:
-		$PlanView/ViewportFake.remove_child(fplangui)
-		$PlanView/Viewport.add_child(fplangui)
-	$PlanView/Viewport/PlanGUI/PlanViewControls/ZoomView/ButtonCentre.connect("pressed", self, "buttoncentre_pressed")
+	planviewcontrols.get_node("ZoomView/ButtonCentre").connect("pressed", self, "buttoncentre_pressed")
 	call_deferred("readydeferred")
+
 	
 func readydeferred():
-	tree = $PlanView/Viewport/PlanGUI/PlanViewControls/Tree
 	tree.connect("button_pressed", self, "fetchbuttonpressed")
 	var root = tree.create_item()
 	root.set_text(0, "Root of treee")
@@ -145,14 +154,14 @@ func setplanviewvisible(planviewvisible, guidpaneltransform, guidpanelsize):
 		$PlanView/CollisionShape.disabled = true
 
 func _process(delta):
-	var viewslide = $PlanView/Viewport/PlanGUI/PlanViewControls/ViewSlide
+	var viewslide = planviewcontrols.get_node("ViewSlide")
 	var joypos = Vector2((-1 if viewslide.get_node("ButtonSlideLeft").is_pressed() else 0) + (1 if viewslide.get_node("ButtonSlideRight").is_pressed() else 0), 
 						 (-1 if viewslide.get_node("ButtonSlideDown").is_pressed() else 0) + (1 if viewslide.get_node("ButtonSlideUp").is_pressed() else 0))
 	if joypos != Vector2(0, 0):
 		var plancamera = $PlanView/Viewport/PlanGUI/Camera
 		plancamera.translation += Vector3(joypos.x, 0, -joypos.y)*plancamera.size/2*delta
 
-	var zoomview = $PlanView/Viewport/PlanGUI/PlanViewControls/ZoomView
+	var zoomview = planviewcontrols.get_node("ZoomView")
 	var bzoomin = zoomview.get_node("ButtonZoomIn").is_pressed()
 	var bzoomout = zoomview.get_node("ButtonZoomOut").is_pressed()
 	if bzoomin or bzoomout:
@@ -161,12 +170,12 @@ func _process(delta):
 		$RealPlanCamera/RealCameraBox.scale = Vector3($PlanView/Viewport/PlanGUI/Camera.size, 1.0, $PlanView/Viewport/PlanGUI/Camera.size)
 
 	if activetargetfloor != null:
-		var floortrim = $PlanView/Viewport/PlanGUI/PlanViewControls/FloorTrim
+		var floortrim = planviewcontrols.get_node("FloorTrim")
 		var joypostrimld = Vector2((-1 if floortrim.get_node("ButtonTrimLeftLeft").is_pressed() else 0) + (1 if floortrim.get_node("ButtonTrimLeftRight").is_pressed() else 0), 
 								   (-1 if floortrim.get_node("ButtonTrimDownDown").is_pressed() else 0) + (1 if floortrim.get_node("ButtonTrimDownUp").is_pressed() else 0))
 		var joypostrimru = Vector2((-1 if floortrim.get_node("ButtonTrimRightLeft").is_pressed() else 0) + (1 if floortrim.get_node("ButtonTrimRightRight").is_pressed() else 0), 
 								   (-1 if floortrim.get_node("ButtonTrimUpDown").is_pressed() else 0) + (1 if floortrim.get_node("ButtonTrimUpUp").is_pressed() else 0))
-		var floormove = $PlanView/Viewport/PlanGUI/PlanViewControls/FloorMove
+		var floormove = planviewcontrols.get_node("FloorMove")
 		var joyposmove = Vector3((-1 if floormove.get_node("ButtonMoveLeft").is_pressed() else 0) + (1 if floormove.get_node("ButtonMoveRight").is_pressed() else 0), 
 								 (-1 if floormove.get_node("ButtonMoveDown").is_pressed() else 0) + (1 if floormove.get_node("ButtonMoveUp").is_pressed() else 0), 
 								 (-0.5 if floormove.get_node("ButtonMoveFall").is_pressed() else 0) + (0.5 if floormove.get_node("ButtonMoveRise").is_pressed() else 0))
@@ -222,8 +231,8 @@ func processplanviewpointing(raycastcollisionpoint, controller_trigger):
 	local_point += Vector3(0.5, -0.5, 0) # X is about 0 to 1, Y is about 0 to -1.
 	viewport_point = Vector2(local_point.x, -local_point.y) * $PlanView/Viewport.size
 
-	var rectrel = viewport_point - $PlanView/Viewport/PlanGUI/PlanViewControls.rect_position
-	var inguipanel = (rectrel.x > 0 and rectrel.y > 0 and rectrel.x < $PlanView/Viewport/PlanGUI/PlanViewControls.rect_size.x and rectrel.y < $PlanView/Viewport/PlanGUI/PlanViewControls.rect_size.y)
+	var rectrel = viewport_point - planviewcontrols.rect_position
+	var inguipanel = (rectrel.x > 0 and rectrel.y > 0 and rectrel.x < planviewcontrols.rect_size.x and rectrel.y < planviewcontrols.rect_size.y)
 	if inguipanel:
 		var event = InputEventMouseMotion.new()
 		event.position = viewport_point

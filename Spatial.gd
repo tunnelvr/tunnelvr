@@ -51,6 +51,7 @@ export var hostipnumber: String = ""
 export var hostportnumber: int = 4546
 export var enablevr: = true
 export var usewebsockets: = true
+export var planviewonly: = false
 
 var perform_runtime_config = true
 var ovr_init_config = null
@@ -140,6 +141,8 @@ func _ready():
 			viewport.transparent_bg = true       # <--- For the AR
 			Tglobal.arvrinterface.k1 = 0.2       # Lens distortion constants
 			Tglobal.arvrinterface.k2 = 0.23
+	
+	$PlanViewSystem.transferintorealviewport((not enablevr) and planviewonly)
 	
 	Tglobal.VRoperating = (Tglobal.arvrinterfacename != "none")
 	if Tglobal.VRoperating:
