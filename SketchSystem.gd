@@ -97,12 +97,6 @@ remote func savesketchsystem(fname):
 	sketchdatafile.close()
 	print("sssssaved in C:/Users/ViveOne/AppData/Roaming/Godot/app_userdata/tunnelvr")
 
-func getactivefloordrawing():
-	var floordrawing = $XCdrawings.get_child(0)  # only one here for now
-	#assert (floordrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE)
-	return floordrawing
-
-
 func loadcentrelinefile(centrelinefile):
 	print("  want to open file ", centrelinefile)
 	var centrelinedrawing = newXCuniquedrawing(DRAWING_TYPE.DT_CENTRELINE, "centreline")
@@ -271,7 +265,16 @@ remote func actsketchchangeL(xcdatalist):
 						if j < len(xctube.xcsectormaterials) and j < xctube.get_node("XCtubesectors").get_child_count():
 							get_node("/root/Spatial/MaterialSystem").updatetubesectormaterial(xctube.get_node("XCtubesectors").get_child(j), xctube.xcsectormaterials[j], false)
 			
-		#elif "planview" in xcdata:
+		elif "planview" in xcdata:
+			var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
+			var plancamera = planviewsystem.get_node("PlanView/Viewport/PlanGUI/Camera")			
+			if "plancamerapos" in xcdata["planview"]:
+				plancamera.translation = xcdata["planview"]["plancamerapos"]
+			if "plancamerasize" in xcdata["planview"]:
+				plancamera.size = xcdata["planview"]["plancamerasize"]
+				planviewsystem.get_node("RealPlanCamera/RealCameraBox").scale = Vector3(plancamera.size, 1.0, plancamera.size)
+			if "transformpos" in xcdata["planview"]:
+				planviewsystem.global_transform = xcdata["planview"]["transformpos"]
 
 		elif "xcvizstates" in xcdata:
 			if Tglobal.printxcdrawingfromdatamessages:

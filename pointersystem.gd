@@ -349,7 +349,10 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 		var alaserspot = activelaserroot.get_node("LaserSpot")
 		alaserspot.global_transform.origin = pointertargetpoint
 		setactivetargetwall(pointertargetwall)
-		activetargetwallgrabbed = activetargetwall if pointertargettype == "Papersheet" else activetargetwall.get_node("PlanView")
+		if pointertargettype == "PlanView":
+			activetargetwallgrabbed = activetargetwall.get_node("PlanView")
+		else:
+			activetargetwallgrabbed = activetargetwall
 		if gripbuttonheld:
 			activetargetwallgrabbedtransform = alaserspot.global_transform.affine_inverse() * activetargetwallgrabbed.global_transform
 			activetargetwallgrabbedpoint = alaserspot.global_transform.origin
@@ -357,6 +360,9 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 			activetargetwallgrabbedpointoffset = alaserspot.global_transform.origin - activetargetwallgrabbed.global_transform.origin
 		else:
 			activetargetwallgrabbedtransform = alaserspot.global_transform.affine_inverse() * activetargetwallgrabbed.global_transform
+			print("aaab1 ", activetargetwallgrabbedtransform)
+			print(" aab2 ", alaserspot.global_transform)
+			print(" aab3 ", activetargetwallgrabbed.global_transform)
 			activetargetwallgrabbedpoint = null
 
 			
@@ -793,6 +799,31 @@ func buttonreleased_vrgrip():
 var targetwallvertplane = true
 var prevactivetargetwallgrabbedorgtransform = null
 func targetwalltransformpos(rpcoptional):
+	if activetargetwallgrabbed.get_name() == "PlanView" or activetargetwallgrabbed.drawingtype != DRAWING_TYPE.DT_XCDRAWING:
+		var newtrans = null
+		if activetargetwallgrabbedpoint != null:
+			newtrans = activelaserroot.get_node("LaserSpot").global_transform * activetargetwallgrabbedtransform
+			newtrans.origin += activetargetwallgrabbedpoint - activetargetwallgrabbed.global_transform * activetargetwallgrabbedlocalpoint
+		else:
+			newtrans = activelaserroot.get_node("LaserSpot").global_transform * activetargetwallgrabbedtransform
+			print("aaaa1 ", activetargetwallgrabbedtransform)
+			print(" aaa2 ", activelaserroot.get_node("LaserSpot").global_transform)
+			print(" aaa3 ", newtrans)
+		if activetargetwallgrabbed.get_name() == "PlanView":
+			var txcdata = { "planview":{ "transformpos":newtrans },
+							"rpcoptional":rpcoptional,
+							"timestamp":OS.get_ticks_msec()*0.001,
+						  }
+			return txcdata
+		elif activetargetwallgrabbed.drawingtype != DRAWING_TYPE.DT_XCDRAWING:
+			var txcdata = { "name":activetargetwallgrabbed.get_name(), 
+							"rpcoptional":rpcoptional,
+							"timestamp":OS.get_ticks_msec()*0.001,
+							"prevtransformpos":activetargetwallgrabbed.transform,
+							"transformpos":newtrans }
+			return txcdata
+	
+	
 	var txcdata = { "name":activetargetwallgrabbed.get_name(), 
 					"rpcoptional":rpcoptional,
 					"timestamp":OS.get_ticks_msec()*0.001,
@@ -831,8 +862,7 @@ func targetwalltransformpos(rpcoptional):
 		
 func buttonreleased_vrtrigger():
 	if activetargetwallgrabbedtransform != null:
-		if activetargetwallgrabbed.get_name() != "PlanView" and activetargetwallgrabbed.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
-			sketchsystem.actsketchchange([ targetwalltransformpos(0) ])
+		#sketchsystem.actsketchchange([ targetwalltransformpos(0) ])
 		activetargetwallgrabbedtransform = null
 						
 
@@ -863,16 +893,10 @@ func _physics_process(delta):
 		planviewsystem.planviewguipanelreleasemouse()
 	
 	if activetargetwallgrabbedtransform != null:
-		if activetargetwallgrabbed.get_name() != "PlanView" and activetargetwallgrabbed.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
-			sketchsystem.actsketchchange([ targetwalltransformpos(1) ])
-
-		elif activetargetwallgrabbedpoint != null:
-			activetargetwallgrabbed.global_transform = activelaserroot.get_node("LaserSpot").global_transform * activetargetwallgrabbedtransform
-			activetargetwallgrabbed.global_transform.origin += activetargetwallgrabbedpoint - activetargetwallgrabbed.global_transform * activetargetwallgrabbedlocalpoint
-		else:
-			activetargetwallgrabbed.global_transform = activelaserroot.get_node("LaserSpot").global_transform * activetargetwallgrabbedtransform
-
-
+		var txcdata = targetwalltransformpos(1)
+		#sketchsystem.actsketchchange([ targetwalltransformpos(1) ])
+		planviewsystem.global_transform = txcdata["planview"]["transformpos"]
+		
 var rightmousebuttonheld = false
 func _input(event):
 	if event.is_action_pressed("ui_cancel"):

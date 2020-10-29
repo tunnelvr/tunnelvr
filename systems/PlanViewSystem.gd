@@ -153,21 +153,6 @@ func setplanviewvisible(planviewvisible, guidpaneltransform, guidpanelsize):
 		visible = false	
 		$PlanView/CollisionShape.disabled = true
 
-func setplanviewcamera(planviewpositiondict, planviewpositiondict1, lam):
-	var plancamera = $PlanView/Viewport/PlanGUI/Camera
-	if "plancamerapos" in planviewpositiondict:
-		if planviewpositiondict1 == null:
-			plancamera.translation = planviewpositiondict["plancamerapos"]
-		else:
-			plancamera.translation = lerp(planviewpositiondict["plancamerapos"], planviewpositiondict1["plancamerapos"], lam)
-			
-	if "plancamerasize" in planviewpositiondict:
-		if planviewpositiondict1 == null:
-			plancamera.size = planviewpositiondict["plancamerasize"]
-		else:
-			plancamera.size = lerp(planviewpositiondict["plancamerasize"], planviewpositiondict1["plancamerasize"], lam)
-		$RealPlanCamera/RealCameraBox.scale = Vector3(plancamera.size, 1.0, plancamera.size)
-
 var slowviewportframeratecountdown = 1
 func _process(delta):
 	if Tglobal.arvrinterfacename == "OVRMobile":
@@ -192,7 +177,8 @@ func _process(delta):
 		var plancamera = $PlanView/Viewport/PlanGUI/Camera
 		planviewpositiondict["plancamerasize"] = plancamera.size * zoomfac
 	if not planviewpositiondict.empty():
-		setplanviewcamera(planviewpositiondict, null, 0)
+		var sketchsystem = get_node("/root/Spatial/SketchSystem")		
+		sketchsystem.actsketchchange([{"planview":planviewpositiondict}])
 
 	if activetargetfloor != null:
 		var floortrim = planviewcontrols.get_node("FloorTrim")
@@ -236,7 +222,8 @@ func _process(delta):
 func buttoncentre_pressed():
 	var headcam = get_node("/root/Spatial").playerMe.get_node("HeadCam")
 	var planviewpositiondict = { "plancamerapos":Vector3(headcam.global_transform.origin.x, $PlanView/Viewport/PlanGUI/Camera.translation.y, headcam.global_transform.origin.z) }
-	setplanviewcamera(planviewpositiondict, null, 0)
+	var sketchsystem = get_node("/root/Spatial/SketchSystem")		
+	sketchsystem.actsketchchange([{"planview":planviewpositiondict}])
 
 func checkplanviewinfront(handrightcontroller):
 	var planviewsystem = self

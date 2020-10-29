@@ -6,7 +6,6 @@ extends Spatial
 
 # rationalize the ResourceLoader.load(fetcheddrawingfile)  # imported as an Image, could be something else
 
-# * getactivefloordrawing is duff.  we should record floor we are working with relative to an object, by connection
 
 # scalebar on planview
 # Treeview to show which are downloaded
