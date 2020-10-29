@@ -116,7 +116,7 @@ func _on_buttonplay_pressed():
 	$Viewport/GUI/Panel/Label.text = "Play voice"
 	
 func _on_buttonload_choke():
-	get_node("/root/Spatial/BodyObjects/PlayerMotion").bouldercount = 50
+	get_node("/root/Spatial/BodyObjects/PlayerMotion").makeboulderchoke(50)
 	$Viewport/GUI/Panel/Label.text = "Boulder choke!"
 	toggleguipanelvisibility(null)
 

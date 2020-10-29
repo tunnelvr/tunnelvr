@@ -271,6 +271,8 @@ remote func actsketchchangeL(xcdatalist):
 						if j < len(xctube.xcsectormaterials) and j < xctube.get_node("XCtubesectors").get_child_count():
 							get_node("/root/Spatial/MaterialSystem").updatetubesectormaterial(xctube.get_node("XCtubesectors").get_child(j), xctube.xcsectormaterials[j], false)
 			
+		#elif "planview" in xcdata:
+
 		elif "xcvizstates" in xcdata:
 			if Tglobal.printxcdrawingfromdatamessages:
 				print("update vizstate ")

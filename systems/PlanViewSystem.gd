@@ -125,7 +125,7 @@ func readydeferred():
 	var root = tree.create_item()
 	root.set_text(0, "Root of treee")
 	#addsubitem(root, "Ireby", "http://cave-registry.org.uk/svn/NorthernEngland/ThreeCountiesArea/rawscans/Ireby/")
-	addsubitem(root, "Ireby", "http://cave-registry.org.uk/svn/NorthernEngland/ThreeCountiesArea/rawscans/")
+	addsubitem(root, "rawscans", "http://cave-registry.org.uk/svn/NorthernEngland/ThreeCountiesArea/rawscans/")
 	
 func toggleplanviewactive():
 	planviewactive = not planviewactive

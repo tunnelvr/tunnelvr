@@ -1,4 +1,4 @@
-[gd_scene load_steps=222 format=2]
+[gd_scene load_steps=223 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/default_env.tres" type="Environment" id=2]
@@ -53,6 +53,7 @@
 [ext_resource path="res://guimaterials/installbuttonimg.png" type="Texture" id=51]
 [ext_resource path="res://sounds/menu_taping.wav" type="AudioStream" id=52]
 [ext_resource path="res://test.gd" type="Script" id=53]
+[ext_resource path="res://assets/objectscenes/boulder.tscn" type="PackedScene" id=54]
 
 [sub_resource type="CylinderShape" id=1]
 radius = 0.1
@@ -2609,7 +2610,7 @@ custom_fonts/mono_font = SubResource( 148 )
 custom_fonts/normal_font = SubResource( 149 )
 bbcode_enabled = true
 bbcode_text = "testing"
-text = "label test"
+text = "testing"
 scroll_active = false
 __meta__ = {
 "_edit_use_anchors_": false
@@ -2724,3 +2725,5 @@ material/0 = SubResource( 168 )
 
 [node name="test" type="Spatial" parent="."]
 script = ExtResource( 53 )
+
+[node name="RigidBody" parent="test" instance=ExtResource( 54 )]
