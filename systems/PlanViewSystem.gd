@@ -152,6 +152,12 @@ func setplanviewvisible(planviewvisible, guidpaneltransform, guidpanelsize):
 		visible = false	
 		$PlanView/CollisionShape.disabled = true
 
+#planviewsystem.visible
+func planviewpositiondict():
+	return { "paneltrans":$PlanView.global_transform,
+			 "plancameratrans": $PlanView/Viewport/PlanGUI/Camera.transform 
+		   }
+
 var slowviewportframeratecountdown = 1
 func _process(delta):
 	if Tglobal.arvrinterfacename == "OVRMobile":
@@ -172,8 +178,9 @@ func _process(delta):
 	var bzoomout = zoomview.get_node("ButtonZoomOut").is_pressed()
 	if bzoomin or bzoomout:
 		var zoomfac = 1/(1 + 0.5*delta) if bzoomin else 1 + 0.5*delta
-		$PlanView/Viewport/PlanGUI/Camera.size *= zoomfac
-		$RealPlanCamera/RealCameraBox.scale = Vector3($PlanView/Viewport/PlanGUI/Camera.size, 1.0, $PlanView/Viewport/PlanGUI/Camera.size)
+		var plancamera = $PlanView/Viewport/PlanGUI/Camera
+		plancamera.size *= zoomfac
+		$RealPlanCamera/RealCameraBox.scale = Vector3(plancamera.size, 1.0, plancamera.size)
 
 	if activetargetfloor != null:
 		var floortrim = planviewcontrols.get_node("FloorTrim")

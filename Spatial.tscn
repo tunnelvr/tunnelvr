@@ -1,4 +1,4 @@
-[gd_scene load_steps=223 format=2]
+[gd_scene load_steps=221 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/default_env.tres" type="Environment" id=2]
@@ -52,8 +52,6 @@
 [ext_resource path="res://systems/testmqtt.gd" type="Script" id=50]
 [ext_resource path="res://guimaterials/installbuttonimg.png" type="Texture" id=51]
 [ext_resource path="res://sounds/menu_taping.wav" type="AudioStream" id=52]
-[ext_resource path="res://test.gd" type="Script" id=53]
-[ext_resource path="res://assets/objectscenes/boulder.tscn" type="PackedScene" id=54]
 
 [sub_resource type="CylinderShape" id=1]
 radius = 0.1
@@ -1122,12 +1120,6 @@ collision_mask = 40
 
 [node name="pointersystem" type="Node" parent="Players/PlayerMe"]
 script = ExtResource( 5 )
-
-[node name="toPlanViewSystem" type="RemoteTransform" parent="Players/PlayerMe"]
-remote_path = NodePath("../../../PlanViewSystem")
-update_position = false
-update_rotation = false
-update_scale = false
 
 [node name="toGuiSystem" type="RemoteTransform" parent="Players/PlayerMe"]
 remote_path = NodePath("../../../GuiSystem")
@@ -2721,8 +2713,3 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.409035, 2.78001, -15.0808 )
 use_in_baked_light = true
 mesh = SubResource( 166 )
 material/0 = SubResource( 168 )
-
-[node name="test" type="Spatial" parent="."]
-script = ExtResource( 53 )
-
-[node name="RigidBody" parent="test" instance=ExtResource( 54 )]

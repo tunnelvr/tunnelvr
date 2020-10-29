@@ -188,6 +188,7 @@ func toggleguipanelvisibility(controller_global_transform):
 	if Tglobal.connectiontoserveractive:
 		assert(selfSpatial.playerMe.networkID != 0)
 		selfSpatial.playerMe.rpc("puppetenableguipanel", transform if visible else null)
+
 		if visible and $Viewport/GUI/Panel/Label.text == "":
 			var msg = "NetIDs "+str(selfSpatial.playerMe.networkID)+":"
 			for id in selfSpatial.players_connected_list:

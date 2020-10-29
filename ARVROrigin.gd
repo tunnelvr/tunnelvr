@@ -17,6 +17,9 @@ func setheadtorchlight(torchon):
 		dl.shadow_enabled = not torchon
 	get_node("/root/Spatial/MaterialSystem").adjustmaterialtotorchlight(torchon)
 	get_node("/root/Spatial/SoundSystem").quicksound("ClickSound", $HeadCam.global_transform.origin + $HeadCam.global_transform.basis.y * 0.2)
+	rpc("puppetsetheadtorchlight", torchon)
+	if is_instance_valid(doppelganger):
+		doppelganger.puppetsetheadtorchlight(torchon)
 
 func setdoppelganger(doppelgangeron):
 	if doppelgangeron:
@@ -50,7 +53,11 @@ remote func puppetenablegripmenus(gmlist, gmtransform):
 
 remote func puppetenableguipanel(guitransform):
 	print("puppetenableguipanel nope not master ", guitransform)
-	
+
+remote func puppetsetheadtorchlight(torchon):
+	print("puppetsetheadtorchlight nope not master ", torchon)
+
+
 puppet func bouncedoppelgangerposition(bouncebackID, positiondict):
 	rpc_unreliable_id(bouncebackID, "setdoppelgangerposition", positiondict)
 

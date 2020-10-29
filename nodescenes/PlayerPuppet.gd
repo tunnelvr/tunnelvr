@@ -24,9 +24,9 @@ remote func setavatarposition(positiondict):
 	$AnimationPlayer_setavatarposition_flash.stop()
 	$AnimationPlayer_setavatarposition_flash.play("setavatarposition_flash")
 	if not visible:
-		if "playertransform" in positiondict and "headcamtransform" in positiondict:
-			global_transform = positiondict["playertransform"]
-			$HeadCam.transform = positiondict["headcamtransform"]
+		if "puppetbody" in positiondict:
+			global_transform = positiondict["puppetbody"]["playertransform"]
+			$HeadCam.transform = positiondict["puppetbody"]["headcamtransform"]
 			$headlocator.transform.origin = $HeadCam.transform.origin
 			visible = true
 			Tglobal.soundsystem.quicksound("PlayerArrive", global_transform.origin)
@@ -125,6 +125,10 @@ remote func puppetenableguipanel(guitransform):
 	else:
 		$FakeGuiSystem/GUIPanel3D.visible = false
 
+remote func puppetsetheadtorchlight(torchon):
+	$HeadCam/headtorchcone/headtorchon.visible = torchon
+	$HeadCam/headtorchcone/headtorchon/SpotLight.visible = (Tglobal.arvrinterfacename != "OVRMobile")
+	
 func _process(delta):
 	process_puppetpositionstack(delta)
 	process_puppetpointerpositionstack(delta)
