@@ -56,14 +56,10 @@ remote func setavatarposition(positiondict):
 		dt = relativetimeminmax + remotetimegap_dtmax + 0.05  # was remotetimegapmaxmin, but only gets smooth when it gets to that value
 	
 	var Ltimestamp = positiondict["timestamp"] + dt
-	var puppetbody = { "timestamp":positiondict["timestamp"], "Ltimestamp":Ltimestamp }
-	if positiondict.has("playertransform"):
-		puppetbody["playertransform"] = positiondict["playertransform"]
-	if positiondict.has("headcamtransform"):
-		puppetbody["headcamtransform"] = positiondict["headcamtransform"]
-	if positiondict.has("footstepcount"):
-		puppetbody["footstepcount"] = positiondict["footstepcount"]
-	if puppetbody.has("playertransform") or puppetbody.has("headcamtransform"):
+	if positiondict.has("puppetbody"):
+		var puppetbody = positiondict["puppetbody"]
+		puppetbody["timestamp"] = positiondict["timestamp"]
+		puppetbody["Ltimestamp"] = Ltimestamp
 		while len(puppetpositionstack) > maxstacklength:
 			puppetpositionstack.pop_front()
 		puppetpositionstack.push_back(puppetbody)

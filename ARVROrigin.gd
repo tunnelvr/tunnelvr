@@ -72,17 +72,25 @@ remotesync func playvoicerecording(wavrecording):
 	$HandRight/AudioStreamPlayer3D.stream = stream
 	$HandRight/AudioStreamPlayer3D.play()
 
+func laserpointerdict():
+	return { "orient":$HandRight.pointerposearvrorigin, 
+			 "length": LaserOrient.get_node("Length").scale.z, 
+			 "spotvisible": LaserOrient.get_node("LaserSpot").visible }
+
+var footstepcount = 0
+func puppetbodydict():
+	return { "playertransform":global_transform, 
+			 "headcamtransform":$HeadCam.transform, 
+			 "footstepcount":footstepcount }
+
 func playerpositiondict():
 	var t0 = OS.get_ticks_msec()*0.001
-	return { "timestamp":t0, 
-			 "playertransform":global_transform, 
-			 "headcamtransform":$HeadCam.transform, 
+	return { "timestamp": t0, 
+			 "puppetbody": puppetbodydict(),
 			 "handleft": $HandLeft.handpositiondict(t0), 
 			 "handright": $HandRight.handpositiondict(t0), 
-			 "laserpointer": { "orient":$HandRight.pointerposearvrorigin, 
-							   "length": LaserOrient.get_node("Length").scale.z, 
-							   "spotvisible": LaserOrient.get_node("LaserSpot").visible }
-			}
+			 "laserpointer": laserpointerdict()
+		   }
 
 var Dleftquesthandcontrollername = "unknown"
 var Drightquesthandcontrollername = "unknown"

@@ -80,23 +80,13 @@ func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointert
 
 	elif gripmenupointertargettype == "XCdrawing" and gripmenupointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		var dragable = (gripmenuactivetargetnode != null) and (activetargetwall == pointertargetwall)
-		var delxcable = true # (activetargetwall == pointertargetwall)
-		for xctube in pointertargetwall.xctubesconn:
-			if len(xctube.xcdrawinglink) != 0:
-				delxcable = false
-		gmlist = ["DragXC" if dragable else "", "DelXC" if delxcable else ""]
+		gmlist = ["DragXC" if dragable else "", "DelXC" if pointertargetwall.notubeconnections_so_delxcable() else ""]
 
 	elif gripmenupointertargettype == "Papersheet":
 		gmlist = [ ]
 		
 	elif gripmenupointertargettype == "XCtubesector":
 		var tubesectormaterialname = gripmenupointertargetwall.xcsectormaterials[gripmenuactivetargettubesectorindex]
-		#var xcdrawings = get_node("/root/Spatial/SketchSystem/XCdrawings")
-		#var xcdrawing0 = xcdrawings.get_node(gripmenupointertargetwall.xcname0)
-		#var xcdrawing1 = xcdrawings.get_node(gripmenupointertargetwall.xcname1)
-		#var xcgcomm = "SelectXC"
-		#if xcdrawing0.get_node("XCdrawingplane").visible and xcdrawing1.get_node("XCdrawingplane").visible:
-		#	xcgcomm = "HideXC"
 		if activetargetwall == get_node("/root/Spatial/PlanViewSystem"):
 			pass
 		elif is_instance_valid(activetargetwall) and len(activetargetwall.nodepoints) == 0:
@@ -107,7 +97,7 @@ func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointert
 			gmlist = ["DelTube", "NewXC", "SelectXC", "HideXC", "materials"]
 
 	elif gripmenupointertargettype == "XCnode":
-		gmlist = ["NewXC"]
+		gmlist = ["NewXC", "DelXC" if pointertargetwall.notubeconnections_so_delxcable() else ""]
 
 	else:
 		gmlist = ["NewXC", "Undo"]

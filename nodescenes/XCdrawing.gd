@@ -437,6 +437,11 @@ func updatexctubeshell(xcdrawings, makevisible):
 		$XCflatshell.visible = false
 		$XCflatshell/CollisionShape.disabled = true
 		
+func notubeconnections_so_delxcable():
+	for xctube in xctubesconn:
+		if len(xctube.xcdrawinglink) != 0:
+			return false
+	return true
 
 func xcdfullsetvisibilitycollision(bvisible):
 	visible = bvisible

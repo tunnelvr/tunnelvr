@@ -71,7 +71,7 @@ func _physics_process(delta):
 				#playerdirectedwalkingvelocity = -playerdirectedwalkingvelocity
 				playerdirectedwalkingvelocity = Vector3(HeadCam.global_transform.basis.z.x, 0, HeadCam.global_transform.basis.z.z).normalized()*walkspeed
 
-	elif not Tglobal.questhandtrackingactive and not Tglobal.controlslocked:
+	elif not Tglobal.questhandtrackingactive and not Tglobal.controlslocked and abs(joypos.y) > 0.2:
 		if not playerdirectedflight: 
 			var dir = Vector3(HeadCam.global_transform.basis.z.x, 0, HeadCam.global_transform.basis.z.z)
 			playerdirectedwalkingvelocity = dir.normalized()*(-joypos.y*walkspeed)

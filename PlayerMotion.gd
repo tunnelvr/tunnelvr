@@ -73,7 +73,6 @@ func _ready():
 
 	$PlayerEnlargedKinematicBody/PlayerBodyCapsule.shape.radius = playerheadbodyradius + flyingkinematicenlargement
 
-var footstepcount = 0
 const footsteplength = 0.4
 const footstepduration = 0.5
 var prevfootsteptimestamp = 0
@@ -103,7 +102,7 @@ func _physics_process(delta):
 	if physicsprocessTimeStamp - prevfootsteptimestamp > footstepduration:
 		var footstepposition = HeadCentre.global_transform.origin - Vector3(0, playerbodyverticalheight - playerheadbodyradius, 0)
 		if prevfootstepposition.distance_to(footstepposition) > footsteplength:
-			footstepcount += 1
+			playerMe.footstepcount += 1
 			prevfootsteptimestamp = physicsprocessTimeStamp
 			prevfootstepposition = footstepposition
 
@@ -346,27 +345,25 @@ func filter_playerposition_bandwidth(positiondict):
 	if dt > dtmax:
 		prevpositiondict = positiondict.duplicate(true)
 		return positiondict
-	if transformwithinrange(prevpositiondict["playertransform"], positiondict["playertransform"], headpositionchange, headanglechange):
-		positiondict.erase("playertransform")
+	if transformwithinrange(prevpositiondict["puppetbody"]["playertransform"], positiondict["puppetbody"]["playertransform"], headpositionchange, headanglechange) and \
+	   transformwithinrange(prevpositiondict["puppetbody"]["headcamtransform"], positiondict["puppetbody"]["headcamtransform"], headpositionchange, headanglechange):
+		positiondict.erase("puppetbody")
 	else:
-		prevpositiondict["playertransform"] = positiondict["playertransform"]
-	if transformwithinrange(prevpositiondict["headcamtransform"], positiondict["headcamtransform"], headpositionchange, headanglechange):
-		positiondict.erase("headcamtransform")
-	else:
-		prevpositiondict["headcamtransform"] = positiondict["headcamtransform"]
+		prevpositiondict["puppetbody"] = positiondict["puppetbody"].duplicate()
 
-	if transformwithinrange(prevpositiondict["laserpointer"]["orient"], positiondict["laserpointer"]["orient"], pointerpositionchange, pointeranglechange) and abs(prevpositiondict["laserpointer"]["length"] - positiondict["laserpointer"]["length"]) < pointerpositionchange and prevpositiondict["laserpointer"]["spotvisible"] == positiondict["laserpointer"]["spotvisible"]:
+	if transformwithinrange(prevpositiondict["laserpointer"]["orient"], positiondict["laserpointer"]["orient"], pointerpositionchange, pointeranglechange) and \
+	   abs(prevpositiondict["laserpointer"]["length"] - positiondict["laserpointer"]["length"]) < pointerpositionchange and \
+	   prevpositiondict["laserpointer"]["spotvisible"] == positiondict["laserpointer"]["spotvisible"]:
 		positiondict.erase("laserpointer")
 	else:
 		prevpositiondict["laserpointer"] = positiondict["laserpointer"].duplicate()
-
 		
 	if filter_playerhand_bandwidth(prevpositiondict["handleft"], positiondict["handleft"]):
 		positiondict.erase("handleft")
 	if filter_playerhand_bandwidth(prevpositiondict["handright"], positiondict["handright"]):
 		positiondict.erase("handright")
 	
-	if not positiondict.has("playertransform") and not positiondict.has("headcamtransform") and not positiondict.has("handleft") and not positiondict.has("handright"):
+	if not positiondict.has("puppetbody") and not positiondict.has("handleft") and not positiondict.has("handright"):
 		return null
 	#prevpositiondict["timestamp"] = positiondict["timestamp"]
 	return positiondict
@@ -376,15 +373,15 @@ func process_shareplayerposition():
 	var doppelganger = playerMe.doppelganger
 	if is_instance_valid(playerMe.doppelganger) or Tglobal.morethanoneplayer:
 		var positiondict = playerMe.playerpositiondict()
-		positiondict["footstepcount"] = footstepcount
 		positiondict = filter_playerposition_bandwidth(positiondict)
 		if positiondict != null:
 			if Tglobal.morethanoneplayer:
 				playerMe.rpc_unreliable("setavatarposition", positiondict)
 			if is_instance_valid(playerMe.doppelganger):
-				if positiondict.has("playertransform"):
-					positiondict["playertransform"] = Transform(Basis(-positiondict["playertransform"].basis.x, positiondict["playertransform"].basis.y, -positiondict["playertransform"].basis.z), 
-																Vector3(doppelganger.global_transform.origin.x, positiondict["playertransform"].origin.y, doppelganger.global_transform.origin.z))
+				if positiondict.has("puppetbody") and positiondict["puppetbody"].has("playertransform"):
+					var playertransform = positiondict["puppetbody"]["playertransform"]
+					positiondict["puppetbody"]["playertransform"] = Transform(Basis(-playertransform.basis.x, playertransform.basis.y, -playertransform.basis.z), 
+																			  Vector3(doppelganger.global_transform.origin.x, playertransform.origin.y, doppelganger.global_transform.origin.z))
 				if playerMe.bouncetestnetworkID != 0:
 					playerMe.rpc_unreliable_id(playerMe.bouncetestnetworkID, "bouncedoppelgangerposition", playerMe.networkID, positiondict)
 				else:
