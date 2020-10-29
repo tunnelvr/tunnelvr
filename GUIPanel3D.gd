@@ -36,8 +36,9 @@ func _on_buttonsave_pressed():
 	sketchsystem.savesketchsystem(savegamefilenameU)
 	$Viewport/GUI/Panel/Label.text = "Sketch Saved"
 	Tglobal.soundsystem.quicksound("MenuClick", collision_point)
-
-func _on_buttonplanview_toggled(button_pressed):
+	
+func _on_buttonplanview_pressed():
+	var button_pressed = $Viewport/GUI/Panel/ButtonPlanView.pressed
 	get_node("/root/Spatial/PlanViewSystem").setplanviewvisible(button_pressed, global_transform, $Quad.mesh.size)
 	$Viewport/GUI/Panel/Label.text = "Planview on" if button_pressed else "Planview off"
 	Tglobal.soundsystem.quicksound("MenuClick", collision_point)
@@ -135,7 +136,7 @@ func _ready():
 	
 	$Viewport/GUI/Panel/ButtonLoad.connect("pressed", self, "_on_buttonload_pressed")
 	$Viewport/GUI/Panel/ButtonSave.connect("pressed", self, "_on_buttonsave_pressed")
-	$Viewport/GUI/Panel/ButtonPlanView.connect("toggled", self, "_on_buttonplanview_toggled")
+	$Viewport/GUI/Panel/ButtonPlanView.connect("pressed", self, "_on_buttonplanview_pressed")
 	$Viewport/GUI/Panel/ButtonHeadtorch.connect("toggled", self, "_on_buttonheadtorch_toggled")
 	$Viewport/GUI/Panel/ButtonDoppelganger.connect("toggled", self, "_on_buttondoppelganger_toggled")
 	$Viewport/GUI/Panel/ButtonSwapControllers.connect("pressed", self, "_on_buttonswapcontrollers_pressed")

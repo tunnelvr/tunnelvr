@@ -131,7 +131,7 @@ func actsketchchange(xcdatalist):
 	var playerMe = get_node("/root/Spatial").playerMe
 	xcdatalist[0]["networkIDsource"] = playerMe.networkID
 	xcdatalist[0]["datetime"] = OS.get_datetime()
-	actsketchchangeL(xcdatalist)
+	actsketchchangeL(xcdatalist)  # <--- the main function you want to step into
 	if true or Tglobal.connectiontoserveractive:
 		var sendrpc = true
 		if combinabletransformposchange(xcdatalist):  # made from targetwalltransformpos()
@@ -274,7 +274,12 @@ remote func actsketchchangeL(xcdatalist):
 				plancamera.size = xcdata["planview"]["plancamerasize"]
 				planviewsystem.get_node("RealPlanCamera/RealCameraBox").scale = Vector3(plancamera.size, 1.0, plancamera.size)
 			if "transformpos" in xcdata["planview"]:
-				planviewsystem.global_transform = xcdata["planview"]["transformpos"]
+				planviewsystem.get_node("PlanView").global_transform = xcdata["planview"]["transformpos"]
+			if "visible" in xcdata["planview"]:
+				planviewsystem.visible = xcdata["planview"]["visible"]
+				planviewsystem.get_node("PlanView/CollisionShape").disabled = not planviewsystem.visible
+				var guipanel3d = get_node("/root/Spatial/GuiSystem/GUIPanel3D")
+				guipanel3d.get_node("Viewport/GUI/Panel/ButtonPlanView").pressed = planviewsystem.visible
 
 		elif "xcvizstates" in xcdata:
 			if Tglobal.printxcdrawingfromdatamessages:

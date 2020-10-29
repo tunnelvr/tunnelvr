@@ -141,17 +141,15 @@ func toggleplanviewactive():
 			sketchsystem.actsketchchange([getactivetargetfloorViz("")])
 
 func setplanviewvisible(planviewvisible, guidpaneltransform, guidpanelsize):
+	var sketchsystem = get_node("/root/Spatial/SketchSystem")
 	if planviewvisible:
 		var paneltrans = $PlanView.global_transform
 		paneltrans.origin = guidpaneltransform.origin + guidpaneltransform.basis.y*(guidpanelsize.y/2) + Vector3(0,$PlanView/ProjectionScreen/ImageFrame.mesh.size.y/2,0)
 		var eyepos = get_node("/root/Spatial").playerMe.get_node("HeadCam").global_transform.origin
 		paneltrans = paneltrans.looking_at(eyepos + 2*(paneltrans.origin-eyepos), Vector3(0, 1, 0))
-		$PlanView.global_transform = paneltrans
-		visible = true
-		$PlanView/CollisionShape.disabled = false
+		sketchsystem.actsketchchange([{ "planview":{ "transformpos":paneltrans, "visible":true } } ])
 	else:
-		visible = false	
-		$PlanView/CollisionShape.disabled = true
+		sketchsystem.actsketchchange([{"planview": { "visible":false}} ])
 
 var slowviewportframeratecountdown = 1
 func _process(delta):
@@ -177,7 +175,7 @@ func _process(delta):
 		var plancamera = $PlanView/Viewport/PlanGUI/Camera
 		planviewpositiondict["plancamerasize"] = plancamera.size * zoomfac
 	if not planviewpositiondict.empty():
-		var sketchsystem = get_node("/root/Spatial/SketchSystem")		
+		var sketchsystem = get_node("/root/Spatial/SketchSystem")
 		sketchsystem.actsketchchange([{"planview":planviewpositiondict}])
 
 	if activetargetfloor != null:
@@ -217,7 +215,7 @@ func _process(delta):
 				imgtrim["imgtrimrightup"] = Vector2(clamp(imgtrim["imgtrimrightup"].x + joypostrimru.x*sfac, imgtrim["imgtrimleftdown"].x+0.1, imgtrim["imgwidth"]*0.5), 
 													clamp(imgtrim["imgtrimrightup"].y + joypostrimru.y*sfac, imgtrim["imgtrimleftdown"].y+0.1, imgheight*0.5))
 			var sketchsystem = get_node("/root/Spatial/SketchSystem")
-			sketchsystem.actsketchchange([txcdata])  # step through this and make the 
+			sketchsystem.actsketchchange([txcdata])
 	
 func buttoncentre_pressed():
 	var headcam = get_node("/root/Spatial").playerMe.get_node("HeadCam")
