@@ -2,8 +2,9 @@ extends Spatial
 
 var networkID = 0
 
-var puppetpositionstack = [ ]  # [ { "timestamp", "Ltimestamp", "playertransform", "headcamtransform" } ] 
+var puppetpositionstack = [ ]         # [ { "timestamp", "Ltimestamp", "playertransform", "headcamtransform" } ] 
 var puppetpointerpositionstack = [ ]  # [ { "timestamp", "Ltimestamp", "orient", "length", "spotvisible" } ] 
+
 
 remote func initplayerpuppet(playerishandtracked):
 	$HandLeft.initpuppetracking(playerishandtracked)
@@ -181,7 +182,6 @@ func process_puppetpointerpositionstack(delta):
 		$LaserOrient.transform = Transform(pp["orient"].basis.slerp(pp1["orient"].basis, lam), lerp(pp["orient"].origin, pp1["orient"].origin, lam)) 
 		$LaserOrient/Length.scale.z = lerp(pp["length"], pp1["length"], lam)
 		#$LaserOrient/LaserSpot.scale.z = pp["laserpointer"]["spotvisible"]
-
 
 puppet func bouncedoppelgangerposition(bouncebackID, positiondict):
 	get_parent().get_parent().playerMe.rpc_unreliable_id(bouncebackID, "setdoppelgangerposition", positiondict)

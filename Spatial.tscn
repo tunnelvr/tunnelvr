@@ -1,4 +1,4 @@
-[gd_scene load_steps=221 format=2]
+[gd_scene load_steps=220 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/default_env.tres" type="Environment" id=2]
@@ -52,10 +52,6 @@
 [ext_resource path="res://systems/testmqtt.gd" type="Script" id=50]
 [ext_resource path="res://guimaterials/installbuttonimg.png" type="Texture" id=51]
 [ext_resource path="res://sounds/menu_taping.wav" type="AudioStream" id=52]
-
-[sub_resource type="CylinderShape" id=1]
-radius = 0.1
-height = 0.18
 
 [sub_resource type="CubeMesh" id=2]
 size = Vector3( 0.35, 0.01, 0.01 )
@@ -1043,6 +1039,7 @@ albedo_color = Color( 0.168627, 0.972549, 0.027451, 1 )
 
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
+enablevr = false
 usewebsockets = false
 
 [node name="Players" type="Spatial" parent="."]
@@ -1067,18 +1064,6 @@ spot_range = 721.6
 spot_attenuation = 0.378929
 spot_angle = 34.3
 spot_angle_attenuation = 1.27456
-
-[node name="ChinHotspot" type="StaticBody" parent="Players/PlayerMe/HeadCam"]
-transform = Transform( -0.999123, -0.0418758, 0, 0.0271606, -0.648029, -0.761131, 0.031873, -0.760463, 0.648598, 0, -0.115856, 0.0245671 )
-collision_layer = 1024
-collision_mask = 0
-
-[node name="CollisionShape" type="CollisionShape" parent="Players/PlayerMe/HeadCam/ChinHotspot"]
-transform = Transform( 1, -1.86265e-09, 0, -1.86265e-09, 1, 0, -1.86265e-09, 2.98023e-08, 1, 0, 0, 0 )
-shape = SubResource( 1 )
-
-[node name="toLabelGenerator" type="RemoteTransform" parent="Players/PlayerMe/HeadCam"]
-remote_path = NodePath("../../../../LabelGenerator")
 
 [node name="HeadCentre" type="MeshInstance" parent="Players/PlayerMe/HeadCam"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.051, 0.085 )
@@ -2160,6 +2145,29 @@ text = "V"
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="Scalebar" type="Control" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
+margin_left = 567.1
+margin_top = -39.598
+margin_right = 607.1
+margin_bottom = 0.402039
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="scalerect" type="ColorRect" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/Scalebar"]
+margin_left = 1.68372
+margin_top = 17.3981
+margin_right = 229.684
+margin_bottom = 32.3981
+color = Color( 0.0745098, 0.564706, 0.858824, 1 )
+
+[node name="scalelabel" type="Label" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/Scalebar"]
+margin_left = -72.3987
+margin_top = 15.1532
+margin_right = -2.39874
+margin_bottom = 37.1532
+text = "Scale: 1m"
 
 [node name="ViewportReal" type="Viewport" parent="PlanViewSystem/PlanView"]
 size = Vector2( 800, 800 )

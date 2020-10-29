@@ -363,19 +363,6 @@ func filter_playerposition_bandwidth(positiondict):
 	if filter_playerhand_bandwidth(prevpositiondict["handright"], positiondict["handright"]):
 		positiondict.erase("handright")
 		
-	if prevpositiondict.has("planview"):
-		if positiondict.has("planview"):
-			if transformwithinrange(prevpositiondict["planview"]["paneltrans"], positiondict["planview"]["paneltrans"], pointerpositionchange, pointeranglechange) and \
-			   transformwithinrange(prevpositiondict["planview"]["plancameratrans"], positiondict["planview"]["plancameratrans"], pointerpositionchange, pointeranglechange) and \
-			   abs(prevpositiondict["planview"]["plancameratrans"].scale.x - positiondict["planview"]["plancameratrans"].scale.x) < 0.01:
-				positiondict.erase("planview")
-			else:
-				prevpositiondict["planview"] = positiondict["planview"].duplicate()
-		else:
-			prevpositiondict.erase("planview")
-	elif positiondict.has("planview"):
-		prevpositiondict["planview"] = positiondict["planview"].duplicate()
-	
 	if not positiondict.has("puppetbody") and not positiondict.has("planview") and \
 	   not positiondict.has("handleft") and not positiondict.has("handright"):
 		return null
@@ -388,8 +375,6 @@ func process_shareplayerposition():
 	var doppelganger = playerMe.doppelganger
 	if is_instance_valid(playerMe.doppelganger) or Tglobal.morethanoneplayer:
 		var positiondict = playerMe.playerpositiondict()
-		if planviewsystem.visible:
-			positiondict["planview"] = planviewsystem.planviewpositiondict()
 		positiondict = filter_playerposition_bandwidth(positiondict)
 		if positiondict != null:
 			if Tglobal.morethanoneplayer:

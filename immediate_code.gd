@@ -13,3 +13,6 @@ func _run():
 	var papertexture = ImageTexture.new()
 	papertexture.create_from_image(a)
 	print(papertexture.get_width())
+	var x = {1:2}
+	x.erase(1)
+	print(x.empty())

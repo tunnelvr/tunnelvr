@@ -119,7 +119,8 @@ func _ready():
 	$RealPlanCamera.set_as_toplevel(true)
 	planviewcontrols.get_node("ZoomView/ButtonCentre").connect("pressed", self, "buttoncentre_pressed")
 	call_deferred("readydeferred")
-
+	set_process(visible)
+		
 func readydeferred():
 	tree.connect("button_pressed", self, "fetchbuttonpressed")
 	var root = tree.create_item()
@@ -152,11 +153,20 @@ func setplanviewvisible(planviewvisible, guidpaneltransform, guidpanelsize):
 		visible = false	
 		$PlanView/CollisionShape.disabled = true
 
-#planviewsystem.visible
-func planviewpositiondict():
-	return { "paneltrans":$PlanView.global_transform,
-			 "plancameratrans": $PlanView/Viewport/PlanGUI/Camera.transform 
-		   }
+func setplanviewcamera(planviewpositiondict, planviewpositiondict1, lam):
+	var plancamera = $PlanView/Viewport/PlanGUI/Camera
+	if "plancamerapos" in planviewpositiondict:
+		if planviewpositiondict1 == null:
+			plancamera.translation = planviewpositiondict["plancamerapos"]
+		else:
+			plancamera.translation = lerp(planviewpositiondict["plancamerapos"], planviewpositiondict1["plancamerapos"], lam)
+			
+	if "plancamerasize" in planviewpositiondict:
+		if planviewpositiondict1 == null:
+			plancamera.size = planviewpositiondict["plancamerasize"]
+		else:
+			plancamera.size = lerp(planviewpositiondict["plancamerasize"], planviewpositiondict1["plancamerasize"], lam)
+		$RealPlanCamera/RealCameraBox.scale = Vector3(plancamera.size, 1.0, plancamera.size)
 
 var slowviewportframeratecountdown = 1
 func _process(delta):
@@ -169,18 +179,20 @@ func _process(delta):
 	var viewslide = planviewcontrols.get_node("ViewSlide")
 	var joypos = Vector2((-1 if viewslide.get_node("ButtonSlideLeft").is_pressed() else 0) + (1 if viewslide.get_node("ButtonSlideRight").is_pressed() else 0), 
 						 (-1 if viewslide.get_node("ButtonSlideDown").is_pressed() else 0) + (1 if viewslide.get_node("ButtonSlideUp").is_pressed() else 0))
+
+	var planviewpositiondict = { }
 	if joypos != Vector2(0, 0):
 		var plancamera = $PlanView/Viewport/PlanGUI/Camera
-		plancamera.translation += Vector3(joypos.x, 0, -joypos.y)*plancamera.size/2*delta
-
+		planviewpositiondict["plancamerapos"] = plancamera.translation + Vector3(joypos.x, 0, -joypos.y)*plancamera.size/2*delta
 	var zoomview = planviewcontrols.get_node("ZoomView")
 	var bzoomin = zoomview.get_node("ButtonZoomIn").is_pressed()
 	var bzoomout = zoomview.get_node("ButtonZoomOut").is_pressed()
 	if bzoomin or bzoomout:
 		var zoomfac = 1/(1 + 0.5*delta) if bzoomin else 1 + 0.5*delta
 		var plancamera = $PlanView/Viewport/PlanGUI/Camera
-		plancamera.size *= zoomfac
-		$RealPlanCamera/RealCameraBox.scale = Vector3(plancamera.size, 1.0, plancamera.size)
+		planviewpositiondict["plancamerasize"] = plancamera.size * zoomfac
+	if not planviewpositiondict.empty():
+		setplanviewcamera(planviewpositiondict, null, 0)
 
 	if activetargetfloor != null:
 		var floortrim = planviewcontrols.get_node("FloorTrim")
@@ -223,7 +235,8 @@ func _process(delta):
 	
 func buttoncentre_pressed():
 	var headcam = get_node("/root/Spatial").playerMe.get_node("HeadCam")
-	$PlanView/Viewport/PlanGUI/Camera.translation = Vector3(headcam.global_transform.origin.x, $PlanView/Viewport/PlanGUI/Camera.translation.y, headcam.global_transform.origin.z)
+	var planviewpositiondict = { "plancamerapos":Vector3(headcam.global_transform.origin.x, $PlanView/Viewport/PlanGUI/Camera.translation.y, headcam.global_transform.origin.z) }
+	setplanviewcamera(planviewpositiondict, null, 0)
 
 func checkplanviewinfront(handrightcontroller):
 	var planviewsystem = self
