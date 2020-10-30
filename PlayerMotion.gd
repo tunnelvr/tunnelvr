@@ -393,7 +393,6 @@ func process_shareplayerposition():
 						positiondict["handleft"] = positiondict["handleft"].duplicate(true)
 					doppelganger.setavatarposition(positiondict)
 
-
 func makeboulderchoke(N):
 	var boulderclutter = get_node("/root/Spatial/BoulderClutter")
 	var HandRight = playerMe.get_node("HandRight")

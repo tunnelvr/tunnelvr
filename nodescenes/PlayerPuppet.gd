@@ -1,15 +1,25 @@
 extends Spatial
 
 var networkID = 0
+var playerplatform = ""
 
 var puppetpositionstack = [ ]         # [ { "timestamp", "Ltimestamp", "playertransform", "headcamtransform" } ] 
 var puppetpointerpositionstack = [ ]  # [ { "timestamp", "Ltimestamp", "orient", "length", "spotvisible" } ] 
 
-
-remote func initplayerpuppet(playerishandtracked):
-	$HandLeft.initpuppetracking(playerishandtracked)
-	$HandRight.initpuppetracking(playerishandtracked)
-
+remote func initplayerappearance(lplayerplatform, headcolour):
+	playerplatform = lplayerplatform
+	get_node("HeadCam/csgheadmesh/skullcomponent").material.albedo_color = headcolour
+	#if playerplatform == "PC":
+	#	get_node("HeadCam/csgheadmesh").mesh.size.x = 0.15
+	if playerplatform == "Quest":
+		get_node("HeadCam/visorline").visible = true
+		get_node("HeadCam/visorline").material.albedo_color = headcolour
+	elif playerplatform == "Vive":
+		get_node("HeadCam/visorline").visible = true
+		get_node("HeadCam/visorline").get_surface_material(0).albedo_color = Color(0, 0, 0.3)
+	else:
+		get_node("HeadCam/visorline").visible = false
+	
 # reltime is localtime - remotetime.  More delay means message sent earlier, means bigger number. Find smallest filtering any outliers
 var relativetimeminmax = 0
 var remotetimegapmaxmin = 0

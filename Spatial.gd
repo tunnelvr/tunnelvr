@@ -74,9 +74,6 @@ func setnetworkidnamecolour(player, networkID):
 	player.networkID = networkID
 	player.set_network_master(networkID)
 	player.set_name("NetworkedPlayer"+String(networkID))
-	var headcolour = Color.from_hsv((networkID%10000)/10000.0, 0.5 + (networkID%2222)/6666.0, 0.75)
-	print("Head color ", headcolour)
-	player.get_node("HeadCam/csgheadmesh/skullcomponent").material.albedo_color = headcolour
 	
 func _ready():
 	print("  Available Interfaces are %s: " % str(ARVRServer.get_interfaces()));
@@ -88,6 +85,7 @@ func _ready():
 		# export Linux/X11 runable, go into directory and run
 		# ../../Godot_v3.2.3-stable_linux_server.64 --main-pack linuxserverversion.pck	
 		# Using Ubuntu App on Windows to get the command line
+		playerMe.playerplatform = "Server"
 		
 	elif checkloadinterface("OVRMobile"):  # ignores enablevr flag on quest platform
 		print("found quest, initializing")
@@ -103,6 +101,7 @@ func _ready():
 			print("  Success initializing Quest Interface.")
 		else:
 			Tglobal.arvrinterface = null
+		playerMe.playerplatform = "Quest"
 
 	elif enablevr and checkloadinterface("Oculus"):
 		print("  Found Oculus Interface.");
@@ -115,6 +114,7 @@ func _ready():
 			# C:/Users/henry/Appdata/Local/Android/Sdk/platform-tools/adb.exe logcat -s VrApi
 		else:
 			Tglobal.arvrinterface = null
+		playerMe.playerplatform = "Rift"
 				
 	elif enablevr and checkloadinterface("OpenVR"):
 		print("found openvr, initializing")
@@ -130,6 +130,7 @@ func _ready():
 			print("  Success initializing OpenVR Interface.");
 		else:
 			Tglobal.arvrinterface = null
+		playerMe.playerplatform = "Vive"
 				
 	elif enablevr and false and checkloadinterface("Native mobile"):
 		print("found nativemobile, initializing")
@@ -140,8 +141,12 @@ func _ready():
 			viewport.transparent_bg = true       # <--- For the AR
 			Tglobal.arvrinterface.k1 = 0.2       # Lens distortion constants
 			Tglobal.arvrinterface.k2 = 0.23
+
+	else:
+		playerMe.playerplatform = "PC"
 	
 	$PlanViewSystem.transferintorealviewport((not enablevr) and planviewonly)
+	playerMe.initplayerappearance_me()
 	
 	Tglobal.VRoperating = (Tglobal.arvrinterfacename != "none")
 	if Tglobal.VRoperating:
@@ -173,8 +178,7 @@ func _ready():
 		$SketchSystem.changetubedxcsvizmode()
 		$SketchSystem.updateworkingshell()
 	elif true:
-		$SketchSystem.loadsketchsystem("res://surveyscans/smallirebysave.res")
-		#loadsketchsystem("res://surveyscans/ireby2save.res")
+		$SketchSystem.loadsketchsystemL("res://surveyscans/smallirebysave.res")
 	else:
 		pass
 	playerMe.global_transform.origin.y += 5
@@ -212,7 +216,7 @@ func _player_connected(id):
 	Tglobal.morethanoneplayer = $Players.get_child_count() >= 2
 	print(" playerMe networkID ", playerMe.networkID, " ", get_tree().get_network_unique_id())
 	assert(playerMe.networkID != 0)
-	playerMe.rpc_id(id, "initplayerpuppet", (ovr_hand_tracking != null))
+	playerMe.rpc_id(id, "initplayerappearance", playerMe.playerplatform, playerMe.get_node("HeadCam/csgheadmesh/skullcomponent").material.albedo_color)
 	players_connected_list.push_back(id)
 	$GuiSystem/GUIPanel3D/Viewport/GUI/Panel/Label.text = "player "+String(id)+" connected"
 	if not Tglobal.controlslocked:
@@ -222,14 +226,12 @@ func _player_connected(id):
 		print("Converting sketchsystemtodict")
 		var sketchdatadict = $SketchSystem.sketchsystemtodict()
 		assert(playerMe.networkID != 0)
-		#$SketchSystem.rpc_id(id, "sketchsystemfromdict", sketchdatadict)
 		print("Generating sketchdicttochunks")
 		var xcdatachunks = $SketchSystem.sketchdicttochunks(sketchdatadict)
 		print("Generated ", len(xcdatachunks), " chunks")
 		for xcdatachunk in xcdatachunks:
 			$SketchSystem.rpc_id(id, "actsketchchangeL", xcdatachunk)
 			yield(get_tree().create_timer(0.2), "timeout")
-
 	
 func _player_disconnected(id):
 	print("_player_disconnected ", id)
@@ -259,7 +261,7 @@ func _connected_to_server():
 	print("SETTING connectiontoserveractive true now")
 	Tglobal.connectiontoserveractive = true
 	assert(playerMe.networkID != 0)
-	playerMe.rpc("initplayerpuppet", (ovr_hand_tracking != null))
+	playerMe.rpc("initplayerappearance", playerMe.playerplatform, playerMe.get_node("HeadCam/csgheadmesh/skullcomponent").material.albedo_color)
 
 	while len(deferred_player_connected_list) != 0:
 		var id = deferred_player_connected_list.pop_front()

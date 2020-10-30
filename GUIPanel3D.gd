@@ -261,11 +261,10 @@ func guipanelreleasemouse():
 func _input(event):
 	if event is InputEventKey and event.pressed:
 		if event.scancode == KEY_L:
-			#sketchsystem.loadsketchsystem(savegamefile)
 			_on_buttonload_pressed()
 		#elif event.scancode == KEY_S:
 		#	sketchsystem.savesketchsystem()
-		elif event.scancode == KEY_D:
+		elif event.scancode == KEY_G:
 			$Viewport/GUI/Panel/ButtonDoppelganger.pressed = not $Viewport/GUI/Panel/ButtonDoppelganger.pressed
 			_on_buttondoppelganger_toggled($Viewport/GUI/Panel/ButtonDoppelganger.pressed)	
 		elif event.scancode == KEY_O:

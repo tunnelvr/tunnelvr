@@ -3,10 +3,20 @@ extends ARVROrigin
 var doppelganger = null 
 
 var networkID = 0
+var playerplatform = ""
+
 var bouncetestnetworkID = 0
 onready var LaserOrient = get_node("/root/Spatial/BodyObjects/LaserOrient")
 var ovr_hand_tracking = null
 onready var guipanel3d = get_node("/root/Spatial/GuiSystem/GUIPanel3D")
+
+func initplayerappearance_me():
+	var d = OS.get_unix_time()
+	var headcolour = Color.from_hsv((d%10000)/10000.0, 0.5 + (d%2222)/6666.0, 0.75)
+	if playerplatform == "Server":
+		headcolour = Color(0.01, 0.01, 0.05)
+	print("Head color ", headcolour, " ", [OS.get_unique_id()])
+	get_node("HeadCam/csgheadmesh/skullcomponent").material.albedo_color = headcolour
 
 func setheadtorchlight(torchon):
 	$HeadCam/HeadtorchLight.visible = torchon
@@ -28,7 +38,8 @@ func setdoppelganger(doppelgangeron):
 			doppelganger.set_name("Doppelganger")
 			doppelganger.get_node("HeadCam/csgheadmesh/skullcomponent").material.albedo_color = get_node("HeadCam/csgheadmesh/skullcomponent").material.albedo_color
 			get_parent().add_child(doppelganger)
-			doppelganger.initplayerpuppet(ovr_hand_tracking != null)
+			doppelganger.initplayerappearance(playerplatform, get_node("HeadCam/csgheadmesh/skullcomponent").material.albedo_color)
+
 		doppelganger.visible = true
 		doppelganger.global_transform.origin = $HeadCam.global_transform.origin - 3*Vector3($HeadCam.global_transform.basis.z.x, 0, $HeadCam.global_transform.basis.z.z).normalized()
 		Tglobal.soundsystem.quicksound("PlayerArrive", doppelganger.global_transform.origin)

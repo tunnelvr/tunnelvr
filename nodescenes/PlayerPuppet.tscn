@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=2]
+[gd_scene load_steps=21 format=2]
 
 [ext_resource path="res://nodescenes/PlayerPuppet.gd" type="Script" id=1]
 [ext_resource path="res://HandScript.gd" type="Script" id=2]
@@ -36,6 +36,13 @@ emission = Color( 0.956863, 0.878431, 0.027451, 1 )
 emission_energy = 0.87
 emission_operator = 0
 emission_on_uv2 = false
+
+[sub_resource type="PrismMesh" id=15]
+size = Vector3( 0.01, 0.01, 0.2 )
+
+[sub_resource type="SpatialMaterial" id=16]
+resource_local_to_scene = true
+albedo_color = Color( 1, 0.0156863, 0.0156863, 1 )
 
 [sub_resource type="CubeMesh" id=7]
 size = Vector3( 0.1, 50, 0.1 )
@@ -145,6 +152,11 @@ spot_angle_attenuation = 1.27456
 __meta__ = {
 "_editor_description_": ""
 }
+
+[node name="visorline" type="MeshInstance" parent="HeadCam"]
+transform = Transform( 2.65432e-14, -1.62921e-07, 1, -1, -1.62921e-07, 0, 1.62921e-07, -1, -1.62921e-07, 1.4521e-08, 0.0545774, -0.0445647 )
+mesh = SubResource( 15 )
+material/0 = SubResource( 16 )
 
 [node name="headlocator" type="Spatial" parent="."]
 

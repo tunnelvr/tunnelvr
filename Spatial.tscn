@@ -1042,7 +1042,6 @@ albedo_color = Color( 0.168627, 0.972549, 0.027451, 1 )
 
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
-enablevr = false
 usewebsockets = false
 
 [node name="Players" type="Spatial" parent="."]
@@ -1187,7 +1186,7 @@ margin_top = 43.0
 margin_right = 196.0
 margin_bottom = 70.0
 text = "savegame.res"
-items = [ "savegame.res", null, false, 0, null, "savegame2.res", null, false, 1, null, "savegame3.res", null, false, 2, null, "server/savegame.res", null, false, 3, null, "server/savegame2.res", null, false, 4, null, "server/savegame3.res", null, false, 5, null ]
+items = [ "savegame.res", null, false, 0, null, "savegame2.res", null, false, 1, null, "savegame3.res", null, false, 2, null, "server/savegame.res", null, false, 3, null, "server/savegame2.res", null, false, 4, null, "server/savegame3.res", null, false, 5, null, "savegame4.res", null, false, 6, null ]
 selected = 0
 __meta__ = {
 "_edit_use_anchors_": false
