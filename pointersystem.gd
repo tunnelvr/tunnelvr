@@ -106,6 +106,8 @@ func setactivetargetwall(newactivetargetwall):
 	
 	activetargetwall = newactivetargetwall
 	activetargetwallgrabbedtransform = null
+	if (activetargetwall == get_node("/root/Spatial/PlanViewSystem")):
+		print("Waaat")
 	
 	LaserOrient.get_node("RayCast").collision_mask = CollisionLayer.CL_Pointer | CollisionLayer.CL_PointerFloor | CollisionLayer.CL_CaveWall | CollisionLayer.CL_CaveWallTrans
 	if activetargetwall != null and activetargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
@@ -348,13 +350,13 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 		clearactivetargetnode()
 		var alaserspot = activelaserroot.get_node("LaserSpot")
 		alaserspot.global_transform.origin = pointertargetpoint
-		setactivetargetwall(pointertargetwall)
 		
 		if pointertargettype == "PlanView":
-			activetargetwallgrabbed = activetargetwall.get_node("PlanView")
+			activetargetwallgrabbed = pointertargetwall.get_node("PlanView")
 		else:
-			activetargetwallgrabbed = activetargetwall
-		assert(activetargetwallgrabbed == (activetargetwall if pointertargettype == "Papersheet" else activetargetwall.get_node("PlanView")))
+			activetargetwallgrabbed = pointertargetwall
+			setactivetargetwall(pointertargetwall)
+		assert(activetargetwallgrabbed == (pointertargetwall if pointertargettype == "Papersheet" else pointertargetwall.get_node("PlanView")))
 
 		if gripbuttonheld:
 			activetargetwallgrabbedtransform = alaserspot.global_transform.affine_inverse() * activetargetwallgrabbed.global_transform
@@ -670,14 +672,14 @@ func buttonreleased_vrgrip():
 				if xcdrawing1 == activetargetwall:
 					setactivetargetwall(null)
 
+			elif pointertarget.get_name() == "HideFloor":
+				var xcdrawing = gripmenu.gripmenupointertargetwall
+				sketchsystem.actsketchchange([{ "xcvizstates":{xcdrawing.get_name():DRAWING_TYPE.VIZ_XCD_FLOOR_HIDDEN}} ])
+
 			elif pointertarget.get_name() == "DelXC":
 				var xcdrawing = gripmenu.gripmenupointertargetwall
 				if xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
-					var delxcable = true
-					for xctube in xcdrawing.xctubesconn:
-						if len(xctube.xcdrawinglink) != 0:
-							delxcable = false
-					if delxcable:
+					if xcdrawing.notubeconnections_so_delxcable():
 						var xcname = xcdrawing.get_name()
 						var nodename = xcdrawing.get_name()
 						var xcv = { "xcvizstates":{ xcdrawing.get_name():0 } }

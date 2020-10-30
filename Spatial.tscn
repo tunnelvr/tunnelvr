@@ -1042,6 +1042,7 @@ albedo_color = Color( 0.168627, 0.972549, 0.027451, 1 )
 
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
+enablevr = false
 usewebsockets = false
 
 [node name="Players" type="Spatial" parent="."]
@@ -1532,17 +1533,17 @@ material/0 = SubResource( 21 )
 [node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/toSolid"]
 shape = SubResource( 11 )
 
-[node name="toGas" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
-transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, -0.25, -0.2, 0 )
+[node name="HideFloor" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
+transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 2.32831e-10, 0, 1, -0.00721074, -0.2, 0.0277643 )
 collision_layer = 8
 collision_mask = 0
 
-[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/toGas"]
+[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/HideFloor"]
 cast_shadow = 0
 mesh = SubResource( 9 )
 material/0 = SubResource( 22 )
 
-[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/toGas"]
+[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/HideFloor"]
 shape = SubResource( 11 )
 
 [node name="toFloor" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
@@ -2184,7 +2185,17 @@ margin_left = -72.3987
 margin_top = 15.1532
 margin_right = -2.39874
 margin_bottom = 37.1532
+custom_colors/font_color = Color( 0, 0, 0, 1 )
+custom_colors/font_outline_modulate = Color( 0.984314, 0.933333, 0.933333, 1 )
+custom_colors/font_color_shadow = Color( 0.937255, 0.862745, 0.862745, 1 )
 text = "Scale: 1m"
+
+[node name="ButtonClosePlanView" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
+margin_right = 20.0
+margin_bottom = 22.0
+hint_tooltip = "Close Plan View
+"
+text = "X"
 
 [node name="ViewportReal" type="Viewport" parent="PlanViewSystem/PlanView"]
 size = Vector2( 800, 800 )

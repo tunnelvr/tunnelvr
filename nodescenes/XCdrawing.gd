@@ -41,7 +41,7 @@ func setxcdrawingvisible():
 			scax = max(scax, abs(nodepoint.x))
 			scay = max(scay, abs(nodepoint.y))
 		$XCdrawingplane.set_scale(Vector3(scax + 2, scay + 2, 1.0))
-	if not get_name().begins_with("Hole"):
+	if not (drawingtype == DRAWING_TYPE.DT_XCDRAWING and get_name().begins_with("Hole")):
 		$XCdrawingplane.visible = true
 		$XCdrawingplane/CollisionShape.disabled = false
 	$XCnodes.visible = true

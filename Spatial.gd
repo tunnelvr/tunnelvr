@@ -213,8 +213,10 @@ func _player_connected(id):
 	print(" playerMe networkID ", playerMe.networkID, " ", get_tree().get_network_unique_id())
 	assert(playerMe.networkID != 0)
 	playerMe.rpc_id(id, "initplayerpuppet", (ovr_hand_tracking != null))
-	$GuiSystem/GUIPanel3D/Viewport/GUI/Panel/Label.text = "player "+String(id)+" connected"
 	players_connected_list.push_back(id)
+	$GuiSystem/GUIPanel3D/Viewport/GUI/Panel/Label.text = "player "+String(id)+" connected"
+	if not Tglobal.controlslocked:
+		$GuiSystem/GUIPanel3D.toggleguipanelvisibility(null)
 
 	if playerMe.networkID == 1:
 		print("Converting sketchsystemtodict")

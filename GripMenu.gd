@@ -69,7 +69,7 @@ func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointert
 	gripmenuactivetargettubesectorindex = activetargettubesectorindex
 	gripmenuactivetargetnode = activetargetnode
 	get_node("/root/Spatial/BodyObjects/GripLaserSpot").translation = gripmenupointertargetpoint
-	get_node("/root/Spatial/BodyObjects/GripLaserSpot").visible = true
+	get_node("/root/Spatial/BodyObjects/GripLaserSpot").visible = get_node("/root/Spatial/BodyObjects/LaserOrient/LaserSpot").visible
 	
 	var paneltrans = global_transform
 	paneltrans.origin = controllertrans.origin - 0.8*ARVRServer.world_scale*(controllertrans.basis.z)
@@ -80,10 +80,12 @@ func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointert
 	var gmlist = [ ]
 	if gripmenupointertargettype == "XCdrawing" and gripmenupointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
 		gmlist = ["NewXC"]
-
+		if get_node("/root/Spatial/PlanViewSystem").visible and pointertargetwall.notubeconnections_so_delxcable():
+			gmlist.push_back("HideFloor")
+			
 	elif gripmenupointertargettype == "XCdrawing" and gripmenupointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
-		var dragable = (gripmenuactivetargetnode != null) and (activetargetwall == pointertargetwall)
-		gmlist = ["DragXC" if dragable else "", "DelXC" if pointertargetwall.notubeconnections_so_delxcable() else ""]
+		var draggable = (gripmenuactivetargetnode != null) and (activetargetwall == pointertargetwall)
+		gmlist = ["DragXC" if draggable else "", "DelXC" if pointertargetwall.notubeconnections_so_delxcable() else ""]
 
 	elif gripmenupointertargettype == "Papersheet":
 		gmlist = [ ]

@@ -276,10 +276,7 @@ remote func actsketchchangeL(xcdatalist):
 			if "transformpos" in xcdata["planview"]:
 				planviewsystem.get_node("PlanView").global_transform = xcdata["planview"]["transformpos"]
 			if "visible" in xcdata["planview"]:
-				planviewsystem.visible = xcdata["planview"]["visible"]
-				planviewsystem.get_node("PlanView/CollisionShape").disabled = not planviewsystem.visible
-				var guipanel3d = get_node("/root/Spatial/GuiSystem/GUIPanel3D")
-				guipanel3d.get_node("Viewport/GUI/Panel/ButtonPlanView").pressed = planviewsystem.visible
+				planviewsystem.actplanviewvisibleactive(xcdata["planview"]["visible"], xcdata["planview"].get("planviewactive", true))
 
 		elif "xcvizstates" in xcdata:
 			if Tglobal.printxcdrawingfromdatamessages:
@@ -304,12 +301,20 @@ remote func actsketchchangeL(xcdatalist):
 					elif xcdrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
 						var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
 						if xcdata["xcvizstates"][xcdrawingname] == DRAWING_TYPE.VIZ_XCD_FLOOR_NORMAL:
+							xcdrawing.setxcdrawingvisible()
 							xcdrawing.get_node("XCdrawingplane/CollisionShape/MeshInstance").get_surface_material(0).set_shader_param("albedo", Color("#FEF4D5"))
 							if planviewsystem.activetargetfloor == xcdrawing:
 								 planviewsystem.activetargetfloor = null
 						elif xcdata["xcvizstates"][xcdrawingname] == DRAWING_TYPE.VIZ_XCD_FLOOR_ACTIVE:
+							xcdrawing.setxcdrawingvisible()
 							xcdrawing.get_node("XCdrawingplane/CollisionShape/MeshInstance").get_surface_material(0).set_shader_param("albedo", Color("#DDFFCC"))
 							planviewsystem.activetargetfloor = xcdrawing
+						elif xcdata["xcvizstates"][xcdrawingname] == DRAWING_TYPE.VIZ_XCD_FLOOR_HIDDEN:
+							xcdrawing.setxcdrawingvisiblehide(true)
+							if planviewsystem.activetargetfloor == xcdrawing:
+								 planviewsystem.activetargetfloor = null
+							xcdrawing.get_node("XCdrawingplane/CollisionShape/MeshInstance").visible = false
+							xcdrawing.get_node("XCdrawingplane/CollisionShape").disabled = true							
 						
 			if "updatetubeshells" in xcdata:
 				for xct in xcdata["updatetubeshells"]:

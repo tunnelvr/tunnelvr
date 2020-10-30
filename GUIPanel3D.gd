@@ -39,9 +39,16 @@ func _on_buttonsave_pressed():
 	
 func _on_buttonplanview_pressed():
 	var button_pressed = $Viewport/GUI/Panel/ButtonPlanView.pressed
-	get_node("/root/Spatial/PlanViewSystem").setplanviewvisible(button_pressed, global_transform, $Quad.mesh.size)
+	var guidpaneltransform = global_transform
+	var guidpanelsize = $Quad.mesh.size
+	if not Tglobal.controlslocked:
+		toggleguipanelvisibility(null)
+		guidpaneltransform = null
+	get_node("/root/Spatial/PlanViewSystem").setplanviewvisible(button_pressed, guidpaneltransform, guidpanelsize)
 	$Viewport/GUI/Panel/Label.text = "Planview on" if button_pressed else "Planview off"
 	Tglobal.soundsystem.quicksound("MenuClick", collision_point)
+	if not Tglobal.controlslocked:
+		toggleguipanelvisibility(null)
 	
 func _on_buttonheadtorch_toggled(button_pressed):
 	get_node("/root/Spatial").playerMe.setheadtorchlight(button_pressed)
@@ -157,6 +164,7 @@ func _ready():
 func clickbuttonheadtorch():
 	$Viewport/GUI/Panel/ButtonHeadtorch.pressed = not $Viewport/GUI/Panel/ButtonHeadtorch.pressed
 	_on_buttonheadtorch_toggled($Viewport/GUI/Panel/ButtonHeadtorch.pressed)
+
 
 func toggleguipanelvisibility(controller_global_transform):
 	if not visible and controller_global_transform != null:

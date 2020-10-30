@@ -118,6 +118,7 @@ func _ready():
 	fetchbuttontex = get_node("/root/Spatial/MaterialSystem/buttonmaterials/FetchButton").get_surface_material(0).albedo_texture
 	$RealPlanCamera.set_as_toplevel(true)
 	planviewcontrols.get_node("ZoomView/ButtonCentre").connect("pressed", self, "buttoncentre_pressed")
+	planviewcontrols.get_node("ButtonClosePlanView").connect("pressed", self, "buttonclose_pressed")
 	call_deferred("readydeferred")
 	set_process(visible)
 		
@@ -128,8 +129,12 @@ func readydeferred():
 	#addsubitem(root, "Ireby", "http://cave-registry.org.uk/svn/NorthernEngland/ThreeCountiesArea/rawscans/Ireby/")
 	addsubitem(root, "rawscans", "http://cave-registry.org.uk/svn/NorthernEngland/ThreeCountiesArea/rawscans/")
 	
-func toggleplanviewactive():
-	planviewactive = not planviewactive
+func actplanviewvisibleactive(lvisible, lactive):
+	visible = lvisible
+	get_node("PlanView/CollisionShape").disabled = not visible
+	var guipanel3d = get_node("/root/Spatial/GuiSystem/GUIPanel3D")
+	guipanel3d.get_node("Viewport/GUI/Panel/ButtonPlanView").pressed = visible
+	planviewactive = lactive
 	if planviewactive:
 		$PlanView/ProjectionScreen/ImageFrame.mesh.surface_get_material(0).emission_enabled = true
 		set_process(true)
@@ -140,20 +145,32 @@ func toggleplanviewactive():
 			var sketchsystem = get_node("/root/Spatial/SketchSystem")
 			sketchsystem.actsketchchange([getactivetargetfloorViz("")])
 
+func toggleplanviewactive():
+	var sketchsystem = get_node("/root/Spatial/SketchSystem")
+	sketchsystem.actsketchchange([{"planview": { "visible":true, "planviewactive":not planviewactive }} ])
+
 func setplanviewvisible(planviewvisible, guidpaneltransform, guidpanelsize):
 	var sketchsystem = get_node("/root/Spatial/SketchSystem")
 	if planviewvisible:
 		var paneltrans = $PlanView.global_transform
-		paneltrans.origin = guidpaneltransform.origin + guidpaneltransform.basis.y*(guidpanelsize.y/2) + Vector3(0,$PlanView/ProjectionScreen/ImageFrame.mesh.size.y/2,0)
-		var eyepos = get_node("/root/Spatial").playerMe.get_node("HeadCam").global_transform.origin
-		paneltrans = paneltrans.looking_at(eyepos + 2*(paneltrans.origin-eyepos), Vector3(0, 1, 0))
-		sketchsystem.actsketchchange([{ "planview":{ "transformpos":paneltrans, "visible":true } } ])
+		if guidpaneltransform != null:
+			paneltrans.origin = guidpaneltransform.origin + guidpaneltransform.basis.y*(guidpanelsize.y/2) + Vector3(0,$PlanView/ProjectionScreen/ImageFrame.mesh.size.y/2,0)
+			var eyepos = get_node("/root/Spatial").playerMe.get_node("HeadCam").global_transform.origin
+			paneltrans = paneltrans.looking_at(eyepos + 2*(paneltrans.origin-eyepos), Vector3(0, 1, 0))
+		else:
+			var controllertrans = get_node("/root/Spatial/BodyObjects/LaserOrient").global_transform
+			var paneldistance = 1.2 if Tglobal.VRoperating else 0.6
+			paneltrans.origin = controllertrans.origin - paneldistance*ARVRServer.world_scale*(controllertrans.basis.z)
+			var lookatpos = controllertrans.origin - 1.6*ARVRServer.world_scale*(controllertrans.basis.z)
+			paneltrans = paneltrans.looking_at(lookatpos, Vector3(0, 1, 0))
+		sketchsystem.actsketchchange([{ "planview":{ "transformpos":paneltrans, "visible":true, "planviewactive":true } } ])
 	else:
-		sketchsystem.actsketchchange([{"planview": { "visible":false}} ])
+		sketchsystem.actsketchchange([{"planview": { "visible":false, "planviewactive":false }} ])
+
 
 var slowviewportframeratecountdown = 1
 func _process(delta):
-	if Tglobal.arvrinterfacename == "OVRMobile":
+	if Tglobal.arvrinterfacename == "OVRMobile" and visible:
 		slowviewportframeratecountdown -= delta
 		if slowviewportframeratecountdown < 0:
 			slowviewportframeratecountdown = 1
@@ -222,6 +239,10 @@ func buttoncentre_pressed():
 	var planviewpositiondict = { "plancamerapos":Vector3(headcam.global_transform.origin.x, $PlanView/Viewport/PlanGUI/Camera.translation.y, headcam.global_transform.origin.z) }
 	var sketchsystem = get_node("/root/Spatial/SketchSystem")		
 	sketchsystem.actsketchchange([{"planview":planviewpositiondict}])
+
+func buttonclose_pressed():
+	var sketchsystem = get_node("/root/Spatial/SketchSystem")
+	sketchsystem.actsketchchange([{"planview": { "visible":false, "planviewactive":false }} ])
 
 func checkplanviewinfront(handrightcontroller):
 	var planviewsystem = self
