@@ -483,6 +483,7 @@ uv1_offset = Vector3( 0, 0.01, 0 )
 [sub_resource type="PlaneMesh" id=75]
 
 [sub_resource type="SpatialMaterial" id=76]
+params_specular_mode = 2
 params_cull_mode = 2
 albedo_texture = ExtResource( 26 )
 uv1_scale = Vector3( 0.2, 0.2, 0.2 )
@@ -605,9 +606,11 @@ uv1_offset = Vector3( 0, 0.16, 0 )
 [sub_resource type="PlaneMesh" id=95]
 
 [sub_resource type="SpatialMaterial" id=96]
+params_specular_mode = 2
 params_cull_mode = 2
 albedo_texture = ExtResource( 32 )
 metallic = 0.37
+metallic_specular = 0.33
 roughness = 0.59
 
 [sub_resource type="SpatialMaterial" id=97]
@@ -1039,7 +1042,6 @@ albedo_color = Color( 0.168627, 0.972549, 0.027451, 1 )
 
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
-enablevr = false
 usewebsockets = false
 
 [node name="Players" type="Spatial" parent="."]
@@ -1056,8 +1058,9 @@ far = 321.0
 [node name="HeadtorchLight" type="SpotLight" parent="Players/PlayerMe/HeadCam"]
 transform = Transform( 1, 0, 0, 0, 0.939693, 0.34202, 0, -0.34202, 0.939693, 0, 0.24, 0 )
 visible = false
-light_energy = 1.06
+light_energy = 1.1
 light_indirect_energy = 7.26
+light_specular = 0.43
 shadow_enabled = true
 shadow_color = Color( 0.0823529, 0.0431373, 0.254902, 1 )
 spot_range = 721.6
@@ -1751,13 +1754,24 @@ material/0 = null
 
 [node name="LaserSelectLine" type="Spatial" parent="BodyObjects"]
 transform = Transform( 1, -4.60809e-07, 4.60809e-07, 0, 0.707107, 0.707107, -6.51682e-07, -0.707107, 0.707107, 0.200002, 3.5, 0.11135 )
-visible = false
 
 [node name="Scale" type="Spatial" parent="BodyObjects/LaserSelectLine"]
 
 [node name="Mesh" type="MeshInstance" parent="BodyObjects/LaserSelectLine/Scale"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.5 )
 mesh = SubResource( 53 )
+material/0 = null
+
+[node name="GripLaserSpot" type="MeshInstance" parent="BodyObjects"]
+transform = Transform( 1, -4.60809e-07, 4.60809e-07, 0, 0.707107, 0.707107, -6.51682e-07, -0.707107, 0.707107, 0.615074, -0.372118, -10.7241 )
+visible = false
+mesh = SubResource( 46 )
+material/0 = null
+
+[node name="LaserSpike" type="MeshInstance" parent="BodyObjects/GripLaserSpot"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0 )
+visible = false
+mesh = SubResource( 48 )
 material/0 = null
 
 [node name="SketchSystem" type="Spatial" parent="."]

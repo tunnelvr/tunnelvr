@@ -29,6 +29,7 @@ func _ready():
 	call_deferred("disableallgripmenus")
 	
 func disableallgripmenus():
+	get_node("/root/Spatial/BodyObjects/GripLaserSpot").visible = false
 	for s in $WordButtons.get_children():
 		s.get_node("MeshInstance").visible = false
 		s.get_node("CollisionShape").disabled = true
@@ -67,7 +68,9 @@ func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointert
 	gripmenupointertargettype = pointertargettype
 	gripmenuactivetargettubesectorindex = activetargettubesectorindex
 	gripmenuactivetargetnode = activetargetnode
-
+	get_node("/root/Spatial/BodyObjects/GripLaserSpot").translation = gripmenupointertargetpoint
+	get_node("/root/Spatial/BodyObjects/GripLaserSpot").visible = true
+	
 	var paneltrans = global_transform
 	paneltrans.origin = controllertrans.origin - 0.8*ARVRServer.world_scale*(controllertrans.basis.z)
 	var lookatpos = controllertrans.origin - 1.6*ARVRServer.world_scale*(controllertrans.basis.z)
