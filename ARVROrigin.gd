@@ -147,10 +147,12 @@ func _process(delta):
 			if Input.is_action_pressed("lh_right"):     lhkeyvec.x += 1
 			hx = lhkeyvec.x
 			lhkeyvec.x = 0
-			var vtarget = -$HeadCam.global_transform.basis.z*20 + $HeadCam.global_transform.basis.x*lhkeyvec.x*15*delta + Vector3(0, lhkeyvec.y, 0)*15*delta
-			$HeadCam.look_at($HeadCam.global_transform.origin + vtarget, Vector3(0,1,0))
-			rotation_degrees.y += $HeadCam.rotation_degrees.y
-			$HeadCam.rotation_degrees.y = 0
+			#var vtarget = -$HeadCam.global_transform.basis.z*20 + $HeadCam.global_transform.basis.x*lhkeyvec.x*15*delta + Vector3(0, lhkeyvec.y, 0)*15*delta
+			#$HeadCam.look_at($HeadCam.global_transform.origin + vtarget, Vector3(0,1,0))
+			#rotation_degrees.y += $HeadCam.rotation_degrees.y
+			#$HeadCam.rotation_degrees.y = 0
+			$HeadCam.rotation_degrees.x = clamp($HeadCam.rotation_degrees.x + 90*delta*lhkeyvec.y, -89, 89)
+
 		$HandRight.process_keyboardcontroltracking($HeadCam, Vector2(hx*0.033, 0))
 	if $HandRight.pointervalid:
 		LaserOrient.global_transform = global_transform*$HandRight.pointerposearvrorigin
