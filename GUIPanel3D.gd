@@ -195,6 +195,7 @@ func toggleguipanelvisibility(controller_global_transform):
 
 	var selfSpatial = get_node("/root/Spatial")
 	if Tglobal.connectiontoserveractive:
+		print("nnnnn ", get_tree().get_network_unique_id())
 		assert(selfSpatial.playerMe.networkID != 0)
 		selfSpatial.playerMe.rpc("puppetenableguipanel", transform if visible else null)
 

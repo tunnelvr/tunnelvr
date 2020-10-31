@@ -853,7 +853,7 @@ func targetwalltransformpos(rpcoptional):
 	else:
 		var angy = -Vector2(laserrelvec.z, laserrelvec.x).angle()
 		#txcdata["transformpos"] = Transform().rotated(Vector3(1,0,0), deg2rad(-90)).rotated(Vector3(0,1,0), angy)
-		txcdata["transformpos"] = Transform(Vector3(1,0,0), Vector3(0,0,-1), Vector3(0,1,0), Vector3(0,0,0)).rotated(Vector3(0,1,0), angy)
+		txcdata["transformpos"] = Transform(Vector3(1,0,0), Vector3(0,0,-1), Vector3(0,1,0), Vector3(0,0,0)) # .rotated(Vector3(0,1,0), angy)
 		var angpush =-(activetargetwallgrabbedlaserroottrans.origin.y - activelaserroot.global_transform.origin.y)
 		txcdata["transformpos"].origin = activetargetwallgrabbedpoint + Vector3(0, 20*angpush, 0)
 	return txcdata
