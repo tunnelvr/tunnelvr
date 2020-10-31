@@ -316,7 +316,10 @@ func _on_networkstate_selected(index):
 		
 	if nssel.begins_with("As Server"):
 		networkstartasserver(true)
-		$Viewport/GUI/Panel/Label.text = "networkID: "+str(selfSpatial.playerMe.networkID)
+		if selfSpatial.playerMe.networkID == 0:
+			$Viewport/GUI/Panel/Label.text = "server failed to start"
+		else:
+			$Viewport/GUI/Panel/Label.text = "networkID: "+str(selfSpatial.playerMe.networkID)
 				
 	if nssel.begins_with("Client->"):
 		selfSpatial.hostipnumber = nssel.replace("Client->", "")
@@ -365,8 +368,10 @@ func networkstartasserver(fromgui):
 		get_tree().set_network_peer(websocketserver)
 	else:
 		networkedmultiplayerenet = NetworkedMultiplayerENet.new()
-		var e = networkedmultiplayerenet.create_server(selfSpatial.hostportnumber, 5)
-		print("networkedmultiplayerenet createserver: ", e)
+		var e = networkedmultiplayerenet.create_server(selfSpatial.hostportnumber, 9)
+		if e != 0:
+			print("networkedmultiplayerenet createserver Error: ", {ERR_CANT_CREATE:"ERR_CANT_CREATE"}.get(e, e))
+			print("*** is there a server running on this port already? ", selfSpatial.hostportnumber)
 		get_tree().set_network_peer(networkedmultiplayerenet)
 
 	var lnetworkID = get_tree().get_network_unique_id()

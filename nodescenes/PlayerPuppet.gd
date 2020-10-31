@@ -13,7 +13,7 @@ remote func initplayerappearance(lplayerplatform, headcolour):
 	#	get_node("HeadCam/csgheadmesh").mesh.size.x = 0.15
 	if playerplatform == "Quest":
 		get_node("HeadCam/visorline").visible = true
-		get_node("HeadCam/visorline").material.albedo_color = headcolour
+		get_node("HeadCam/visorline").get_surface_material(0).albedo_color = headcolour
 	elif playerplatform == "Vive":
 		get_node("HeadCam/visorline").visible = true
 		get_node("HeadCam/visorline").get_surface_material(0).albedo_color = Color(0, 0, 0.3)
