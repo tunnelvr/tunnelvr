@@ -6,13 +6,9 @@ extends EditorScript
 # *******
 
 func _run():
-	var d = "res://surveyscans/LambTrap-drawnup-1.png"
-	var a = ResourceLoader.load(d)
-	print(a)
-	print(a is Image)
-	var papertexture = ImageTexture.new()
-	papertexture.create_from_image(a)
-	print(papertexture.get_width())
-	var x = {1:2}
-	x.erase(1)
-	print(x.empty())
+	var x = {"a":Transform()}
+	x["a"].origin = Vector3(1,2,3)
+	var y = x.duplicate()
+	print(x["a"] == y["a"])
+	y["a"].origin = Vector3(4,5,6)
+	print(x["a"] == y["a"])

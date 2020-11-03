@@ -1,4 +1,4 @@
-[gd_scene load_steps=220 format=2]
+[gd_scene load_steps=225 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/default_env.tres" type="Environment" id=2]
@@ -52,6 +52,7 @@
 [ext_resource path="res://systems/testmqtt.gd" type="Script" id=50]
 [ext_resource path="res://guimaterials/installbuttonimg.png" type="Texture" id=51]
 [ext_resource path="res://sounds/menu_taping.wav" type="AudioStream" id=52]
+[ext_resource path="res://guimaterials/borderedfloor.material" type="Material" id=53]
 
 [sub_resource type="CubeMesh" id=1]
 size = Vector3( 0.35, 0.01, 0.01 )
@@ -873,94 +874,149 @@ emission_on_uv2 = false
 emission_texture = ExtResource( 16 )
 
 [sub_resource type="QuadMesh" id=134]
+
+[sub_resource type="QuadMesh" id=169]
+
+[sub_resource type="Shader" id=170]
+code = "shader_type spatial;
+render_mode blend_mix,depth_draw_opaque,cull_disabled,diffuse_burley,specular_schlick_ggx;
+uniform vec4 albedo : hint_color;
+uniform sampler2D texture_albedo : hint_albedo;
+uniform float specular;
+uniform float metallic;
+uniform float roughness : hint_range(0,1);
+uniform vec3 uv1_scale;
+uniform vec3 uv1_offset;
+uniform float uv_borderwidth;
+uniform vec4 albedo_border : hint_color;
+varying vec2 uvorg;
+
+void vertex() {
+	uvorg = UV;
+	UV = UV*uv1_scale.xy+uv1_offset.xy;
+}
+
+void fragment() {
+	vec2 base_uv = UV;
+	vec4 albedo_tex = texture(texture_albedo,base_uv);
+	ALBEDO = albedo.rgb * albedo_tex.rgb;
+	if (uv_borderwidth != 0.0) {
+		float uvfromedge = min(min(uvorg.x, 1.0 - uvorg.x), min(uvorg.y, 1.0 - uvorg.y));
+		ALBEDO = mix(ALBEDO, albedo_border.rgb, max(uv_borderwidth - uvfromedge, 0.0)/uv_borderwidth);
+	}
+	METALLIC = metallic;
+	ROUGHNESS = roughness;
+	SPECULAR = specular;
+}
+
+
+
+
+
+
+
+"
+
+[sub_resource type="ShaderMaterial" id=171]
+shader = SubResource( 170 )
+shader_param/albedo = Color( 0.576471, 0.92549, 0.52549, 1 )
+shader_param/specular = null
+shader_param/metallic = 0.0
+shader_param/roughness = 0.0
+shader_param/uv1_scale = null
+shader_param/uv1_offset = null
+shader_param/uv_borderwidth = 0.05
+shader_param/albedo_border = Color( 0.980392, 0.321569, 0.0352941, 1 )
+
+[sub_resource type="QuadMesh" id=135]
 size = Vector2( 1, 0.2 )
 
-[sub_resource type="SpatialMaterial" id=135]
+[sub_resource type="SpatialMaterial" id=136]
 params_cull_mode = 2
 albedo_color = Color( 0.835294, 0.498039, 0.105882, 1 )
 metallic = 0.8
 roughness = 0.67
 
-[sub_resource type="QuadMesh" id=136]
+[sub_resource type="QuadMesh" id=137]
 size = Vector2( 1, 0.2 )
 
-[sub_resource type="SpatialMaterial" id=137]
+[sub_resource type="SpatialMaterial" id=138]
 flags_no_depth_test = true
 params_cull_mode = 2
 albedo_color = Color( 0.866667, 0.498039, 0.105882, 1 )
 metallic = 0.45
 roughness = 0.42
 
-[sub_resource type="QuadMesh" id=138]
+[sub_resource type="QuadMesh" id=139]
 size = Vector2( 1, 0.2 )
 
-[sub_resource type="SpatialMaterial" id=139]
+[sub_resource type="SpatialMaterial" id=140]
 params_cull_mode = 2
 albedo_color = Color( 0.180392, 0.835294, 0.105882, 1 )
 metallic = 0.8
 roughness = 0.67
 
-[sub_resource type="CapsuleMesh" id=140]
+[sub_resource type="CapsuleMesh" id=141]
 radius = 0.1
 mid_height = 0.5
 
-[sub_resource type="SpatialMaterial" id=141]
+[sub_resource type="SpatialMaterial" id=142]
 albedo_color = Color( 0.980392, 0.47451, 0.435294, 1 )
 metallic = 0.14
 roughness = 0.33
 transmission_enabled = true
 transmission = Color( 0.113725, 0.164706, 0.968627, 1 )
 
-[sub_resource type="SpatialMaterial" id=142]
+[sub_resource type="SpatialMaterial" id=143]
 albedo_color = Color( 0.482353, 0.976471, 0.52549, 1 )
 metallic = 0.32
 roughness = 0.62
 
-[sub_resource type="PlaneMesh" id=143]
+[sub_resource type="PlaneMesh" id=144]
 size = Vector2( 1, 0.5 )
 
-[sub_resource type="SpatialMaterial" id=144]
+[sub_resource type="SpatialMaterial" id=145]
 albedo_texture = ExtResource( 49 )
 
-[sub_resource type="SpatialMaterial" id=145]
+[sub_resource type="SpatialMaterial" id=146]
 albedo_texture = ExtResource( 51 )
 
-[sub_resource type="AudioStreamMicrophone" id=146]
-
-[sub_resource type="DynamicFont" id=147]
-font_data = ExtResource( 40 )
+[sub_resource type="AudioStreamMicrophone" id=147]
 
 [sub_resource type="DynamicFont" id=148]
+font_data = ExtResource( 40 )
+
+[sub_resource type="DynamicFont" id=149]
 font_data = ExtResource( 39 )
 
-[sub_resource type="PlaneMesh" id=149]
+[sub_resource type="PlaneMesh" id=150]
 size = Vector2( 2, 0.1 )
 
-[sub_resource type="ViewportTexture" id=150]
+[sub_resource type="ViewportTexture" id=151]
 viewport_path = NodePath("LabelGenerator/Viewport")
 
-[sub_resource type="SpatialMaterial" id=151]
+[sub_resource type="SpatialMaterial" id=152]
 resource_local_to_scene = true
 flags_unshaded = true
 flags_no_depth_test = true
 flags_do_not_receive_shadows = true
 params_cull_mode = 2
-albedo_texture = SubResource( 150 )
+albedo_texture = SubResource( 151 )
 
-[sub_resource type="BoxShape" id=152]
+[sub_resource type="BoxShape" id=153]
 
-[sub_resource type="SpatialMaterial" id=153]
+[sub_resource type="SpatialMaterial" id=154]
 params_cull_mode = 2
 albedo_texture = ExtResource( 7 )
 roughness = 0.43
 uv1_scale = Vector3( 20, 20, 1 )
 
-[sub_resource type="PlaneMesh" id=154]
-material = SubResource( 153 )
+[sub_resource type="PlaneMesh" id=155]
+material = SubResource( 154 )
 subdivide_width = 4
 subdivide_depth = 4
 
-[sub_resource type="Shader" id=155]
+[sub_resource type="Shader" id=156]
 code = "shader_type spatial;
 render_mode blend_mix,depth_draw_opaque,cull_back,diffuse_burley,specular_schlick_ggx;
 uniform vec4 albedo : hint_color;
@@ -991,10 +1047,10 @@ void fragment() {
 }
 "
 
-[sub_resource type="ProxyTexture" id=156]
+[sub_resource type="ProxyTexture" id=157]
 
-[sub_resource type="ShaderMaterial" id=157]
-shader = SubResource( 155 )
+[sub_resource type="ShaderMaterial" id=158]
+shader = SubResource( 156 )
 shader_param/albedo = Color( 0.435294, 0.215686, 0.141176, 0.454902 )
 shader_param/specular = 0.5
 shader_param/metallic = 0.48
@@ -1002,46 +1058,47 @@ shader_param/roughness = 0.71
 shader_param/point_size = 1.0
 shader_param/uv1_scale = Vector3( 3, 1, 1 )
 shader_param/uv1_offset = Vector3( 0, 0, 0 )
-shader_param/texture_albedo = SubResource( 156 )
+shader_param/texture_albedo = SubResource( 157 )
 
-[sub_resource type="PlaneMesh" id=158]
-material = SubResource( 157 )
+[sub_resource type="PlaneMesh" id=159]
+material = SubResource( 158 )
 size = Vector2( 4, 2 )
 
-[sub_resource type="SpatialMaterial" id=159]
+[sub_resource type="SpatialMaterial" id=160]
 albedo_color = Color( 1, 0.992157, 0.992157, 1 )
 metallic = 0.41
 roughness = 0.55
 
-[sub_resource type="CylinderMesh" id=160]
+[sub_resource type="CylinderMesh" id=161]
 top_radius = 2.0
 bottom_radius = 4.0
 height = 5.0
 
-[sub_resource type="SphereMesh" id=161]
+[sub_resource type="SphereMesh" id=162]
 radius = 4.0
 height = 6.0
 
-[sub_resource type="CubeMesh" id=162]
+[sub_resource type="CubeMesh" id=163]
 size = Vector3( 4, 2, 2 )
 
-[sub_resource type="SpatialMaterial" id=163]
+[sub_resource type="SpatialMaterial" id=164]
 albedo_color = Color( 0.364706, 0.878431, 0.105882, 1 )
 metallic = 0.42
 roughness = 0.48
 
-[sub_resource type="GIProbeData" id=164]
+[sub_resource type="GIProbeData" id=165]
 
-[sub_resource type="CylinderMesh" id=165]
+[sub_resource type="CylinderMesh" id=166]
 height = 1.1
 
-[sub_resource type="SpatialMaterial" id=166]
-
 [sub_resource type="SpatialMaterial" id=167]
+
+[sub_resource type="SpatialMaterial" id=168]
 albedo_color = Color( 0.168627, 0.972549, 0.027451, 1 )
 
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
+enablevr = false
 usewebsockets = false
 
 [node name="Players" type="Spatial" parent="."]
@@ -1053,6 +1110,7 @@ script = ExtResource( 18 )
 
 [node name="HeadCam" type="ARVRCamera" parent="Players/PlayerMe"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 1.70297e-07, 1.81351, -0.261318 )
+cull_mask = 1039359
 far = 321.0
 
 [node name="HeadtorchLight" type="SpotLight" parent="Players/PlayerMe/HeadCam"]
@@ -1729,7 +1787,7 @@ material/0 = SubResource( 44 )
 [node name="RayCast" type="RayCast" parent="BodyObjects/LaserOrient"]
 enabled = true
 cast_to = Vector3( 0, 0, -50 )
-collision_mask = 120
+collision_mask = 248
 
 [node name="LaserSpot" type="MeshInstance" parent="BodyObjects/LaserOrient"]
 transform = Transform( 1, 0, 0, 0, 1, -8.9407e-08, 0, 8.9407e-08, 1, 0, -4.76837e-07, -5.476 )
@@ -1807,6 +1865,7 @@ __meta__ = {
 
 [node name="Camera" type="Camera" parent="PlanViewSystem/PlanView/Viewport/PlanGUI"]
 transform = Transform( 1, 0, 0, 0, -1.62921e-07, 1, 0, -1, -1.62921e-07, -1, 50, -12 )
+cull_mask = 1047807
 environment = ExtResource( 20 )
 projection = 1
 fov = 87.5304
@@ -1825,69 +1884,61 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Tree" type="Tree" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
-margin_left = 431.0
-margin_right = 768.0
-margin_bottom = 100.0
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
 [node name="ViewSlide" type="Control" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
 material = SubResource( 54 )
-margin_left = 2.59387
-margin_top = 3.05945
-margin_right = 108.594
-margin_bottom = 98.0594
+margin_left = 3.0
+margin_top = 4.0
+margin_right = 109.0
+margin_bottom = 98.0
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="Label" type="Label" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ViewSlide"]
-margin_left = 13.2179
-margin_top = 12.6522
-margin_right = 82.2179
-margin_bottom = 34.6522
+margin_left = 17.2179
+margin_top = 53.6522
+margin_right = 86.2179
+margin_bottom = 75.6522
 text = "ViewSlide"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="ButtonSlideDown" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ViewSlide"]
-margin_left = 36.899
-margin_top = 58.7379
-margin_right = 59.899
-margin_bottom = 84.7379
+margin_left = 38.899
+margin_top = 25.7379
+margin_right = 61.899
+margin_bottom = 51.7379
 text = "V"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="ButtonSlideLeft" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ViewSlide"]
-margin_left = 4.7621
-margin_top = 58.713
-margin_right = 34.7621
-margin_bottom = 84.713
+margin_left = 6.7621
+margin_top = 27.713
+margin_right = 36.7621
+margin_bottom = 53.713
 text = "<<"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="ButtonSlideRight" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ViewSlide"]
-margin_left = 61.9428
-margin_top = 59.3356
-margin_right = 91.9428
-margin_bottom = 85.3356
+margin_left = 64.9428
+margin_top = 28.3356
+margin_right = 94.9428
+margin_bottom = 54.3356
 text = ">>"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="ButtonSlideUp" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ViewSlide"]
-margin_left = 36.7905
-margin_top = 31.0826
-margin_right = 59.7905
-margin_bottom = 57.0826
+margin_left = 38.7905
+margin_top = -0.9174
+margin_right = 61.7905
+margin_bottom = 25.0826
 text = "^"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -1895,49 +1946,49 @@ __meta__ = {
 
 [node name="ZoomView" type="Control" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
 material = SubResource( 54 )
-margin_left = 100.0
-margin_top = 4.0
-margin_right = 176.0
-margin_bottom = 99.0
+margin_left = 94.0
+margin_top = 5.0
+margin_right = 186.0
+margin_bottom = 54.0
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="Label" type="Label" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ZoomView"]
-margin_left = 16.0486
-margin_top = 8.23785
-margin_right = 62.0486
-margin_bottom = 30.2379
+margin_left = 23.0486
+margin_top = -0.76215
+margin_right = 69.0486
+margin_bottom = 21.2379
 text = "Zoom"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="ButtonZoomOut" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ZoomView"]
-margin_left = 4.74051
-margin_top = 31.1992
-margin_right = 34.7405
-margin_bottom = 57.1992
+margin_left = 5.0
+margin_top = 20.0
+margin_right = 33.0
+margin_bottom = 46.0
 text = "<<"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="ButtonCentre" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ZoomView"]
-margin_left = 10.0306
-margin_top = 59.2411
-margin_right = 64.0306
-margin_bottom = 85.2411
-text = "Centre"
+margin_left = 34.0
+margin_top = 20.0
+margin_right = 57.0
+margin_bottom = 46.0
+text = "O"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="ButtonZoomIn" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ZoomView"]
-margin_left = 38.0
-margin_top = 29.7621
-margin_right = 68.0
-margin_bottom = 55.7621
+margin_left = 58.0
+margin_top = 20.0
+margin_right = 86.0
+margin_bottom = 46.0
 text = ">>"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -2064,10 +2115,10 @@ __meta__ = {
 }
 
 [node name="Label" type="Label" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorMove"]
-margin_left = 2.0
-margin_top = 7.0
-margin_right = 47.0
-margin_bottom = 29.0
+margin_left = -11.8988
+margin_top = 1.48016
+margin_right = 33.1012
+margin_bottom = 23.4802
 text = "Grow"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -2084,20 +2135,20 @@ __meta__ = {
 }
 
 [node name="ButtonShrink" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorMove"]
-margin_left = 55.6724
-margin_top = 5.4433
-margin_right = 83.6724
-margin_bottom = 27.4433
+margin_left = 35.5136
+margin_top = 2.92346
+margin_right = 63.5136
+margin_bottom = 24.9235
 text = "<<"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="ButtonGrow" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorMove"]
-margin_left = 85.7935
-margin_top = 2.76001
-margin_right = 113.793
-margin_bottom = 24.76
+margin_left = 66.8947
+margin_top = 1.50006
+margin_right = 94.8947
+margin_bottom = 23.5001
 text = ">>"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -2164,10 +2215,9 @@ __meta__ = {
 }
 
 [node name="Scalebar" type="Control" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
-margin_left = 567.1
-margin_top = -39.598
-margin_right = 607.1
-margin_bottom = 0.402039
+margin_left = 71.0
+margin_top = -36.0
+margin_right = 311.0
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -2195,6 +2245,38 @@ margin_bottom = 22.0
 hint_tooltip = "Close Plan View
 "
 text = "X"
+
+[node name="CheckBoxTubesVisible" type="CheckBox" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
+anchor_right = 0.015
+anchor_bottom = 0.24
+margin_left = 106.0
+margin_top = 51.0
+margin_right = 158.0
+margin_bottom = 51.0
+text = "tubes"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Tree" type="Tree" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
+visible = false
+margin_left = 108.821
+margin_top = -243.74
+margin_right = 457.821
+margin_bottom = 99.2599
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="CheckBoxFileTree" type="CheckBox" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
+margin_left = 8.40472
+margin_top = 69.5596
+margin_right = 99.4047
+margin_bottom = 99.5596
+text = "Filetree"
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="ViewportReal" type="Viewport" parent="PlanViewSystem/PlanView"]
 size = Vector2( 800, 800 )
@@ -2252,7 +2334,7 @@ material/0 = null
 
 [node name="RayCast" type="RayCast" parent="PlanViewSystem/RealPlanCamera/LaserScope/LaserOrient"]
 cast_to = Vector3( 0, 0, -150 )
-collision_mask = 56
+collision_mask = 312
 
 [node name="LaserSpot" type="MeshInstance" parent="PlanViewSystem/RealPlanCamera/LaserScope/LaserOrient"]
 transform = Transform( 1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, 0.478879, -49.3258, -0.0697994 )
@@ -2437,7 +2519,7 @@ mesh = SubResource( 99 )
 material/0 = SubResource( 113 )
 
 [node name="nodematerial" type="Spatial" parent="MaterialSystem"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -1.72857, 0, 0.534184 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -1.22537, 0, 0.534184 )
 
 [node name="normal" type="MeshInstance" parent="MaterialSystem/nodematerial"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0733414, 0, 0.0848312 )
@@ -2475,12 +2557,12 @@ mesh = SubResource( 114 )
 material/0 = SubResource( 121 )
 
 [node name="station" type="MeshInstance" parent="MaterialSystem/nodematerial"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.658091, 0, -1.33024 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.636623, -0.00165558, -1.21666 )
 mesh = SubResource( 122 )
 material/0 = SubResource( 123 )
 
 [node name="lasermaterial" type="Spatial" parent="MaterialSystem"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -1.74416, 0, -1.16549 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -1.22997, 0, -1.16549 )
 
 [node name="spot" type="MeshInstance" parent="MaterialSystem/lasermaterial"]
 transform = Transform( 1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, 0, 0, 0 )
@@ -2517,58 +2599,68 @@ mesh = SubResource( 130 )
 material/0 = SubResource( 131 )
 
 [node name="highlight" type="MeshInstance" parent="MaterialSystem/xcdrawingmaterials"]
-transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, -2.40118, 0, 0 )
+transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, -2.262, 0, 0.156 )
 mesh = SubResource( 132 )
 material/0 = SubResource( 133 )
 
+[node name="floorbordered" type="MeshInstance" parent="MaterialSystem/xcdrawingmaterials"]
+transform = Transform( -0.999877, -2.55616e-09, -0.0156896, -0.0156896, 1.62901e-07, 0.999877, 0, 1, -1.62921e-07, -2.28106, -2.38419e-07, 1.19085 )
+mesh = SubResource( 134 )
+material/0 = ExtResource( 53 )
+
+[node name="floorborderedactive" type="MeshInstance" parent="MaterialSystem/xcdrawingmaterials"]
+transform = Transform( -0.999877, -2.55616e-09, -0.0156896, -0.0156896, 1.62901e-07, 0.999877, 0, 1, -1.62921e-07, -1.16991, -2.38419e-07, 1.19085 )
+mesh = SubResource( 169 )
+material/0 = SubResource( 171 )
+
 [node name="pathlines" type="Spatial" parent="MaterialSystem"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -3.72305, 0, 0.742517 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -3.72305, 0, 1.04259 )
 
 [node name="normal" type="MeshInstance" parent="MaterialSystem/pathlines"]
-transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, 0, 0, 0 )
-mesh = SubResource( 134 )
-material/0 = SubResource( 135 )
+transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, 0.00409698, 0.0395899, -0.194405 )
+mesh = SubResource( 135 )
+material/0 = SubResource( 136 )
 
 [node name="nodepthtest" type="MeshInstance" parent="MaterialSystem/pathlines"]
 transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, 0, 0, -0.578178 )
-mesh = SubResource( 136 )
-material/0 = SubResource( 137 )
+mesh = SubResource( 137 )
+material/0 = SubResource( 138 )
 
 [node name="centreline" type="MeshInstance" parent="MaterialSystem/pathlines"]
-transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, 0, 0, -1.12788 )
-mesh = SubResource( 138 )
-material/0 = SubResource( 139 )
+transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, -0.0245323, -0.0287361, -0.990627 )
+mesh = SubResource( 139 )
+material/0 = SubResource( 140 )
 
 [node name="handmaterials" type="Spatial" parent="MaterialSystem"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -3.78539, 0, 1.23808 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -3.78539, 0, 1.47726 )
 
 [node name="handleft" type="MeshInstance" parent="MaterialSystem/handmaterials"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.321026, 0, 0.121136 )
-mesh = SubResource( 140 )
-material/0 = SubResource( 141 )
+mesh = SubResource( 141 )
+material/0 = SubResource( 142 )
 
 [node name="handright" type="MeshInstance" parent="MaterialSystem/handmaterials"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0500312, 0, 0.121136 )
-mesh = SubResource( 140 )
-material/0 = SubResource( 142 )
+mesh = SubResource( 141 )
+material/0 = SubResource( 143 )
 
 [node name="buttonmaterials" type="Spatial" parent="MaterialSystem"]
 
 [node name="FetchButton" type="MeshInstance" parent="MaterialSystem/buttonmaterials"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -3.67453, 0, 2.38567 )
-mesh = SubResource( 143 )
-material/0 = SubResource( 144 )
+mesh = SubResource( 144 )
+material/0 = SubResource( 145 )
 
 [node name="InstallButton" type="MeshInstance" parent="MaterialSystem/buttonmaterials"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -3.67453, 0, 3.02779 )
-mesh = SubResource( 143 )
-material/0 = SubResource( 145 )
+mesh = SubResource( 144 )
+material/0 = SubResource( 146 )
 
 [node name="SoundSystem" type="Spatial" parent="."]
 script = ExtResource( 19 )
 
 [node name="AudioStreamRecord" type="AudioStreamPlayer" parent="SoundSystem"]
-stream = SubResource( 146 )
+stream = SubResource( 147 )
 autoplay = true
 bus = "Record"
 
@@ -2632,8 +2724,8 @@ render_target_v_flip = true
 margin_right = 430.0
 margin_bottom = 46.0
 size_flags_stretch_ratio = 0.0
-custom_fonts/mono_font = SubResource( 147 )
-custom_fonts/normal_font = SubResource( 148 )
+custom_fonts/mono_font = SubResource( 148 )
+custom_fonts/normal_font = SubResource( 149 )
 bbcode_enabled = true
 bbcode_text = "testing"
 text = "testing"
@@ -2645,8 +2737,8 @@ __meta__ = {
 [node name="ViewportLabelPreview" type="MeshInstance" parent="LabelGenerator"]
 transform = Transform( 1, 0, 0, 0, 0.655202, -0.755453, 0, 0.755453, 0.655202, 2.27374e-13, -2.8247, -4.59181 )
 visible = false
-mesh = SubResource( 149 )
-material/0 = SubResource( 151 )
+mesh = SubResource( 150 )
+material/0 = SubResource( 152 )
 
 [node name="ImageSystem" type="Node" parent="."]
 script = ExtResource( 17 )
@@ -2658,11 +2750,11 @@ collision_mask = 0
 
 [node name="CollisionShape" type="CollisionShape" parent="underfloor"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0 )
-shape = SubResource( 152 )
+shape = SubResource( 153 )
 
 [node name="Mesh" type="MeshInstance" parent="underfloor"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0354076, -1.90735e-06, 0.00133395 )
-mesh = SubResource( 154 )
+mesh = SubResource( 155 )
 material/0 = null
 
 [node name="BoulderClutter" type="Spatial" parent="."]
@@ -2671,7 +2763,7 @@ material/0 = null
 transform = Transform( 1, 0, 0, 0, 0.697453, 0.716631, 0, -0.716631, 0.697453, 2.42691, 1.16181, 1.94417 )
 visible = false
 material_override = ExtResource( 3 )
-mesh = SubResource( 158 )
+mesh = SubResource( 159 )
 material/0 = ExtResource( 3 )
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
@@ -2679,12 +2771,14 @@ environment = ExtResource( 2 )
 
 [node name="DirectionalLight" type="DirectionalLight" parent="WorldEnvironment"]
 transform = Transform( -1, -2.66914e-07, 1.86895e-07, 0, 0.573576, 0.819152, -3.25841e-07, 0.819152, -0.573576, 0, 50, 0 )
+layers = 4096
 light_color = Color( 0.584314, 0.584314, 0.584314, 1 )
 shadow_color = Color( 0.388235, 0.0705882, 0.0705882, 1 )
 
 [node name="DirectionalLight2" type="DirectionalLight" parent="WorldEnvironment"]
 transform = Transform( -1, -3.25841e-07, 5.30863e-14, 0, -1.62921e-07, -1, 3.25841e-07, -1, 1.62921e-07, 0, -50, 0 )
 visible = false
+layers = 4096
 light_color = Color( 0.666667, 0.568627, 0.462745, 1 )
 light_energy = 0.91
 light_indirect_energy = 0.0
@@ -2710,27 +2804,27 @@ visible = false
 
 [node name="CSGMesh" type="CSGMesh" parent="LightingExperiments"]
 transform = Transform( 0.392096, 0, 0.919924, 0, 1, 0, -0.919924, 0, 0.392096, 0, 2.91049, -14.6547 )
-material_override = SubResource( 159 )
+material_override = SubResource( 160 )
 use_in_baked_light = true
-mesh = SubResource( 160 )
+mesh = SubResource( 161 )
 
 [node name="CSGMesh" type="CSGMesh" parent="LightingExperiments/CSGMesh"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.45282, 1.58561 )
 use_in_baked_light = true
 operation = 2
-mesh = SubResource( 161 )
+mesh = SubResource( 162 )
 
 [node name="MeshInstance" type="MeshInstance" parent="LightingExperiments"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.92343, 0.110373, -16.1766 )
 use_in_baked_light = true
-mesh = SubResource( 162 )
-material/0 = SubResource( 163 )
+mesh = SubResource( 163 )
+material/0 = SubResource( 164 )
 
 [node name="GIProbe" type="GIProbe" parent="LightingExperiments"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.687242, 4.07743, -13.0581 )
 extents = Vector3( 10, 5.1816, 10 )
 interior = true
-data = SubResource( 164 )
+data = SubResource( 165 )
 
 [node name="OmniLight" type="OmniLight" parent="LightingExperiments"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 1.42038, 2.36254, -16.309 )
@@ -2740,11 +2834,11 @@ omni_range = 18.5
 [node name="MeshInstance2" type="MeshInstance" parent="LightingExperiments"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -1.52614, 1.0228, -13.1769 )
 use_in_baked_light = true
-mesh = SubResource( 165 )
-material/0 = SubResource( 166 )
+mesh = SubResource( 166 )
+material/0 = SubResource( 167 )
 
 [node name="MeshInstance3" type="MeshInstance" parent="LightingExperiments"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.409035, 2.78001, -15.0808 )
 use_in_baked_light = true
-mesh = SubResource( 165 )
-material/0 = SubResource( 167 )
+mesh = SubResource( 166 )
+material/0 = SubResource( 168 )

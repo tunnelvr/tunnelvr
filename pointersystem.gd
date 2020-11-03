@@ -109,7 +109,8 @@ func setactivetargetwall(newactivetargetwall):
 	if (activetargetwall == get_node("/root/Spatial/PlanViewSystem")):
 		print("Waaat")
 	
-	LaserOrient.get_node("RayCast").collision_mask = CollisionLayer.CL_Pointer | CollisionLayer.CL_PointerFloor | CollisionLayer.CL_CaveWall | CollisionLayer.CL_CaveWallTrans
+	assert(CollisionLayer.CLV_MainRayAll == (CollisionLayer.CL_Pointer | CollisionLayer.CL_CentrelineStation | CollisionLayer.CL_PointerFloor | CollisionLayer.CL_CaveWall | CollisionLayer.CL_CaveWallTrans))
+	LaserOrient.get_node("RayCast").collision_mask = CollisionLayer.CL_Pointer | CollisionLayer.CL_CentrelineStation | CollisionLayer.CL_PointerFloor | CollisionLayer.CL_CaveWall | CollisionLayer.CL_CaveWallTrans
 	if activetargetwall != null and activetargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		if not activetargetwall.get_node("XCdrawingplane").visible:
 			sketchsystem.actsketchchange([{"xcvizstates":{activetargetwall.get_name():3}}])
@@ -233,10 +234,6 @@ func _on_button_pressed(p_button):
 			buttonpressed_vrtrigger(gripbuttonheld)
 		elif p_button == BUTTONS.HT_PINCH_MIDDLE_FINGER:
 			buttonpressed_vrgrip()
-		#elif p_button == BUTTONS.HT_PINCH_RING_FINGER:
-		#	guipanel3d.clickbuttonheadtorch()
-		#elif p_button == BUTTONS.HT_PINCH_PINKY:
-		#	buttonpressed_vrby(gripbuttonheld)
 	else:
 		if p_button == BUTTONS.VR_BUTTON_BY:
 			buttonpressed_vrby(gripbuttonheld)

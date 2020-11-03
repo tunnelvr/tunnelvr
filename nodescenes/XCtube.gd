@@ -250,6 +250,8 @@ func maketubepolyassociation_andreorder(xcdrawing0, xcdrawing1):
 		xcsectormaterials = newxcsectormaterials
 		
 	return [poly0, poly1, ila]
+	return [poly0, poly1, ila]
+	return [poly0, poly1, ila]
 
 
 func slicetubetoxcdrawing(xcdrawing, xcdata, xctdatadel, xctdata0, xctdata1):

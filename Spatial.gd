@@ -170,7 +170,14 @@ func _ready():
 	var perm = OS.get_granted_permissions()
 	print("Granted permissions: ", perm)
 
-	if false:
+	if true:
+		var centrelinefile = "res://surveyscans/LambTrap1.json"
+		var xcdatalist = Centrelinedata.xcdatalistfromcentreline(centrelinefile)
+		Tglobal.printxcdrawingfromdatamessages = false
+		$SketchSystem.actsketchchange(xcdatalist)
+		Tglobal.printxcdrawingfromdatamessages = true
+		
+	elif true:
 		#$SketchSystem.loadcentrelinefile("res://surveyscans/dukest1resurvey2009json.res")
 		#$SketchSystem.loadcentrelinefile("res://surveyscans/Ireby/Ireby2/Ireby2.json")
 		$SketchSystem.loadcentrelinefile("res://surveyscans/LambTrap1.json")
@@ -275,10 +282,9 @@ func _process(_delta):
 		perform_runtime_config = true
 		set_process(false)
 				
-
 func clearallprocessactivityforreload():
-	$LabelGenerator.workingxcnode = null
-	$LabelGenerator.remainingxcnodes.clear()
+	$LabelGenerator.workingxcnodename = null
+	$LabelGenerator.remainingxcnodenames.clear()
 	$ImageSystem.fetcheddrawing = null
 	$ImageSystem.paperdrawinglist.clear()
 

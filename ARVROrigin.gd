@@ -19,13 +19,22 @@ func initplayerappearance_me():
 	get_node("HeadCam/csgheadmesh/skullcomponent").material.albedo_color = headcolour
 
 func setheadtorchlight(torchon):
-	$HeadCam/HeadtorchLight.visible = torchon
-	get_node("/root/Spatial/WorldEnvironment").environment = preload("res://environments/underground_env.tres") if torchon else preload("res://environments/default_env.tres")
-	get_node("/root/Spatial/WorldEnvironment/DirectionalLight").visible = not torchon
-	var dl = get_node_or_null("/root/Spatial/WorldEnvironment/DirectionalLight2")
-	if dl != null:
-		dl.shadow_enabled = not torchon
-	get_node("/root/Spatial/MaterialSystem").adjustmaterialtotorchlight(torchon)
+	if torchon:
+		$HeadCam/HeadtorchLight.visible = true
+		get_node("/root/Spatial/WorldEnvironment").environment = preload("res://environments/underground_env.tres")
+		# waiting for godot 4  https://github.com/godotengine/godot/issues/19438
+		#get_node("/root/Spatial").playerMe.get_node("HeadCam").cull_mask &= 1048575 - 4096
+		get_node("/root/Spatial/WorldEnvironment/DirectionalLight").visible = false
+		get_node("/root/Spatial/MaterialSystem").adjustmaterialtotorchlight(true)
+	else:
+		$HeadCam/HeadtorchLight.visible = false
+		get_node("/root/Spatial/WorldEnvironment").environment = preload("res://environments/default_env.tres")
+		#get_node("/root/Spatial").playerMe.get_node("HeadCam").cull_mask |= 4096
+		get_node("/root/Spatial/WorldEnvironment/DirectionalLight").visible = true
+		get_node("/root/Spatial/MaterialSystem").adjustmaterialtotorchlight(false)
+	#var dl = get_node_or_null("/root/Spatial/WorldEnvironment/DirectionalLight2")
+	#if dl != null:
+	#	dl.shadow_enabled = not torchon
 	get_node("/root/Spatial/SoundSystem").quicksound("ClickSound", $HeadCam.global_transform.origin + $HeadCam.global_transform.basis.y * 0.2)
 	rpc("puppetsetheadtorchlight", torchon)
 	if is_instance_valid(doppelganger):

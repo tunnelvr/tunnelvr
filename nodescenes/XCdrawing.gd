@@ -26,7 +26,7 @@ func setxcdrawingvisiblehide(hidenodes):
 	$XCdrawingplane.visible = false
 	$XCdrawingplane/CollisionShape.disabled = true
 	if hidenodes:
-		var rvisible = Tglobal.tubedxcsvisible or (drawingtype != DRAWING_TYPE.DT_XCDRAWING) or (len(xctubesconn) == 0)
+		var rvisible = (Tglobal.tubedxcsvisible or (drawingtype != DRAWING_TYPE.DT_XCDRAWING) or (len(xctubesconn) == 0)) and (drawingtype != DRAWING_TYPE.DT_CENTRELINE)
 		$XCnodes.visible = rvisible
 		$PathLines.visible = rvisible
 		for xcn in $XCnodes.get_children():
@@ -167,9 +167,27 @@ func mergexcrpcdata(xcdata):
 			nodepoints[nA] = nodepointsAdd[nA]
 			var xcn = $XCnodes.get_node_or_null(nA)
 			if xcn == null:
-				xcn = XCnode.instance()
-				xcn.set_name(nA)
-				$XCnodes.add_child(xcn)
+				if drawingtype == DRAWING_TYPE.DT_CENTRELINE:
+					xcn = XCnode_centreline.instance()
+					xcn.get_node("CollisionShape/MeshInstance").layers = CollisionLayer.VL_centrelinestations
+					xcn.get_node("StationLabel").layers = CollisionLayer.VL_centrelinestationslabel
+					xcn.set_name(nA)
+					$XCnodes.add_child(xcn)
+					var xcnpv = XCnode_centreline.instance()
+					xcnpv.set_name(nA)
+					xcnpv.get_node("CollisionShape/MeshInstance").layers = CollisionLayer.VL_centrelinestationsplanview
+					xcnpv.get_node("StationLabel").layers = CollisionLayer.VL_centrelinestationslabelplanview
+					xcnpv.get_node("CollisionShape/MeshInstance").get_surface_material(0).albedo_color = Color(1,0,0.5)
+					xcnpv.collision_layer = (xcnpv.collision_layer&(1048575 - CollisionLayer.CL_CentrelineStation))|CollisionLayer.CL_CentrelineStationPlanView
+					$XCnodes_PlanView.add_child(xcnpv)
+					xcnpv.translation = nodepointsAdd[nA]
+				else:
+					xcn = XCnode.instance()
+					if nA.begins_with("r"):
+						var materialsystem = get_node("/root/Spatial/MaterialSystem")
+						xcn.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("normalhole"))
+					xcn.set_name(nA)
+					$XCnodes.add_child(xcn)
 			xcn.translation = nodepointsAdd[nA]
 			
 	if "maxnodepointnumber" in xcdata:
@@ -210,94 +228,6 @@ func mergexcrpcdata(xcdata):
 			setxcdrawingvisiblehide(true)
 
 
-# "C:\Program Files (x86)\Survex\aven.exe" Ireby\Ireby2\Ireby2.svx
-# python surveyscans\convertdmptojson.py (after editing it for the input and output files)
-func importcentrelinedata(centrelinedata, sketchsystem):
-	$XCdrawingplane.visible = false
-	$XCdrawingplane/CollisionShape.disabled = true
-	drawingtype = DRAWING_TYPE.DT_CENTRELINE
-	#assert (get_name() == "centreline")
-	assert ($XCnodes.get_child_count() == 0 and len(nodepoints) == 0 and len(onepathpairs) == 0 and len(xctubesconn) == 0)
-
-	var stationpointscoords = centrelinedata.stationpointscoords
-	var stationpointsnames = centrelinedata.stationpointsnames
-	var legsconnections = centrelinedata.legsconnections
-	var legsstyles = centrelinedata.legsstyles
-	
-	# find centre (should use an AABB function if exists)
-	var bb = [ stationpointscoords[0], stationpointscoords[1], stationpointscoords[2], 
-			   stationpointscoords[0], stationpointscoords[1], stationpointscoords[2] ]
-	for i in range(len(stationpointsnames)):
-		for j in range(3):
-			bb[j] = min(bb[j], stationpointscoords[i*3+j])
-			bb[j+3] = max(bb[j+3], stationpointscoords[i*3+j])
-	print("svx bounding box", bb)		
-	$XCdrawingplane.set_scale(Vector3(1,1,1))
-	global_transform = Transform()
-	var stationpoints = [ ]
-	for i in range(len(stationpointsnames)):
-		var stationpointname = stationpointsnames[i].replace(".", ",")   # dots not allowed in node name, but commas are
-		stationpointsnames[i] = stationpointname
-		#nodepoints[k] = Vector3(stationpointscoords[i*3], 8.1+stationpointscoords[i*3+2], -stationpointscoords[i*3+1])
-		var stationpoint = Vector3(stationpointscoords[i*3] - (bb[0]+bb[3])/2, 
-								   stationpointscoords[i*3+2] - bb[2] + 1, 
-								   -(stationpointscoords[i*3+1] - (bb[1]+bb[4])/2))
-		stationpoints.append(stationpoint)
-		if stationpointname == "":
-			continue
-		nodepoints[stationpointname] = stationpoint
-		var xcn = XCnode_centreline.instance()
-		$XCnodes.add_child(xcn)
-		xcn.set_name(stationpointname)
-		xcn.translation = nodepoints[stationpointname]
-		maxnodepointnumber = max(maxnodepointnumber, int(stationpointname))
-	for i in range(len(legsstyles)):
-		if stationpointsnames[legsconnections[i*2]] == "" or stationpointsnames[legsconnections[i*2+1]] == "":
-			continue
-		onepathpairs.append(stationpointsnames[legsconnections[i*2]])
-		onepathpairs.append(stationpointsnames[legsconnections[i*2+1]])
-	updatexcpaths()
-
-	# now make the cross sections
-	var xsectgps = centrelinedata.xsectgps
-	var hexonepathpairs = [ "hl","hu", "hu","hv", "hv","hr", "hr","he", "he","hd", "hd","hl"]
-	for j in range(len(xsectgps)):
-		var xsectgp = xsectgps[j]
-		var xsectindexes = xsectgp.xsectindexes
-		var xsectrightvecs = xsectgp.xsectrightvecs
-		var xsectlruds = xsectgp.xsectlruds
-
-		var xcdrawingSect = null
-		for i in range(len(xsectindexes)):
-			var sname = stationpointsnames[xsectindexes[i]]+"s"+String(j)
-			if sketchsystem.get_node("XCdrawings").has_node(sname):
-				continue
-			var hexnodepoints = { }
-			var xl = max(0.1, xsectlruds[i*4+0])
-			var xr = max(0.1, xsectlruds[i*4+1])
-			var xu = max(0.1, xsectlruds[i*4+2])
-			var xd = max(0.1, xsectlruds[i*4+3])
-			hexnodepoints["hl"] = Vector3(-xl, 0, 0)
-			hexnodepoints["hr"] = Vector3(xr, 0, 0)
-			hexnodepoints["hu"] = Vector3(-xl/2, xu, 0)
-			hexnodepoints["hv"] = Vector3(+xr/2, xu, 0)
-			hexnodepoints["hd"] = Vector3(-xl/2, -xd, 0)
-			hexnodepoints["he"] = Vector3(+xr/2, -xd, 0)
-
-			var p = stationpoints[xsectindexes[i]]
-			var ang = Vector2(xsectrightvecs[i*2], -xsectrightvecs[i*2+1]).angle()
-			var xcdrawingSect1 = sketchsystem.newXCuniquedrawing(DRAWING_TYPE.DT_XCDRAWING, sname)
-			assert (xcdrawingSect1.get_name() == sname)
-			var xcdata = { "name":xcdrawingSect1.get_name(), "xcresource":"station_"+sname, "drawingtype":DRAWING_TYPE.DT_XCDRAWING, 
-						   "transformpos":Transform(Basis().rotated(Vector3(0,-1,0), ang), p), "maxnodepointnumber":0, 
-						   "nodepoints":hexnodepoints, "onepathpairs":hexonepathpairs.duplicate(), "visible":false 
-						 }
-			xcdrawingSect1.mergexcrpcdata(xcdata)
-			if xcdrawingSect != null:
-				var xctube = sketchsystem.newXCtube(xcdrawingSect, xcdrawingSect1)
-				xctube.xcdrawinglink = ["hl", "hl", "hr", "hr"].duplicate()
-				xctube.updatetubelinkpaths(sketchsystem)
-			xcdrawingSect = xcdrawingSect1
 	
 func setxcnpoint(xcn, pt, planar):
 	xcn.global_transform.origin = pt

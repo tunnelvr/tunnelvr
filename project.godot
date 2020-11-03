@@ -15,6 +15,11 @@ _global_script_classes=[ {
 "path": "res://utilities/BUTTONS.gd"
 }, {
 "base": "Reference",
+"class": "Centrelinedata",
+"language": "GDScript",
+"path": "res://utilities/Centrelinedata.gd"
+}, {
+"base": "Reference",
 "class": "CollisionLayer",
 "language": "GDScript",
 "path": "res://utilities/CollisionLayer.gd"
@@ -31,6 +36,7 @@ _global_script_classes=[ {
 } ]
 _global_script_class_icons={
 "BUTTONS": "",
+"Centrelinedata": "",
 "CollisionLayer": "",
 "DRAWING_TYPE": "",
 "Polynets": ""
@@ -111,15 +117,33 @@ newboulder={
 
 [layer_names]
 
+3d_render/layer_1="default"
 3d_physics/layer_1="Player"
+3d_render/layer_2="uioverlays"
 3d_physics/layer_2="Environment"
+3d_render/layer_3="floortextures"
 3d_physics/layer_3="Objects"
+3d_render/layer_4="xcdrawingnodes"
 3d_physics/layer_4="Pointer"
+3d_render/layer_5="xcdrawinglines"
 3d_physics/layer_5="PointerFloor"
+3d_render/layer_6="xctubelines"
 3d_physics/layer_6="CaveWall"
+3d_render/layer_7="xctubeposlines"
 3d_physics/layer_7="CaveWallTrans"
+3d_render/layer_8="xctubenodes"
+3d_physics/layer_8="CentrelineStation"
+3d_render/layer_9="xcshells"
+3d_physics/layer_9="CentrelineStationPlanView"
+3d_render/layer_10="centrelinestations"
+3d_render/layer_11="centrelinestationsplanview"
 3d_physics/layer_11="PlayerHotspot"
+3d_render/layer_12="surveylegs"
 3d_physics/layer_12="Papersheet"
+3d_render/layer_13="overheadlight"
+3d_render/layer_14="centrelinestationlabel"
+3d_render/layer_15="floortexturesplanview"
+3d_render/layer_16="centrelinestationlabelplanview"
 
 [rendering]
 

@@ -59,7 +59,6 @@ func updateworkingshell():
 
 func updatecentrelinevisibility():
 	get_tree().call_group("gpnoncentrelinegeo", "xcdfullsetvisibilitycollision", not Tglobal.centrelineonly)
-	get_node("/root/Spatial/PlanViewSystem").updatecentrelinesizes()
 	get_tree().call_group("gpcentrelinegeo", "xcdfullsetvisibilitycollision", Tglobal.centrelinevisible)
 	if Tglobal.centrelinevisible:
 		var playerMe = get_node("/root/Spatial").playerMe
@@ -195,7 +194,6 @@ func caveworldreceivechunkingfailed(msg):
 	return null
 	
 remote func actsketchchangeL(xcdatalist):
-	
 	if "caveworldchunk" in xcdatalist[0]:
 		if xcdatalist[0]["caveworldchunk"] == 0:
 			Tglobal.printxcdrawingfromdatamessages = false
@@ -276,7 +274,9 @@ remote func actsketchchangeL(xcdatalist):
 			if "transformpos" in xcdata["planview"]:
 				planviewsystem.get_node("PlanView").global_transform = xcdata["planview"]["transformpos"]
 			if "visible" in xcdata["planview"]:
-				planviewsystem.actplanviewvisibleactive(xcdata["planview"]["visible"], xcdata["planview"].get("planviewactive", true))
+				planviewsystem.actplanviewvisibleactive(xcdata["planview"]["visible"], 
+														xcdata["planview"].get("planviewactive", true), 
+														xcdata["planview"].get("tubesvisible", planviewsystem.planviewcontrols.get_node("CheckBoxTubesVisible").pressed))
 
 		elif "xcvizstates" in xcdata:
 			if Tglobal.printxcdrawingfromdatamessages:
@@ -298,23 +298,15 @@ remote func actsketchchangeL(xcdatalist):
 						for xctube in xcdrawing.xctubesconn:
 							xctube.setxctubepathlinevisibility(self)
 
+					elif xcdrawing.drawingtype == DRAWING_TYPE.DT_CENTRELINE:
+						xcdata["prevxcvizstates"] = { xcdrawingname:DRAWING_TYPE.VIZ_XCD_HIDE }
+						var drawingvisiblecode = xcdata["xcvizstates"][xcdrawingname]
+						assert (drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_HIDE)
+						xcdrawing.setxcdrawingvisiblehide(true)
+
 					elif xcdrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
 						var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
-						if xcdata["xcvizstates"][xcdrawingname] == DRAWING_TYPE.VIZ_XCD_FLOOR_NORMAL:
-							xcdrawing.setxcdrawingvisible()
-							xcdrawing.get_node("XCdrawingplane/CollisionShape/MeshInstance").get_surface_material(0).set_shader_param("albedo", Color("#FEF4D5"))
-							if planviewsystem.activetargetfloor == xcdrawing:
-								 planviewsystem.activetargetfloor = null
-						elif xcdata["xcvizstates"][xcdrawingname] == DRAWING_TYPE.VIZ_XCD_FLOOR_ACTIVE:
-							xcdrawing.setxcdrawingvisible()
-							xcdrawing.get_node("XCdrawingplane/CollisionShape/MeshInstance").get_surface_material(0).set_shader_param("albedo", Color("#DDFFCC"))
-							planviewsystem.activetargetfloor = xcdrawing
-						elif xcdata["xcvizstates"][xcdrawingname] == DRAWING_TYPE.VIZ_XCD_FLOOR_HIDDEN:
-							xcdrawing.setxcdrawingvisiblehide(true)
-							if planviewsystem.activetargetfloor == xcdrawing:
-								 planviewsystem.activetargetfloor = null
-							xcdrawing.get_node("XCdrawingplane/CollisionShape/MeshInstance").visible = false
-							xcdrawing.get_node("XCdrawingplane/CollisionShape").disabled = true							
+						planviewsystem.setactivefloorviz(xcdrawing, xcdata["xcvizstates"][xcdrawingname])
 						
 			if "updatetubeshells" in xcdata:
 				for xct in xcdata["updatetubeshells"]:
@@ -513,6 +505,9 @@ func newXCuniquedrawing(drawingtype, sname):
 		xcdrawing.add_to_group("gpnoncentrelinegeo")
 		xcdrawing.linewidth = 0.05
 	elif drawingtype == DRAWING_TYPE.DT_CENTRELINE:
+		var xcnodesplanview = Spatial.new()
+		xcnodesplanview.set_name("XCnodes_PlanView")
+		xcdrawing.add_child(xcnodesplanview)
 		xcdrawing.add_to_group("gpcentrelinegeo")
 		xcdrawing.linewidth = 0.035
 	else:
@@ -546,9 +541,11 @@ func newXCuniquedrawingPaperN(xcresource, sname, drawingtype):
 	xcdrawing.get_node("XCdrawingplane/CollisionShape").disabled = false
 	#var m = preload("res://surveyscans/scanimagefloor.material").duplicate()
 	#m.albedo_texture = ImageTexture.new()
-	var m = preload("res://guimaterials/borderedfloor.material").duplicate()
+	var m = get_node("/root/Spatial/MaterialSystem").get_node("xcdrawingmaterials/floorbordered").get_surface_material(0).duplicate()
 	m.set_shader_param("texture_albedo", ImageTexture.new())
 	xcdrawing.get_node("XCdrawingplane/CollisionShape/MeshInstance").set_surface_material(0, m)
+
+
 
 	return xcdrawing
 

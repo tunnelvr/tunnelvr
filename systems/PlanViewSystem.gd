@@ -29,6 +29,28 @@ func getactivetargetfloorViz(newactivetargetfloorname: String):
 		xcviz["xcvizstates"][newactivetargetfloorname] = DRAWING_TYPE.VIZ_XCD_FLOOR_ACTIVE
 	return xcviz
 
+func setactivefloorviz(xcdrawing, xcvizstate):
+	var mat = xcdrawing.get_node("XCdrawingplane/CollisionShape/MeshInstance").get_surface_material(0)
+	if xcvizstate == DRAWING_TYPE.VIZ_XCD_FLOOR_NORMAL:
+		xcdrawing.setxcdrawingvisible()
+		var matc = get_node("/root/Spatial/MaterialSystem").get_node("xcdrawingmaterials/floorbordered").get_surface_material(0)
+		mat.set_shader_param("albedo", matc.get_shader_param("albedo"))
+		mat.set_shader_param("albedo_border", matc.get_shader_param("albedo_border"))
+		if activetargetfloor == xcdrawing:
+			 activetargetfloor = null
+	elif xcvizstate == DRAWING_TYPE.VIZ_XCD_FLOOR_ACTIVE:
+		xcdrawing.setxcdrawingvisible()
+		var matc = get_node("/root/Spatial/MaterialSystem").get_node("xcdrawingmaterials/floorborderedactive").get_surface_material(0)
+		mat.set_shader_param("albedo", matc.get_shader_param("albedo"))
+		mat.set_shader_param("albedo_border", matc.get_shader_param("albedo_border"))
+		activetargetfloor = xcdrawing
+	elif xcvizstate == DRAWING_TYPE.VIZ_XCD_FLOOR_HIDDEN:
+		xcdrawing.setxcdrawingvisiblehide(true)
+		if activetargetfloor == xcdrawing:
+			 activetargetfloor = null
+		xcdrawing.get_node("XCdrawingplane/CollisionShape/MeshInstance").visible = false
+		xcdrawing.get_node("XCdrawingplane/CollisionShape").disabled = true							
+
 func defaultimgtrim():
 	return { "imgwidth":20, 
 			 "imgtrimleftdown":Vector2(-10, -10),
@@ -110,6 +132,17 @@ func transferintorealviewport(setascurrentcamera):
 		$PlanView/Viewport.set_name("ViewportFake")
 		$PlanView/ViewportReal.set_name("Viewport")
 		$PlanView/ProjectionScreen.get_surface_material(0).albedo_texture = $PlanView/Viewport.get_texture()
+
+
+func checkboxtubesvisible_pressed():
+	var sketchsystem = get_node("/root/Spatial/SketchSystem")
+	var pvchange = { "visible":visible, 
+					 "planviewactive":planviewactive,
+					 "tubesvisible":planviewcontrols.get_node("CheckBoxTubesVisible").pressed 
+				   }
+	sketchsystem.actsketchchange([{"planview":pvchange}]) 
+
+
 		
 func _ready():
 	listregex.compile('<li><a href="([^"]*)">')
@@ -119,19 +152,39 @@ func _ready():
 	$RealPlanCamera.set_as_toplevel(true)
 	planviewcontrols.get_node("ZoomView/ButtonCentre").connect("pressed", self, "buttoncentre_pressed")
 	planviewcontrols.get_node("ButtonClosePlanView").connect("pressed", self, "buttonclose_pressed")
+	planviewcontrols.get_node("CheckBoxTubesVisible").connect("pressed", self, "checkboxtubesvisible_pressed")
+	planviewcontrols.get_node("CheckBoxFileTree").connect("toggled", self, "checkboxfiletree_toggled")
 	call_deferred("readydeferred")
 	set_process(visible)
 		
 func readydeferred():
 	tree.connect("button_pressed", self, "fetchbuttonpressed")
 	var root = tree.create_item()
-	root.set_text(0, "Root of treee")
+	root.set_text(0, "Root of tree")
 	#addsubitem(root, "Ireby", "http://cave-registry.org.uk/svn/NorthernEngland/ThreeCountiesArea/rawscans/Ireby/")
-	addsubitem(root, "rawscans", "http://cave-registry.org.uk/svn/NorthernEngland/ThreeCountiesArea/rawscans/")
+	#addsubitem(root, "rawscans", "http://cave-registry.org.uk/svn/NorthernEngland/ThreeCountiesArea/rawscans/")
+	addsubitem(root, "rawscans", "http://cave-registry.org.uk/svn/NorthernEngland/ThreeCountiesArea/")
 	
-func actplanviewvisibleactive(lvisible, lactive):
+
+func actplanviewvisibleactive(lvisible, lactive, tubesvisible):
 	visible = lvisible
-	get_node("PlanView/CollisionShape").disabled = not visible
+	
+	if visible:
+		# see also updatecentrelinevisibility()
+		get_node("PlanView/CollisionShape").disabled = false
+		var playerMe = get_node("/root/Spatial").playerMe
+		get_node("/root/Spatial/LabelGenerator").restartlabelmakingprocess(playerMe.get_node("HeadCam").global_transform.origin)
+	else:
+		get_node("PlanView/CollisionShape").disabled = true
+			
+	planviewcontrols.get_node("CheckBoxTubesVisible").pressed = tubesvisible
+	if tubesvisible:
+		get_node("PlanView/Viewport/PlanGUI/Camera").cull_mask = CollisionLayer.VLCM_PlanViewCamera
+		get_node("RealPlanCamera/LaserScope/LaserOrient/RayCast").collision_mask = CollisionLayer.CLV_PlanRayAll
+	else:
+		get_node("PlanView/Viewport/PlanGUI/Camera").cull_mask = CollisionLayer.VLCM_PlanViewCameraNoTube
+		get_node("RealPlanCamera/LaserScope/LaserOrient/RayCast").collision_mask = CollisionLayer.CLV_PlanRayNoTube
+	
 	var guipanel3d = get_node("/root/Spatial/GuiSystem/GUIPanel3D")
 	guipanel3d.get_node("Viewport/GUI/Panel/ButtonPlanView").pressed = visible
 	planviewactive = lactive
@@ -149,32 +202,47 @@ func toggleplanviewactive():
 	var sketchsystem = get_node("/root/Spatial/SketchSystem")
 	sketchsystem.actsketchchange([{"planview": { "visible":true, "planviewactive":not planviewactive }} ])
 
-func setplanviewvisible(planviewvisible, guidpaneltransform, guidpanelsize):
-	var sketchsystem = get_node("/root/Spatial/SketchSystem")
-	if planviewvisible:
+
+func planviewtransformpos(guidpaneltransform, guidpanelsize):
+	if guidpaneltransform != null:
 		var paneltrans = $PlanView.global_transform
-		if guidpaneltransform != null:
-			paneltrans.origin = guidpaneltransform.origin + guidpaneltransform.basis.y*(guidpanelsize.y/2) + Vector3(0,$PlanView/ProjectionScreen/ImageFrame.mesh.size.y/2,0)
-			var eyepos = get_node("/root/Spatial").playerMe.get_node("HeadCam").global_transform.origin
-			paneltrans = paneltrans.looking_at(eyepos + 2*(paneltrans.origin-eyepos), Vector3(0, 1, 0))
-		else:
-			var controllertrans = get_node("/root/Spatial/BodyObjects/LaserOrient").global_transform
-			var paneldistance = 1.2 if Tglobal.VRoperating else 0.6
-			paneltrans.origin = controllertrans.origin - paneldistance*ARVRServer.world_scale*(controllertrans.basis.z)
-			var lookatpos = controllertrans.origin - 1.6*ARVRServer.world_scale*(controllertrans.basis.z)
-			paneltrans = paneltrans.looking_at(lookatpos, Vector3(0, 1, 0))
-		sketchsystem.actsketchchange([{ "planview":{ "transformpos":paneltrans, "visible":true, "planviewactive":true } } ])
+		paneltrans.origin = guidpaneltransform.origin + guidpaneltransform.basis.y*(guidpanelsize.y/2) + Vector3(0,$PlanView/ProjectionScreen/ImageFrame.mesh.size.y/2,0)
+		var eyepos = get_node("/root/Spatial").playerMe.get_node("HeadCam").global_transform.origin
+		paneltrans = paneltrans.looking_at(eyepos + 2*(paneltrans.origin-eyepos), Vector3(0, 1, 0))
+		return paneltrans
 	else:
-		sketchsystem.actsketchchange([{"planview": { "visible":false, "planviewactive":false }} ])
+		var paneltrans = $PlanView.global_transform
+		var controllertrans = get_node("/root/Spatial/BodyObjects/LaserOrient").global_transform
+		var paneldistance = 1.2 if Tglobal.VRoperating else 0.6
+		paneltrans.origin = controllertrans.origin - paneldistance*ARVRServer.world_scale*(controllertrans.basis.z)
+		var lookatpos = controllertrans.origin - 1.6*ARVRServer.world_scale*(controllertrans.basis.z)
+		paneltrans = paneltrans.looking_at(lookatpos, Vector3(0, 1, 0))
+		return paneltrans
 
 
 var slowviewportframeratecountdown = 1
+var slowviewupdatecentrelinesizeupdaterate = 1.5
+var prevcamerasize = 0
 func _process(delta):
 	if Tglobal.arvrinterfacename == "OVRMobile" and visible:
 		slowviewportframeratecountdown -= delta
 		if slowviewportframeratecountdown < 0:
 			slowviewportframeratecountdown = 1
 			$PlanView/Viewport.render_target_update_mode = Viewport.UPDATE_ONCE
+
+	if visible:
+		slowviewupdatecentrelinesizeupdaterate -= delta
+		if slowviewupdatecentrelinesizeupdaterate < 0:
+			if prevcamerasize != $PlanView/Viewport/PlanGUI/Camera.size:
+				prevcamerasize = $PlanView/Viewport/PlanGUI/Camera.size
+				var sca = $PlanView/Viewport/PlanGUI/Camera.size/70.0*2.5
+				for xcdrawingcentreline in get_tree().get_nodes_in_group("gpcentrelinegeo"):
+					for xcn in xcdrawingcentreline.get_node("XCnodes_PlanView").get_children():
+						xcn.get_node("StationLabel").get_surface_material(0).set_shader_param("vertex_scale", sca)
+						xcn.get_node("CollisionShape").scale = Vector3(sca*2, sca*2, sca*2)
+					xcdrawingcentreline.linewidth = 0.035*sca
+					xcdrawingcentreline.updatexcpaths()
+			slowviewupdatecentrelinesizeupdaterate = 1.6
 	
 	var viewslide = planviewcontrols.get_node("ViewSlide")
 	var joypos = Vector2((-1 if viewslide.get_node("ButtonSlideLeft").is_pressed() else 0) + (1 if viewslide.get_node("ButtonSlideRight").is_pressed() else 0), 
@@ -249,6 +317,20 @@ func checkplanviewinfront(handrightcontroller):
 	var collider_transform = planviewsystem.get_node("PlanView").global_transform
 	return collider_transform.xform_inv(handrightcontroller.global_transform.origin).z > 0
 
+func checkinguipanel(viewport_point):
+	var rectrel = viewport_point - planviewcontrols.rect_position
+	if rectrel.x > 0 and rectrel.y > 0 and rectrel.x < planviewcontrols.rect_size.x and rectrel.y < planviewcontrols.rect_size.y:
+		return true
+	var filetree = planviewcontrols.get_node("Tree")
+	if filetree.visible:
+		var rectrelt = rectrel - filetree.rect_position
+		if  rectrelt.x > 0 and  rectrelt.y > 0 and  rectrelt.x < filetree.rect_size.x and  rectrelt.y < filetree.rect_size.y:
+			return true
+	return false
+
+func checkboxfiletree_toggled(button_pressed):
+	planviewcontrols.get_node("Tree").visible = button_pressed
+
 var viewport_mousedown = false
 var viewport_point = Vector2(0,0)
 func processplanviewpointing(raycastcollisionpoint, controller_trigger):
@@ -263,8 +345,7 @@ func processplanviewpointing(raycastcollisionpoint, controller_trigger):
 	local_point += Vector3(0.5, -0.5, 0) # X is about 0 to 1, Y is about 0 to -1.
 	viewport_point = Vector2(local_point.x, -local_point.y) * $PlanView/Viewport.size
 
-	var rectrel = viewport_point - planviewcontrols.rect_position
-	var inguipanel = (rectrel.x > 0 and rectrel.y > 0 and rectrel.x < planviewcontrols.rect_size.x and rectrel.y < planviewcontrols.rect_size.y)
+	var inguipanel = checkinguipanel(viewport_point)
 	if inguipanel:
 		var event = InputEventMouseMotion.new()
 		event.position = viewport_point
@@ -292,17 +373,5 @@ func planviewguipanelreleasemouse():
 	event.position = viewport_point
 	$PlanView/Viewport.input(event)
 	viewport_mousedown = false
-
-func updatecentrelinesizes():
-	var sca = 1
-	if Tglobal.centrelineonly:
-		sca = $PlanView/Viewport/PlanGUI/Camera.size/70.0*2.5
-	for xcdrawing in get_tree().get_nodes_in_group("gpcentrelinegeo"):
-		for xcn in xcdrawing.get_node("XCnodes").get_children():
-			xcn.get_node("StationLabel").get_surface_material(0).set_shader_param("vertex_scale", sca)
-			xcn.get_node("CollisionShape").scale = Vector3(sca*2, sca*2, sca*2)
-		xcdrawing.linewidth = 0.035*sca
-		xcdrawing.updatexcpaths()
-
 
 
