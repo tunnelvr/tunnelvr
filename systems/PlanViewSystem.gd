@@ -31,11 +31,10 @@ func getactivetargetfloorViz(newactivetargetfloorname: String):
 		if newactivetargetfloor != null:
 			xcviz["prevxcvizstates"][newactivetargetfloorname] = newactivetargetfloor.drawingvisiblecode
 		xcviz["xcvizstates"][newactivetargetfloorname] = DRAWING_TYPE.VIZ_XCD_FLOOR_ACTIVE
-		if newactivetargetfloor != null and newactivetargetfloor.drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE:
+		if newactivetargetfloor != null and (newactivetargetfloor.drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE or newactivetargetfloor.drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE_ACTIVE):
 			xcviz["xcvizstates"][newactivetargetfloorname] = DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE_ACTIVE
 
 	return xcviz
-
 
 func setactivetargetfloor(lactivetargetfloor):
 	activetargetfloor = lactivetargetfloor

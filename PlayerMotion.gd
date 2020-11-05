@@ -134,7 +134,6 @@ func _physics_process(delta):
 		$MotionVectorPreview/Scale.scale.z = playercentrevelocitylength
 		if playercentrevelocitylength > 0.01:
 			$MotionVectorPreview.global_transform = Transform(Basis(), playerbodycentre).looking_at(playerbodycentre - playercentrevelocity, Vector3(0,1,0) if abs(playercentrevelocity.y) < 0.8*playercentrevelocitylength else Vector3(1,0,0))
-
 		
 
 func process_feet_on_floor(delta, playerdirectedwalkmovement):
@@ -351,9 +350,10 @@ func filter_playerposition_bandwidth(positiondict):
 	else:
 		prevpositiondict["puppetbody"] = positiondict["puppetbody"].duplicate()
 
-	if transformwithinrange(prevpositiondict["laserpointer"]["orient"], positiondict["laserpointer"]["orient"], pointerpositionchange, pointeranglechange) and \
-	   abs(prevpositiondict["laserpointer"]["length"] - positiondict["laserpointer"]["length"]) < pointerpositionchange and \
-	   prevpositiondict["laserpointer"]["spotvisible"] == positiondict["laserpointer"]["spotvisible"]:
+	var laserpointerinrange = transformwithinrange(prevpositiondict["laserpointer"]["orient"], positiondict["laserpointer"]["orient"], pointerpositionchange, pointeranglechange) and \
+			abs(prevpositiondict["laserpointer"]["length"] - positiondict["laserpointer"]["length"]) < pointerpositionchange and \
+			prevpositiondict["laserpointer"]["spotvisible"] == positiondict["laserpointer"]["spotvisible"]
+	if laserpointerinrange and ("laserselectline" in prevpositiondict) == ("laserselectline" in positiondict) and ("planviewlaser" in prevpositiondict) == ("planviewlaser" in positiondict):
 		positiondict.erase("laserpointer")
 	else:
 		prevpositiondict["laserpointer"] = positiondict["laserpointer"].duplicate()

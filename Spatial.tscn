@@ -2288,16 +2288,6 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ButtonTilt" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorMove"]
-margin_left = 176.736
-margin_top = 1.96039
-margin_right = 222.736
-margin_bottom = 23.9604
-text = "Tilt"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
 [node name="ButtonTiltFore" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorMove"]
 margin_left = 117.52
 margin_top = 44.7977
@@ -2319,18 +2309,21 @@ __meta__ = {
 }
 
 [node name="LabelXCresource" type="Label" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorMove"]
-margin_left = 182.0
-margin_top = 50.0
-margin_right = 487.0
-margin_bottom = 91.0
+margin_left = 173.0
+margin_top = 24.0
+margin_right = 478.0
+margin_bottom = 83.0
 autowrap = true
 
 [node name="CheckBoxUnshaded" type="CheckBox" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorMove"]
-margin_left = 178.26
-margin_top = 27.2421
-margin_right = 269.26
-margin_bottom = 51.2421
+margin_left = 169.441
+margin_top = -2.99594
+margin_right = 260.441
+margin_bottom = 21.0041
 text = "unshaded"
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="Scalebar" type="Control" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
 margin_left = 71.0

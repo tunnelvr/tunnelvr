@@ -779,7 +779,10 @@ func buttonreleased_vrgrip():
 		setactivetargetwall(null)
 		clearpointertarget()
 		activelaserroot.get_node("LaserSpot").visible = false
-		# keep nodes visible???
+
+	elif planviewsystem.planviewactive and pointertargettype == "XCdrawing" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE and \
+			planviewsystem.activetargetfloor != null and pointertargetwall == planviewsystem.activetargetfloor and pointertargetwall == gripmenu.gripmenupointertargetwall:
+		sketchsystem.actsketchchange([planviewsystem.getactivetargetfloorViz("")])
 		
 	elif activetargetwall != null and activetargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		var updatexcshells = [ activetargetwall.get_name() ]

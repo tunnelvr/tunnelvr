@@ -192,15 +192,45 @@ func process_puppetpointerpositionstack(delta):
 	if len(puppetpointerpositionstack) == 1:
 		$LaserOrient.transform = pp["orient"]
 		$LaserOrient/Length.scale.z = pp["length"]
-		#pp["spotvisible"]
+		if "laserselectline" in pp:
+			$LaserSelectLine.global_transform = pp["laserselectline"]["global_transform"]
+			$LaserSelectLine/Scale.z = pp["laserselectline"]["scalez"]
+			$LaserSelectLine.visible = true
+		else:
+			$LaserSelectLine.visible = false
 		puppetpointerpositionstack.pop_front()
+		
+		if "planviewlaser" in pp:
+			$PlanViewLaser.global_transform = pp["planviewlaser"]["global_transform"]
+			$PlanViewLaser/Length.scale.z = pp["planviewlaser"]["length"]
+			$PlanViewLaser.visible = true
+		else:
+			$PlanViewLaser.visible = false
 		
 	else:
 		var pp1 = puppetpointerpositionstack[1]
 		var lam = inverse_lerp(pp["Ltimestamp"], pp1["Ltimestamp"], t)
-		$LaserOrient.transform = Transform(pp["orient"].basis.slerp(pp1["orient"].basis, lam), lerp(pp["orient"].origin, pp1["orient"].origin, lam)) 
+		$LaserOrient.transform = Transform(pp["orient"].basis.slerp(pp1["orient"].basis, lam), 
+										   lerp(pp["orient"].origin, pp1["orient"].origin, lam)) 
 		$LaserOrient/Length.scale.z = lerp(pp["length"], pp1["length"], lam)
-		#$LaserOrient/LaserSpot.scale.z = pp["laserpointer"]["spotvisible"]
+
+		if "laserselectline" in pp and "laserselectline" in pp1:
+			$LaserSelectLine.global_transform = Transform(pp["laserselectline"]["global_transform"].basis.slerp(pp1["laserselectline"]["global_transform"].basis, lam), 
+														  lerp(pp["laserselectline"]["global_transform"].origin, pp1["laserselectline"]["global_transform"].origin, lam)) 
+			$LaserSelectLine/Scale.scale.z = lerp(pp["laserselectline"]["scalez"], pp1["laserselectline"]["scalez"], lam)
+			$LaserSelectLine.visible = true
+		else:
+			$LaserSelectLine.visible = false
+
+		if "planviewlaser" in pp and "planviewlaser" in pp1:
+			$PlanViewLaser.global_transform = Transform(pp["planviewlaser"]["global_transform"].basis.slerp(pp1["planviewlaser"]["global_transform"].basis, lam), 
+														lerp(pp["planviewlaser"]["global_transform"].origin, pp1["planviewlaser"]["global_transform"].origin, lam)) 
+			$PlanViewLaser/Length.scale.z = lerp(pp["planviewlaser"]["length"], pp1["planviewlaser"]["length"], lam)
+			$PlanViewLaser.visible = true
+		else:
+			$PlanViewLaser.visible = false
+
+
 
 puppet func bouncedoppelgangerposition(bouncebackID, positiondict):
 	get_parent().get_parent().playerMe.rpc_unreliable_id(bouncebackID, "setdoppelgangerposition", positiondict)

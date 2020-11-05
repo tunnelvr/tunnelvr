@@ -7,6 +7,8 @@ var playerplatform = ""
 
 var bouncetestnetworkID = 0
 onready var LaserOrient = get_node("/root/Spatial/BodyObjects/LaserOrient")
+onready var LaserSelectLine = get_node("/root/Spatial/BodyObjects/LaserSelectLine")
+onready var PlanViewSystem = get_node("/root/Spatial/PlanViewSystem")
 var ovr_hand_tracking = null
 onready var guipanel3d = get_node("/root/Spatial/GuiSystem/GUIPanel3D")
 
@@ -100,9 +102,16 @@ remotesync func playvoicerecording(wavrecording):
 	$HandRight/AudioStreamPlayer3D.play()
 
 func laserpointerdict():
-	return { "orient":$HandRight.pointerposearvrorigin, 
-			 "length": LaserOrient.get_node("Length").scale.z, 
-			 "spotvisible": LaserOrient.get_node("LaserSpot").visible }
+	var ldict = { "orient":$HandRight.pointerposearvrorigin, 
+				  "length": LaserOrient.get_node("Length").scale.z, 
+				  "spotvisible": LaserOrient.get_node("LaserSpot").visible }
+	if LaserSelectLine.visible:
+		ldict["laserselectline"] = { "global_transform":LaserSelectLine.global_transform, 
+									 "scalez":LaserSelectLine.get_node("Scale").scale.z }
+	if PlanViewSystem.planviewactive and PlanViewSystem.get_node("RealPlanCamera/LaserScope").visible:
+		ldict["planviewlaser"] = { "global_transform":PlanViewSystem.get_node("RealPlanCamera/LaserScope/LaserOrient").global_transform, 
+								   "length":PlanViewSystem.get_node("RealPlanCamera/LaserScope/LaserOrient/Length").scale.z }
+	return ldict
 
 var footstepcount = 0
 func puppetbodydict():
