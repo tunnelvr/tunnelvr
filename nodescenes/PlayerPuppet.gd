@@ -164,16 +164,23 @@ func process_puppetpositionstack(delta):
 	else:
 		var pp1 = puppetpositionstack[1]
 		var lam = inverse_lerp(pp["Ltimestamp"], pp1["Ltimestamp"], t)
+		var Dx = ""
 		if pp.has("playertransform") and pp1.has("playertransform"):
+			Dx = var2str(pp["playertransform"].basis)
 			global_transform = Transform(pp["playertransform"].basis.slerp(pp1["playertransform"].basis, lam), 
 										 lerp(pp["playertransform"].origin, pp1["playertransform"].origin, lam))
+			if Quat(pp["playertransform"].basis) == Quat(0,0,0,1):
+				print("Baaad ", Dx)
 		if pp.has("headcamtransform") and pp1.has("headcamtransform"):
+			Dx = var2str(pp["headcamtransform"].basis)
 			$HeadCam.transform = Transform(pp["headcamtransform"].basis.slerp(pp1["headcamtransform"].basis, lam), 
 										   lerp(pp["headcamtransform"].origin, pp1["headcamtransform"].origin, lam))
 			$headlocator.transform.origin = $HeadCam.transform.origin
 		if pp1.has("footstepcount") and pp1["footstepcount"] != prevfootstepcount:
 			Tglobal.soundsystem.quicksound("TapSound", $HeadCam.global_transform.origin - Vector3(0, 1.5, 0))
 			prevfootstepcount = pp1["footstepcount"]
+			if (prevfootstepcount%100) == 101:
+				print(Dx)
 				
 func process_puppetpointerpositionstack(delta):
 	var t = OS.get_ticks_msec()*0.001

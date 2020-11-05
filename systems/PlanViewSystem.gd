@@ -19,37 +19,52 @@ var fetchbuttontex = null
 func getactivetargetfloorViz(newactivetargetfloorname: String):
 	var xcviz = { "prevxcvizstates":{ }, "xcvizstates":{ } }
 	if activetargetfloor != null and newactivetargetfloorname != activetargetfloor.get_name():
-		xcviz["prevxcvizstates"][activetargetfloor.get_name()] = DRAWING_TYPE.VIZ_XCD_FLOOR_ACTIVE
-		xcviz["xcvizstates"][activetargetfloor.get_name()] = DRAWING_TYPE.VIZ_XCD_FLOOR_NORMAL
+		xcviz["prevxcvizstates"][activetargetfloor.get_name()] = activetargetfloor.drawingvisiblecode
+		if activetargetfloor.drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE_ACTIVE:
+			xcviz["xcvizstates"][activetargetfloor.get_name()] = DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE
+		elif activetargetfloor.drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_FLOOR_ACTIVE:
+			xcviz["xcvizstates"][activetargetfloor.get_name()] = DRAWING_TYPE.VIZ_XCD_FLOOR_NORMAL
+
 	if newactivetargetfloorname != "":
-		if activetargetfloor != null and newactivetargetfloorname == activetargetfloor.get_name():
-			xcviz["prevxcvizstates"][newactivetargetfloorname] = DRAWING_TYPE.VIZ_XCD_FLOOR_ACTIVE
-		else:
-			xcviz["prevxcvizstates"][newactivetargetfloorname] = DRAWING_TYPE.VIZ_XCD_FLOOR_NORMAL
+		var sketchsystem = get_node("/root/Spatial/SketchSystem")
+		var newactivetargetfloor = sketchsystem.get_node("XCdrawings").get_node_or_null(newactivetargetfloorname)
+		if newactivetargetfloor != null:
+			xcviz["prevxcvizstates"][newactivetargetfloorname] = newactivetargetfloor.drawingvisiblecode
 		xcviz["xcvizstates"][newactivetargetfloorname] = DRAWING_TYPE.VIZ_XCD_FLOOR_ACTIVE
+		if newactivetargetfloor != null and newactivetargetfloor.drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE:
+			xcviz["xcvizstates"][newactivetargetfloorname] = DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE_ACTIVE
+
 	return xcviz
 
-func setactivefloorviz(xcdrawing, xcvizstate):
-	var mat = xcdrawing.get_node("XCdrawingplane/CollisionShape/MeshInstance").get_surface_material(0)
-	if xcvizstate == DRAWING_TYPE.VIZ_XCD_FLOOR_NORMAL:
-		xcdrawing.setxcdrawingvisible()
-		var matc = get_node("/root/Spatial/MaterialSystem").get_node("xcdrawingmaterials/floorbordered").get_surface_material(0)
-		mat.set_shader_param("albedo", matc.get_shader_param("albedo"))
-		mat.set_shader_param("albedo_border", matc.get_shader_param("albedo_border"))
-		if activetargetfloor == xcdrawing:
-			 activetargetfloor = null
-	elif xcvizstate == DRAWING_TYPE.VIZ_XCD_FLOOR_ACTIVE:
-		xcdrawing.setxcdrawingvisible()
-		var matc = get_node("/root/Spatial/MaterialSystem").get_node("xcdrawingmaterials/floorborderedactive").get_surface_material(0)
-		mat.set_shader_param("albedo", matc.get_shader_param("albedo"))
-		mat.set_shader_param("albedo_border", matc.get_shader_param("albedo_border"))
-		activetargetfloor = xcdrawing
-	elif xcvizstate == DRAWING_TYPE.VIZ_XCD_FLOOR_HIDDEN:
-		xcdrawing.setxcdrawingvisiblehide(true)
-		if activetargetfloor == xcdrawing:
-			 activetargetfloor = null
-		xcdrawing.get_node("XCdrawingplane/CollisionShape/MeshInstance").visible = false
-		xcdrawing.get_node("XCdrawingplane/CollisionShape").disabled = true							
+
+func setactivetargetfloor(lactivetargetfloor):
+	activetargetfloor = lactivetargetfloor
+	if activetargetfloor == null:
+		planviewcontrols.get_node("FloorMove/CheckBoxUnshaded").pressed = false
+		planviewcontrols.get_node("FloorMove/LabelXCresource").text = ""
+	else:
+		planviewcontrols.get_node("FloorMove/CheckBoxUnshaded").pressed = (activetargetfloor.drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE) or \
+																		  (activetargetfloor.drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE_ACTIVE)
+		planviewcontrols.get_node("FloorMove/LabelXCresource").text = activetargetfloor.xcresource
+
+func checkboxunshaded_pressed():
+	if activetargetfloor != null:
+		var newdrawingcode = activetargetfloor.drawingvisiblecode
+		if planviewcontrols.get_node("FloorMove/CheckBoxUnshaded").pressed:
+			if newdrawingcode == DRAWING_TYPE.VIZ_XCD_FLOOR_NORMAL:
+				newdrawingcode = DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE
+			if newdrawingcode == DRAWING_TYPE.VIZ_XCD_FLOOR_ACTIVE:
+				newdrawingcode = DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE_ACTIVE
+		else:
+			if newdrawingcode == DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE:
+				newdrawingcode = DRAWING_TYPE.VIZ_XCD_FLOOR_NORMAL
+			if newdrawingcode == DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE_ACTIVE:
+				newdrawingcode = DRAWING_TYPE.VIZ_XCD_FLOOR_ACTIVE
+		var floorviz = { "prevxcvizstates":{ activetargetfloor.get_name():activetargetfloor.drawingvisiblecode  }, 
+						 "xcvizstates":{ activetargetfloor.get_name():newdrawingcode } }
+		var sketchsystem = get_node("/root/Spatial/SketchSystem")
+		sketchsystem.actsketchchange([floorviz])
+			
 
 func defaultimgtrim():
 	return { "imgwidth":20, 
@@ -133,7 +148,6 @@ func transferintorealviewport(setascurrentcamera):
 		$PlanView/ViewportReal.set_name("Viewport")
 		$PlanView/ProjectionScreen.get_surface_material(0).albedo_texture = $PlanView/Viewport.get_texture()
 
-
 func checkboxtubesvisible_pressed():
 	var sketchsystem = get_node("/root/Spatial/SketchSystem")
 	var pvchange = { "visible":visible, 
@@ -153,6 +167,7 @@ func _ready():
 	planviewcontrols.get_node("ZoomView/ButtonCentre").connect("pressed", self, "buttoncentre_pressed")
 	planviewcontrols.get_node("ButtonClosePlanView").connect("pressed", self, "buttonclose_pressed")
 	planviewcontrols.get_node("CheckBoxTubesVisible").connect("pressed", self, "checkboxtubesvisible_pressed")
+	planviewcontrols.get_node("FloorMove/CheckBoxUnshaded").connect("pressed", self, "checkboxunshaded_pressed")
 	planviewcontrols.get_node("CheckBoxFileTree").connect("toggled", self, "checkboxfiletree_toggled")
 	call_deferred("readydeferred")
 	set_process(visible)
@@ -274,20 +289,26 @@ func _process(delta):
 								 (-1 if floormove.get_node("ButtonMoveDown").is_pressed() else 0) + (1 if floormove.get_node("ButtonMoveUp").is_pressed() else 0), 
 								 (-0.5 if floormove.get_node("ButtonMoveFall").is_pressed() else 0) + (0.5 if floormove.get_node("ButtonMoveRise").is_pressed() else 0))
 		var joygrow = (-1 if floormove.get_node("ButtonShrink").is_pressed() else 0) + (1 if floormove.get_node("ButtonGrow").is_pressed() else 0)
+		var joyrot = Vector2((-1 if floormove.get_node("ButtonRotR").is_pressed() else 0) + (1 if floormove.get_node("ButtonRotL").is_pressed() else 0), 
+							 (-1 if floormove.get_node("ButtonTiltFore").is_pressed() else 0) + (1 if floormove.get_node("ButtonTiltBack").is_pressed() else 0))
 		if len(activetargetfloor.nodepoints) != 0:
 			joyposmove.x = 0
 			joyposmove.y = 0
 			joygrow = 0
-		if joypostrimld != Vector2(0,0) or joypostrimru != Vector2(0,0) or joyposmove != Vector3(0,0,0) or joygrow != 0:
+			joyrot = Vector2(0, 0)
+		if joypostrimld != Vector2(0,0) or joypostrimru != Vector2(0,0) or joyposmove != Vector3(0,0,0) or joygrow != 0 or joyrot != Vector2(0, 0):
 			var txcdata = { "name":activetargetfloor.get_name(), 
 							"rpcoptional":1,
 							"timestamp":OS.get_ticks_msec()*0.001 }
 			var d = activetargetfloor
 			var drawingplane = d.get_node("XCdrawingplane")
 			var sfac = delta*8
-			if joyposmove != Vector3(0,0,0):
+			if joyposmove != Vector3(0,0,0) or joyrot != Vector2(0, 0):
 				txcdata["prevtransformpos"] = d.transform
-				txcdata["transformpos"] = Transform(d.transform.basis, d.transform.origin + d.transform.basis*joyposmove*delta*8)
+				var tb = d.transform.basis
+				if joyrot != Vector2(0, 0):
+					tb = Basis(tb.get_euler() + Vector3(joyrot.y*delta, joyrot.x*delta, 0))
+				txcdata["transformpos"] = Transform(tb, d.transform.origin + d.transform.basis*joyposmove*delta*8)
 
 			if joypostrimld != Vector2(0,0) or joypostrimru != Vector2(0,0) or joygrow != 0:
 				txcdata["previmgtrim"] = { "imgwidth":d.imgwidth, "imgtrimleftdown":d.imgtrimleftdown, "imgtrimrightup":d.imgtrimrightup }

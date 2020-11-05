@@ -451,7 +451,7 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 		clearactivetargetnode()
 
 	elif pointertargettype == "XCdrawing" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE and \
-					planviewsystem.planviewactive and activelaserroot != LaserOrient: 
+					planviewsystem.planviewactive: 
 		if gripbuttonheld and planviewsystem.activetargetfloor == pointertargetwall:
 			sketchsystem.actsketchchange([planviewsystem.getactivetargetfloorViz("")])
 		else:

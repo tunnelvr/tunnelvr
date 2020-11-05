@@ -91,28 +91,12 @@ func sketchsystemtodict():
 remote func savesketchsystem(fname):
 	var sketchdatadict = sketchsystemtodict()
 	var sketchdatafile = File.new()
-	sketchdatafile.open(fname, File.WRITE)
+	var fnamewriting = fname + "_WRITING"
+	sketchdatafile.open(fnamewriting, File.WRITE)
 	sketchdatafile.store_var(sketchdatadict)
 	sketchdatafile.close()
-	print("sssssaved in C:/Users/ViveOne/AppData/Roaming/Godot/app_userdata/tunnelvr")
-
-func loadcentrelinefile(centrelinefile):
-	print("  want to open file ", centrelinefile)
-	var centrelinedrawing = newXCuniquedrawing(DRAWING_TYPE.DT_CENTRELINE, "centreline")
-	var centrelinedatafile = File.new()
-
-	centrelinedrawing.xcresource = centrelinefile
-
-	centrelinedatafile.open(centrelinedrawing.xcresource, File.READ)
-	var centrelinedata = parse_json(centrelinedatafile.get_line())
-	centrelinedrawing.importcentrelinedata(centrelinedata, self)
-	#var xsectgps = centrelinedata.xsectgps
-	var LabelGenerator = get_node("/root/Spatial/LabelGenerator")
-	LabelGenerator.addnodestolabeltask(centrelinedrawing)
-	if Tglobal.centrelinevisible:
-		var playerMe = get_node("/root/Spatial").playerMe		
-		LabelGenerator.restartlabelmakingprocess(playerMe.get_node("HeadCam").global_transform.origin)
-	print("default lllloaded")
+	Directory.new().rename(fnamewriting, fname)
+	print("saved ", fname, " in C:/Users/ViveOne/AppData/Roaming/Godot/app_userdata/tunnelvr")
 
 
 func combinabletransformposchange(xcdatalist):
@@ -284,29 +268,20 @@ remote func actsketchchangeL(xcdatalist):
 			for xcdrawingname in xcdata["xcvizstates"]:
 				var xcdrawing = $XCdrawings.get_node_or_null(xcdrawingname)
 				if xcdrawing != null:
+					if not ("prevxcvizstates" in xcdata):
+						xcdata["prevxcvizstates"] = { }
+					xcdata["prevxcvizstates"][xcdrawingname] = xcdrawing.drawingvisiblecode
 					if xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
-						if not ("prevxcvizstates" in xcdata):
-							xcdata["prevxcvizstates"] = { }
-						var drawingplanevisible = xcdrawing.get_node("XCdrawingplane").visible
-						var drawingnodesvisible = xcdrawing.get_node("XCnodes").visible
-						xcdata["prevxcvizstates"][xcdrawingname] = (DRAWING_TYPE.VIZ_XCD_PLANE_VISIBLE if drawingplanevisible else 0) + (DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE if drawingnodesvisible else 0)
-						var drawingvisiblecode = xcdata["xcvizstates"][xcdrawingname]
-						if (drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_PLANE_VISIBLE) != 0:
-							xcdrawing.setxcdrawingvisible()
-						else:
-							xcdrawing.setxcdrawingvisiblehide((drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE) == 0)
+						xcdrawing.setdrawingvisiblecode(xcdata["xcvizstates"][xcdrawingname])
 						for xctube in xcdrawing.xctubesconn:
 							xctube.setxctubepathlinevisibility(self)
 
 					elif xcdrawing.drawingtype == DRAWING_TYPE.DT_CENTRELINE:
-						xcdata["prevxcvizstates"] = { xcdrawingname:DRAWING_TYPE.VIZ_XCD_HIDE }
-						var drawingvisiblecode = xcdata["xcvizstates"][xcdrawingname]
-						assert (drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_HIDE)
-						xcdrawing.setxcdrawingvisiblehide(true)
+						xcdata["prevxcvizstates"][xcdrawingname] = { xcdrawingname:DRAWING_TYPE.VIZ_XCD_HIDE }
+						xcdrawing.setdrawingvisiblecode(xcdata["xcvizstates"][xcdrawingname])
 
 					elif xcdrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
-						var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
-						planviewsystem.setactivefloorviz(xcdrawing, xcdata["xcvizstates"][xcdrawingname])
+						xcdrawing.setdrawingvisiblecode(xcdata["xcvizstates"][xcdrawingname])
 						
 			if "updatetubeshells" in xcdata:
 				for xct in xcdata["updatetubeshells"]:
@@ -432,6 +407,16 @@ func sketchdicttochunks(sketchdatadict):
 	var xcdrawingnamemapItubes = { }
 	for i in range(len(xctubesarrayD)):
 		var xctubeD = xctubesarrayD[i]
+
+		# (I think the file was corrupted by incompletely writing)
+		if xctubeD == null:
+			print("Null tube in array at ", i, " of ", len(xctubesarrayD))
+			continue
+		if "xcdrawinglink" in xctubeD:
+			if not ("xcsectormaterials" in xctubeD):
+				print("Bad tube in array at ", i, " of ", len(xctubesarrayD))
+				continue
+			
 		if not (xctubeD.xcname0 in xcdrawingnamemapItubes):
 			xcdrawingnamemapItubes[xctubeD.xcname0] = [ ]
 		xcdrawingnamemapItubes[xctubeD.xcname0].push_back(i)
@@ -504,12 +489,16 @@ func newXCuniquedrawing(drawingtype, sname):
 	if drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		xcdrawing.add_to_group("gpnoncentrelinegeo")
 		xcdrawing.linewidth = 0.05
+		xcdrawing.drawingvisiblecode = DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE
+		
 	elif drawingtype == DRAWING_TYPE.DT_CENTRELINE:
 		var xcnodesplanview = Spatial.new()
 		xcnodesplanview.set_name("XCnodes_PlanView")
 		xcdrawing.add_child(xcnodesplanview)
 		xcdrawing.add_to_group("gpcentrelinegeo")
 		xcdrawing.linewidth = 0.035
+		xcdrawing.drawingvisiblecode = DRAWING_TYPE.VIZ_XCD_HIDE
+	
 	else:
 		assert (false)
 	return xcdrawing
@@ -527,6 +516,7 @@ func uniqueXCdrawingPapername(xcresource):
 func newXCuniquedrawingPaperN(xcresource, sname, drawingtype):
 	var xcdrawing = XCdrawing.instance()
 	xcdrawing.drawingtype = drawingtype
+	xcdrawing.drawingvisiblecode = DRAWING_TYPE.VIZ_XCD_FLOOR_NORMAL
 	xcdrawing.xcresource = xcresource
 	xcdrawing.set_name(sname)
 	$XCdrawings.add_child(xcdrawing)
@@ -535,8 +525,8 @@ func newXCuniquedrawingPaperN(xcresource, sname, drawingtype):
 	if xcdrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
 		xcdrawing.get_node("XCdrawingplane").collision_layer = CollisionLayer.CL_Environment | CollisionLayer.CL_PointerFloor
 	else:
-		 xcdrawing.get_node("XCdrawingplane").collision_layer = CollisionLayer.CL_Pointer
-
+		xcdrawing.get_node("XCdrawingplane").collision_layer = CollisionLayer.CL_Pointer
+	
 	xcdrawing.get_node("XCdrawingplane").visible = true
 	xcdrawing.get_node("XCdrawingplane/CollisionShape").disabled = false
 	#var m = preload("res://surveyscans/scanimagefloor.material").duplicate()
@@ -544,8 +534,6 @@ func newXCuniquedrawingPaperN(xcresource, sname, drawingtype):
 	var m = get_node("/root/Spatial/MaterialSystem").get_node("xcdrawingmaterials/floorbordered").get_surface_material(0).duplicate()
 	m.set_shader_param("texture_albedo", ImageTexture.new())
 	xcdrawing.get_node("XCdrawingplane/CollisionShape/MeshInstance").set_surface_material(0, m)
-
-
 
 	return xcdrawing
 

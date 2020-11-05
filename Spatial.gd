@@ -46,7 +46,7 @@ extends Spatial
 
 # use this to sniff out waiting for godot performances https://www.concordtheatricals.co.uk/p/7476/waiting-for-godot
 	
-export var hostipnumber: String = ""
+var hostipnumber: String = ""
 export var hostportnumber: int = 4546
 export var enablevr: = true
 export var usewebsockets: = true
@@ -170,20 +170,15 @@ func _ready():
 	var perm = OS.get_granted_permissions()
 	print("Granted permissions: ", perm)
 
-	if true:
+	if false:
+		#var centrelinefile = "res://surveyscans/dukest1resurvey2009json.res"
+		#var centrelinefile = "res://surveyscans/Ireby/Ireby2/Ireby2.json"
 		var centrelinefile = "res://surveyscans/LambTrap1.json"
 		var xcdatalist = Centrelinedata.xcdatalistfromcentreline(centrelinefile)
 		Tglobal.printxcdrawingfromdatamessages = false
 		$SketchSystem.actsketchchange(xcdatalist)
 		Tglobal.printxcdrawingfromdatamessages = true
 		
-	elif true:
-		#$SketchSystem.loadcentrelinefile("res://surveyscans/dukest1resurvey2009json.res")
-		#$SketchSystem.loadcentrelinefile("res://surveyscans/Ireby/Ireby2/Ireby2.json")
-		$SketchSystem.loadcentrelinefile("res://surveyscans/LambTrap1.json")
-		$SketchSystem.updatecentrelinevisibility()
-		$SketchSystem.changetubedxcsvizmode()
-		$SketchSystem.updateworkingshell()
 	elif true:
 		$SketchSystem.loadsketchsystemL("res://surveyscans/smallirebysave.res")
 	else:

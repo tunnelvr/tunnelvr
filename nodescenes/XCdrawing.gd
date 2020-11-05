@@ -14,6 +14,8 @@ var imgwidth = 0
 var imgtrimleftdown = Vector2(0,0)
 var imgtrimrightup = Vector2(0,0)
 
+var drawingvisiblecode = DRAWING_TYPE.VIZ_XCD_HIDE
+
 # derived data
 var xctubesconn = [ ]   # references to xctubes that connect to here (could use their names instead)
 var maxnodepointnumber = 0
@@ -21,7 +23,7 @@ var imgheightwidthratio = 0  # known from the xcresource image (though could be 
 
 var linewidth = 0.05
 
-func setxcdrawingvisiblehide(hidenodes):
+func setxcdrawingvisiblehideL(hidenodes):
 	assert ($XCdrawingplane.visible != $XCdrawingplane/CollisionShape.disabled)	
 	$XCdrawingplane.visible = false
 	$XCdrawingplane/CollisionShape.disabled = true
@@ -33,7 +35,7 @@ func setxcdrawingvisiblehide(hidenodes):
 			xcn.get_node("CollisionShape").disabled = not rvisible
 	assert ($XCdrawingplane.visible != $XCdrawingplane/CollisionShape.disabled)
 
-func setxcdrawingvisible():
+func setxcdrawingvisibleL():
 	assert ($XCdrawingplane.visible != $XCdrawingplane/CollisionShape.disabled)	
 	if not $XCdrawingplane.visible and drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		var scax = 0.0
@@ -50,6 +52,52 @@ func setxcdrawingvisible():
 	for xcn in $XCnodes.get_children():
 		xcn.get_node("CollisionShape").disabled = false
 	assert ($XCdrawingplane.visible != $XCdrawingplane/CollisionShape.disabled)
+
+func setdrawingvisiblecode(ldrawingvisiblecode):
+	var alreadynoshade = (drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE) or (drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE_ACTIVE)
+	drawingvisiblecode = ldrawingvisiblecode
+	if drawingtype == DRAWING_TYPE.DT_XCDRAWING:
+		if (drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_PLANE_VISIBLE) != 0:
+			setxcdrawingvisibleL()
+		else:
+			setxcdrawingvisiblehideL((drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE) == 0)
+	elif drawingtype == DRAWING_TYPE.DT_CENTRELINE:
+		assert (drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_HIDE)
+		setxcdrawingvisiblehideL(true)
+	elif drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
+		var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
+		var mat = $XCdrawingplane/CollisionShape/MeshInstance.get_surface_material(0)
+		var noshade = (drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE) or (drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE_ACTIVE)
+		if alreadynoshade != noshade:
+			var m = get_node("/root/Spatial/MaterialSystem").get_node("xcdrawingmaterials/floorunshaded" if noshade else "xcdrawingmaterials/floorbordered").get_surface_material(0).duplicate()
+			m.set_shader_param("texture_albedo", mat.get_shader_param("texture_albedo"))
+			mat = m
+			$XCdrawingplane/CollisionShape/MeshInstance.set_surface_material(0, mat)
+			applytrimmedpaperuvscale()
+	
+		if drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_FLOOR_NORMAL or drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE:
+			setxcdrawingvisibleL()
+			var matc = get_node("/root/Spatial/MaterialSystem").get_node("xcdrawingmaterials/floorunshaded" if noshade else "xcdrawingmaterials/floorbordered").get_surface_material(0)
+			mat.set_shader_param("albedo", matc.get_shader_param("albedo"))
+			mat.set_shader_param("albedo_border", matc.get_shader_param("albedo_border"))
+			if planviewsystem.activetargetfloor == self:
+				 planviewsystem.setactivetargetfloor(null)
+			$XCdrawingplane.visible = true
+			$XCdrawingplane/CollisionShape.disabled = false
+		elif drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_FLOOR_ACTIVE or drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE_ACTIVE:
+			setxcdrawingvisibleL()
+			var matc = get_node("/root/Spatial/MaterialSystem").get_node("xcdrawingmaterials/floorborderedactive").get_surface_material(0)
+			mat.set_shader_param("albedo", matc.get_shader_param("albedo"))
+			mat.set_shader_param("albedo_border", matc.get_shader_param("albedo_border"))
+			planviewsystem.setactivetargetfloor(self)
+			$XCdrawingplane.visible = true
+			$XCdrawingplane/CollisionShape.disabled = false
+		elif drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_FLOOR_HIDDEN:
+			setxcdrawingvisiblehideL(true)
+			if planviewsystem.activetargetfloor == self:
+				 planviewsystem.setactivetargetfloor(null)
+			$XCdrawingplane.visible = false
+			$XCdrawingplane/CollisionShape.disabled = true
 
 		
 func updateformetresquaresscaletexture():
@@ -91,7 +139,8 @@ func exportxcrpcdata():
 				 "nodepoints": nodepoints, 
 				 "maxnodepointnumber":maxnodepointnumber,
 				 "imgtrim":{ "imgwidth":imgwidth, "imgtrimleftdown":imgtrimleftdown, "imgtrimrightup":imgtrimrightup, "imgheightwidthratio":imgheightwidthratio },
-				 "visible":true 
+				 "visible":true, # to abolish 
+				 "drawingvisiblecode":drawingvisiblecode
 			   }
 		
 	return { "name":get_name(), 
@@ -108,7 +157,8 @@ func exportxcrpcdata():
 			 # "prevonepathpairs":
 			 # "newonepathpairs"
 			 "maxnodepointnumber":maxnodepointnumber,
-			 "visible":$XCdrawingplane.visible 
+			 "visible":$XCdrawingplane.visible, # to abolish
+			 "drawingvisiblecode":drawingvisiblecode
 		   }
 		
 func applytrimmedpaperuvscale():
@@ -221,13 +271,15 @@ func mergexcrpcdata(xcdata):
 			onepathpairs[j+1] = onepathpairs[-1]
 
 	updatexcpaths()
-	if "visible" in xcdata:
-		if xcdata["visible"]:
-			setxcdrawingvisible()
-		else:
-			setxcdrawingvisiblehide(true)
-
-
+	if "drawingvisiblecode" in xcdata or "visible" in xcdata:
+		if not ("drawingvisiblecode" in xcdata):
+			if drawingtype == DRAWING_TYPE.DT_XCDRAWING:
+				xcdata["drawingvisiblecode"] = DRAWING_TYPE.VIZ_XCD_PLANE_VISIBLE if xcdata["visible"] else DRAWING_TYPE.VIZ_XCD_HIDE
+			elif drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
+				xcdata["drawingvisiblecode"] = DRAWING_TYPE.VIZ_XCD_FLOOR_NORMAL if xcdata["visible"] else DRAWING_TYPE.VIZ_XCD_FLOOR_HIDDEN
+			elif drawingtype == DRAWING_TYPE.DT_CENTRELINE:
+				xcdata["drawingvisiblecode"] = DRAWING_TYPE.VIZ_XCD_HIDE
+		setdrawingvisiblecode(xcdata["drawingvisiblecode"])
 	
 func setxcnpoint(xcn, pt, planar):
 	xcn.global_transform.origin = pt

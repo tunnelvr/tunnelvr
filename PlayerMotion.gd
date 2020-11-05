@@ -90,7 +90,7 @@ func _physics_process(delta):
 		var t1 = Transform(Basis(), -HeadCam.transform.origin)
 		var t2 = Transform(Basis(), HeadCam.transform.origin)
 		var rot = Transform().rotated(Vector3(0.0, -1, 0.0), deg2rad(PlayerDirections.nextphysicsrotatestep))
-		playerMe.transform *= t2*rot*t1
+		playerMe.transform = (playerMe.transform*t2*rot*t1).orthonormalized()
 		PlayerDirections.nextphysicsrotatestep = 0.0
 		# could add footstep count here
 		
