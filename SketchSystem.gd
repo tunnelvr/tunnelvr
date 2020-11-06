@@ -532,7 +532,7 @@ func newXCuniquedrawingPaperN(xcresource, sname, drawingtype):
 	#var m = preload("res://surveyscans/scanimagefloor.material").duplicate()
 	#m.albedo_texture = ImageTexture.new()
 	var m = get_node("/root/Spatial/MaterialSystem").get_node("xcdrawingmaterials/floorbordered").get_surface_material(0).duplicate()
-	m.set_shader_param("texture_albedo", ImageTexture.new())
+	#m.set_shader_param("texture_albedo", ImageTexture.new())
 	xcdrawing.get_node("XCdrawingplane/CollisionShape/MeshInstance").set_surface_material(0, m)
 
 	return xcdrawing

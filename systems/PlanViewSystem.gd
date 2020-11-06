@@ -8,13 +8,14 @@ var activetargetfloortransformpos = null
 var activetargetfloorimgtrim = null
 
 var buttonidxtoitem = { }
-onready var tree = $PlanView/Viewport/PlanGUI/PlanViewControls/Tree
+onready var fileviewtree = $PlanView/Viewport/PlanGUI/PlanViewControls/FileviewTree
 onready var planviewcontrols = $PlanView/Viewport/PlanGUI/PlanViewControls
 var imgregex = RegEx.new()
 var listregex = RegEx.new()
 
 var installbuttontex = null
 var fetchbuttontex = null
+var clearcachebuttontex = null
 
 func getactivetargetfloorViz(newactivetargetfloorname: String):
 	var xcviz = { "prevxcvizstates":{ }, "xcvizstates":{ } }
@@ -44,7 +45,7 @@ func setactivetargetfloor(lactivetargetfloor):
 	else:
 		planviewcontrols.get_node("FloorMove/CheckBoxUnshaded").pressed = (activetargetfloor.drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE) or \
 																		  (activetargetfloor.drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE_ACTIVE)
-		planviewcontrols.get_node("FloorMove/LabelXCresource").text = activetargetfloor.xcresource
+		planviewcontrols.get_node("FloorMove/LabelXCresource").text = activetargetfloor.xcresource.replace("%20", " ")
 
 func checkboxunshaded_pressed():
 	if activetargetfloor != null:
@@ -77,9 +78,14 @@ func fetchbuttonpressed(item, column, idx):
 		print("fetchbuttonpressed item is null problem")
 		item = buttonidxtoitem.get(idx)
 	var url = item.get_tooltip(0)
-	var name = item.get_text(0)
+	if url == "**clear-cache**":
+		print("Clearing image and webpage caches")
+		ImageSystem.clearcachedir(ImageSystem.imgdir)
+		ImageSystem.clearcachedir(ImageSystem.nonimagedir)
+		return
+	var fname = item.get_text(0)
 	print("url to fetch: ", url)
-	if imgregex.search(name):
+	if imgregex.search(fname):
 		var pt0 = $RealPlanCamera.global_transform.origin - Vector3(0,100,0)
 		for xcdrawing in sketchsystem.get_node("XCdrawings").get_children():
 			if xcdrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
@@ -102,19 +108,19 @@ func fetchbuttonpressed(item, column, idx):
 		#item.erase_button(column, idx)
 		#buttonidxtoitem.erase(idx)
 		item.set_custom_bg_color(0, Color("#ff0099"))
-		ImageSystem.fetchunrolltree(tree, item, item.get_tooltip(0))
+		ImageSystem.fetchunrolltree(fileviewtree, item, item.get_tooltip(0))
 
-func addsubitem(upperitem, name, url):
-	var item = tree.create_item(upperitem)
-	item.set_text(0, name)
+func addsubitem(upperitem, fname, url):
+	var item = fileviewtree.create_item(upperitem)
+	item.set_text(0, fname)
 	item.set_tooltip(0, url)
 	var tex = null
-	if imgregex.search(name):
+	if imgregex.search(fname):
 		tex = installbuttontex.duplicate()
 	elif url.ends_with("/"):
 		tex = fetchbuttontex.duplicate()
 	else:
-		print("unknown file ignored: ", name)
+		print("unknown file ignored: ", fname)
 		return
 	#var idx = item.get_button_count(0)
 	var idx = len(buttonidxtoitem)
@@ -130,7 +136,7 @@ func openlinklistpage(item, htmltext):
 		var lk = m.get_string(1)
 		if not lk.begins_with("."):
 			lk = lk.replace("&amp;", "&")
-			addsubitem(item, lk, dirurl + lk)
+			addsubitem(item, lk.replace("%20", " "), dirurl + lk)
 
 func transferintorealviewport(setascurrentcamera):
 	if setascurrentcamera:
@@ -162,6 +168,8 @@ func _ready():
 	imgregex.compile('(?i)\\.(png|jpg|jpeg)$')
 	installbuttontex = get_node("/root/Spatial/MaterialSystem/buttonmaterials/InstallButton").get_surface_material(0).albedo_texture
 	fetchbuttontex = get_node("/root/Spatial/MaterialSystem/buttonmaterials/FetchButton").get_surface_material(0).albedo_texture
+	clearcachebuttontex = get_node("/root/Spatial/MaterialSystem/buttonmaterials/ClearCacheButton").get_surface_material(0).albedo_texture
+
 	$RealPlanCamera.set_as_toplevel(true)
 	planviewcontrols.get_node("ZoomView/ButtonCentre").connect("pressed", self, "buttoncentre_pressed")
 	planviewcontrols.get_node("ButtonClosePlanView").connect("pressed", self, "buttonclose_pressed")
@@ -172,12 +180,16 @@ func _ready():
 	set_process(visible)
 		
 func readydeferred():
-	tree.connect("button_pressed", self, "fetchbuttonpressed")
-	var root = tree.create_item()
+	fileviewtree.connect("button_pressed", self, "fetchbuttonpressed")
+	var root = fileviewtree.create_item()
 	root.set_text(0, "Root of tree")
+	root.set_tooltip(0, "**clear-cache**")
 	#addsubitem(root, "Ireby", "http://cave-registry.org.uk/svn/NorthernEngland/ThreeCountiesArea/rawscans/Ireby/")
 	#addsubitem(root, "rawscans", "http://cave-registry.org.uk/svn/NorthernEngland/ThreeCountiesArea/rawscans/")
 	addsubitem(root, "rawscans", "http://cave-registry.org.uk/svn/NorthernEngland/ThreeCountiesArea/")
+	var idx = len(buttonidxtoitem)
+	root.add_button(0, clearcachebuttontex, idx)
+	buttonidxtoitem[idx] = root
 	
 
 func actplanviewvisibleactive(lvisible, lactive, tubesvisible):
@@ -341,15 +353,14 @@ func checkinguipanel(viewport_point):
 	var rectrel = viewport_point - planviewcontrols.rect_position
 	if rectrel.x > 0 and rectrel.y > 0 and rectrel.x < planviewcontrols.rect_size.x and rectrel.y < planviewcontrols.rect_size.y:
 		return true
-	var filetree = planviewcontrols.get_node("Tree")
-	if filetree.visible:
-		var rectrelt = rectrel - filetree.rect_position
-		if  rectrelt.x > 0 and  rectrelt.y > 0 and  rectrelt.x < filetree.rect_size.x and  rectrelt.y < filetree.rect_size.y:
+	if fileviewtree.visible:
+		var rectrelt = rectrel - fileviewtree.rect_position
+		if  rectrelt.x > 0 and  rectrelt.y > 0 and  rectrelt.x < fileviewtree.rect_size.x and rectrelt.y < fileviewtree.rect_size.y:
 			return true
 	return false
 
 func checkboxfiletree_toggled(button_pressed):
-	planviewcontrols.get_node("Tree").visible = button_pressed
+	fileviewtree.visible = button_pressed
 
 var viewport_mousedown = false
 var viewport_point = Vector2(0,0)

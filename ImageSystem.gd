@@ -62,6 +62,32 @@ func correctdefaultimgtrimtofull(d):
 	d.imgtrimleftdown = Vector2(-d.imgwidth*0.5, -imgheight*0.5)
 	d.imgtrimrightup = Vector2(d.imgwidth*0.5, imgheight*0.5)
 
+func clearcachedir(dname):
+	var dir = Directory.new()
+	if not dir.dir_exists(dname):
+		return
+	var e = dir.open(dname)
+	if e != OK:
+		print("list dir error ", e)
+		return
+	var fnames = [ ]
+	dir.list_dir_begin()
+	var file_name = dir.get_next()
+	while file_name != "":
+		if file_name != "." and file_name != "..":
+			assert (not dir.current_is_dir())
+			fnames.push_back(dname + file_name)
+		file_name = dir.get_next()
+	for fname in fnames:
+		print("removing ", fname)
+		var e1 = dir.remove(fname)
+		if e1 != OK:
+			print("remove file error ", e1)
+	var e2 = dir.remove(dname)
+	if e2 != OK:
+		print("remove dir error ", e2)
+			
+
 func _process(delta):
 	if imagefetchingcountdowntimer > 0.0:
 		imagefetchingcountdowntimer -= delta
@@ -94,8 +120,8 @@ func _process(delta):
 				fetcheddrawingfile = "res://guimaterials/imagefilefailure.png"
 		elif paperdrawing.xcresource.begins_with("http"):
 			fetcheddrawingfile = imgdir+getshortimagename(paperdrawing.xcresource, true, 6)
-			print([paperdrawing.xcresource, defaultfloordrawing])
-			print([1, fetcheddrawingfile, defaultfloordrawingres])
+			print(["pppx ", paperdrawing.xcresource, defaultfloordrawing])
+			print(["pppx1 ", fetcheddrawingfile, defaultfloordrawingres])
 			if paperdrawing.xcresource == defaultfloordrawing:
 				fetcheddrawingfile = defaultfloordrawingres
 			if not File.new().file_exists(fetcheddrawingfile):
@@ -156,8 +182,8 @@ func _process(delta):
 	else:
 		set_process(false)
 
-func fetchunrolltree(tree, item, url):
-	var nonimagedataobject = { "url":url, "tree":tree, "item":item }
+func fetchunrolltree(fileviewtree, item, url):
+	var nonimagedataobject = { "url":url, "tree":fileviewtree, "item":item }
 	nonimagepageslist.append(nonimagedataobject)
 	set_process(true)
 
