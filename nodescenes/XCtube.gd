@@ -79,7 +79,8 @@ func setxctubepathlinevisibility(sketchsystem):
 	var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(xcname1)
 	$PathLines.visible = xcdrawing0.get_node("PathLines").visible or xcdrawing1.get_node("PathLines").visible
 
-# targetwalltransformpos
+
+
 func centrelineconnectionfloortransformpos(sketchsystem):
 	assert (len(xcdrawinglink) != 0)
 	var xcdrawingCentreline = sketchsystem.get_node("XCdrawings").get_node(xcname0)
@@ -169,7 +170,7 @@ func updatetubelinkpaths(sketchsystem):
 	surfaceTool.generate_normals()
 	$PathLines.mesh = surfaceTool.commit()
 	$PathLines.set_surface_material(0, get_node("/root/Spatial/MaterialSystem").pathlinematerial("normal"))
-	#print("ususxxxxc ", len($PathLines.mesh.get_faces()), " ", len($PathLines.mesh.get_faces())) #surfaceTool.generate_normals()
+
 
 func pickpolysindex(polys, meetnodenames):
 	for i in range(len(polys)):
@@ -335,9 +336,12 @@ func slicetubetoxcdrawing(xcdrawing, xcdata, xctdatadel, xctdata0, xctdata1):
 		return false
 	return true
 
+func HoleName(i):
+	return "Hole"+("" if i == 0 else ";"+str(i))+";"+xcname0+";"+xcname1
+
 func ConstructHoleXC(i, sketchsystem):
 	assert (xcsectormaterials[i] == "hole")
-	var xcdrawingholename = "Hole"+("" if i == 0 else ";"+str(i))+";"+xcname0+";"+xcname1
+	var xcdrawingholename = HoleName(i)
 	var xcdrawinghole = sketchsystem.get_node_or_null("XCdrawings").get_node(xcdrawingholename)
 	var xcdata = { "name":xcdrawingholename, 
 				   "drawingtype":DRAWING_TYPE.DT_XCDRAWING,
@@ -507,6 +511,13 @@ func updatetubeshell(xcdrawings, makevisible):
 		xctubesector.get_node("CollisionShape").shape = cps
 		xctubesector.get_node("CollisionShape").shape.set_faces(tubesectormesh.get_faces())
 		get_node("/root/Spatial/MaterialSystem").updatetubesectormaterial(xctubesector, xcsectormaterials[i], false)
+
+		if xcsectormaterials[i] == "hole":
+			var sketchsystem = get_node("/root/Spatial/SketchSystem")
+			var xcdrawinghole = sketchsystem.get_node_or_null("XCdrawings").get_node(HoleName(i))
+			if xcdrawinghole != null and len(xcdrawinghole.xctubesconn) != 0:
+				xctubesector.get_node("MeshInstance").visible = false
+				xctubesector.get_node("CollisionShape").disabled = true
 		$XCtubesectors.add_child(xctubesector)
 
 	

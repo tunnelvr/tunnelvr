@@ -377,7 +377,7 @@ func process_shareplayerposition():
 		var positiondict = playerMe.playerpositiondict()
 		positiondict = filter_playerposition_bandwidth(positiondict)
 		if positiondict != null:
-			if Tglobal.morethanoneplayer:
+			if Tglobal.morethanoneplayer and Tglobal.connectiontoserveractive:
 				playerMe.rpc_unreliable("setavatarposition", positiondict)
 			if is_instance_valid(playerMe.doppelganger):
 				if positiondict.has("puppetbody") and positiondict["puppetbody"].has("playertransform"):
