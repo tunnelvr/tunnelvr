@@ -101,6 +101,11 @@ func _on_centrelinevisibility_selected(index):
 	sketchsystem.updatecentrelinevisibility()
 	$Viewport/GUI/Panel/Label.text = "Centrelines: "+cvsel
 
+func _on_worldscale_selected(index):
+	var newworldscale = int($Viewport/GUI/Panel/WorldScale.get_item_text(index))
+	get_node("/root/Spatial").playerMe.world_scale = newworldscale
+	#get_node("/root/Spatial/GuiSystem").scale = Vector3(newworldscale, newworldscale, newworldscale)
+
 func _on_xcdrawingvisibility_selected(index):
 	var cvsel = $Viewport/GUI/Panel/XCdrawingVisibility.get_item_text(index)
 	if cvsel == "show":
@@ -167,6 +172,7 @@ func _ready():
 	
 	$Viewport/GUI/Panel/CentrelineVisibility.connect("item_selected", self, "_on_centrelinevisibility_selected")
 	$Viewport/GUI/Panel/XCdrawingVisibility.connect("item_selected", self, "_on_xcdrawingvisibility_selected")
+	$Viewport/GUI/Panel/WorldScale.connect("item_selected", self, "_on_worldscale_selected")
 	$Viewport/GUI/Panel/Networkstate.connect("item_selected", self, "_on_networkstate_selected")
 
 	if $Viewport/GUI/Panel/Networkstate.selected != 0:  # could record saved settings on disk
@@ -179,14 +185,15 @@ func clickbuttonheadtorch():
 
 func toggleguipanelvisibility(controller_global_transform):
 	if not visible and controller_global_transform != null:
-		var paneltrans = global_transform
+		var paneltrans = Transform()
 		var controllertrans = controller_global_transform
 		var paneldistance = 0.6 if Tglobal.VRoperating else 0.2
 		paneltrans.origin = controllertrans.origin - paneldistance*ARVRServer.world_scale*(controllertrans.basis.z)
 		var lookatpos = controllertrans.origin - 1.6*ARVRServer.world_scale*(controllertrans.basis.z)
 		paneltrans = paneltrans.looking_at(lookatpos, Vector3(0, 1, 0))
+		paneltrans = Transform(paneltrans.basis.scaled(Vector3(ARVRServer.world_scale, ARVRServer.world_scale, ARVRServer.world_scale)), paneltrans.origin)		
 		global_transform = paneltrans
-
+		
 		$Viewport/GUI/Panel/Label.text = ""
 		var MQTTExperiment = get_node_or_null("/root/Spatial/MQTTExperiment")
 		if MQTTExperiment != null and MQTTExperiment.msg != "":

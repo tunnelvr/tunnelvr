@@ -1085,6 +1085,7 @@ albedo_texture = SubResource( 163 )
 [sub_resource type="BoxShape" id=165]
 
 [sub_resource type="SpatialMaterial" id=166]
+params_specular_mode = 2
 params_cull_mode = 2
 albedo_texture = ExtResource( 7 )
 roughness = 0.43
@@ -1177,7 +1178,6 @@ albedo_color = Color( 0.168627, 0.972549, 0.027451, 1 )
 
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
-enablevr = false
 
 [node name="Players" type="Spatial" parent="."]
 transform = Transform( -1, 0, -3.25841e-07, 0, 1, 0, 3.25841e-07, 0, -1, 0, 0, 0 )
@@ -1247,6 +1247,7 @@ script = ExtResource( 5 )
 
 [node name="toGuiSystem" type="RemoteTransform" parent="Players/PlayerMe"]
 remote_path = NodePath("../../../GuiSystem")
+update_scale = false
 
 [node name="GuiSystem" type="Spatial" parent="."]
 transform = Transform( 0.999994, 0, -0.00336782, 0, 1, 0, 0.00336782, 0, 0.999994, -2.08989e-06, 2, -6.412 )
@@ -1453,16 +1454,6 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="XCdrawing" type="Label" parent="GuiSystem/GUIPanel3D/ViewportFake/GUI/Panel"]
-margin_left = 166.933
-margin_top = 144.168
-margin_right = 224.933
-margin_bottom = 166.168
-text = "XCdraw:"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
 [node name="CentrelineVisibility" type="OptionButton" parent="GuiSystem/GUIPanel3D/ViewportFake/GUI/Panel"]
 margin_left = 234.0
 margin_top = 109.0
@@ -1475,6 +1466,16 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="XCdrawing" type="Label" parent="GuiSystem/GUIPanel3D/ViewportFake/GUI/Panel"]
+margin_left = 166.933
+margin_top = 144.168
+margin_right = 224.933
+margin_bottom = 166.168
+text = "XCdraw:"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [node name="XCdrawingVisibility" type="OptionButton" parent="GuiSystem/GUIPanel3D/ViewportFake/GUI/Panel"]
 margin_left = 232.0
 margin_top = 142.0
@@ -1482,6 +1483,28 @@ margin_right = 289.0
 margin_bottom = 169.0
 text = "hide"
 items = [ "hide", null, false, 0, null, "hide2", null, false, 1, null, "show", null, false, 2, null, "only", null, false, 3, null ]
+selected = 0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="WorldScaleLabel" type="Label" parent="GuiSystem/GUIPanel3D/ViewportFake/GUI/Panel"]
+margin_left = 150.0
+margin_top = 167.0
+margin_right = 237.0
+margin_bottom = 189.0
+text = "World scale:"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="WorldScale" type="OptionButton" parent="GuiSystem/GUIPanel3D/ViewportFake/GUI/Panel"]
+margin_left = 245.0
+margin_top = 166.0
+margin_right = 294.0
+margin_bottom = 193.0
+text = "1x"
+items = [ "1x", null, false, 0, null, "10x", null, false, 1, null, "50x", null, false, 2, null ]
 selected = 0
 __meta__ = {
 "_edit_use_anchors_": false
@@ -1951,6 +1974,7 @@ __meta__ = {
 }
 
 [node name="PlanGUI" type="Control" parent="PlanViewSystem/PlanView/Viewport"]
+visible = false
 margin_right = 800.0
 margin_bottom = 800.0
 theme = ExtResource( 47 )

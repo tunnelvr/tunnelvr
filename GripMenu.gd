@@ -75,6 +75,7 @@ func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointert
 	paneltrans.origin = controllertrans.origin - 0.8*ARVRServer.world_scale*(controllertrans.basis.z)
 	var lookatpos = controllertrans.origin - 1.6*ARVRServer.world_scale*(controllertrans.basis.z)
 	paneltrans = paneltrans.looking_at(lookatpos, Vector3(0, 1, 0))
+	paneltrans = Transform(paneltrans.basis.scaled(Vector3(ARVRServer.world_scale, ARVRServer.world_scale, ARVRServer.world_scale)), paneltrans.origin)
 	global_transform = paneltrans
 
 	var gmlist = [ ]
