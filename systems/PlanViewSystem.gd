@@ -200,9 +200,11 @@ func actplanviewvisibleactive(lvisible, lactive, tubesvisible):
 		get_node("PlanView/CollisionShape").disabled = false
 		var playerMe = get_node("/root/Spatial").playerMe
 		get_node("/root/Spatial/LabelGenerator").restartlabelmakingprocess(playerMe.get_node("HeadCam").global_transform.origin)
+		get_node("/root/Spatial/WorldEnvironment/DirectionalLight").visible = true
 	else:
 		get_node("PlanView/CollisionShape").disabled = true
-			
+		get_node("/root/Spatial/WorldEnvironment/DirectionalLight").visible = not get_node("/root/Spatial/GuiSystem/GUIPanel3D/Viewport/GUI/Panel/ButtonHeadtorch").pressed
+
 	planviewcontrols.get_node("CheckBoxTubesVisible").pressed = tubesvisible
 	if tubesvisible:
 		get_node("PlanView/Viewport/PlanGUI/Camera").cull_mask = CollisionLayer.VLCM_PlanViewCamera
@@ -227,7 +229,6 @@ func actplanviewvisibleactive(lvisible, lactive, tubesvisible):
 func toggleplanviewactive():
 	var sketchsystem = get_node("/root/Spatial/SketchSystem")
 	sketchsystem.actsketchchange([{"planview": { "visible":true, "planviewactive":not planviewactive }} ])
-
 
 func planviewtransformpos(guidpaneltransform, guidpanelsize):
 	if guidpaneltransform != null:
@@ -297,8 +298,8 @@ func _process(delta):
 								   (-1 if floortrim.get_node("ButtonTrimUpDown").is_pressed() else 0) + (1 if floortrim.get_node("ButtonTrimUpUp").is_pressed() else 0))
 		var floormove = planviewcontrols.get_node("FloorMove")
 		var joyposmove = Vector3((-1 if floormove.get_node("ButtonMoveLeft").is_pressed() else 0) + (1 if floormove.get_node("ButtonMoveRight").is_pressed() else 0), 
-								 (-1 if floormove.get_node("ButtonMoveDown").is_pressed() else 0) + (1 if floormove.get_node("ButtonMoveUp").is_pressed() else 0), 
-								 (-0.5 if floormove.get_node("ButtonMoveFall").is_pressed() else 0) + (0.5 if floormove.get_node("ButtonMoveRise").is_pressed() else 0))
+								 0.5*(-1 if floormove.get_node("ButtonMoveFall").is_pressed() else 0) + (1 if floormove.get_node("ButtonMoveRise").is_pressed() else 0),
+								 (-1 if floormove.get_node("ButtonMoveDown").is_pressed() else 0) + (1 if floormove.get_node("ButtonMoveUp").is_pressed() else 0))
 		var joygrow = (-1 if floormove.get_node("ButtonShrink").is_pressed() else 0) + (1 if floormove.get_node("ButtonGrow").is_pressed() else 0)
 		var joyrot = Vector2((-1 if floormove.get_node("ButtonRotR").is_pressed() else 0) + (1 if floormove.get_node("ButtonRotL").is_pressed() else 0), 
 							 (-1 if floormove.get_node("ButtonTiltFore").is_pressed() else 0) + (1 if floormove.get_node("ButtonTiltBack").is_pressed() else 0))
@@ -319,7 +320,7 @@ func _process(delta):
 				var tb = d.transform.basis
 				if joyrot != Vector2(0, 0):
 					tb = Basis(tb.get_euler() + Vector3(joyrot.y*delta, joyrot.x*delta, 0))
-				txcdata["transformpos"] = Transform(tb, d.transform.origin + d.transform.basis*joyposmove*delta*8)
+				txcdata["transformpos"] = Transform(tb, d.transform.origin + Basis()*joyposmove*delta*8)
 
 			if joypostrimld != Vector2(0,0) or joypostrimru != Vector2(0,0) or joygrow != 0:
 				txcdata["previmgtrim"] = { "imgwidth":d.imgwidth, "imgtrimleftdown":d.imgtrimleftdown, "imgtrimrightup":d.imgtrimrightup }

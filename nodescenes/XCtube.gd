@@ -529,3 +529,11 @@ func xcdfullsetvisibilitycollision(bvisible):
 		else:
 			tubesector.get_node("CollisionShape").disabled = true
 
+func splinepointplanetrans(pointertargetpoint, sketchsystem):
+	var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(xcname0)
+	var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(xcname1)
+	#xcdrawing.transform.basis.y = 
+	return Transform(xcdrawing0.transform.basis, pointertargetpoint)
+	#				if abs(xcdrawing0.global_transform.basis.z.y) > 0.3 and abs(xcdrawing1.global_transform.basis.z.y) > 0.3:
+	#				newxcvertplane = false
+

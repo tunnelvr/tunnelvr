@@ -269,6 +269,10 @@ func buttonpressed_vrgrip():
 				activetargettube.updatetubelinkpaths(sketchsystem)
 			activetargettube.get_node("PathLines").visible = true
 			activetargettube.get_node("PathLines").set_surface_material(0, materialsystem.pathlinematerial("nodepthtest"))
+
+			get_node("/root/Spatial/BodyObjects/SplinePointView/SplinePointPlane").transform = activetargettube.splinepointplanetrans(pointertargetpoint, sketchsystem)
+			get_node("/root/Spatial/BodyObjects/SplinePointView").visible = true
+
 		else:
 			print("Wrong: sector index not match sectors in tubedata")
 	gripmenu.gripmenuon(LaserOrient.global_transform, pointertargetpoint, pointertargetwall, pointertargettype, activetargettube, activetargettubesectorindex, activetargetwall, activetargetnode)
@@ -577,6 +581,7 @@ func buttonreleased_vrgrip():
 		else:
 			print("Wrong: activetargettubesectorindex >= activetargettube.xcsectormaterials ")
 		activetargettube.get_node("PathLines").set_surface_material(0, materialsystem.pathlinematerial("normal"))
+		get_node("/root/Spatial/BodyObjects/SplinePointView").visible = false
 		activetargettube = null
 	
 	if gripbuttonpressused:
