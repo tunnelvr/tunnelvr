@@ -5,11 +5,11 @@
 [sub_resource type="BoxShape" id=1]
 extents = Vector3( 0.1, 0.1, 0.1 )
 
-[sub_resource type="CubeMesh" id=9]
+[sub_resource type="CubeMesh" id=2]
 resource_local_to_scene = true
 size = Vector3( 0.2, 0.2, 0.2 )
 
-[sub_resource type="SpatialMaterial" id=8]
+[sub_resource type="SpatialMaterial" id=3]
 albedo_color = Color( 0.286275, 0.87451, 0.145098, 1 )
 
 [sub_resource type="SpatialMaterial" id=4]
@@ -79,8 +79,8 @@ shape = SubResource( 1 )
 
 [node name="MeshInstance" type="MeshInstance" parent="CollisionShape"]
 layers = 513
-mesh = SubResource( 9 )
-material/0 = SubResource( 8 )
+mesh = SubResource( 2 )
+material/0 = SubResource( 3 )
 
 [node name="StationLabel" type="MeshInstance" parent="."]
 transform = Transform( 1, 0, 0, 0, -1.62921e-07, 1, 0, -1, -1.62921e-07, 0, 0, 0 )

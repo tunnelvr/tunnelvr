@@ -13,11 +13,11 @@ var ovr_hand_tracking = null
 onready var guipanel3d = get_node("/root/Spatial/GuiSystem/GUIPanel3D")
 
 func initplayerappearance_me():
-	var d = OS.get_unix_time()
+	var d = hash(String(OS.get_unix_time())+"abc")
 	var headcolour = Color.from_hsv((d%10000)/10000.0, 0.5 + (d%2222)/6666.0, 0.75)
 	if playerplatform == "Server":
 		headcolour = Color(0.01, 0.01, 0.05)
-	print("Head color ", headcolour, " ", [OS.get_unique_id()])
+	print("Head colour ", headcolour, " ", [OS.get_unique_id()])
 	get_node("HeadCam/csgheadmesh/skullcomponent").material.albedo_color = headcolour
 
 func setheadtorchlight(torchon):

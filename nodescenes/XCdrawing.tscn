@@ -2,11 +2,11 @@
 
 [ext_resource path="res://nodescenes/XCdrawing.gd" type="Script" id=1]
 
-[sub_resource type="BoxShape" id=178]
+[sub_resource type="BoxShape" id=1]
 margin = 0.01
 extents = Vector3( 1, 1, 0.01 )
 
-[sub_resource type="SpatialMaterial" id=179]
+[sub_resource type="SpatialMaterial" id=2]
 flags_transparent = true
 params_cull_mode = 2
 albedo_color = Color( 0, 1, 0.901961, 0.439216 )
@@ -14,8 +14,8 @@ metallic_specular = 0.09
 roughness = 0.2
 uv1_scale = Vector3( 1.5, 1.5, 1 )
 
-[sub_resource type="PlaneMesh" id=180]
-material = SubResource( 179 )
+[sub_resource type="PlaneMesh" id=3]
+material = SubResource( 2 )
 
 [node name="XCdrawing" type="Spatial"]
 script = ExtResource( 1 )
@@ -26,13 +26,13 @@ collision_layer = 16
 collision_mask = 0
 
 [node name="CollisionShape" type="CollisionShape" parent="XCdrawingplane"]
-shape = SubResource( 178 )
+shape = SubResource( 1 )
 
 [node name="MeshInstance" type="MeshInstance" parent="XCdrawingplane/CollisionShape"]
 transform = Transform( 1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0 )
 layers = 2
 cast_shadow = 0
-mesh = SubResource( 180 )
+mesh = SubResource( 3 )
 material/0 = null
 
 [node name="XCnodes" type="Spatial" parent="."]

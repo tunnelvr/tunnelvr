@@ -7,11 +7,15 @@ var xcname1 : String
 # this should be a list of dicts so we can run more info into them
 var xcdrawinglink = [ ]      # [ 0nodenamefrom, 0nodenameto, 1nodenamefrom, 1nodenameto, ... ]
 var xcsectormaterials = [ ]  # [ 0material, 1material, ... ]
+var xclinkintermediatenodes = null 		 # [ 0[Vector3, Vector3], 1[ ], 2[ ] ] parallel to the drawinglinks, if it is set
 
 # derived data
 var positioningtube = false
 var pickedpolyindex0 = -1
 var pickedpolyindex1 = -1
+
+var planeintersectaxisvec = Vector3(0,0,0)
+var planeintersectpoint = Vector3(0,0,0)
 
 var tubesectorptindexlists = [ ]
 
@@ -79,8 +83,6 @@ func setxctubepathlinevisibility(sketchsystem):
 	var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(xcname1)
 	$PathLines.visible = xcdrawing0.get_node("PathLines").visible or xcdrawing1.get_node("PathLines").visible
 
-
-
 func centrelineconnectionfloortransformpos(sketchsystem):
 	assert (len(xcdrawinglink) != 0)
 	var xcdrawingCentreline = sketchsystem.get_node("XCdrawings").get_node(xcname0)
@@ -142,8 +144,8 @@ func updatetubelinkpaths(sketchsystem):
 	for j in range(0, len(xcdrawinglink), 2):
 		#var p0 = xcdrawing0.nodepoints[xcdrawinglink[j]]
 		#var p1 = xcdrawing1.nodepoints[xcdrawinglink[j+1]]
-		var p0 = xcdrawing0nodes.get_node(xcdrawinglink[j]).global_transform.origin + Vector3(0,0.001,0)
-		var p1 = xcdrawing1nodes.get_node(xcdrawinglink[j+1]).global_transform.origin + Vector3(0,0.001,0)
+		var p0 = xcdrawing0nodes.get_node(xcdrawinglink[j]).global_transform.origin
+		var p1 = xcdrawing1nodes.get_node(xcdrawinglink[j+1]).global_transform.origin
 		var vec = p1 - p0
 		var veclen = max(0.01, vec.length())
 		var perp = Vector3(1, 0, 0)
@@ -152,21 +154,63 @@ func updatetubelinkpaths(sketchsystem):
 			if perp == Vector3(0, 0, 0) or positioningtube:
 				perp = xcdrawing1.global_transform.basis.x
 		var arrowlen = min(0.4, veclen*0.5)
-		var p0left = p0 - linewidth*perp
-		var p0right = p0 + linewidth*perp
-		var p1left = p1 - linewidth*perp
-		var p1right = p1 + linewidth*perp
-		var pa = p1 - vec*(arrowlen/veclen)
-		var arrowfac = max(2*linewidth, arrowlen/2)
-		surfaceTool.add_vertex(p0left)
-		surfaceTool.add_vertex(p1left)
-		surfaceTool.add_vertex(p0right)
-		surfaceTool.add_vertex(p0right)
-		surfaceTool.add_vertex(p1left)
-		surfaceTool.add_vertex(p1right)
-		surfaceTool.add_vertex(p1)
-		surfaceTool.add_vertex(pa + arrowfac*perp)
-		surfaceTool.add_vertex(pa - arrowfac*perp)
+
+		var p0m = p0
+		var p0mleft = p0m - linewidth*perp
+		var p0mright = p0m + linewidth*perp
+		var jb = j/2
+		var nintermediatenodes = (0 if xclinkintermediatenodes == null else len(xclinkintermediatenodes[jb]))
+		for i in range(nintermediatenodes+1):
+			var p1m = p1
+			var p1mbasis = null
+			if i < nintermediatenodes:
+				var p1mc = lerp(p0, p1, xclinkintermediatenodes[jb][i].z)
+				p1mbasis = intermedpointplanebasis(p1mc, get_node("/root/Spatial/SketchSystem"))
+				p1m = p1mc + p1mbasis.x*xclinkintermediatenodes[jb][i].x + p1mbasis.y*xclinkintermediatenodes[jb][i].y
+			var p1mleft = p1m - linewidth*perp
+			var p1mright = p1m + linewidth*perp
+			surfaceTool.add_vertex(p0mleft)
+			surfaceTool.add_vertex(p1mleft)
+			surfaceTool.add_vertex(p0mright)
+			surfaceTool.add_vertex(p0mright)
+			surfaceTool.add_vertex(p1mleft)
+			surfaceTool.add_vertex(p1mright)
+			if i < nintermediatenodes:
+				p0m = p1m
+				p0mleft = p1mleft
+				p0mright = p1mright
+				var inodename = "j%di%d"%[jb, i]
+				var inode = $PathLines.get_node_or_null(inodename)
+				if inode == null:
+					inode = preload("res://nodescenes/XCnode_intermediate.tscn").instance()
+					inode.set_name(inodename)
+					$PathLines.add_child(inode)
+				inode.global_transform = Transform(p1mbasis, p1m)
+			else:
+				var pa = p1m - (p1m - p0m).normalized()*arrowlen
+				var arrowfac = max(2*linewidth, arrowlen/2)
+				surfaceTool.add_vertex(p1m)
+				surfaceTool.add_vertex(pa + arrowfac*perp)
+				surfaceTool.add_vertex(pa - arrowfac*perp)
+				
+		
+		var im = nintermediatenodes 
+		while true:
+			var imnodename = "j%di%d"%[jb, im]
+			if not $PathLines.has_node(imnodename):
+				break
+			$PathLines.get_node(imnodename).queue_free()
+			im += 1
+			
+	var jbm = len(xcdrawinglink) 
+	while $PathLines.has_node("j%di%d"%[jbm, 0]):
+		var im = 0
+		var imnodename = "j%di%d"%[jbm, im]
+		if not $PathLines.has_node(imnodename):
+			break
+		$PathLines.get_node(imnodename).queue_free()
+		im += 1
+
 	surfaceTool.generate_normals()
 	$PathLines.mesh = surfaceTool.commit()
 	$PathLines.set_surface_material(0, get_node("/root/Spatial/MaterialSystem").pathlinematerial("normal"))
@@ -432,6 +476,7 @@ func updatetubeshell(xcdrawings, makevisible):
 		
 	var xcdrawing0 = xcdrawings.get_node(xcname0)
 	var xcdrawing1 = xcdrawings.get_node(xcname1)
+	makeplaneintersectionaxisvec(xcdrawing0, xcdrawing1)
 	var mtpa = maketubepolyassociation_andreorder(xcdrawing0, xcdrawing1)
 	var poly0 = mtpa[0]
 	var poly1 = mtpa[1]
@@ -529,11 +574,51 @@ func xcdfullsetvisibilitycollision(bvisible):
 		else:
 			tubesector.get_node("CollisionShape").disabled = true
 
-func splinepointplanetrans(pointertargetpoint, sketchsystem):
-	var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(xcname0)
-	var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(xcname1)
-	#xcdrawing.transform.basis.y = 
-	return Transform(xcdrawing0.transform.basis, pointertargetpoint)
-	#				if abs(xcdrawing0.global_transform.basis.z.y) > 0.3 and abs(xcdrawing1.global_transform.basis.z.y) > 0.3:
-	#				newxcvertplane = false
 
+func makeplaneintersectionaxisvec(xcdrawing0, xcdrawing1):
+	var n0 = xcdrawing0.transform.basis.z
+	var n1 = xcdrawing1.transform.basis.z
+	var c0 = n0.dot(xcdrawing0.transform.origin)
+	var c1 = n1.dot(xcdrawing1.transform.origin)
+	var n0dn1 = n0.dot(n1)
+	var adet = 1 - n0dn1*n0dn1
+	var lplaneintersectaxisvec = n0.cross(n1)
+	var planeintersectaxisveclen = lplaneintersectaxisvec.length()
+	if planeintersectaxisveclen > 0.0001 and adet > 0.0001:
+		planeintersectaxisvec = lplaneintersectaxisvec/planeintersectaxisveclen
+		# solve (a0 n0 + a1 n1) . ni = c0
+		var ad0 = c0 - n0dn1*c1
+		var ad1 = -n0dn1*c0 + c1
+		planeintersectpoint = (n0*ad0 + n1*ad1)/adet
+	else:
+		planeintersectaxisvec = Vector3(0,0,0)
+
+func intermedpointplanebasis(pointertargetpoint, sketchsystem):
+	if planeintersectaxisvec != Vector3(0,0,0):
+		var vtargetint = planeintersectpoint - pointertargetpoint
+		var d = vtargetint.dot(planeintersectaxisvec)
+		var vtargetintn = vtargetint - d*planeintersectaxisvec
+		var bxvec = vtargetintn.normalized()
+		var byvec = planeintersectaxisvec
+		var bzvec = bxvec.cross(byvec)
+		if is_equal_approx(bzvec.length(), 1):
+			return Basis(bxvec, byvec, bzvec)
+		print("bad zvecn ", bzvec.length())
+	var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(xcname0)
+	return xcdrawing0.transform.basis
+
+func insertxclinkintermediatenode(j, dv):
+	if xclinkintermediatenodes == null:
+		xclinkintermediatenodes = [ ]
+	while len(xclinkintermediatenodes) < len(xcdrawinglink)/2:
+		xclinkintermediatenodes.push_back([])
+	var i = 0
+	while i < len(xclinkintermediatenodes[j]) and xclinkintermediatenodes[j][i].z <= dv.z:
+		i += 1
+	if i < len(xclinkintermediatenodes[j]) and xclinkintermediatenodes[j][i].z == dv.z:
+		xclinkintermediatenodes[j][i] = dv
+	else:
+		xclinkintermediatenodes[j].insert(i, dv)
+		
+	
+	

@@ -8,6 +8,7 @@ var xcresource = ""     # source file
 var nodepoints = { }    # { nodename:Vector3 } in local coordinate system
 var onepathpairs = [ ]  # [ Anodename0, Anodename1, Bnodename0, Bnodename1, ... ]
 var drawingtype = DRAWING_TYPE.DT_XCDRAWING
+var xcchangesequence = -1
 var xcflatshellmaterial = "simpledirt"
 
 var imgwidth = 0
@@ -185,7 +186,7 @@ func mergexcrpcdata(xcdata):
 			imgheightwidthratio = imgtrim["imgheightwidthratio"]
 		applytrimmedpaperuvscale()
 		
-	if "nodepoints" in xcdata:
+	if "nodepoints" in xcdata:  # full overwrite
 		nodepoints = xcdata["nodepoints"]
 		for xcn in $XCnodes.get_children():
 			if not nodepoints.has(xcn.get_name()):
@@ -204,7 +205,7 @@ func mergexcrpcdata(xcdata):
 				$XCnodes.add_child(xcn)
 			xcn.translation = nodepoints[k]
 			
-	if "prevnodepoints" in xcdata:
+	if "prevnodepoints" in xcdata:   # diff case
 		var nodepointsErase = xcdata["prevnodepoints"]
 		var nodepointsAdd = xcdata["nextnodepoints"]
 		for nE in nodepointsErase:
@@ -243,10 +244,10 @@ func mergexcrpcdata(xcdata):
 	if "maxnodepointnumber" in xcdata:
 		maxnodepointnumber = xcdata["maxnodepointnumber"]
 
-	if "onepathpairs" in xcdata:
+	if "onepathpairs" in xcdata:   # full overwrite
 		onepathpairs = xcdata["onepathpairs"]
 	
-	if "prevonepathpairs" in xcdata:
+	if "prevonepathpairs" in xcdata:  # diff case 
 		var onepathpairsErase = xcdata["prevonepathpairs"]
 		var onepathpairsAdd = xcdata["newonepathpairs"]
 		for i in range(0, len(onepathpairsErase), 2):
@@ -266,7 +267,7 @@ func mergexcrpcdata(xcdata):
 		var p1 = nodepoints.get(onepathpairs[j+1])
 		if p0 == null or p1 == null:
 			print("Deleting unknown point from onepathpairs ", (onepathpairs[j] if p0 == null else ""), "  ", (onepathpairs[j+1] if p1 == null else ""))
-			assert (false)
+			assert (false)  # assert (fromremotecall)
 			onepathpairs[j] = onepathpairs[-2]
 			onepathpairs[j+1] = onepathpairs[-1]
 

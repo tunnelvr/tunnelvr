@@ -194,7 +194,7 @@ func process_puppetpointerpositionstack(delta):
 		$LaserOrient/Length.scale.z = pp["length"]
 		if "laserselectline" in pp:
 			$LaserSelectLine.global_transform = pp["laserselectline"]["global_transform"]
-			$LaserSelectLine/Scale.z = pp["laserselectline"]["scalez"]
+			$LaserSelectLine/Scale.scale.z = pp["laserselectline"]["scalez"]
 			$LaserSelectLine.visible = true
 		else:
 			$LaserSelectLine.visible = false

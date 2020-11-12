@@ -34,7 +34,7 @@ func findxctube(xcname0, xcname1):
 			return xctube
 	return null
 	
-remote func xctubefromdata(xctdata):
+func xctubefromdata(xctdata):
 	var xctube = findxctube(xctdata["xcname0"], xctdata["xcname1"])
 	if xctube == null:
 		var xcdrawing0 = get_node("XCdrawings").get_node(xctdata["xcname0"])
@@ -114,6 +114,7 @@ func actsketchchange(xcdatalist):
 	var playerMe = get_node("/root/Spatial").playerMe
 	xcdatalist[0]["networkIDsource"] = playerMe.networkID
 	xcdatalist[0]["datetime"] = OS.get_datetime()
+
 	actsketchchangeL(xcdatalist)  # <--- the main function you want to step into
 	if true or Tglobal.connectiontoserveractive:
 		var sendrpc = true
@@ -125,6 +126,8 @@ func actsketchchange(xcdatalist):
 					prevcombinabletransformposchangetimestamp = xcdatalist[0].get("timestamp", 0)
 		if sendrpc and Tglobal.connectiontoserveractive:
 			assert(playerMe.networkID != 0)
+			#print("Delaying transmission by 20 seconds to simulate bad connections")
+			#yield(get_tree().create_timer(20), "timeout")
 			rpc("actsketchchangeL", xcdatalist)
 
 func clearentirecaveworld():
@@ -178,6 +181,8 @@ func caveworldreceivechunkingfailed(msg):
 	return null
 	
 remote func actsketchchangeL(xcdatalist):
+	var playerMe = get_node("/root/Spatial").playerMe
+	var fromremotecall = ("networkIDsource" in xcdatalist[0]) and xcdatalist[0]["networkIDsource"] != playerMe.networkID
 	if "caveworldchunk" in xcdatalist[0]:
 		if xcdatalist[0]["caveworldchunk"] == 0:
 			Tglobal.printxcdrawingfromdatamessages = false
@@ -202,17 +207,16 @@ remote func actsketchchangeL(xcdatalist):
 
 	elif "undoact" in xcdatalist[0]:
 		if len(actsketchchangeundostack) != 0:
-			# check this matches
+			# not done check this undo matches
 			actsketchchangeundostack.pop_back()
+			
 	else:
-		var playerMe = get_node("/root/Spatial").playerMe
-		if "networkIDsource" in xcdatalist[0]:
-			if xcdatalist[0]["networkIDsource"] != playerMe.networkID:
-				var playerOther = get_node("/root/Spatial/Players").get_node_or_null("NetworkedPlayer"+String(xcdatalist[0]["networkIDsource"]))
-				if playerOther != null:
-					playerOther.get_node("AnimationPlayer_actsketchchange").play("actsketchchange_flash")
-			if xcdatalist[0]["networkIDsource"] == playerMe.networkID and playerMe.doppelganger != null:
-				playerMe.doppelganger.get_node("AnimationPlayer_actsketchchange").play("actsketchchange_flash")
+		if fromremotecall:
+			var playerOther = get_node("/root/Spatial/Players").get_node_or_null("NetworkedPlayer"+String(xcdatalist[0]["networkIDsource"]))
+			if playerOther != null:
+				playerOther.get_node("AnimationPlayer_actsketchchange").play("actsketchchange_flash")
+		elif playerMe.doppelganger != null:
+			playerMe.doppelganger.get_node("AnimationPlayer_actsketchchange").play("actsketchchange_flash")
 		if combinabletransformposchange(xcdatalist):
 			actsketchchangeundostack[-1][0].erase("rpcoptional")
 			if "transformpos" in xcdatalist[0]:
@@ -226,6 +230,7 @@ remote func actsketchchangeL(xcdatalist):
 			
 	var xcdrawingstoupdate = { }
 	var xctubestoupdate = { }
+	var xcdrawingsrejected = [ ]
 	for i in range(len(xcdatalist)):
 		var xcdata = xcdatalist[i]
 		if "caveworldchunk" in xcdata:
@@ -235,7 +240,7 @@ remote func actsketchchangeL(xcdatalist):
 				print("update tube ", xcdata["tubename"])
 			if xcdata["tubename"] == "**notset":
 				xcdata["tubename"] = "XCtube_"+xcdata["xcname0"]+"_"+xcdata["xcname1"]
-			var xctube = xctubefromdata(xcdata)
+			var xctube = xctubefromdata(xcdata)  # inline this in order to implement xcchangesequence logic
 			if len(xctube.xcdrawinglink) == 0 and len(xctube.xcsectormaterials) == 0:
 				removeXCtube(xctube)
 				xctube.queue_free() 
@@ -261,7 +266,7 @@ remote func actsketchchangeL(xcdatalist):
 				planviewsystem.actplanviewvisibleactive(xcdata["planview"]["visible"], 
 														xcdata["planview"].get("planviewactive", true), 
 														xcdata["planview"].get("tubesvisible", planviewsystem.planviewcontrols.get_node("CheckBoxTubesVisible").pressed))
-
+														
 		elif "xcvizstates" in xcdata:
 			if Tglobal.printxcdrawingfromdatamessages:
 				print("update vizstate ")
@@ -297,14 +302,19 @@ remote func actsketchchangeL(xcdatalist):
 						
 		else:  # xcdrawing
 			assert ("name" in xcdata)
-			if "transformpos" in xcdata and not ("prevtransformpos" in xcdata):
+			if "transformpos" in xcdata and not ("prevtransformpos" in xcdata) and not fromremotecall:
 				var lxcdrawing = $XCdrawings.get_node_or_null(xcdata["name"])
 				if lxcdrawing != null:
 					xcdata["prevtransformpos"] = lxcdrawing.transform
-					
-			var xcdrawing = xcdrawingfromdata(xcdata)
+			if "overridingxcdrawing" in xcdata:
+				assert(fromremotecall)
+				var xcd = $XCdrawings.get_node_or_null(xcdata["name"])
+				if xcd != null:
+					xcd.xcchangesequence = -1
+			var xcdrawing = xcdrawingfromdata(xcdata, fromremotecall)
 			if xcdrawing == null:
-				print("new XC drawing from data missing drawingtype!!! ", xcdata)
+				xcdrawingsrejected.append(xcdata["name"])
+				print("rejecting XC drawing from data", xcdata)
 			elif "nodepoints" in xcdata or "nextnodepoints" in xcdata or "onepathpairs" in xcdata or "newonepathpairs" in xcdata:
 				xcdrawingstoupdate[xcdrawing.get_name()] = xcdrawing
 				if len(xcdata.get("prevnodepoints", [])) != 0:
@@ -314,7 +324,7 @@ remote func actsketchchangeL(xcdatalist):
 				for xctube in xcdrawing.xctubesconn:
 					xctubestoupdate[xctube.get_name()] = xctube
 					
-			if caveworldchunkI == -1:
+			if caveworldchunkI == -1 and xcdrawing != null:
 				var tpos = null
 				var xcname = null
 				var sname = "ClickSound"
@@ -360,9 +370,31 @@ remote func actsketchchangeL(xcdatalist):
 			for xcdatalistR in xcdatalistReceivedDuringChunkingL:
 				actsketchchangeL(xcdatalistR)
 
+	if len(xcdrawingsrejected) != 0:
+		print("The following drawings have bad change sequences and need to be requested from the server", xcdrawingsrejected)
+		if playerMe.networkID == 1:
+			sendoverridingxcdrawingsdata(xcdrawingsrejected, xcdatalist[0]["networkIDsource"])
+		else:
+			rpc_id(1, "sendoverridingxcdrawingsdata", xcdrawingsrejected, playerMe.networkID)
+			
 	return null
 		
-func xcdrawingfromdata(xcdata):
+remote func sendoverridingxcdrawingsdata(xcdrawingsrejected, playeridtoupdate):
+	var playerMe = get_node("/root/Spatial").playerMe
+	assert (playerMe.networkID == 1)
+	var xcdatalist = [ ]
+	for xcdrawingname in xcdrawingsrejected:
+		var xcdrawing = $XCdrawings.get_node_or_null(xcdrawingname)
+		if xcdrawingname != null:
+			var xcdata = xcdrawing.exportxcrpcdata()
+			xcdata["overridingxcdrawing"] = 1
+			xcdata["xcchangesequence"] = xcdrawing.xcchangesequence
+			xcdata["networkIDsource"] = playerMe.networkID
+			xcdatalist.push_back(xcdata)
+	rpc_id(playeridtoupdate, "actsketchchangeL", xcdatalist)
+		
+	
+func xcdrawingfromdata(xcdata, fromremotecall):
 	var xcdrawing = $XCdrawings.get_node_or_null(xcdata["name"])
 	if xcdrawing == null:
 		if Tglobal.printxcdrawingfromdatamessages:
@@ -375,9 +407,20 @@ func xcdrawingfromdata(xcdata):
 			xcdrawing = newXCuniquedrawingPaperN(xcdata["xcresource"], xcdata["name"], xcdata["drawingtype"])
 		else:
 			xcdrawing = newXCuniquedrawing(xcdata["drawingtype"], xcdata["name"])
-
+	
 	elif Tglobal.printxcdrawingfromdatamessages:
 		print("update xcdrawing ", xcdata.get("name"))
+
+	xcdrawing.xcchangesequence += 1
+	if not fromremotecall:
+		xcdata["xcchangesequence"] = xcdrawing.xcchangesequence
+	elif "xcchangesequence" in xcdata and xcdata["xcchangesequence"] != xcdrawing.xcchangesequence:
+		if xcdrawing.xcchangesequence == 0:
+			xcdrawing.xcchangesequence = xcdata["xcchangesequence"]
+		else:
+			print("Mismatch change sequence in drawing ", xcdata["name"], " remote ", xcdata["xcchangesequence"], " here ", xcdrawing.xcchangesequence)
+			return null
+		  
 	xcdrawing.mergexcrpcdata(xcdata)
 	if xcdrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE or xcdrawing.drawingtype == DRAWING_TYPE.DT_PAPERTEXTURE:
 		if "xcresource" in xcdata:

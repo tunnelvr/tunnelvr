@@ -2,10 +2,7 @@ extends Spatial
 
 # Stuff to do:
 
-# A grey mesh sphere over the head with a hole in it that we turn on when walking or flying
-
 # rationalize the ResourceLoader.load(fetcheddrawingfile)  # imported as an Image, could be something else
-
 
 # scalebar on planview
 # Treeview to show which are downloaded
@@ -16,8 +13,12 @@ extends Spatial
 #   -- plot with front-culling so as to see inside the shapes, and plot with image textures on
 
 # * highlight nodes under pointer system so it's global and simplifies colouring code (active node to be an overlay)
+# * RTC version to work (and would use webXR)
 
-# * can set the type of the material (including invisible and no collision, so open on side)
+# * XCdrawing shell pickable and changable material
+# * Finish debugging planview and centreline nodes (which should often be visible)
+# * centreline nodes to have label highlighted only when pointed at
+
 
 # * godot docs.  assert returns null from the function it's in when you ignore it
 # * check out HDR example https://godotengine.org/asset-library/asset/110

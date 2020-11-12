@@ -39,9 +39,12 @@ var activetargetwallgrabbedpointoffset = null
 var activetargetwallgrabbedlocalpoint = null
 var activetargetwallgrabbedlaserroottrans = null
 
+var splinepointplanetubename = ""
+var splinepointplanesectorindex = -1
+var splinepointplanelambda = -1.0
 
 func clearpointertargetmaterial():
-	if pointertargettype == "XCnode":
+	if pointertargettype == "XCnode" and pointertarget != null:
 		pointertarget.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("selected" if pointertarget == activetargetnode else clearednodematerialtype(pointertarget, pointertargetwall == activetargetwall)))
 	if (pointertargettype == "XCdrawing" or pointertargettype == "XCnode") and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		if pointertargetwall == activetargetwall:
@@ -154,6 +157,8 @@ func targettype(target):
 		return "XCnode"
 	if targetparent.get_parent().get_name() == "GripMenu":
 		return "GripMenuItem"
+	if targetparent.get_name() == "SplinePointView":
+		return "SplinePointView"
 	return "unknown"
 		
 func targetwall(target, targettype):
@@ -270,9 +275,6 @@ func buttonpressed_vrgrip():
 			activetargettube.get_node("PathLines").visible = true
 			activetargettube.get_node("PathLines").set_surface_material(0, materialsystem.pathlinematerial("nodepthtest"))
 
-			get_node("/root/Spatial/BodyObjects/SplinePointView/SplinePointPlane").transform = activetargettube.splinepointplanetrans(pointertargetpoint, sketchsystem)
-			get_node("/root/Spatial/BodyObjects/SplinePointView").visible = true
-
 		else:
 			print("Wrong: sector index not match sectors in tubedata")
 	gripmenu.gripmenuon(LaserOrient.global_transform, pointertargetpoint, pointertargetwall, pointertargettype, activetargettube, activetargettubesectorindex, activetargetwall, activetargetnode)
@@ -347,6 +349,38 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 		sketchsystem.actsketchchange(xcdatalist)
 		#Tglobal.soundsystem.quicksound("BlipSound", pointertargetpoint)
 	
+	elif activetargetnode == null and activetargetnodewall == null and pointertargettype == "XCtubesector":
+		var pointertargettube = pointertargetwall
+		if true or pointertargettube.get_node("PathLines").visible:
+			var ipbasis = pointertargettube.intermedpointplanebasis(pointertargetpoint, sketchsystem)
+			splinepointplanesectorindex = pointertarget.get_index()
+			var j = splinepointplanesectorindex*2
+			if j < len(pointertargettube.xcdrawinglink):
+				var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(pointertargettube.xcname0)
+				var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(pointertargettube.xcname1)
+				var xcdrawing0nodes = xcdrawing0.get_node("XCnodes")
+				var xcdrawing1nodes = xcdrawing1.get_node("XCnodes")
+				var p0 = xcdrawing0nodes.get_node(pointertargettube.xcdrawinglink[j]).global_transform.origin
+				var p1 = xcdrawing1nodes.get_node(pointertargettube.xcdrawinglink[j+1]).global_transform.origin
+				splinepointplanelambda = inverse_lerp(ipbasis.z.dot(p0), ipbasis.z.dot(p1), ipbasis.z.dot(pointertargetpoint))
+				if 0.01 < splinepointplanelambda and splinepointplanelambda < 0.99:
+					var p = lerp(p0, p1, splinepointplanelambda)
+					var SplinePointView = get_node("/root/Spatial/BodyObjects/SplinePointView")
+					SplinePointView.get_node("SplinePointPlane").transform = Transform(ipbasis, p)
+					SplinePointView.visible = true
+					SplinePointView.get_node("SplinePointPlane/CollisionShape").disabled = false
+					splinepointplanetubename = pointertargettube.get_name()
+	
+	elif pointertargettype == "SplinePointView":
+		var splinepointplanetube = sketchsystem.get_node("XCtubes").get_node_or_null(splinepointplanetubename)
+		if splinepointplanetube != null:
+			var SplinePointView = get_node("/root/Spatial/BodyObjects/SplinePointView")
+			var dvd = SplinePointView.get_node("SplinePointPlane").transform.xform_inv(pointertargetpoint)
+			print("dvd ", dvd, "  ", splinepointplanelambda) # assert(is_zero_approx(dvd.z)) -- thickness of the disk till we use a plane instead
+			splinepointplanetube.insertxclinkintermediatenode(splinepointplanesectorindex, Vector3(dvd.x, dvd.y, splinepointplanelambda))
+			splinepointplanetube.updatetubelinkpaths(sketchsystem)
+			clearsplinepointplaneview()
+				
 	elif pointertargettype == "Papersheet" or pointertargettype == "PlanView":
 		clearactivetargetnode()
 		var alaserspot = activelaserroot.get_node("LaserSpot")
@@ -581,7 +615,6 @@ func buttonreleased_vrgrip():
 		else:
 			print("Wrong: activetargettubesectorindex >= activetargettube.xcsectormaterials ")
 		activetargettube.get_node("PathLines").set_surface_material(0, materialsystem.pathlinematerial("normal"))
-		get_node("/root/Spatial/BodyObjects/SplinePointView").visible = false
 		activetargettube = null
 	
 	if gripbuttonpressused:
@@ -863,12 +896,19 @@ func targetwalltransformpos(rpcoptional):
 		txcdata["transformpos"].origin = activetargetwallgrabbedpoint + Vector3(0, 20*angpush, 0)
 	return txcdata
 
+func clearsplinepointplaneview():
+	var SplinePointView = get_node("/root/Spatial/BodyObjects/SplinePointView")
+	SplinePointView.visible = false
+	SplinePointView.get_node("SplinePointPlane/CollisionShape").disabled = true
+	splinepointplanetubename = ""
 		
 func buttonreleased_vrtrigger():
 	if activetargetwallgrabbedtransform != null:
 		sketchsystem.actsketchchange([ targetwalltransformpos(0) ])
 		activetargetwallgrabbedtransform = null
-						
+	if splinepointplanetubename != "":
+		if pointertargettype != "SplinePointView":
+			clearsplinepointplaneview()
 
 func _physics_process(delta):
 	var planviewnothit = true

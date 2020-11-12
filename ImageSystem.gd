@@ -120,14 +120,14 @@ func _process(delta):
 				fetcheddrawingfile = "res://guimaterials/imagefilefailure.png"
 		elif paperdrawing.xcresource.begins_with("http"):
 			fetcheddrawingfile = imgdir+getshortimagename(paperdrawing.xcresource, true, 6)
-			print(["pppx ", paperdrawing.xcresource, defaultfloordrawing])
-			print(["pppx1 ", fetcheddrawingfile, defaultfloordrawingres])
 			if paperdrawing.xcresource == defaultfloordrawing:
 				fetcheddrawingfile = defaultfloordrawingres
+				print("fetching default drawing file ", fetcheddrawingfile)
 			if not File.new().file_exists(fetcheddrawingfile):
 				if not Directory.new().dir_exists(imgdir):
 					var err = Directory.new().make_dir(imgdir)
 					print("Making directory ", imgdir, " err code: ", err)
+				print("making httprequest ", paperdrawing.xcresource)
 				httprequest = HTTPRequest.new()
 				add_child(httprequest)
 				httprequest.connect("request_completed", self, "_http_request_completed", [{"httprequest":httprequest, "paperdrawing":paperdrawing, "objectname":paperdrawing.get_name()}])
@@ -135,6 +135,7 @@ func _process(delta):
 				httprequest.request(paperdrawing.xcresource)
 				httprequestduration = 0.0
 			else:
+				print("using cached image ", fetcheddrawingfile)
 				fetcheddrawing = paperdrawing
 		else:
 			fetcheddrawingfile = "res://guimaterials/imagefilefailure.png"
@@ -145,7 +146,6 @@ func _process(delta):
 			img = ResourceLoader.load(fetcheddrawingfile)  # imported as an Image, could be something else
 		else:
 			img.load(fetcheddrawingfile)
-		print("FFF", [img, fetcheddrawing, fetcheddrawingfile])
 		var papertexture = ImageTexture.new()
 		papertexture.create_from_image(img)
 		var fetcheddrawingmaterial = fetcheddrawing.get_node("XCdrawingplane/CollisionShape/MeshInstance").get_surface_material(0)
@@ -154,7 +154,6 @@ func _process(delta):
 		if papertexture.get_width() != 0:
 			var previmgheightwidthratio = fetcheddrawing.imgheightwidthratio
 			fetcheddrawing.imgheightwidthratio = papertexture.get_height()*1.0/papertexture.get_width()
-			print("fff  ", fetcheddrawing.imgheightwidthratio)
 			if previmgheightwidthratio == 0:
 				correctdefaultimgtrimtofull(fetcheddrawing)				
 			if fetcheddrawing.imgwidth != 0:

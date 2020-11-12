@@ -13,12 +13,18 @@ static func makexcdpolys(nodepoints, onepathpairs, discardsinglenodepaths):
 	for i in range(Npaths):
 		var i0 = onepathpairs[i*2]
 		var i1 = onepathpairs[i*2+1]
-		var vec3 = nodepoints[i1] - nodepoints[i0]
-		var vec = Vector2(vec3.x, vec3.y)
-		Lpathvectorseq[i0].append([vec.angle(), i])
-		Lpathvectorseq[i1].append([(-vec).angle(), i])
-		opvisits2.append(0)
-		opvisits2.append(0)
+		if i0 != i1:
+			var vec3 = nodepoints[i1] - nodepoints[i0]
+			var vec = Vector2(vec3.x, vec3.y)
+			Lpathvectorseq[i0].append([vec.angle(), i])
+			Lpathvectorseq[i1].append([(-vec).angle(), i])
+			opvisits2.append(0)
+			opvisits2.append(0)
+		else:
+			print("Suppressing loop edge in onepathpairs (how did it get here?) polynet function would fail as it relies on orientation")
+			opvisits2.append(-1)
+			opvisits2.append(-1)
+
 		
 	for pathvectorseq in Lpathvectorseq.values():
 		pathvectorseq.sort_custom(sd0class, "sd0")
@@ -45,6 +51,10 @@ static func makexcdpolys(nodepoints, onepathpairs, discardsinglenodepaths):
 					break
 		
 		# find and record the orientation of the polygon by looking at the bottom left
+		if len(poly) == 0:
+			print("bad poly size 0")
+			continue
+			
 		var jbl = 0
 		var ptbl = nodepoints[poly[jbl]]
 		for j in range(1, len(poly)):
