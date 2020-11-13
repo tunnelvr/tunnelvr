@@ -59,7 +59,7 @@ func updateworkingshell():
 
 func updatecentrelinevisibility():
 	get_tree().call_group("gpnoncentrelinegeo", "xcdfullsetvisibilitycollision", not Tglobal.centrelineonly)
-	get_tree().call_group("gpcentrelinegeo", "xcdfullsetvisibilitycollision", Tglobal.centrelinevisible)
+	#get_tree().call_group("gpcentrelinegeo", "xcdfullsetvisibilitycollision", Tglobal.centrelinevisible)
 	if Tglobal.centrelinevisible:
 		var playerMe = get_node("/root/Spatial").playerMe
 		get_node("/root/Spatial/LabelGenerator").restartlabelmakingprocess(playerMe.get_node("HeadCam").global_transform.origin)
@@ -541,6 +541,9 @@ func newXCuniquedrawing(drawingtype, sname):
 		xcdrawing.add_to_group("gpcentrelinegeo")
 		xcdrawing.linewidth = 0.035
 		xcdrawing.drawingvisiblecode = DRAWING_TYPE.VIZ_XCD_HIDE
+		xcdrawing.get_node("PathLines").visible = true
+		xcdrawing.get_node("PathLines").layers = CollisionLayer.VL_centrelinedrawinglines
+		xcdrawing.get_node("XCnodes").visible = true
 	
 	else:
 		assert (false)

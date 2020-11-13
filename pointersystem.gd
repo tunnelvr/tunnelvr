@@ -45,7 +45,14 @@ var splinepointplanelambda = -1.0
 
 func clearpointertargetmaterial():
 	if pointertargettype == "XCnode" and pointertarget != null:
-		pointertarget.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("selected" if pointertarget == activetargetnode else clearednodematerialtype(pointertarget, pointertargetwall == activetargetwall)))
+		if pointertargetwall != null and pointertargetwall.drawingtype == DRAWING_TYPE.DT_CENTRELINE:
+			var pointertargetnonplan = pointertargetwall.get_node("XCnodes").get_node(pointertarget.get_name())
+			var pointertargetplanview = pointertargetwall.get_node("XCnodes_PlanView").get_node(pointertarget.get_name())
+			pointertargetnonplan.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("selected" if pointertarget == activetargetnode else "station"))
+			pointertargetnonplan.get_node("StationLabel").visible = false
+			pointertargetplanview.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("selected" if pointertarget == activetargetnode else "station"))
+		else:
+			pointertarget.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("selected" if pointertarget == activetargetnode else clearednodematerialtype(pointertarget, pointertargetwall == activetargetwall)))
 	if (pointertargettype == "XCdrawing" or pointertargettype == "XCnode") and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		if pointertargetwall == activetargetwall:
 			pointertargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").set_surface_material(0, materialsystem.xcdrawingmaterial("active"))
@@ -58,7 +65,15 @@ func clearpointertargetmaterial():
 			
 func setpointertargetmaterial():
 	if pointertargettype == "XCnode":
-		pointertarget.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("selected_highlight" if pointertarget == activetargetnode else "highlight"))
+		if pointertargetwall != null and pointertargetwall.drawingtype == DRAWING_TYPE.DT_CENTRELINE:
+			var pointertargetnonplan = pointertargetwall.get_node("XCnodes").get_node(pointertarget.get_name())
+			var pointertargetplanview = pointertargetwall.get_node("XCnodes_PlanView").get_node(pointertarget.get_name())
+			pointertargetnonplan.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("selected_highlight" if pointertarget == activetargetnode else "highlight"))
+			pointertargetnonplan.get_node("StationLabel").visible = true
+			pointertargetplanview.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("selected_highlight" if pointertarget == activetargetnode else "highlight"))
+		else:
+			pointertarget.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("selected_highlight" if pointertarget == activetargetnode else "highlight"))
+			
 	if (pointertargettype == "XCdrawing" or pointertargettype == "XCnode") and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		pointertargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").set_surface_material(0, materialsystem.xcdrawingmaterial("highlight"))
 		pointertargetwall.updateformetresquaresscaletexture()
@@ -79,7 +94,13 @@ func clearednodematerialtype(xcn, bwallactive):
 
 func clearactivetargetnode():
 	if activetargetnode != null:
-		activetargetnode.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial(clearednodematerialtype(activetargetnode, activetargetnodewall == activetargetwall)))
+		if activetargetnodewall != null and activetargetnodewall.drawingtype == DRAWING_TYPE.DT_CENTRELINE:
+			var activetargetnodenonplan = activetargetnodewall.get_node("XCnodes").get_node(activetargetnode.get_name())
+			var activetargetnodeplanview = activetargetnodewall.get_node("XCnodes_PlanView").get_node(activetargetnode.get_name())
+			activetargetnodenonplan.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("station"))
+			activetargetnodeplanview.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("station"))
+		else:
+			activetargetnode.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial(clearednodematerialtype(activetargetnode, activetargetnodewall == activetargetwall)))
 	activetargetnode = null
 	activetargetnodewall = null
 	activelaserroot.get_node("LaserSpot").set_surface_material(0, materialsystem.lasermaterial("spot"))
@@ -154,6 +175,8 @@ func targettype(target):
 	if targetparent.get_name() == "XCtubesectors":
 		return "XCtubesector"
 	if targetparent.get_name() == "XCnodes":
+		return "XCnode"
+	if targetparent.get_name() == "XCnodes_PlanView":
 		return "XCnode"
 	if targetparent.get_parent().get_name() == "GripMenu":
 		return "GripMenuItem"

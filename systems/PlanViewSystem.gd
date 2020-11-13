@@ -305,7 +305,7 @@ func _process(delta):
 							 (-1 if floormove.get_node("ButtonTiltFore").is_pressed() else 0) + (1 if floormove.get_node("ButtonTiltBack").is_pressed() else 0))
 		if len(activetargetfloor.nodepoints) != 0:
 			joyposmove.x = 0
-			joyposmove.y = 0
+			joyposmove.z = 0
 			joygrow = 0
 			joyrot = Vector2(0, 0)
 		if joypostrimld != Vector2(0,0) or joypostrimru != Vector2(0,0) or joyposmove != Vector3(0,0,0) or joygrow != 0 or joyrot != Vector2(0, 0):

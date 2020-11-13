@@ -71,16 +71,15 @@ func _process(delta):
 				xcnodelabelpanel.mesh.size.x = tex.get_width()*(xcnodelabelpanel.mesh.size.y/tex.get_height())
 				mat = xcnodelabelpanel.get_surface_material(0)
 				mat.set_shader_param("texture_albedo", tex)
-				#xcnodelabelpanel.get_surface_material(0).albedo_texture = tex
 				mat.set_shader_param("vertex_offset", Vector3(xcnodelabelpanel.mesh.size.x*0.5 + 0.3, xcnodelabelpanel.mesh.size.y*0.5, 0))
 				mat.set_shader_param("vertex_scale", 1.0)
-				#xcnodelabelpanel.visible = true
+				xcnodelabelpanel.visible = false
+				
 			if workingxcnodeplanview != null:
 				var xcnodelabelpanelp = workingxcnodeplanview.get_node("StationLabel")
 				xcnodelabelpanelp.mesh.size.x = tex.get_width()*(xcnodelabelpanelp.mesh.size.y/tex.get_height())
 				var matp = xcnodelabelpanelp.get_surface_material(0)
 				matp.set_shader_param("texture_albedo", tex)
-				#xcnodelabelpanel.get_surface_material(0).albedo_texture = tex
 				matp.set_shader_param("vertex_offset", Vector3(xcnodelabelpanelp.mesh.size.x*0.5 + 0.3, xcnodelabelpanel.mesh.size.y*0.5, 0))
 				matp.set_shader_param("vertex_scale", 1.0)
 				matp.set_shader_param("uv1_scale", Vector3(1,-1,1))

@@ -56,7 +56,7 @@ static func xcdatalistfromcentreline(centrelinefile):
 								"maxnodepointnumber":maxnodepointnumber
 							  }
 	var xcdrawinglist = [ xcdrawingcentreline ]
-	var xcvizstates = { xcdrawingcentreline["name"]:DRAWING_TYPE.VIZ_XCD_HIDE }
+	var xcvizstates = { xcdrawingcentreline["name"]:DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE }
 	var updatetubeshells = [ ]
 
 	var xsectgps = centrelinedata.xsectgps

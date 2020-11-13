@@ -28,7 +28,7 @@ func setxcdrawingvisiblehideL(hidenodes):
 	assert ($XCdrawingplane.visible != $XCdrawingplane/CollisionShape.disabled)	
 	$XCdrawingplane.visible = false
 	$XCdrawingplane/CollisionShape.disabled = true
-	if hidenodes:
+	if hidenodes and drawingtype != DRAWING_TYPE.DT_CENTRELINE:
 		var rvisible = (Tglobal.tubedxcsvisible or (drawingtype != DRAWING_TYPE.DT_XCDRAWING) or (len(xctubesconn) == 0)) and (drawingtype != DRAWING_TYPE.DT_CENTRELINE)
 		$XCnodes.visible = rvisible
 		$PathLines.visible = rvisible
@@ -186,28 +186,15 @@ func mergexcrpcdata(xcdata):
 			imgheightwidthratio = imgtrim["imgheightwidthratio"]
 		applytrimmedpaperuvscale()
 		
-	if "nodepoints" in xcdata:  # full overwrite
-		nodepoints = xcdata["nodepoints"]
-		for xcn in $XCnodes.get_children():
-			if not nodepoints.has(xcn.get_name()):
-				xcn.queue_free()
-		for k in nodepoints:
-			var xcn = $XCnodes.get_node(k) if $XCnodes.has_node(k) else null
-			if xcn == null:
-				if drawingtype == DRAWING_TYPE.DT_CENTRELINE:
-					xcn = XCnode_centreline.instance()
-				else:
-					xcn = XCnode.instance()
-					if k.begins_with("r"):
-						var materialsystem = get_node("/root/Spatial/MaterialSystem")
-						xcn.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("normalhole"))
-				xcn.set_name(k)
-				$XCnodes.add_child(xcn)
-			xcn.translation = nodepoints[k]
+	if "nodepoints" in xcdata or "prevnodepoints" in xcdata:
+		var nodepointsErase = xcdata.get("prevnodepoints")
+		var nodepointsAdd = xcdata.get("nextnodepoints")
+		if nodepointsErase == null:
+			nodepointsErase = [ ]
+			nodepointsAdd = xcdata["nodepoints"]
+			for xcn in $XCnodes.get_children():
+				nodepointsErase.push_back(xcn.get_name())
 			
-	if "prevnodepoints" in xcdata:   # diff case
-		var nodepointsErase = xcdata["prevnodepoints"]
-		var nodepointsAdd = xcdata["nextnodepoints"]
 		for nE in nodepointsErase:
 			nodepoints.erase(nE)
 			if $XCnodes.has_node(nE) and not (nE in nodepointsAdd):
@@ -219,16 +206,19 @@ func mergexcrpcdata(xcdata):
 			var xcn = $XCnodes.get_node_or_null(nA)
 			if xcn == null:
 				if drawingtype == DRAWING_TYPE.DT_CENTRELINE:
+					var materialsystem = get_node("/root/Spatial/MaterialSystem")
 					xcn = XCnode_centreline.instance()
 					xcn.get_node("CollisionShape/MeshInstance").layers = CollisionLayer.VL_centrelinestations
 					xcn.get_node("StationLabel").layers = CollisionLayer.VL_centrelinestationslabel
+					xcn.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("station"))
 					xcn.set_name(nA)
 					$XCnodes.add_child(xcn)
 					var xcnpv = XCnode_centreline.instance()
 					xcnpv.set_name(nA)
 					xcnpv.get_node("CollisionShape/MeshInstance").layers = CollisionLayer.VL_centrelinestationsplanview
 					xcnpv.get_node("StationLabel").layers = CollisionLayer.VL_centrelinestationslabelplanview
-					xcnpv.get_node("CollisionShape/MeshInstance").get_surface_material(0).albedo_color = Color(1,0,0.5)
+					#xcnpv.get_node("CollisionShape/MeshInstance").get_surface_material(0).albedo_color = Color(1,0,0.5)
+					xcnpv.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("station"))
 					xcnpv.collision_layer = (xcnpv.collision_layer&(1048575 - CollisionLayer.CL_CentrelineStation))|CollisionLayer.CL_CentrelineStationPlanView
 					$XCnodes_PlanView.add_child(xcnpv)
 					xcnpv.translation = nodepointsAdd[nA]
@@ -430,6 +420,7 @@ func notubeconnections_so_delxcable():
 func xcdfullsetvisibilitycollision(bvisible):
 	visible = bvisible
 	if drawingtype == DRAWING_TYPE.DT_CENTRELINE:
+		assert(false)
 		$PathLines.visible = bvisible
 		$XCnodes.visible = bvisible
 		for xcn in get_node("XCnodes").get_children():

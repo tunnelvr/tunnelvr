@@ -144,6 +144,7 @@ newboulder={
 3d_render/layer_14="centrelinestationlabel"
 3d_render/layer_15="floortexturesplanview"
 3d_render/layer_16="centrelinestationlabelplanview"
+3d_render/layer_17="centrelinedrawinglines"
 
 [rendering]
 

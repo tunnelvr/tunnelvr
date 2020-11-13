@@ -816,7 +816,7 @@ emission_on_uv2 = false
 size = Vector3( 0.2, 0.2, 0.2 )
 
 [sub_resource type="SpatialMaterial" id=126]
-albedo_color = Color( 0.180392, 0.905882, 0.309804, 1 )
+albedo_color = Color( 0.831373, 0.180392, 0.905882, 1 )
 
 [sub_resource type="SphereMesh" id=127]
 radius = 0.05
@@ -1183,7 +1183,7 @@ script = ExtResource( 18 )
 
 [node name="HeadCam" type="ARVRCamera" parent="Players/PlayerMe"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 1.70297e-07, 1.81351, -0.261318 )
-cull_mask = 1039359
+cull_mask = 949247
 far = 321.0
 
 [node name="HeadtorchLight" type="SpotLight" parent="Players/PlayerMe/HeadCam"]
@@ -1969,7 +1969,6 @@ __meta__ = {
 }
 
 [node name="PlanGUI" type="Control" parent="PlanViewSystem/PlanView/Viewport"]
-visible = false
 margin_right = 800.0
 margin_bottom = 800.0
 theme = ExtResource( 47 )
