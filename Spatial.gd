@@ -8,6 +8,8 @@ extends Spatial
 # Treeview to show which are downloaded
 # record zooming trimming position on each and a programmable scalebar
 
+# * 
+
 # * xcchangesequence technology applied to tubes (check using the 20 second delay)
 
 # * How is it going to work from planview?
