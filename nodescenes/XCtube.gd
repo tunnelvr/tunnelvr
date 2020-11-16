@@ -7,15 +7,16 @@ var xcname1 : String
 # this should be a list of dicts so we can run more info into them
 var xcdrawinglink = [ ]      # [ 0nodenamefrom, 0nodenameto, 1nodenamefrom, 1nodenameto, ... ]
 var xcsectormaterials = [ ]  # [ 0material, 1material, ... ]
-var xclinkintermediatenodes = null 		 # [ 0[Vector3, Vector3], 1[ ], 2[ ] ] parallel to the drawinglinks, if it is set
+var xclinkintermediatenodes = null 		 # [ 0[Vector3(u,v,lambda), Vector3, Vector3], 1[ ], 2[ ] ] parallel to the drawinglinks, if it is set
 
 # derived data
 var positioningtube = false
 var pickedpolyindex0 = -1
 var pickedpolyindex1 = -1
 
-var planeintersectaxisvec = Vector3(0,0,0)
-var planeintersectpoint = Vector3(0,0,0)
+var planeintersectaxisvec = null
+var planeintersectpoint = null
+var planealongvecwhenparallel = null
 
 var tubesectorptindexlists = [ ]
 
@@ -41,10 +42,12 @@ func mergexctrpcdata(xctdata):
 	if "xcdrawinglink" in xctdata:
 		xcdrawinglink = xctdata["xcdrawinglink"]
 		xcsectormaterials = xctdata["xcsectormaterials"]
+		xclinkintermediatenodes = null
 	if "prevdrawinglinks" in xctdata:
 			 # "prevdrawinglinks": [ node0, node1, material, ... ] ]
 			 # "newdrawinglinks":
 		assert (len(xcsectormaterials)*2 == len(xcdrawinglink))
+		assert (xclinkintermediatenodes == null or len(xclinkintermediatenodes) == len(xcsectormaterials))
 		var drawinglinksErase = xctdata["prevdrawinglinks"]
 		var drawinglinksAdd = xctdata["newdrawinglinks"]
 		var nE = int(len(drawinglinksErase)/3)
@@ -64,20 +67,27 @@ func mergexctrpcdata(xctdata):
 					xcdrawinglink.remove(j*2+1)
 					xcdrawinglink.remove(j*2)
 					xcsectormaterials.remove(j)
+					if xclinkintermediatenodes != null:
+						xclinkintermediatenodes.remove(j)
+
 		while iA < nA:
 			var j = linkspresentindex(drawinglinksAdd[iA*3+m0], drawinglinksAdd[iA*3+m1])
 			if j == -1:
 				xcdrawinglink.push_back(drawinglinksAdd[iA*3+m0])
 				xcdrawinglink.push_back(drawinglinksAdd[iA*3+m1])
 				xcsectormaterials.push_back(drawinglinksAdd[iA*3+2])	
+				if xclinkintermediatenodes != null:
+					xclinkintermediatenodes.push_back([ ])
 			else:
 				print("wrong: sector already here")
 				xcsectormaterials[j] = drawinglinksAdd[iA*3+2]
+				xclinkintermediatenodes[j] = [ ]
 			iA += 1
 		if len(materialsectorschanged) != 0:
 			xctdata["materialsectorschanged"] = materialsectorschanged
 		assert (len(xcsectormaterials)*2 == len(xcdrawinglink))
-
+		assert (xclinkintermediatenodes == null or len(xclinkintermediatenodes) == len(xcsectormaterials))
+		
 func setxctubepathlinevisibility(sketchsystem):
 	var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(xcname0)
 	var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(xcname1)
@@ -161,12 +171,14 @@ func updatetubelinkpaths(sketchsystem):
 		var jb = j/2
 		var nintermediatenodes = (0 if xclinkintermediatenodes == null else len(xclinkintermediatenodes[jb]))
 		for i in range(nintermediatenodes+1):
-			var p1m = p1
-			var p1mbasis = null
+			var p1m
+			var p1mtrans
 			if i < nintermediatenodes:
-				var p1mc = lerp(p0, p1, xclinkintermediatenodes[jb][i].z)
-				p1mbasis = intermedpointplanebasis(p1mc, get_node("/root/Spatial/SketchSystem"))
-				p1m = p1mc + p1mbasis.x*xclinkintermediatenodes[jb][i].x + p1mbasis.y*xclinkintermediatenodes[jb][i].y
+				p1mtrans = intermedpointposT(p0, p1, xclinkintermediatenodes[jb][i])
+				p1m = p1mtrans.origin
+			else:
+				p1m = p1
+				p1mtrans = null
 			var p1mleft = p1m - linewidth*perp
 			var p1mright = p1m + linewidth*perp
 			surfaceTool.add_vertex(p0mleft)
@@ -185,7 +197,7 @@ func updatetubelinkpaths(sketchsystem):
 					inode = preload("res://nodescenes/XCnode_intermediate.tscn").instance()
 					inode.set_name(inodename)
 					$PathLines.add_child(inode)
-				inode.global_transform = Transform(p1mbasis, p1m)
+				inode.global_transform = p1mtrans
 			else:
 				var pa = p1m - (p1m - p0m).normalized()*arrowlen
 				var arrowfac = max(2*linewidth, arrowlen/2)
@@ -295,9 +307,7 @@ func maketubepolyassociation_andreorder(xcdrawing0, xcdrawing1):
 		xcsectormaterials = newxcsectormaterials
 		
 	return [poly0, poly1, ila]
-	return [poly0, poly1, ila]
-	return [poly0, poly1, ila]
-
+	
 
 func slicetubetoxcdrawing(xcdrawing, xcdata, xctdatadel, xctdata0, xctdata1):
 	var xcdrawings = get_node("/root/Spatial/SketchSystem/XCdrawings")
@@ -434,12 +444,7 @@ func ConstructHoleXC(i, sketchsystem):
 	return xcdata
 
 
-func get_pt(xcnodes, poly, ila, i):
-	return xcnodes.get_node(poly[(ila+i)%len(poly)]).global_transform.origin
 
-func add_vertex(surfaceTool, xcnodes, poly, ila, i):
-	var pt = xcnodes.get_node(poly[(ila+i)%len(poly)]).global_transform.origin
-	surfaceTool.add_vertex(pt)
 
 func advanceuvFar(uvFixed, ptFixed, uvFar, ptFar, ptFarNew, bclockwise):
 	var uvvec = uvFar - uvFixed
@@ -456,6 +461,156 @@ func advanceuvFar(uvFixed, ptFixed, uvFar, ptFar, ptFarNew, bclockwise):
 	var uvvecnew = uvvec*vecFarNewCos + uvperpvec*vecFarNewSin
 	var uvvecnewR = uvvecnew*vecFarFarNewRatio
 	return uvFixed + uvvecnewR
+
+func tubesectorindexll(poly0, ila0, ila0N, poly1, ila1, ila1N):
+	# used in holexc and should instead use the tuberail selected by single apature based on maketubepolyassociation_andreorder
+	var tubesectorindexl = [ [ poly0[ila0] ], [ poly1[ila1] ] ]
+	for j0 in range(ila0N):
+		tubesectorindexl[0].push_back(poly0[(ila0+j0+1)%len(poly0)])
+	for j1 in range(ila1N):
+		tubesectorindexl[1].push_back(poly1[(ila1+j1+1)%len(poly1)])
+	return tubesectorindexl
+
+func get_pt(xcnodes, poly, ila, i):
+	return xcnodes.get_node(poly[(ila+i)%len(poly)]).global_transform.origin
+
+func initialtuberails(xcnodes0, poly0, ila0, ila0N, xcnodes1, poly1, ila1, ila1N):
+	var acc = -ila0N/2.0  if ila0N>=ila1N  else  ila1N/2
+	var i0 = 0
+	var i1 = 0
+
+	var pti0 = get_pt(xcnodes0, poly0, ila0, i0)
+	var pti1 = get_pt(xcnodes1, poly1, ila1, i1)
+	var uvi0 = Vector2(0, 0)
+	var uvi1 = Vector2(pti0.distance_to(pti1),0)
+
+	var tuberail0 = [ [ pti0, uvi0, 0.0 ] ]
+	var tuberail1 = [ [ pti1, uvi1, 0.0 ] ]
+	while i0 < ila0N or i1 < ila1N:
+		assert (i0 <= ila0N and i1 <= ila1N)
+		if i0 < ila0N and (acc - ila0N < 0 or i1 == ila1N):
+			acc += ila1N
+			i0 += 1
+			var pti0next = get_pt(xcnodes0, poly0, ila0, i0)
+			uvi0 = advanceuvFar(uvi1, pti1, uvi0, pti0, pti0next, true)
+			pti0 = pti0next
+		if i1 < ila1N and (acc >= 0 or i0 == ila0N):
+			acc -= ila0N
+			i1 += 1
+			var pti1next = get_pt(xcnodes1, poly1, ila1, i1)
+			uvi1 = advanceuvFar(uvi0, pti0, uvi1, pti1, pti1next, false)
+			pti1 = pti1next
+		tuberail0.push_back([pti0, uvi0, i0*1.0/ila0N])
+		tuberail1.push_back([pti1, uvi1, i1*1.0/ila1N])
+	return [tuberail0, tuberail1]
+		
+
+func triangulatetuberung(surfaceTool, tuberail0rung0, tuberail1rung0, tuberail0rung1, tuberail1rung1):
+	surfaceTool.add_uv(tuberail0rung0[1])
+	surfaceTool.add_uv2(tuberail0rung0[1])
+	surfaceTool.add_vertex(tuberail0rung0[0])
+
+	surfaceTool.add_uv(tuberail1rung0[1])
+	surfaceTool.add_uv2(tuberail1rung0[1])
+	surfaceTool.add_vertex(tuberail1rung0[0])
+
+	if tuberail1rung0[0] != tuberail1rung1[0]:
+		surfaceTool.add_uv(tuberail1rung1[1])
+		surfaceTool.add_uv2(tuberail1rung1[1])
+		surfaceTool.add_vertex(tuberail1rung1[0])
+		if tuberail0rung0[0] == tuberail0rung1[0]:
+			return
+
+		surfaceTool.add_uv(tuberail0rung0[1])
+		surfaceTool.add_uv2(tuberail0rung0[1])
+		surfaceTool.add_vertex(tuberail0rung0[0])
+
+		surfaceTool.add_uv(tuberail1rung1[1])
+		surfaceTool.add_uv2(tuberail1rung1[1])
+		surfaceTool.add_vertex(tuberail1rung1[0])
+
+	surfaceTool.add_uv(tuberail0rung1[1])
+	surfaceTool.add_uv2(tuberail0rung1[1])
+	surfaceTool.add_vertex(tuberail0rung1[0])
+
+
+func triangulatetuberails(surfaceTool, tuberail0, tuberail1):
+	for i in range(len(tuberail0)-1):
+		triangulatetuberung(surfaceTool, tuberail0[i], tuberail1[i], tuberail0[i+1], tuberail1[i+1])
+
+func intermediaterailsequence(zi, zi1, railsequencerung0, railsequencerung1):
+	var ij = -1
+	var i1j = -1
+	var zij0 = Vector3(0,0,0)
+	var zi1j0 = Vector3(0,0,0)
+	var zij1 = Vector3(0,0,1) if len(zi) == 0 else zi[0]
+	var zi1j1 = Vector3(0,0,1) if len(zi1) == 0 else zi1[0]
+
+	while true:
+		assert(ij < len(zi) or i1j < len(zi1))
+		var adv = 0
+		if ij == len(zi):
+			adv = 1
+		elif i1j == len(zi1):
+			adv = -1
+		elif zi1j1.z < zij1.z:
+			if zi1j1.z - zij0.z < zij1.z - zi1j1.z:
+				adv = 1
+		else:
+			if zij1.z - zi1j0.z < zi1j1.z - zij1.z:
+				adv = -1
+
+		if adv <= 0:
+			ij += 1
+			zij0 = zij1
+			if ij != len(zi):
+				zij1 = Vector3(0,0,1) if ij+1 == len(zi) else zi[ij+1] 
+		if adv >= 0:
+			i1j += 1
+			zi1j0 = zi1j1
+			if i1j != len(zi1):
+				zi1j1 = Vector3(0,0,1) if i1j+1 == len(zi1) else zi1[i1j+1] 
+		if ij == len(zi) and i1j == len(zi1):
+			break
+		railsequencerung0.push_back(zij0)
+		railsequencerung1.push_back(zi1j0)
+	
+func intermedpointpos(p0, p1, dp):
+	var sp = lerp(p0, p1, dp.z)
+	var spbasis = intermedpointplanebasis(sp)
+	return sp + spbasis.x*dp.x + spbasis.y*dp.y
+
+func intermedpointposT(p0, p1, dp):
+	var sp = lerp(p0, p1, dp.z)
+	var spbasis = intermedpointplanebasis(sp)
+	return Transform(spbasis, sp + spbasis.x*dp.x + spbasis.y*dp.y)
+	
+func slicerungsatintermediatetuberail(tuberail0, tuberail1, rung0k, rung1k):
+	assert(len(tuberail0) == len(tuberail1))
+	var tuberailk = [ ]
+	for i in range(len(tuberail0)):
+		var dpi
+		var x
+		if i != 0 and i != len(tuberail0) - 1:
+			var u0 = tuberail0[i][2]
+			var u1 = tuberail1[i][2]
+			var z0 = rung0k.z
+			var z1 = rung1k.z
+			x = (z0 + (z1-z0)*u0) / (1 - (z1-z0)*(u1-u0))
+			var y = u0 + x*(u1-u0)
+			assert(is_equal_approx(x, z0 + y*(z1-z0)))
+			assert(0 <= x and x <= 1 and 0 <= y and y <= 1)
+			dpi = lerp(rung0k, rung1k, y)
+		else:
+			if i == 0:
+				assert(tuberail0[i][2] == 0 and tuberail1[i][2] == 0)
+				dpi = rung0k
+			else:
+				assert(tuberail0[i][2] == 1 and tuberail1[i][2] == 1)
+				dpi = rung1k
+			x = dpi.z
+		tuberailk.push_back([intermedpointpos(tuberail0[i][0], tuberail1[i][0], dpi), lerp(tuberail0[i][1], tuberail1[i][1], x)])
+	return tuberailk
 
 func updatetubeshell(xcdrawings, makevisible):
 	if not makevisible:
@@ -493,59 +648,31 @@ func updatetubeshell(xcdrawings, makevisible):
 		if ila1N < 0 or len(ila) == 1:   # there's a V-shaped case where this isn't good enough
 			ila1N += len(poly1)
 			
-		var tubesectorindexl = [ [ poly0[ila0] ], [ poly1[ila1] ] ]
-		for j0 in range(ila0N):
-			tubesectorindexl[0].push_back(poly0[(ila0+j0+1)%len(poly0)])
-		for j1 in range(ila1N):
-			tubesectorindexl[1].push_back(poly1[(ila1+j1+1)%len(poly1)])
-		tubesectorptindexlists.push_back(tubesectorindexl)
-
+		tubesectorptindexlists.push_back(tubesectorindexll(poly0, ila0, ila0N, poly1, ila1, ila1N))
+		var tuberails = initialtuberails(xcnodes0, poly0, ila0, ila0N, xcnodes1, poly1, ila1, ila1N)
+		var tuberail0 = tuberails[0]
+		var tuberail1 = tuberails[1]
 		var surfaceTool = SurfaceTool.new()
 		surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
-
-		var acc = -ila0N/2.0  if ila0N>=ila1N  else  ila1N/2
-		var i0 = 0
-		var i1 = 0
-
-		var pti0 = get_pt(xcnodes0, poly0, ila0, i0)
-		var pti1 = get_pt(xcnodes1, poly1, ila1, i1)
-		var uvi0 = Vector2(0, 0)
-		var uvi1 = Vector2(pti0.distance_to(pti1),0)
-
-		while i0 < ila0N or i1 < ila1N:
-			assert (i0 <= ila0N and i1 <= ila1N)
-			if i0 < ila0N and (acc - ila0N < 0 or i1 == ila1N):
-				acc += ila1N
-				surfaceTool.add_uv(uvi0)
-				surfaceTool.add_uv2(uvi0)
-				surfaceTool.add_vertex(pti0)
-				surfaceTool.add_uv(uvi1)
-				surfaceTool.add_uv2(uvi1)
-				surfaceTool.add_vertex(pti1)
-				i0 += 1
-				var pti0next = get_pt(xcnodes0, poly0, ila0, i0)
-				uvi0 = advanceuvFar(uvi1, pti1, uvi0, pti0, pti0next, true)
-				pti0 = pti0next
-				surfaceTool.add_uv(uvi0)
-				surfaceTool.add_uv2(uvi0)
-				surfaceTool.add_vertex(pti0)
-				
-			if i1 < ila1N and (acc >= 0 or i0 == ila0N):
-				acc -= ila0N
-				surfaceTool.add_uv(uvi0)
-				surfaceTool.add_uv2(uvi0)
-				surfaceTool.add_vertex(pti0)
-				surfaceTool.add_uv(uvi1)
-				surfaceTool.add_uv2(uvi1)
-				surfaceTool.add_vertex(pti1)
-				i1 += 1
-				var pti1next = get_pt(xcnodes1, poly1, ila1, i1)
-				uvi1 = advanceuvFar(uvi0, pti0, uvi1, pti1, pti1next, false)
-				pti1 = pti1next
-				surfaceTool.add_uv(uvi1)
-				surfaceTool.add_uv2(uvi1)
-				surfaceTool.add_vertex(pti1)
-		
+		if xclinkintermediatenodes != null:
+			assert (len(ila) == len(xclinkintermediatenodes))
+			var xclinkintermediatenodesi = xclinkintermediatenodes[i]
+			var xclinkintermediatenodesi1 = xclinkintermediatenodes[(i+1)%len(ila)]
+			var railsequencerung0 = [ ]
+			var railsequencerung1 = [ ]
+			intermediaterailsequence(xclinkintermediatenodesi, xclinkintermediatenodesi1, railsequencerung0, railsequencerung1)
+			assert(len(railsequencerung0) == len(railsequencerung1))
+			var tuberailk0 = tuberail0
+			for k in range(len(railsequencerung0)+1):
+				var tuberailk1
+				if k < len(railsequencerung0):
+					tuberailk1 = slicerungsatintermediatetuberail(tuberail0, tuberail1, railsequencerung0[k], railsequencerung1[k])
+				else:
+					tuberailk1 = tuberail1
+				triangulatetuberails(surfaceTool, tuberailk0, tuberailk1)
+				tuberailk0 = tuberailk1
+		else:
+			triangulatetuberails(surfaceTool, tuberail0, tuberail1)
 		surfaceTool.generate_normals()
 		var tubesectormesh = surfaceTool.commit()
 		var xctubesector = preload("res://nodescenes/XCtubeshell.tscn").instance()
@@ -591,21 +718,21 @@ func makeplaneintersectionaxisvec(xcdrawing0, xcdrawing1):
 		var ad1 = -n0dn1*c0 + c1
 		planeintersectpoint = (n0*ad0 + n1*ad1)/adet
 	else:
-		planeintersectaxisvec = Vector3(0,0,0)
+		planeintersectaxisvec = xcdrawing0.transform.basis.y
+		planealongvecwhenparallel = xcdrawing0.transform.basis.x
 
-func intermedpointplanebasis(pointertargetpoint, sketchsystem):
-	if planeintersectaxisvec != Vector3(0,0,0):
+func intermedpointplanebasis(pointertargetpoint):
+	var byvec = planeintersectaxisvec
+	var bxvec = planealongvecwhenparallel
+	if planealongvecwhenparallel == null:
 		var vtargetint = planeintersectpoint - pointertargetpoint
 		var d = vtargetint.dot(planeintersectaxisvec)
 		var vtargetintn = vtargetint - d*planeintersectaxisvec
-		var bxvec = vtargetintn.normalized()
-		var byvec = planeintersectaxisvec
-		var bzvec = bxvec.cross(byvec)
-		if is_equal_approx(bzvec.length(), 1):
-			return Basis(bxvec, byvec, bzvec)
+		bxvec = vtargetintn.normalized()
+	var bzvec = bxvec.cross(byvec)
+	if not is_equal_approx(bzvec.length(), 1):
 		print("bad zvecn ", bzvec.length())
-	var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(xcname0)
-	return xcdrawing0.transform.basis
+	return Basis(bxvec, byvec, bzvec)
 
 func insertxclinkintermediatenode(j, dv):
 	if xclinkintermediatenodes == null:

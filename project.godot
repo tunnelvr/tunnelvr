@@ -44,7 +44,7 @@ _global_script_class_icons={
 
 [application]
 
-config/name="tunnelvr4"
+config/name="tunnelvr_v0.5"
 run/main_scene="res://Spatial.tscn"
 boot_splash/image="res://screenshot.png"
 config/icon="res://icon.png"
@@ -145,6 +145,10 @@ newboulder={
 3d_render/layer_15="floortexturesplanview"
 3d_render/layer_16="centrelinestationlabelplanview"
 3d_render/layer_17="centrelinedrawinglines"
+
+[network]
+
+limits/packet_peer_stream/max_buffer_po2=17
 
 [rendering]
 

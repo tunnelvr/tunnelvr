@@ -82,6 +82,7 @@ func _physics_process(delta):
 	physicsprocessTimeStamp += delta
 
 	# The Quest reliably spits out a run of bad camera orientation (translated into nans in the HeadCentre) between time stamp 0.15 and 0.26667
+	# reported at https://github.com/godotengine/godot/issues/41943#issuecomment-727268517
 	if is_nan(HeadCentre.global_transform.origin.x):
 		print(" skipping bad headcam position:", physicsprocessTimeStamp, " orientation ", HeadCam.global_transform.basis.x)
 		return

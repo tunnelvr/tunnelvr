@@ -375,7 +375,7 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 	elif activetargetnode == null and activetargetnodewall == null and pointertargettype == "XCtubesector":
 		var pointertargettube = pointertargetwall
 		if true or pointertargettube.get_node("PathLines").visible:
-			var ipbasis = pointertargettube.intermedpointplanebasis(pointertargetpoint, sketchsystem)
+			var ipbasis = pointertargettube.intermedpointplanebasis(pointertargetpoint)
 			splinepointplanesectorindex = pointertarget.get_index()
 			var j = splinepointplanesectorindex*2
 			if j < len(pointertargettube.xcdrawinglink):
