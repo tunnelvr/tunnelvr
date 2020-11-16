@@ -44,6 +44,7 @@ func xctubefromdata(xctdata):
 			xctube = newXCtube(xcdrawing0, xcdrawing1)
 		else:
 			xctube = newXCtube(xcdrawing1, xcdrawing0)
+		xctube.makeplaneintersectionaxisvec(xcdrawing0, xcdrawing1)
 	else:
 		xctdata["m0"] = 1 if xctube.xcname0 == xctdata["xcname1"] else 0
 	xctube.mergexctrpcdata(xctdata)

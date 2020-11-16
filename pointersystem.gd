@@ -400,8 +400,17 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 			var SplinePointView = get_node("/root/Spatial/BodyObjects/SplinePointView")
 			var dvd = SplinePointView.get_node("SplinePointPlane").transform.xform_inv(pointertargetpoint)
 			print("dvd ", dvd, "  ", splinepointplanelambda) # assert(is_zero_approx(dvd.z)) -- thickness of the disk till we use a plane instead
-			splinepointplanetube.insertxclinkintermediatenode(splinepointplanesectorindex, Vector3(dvd.x, dvd.y, splinepointplanelambda))
-			splinepointplanetube.updatetubelinkpaths(sketchsystem)
+			var nodename0 = splinepointplanetube["xcdrawinglink"][splinepointplanesectorindex*2]
+			var nodename1 = splinepointplanetube["xcdrawinglink"][splinepointplanesectorindex*2+1]
+			var xctdata = { "tubename":splinepointplanetubename,
+							"xcname0":splinepointplanetube.xcname0,
+							"xcname1":splinepointplanetube.xcname1,
+							"prevdrawinglinks":[nodename0, nodename1, null, null], 
+							"newdrawinglinks":[nodename0, nodename1, null, [ Vector3(dvd.x, dvd.y, splinepointplanelambda)] ] 
+						  }
+			sketchsystem.actsketchchange([xctdata])
+			#splinepointplanetube.insertxclinkintermediatenode(splinepointplanesectorindex, Vector3(dvd.x, dvd.y, splinepointplanelambda))
+			#splinepointplanetube.updatetubelinkpaths(sketchsystem)
 			clearsplinepointplaneview()
 				
 	elif pointertargettype == "Papersheet" or pointertargettype == "PlanView":
@@ -491,15 +500,15 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 		if xctube == null:
 			xctdata["tubename"] = "**notset"
 			xctdata["prevdrawinglinks"] = [ ]
-			xctdata["newdrawinglinks"] = [ nodename0_station, newnodename, "floorcentrelineposition" ]
+			xctdata["newdrawinglinks"] = [ nodename0_station, newnodename, "floorcentrelineposition", null ]
 		else:
 			xctdata["tubename"] = xctube.get_name()
-			xctdata["newdrawinglinks"] = [ nodename0_station, newnodename, "floorcentrelineposition" ]
+			xctdata["newdrawinglinks"] = [ nodename0_station, newnodename, "floorcentrelineposition", null ]
 			var j = xctube.linkspresentindex(nodename0_station, null)
 			if j != -1:
 				var reppapernodename = xctube.xcdrawinglink[j*2+1]
 				xcndata["prevnodepoints"][reppapernodename] = pointertargetwall.nodepoints[reppapernodename]
-				xctdata["prevdrawinglinks"] = [ nodename0_station, reppapernodename, xctube.xcsectormaterials[j] ]
+				xctdata["prevdrawinglinks"] = [ nodename0_station, reppapernodename, xctube.xcsectormaterials[j], null ]
 			else:
 				xctdata["prevdrawinglinks"] = [ ]
 		sketchsystem.actsketchchange([xcndata, xctdata])
@@ -548,15 +557,15 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 			if xctube == null:
 				xctdata["tubename"] = "**notset"
 				xctdata["prevdrawinglinks"] = [ ]
-				xctdata["newdrawinglinks"] = [ nodename0, nodename1, "simpledirt" ]
+				xctdata["newdrawinglinks"] = [ nodename0, nodename1, "simpledirt", null ]
 			else:
 				xctdata["tubename"] = xctube.get_name()
 				var j = xctube.linkspresentindex(nodename0, nodename1) if xctube.xcname0 == xcname0 else xctube.linkspresentindex(nodename1, nodename0)
 				if j == -1:
 					xctdata["prevdrawinglinks"] = [ ]
-					xctdata["newdrawinglinks"] = [ nodename0, nodename1, "simpledirt" ]
+					xctdata["newdrawinglinks"] = [ nodename0, nodename1, "simpledirt", null ]
 				else:
-					xctdata["prevdrawinglinks"] = [ nodename0, nodename1, xctube.xcsectormaterials[j] ]
+					xctdata["prevdrawinglinks"] = [ nodename0, nodename1, xctube.xcsectormaterials[j], (xctube.xclinkintermediatenodes[j] if xctube.xclinkintermediatenodes != null else null) ]
 					xctdata["newdrawinglinks"] = [ ]
 			var xcvdata = { "xcvizstates":{ pointertargetwall.get_name():3 } }
 			sketchsystem.actsketchchange([xctdata, xcvdata])
@@ -621,11 +630,13 @@ func buttonreleased_vrgrip():
 			assert (gripmenu.gripmenupointertargettype == "XCtubesector") 
 			var sectormaterialname = pointertarget.get_name()
 			if activetargettubesectorindex < len(activetargettube.xcsectormaterials):
+				var nodename0 = activetargettube.xcdrawinglink[activetargettubesectorindex*2]
+				var nodename1 = activetargettube.xcdrawinglink[activetargettubesectorindex*2+1]
 				sketchsystem.actsketchchange([{ "tubename":activetargettube.get_name(), 
 												"xcname0":activetargettube.xcname0, 
 												"xcname1":activetargettube.xcname1,
-												"prevdrawinglinks":[activetargettube.xcdrawinglink[activetargettubesectorindex*2], activetargettube.xcdrawinglink[activetargettubesectorindex*2+1], activetargettube.xcsectormaterials[activetargettubesectorindex]],
-												"newdrawinglinks":[activetargettube.xcdrawinglink[activetargettubesectorindex*2], activetargettube.xcdrawinglink[activetargettubesectorindex*2+1], sectormaterialname]
+												"prevdrawinglinks":[nodename0, nodename1, activetargettube.xcsectormaterials[activetargettubesectorindex], null],
+												"newdrawinglinks":[nodename0, nodename1, sectormaterialname, null]
 											 }])
 				gripmenu.disableallgripmenus()
 				return
@@ -762,6 +773,7 @@ func buttonreleased_vrgrip():
 						prevdrawinglinks.push_back(xctube.xcdrawinglink[j])
 						prevdrawinglinks.push_back(xctube.xcdrawinglink[j+1])
 						prevdrawinglinks.push_back(xctube.xcsectormaterials[j/2])
+						prevdrawinglinks.push_back(xctube.xclinkintermediatenodes[j/2] if xctube.xclinkintermediatenodes != null else null)
 					var xctdata = { "tubename":xctube.get_name(), 
 									"xcname0":xctube.xcname0, 
 									"xcname1":xctube.xcname1,

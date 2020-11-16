@@ -61,7 +61,7 @@ static func xcdatalistfromcentreline(centrelinefile):
 
 	var xsectgps = centrelinedata.xsectgps
 	var hexonepathpairs = [ "hl","hu", "hu","hv", "hv","hr", "hr","he", "he","hd", "hd","hl"]
-	var hextubepairs = ["hl", "hl", "hr", "hr"]
+	var hextubepairs = ["hl", "hl", "mediumrock", null,  "hr", "hr", "partialrock", null]
 	for j in range(len(xsectgps)):
 		var xsectgp = xsectgps[j]
 		var xsectindexes = xsectgp.xsectindexes

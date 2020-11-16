@@ -23,14 +23,18 @@ var tubesectorptindexlists = [ ]
 const linewidth = 0.02
 
 func exportxctrpcdata():   # read by xctubefromdata()
-	return { "name":get_name(),  # tubename
-			 "xcname0":xcname0, 
-			 "xcname1":xcname1, 
-			 "xcdrawinglink":xcdrawinglink, 
-			 "xcsectormaterials":xcsectormaterials 
-			 # "prevdrawinglinks": [ node0, node1, material, ... ] ]
-			 # "newdrawinglinks":
-		   }
+	var res = { "name":get_name(),  # tubename
+				"xcname0":xcname0, 
+				"xcname1":xcname1, 
+				"xcdrawinglink":xcdrawinglink, 
+				"xcsectormaterials":xcsectormaterials 
+				# "prevdrawinglinks": [ node0, node1, material, xclinkintermediatenodes,... ] ]
+				# "newdrawinglinks":
+			  }
+	if xclinkintermediatenodes != null:
+		res["xclinkintermediatenodes"] = xclinkintermediatenodes
+	return res 
+
 
 func linkspresentindex(nodename0, nodename1):
 	for j in range(int(len(xcdrawinglink)/2)):
@@ -38,31 +42,41 @@ func linkspresentindex(nodename0, nodename1):
 			return j
 	return -1
 
+const rN = 4
 func mergexctrpcdata(xctdata):
 	if "xcdrawinglink" in xctdata:
 		xcdrawinglink = xctdata["xcdrawinglink"]
 		xcsectormaterials = xctdata["xcsectormaterials"]
-		xclinkintermediatenodes = null
+		xclinkintermediatenodes = xctdata.get("xclinkintermediatenodes", null)
 	if "prevdrawinglinks" in xctdata:
-			 # "prevdrawinglinks": [ node0, node1, material, ... ] ]
+			 # "prevdrawinglinks": [ node0, node1, material, xclinkintermediatenodes, ... ] ]
 			 # "newdrawinglinks":
 		assert (len(xcsectormaterials)*2 == len(xcdrawinglink))
 		assert (xclinkintermediatenodes == null or len(xclinkintermediatenodes) == len(xcsectormaterials))
 		var drawinglinksErase = xctdata["prevdrawinglinks"]
 		var drawinglinksAdd = xctdata["newdrawinglinks"]
-		var nE = int(len(drawinglinksErase)/3)
-		var nA = int(len(drawinglinksAdd)/3)
+		var nE = int(len(drawinglinksErase)/rN)
+		var nA = int(len(drawinglinksAdd)/rN)
+		assert (len(drawinglinksErase) == nE*rN)
+		assert (len(drawinglinksAdd) == nA*rN)
 		var iA = 0
 		var m0 = xctdata["m0"]
 		var m1 = 1-m0
 		var materialsectorschanged = [ ]
 		for iE in range(nE):
-			var j = linkspresentindex(drawinglinksErase[iE*3+m0], drawinglinksErase[iE*3+m1])
+			var j = linkspresentindex(drawinglinksErase[iE*rN+m0], drawinglinksErase[iE*rN+m1])
 			if j != -1:
-				if iA < nA and drawinglinksAdd[iA*3] == drawinglinksErase[iE*3] and drawinglinksAdd[iA*3+1] == drawinglinksErase[iE*3+1]:
-					xcsectormaterials[j] = drawinglinksAdd[iA*3+2]
+				if iA < nA and drawinglinksAdd[iA*rN] == drawinglinksErase[iE*rN] and drawinglinksAdd[iA*rN+1] == drawinglinksErase[iE*rN+1]:
+					if drawinglinksAdd[iA*rN+2] != null:
+						xcsectormaterials[j] = drawinglinksAdd[iA*rN+2]
+						materialsectorschanged.push_back(j)
+					if drawinglinksErase[iE*rN+3] != null:
+						for dv in drawinglinksErase[iE*rN+3]:
+							removexclinkintermediatenode(j, dv)
+					if drawinglinksAdd[iA*rN+3] != null:
+						for dv in drawinglinksAdd[iA*rN+3]:
+							insertxclinkintermediatenode(j, dv)
 					iA += 1
-					materialsectorschanged.push_back(j)
 				else:
 					xcdrawinglink.remove(j*2+1)
 					xcdrawinglink.remove(j*2)
@@ -71,17 +85,25 @@ func mergexctrpcdata(xctdata):
 						xclinkintermediatenodes.remove(j)
 
 		while iA < nA:
-			var j = linkspresentindex(drawinglinksAdd[iA*3+m0], drawinglinksAdd[iA*3+m1])
+			var j = linkspresentindex(drawinglinksAdd[iA*rN+m0], drawinglinksAdd[iA*rN+m1])
 			if j == -1:
-				xcdrawinglink.push_back(drawinglinksAdd[iA*3+m0])
-				xcdrawinglink.push_back(drawinglinksAdd[iA*3+m1])
-				xcsectormaterials.push_back(drawinglinksAdd[iA*3+2])	
+				xcdrawinglink.push_back(drawinglinksAdd[iA*rN+m0])
+				xcdrawinglink.push_back(drawinglinksAdd[iA*rN+m1])
+				xcsectormaterials.push_back(drawinglinksAdd[iA*rN+2])
+
+
 				if xclinkintermediatenodes != null:
-					xclinkintermediatenodes.push_back([ ])
+					xclinkintermediatenodes.push_back(drawinglinksAdd[iA*rN+3] if drawinglinksAdd[iA*rN+3] != null else [])
+				elif drawinglinksAdd[iA*rN+3] != null:
+					xclinkintermediatenodes = [ ]
+					for ji in len(xcsectormaterials) - 1:
+						xclinkintermediatenodes.push_back([ ])
+					xclinkintermediatenodes.push_back(drawinglinksAdd[iA*rN+3])
 			else:
 				print("wrong: sector already here")
-				xcsectormaterials[j] = drawinglinksAdd[iA*3+2]
-				xclinkintermediatenodes[j] = [ ]
+				xcsectormaterials[j] = drawinglinksAdd[iA*rN+2]
+				if xclinkintermediatenodes != null:
+					xclinkintermediatenodes[j] = drawinglinksAdd[iA*rN+3] if drawinglinksAdd[iA*rN+3] != null else []
 			iA += 1
 		if len(materialsectorschanged) != 0:
 			xctdata["materialsectorschanged"] = materialsectorschanged
@@ -347,14 +369,17 @@ func slicetubetoxcdrawing(xcdrawing, xcdata, xctdatadel, xctdata0, xctdata1):
 				xctdatadel["prevdrawinglinks"].push_back(poly0[ila0])
 				xctdatadel["prevdrawinglinks"].push_back(poly1[ila1])
 				xctdatadel["prevdrawinglinks"].push_back(xcsectormaterials[i])
+				xctdatadel["prevdrawinglinks"].push_back(xclinkintermediatenodes[i] if xclinkintermediatenodes != null else null)
 
 				xctdata0["newdrawinglinks"].push_back(poly0[ila0])
 				xctdata0["newdrawinglinks"].push_back(xcname)
 				xctdata0["newdrawinglinks"].push_back(xcsectormaterials[i])
+				xctdata0["newdrawinglinks"].push_back(xclinkintermediatenodes[i] if xclinkintermediatenodes != null else null)
 
 				xctdata1["newdrawinglinks"].push_back(xcname)
 				xctdata1["newdrawinglinks"].push_back(poly1[ila1])
 				xctdata1["newdrawinglinks"].push_back(xcsectormaterials[i])
+				xctdata1["newdrawinglinks"].push_back(null)
 			
 			# 0 = xcdrawing.global_transform.basis.z.dot(pt0 + lam*(pt1 - pt0) - xcdrawing.global_transform.origin)
 			# lam*xcdrawing.global_transform.basis.z.dot(pt0 - pt1) = xcdrawing.global_transform.basis.z.dot(pt0 - xcdrawing.global_transform.origin)
@@ -631,7 +656,6 @@ func updatetubeshell(xcdrawings, makevisible):
 		
 	var xcdrawing0 = xcdrawings.get_node(xcname0)
 	var xcdrawing1 = xcdrawings.get_node(xcname1)
-	makeplaneintersectionaxisvec(xcdrawing0, xcdrawing1)
 	var mtpa = maketubepolyassociation_andreorder(xcdrawing0, xcdrawing1)
 	var poly0 = mtpa[0]
 	var poly1 = mtpa[1]
@@ -734,11 +758,21 @@ func intermedpointplanebasis(pointertargetpoint):
 		print("bad zvecn ", bzvec.length())
 	return Basis(bxvec, byvec, bzvec)
 
+
+func removexclinkintermediatenode(j, dv):
+	if xclinkintermediatenodes != null:
+		for i in range(len(xclinkintermediatenodes[j])):
+			if xclinkintermediatenodes[j][i].z == dv.z:
+				xclinkintermediatenodes[j].remove(i)
+				return
+	print("no matching intermediate node to delete")
+
 func insertxclinkintermediatenode(j, dv):
 	if xclinkintermediatenodes == null:
 		xclinkintermediatenodes = [ ]
-	while len(xclinkintermediatenodes) < len(xcdrawinglink)/2:
-		xclinkintermediatenodes.push_back([])
+		for ji in range(len(xcdrawinglink)/2):
+			xclinkintermediatenodes.push_back([])
+	assert(len(xclinkintermediatenodes) == len(xcdrawinglink)/2)
 	var i = 0
 	while i < len(xclinkintermediatenodes[j]) and xclinkintermediatenodes[j][i].z <= dv.z:
 		i += 1
