@@ -19,6 +19,8 @@ func _on_buttonload_pressed():
 	if File.new().file_exists(savegamefilenameU):
 		sketchsystem.loadsketchsystemL(savegamefilenameU)
 		$Viewport/GUI/Panel/Label.text = "Sketch Loaded"
+		if not Tglobal.controlslocked:
+			toggleguipanelvisibility(null)
 	else:
 		$Viewport/GUI/Panel/Label.text = savegamefilename + " does not exist"
 	Tglobal.soundsystem.quicksound("MenuClick", collision_point)

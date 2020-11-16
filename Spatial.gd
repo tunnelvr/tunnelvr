@@ -8,7 +8,9 @@ extends Spatial
 # Treeview to show which are downloaded
 # record zooming trimming position on each and a programmable scalebar
 
-# * 
+# * check size/100x scale with gitter problem on vive
+# * check mass culling of everything not really close to see what framerate does
+# * centreline nodes drawn or not tickbox
 
 # * xcchangesequence technology applied to tubes (check using the 20 second delay)
 

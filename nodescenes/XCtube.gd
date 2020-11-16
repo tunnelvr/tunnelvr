@@ -113,7 +113,10 @@ func mergexctrpcdata(xctdata):
 func setxctubepathlinevisibility(sketchsystem):
 	var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(xcname0)
 	var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(xcname1)
-	$PathLines.visible = xcdrawing0.get_node("PathLines").visible or xcdrawing1.get_node("PathLines").visible
+	var pathlinesvisible = xcdrawing0.get_node("PathLines").visible or xcdrawing1.get_node("PathLines").visible
+	$PathLines.visible = pathlinesvisible
+	for inode in $PathLines.get_children():
+		inode.get_node("CollisionShape").disabled = not pathlinesvisible
 
 func centrelineconnectionfloortransformpos(sketchsystem):
 	assert (len(xcdrawinglink) != 0)
@@ -164,7 +167,13 @@ func centrelineconnectionfloortransformpos(sketchsystem):
 
 	return xcdatalist
 		
-		
+func encodeintermediatenodename(linkindex, nodeindex):
+	return "j%di%d"%[linkindex, nodeindex]
+func decodeintermediatenodenamelinkindex(inodename):
+	return int(inodename.split("i")[0])
+func decodeintermediatenodenamenodeindex(inodename):
+	return int(inodename.split("i")[1])
+
 func updatetubelinkpaths(sketchsystem):
 	var surfaceTool = SurfaceTool.new()
 	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
@@ -213,7 +222,7 @@ func updatetubelinkpaths(sketchsystem):
 				p0m = p1m
 				p0mleft = p1mleft
 				p0mright = p1mright
-				var inodename = "j%di%d"%[jb, i]
+				var inodename = encodeintermediatenodename(jb, i)
 				var inode = $PathLines.get_node_or_null(inodename)
 				if inode == null:
 					inode = preload("res://nodescenes/XCnode_intermediate.tscn").instance()
@@ -230,16 +239,16 @@ func updatetubelinkpaths(sketchsystem):
 		
 		var im = nintermediatenodes 
 		while true:
-			var imnodename = "j%di%d"%[jb, im]
+			var imnodename = encodeintermediatenodename(jb, im)
 			if not $PathLines.has_node(imnodename):
 				break
 			$PathLines.get_node(imnodename).queue_free()
 			im += 1
 			
 	var jbm = len(xcdrawinglink) 
-	while $PathLines.has_node("j%di%d"%[jbm, 0]):
+	while $PathLines.has_node(encodeintermediatenodename(jbm, 0)):
 		var im = 0
-		var imnodename = "j%di%d"%[jbm, im]
+		var imnodename = encodeintermediatenodename(jbm, im)
 		if not $PathLines.has_node(imnodename):
 			break
 		$PathLines.get_node(imnodename).queue_free()

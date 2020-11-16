@@ -39,9 +39,10 @@ var activetargetwallgrabbedpointoffset = null
 var activetargetwallgrabbedlocalpoint = null
 var activetargetwallgrabbedlaserroottrans = null
 
-var splinepointplanetubename = ""
-var splinepointplanesectorindex = -1
-var splinepointplanelambda = -1.0
+var intermediatepointplanetubename = ""
+var intermediatepointplanesectorindex = -1
+var intermediatepointplanelambda = -1.0
+var intermediatepointpicked = null
 
 func clearpointertargetmaterial():
 	if pointertargettype == "XCnode" and pointertarget != null:
@@ -53,6 +54,8 @@ func clearpointertargetmaterial():
 			pointertargetplanview.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("selected" if pointertarget == activetargetnode else "station"))
 		else:
 			pointertarget.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("selected" if pointertarget == activetargetnode else clearednodematerialtype(pointertarget, pointertargetwall == activetargetwall)))
+	if pointertargettype == "IntermediateNode":
+		pointertarget.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("nodeintermediate"))
 	if (pointertargettype == "XCdrawing" or pointertargettype == "XCnode") and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		if pointertargetwall == activetargetwall:
 			pointertargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").set_surface_material(0, materialsystem.xcdrawingmaterial("active"))
@@ -73,6 +76,9 @@ func setpointertargetmaterial():
 			pointertargetplanview.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("selected_highlight" if pointertarget == activetargetnode else "highlight"))
 		else:
 			pointertarget.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("selected_highlight" if pointertarget == activetargetnode else "highlight"))
+
+	if pointertargettype == "IntermediateNode":
+		pointertarget.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("highlight"))
 			
 	if (pointertargettype == "XCdrawing" or pointertargettype == "XCnode") and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		pointertargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").set_surface_material(0, materialsystem.xcdrawingmaterial("highlight"))
@@ -180,8 +186,10 @@ func targettype(target):
 		return "XCnode"
 	if targetparent.get_parent().get_name() == "GripMenu":
 		return "GripMenuItem"
-	if targetparent.get_name() == "SplinePointView":
-		return "SplinePointView"
+	if targetparent.get_name() == "IntermediatePointView":
+		return "IntermediatePointView"
+	if targetparent.get_name() == "PathLines" and activetargetnode == null:
+		return "IntermediateNode"
 	return "unknown"
 		
 func targetwall(target, targettype):
@@ -193,6 +201,8 @@ func targetwall(target, targettype):
 		return target.get_parent().get_parent()
 	if targettype == "PlanView":
 		return target.get_parent()
+	if targettype == "IntermediateNode":
+		return target.get_parent().get_parent()
 	return null
 			
 func clearpointertarget():
@@ -374,10 +384,10 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 	
 	elif activetargetnode == null and activetargetnodewall == null and pointertargettype == "XCtubesector":
 		var pointertargettube = pointertargetwall
-		if true or pointertargettube.get_node("PathLines").visible:
+		if pointertargettube.get_node("PathLines").visible:
 			var ipbasis = pointertargettube.intermedpointplanebasis(pointertargetpoint)
-			splinepointplanesectorindex = pointertarget.get_index()
-			var j = splinepointplanesectorindex*2
+			intermediatepointplanesectorindex = pointertarget.get_index()
+			var j = intermediatepointplanesectorindex*2
 			if j < len(pointertargettube.xcdrawinglink):
 				var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(pointertargettube.xcname0)
 				var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(pointertargettube.xcname1)
@@ -385,31 +395,32 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 				var xcdrawing1nodes = xcdrawing1.get_node("XCnodes")
 				var p0 = xcdrawing0nodes.get_node(pointertargettube.xcdrawinglink[j]).global_transform.origin
 				var p1 = xcdrawing1nodes.get_node(pointertargettube.xcdrawinglink[j+1]).global_transform.origin
-				splinepointplanelambda = inverse_lerp(ipbasis.z.dot(p0), ipbasis.z.dot(p1), ipbasis.z.dot(pointertargetpoint))
-				if 0.01 < splinepointplanelambda and splinepointplanelambda < 0.99:
-					var p = lerp(p0, p1, splinepointplanelambda)
-					var SplinePointView = get_node("/root/Spatial/BodyObjects/SplinePointView")
-					SplinePointView.get_node("SplinePointPlane").transform = Transform(ipbasis, p)
-					SplinePointView.visible = true
-					SplinePointView.get_node("SplinePointPlane/CollisionShape").disabled = false
-					splinepointplanetubename = pointertargettube.get_name()
+				intermediatepointplanelambda = inverse_lerp(ipbasis.z.dot(p0), ipbasis.z.dot(p1), ipbasis.z.dot(pointertargetpoint))
+				intermediatepointpicked = null
+				if 0.01 < intermediatepointplanelambda and intermediatepointplanelambda < 0.99:
+					var p = lerp(p0, p1, intermediatepointplanelambda)
+					var IntermediatePointView = get_node("/root/Spatial/BodyObjects/IntermediatePointView")
+					IntermediatePointView.get_node("IntermediatePointPlane").transform = Transform(ipbasis, p)
+					IntermediatePointView.visible = true
+					IntermediatePointView.get_node("IntermediatePointPlane/CollisionShape").disabled = false
+					intermediatepointplanetubename = pointertargettube.get_name()
 	
-	elif pointertargettype == "SplinePointView":
-		var splinepointplanetube = sketchsystem.get_node("XCtubes").get_node_or_null(splinepointplanetubename)
+	elif pointertargettype == "IntermediatePointView":
+		var splinepointplanetube = sketchsystem.get_node("XCtubes").get_node_or_null(intermediatepointplanetubename)
 		if splinepointplanetube != null:
-			var SplinePointView = get_node("/root/Spatial/BodyObjects/SplinePointView")
-			var dvd = SplinePointView.get_node("SplinePointPlane").transform.xform_inv(pointertargetpoint)
-			print("dvd ", dvd, "  ", splinepointplanelambda) # assert(is_zero_approx(dvd.z)) -- thickness of the disk till we use a plane instead
-			var nodename0 = splinepointplanetube["xcdrawinglink"][splinepointplanesectorindex*2]
-			var nodename1 = splinepointplanetube["xcdrawinglink"][splinepointplanesectorindex*2+1]
-			var xctdata = { "tubename":splinepointplanetubename,
+			var IntermediatePointView = get_node("/root/Spatial/BodyObjects/IntermediatePointView")
+			var dvd = IntermediatePointView.get_node("IntermediatePointPlane").transform.xform_inv(pointertargetpoint)
+			print("dvd ", dvd, "  ", intermediatepointplanelambda) # assert(is_zero_approx(dvd.z)) -- thickness of the disk till we use a plane instead
+			var nodename0 = splinepointplanetube["xcdrawinglink"][intermediatepointplanesectorindex*2]
+			var nodename1 = splinepointplanetube["xcdrawinglink"][intermediatepointplanesectorindex*2+1]
+			var xctdata = { "tubename":intermediatepointplanetubename,
 							"xcname0":splinepointplanetube.xcname0,
 							"xcname1":splinepointplanetube.xcname1,
-							"prevdrawinglinks":[nodename0, nodename1, null, null], 
-							"newdrawinglinks":[nodename0, nodename1, null, [ Vector3(dvd.x, dvd.y, splinepointplanelambda)] ] 
+							"prevdrawinglinks":[nodename0, nodename1, null, (null if intermediatepointpicked == null else [ intermediatepointpicked ]) ], 
+							"newdrawinglinks":[nodename0, nodename1, null, [ Vector3(dvd.x, dvd.y, intermediatepointplanelambda)] ] 
 						  }
 			sketchsystem.actsketchchange([xctdata])
-			#splinepointplanetube.insertxclinkintermediatenode(splinepointplanesectorindex, Vector3(dvd.x, dvd.y, splinepointplanelambda))
+			#splinepointplanetube.insertxclinkintermediatenode(intermediatepointplanesectorindex, Vector3(dvd.x, dvd.y, intermediatepointplanelambda))
 			#splinepointplanetube.updatetubelinkpaths(sketchsystem)
 			clearsplinepointplaneview()
 				
@@ -530,7 +541,6 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 	elif activetargetnode != null and pointertarget == activetargetnode:
 		clearactivetargetnode()
 
-	# connecting lines between xctype nodes
 	elif activetargetnode != null and pointertargettype == "XCnode" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		if activetargetnodewall == pointertargetwall and activetargetnodewall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 			var xcdata = { "name":pointertargetwall.get_name() }
@@ -577,6 +587,17 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 				setactivetargetwall(pointertargetwall)
 		setactivetargetnode(pointertarget)
 		initialsequencenodename = pointertarget.get_name()
+
+	elif pointertargettype == "IntermediateNode":
+		intermediatepointplanetubename = pointertargetwall.get_name()
+		intermediatepointplanesectorindex = pointertargetwall.decodeintermediatenodenamelinkindex(pointertarget.get_name())
+		var inodeindex = pointertargetwall.decodeintermediatenodenamenodeindex(pointertarget.get_name())
+		intermediatepointpicked = pointertargetwall.xclinkintermediatenodes[intermediatepointplanesectorindex][inodeindex]
+		intermediatepointplanelambda = intermediatepointpicked.z
+		var IntermediatePointView = get_node("/root/Spatial/BodyObjects/IntermediatePointView")
+		IntermediatePointView.get_node("IntermediatePointPlane").transform = pointertarget.transform
+		IntermediatePointView.visible = true
+		IntermediatePointView.get_node("IntermediatePointPlane/CollisionShape").disabled = false
 		
 	if gripbuttonheld:
 		gripbuttonpressused = true
@@ -932,17 +953,17 @@ func targetwalltransformpos(rpcoptional):
 	return txcdata
 
 func clearsplinepointplaneview():
-	var SplinePointView = get_node("/root/Spatial/BodyObjects/SplinePointView")
-	SplinePointView.visible = false
-	SplinePointView.get_node("SplinePointPlane/CollisionShape").disabled = true
-	splinepointplanetubename = ""
+	var IntermediatePointView = get_node("/root/Spatial/BodyObjects/IntermediatePointView")
+	IntermediatePointView.visible = false
+	IntermediatePointView.get_node("IntermediatePointPlane/CollisionShape").disabled = true
+	intermediatepointplanetubename = ""
 		
 func buttonreleased_vrtrigger():
 	if activetargetwallgrabbedtransform != null:
 		sketchsystem.actsketchchange([ targetwalltransformpos(0) ])
 		activetargetwallgrabbedtransform = null
-	if splinepointplanetubename != "":
-		if pointertargettype != "SplinePointView":
+	if intermediatepointplanetubename != "":
+		if pointertargettype != "IntermediatePointView":
 			clearsplinepointplaneview()
 
 func _physics_process(delta):

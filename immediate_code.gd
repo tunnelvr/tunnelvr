@@ -5,13 +5,16 @@ extends EditorScript
 # Control-Shift X to run this code in the editor
 # *******
 
-func intermediaterailsequence(xclinkintermediatenodesi, xclinkintermediatenodesi1):
-	var railsequencerungs
+func _run():
+	var x = "j88i12"
+	print(int(x.split("i")[1])+1)
+
 
 var zi = [ ]
 var zi1 = [ 0.48, 0.66 ]
 
-func _run():
+
+func _runjunk():
 	var ij = -1
 	var i1j = -1
 	var zij0 = 0.0
