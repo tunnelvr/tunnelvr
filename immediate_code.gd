@@ -8,6 +8,7 @@ extends EditorScript
 func _run():
 	var x = "j88i12"
 	print(int(x.split("i")[1])+1)
+	print(0b00100000000000)
 
 
 var zi = [ ]

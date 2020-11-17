@@ -145,8 +145,7 @@ func setactivetargetwall(newactivetargetwall):
 	if (activetargetwall == get_node("/root/Spatial/PlanViewSystem")):
 		print("Waaat")
 	
-	assert(CollisionLayer.CLV_MainRayAll == (CollisionLayer.CL_Pointer | CollisionLayer.CL_CentrelineStation | CollisionLayer.CL_PointerFloor | CollisionLayer.CL_CaveWall | CollisionLayer.CL_CaveWallTrans))
-	LaserOrient.get_node("RayCast").collision_mask = CollisionLayer.CL_Pointer | CollisionLayer.CL_CentrelineStation | CollisionLayer.CL_PointerFloor | CollisionLayer.CL_CaveWall | CollisionLayer.CL_CaveWallTrans
+	LaserOrient.get_node("RayCast").collision_mask = CollisionLayer.CLV_MainRayAll
 	if activetargetwall != null and activetargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		if not activetargetwall.get_node("XCdrawingplane").visible:
 			sketchsystem.actsketchchange([{"xcvizstates":{activetargetwall.get_name():3}}])
@@ -156,7 +155,7 @@ func setactivetargetwall(newactivetargetwall):
 			if xcnode != activetargetnode:
 				xcnode.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial(clearednodematerialtype(xcnode, true)))
 		if len(activetargetwall.nodepoints) != 0:
-			LaserOrient.get_node("RayCast").collision_mask = CollisionLayer.CL_Pointer | CollisionLayer.CL_PointerFloor 
+			LaserOrient.get_node("RayCast").collision_mask = CollisionLayer.CLV_MainRayXC
 
 	if activetargetwall != null and activetargetwall.drawingtype == DRAWING_TYPE.DT_PAPERTEXTURE:
 		activetargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").get_surface_material(0).albedo_color = Color("#DDFFCC")
@@ -1000,7 +999,8 @@ func clearintermediatepointplaneview():
 	IntermediatePointView.visible = false
 	IntermediatePointView.get_node("IntermediatePointPlane/CollisionShape").disabled = true
 	intermediatepointplanetubename = ""
-		
+	LaserOrient.get_node("RayCast").collision_mask = CollisionLayer.CLV_MainRayAll
+	
 func buttonreleased_vrtrigger():
 	if activetargetwallgrabbedtransform != null:
 		sketchsystem.actsketchchange([ targetwalltransformpos(0) ])
@@ -1008,6 +1008,8 @@ func buttonreleased_vrtrigger():
 	if intermediatepointplanetubename != "":
 		if pointertargettype != "IntermediatePointView":
 			clearintermediatepointplaneview()
+		else:
+			LaserOrient.get_node("RayCast").collision_mask = CollisionLayer.CL_IntermediatePlane
 
 func _physics_process(delta):
 	var planviewnothit = true

@@ -141,6 +141,7 @@ newboulder={
 3d_render/layer_12="surveylegs"
 3d_physics/layer_12="Papersheet"
 3d_render/layer_13="overheadlight"
+3d_physics/layer_13="IntermediatePlane"
 3d_render/layer_14="centrelinestationlabel"
 3d_render/layer_15="floortexturesplanview"
 3d_render/layer_16="centrelinestationlabelplanview"

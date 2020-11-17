@@ -12,11 +12,13 @@ enum {
 	CL_CentrelineStation=0b00000010000000,
 	CL_CentrelineStationPlanView \
 						=0b00000100000000,
-	CL_PlayerHotspot	=0b00001000000000,
-	CL_Papersheet		=0b00010000000000,
+	CL_PlayerHotspot	=0b00010000000000,
+	CL_Papersheet		=0b00100000000000,
+	CL_IntermediatePlane=0b01000000000000,
 	
-	CLV_MainRayAll		=0b00000011111000,
-	CLV_MainRayXC		=0b00000000011000,
+	CLV_MainRayAll		=0b01000011111000,
+	CLV_MainRayXC		=0b01000000011000,
+
 	CLV_PlanRayAll		=0b00000101111000,
 	CLV_PlanRayNoTube	=0b00000100011000
 }
