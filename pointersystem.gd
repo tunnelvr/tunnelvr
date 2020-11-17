@@ -405,6 +405,29 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 					IntermediatePointView.get_node("IntermediatePointPlane/CollisionShape").disabled = false
 					intermediatepointplanetubename = pointertargettube.get_name()
 	
+	elif pointertargettype == "IntermediateNode":
+		var pointertargettube = pointertargetwall
+		intermediatepointplanesectorindex = pointertargettube.decodeintermediatenodenamelinkindex(pointertarget.get_name())
+		var j = intermediatepointplanesectorindex*2
+		if j < len(pointertargettube.xcdrawinglink):
+			var inodeindex = pointertargettube.decodeintermediatenodenamenodeindex(pointertarget.get_name())
+			intermediatepointpicked = pointertargettube.xclinkintermediatenodes[intermediatepointplanesectorindex][inodeindex]
+			intermediatepointplanelambda = intermediatepointpicked.z
+			var IntermediatePointView = get_node("/root/Spatial/BodyObjects/IntermediatePointView")
+			var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(pointertargettube.xcname0)
+			var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(pointertargettube.xcname1)
+			var xcdrawing0nodes = xcdrawing0.get_node("XCnodes")
+			var xcdrawing1nodes = xcdrawing1.get_node("XCnodes")
+			var p0 = xcdrawing0nodes.get_node(pointertargettube.xcdrawinglink[j]).global_transform.origin
+			var p1 = xcdrawing1nodes.get_node(pointertargettube.xcdrawinglink[j+1]).global_transform.origin
+			var p = lerp(p0, p1, intermediatepointplanelambda)
+			var ipbasis = pointertargettube.intermedpointplanebasis(p)
+			IntermediatePointView.get_node("IntermediatePointPlane").transform = Transform(ipbasis, p)
+			IntermediatePointView.visible = true
+			IntermediatePointView.get_node("IntermediatePointPlane/CollisionShape").disabled = false
+			intermediatepointplanetubename = pointertargettube.get_name()
+
+	
 	elif pointertargettype == "IntermediatePointView":
 		var splinepointplanetube = sketchsystem.get_node("XCtubes").get_node_or_null(intermediatepointplanetubename)
 		if splinepointplanetube != null:
@@ -588,16 +611,6 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 		setactivetargetnode(pointertarget)
 		initialsequencenodename = pointertarget.get_name()
 
-	elif pointertargettype == "IntermediateNode":
-		intermediatepointplanetubename = pointertargetwall.get_name()
-		intermediatepointplanesectorindex = pointertargetwall.decodeintermediatenodenamelinkindex(pointertarget.get_name())
-		var inodeindex = pointertargetwall.decodeintermediatenodenamenodeindex(pointertarget.get_name())
-		intermediatepointpicked = pointertargetwall.xclinkintermediatenodes[intermediatepointplanesectorindex][inodeindex]
-		intermediatepointplanelambda = intermediatepointpicked.z
-		var IntermediatePointView = get_node("/root/Spatial/BodyObjects/IntermediatePointView")
-		IntermediatePointView.get_node("IntermediatePointPlane").transform = pointertarget.transform
-		IntermediatePointView.visible = true
-		IntermediatePointView.get_node("IntermediatePointPlane/CollisionShape").disabled = false
 		
 	if gripbuttonheld:
 		gripbuttonpressused = true

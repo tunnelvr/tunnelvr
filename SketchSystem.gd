@@ -352,10 +352,10 @@ remote func actsketchchangeL(xcdatalist):
 
 	if caveworldchunkI != -1:
 		changetubedxcsvizmode(xcdrawingstoupdate.values())
-		# updateworkingshell()
 		for xctube in xctubestoupdate.values():
 			if not xctube.positioningtube:
 				xctube.updatetubeshell($XCdrawings, Tglobal.tubeshellsvisible)
+				xctube.setxctubepathlinevisibility(self)
 		for xcdrawing in xcdrawingstoupdate.values():
 			if xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 				xcdrawing.updatexctubeshell($XCdrawings, Tglobal.tubeshellsvisible)

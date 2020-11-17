@@ -1941,7 +1941,7 @@ material/0 = null
 [node name="IntermediatePointView" type="Spatial" parent="BodyObjects"]
 
 [node name="IntermediatePointPlane" type="StaticBody" parent="BodyObjects/IntermediatePointView"]
-transform = Transform( 1, 0, 0, 0, 0.598017, 0.801484, 0, -0.801484, 0.598017, 37.8057, 3.09404, 29.5029 )
+transform = Transform( 1, 0, 0, 0, 0.598017, 0.801484, 0, -0.801484, 0.598017, 37.8057, 2.3513, 29.5029 )
 collision_layer = 16
 collision_mask = 0
 
