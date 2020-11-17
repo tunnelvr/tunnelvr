@@ -56,6 +56,9 @@ func clearpointertargetmaterial():
 			pointertarget.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("selected" if pointertarget == activetargetnode else clearednodematerialtype(pointertarget, pointertargetwall == activetargetwall)))
 	if pointertargettype == "IntermediateNode":
 		pointertarget.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("nodeintermediate"))
+	if pointertargettype == "IntermediatePointView":
+		pointertarget.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.xcdrawingmaterial("intermediateplane"))
+
 	if (pointertargettype == "XCdrawing" or pointertargettype == "XCnode") and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		if pointertargetwall == activetargetwall:
 			pointertargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").set_surface_material(0, materialsystem.xcdrawingmaterial("active"))
@@ -80,6 +83,9 @@ func setpointertargetmaterial():
 	if pointertargettype == "IntermediateNode":
 		pointertarget.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("highlight"))
 			
+	if pointertargettype == "IntermediatePointView":
+		pointertarget.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.xcdrawingmaterial("intermediateplanehighlight"))
+	
 	if (pointertargettype == "XCdrawing" or pointertargettype == "XCnode") and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		pointertargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").set_surface_material(0, materialsystem.xcdrawingmaterial("highlight"))
 		pointertargetwall.updateformetresquaresscaletexture()
@@ -233,9 +239,26 @@ func setpointertarget(laserroot, raycast):
 		pointertargetwall = targetwall(pointertarget, pointertargettype)
 		setpointertargetmaterial()
 		
-		#print("ppp  ", activetargetnode, " ", pointertargettype)
-		laserroot.get_node("LaserSpot").visible = ((pointertargettype == "XCdrawing") or (pointertargettype == "XCtubesector"))
-		LaserSelectLine.visible = (activetargetnode != null) and not handright.gripbuttonheld and ((pointertargettype == "XCdrawing") or (activetargetnode != null))
+		laserroot.get_node("LaserSpot").visible = (pointertargettype == "XCdrawing") or \
+												  (pointertargettype == "XCtubesector") or \
+												  (pointertargettype == "IntermediatePointView")
+		
+		if activetargetnode != null and pointertargetwall != null:
+			if activetargetnodewall.drawingtype == DRAWING_TYPE.DT_CENTRELINE:
+				LaserSelectLine.visible = pointertargetwall != null and pointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE
+			elif activetargetnodewall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
+				if pointertargettype == "XCnode":
+					LaserSelectLine.visible = true
+				elif pointertargettype == "XCdrawing" and pointertargetwall == activetargetnodewall:
+					LaserSelectLine.visible = true
+				else:
+					LaserSelectLine.visible = false
+			else:
+				LaserSelectLine.visible = false
+		elif pointertargettype == "IntermediatePointView":
+			LaserSelectLine.visible = true
+		else:
+			LaserSelectLine.visible = false
 			
 	pointertargetpoint = newpointertargetpoint
 	if is_instance_valid(pointertarget) and pointertarget == guipanel3d:
@@ -248,12 +271,17 @@ func setpointertarget(laserroot, raycast):
 		laserroot.get_node("Length").scale.z = -laserroot.get_node("RayCast").cast_to.z
 		
 	if LaserSelectLine.visible:
+		var lslfrom = null
 		if pointertarget != null and activetargetnode != null:
-			LaserSelectLine.global_transform.origin = pointertargetpoint
-			LaserSelectLine.get_node("Scale").scale.z = LaserSelectLine.global_transform.origin.distance_to(activetargetnode.global_transform.origin)
-			LaserSelectLine.global_transform = laserroot.get_node("LaserSpot").global_transform.looking_at(activetargetnode.global_transform.origin, Vector3(0,1,0))
+			lslfrom = activetargetnode.global_transform.origin
+		elif pointertargettype == "IntermediatePointView":
+			lslfrom = get_node("/root/Spatial/BodyObjects/IntermediatePointView/IntermediatePointPlane").transform.origin
 		else:
 			LaserSelectLine.visible = false
+		if lslfrom != null:
+			LaserSelectLine.global_transform.origin = pointertargetpoint
+			LaserSelectLine.get_node("Scale").scale.z = pointertargetpoint.distance_to(lslfrom)
+			LaserSelectLine.global_transform = laserroot.get_node("LaserSpot").global_transform.looking_at(lslfrom, Vector3(0,1,0))
 
 func _on_button_pressed(p_button):
 	var gripbuttonheld = handright.gripbuttonheld
@@ -426,7 +454,6 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 			IntermediatePointView.visible = true
 			IntermediatePointView.get_node("IntermediatePointPlane/CollisionShape").disabled = false
 			intermediatepointplanetubename = pointertargettube.get_name()
-
 	
 	elif pointertargettype == "IntermediatePointView":
 		var splinepointplanetube = sketchsystem.get_node("XCtubes").get_node_or_null(intermediatepointplanetubename)
@@ -443,9 +470,7 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 							"newdrawinglinks":[nodename0, nodename1, null, [ Vector3(dvd.x, dvd.y, intermediatepointplanelambda)] ] 
 						  }
 			sketchsystem.actsketchchange([xctdata])
-			#splinepointplanetube.insertxclinkintermediatenode(intermediatepointplanesectorindex, Vector3(dvd.x, dvd.y, intermediatepointplanelambda))
-			#splinepointplanetube.updatetubelinkpaths(sketchsystem)
-			clearsplinepointplaneview()
+			clearintermediatepointplaneview()
 				
 	elif pointertargettype == "Papersheet" or pointertargettype == "PlanView":
 		clearactivetargetnode()
@@ -965,7 +990,7 @@ func targetwalltransformpos(rpcoptional):
 		txcdata["transformpos"].origin = activetargetwallgrabbedpoint + Vector3(0, 20*angpush, 0)
 	return txcdata
 
-func clearsplinepointplaneview():
+func clearintermediatepointplaneview():
 	var IntermediatePointView = get_node("/root/Spatial/BodyObjects/IntermediatePointView")
 	IntermediatePointView.visible = false
 	IntermediatePointView.get_node("IntermediatePointPlane/CollisionShape").disabled = true
@@ -977,7 +1002,7 @@ func buttonreleased_vrtrigger():
 		activetargetwallgrabbedtransform = null
 	if intermediatepointplanetubename != "":
 		if pointertargettype != "IntermediatePointView":
-			clearsplinepointplaneview()
+			clearintermediatepointplaneview()
 
 func _physics_process(delta):
 	var planviewnothit = true
