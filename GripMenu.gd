@@ -90,6 +90,9 @@ func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointert
 
 	elif gripmenupointertargettype == "Papersheet":
 		gmlist = [ ]
+
+	elif gripmenupointertargettype == "IntermediatePointView":
+		gmlist = [ ]
 		
 	elif gripmenupointertargettype == "XCtubesector":
 		var tubesectormaterialname = gripmenupointertargetwall.xcsectormaterials[gripmenuactivetargettubesectorindex]

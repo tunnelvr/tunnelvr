@@ -463,13 +463,15 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 			print("dvd ", dvd, "  ", intermediatepointplanelambda) # assert(is_zero_approx(dvd.z)) -- thickness of the disk till we use a plane instead
 			var nodename0 = splinepointplanetube["xcdrawinglink"][intermediatepointplanesectorindex*2]
 			var nodename1 = splinepointplanetube["xcdrawinglink"][intermediatepointplanesectorindex*2+1]
-			var xctdata = { "tubename":intermediatepointplanetubename,
-							"xcname0":splinepointplanetube.xcname0,
-							"xcname1":splinepointplanetube.xcname1,
-							"prevdrawinglinks":[nodename0, nodename1, null, (null if intermediatepointpicked == null else [ intermediatepointpicked ]) ], 
-							"newdrawinglinks":[nodename0, nodename1, null, [ Vector3(dvd.x, dvd.y, intermediatepointplanelambda)] ] 
-						  }
-			sketchsystem.actsketchchange([xctdata])
+			var newintermediatepoint = Vector3(dvd.x, dvd.y, intermediatepointplanelambda) if not gripbuttonheld else null
+			if intermediatepointpicked != null or newintermediatepoint != null:
+				var xctdata = { "tubename":intermediatepointplanetubename,
+								"xcname0":splinepointplanetube.xcname0,
+								"xcname1":splinepointplanetube.xcname1,
+								"prevdrawinglinks":[ nodename0, nodename1, null, (null if intermediatepointpicked == null else [ intermediatepointpicked ]) ], 
+								"newdrawinglinks":[ nodename0, nodename1, null, (null if newintermediatepoint == null else [ newintermediatepoint ]) ] 
+							  }
+				sketchsystem.actsketchchange([xctdata])
 			clearintermediatepointplaneview()
 				
 	elif pointertargettype == "Papersheet" or pointertargettype == "PlanView":
@@ -927,6 +929,9 @@ func buttonreleased_vrgrip():
 
 	elif activetargetnode != null:
 		clearactivetargetnode()
+
+	elif intermediatepointplanetubename != "":
+		clearintermediatepointplaneview()
 
 	gripmenu.disableallgripmenus()
 
