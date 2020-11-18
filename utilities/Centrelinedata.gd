@@ -26,7 +26,6 @@ static func xcdatalistfromcentreline(centrelinefile):
 	var stationpointsnames = [ ]
 	var stationpoints = [ ]
 	var stationnodepoints = { }
-	var maxnodepointnumber = 0
 	for i in range(len(stationpointsnamesorg)):
 		var stationpointname = stationpointsnamesorg[i].replace(".", ",")   # dots not allowed in node name, but commas are
 		stationpointsnames.push_back(stationpointname)
@@ -37,7 +36,6 @@ static func xcdatalistfromcentreline(centrelinefile):
 		stationpoints.push_back(stationpoint)
 		if stationpointname != "":
 			stationnodepoints[stationpointname] = stationpoint
-			maxnodepointnumber = max(maxnodepointnumber, int(stationpointname))
 
 	var centrelinelegs = [ ]
 	for i in range(len(legsstyles)):
@@ -53,7 +51,6 @@ static func xcdatalistfromcentreline(centrelinefile):
 								"nextnodepoints":stationnodepoints,
 								"prevonepathpairs":[ ],
 								"newonepathpairs":centrelinelegs, 
-								"maxnodepointnumber":maxnodepointnumber
 							  }
 	var xcdrawinglist = [ xcdrawingcentreline ]
 	var xcvizstates = { xcdrawingcentreline["name"]:DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE }
@@ -92,7 +89,6 @@ static func xcdatalistfromcentreline(centrelinefile):
 						   "nextnodepoints":hexnodepoints,
 						   "prevonepathpairs":[ ],
 						   "newonepathpairs":hexonepathpairs.duplicate(),
-						   "maxnodepointnumber":0 
 						 }
 			xcdrawinglist.push_back(xcdata)
 			xcvizstates[sname] = DRAWING_TYPE.VIZ_XCD_HIDE

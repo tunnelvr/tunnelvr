@@ -6,10 +6,7 @@ extends EditorScript
 # *******
 
 func _run():
-	var x = "j88i12"
-	print(int(x.split("i")[1])+1)
-	print(0b00100000000000)
-
+	print(int("sdfsd"))
 
 var zi = [ ]
 var zi1 = [ 0.48, 0.66 ]

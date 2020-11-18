@@ -4,6 +4,10 @@ extends Spatial
 
 # rationalize the ResourceLoader.load(fetcheddrawingfile)  # imported as an Image, could be something else
 
+# To release, export to the Linux, Windows and Quest2/Android platforms, zip the appropriate dlls and sos together and 
+# Upload to Alex's machine.  To run, go into Ubuntu export Linux/X11 runable, go into /mnt/c/Users/henry/godot/tunnelvr_releases and run:
+# ../Godot_v3.2.3-stable_linux_server.64  --main-pack tunnelvr_v0.5.0.pck
+
 # scalebar on planview
 # Treeview to show which are downloaded
 # record zooming trimming position on each and a programmable scalebar
@@ -277,6 +281,7 @@ func _connected_to_server():
 		print("Now calling deferred _player_connected on id ", id)
 		call_deferred("_player_connected", id)
 	
+
 func _process(_delta):
 	if !perform_runtime_config:
 		ovr_performance.set_clock_levels(1, 1)

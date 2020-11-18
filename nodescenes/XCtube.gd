@@ -328,21 +328,29 @@ func maketubepolyassociation_andreorder(xcdrawing0, xcdrawing1):
 		ila.sort_custom(self, "fa")
 		var newxcdrawinglink = [ ]
 		var newxcsectormaterials = [ ]
+		var newxclinkintermediatenodes = null if xclinkintermediatenodes == null else [ ]
 		for i in range(len(ila)):
 			newxcdrawinglink.append(poly0[ila[i][0]])
 			newxcdrawinglink.append(poly1[ila[i][1]])
 			newxcsectormaterials.append(xcsectormaterials[ila[i][2]/2])
+			if newxclinkintermediatenodes != null:
+				newxclinkintermediatenodes.append(xclinkintermediatenodes[ila[i][2]/2])
 		for j in missingjvals:
 			newxcdrawinglink.append(xcdrawinglink[j])
 			newxcdrawinglink.append(xcdrawinglink[j+1])
 			newxcsectormaterials.append(xcsectormaterials[j/2])
+			if newxclinkintermediatenodes != null:
+				newxclinkintermediatenodes.append(xclinkintermediatenodes[j/2])
 		assert(len(xcdrawinglink) == len(newxcdrawinglink))
 		xcdrawinglink = newxcdrawinglink
 		xcsectormaterials = newxcsectormaterials
-		
+		xclinkintermediatenodes = newxclinkintermediatenodes
+		if xclinkintermediatenodes != null:
+			var sketchsystem = get_node("/root/Spatial/SketchSystem")
+			updatetubelinkpaths(sketchsystem)
+
 	return [poly0, poly1, ila]
 	
-
 func slicetubetoxcdrawing(xcdrawing, xcdata, xctdatadel, xctdata0, xctdata1):
 	var xcdrawings = get_node("/root/Spatial/SketchSystem/XCdrawings")
 	var xcdrawing0 = xcdrawings.get_node(xcname0)
@@ -537,8 +545,8 @@ func initialtuberails(xcnodes0, poly0, ila0, ila0N, xcnodes1, poly1, ila1, ila1N
 			var pti1next = get_pt(xcnodes1, poly1, ila1, i1)
 			uvi1 = advanceuvFar(uvi0, pti0, uvi1, pti1, pti1next, false)
 			pti1 = pti1next
-		tuberail0.push_back([pti0, uvi0, i0*1.0/ila0N])
-		tuberail1.push_back([pti1, uvi1, i1*1.0/ila1N])
+		tuberail0.push_back([pti0, uvi0, i0*1.0/ila0N if ila0N != 0 else 1.0])
+		tuberail1.push_back([pti1, uvi1, i1*1.0/ila1N if ila1N != 0 else 1.0])
 	return [tuberail0, tuberail1]
 		
 
@@ -640,10 +648,10 @@ func slicerungsatintermediatetuberail(tuberail0, tuberail1, rung0k, rung1k):
 			dpi = lerp(rung0k, rung1k, y)
 		else:
 			if i == 0:
-				assert(tuberail0[i][2] == 0 and tuberail1[i][2] == 0)
+				assert(tuberail0[i][2] == 0.0 and tuberail1[i][2] == 0.0)
 				dpi = rung0k
 			else:
-				assert(tuberail0[i][2] == 1 and tuberail1[i][2] == 1)
+				assert(tuberail0[i][2] == 1.0 and tuberail1[i][2] == 1.0)
 				dpi = rung1k
 			x = dpi.z
 		tuberailk.push_back([intermedpointpos(tuberail0[i][0], tuberail1[i][0], dpi), lerp(tuberail0[i][1], tuberail1[i][1], x)])

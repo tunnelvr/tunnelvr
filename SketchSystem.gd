@@ -198,7 +198,7 @@ remote func actsketchchangeL(xcdatalist):
 		elif xcdatalist[0]["caveworldchunk"] != caveworldchunkI + 1:
 			return caveworldreceivechunkingfailed("mismatch in world chunk sequence")
 		caveworldchunkI = xcdatalist[0]["caveworldchunk"]
-		print("Loading caveworldchunk ", caveworldchunkI, " of ",  xcdatalist[0]["caveworldchunkLast"])
+		print("Loading caveworldchunk ", caveworldchunkI, " of ",  xcdatalist[0]["caveworldchunkLast"], " size ", len(xcdatalist))
 
 	elif caveworldchunkI != -1:
 		if xcdatalist[0]["networkIDsource"] == caveworldchunking_networkIDsource:
@@ -368,8 +368,10 @@ remote func actsketchchangeL(xcdatalist):
 			Tglobal.printxcdrawingfromdatamessages = true
 			updatecentrelinevisibility()
 			get_node("/root/Spatial/BodyObjects/PlayerDirections").flywalkreversed = get_node("/root/Spatial/GuiSystem/GUIPanel3D/Viewport/GUI/Panel/FlyWalkReversed").pressed
-			for xcdatalistR in xcdatalistReceivedDuringChunkingL:
-				actsketchchangeL(xcdatalistR)
+			if len(xcdatalistReceivedDuringChunkingL) != 0:
+				print("Now processing ", len(xcdatalistReceivedDuringChunkingL), " received during chunking")
+				for xcdatalistR in xcdatalistReceivedDuringChunkingL:
+					actsketchchangeL(xcdatalistR)
 
 	if len(xcdrawingsrejected) != 0:
 		print("The following drawings have bad change sequences and need to be requested from the server", xcdrawingsrejected)
@@ -422,7 +424,12 @@ func xcdrawingfromdata(xcdata, fromremotecall):
 			print("Mismatch change sequence in drawing ", xcdata["name"], " remote ", xcdata["xcchangesequence"], " here ", xcdrawing.xcchangesequence)
 			return null
 		  
+	var t0 = OS.get_ticks_msec()
 	xcdrawing.mergexcrpcdata(xcdata)
+	var dt = OS.get_ticks_msec() - t0
+	if dt > 100:
+		print("    Warning: long mergexcrpcdata operation happened for ", xcdata["name"], " of ", dt, " msecs")
+		
 	if xcdrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE or xcdrawing.drawingtype == DRAWING_TYPE.DT_PAPERTEXTURE:
 		if "xcresource" in xcdata:
 			get_node("/root/Spatial/ImageSystem").fetchpaperdrawing(xcdrawing)

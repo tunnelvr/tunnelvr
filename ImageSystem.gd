@@ -32,6 +32,7 @@ var nonimagepageslist = [ ]
 var imagefetchingcountdowntimer = 0.0
 var imagefetchingcountdowntime = 0.15
 var fetcheddrawing = null
+
 var fetchednonimagedataobject = null
 var httprequest = null
 var httprequestduration = 0.0
@@ -88,7 +89,9 @@ func clearcachedir(dname):
 		print("remove dir error ", e2)
 			
 
+var nFrame = 0
 func _process(delta):
+	nFrame += 1
 	if imagefetchingcountdowntimer > 0.0:
 		imagefetchingcountdowntimer -= delta
 		return
@@ -141,27 +144,41 @@ func _process(delta):
 			fetcheddrawingfile = "res://guimaterials/imagefilefailure.png"
 
 	elif fetcheddrawing != null:
-		var img = Image.new()
+		var img = null
 		if fetcheddrawingfile.begins_with("res://"):
 			img = ResourceLoader.load(fetcheddrawingfile)  # imported as an Image, could be something else
 		else:
-			img.load(fetcheddrawingfile)
-		var papertexture = ImageTexture.new()
-		papertexture.create_from_image(img)
-		var fetcheddrawingmaterial = fetcheddrawing.get_node("XCdrawingplane/CollisionShape/MeshInstance").get_surface_material(0)
-		#fetcheddrawingmaterial.albedo_texture = papertexture
-		fetcheddrawingmaterial.set_shader_param("texture_albedo", papertexture)
-		if papertexture.get_width() != 0:
-			var previmgheightwidthratio = fetcheddrawing.imgheightwidthratio
-			fetcheddrawing.imgheightwidthratio = papertexture.get_height()*1.0/papertexture.get_width()
-			if previmgheightwidthratio == 0:
-				correctdefaultimgtrimtofull(fetcheddrawing)				
-			if fetcheddrawing.imgwidth != 0:
-				fetcheddrawing.applytrimmedpaperuvscale()
-				
-		else:
-			print(fetcheddrawingfile, "   has zero width, deleting")
-			Directory.new().remove(fetcheddrawingfile)
+			var fimg = File.new()
+			fimg.open(fetcheddrawingfile, File.READ)
+			var fimglen = fimg.get_len()
+			fimg.close()
+			if fimglen < 1.5*1000000:
+				img = Image.new()
+				var t0 = OS.get_ticks_msec()
+				img.load(fetcheddrawingfile)
+				var dt = OS.get_ticks_msec() - t0
+				if dt > 100:
+					print("Warning: file ", fetcheddrawingfile, " size ", fimglen, " bytes took ", dt, " msecs to decode")
+			else:
+				print("Skipping big image file ", fetcheddrawingfile, " size ", fimglen, " bytes")
+				img = null
+		
+		if img != null:
+			var papertexture = ImageTexture.new()
+			papertexture.create_from_image(img)
+			if papertexture.get_width() != 0:
+				var fetcheddrawingmaterial = fetcheddrawing.get_node("XCdrawingplane/CollisionShape/MeshInstance").get_surface_material(0)
+				fetcheddrawingmaterial.set_shader_param("texture_albedo", papertexture)
+				var previmgheightwidthratio = fetcheddrawing.imgheightwidthratio
+				fetcheddrawing.imgheightwidthratio = papertexture.get_height()*1.0/papertexture.get_width()
+				if previmgheightwidthratio == 0:
+					correctdefaultimgtrimtofull(fetcheddrawing)				
+				if fetcheddrawing.imgwidth != 0:
+					fetcheddrawing.applytrimmedpaperuvscale()
+					
+			else:
+				print(fetcheddrawingfile, "   has zero width, deleting")
+				Directory.new().remove(fetcheddrawingfile)
 			
 		fetcheddrawing = null
 
@@ -179,7 +196,7 @@ func _process(delta):
 		httprequestduration += delta
 
 	else:
-		set_process(false)
+		pass # set_process(false)
 
 func fetchunrolltree(fileviewtree, item, url):
 	var nonimagedataobject = { "url":url, "tree":fileviewtree, "item":item }

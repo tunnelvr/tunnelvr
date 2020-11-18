@@ -138,7 +138,6 @@ func exportxcrpcdata():
 				 "drawingtype":drawingtype,
 				 "transformpos":transform,
 				 "nodepoints": nodepoints, 
-				 "maxnodepointnumber":maxnodepointnumber,
 				 "imgtrim":{ "imgwidth":imgwidth, "imgtrimleftdown":imgtrimleftdown, "imgtrimrightup":imgtrimrightup, "imgheightwidthratio":imgheightwidthratio },
 				 "visible":true, # to abolish 
 				 "drawingvisiblecode":drawingvisiblecode
@@ -157,7 +156,6 @@ func exportxcrpcdata():
 			 "onepathpairs":onepathpairs,
 			 # "prevonepathpairs":
 			 # "newonepathpairs"
-			 "maxnodepointnumber":maxnodepointnumber,
 			 "visible":$XCdrawingplane.visible, # to abolish
 			 "drawingvisiblecode":drawingvisiblecode
 		   }
@@ -176,6 +174,9 @@ func mergexcrpcdata(xcdata):
 	assert ((get_name() == xcdata["name"]) and (not ("drawingtype" in xcdata) or drawingtype == xcdata["drawingtype"]))
 	if "transformpos" in xcdata:
 		set_transform(xcdata["transformpos"])
+
+	if drawingtype == DRAWING_TYPE.DT_CENTRELINE:
+		print("Centreline being now input")
 
 	if "imgtrim" in xcdata:
 		var imgtrim = xcdata["imgtrim"]
@@ -228,12 +229,10 @@ func mergexcrpcdata(xcdata):
 						var materialsystem = get_node("/root/Spatial/MaterialSystem")
 						xcn.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("normalhole"))
 					xcn.set_name(nA)
+					maxnodepointnumber = max(maxnodepointnumber, int(nA))
 					$XCnodes.add_child(xcn)
 			xcn.translation = nodepointsAdd[nA]
-			
-	if "maxnodepointnumber" in xcdata:
-		maxnodepointnumber = xcdata["maxnodepointnumber"]
-
+		
 	if "onepathpairs" in xcdata:   # full overwrite
 		onepathpairs = xcdata["onepathpairs"]
 	
@@ -287,24 +286,12 @@ func pairpresentindex(i0, i1):
 	return -1
 
 func newuniquexcnodename():
-	maxnodepointnumber += 1
-	return "p"+String(maxnodepointnumber)
-
-func newxcnode(name=null):
-	var xcn = XCnode.instance()
-	if name == null:
+	while true:
 		maxnodepointnumber += 1
-		xcn.set_name("p"+String(maxnodepointnumber))
-	else:
-		xcn.set_name(name)
-		maxnodepointnumber = max(maxnodepointnumber, int(name))
+		var newnodename = "p"+String(maxnodepointnumber)
+		if not $XCnodes.has_node(newnodename):
+			return newnodename
 		
-	nodepoints[xcn.get_name()] = Vector3()
-	assert (not $XCnodes.has_node(xcn.get_name()))
-	$XCnodes.add_child(xcn)
-	return xcn
-
-
 func updatexcpaths():
 	if drawingtype == DRAWING_TYPE.DT_PAPERTEXTURE:
 		return

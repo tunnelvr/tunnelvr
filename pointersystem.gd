@@ -244,7 +244,7 @@ func setpointertarget(laserroot, raycast):
 		
 		if activetargetnode != null and pointertargetwall != null:
 			if activetargetnodewall.drawingtype == DRAWING_TYPE.DT_CENTRELINE:
-				LaserSelectLine.visible = pointertargetwall != null and pointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE
+				LaserSelectLine.visible = pointertargetwall != null and pointertargettype == "XCdrawing" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE
 			elif activetargetnodewall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 				if pointertargettype == "XCnode":
 					LaserSelectLine.visible = true
@@ -394,6 +394,7 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 					prevdrawinglinks.push_back(xctube.xcdrawinglink[j])
 					prevdrawinglinks.push_back(xctube.xcdrawinglink[j+1])
 					prevdrawinglinks.push_back(xctube.xcsectormaterials[j/2])
+					prevdrawinglinks.push_back(xctube.xclinkintermediatenodes[j/2] if xctube.xclinkintermediatenodes != null else null)
 			if len(prevdrawinglinks) != 0:
 				var xctdata = { "tubename":xctube.get_name(), 
 								"xcname0":xctube.xcname0, 
@@ -438,21 +439,26 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 		var j = intermediatepointplanesectorindex*2
 		if j < len(pointertargettube.xcdrawinglink):
 			var inodeindex = pointertargettube.decodeintermediatenodenamenodeindex(pointertarget.get_name())
-			intermediatepointpicked = pointertargettube.xclinkintermediatenodes[intermediatepointplanesectorindex][inodeindex]
-			intermediatepointplanelambda = intermediatepointpicked.z
-			var IntermediatePointView = get_node("/root/Spatial/BodyObjects/IntermediatePointView")
-			var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(pointertargettube.xcname0)
-			var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(pointertargettube.xcname1)
-			var xcdrawing0nodes = xcdrawing0.get_node("XCnodes")
-			var xcdrawing1nodes = xcdrawing1.get_node("XCnodes")
-			var p0 = xcdrawing0nodes.get_node(pointertargettube.xcdrawinglink[j]).global_transform.origin
-			var p1 = xcdrawing1nodes.get_node(pointertargettube.xcdrawinglink[j+1]).global_transform.origin
-			var p = lerp(p0, p1, intermediatepointplanelambda)
-			var ipbasis = pointertargettube.intermedpointplanebasis(p)
-			IntermediatePointView.get_node("IntermediatePointPlane").transform = Transform(ipbasis, p)
-			IntermediatePointView.visible = true
-			IntermediatePointView.get_node("IntermediatePointPlane/CollisionShape").disabled = false
-			intermediatepointplanetubename = pointertargettube.get_name()
+			if inodeindex < len(pointertargettube.xclinkintermediatenodes[intermediatepointplanesectorindex]):
+				intermediatepointpicked = pointertargettube.xclinkintermediatenodes[intermediatepointplanesectorindex][inodeindex]
+				intermediatepointplanelambda = intermediatepointpicked.z
+				var IntermediatePointView = get_node("/root/Spatial/BodyObjects/IntermediatePointView")
+				var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(pointertargettube.xcname0)
+				var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(pointertargettube.xcname1)
+				var xcdrawing0nodes = xcdrawing0.get_node("XCnodes")
+				var xcdrawing1nodes = xcdrawing1.get_node("XCnodes")
+				var p0 = xcdrawing0nodes.get_node(pointertargettube.xcdrawinglink[j]).global_transform.origin
+				var p1 = xcdrawing1nodes.get_node(pointertargettube.xcdrawinglink[j+1]).global_transform.origin
+				var p = lerp(p0, p1, intermediatepointplanelambda)
+				var ipbasis = pointertargettube.intermedpointplanebasis(p)
+				IntermediatePointView.get_node("IntermediatePointPlane").transform = Transform(ipbasis, p)
+				IntermediatePointView.visible = true
+				IntermediatePointView.get_node("IntermediatePointPlane/CollisionShape").disabled = false
+				intermediatepointplanetubename = pointertargettube.get_name()
+			else:
+				print("intermediate node ", pointertarget.get_name(), " on link with only ", len(pointertargettube.xclinkintermediatenodes[intermediatepointplanesectorindex]), " elements")
+		else:
+			print("intermediate node ", pointertarget.get_name(), " when there are only ", len(pointertargettube.xclinkintermediatenodes), " links")
 	
 	elif pointertargettype == "IntermediatePointView":
 		var splinepointplanetube = sketchsystem.get_node("XCtubes").get_node_or_null(intermediatepointplanetubename)
@@ -518,8 +524,6 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 			if len(pointertargetwall.nodepoints) == 0:
 				LaserOrient.get_node("RayCast").collision_mask = CollisionLayer.CL_Pointer | CollisionLayer.CL_PointerFloor 
 				
-			#var newpointertarget = pointertargetwall.newxcnode()
-			#pointertargetwall.setxcnpoint(newpointertarget, pointertargetpoint, true)
 			var newnodename = pointertargetwall.newuniquexcnodename()
 			var newnodepoint = pointertargetwall.global_transform.xform_inv(pointertargetpoint)
 			newnodepoint.z = 0.0

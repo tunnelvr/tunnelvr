@@ -1967,6 +1967,7 @@ mesh = SubResource( 48 )
 material/0 = null
 
 [node name="IntermediatePointView" type="Spatial" parent="BodyObjects"]
+visible = false
 
 [node name="IntermediatePointPlane" type="StaticBody" parent="BodyObjects/IntermediatePointView"]
 transform = Transform( 1, 0, 0, 0, 0.598017, 0.801484, 0, -0.801484, 0.598017, 0, 0, 0 )
