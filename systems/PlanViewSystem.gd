@@ -193,17 +193,19 @@ func readydeferred():
 	
 
 func actplanviewvisibleactive(lvisible, lactive, tubesvisible):
-	visible = lvisible
-	
-	if visible:
-		# see also updatecentrelinevisibility()
-		get_node("PlanView/CollisionShape").disabled = false
-		var playerMe = get_node("/root/Spatial").playerMe
-		get_node("/root/Spatial/LabelGenerator").restartlabelmakingprocess(playerMe.get_node("HeadCam").global_transform.origin)
-		get_node("/root/Spatial/WorldEnvironment/DirectionalLight").visible = true
-	else:
-		get_node("PlanView/CollisionShape").disabled = true
-		get_node("/root/Spatial/WorldEnvironment/DirectionalLight").visible = not get_node("/root/Spatial/GuiSystem/GUIPanel3D/Viewport/GUI/Panel/ButtonHeadtorch").pressed
+	if visible != lvisible:
+		visible = lvisible
+		for xccentreline in get_tree().get_nodes_in_group("gpcentrelinegeo"):
+			xccentreline.get_node("PathLines").visible = visible
+			xccentreline.get_node("XCnodes_PlanView").visible = visible
+		if visible:  # see also updatecentrelinevisibility()
+			get_node("PlanView/CollisionShape").disabled = false
+			var playerMe = get_node("/root/Spatial").playerMe
+			get_node("/root/Spatial/LabelGenerator").restartlabelmakingprocess(playerMe.get_node("HeadCam").global_transform.origin)
+			get_node("/root/Spatial/WorldEnvironment/DirectionalLight").visible = true
+		else:
+			get_node("PlanView/CollisionShape").disabled = true
+			get_node("/root/Spatial/WorldEnvironment/DirectionalLight").visible = not get_node("/root/Spatial/GuiSystem/GUIPanel3D/Viewport/GUI/Panel/ButtonHeadtorch").pressed
 
 	planviewcontrols.get_node("CheckBoxTubesVisible").pressed = tubesvisible
 	if tubesvisible:
@@ -262,12 +264,13 @@ func _process(delta):
 		if slowviewupdatecentrelinesizeupdaterate < 0:
 			if prevcamerasize != $PlanView/Viewport/PlanGUI/Camera.size:
 				prevcamerasize = $PlanView/Viewport/PlanGUI/Camera.size
-				var sca = $PlanView/Viewport/PlanGUI/Camera.size/70.0*2.5
+				var nodesca = $PlanView/Viewport/PlanGUI/Camera.size/70.0*5
+				var labelsca = nodesca*1.2
 				for xcdrawingcentreline in get_tree().get_nodes_in_group("gpcentrelinegeo"):
 					for xcn in xcdrawingcentreline.get_node("XCnodes_PlanView").get_children():
-						xcn.get_node("StationLabel").get_surface_material(0).set_shader_param("vertex_scale", sca)
-						xcn.get_node("CollisionShape").scale = Vector3(sca*2, sca*2, sca*2)
-					xcdrawingcentreline.linewidth = 0.035*sca
+						xcn.get_node("StationLabel").get_surface_material(0).set_shader_param("vertex_scale", labelsca)
+						xcn.get_node("CollisionShape").scale = Vector3(nodesca, nodesca, nodesca)
+					xcdrawingcentreline.linewidth = 0.035*nodesca
 					xcdrawingcentreline.updatexcpaths()
 			slowviewupdatecentrelinesizeupdaterate = 1.6
 	

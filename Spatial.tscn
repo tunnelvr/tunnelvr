@@ -1221,7 +1221,7 @@ script = ExtResource( 18 )
 
 [node name="HeadCam" type="ARVRCamera" parent="Players/PlayerMe"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 1.70297e-07, 1.81351, -0.261318 )
-cull_mask = 949247
+cull_mask = 1014783
 far = 321.0
 
 [node name="HeadtorchLight" type="SpotLight" parent="Players/PlayerMe/HeadCam"]

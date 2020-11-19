@@ -186,10 +186,10 @@ func updatetubelinkpaths(sketchsystem):
 	var xcdrawing1nodes = xcdrawing1.get_node("XCnodes")
 	assert ((len(xcdrawinglink)%2) == 0)
 	for j in range(0, len(xcdrawinglink), 2):
-		#var p0 = xcdrawing0.nodepoints[xcdrawinglink[j]]
-		#var p1 = xcdrawing1.nodepoints[xcdrawinglink[j+1]]
-		var p0 = xcdrawing0nodes.get_node(xcdrawinglink[j]).global_transform.origin
-		var p1 = xcdrawing1nodes.get_node(xcdrawinglink[j+1]).global_transform.origin
+		var p0 = xcdrawing0.transform * xcdrawing0.nodepoints[xcdrawinglink[j]]
+		var p1 = xcdrawing1.transform * xcdrawing1.nodepoints[xcdrawinglink[j+1]]
+		#var p0 = xcdrawing0nodes.get_node(xcdrawinglink[j]).global_transform.origin
+		#var p1 = xcdrawing1nodes.get_node(xcdrawinglink[j+1]).global_transform.origin
 		var vec = p1 - p0
 		var veclen = max(0.01, vec.length())
 		var perp = Vector3(1, 0, 0)

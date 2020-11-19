@@ -8,6 +8,7 @@ extends Spatial
 # Upload to Alex's machine.  To run, go into Ubuntu export Linux/X11 runable, go into /mnt/c/Users/henry/godot/tunnelvr_releases and run:
 # ../Godot_v3.2.3-stable_linux_server.64  --main-pack tunnelvr_v0.5.0.pck
 
+# xcdfullsetvisibilitycollision to use CollisionLayers technology instead
 # scalebar on planview
 # Treeview to show which are downloaded
 # record zooming trimming position on each and a programmable scalebar
@@ -15,7 +16,6 @@ extends Spatial
 # * check size/100x scale with gitter problem on vive
 # * check mass culling of everything not really close to see what framerate does
 # * centreline nodes drawn or not tickbox
-
 
 # * xcchangesequence technology applied to tubes (check using the 20 second delay)
 

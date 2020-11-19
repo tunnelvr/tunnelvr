@@ -19,7 +19,7 @@ albedo_color = Color( 0.945098, 0.0588235, 0.870588, 1 )
 [sub_resource type="QuadMesh" id=5]
 resource_local_to_scene = true
 material = SubResource( 4 )
-size = Vector2( 3.8, 0.6 )
+size = Vector2( 1.9, 0.3 )
 
 [sub_resource type="Shader" id=6]
 code = "shader_type spatial;
@@ -66,7 +66,7 @@ shader_param/uv1_scale = Vector3( 1, 1, 1 )
 shader_param/uv1_offset = Vector3( 0, 0, 0 )
 shader_param/uv2_scale = Vector3( 1, 1, 1 )
 shader_param/uv2_offset = Vector3( 0, 0, 0 )
-shader_param/vertex_offset = Vector3( 1.8, 0.3, 0 )
+shader_param/vertex_offset = Vector3( -1.05, 0.15, 0 )
 shader_param/vertex_scale = 1.0
 shader_param/texture_albedo = ExtResource( 1 )
 

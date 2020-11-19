@@ -118,6 +118,12 @@ func _physics_process(delta):
 	
 	if PlayerDirections.playerdirectedflight:
 		process_directedflight(delta, PlayerDirections.playerdirectedflightvelocity)
+		PlayerDirections.forceontogroundtimedown = 0
+	elif PlayerDirections.forceontogroundtimedown != 0:
+		PlayerDirections.forceontogroundtimedown -= delta
+		if PlayerDirections.forceontogroundtimedown < 0:
+			PlayerDirections.forceontogroundtimedown = 0
+			process_ontoground(delta)
 	elif playerinfreefall:
 		process_freefall(delta)
 	else:
@@ -255,6 +261,19 @@ func process_freefall(delta):
 		playerfreefallbodyvelocity *= 1 - max(0, slideincidence)*freefallsurfaceslidedragfactor*delta
 		if slidecollision.normal.y > floor_max_angle_wallgradient:
 			endfreefallmode()
+	playerbodycentre_prev = playerbodycentre
+
+func process_ontoground(delta):
+	playerbodycentre = HeadCentre.global_transform.origin - Vector3(0, playerheadcentreabovebodycentreheight, 0) + Ddebugvisualoffset
+	$PlayerKinematicBody.global_transform.origin = playerbodycentre
+	var Dplayerbodycentre = playerbodycentre
+	for i in range(10):
+		var kincol = $PlayerKinematicBody.move_and_collide(Vector3(0, -1, 0))
+		if kincol != null:
+			break
+	playerbodycentre = $PlayerKinematicBody.global_transform.origin
+	playerMe.global_transform.origin = -Ddebugvisualoffset + playerbodycentre + Vector3(0, playerheadcentreabovebodycentreheight, 0) - headcentrefromvroriginvector
+	print("processed onto ground from ", Dplayerbodycentre, " to ", playerbodycentre, " delta ", delta)
 	playerbodycentre_prev = playerbodycentre
 
 func process_directedwalkmovement(delta, playerdirectedwalkingvelocity):

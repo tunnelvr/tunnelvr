@@ -12,6 +12,7 @@ var playerdirectedflight = false
 var playerdirectedflightvelocity = Vector3(0,0,0)
 var playerdirectedwalkingvelocity = Vector3(0,0,0)
 var flywalkreversed = false
+var forceontogroundtimedown = 0
 
 func initcontrollersignalconnections():
 	HandLeftController.connect("button_pressed", self, "_on_button_pressed")

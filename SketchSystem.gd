@@ -60,7 +60,7 @@ func updateworkingshell():
 
 func updatecentrelinevisibility():
 	get_tree().call_group("gpnoncentrelinegeo", "xcdfullsetvisibilitycollision", not Tglobal.centrelineonly)
-	#get_tree().call_group("gpcentrelinegeo", "xcdfullsetvisibilitycollision", Tglobal.centrelinevisible)
+	get_tree().call_group("gpcentrelinegeo", "xcdfullsetvisibilitycollision", Tglobal.centrelinevisible)
 	if Tglobal.centrelinevisible:
 		var playerMe = get_node("/root/Spatial").playerMe
 		get_node("/root/Spatial/LabelGenerator").restartlabelmakingprocess(playerMe.get_node("HeadCam").global_transform.origin)
@@ -192,7 +192,7 @@ remote func actsketchchangeL(xcdatalist):
 				spawnplayerme(xcdatalist[0]["playerMe"])
 			caveworldchunking_networkIDsource = xcdatalist[0]["networkIDsource"]
 			xcdatalistReceivedDuringChunking = [ ]
-			get_node("/root/Spatial/BodyObjects/PlayerDirections").flywalkreversed = false
+			get_node("/root/Spatial/BodyObjects/PlayerDirections").flywalkreversed = true
 		elif xcdatalist[0]["networkIDsource"] != caveworldchunking_networkIDsource:
 			return caveworldreceivechunkingfailed("mismatch in world chunk id source")
 		elif xcdatalist[0]["caveworldchunk"] != caveworldchunkI + 1:
@@ -367,7 +367,10 @@ remote func actsketchchangeL(xcdatalist):
 			xcdatalistReceivedDuringChunking = null
 			Tglobal.printxcdrawingfromdatamessages = true
 			updatecentrelinevisibility()
-			get_node("/root/Spatial/BodyObjects/PlayerDirections").flywalkreversed = get_node("/root/Spatial/GuiSystem/GUIPanel3D/Viewport/GUI/Panel/FlyWalkReversed").pressed
+			var flywalkreversed = get_node("/root/Spatial/GuiSystem/GUIPanel3D/Viewport/GUI/Panel/FlyWalkReversed").pressed
+			get_node("/root/Spatial/BodyObjects/PlayerDirections").flywalkreversed = flywalkreversed
+			if not flywalkreversed:
+				get_node("/root/Spatial/BodyObjects/PlayerDirections").forceontogroundtimedown = 0.25
 			if len(xcdatalistReceivedDuringChunkingL) != 0:
 				print("Now processing ", len(xcdatalistReceivedDuringChunkingL), " received during chunking")
 				for xcdatalistR in xcdatalistReceivedDuringChunkingL:
@@ -436,7 +439,7 @@ func xcdrawingfromdata(xcdata, fromremotecall):
 	if xcdrawing.drawingtype == DRAWING_TYPE.DT_CENTRELINE:
 		#assert (false)   # shouldn't happen, not to be updated!
 		var LabelGenerator = get_node("/root/Spatial/LabelGenerator")
-		LabelGenerator.addnodestolabeltask(xcdrawing)
+		LabelGenerator.addnodestolabeltaskN(xcdrawing)
 		if Tglobal.centrelinevisible:
 			var playerMe = get_node("/root/Spatial").playerMe
 			LabelGenerator.restartlabelmakingprocess(playerMe.get_node("HeadCam").global_transform.origin)

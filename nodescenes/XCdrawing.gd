@@ -170,6 +170,7 @@ func applytrimmedpaperuvscale():
 	m.set_shader_param("uv1_scale", Vector3((imgtrimrightup.x - imgtrimleftdown.x)/imgwidth, (imgtrimrightup.y - imgtrimleftdown.y)/imgheight, 1))
 	m.set_shader_param("uv1_offset", Vector3((imgtrimleftdown.x - (-imgwidth*0.5))/imgwidth, -(imgtrimrightup.y - (imgheight*0.5))/imgheight, 0))
 
+const deferconstructionofcentrelinenodes = true
 func mergexcrpcdata(xcdata):
 	assert ((get_name() == xcdata["name"]) and (not ("drawingtype" in xcdata) or drawingtype == xcdata["drawingtype"]))
 	if "transformpos" in xcdata:
@@ -199,30 +200,32 @@ func mergexcrpcdata(xcdata):
 		for nE in nodepointsErase:
 			nodepoints.erase(nE)
 			if $XCnodes.has_node(nE) and not (nE in nodepointsAdd):
-				var xcn = $XCnodes.get_node(nE)
-				xcn.queue_free()
-				$XCnodes.remove_child(xcn)
+				var xcn = $XCnodes.get_node_or_null(nE)
+				if xcn != null:
+					xcn.queue_free()
+					$XCnodes.remove_child(xcn)
 		for nA in nodepointsAdd:
 			nodepoints[nA] = nodepointsAdd[nA]
 			var xcn = $XCnodes.get_node_or_null(nA)
 			if xcn == null:
 				if drawingtype == DRAWING_TYPE.DT_CENTRELINE:
-					var materialsystem = get_node("/root/Spatial/MaterialSystem")
-					xcn = XCnode_centreline.instance()
-					xcn.get_node("CollisionShape/MeshInstance").layers = CollisionLayer.VL_centrelinestations
-					xcn.get_node("StationLabel").layers = CollisionLayer.VL_centrelinestationslabel
-					xcn.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("station"))
-					xcn.set_name(nA)
-					$XCnodes.add_child(xcn)
-					var xcnpv = XCnode_centreline.instance()
-					xcnpv.set_name(nA)
-					xcnpv.get_node("CollisionShape/MeshInstance").layers = CollisionLayer.VL_centrelinestationsplanview
-					xcnpv.get_node("StationLabel").layers = CollisionLayer.VL_centrelinestationslabelplanview
-					#xcnpv.get_node("CollisionShape/MeshInstance").get_surface_material(0).albedo_color = Color(1,0,0.5)
-					xcnpv.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("station"))
-					xcnpv.collision_layer = (xcnpv.collision_layer&(1048575 - CollisionLayer.CL_CentrelineStation))|CollisionLayer.CL_CentrelineStationPlanView
-					$XCnodes_PlanView.add_child(xcnpv)
-					xcnpv.translation = nodepointsAdd[nA]
+					if not deferconstructionofcentrelinenodes:
+						var materialsystem = get_node("/root/Spatial/MaterialSystem")
+						xcn = XCnode_centreline.instance()
+						xcn.get_node("CollisionShape/MeshInstance").layers = CollisionLayer.VL_centrelinestations
+						xcn.get_node("StationLabel").layers = CollisionLayer.VL_centrelinestationslabel
+						xcn.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("station"))
+						xcn.set_name(nA)
+						$XCnodes.add_child(xcn)
+						xcn.translation = nodepointsAdd[nA]
+						var xcnpv = XCnode_centreline.instance()
+						xcnpv.set_name(nA)
+						xcnpv.get_node("CollisionShape/MeshInstance").layers = CollisionLayer.VL_centrelinestationsplanview
+						xcnpv.get_node("StationLabel").layers = CollisionLayer.VL_centrelinestationslabelplanview
+						xcnpv.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("station"))
+						xcnpv.collision_layer = CollisionLayer.CL_CentrelineStationPlanView
+						$XCnodes_PlanView.add_child(xcnpv)
+						xcnpv.translation = nodepointsAdd[nA]
 				else:
 					xcn = XCnode.instance()
 					if nA.begins_with("r"):
@@ -231,7 +234,9 @@ func mergexcrpcdata(xcdata):
 					xcn.set_name(nA)
 					maxnodepointnumber = max(maxnodepointnumber, int(nA))
 					$XCnodes.add_child(xcn)
-			xcn.translation = nodepointsAdd[nA]
+					xcn.translation = nodepointsAdd[nA]
+			else:
+				xcn.translation = nodepointsAdd[nA]
 		
 	if "onepathpairs" in xcdata:   # full overwrite
 		onepathpairs = xcdata["onepathpairs"]
@@ -407,7 +412,6 @@ func notubeconnections_so_delxcable():
 func xcdfullsetvisibilitycollision(bvisible):
 	visible = bvisible
 	if drawingtype == DRAWING_TYPE.DT_CENTRELINE:
-		assert(false)
 		$PathLines.visible = bvisible
 		$XCnodes.visible = bvisible
 		for xcn in get_node("XCnodes").get_children():
