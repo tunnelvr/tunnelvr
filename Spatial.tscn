@@ -1,4 +1,4 @@
-[gd_scene load_steps=239 format=2]
+[gd_scene load_steps=238 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/default_env.tres" type="Environment" id=2]
@@ -10,7 +10,6 @@
 [ext_resource path="res://guimaterials/materialnames.png" type="Texture" id=8]
 [ext_resource path="res://sounds/switch7.wav" type="AudioStream" id=9]
 [ext_resource path="res://SketchSystem.gd" type="Script" id=10]
-[ext_resource path="res://icon.png" type="Texture" id=11]
 [ext_resource path="res://guimeshes/headmesh.tscn" type="PackedScene" id=12]
 [ext_resource path="res://sounds/laser3.wav" type="AudioStream" id=13]
 [ext_resource path="res://GUIPanel3D.gd" type="Script" id=14]
@@ -1380,35 +1379,13 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ButtonRecord" type="Button" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 158.0
-margin_top = 215.0
-margin_right = 217.0
-margin_bottom = 243.0
-rect_pivot_offset = Vector2( 111.073, 28.0005 )
-text = "Record"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
 [node name="ButtonChoke" type="Button" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 290.0
-margin_top = 216.0
-margin_right = 349.0
-margin_bottom = 244.0
+margin_left = 111.73
+margin_top = 184.887
+margin_right = 170.73
+margin_bottom = 212.887
 rect_pivot_offset = Vector2( 111.073, 28.0005 )
 text = "Choke"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="ButtonPlay" type="Button" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 224.0
-margin_top = 215.0
-margin_right = 283.0
-margin_bottom = 243.0
-rect_pivot_offset = Vector2( 111.073, 28.0005 )
-text = "Play"
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -1423,10 +1400,10 @@ hint_tooltip = "test tooltip"
 text = "Headtorch"
 
 [node name="ButtonDoppelganger" type="CheckBox" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 15.0
-margin_top = 162.0
-margin_right = 141.0
-margin_bottom = 190.0
+margin_left = 171.407
+margin_top = 190.59
+margin_right = 297.407
+margin_bottom = 218.59
 rect_pivot_offset = Vector2( 138.61, -8.13628 )
 hint_tooltip = "test tooltip"
 text = "Doppelganger"
@@ -1435,10 +1412,10 @@ __meta__ = {
 }
 
 [node name="ButtonLockControls" type="CheckBox" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 16.0
-margin_top = 187.0
-margin_right = 140.0
-margin_bottom = 215.0
+margin_left = 19.3636
+margin_top = 158.41
+margin_right = 143.364
+margin_bottom = 186.41
 rect_pivot_offset = Vector2( 138.61, -8.13628 )
 hint_tooltip = "test tooltip"
 text = "Lock Controls"
@@ -1447,10 +1424,10 @@ __meta__ = {
 }
 
 [node name="FlyWalkReversed" type="CheckBox" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 17.0
-margin_top = 214.0
-margin_right = 120.0
-margin_bottom = 242.0
+margin_left = 18.6818
+margin_top = 180.364
+margin_right = 121.682
+margin_bottom = 208.364
 rect_pivot_offset = Vector2( 138.61, -8.13628 )
 hint_tooltip = "test tooltip"
 text = "Fly/Walk"
@@ -1493,23 +1470,23 @@ __meta__ = {
 }
 
 [node name="MSAA" type="Label" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 166.933
-margin_top = 144.168
-margin_right = 224.933
-margin_bottom = 166.168
+margin_left = 166.092
+margin_top = 137.441
+margin_right = 224.092
+margin_bottom = 159.441
 text = "MSAA:"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="MSAAstatus" type="OptionButton" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 232.0
-margin_top = 142.0
-margin_right = 289.0
-margin_bottom = 169.0
-text = "none"
-items = [ "none", null, false, 0, null, "2x", null, false, 1, null, "4x", null, false, 2, null ]
-selected = 0
+margin_left = 221.909
+margin_top = 136.114
+margin_right = 264.909
+margin_bottom = 163.114
+text = "4x"
+items = [ "disabled", null, false, 0, null, "2x", null, false, 1, null, "4x", null, false, 2, null ]
+selected = 2
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -1536,24 +1513,17 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ColorRect" type="ColorRect" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 126.965
-margin_top = 215.801
-margin_right = 151.965
-margin_bottom = 240.801
-color = Color( 1, 0, 0, 1 )
+[node name="PlayerList" type="OptionButton" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
+margin_left = 22.0
+margin_top = 230.0
+margin_right = 99.0
+margin_bottom = 253.0
 
-[node name="TextureRect" type="TextureRect" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-margin_left = -58.5962
-margin_top = 77.6783
-margin_right = -39.5962
-margin_bottom = 98.6783
-texture = ExtResource( 11 )
-expand = true
+[node name="PlayerInfo" type="Label" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
+margin_left = 116.227
+margin_top = 225.796
+margin_right = 345.227
+margin_bottom = 265.796
 __meta__ = {
 "_edit_use_anchors_": false
 }

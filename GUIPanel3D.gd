@@ -172,13 +172,14 @@ func _ready():
 	$Viewport/GUI/Panel/ButtonSwapControllers.connect("pressed", self, "_on_buttonswapcontrollers_pressed")
 	$Viewport/GUI/Panel/ButtonLockControls.connect("toggled", self, "_on_buttonlockcontrols_toggled")
 	$Viewport/GUI/Panel/FlyWalkReversed.connect("toggled", self, "_on_buttonflywalkreversed_toggled")
-	$Viewport/GUI/Panel/ButtonRecord.connect("button_down", self, "_on_buttonrecord_down")
-	$Viewport/GUI/Panel/ButtonRecord.connect("button_up", self, "_on_buttonrecord_up")
-	$Viewport/GUI/Panel/ButtonPlay.connect("pressed", self, "_on_buttonplay_pressed")
+	#$Viewport/GUI/Panel/ButtonRecord.connect("button_down", self, "_on_buttonrecord_down")
+	#$Viewport/GUI/Panel/ButtonRecord.connect("button_up", self, "_on_buttonrecord_up")
+	#$Viewport/GUI/Panel/ButtonPlay.connect("pressed", self, "_on_buttonplay_pressed")
 	$Viewport/GUI/Panel/ButtonChoke.connect("pressed", self, "_on_buttonload_choke")
 	
 	$Viewport/GUI/Panel/CentrelineVisibility.connect("item_selected", self, "_on_centrelinevisibility_selected")
 	$Viewport/GUI/Panel/MSAAstatus.connect("item_selected", self, "_on_msaa_selected")
+	$Viewport/GUI/Panel/PlayerList.connect("item_selected", self, "_on_playerlist_selected")
 	$Viewport/GUI/Panel/WorldScale.connect("item_selected", self, "_on_worldscale_selected")
 	$Viewport/GUI/Panel/Networkstate.connect("item_selected", self, "_on_networkstate_selected")
 
@@ -189,6 +190,39 @@ func clickbuttonheadtorch():
 	$Viewport/GUI/Panel/ButtonHeadtorch.pressed = not $Viewport/GUI/Panel/ButtonHeadtorch.pressed
 	_on_buttonheadtorch_toggled($Viewport/GUI/Panel/ButtonHeadtorch.pressed)
 
+var selectedplayernetworkid = 0
+func _on_playerlist_selected(index):
+	var player = get_node("/root/Spatial/Players").get_child(index)
+	if player != null:
+		selectedplayernetworkid = player.networkID
+		$Viewport/GUI/Panel/PlayerInfo.text = String(selectedplayernetworkid)
+	else:
+		selectedplayernetworkid = -1
+		$Viewport/GUI/Panel/PlayerInfo.text = String("updating")
+		updateplayerlist()
+	
+func updateplayerlist():
+	var playerMe = get_node("/root/Spatial").playerMe
+	var selectedplayerindex = 0
+	$Viewport/GUI/Panel/PlayerList.clear()
+	for player in get_node("/root/Spatial/Players").get_children():
+		var playername
+		if player == playerMe:
+			playername = "me"
+		elif player == playerMe.doppelganger:
+			playername = "doppel"
+		elif player.networkID == 1:
+			playername = "server"
+		else:
+			playername = "player%d" % player.get_index()
+		$Viewport/GUI/Panel/PlayerList.add_item(playername)
+		print("adding player to list: ", playername)
+		
+		if player.networkID == selectedplayernetworkid:
+			selectedplayerindex = player.get_index()
+
+	$Viewport/GUI/Panel/PlayerList.select(selectedplayerindex)
+	
 
 func toggleguipanelvisibility(controller_global_transform):
 	if not visible and controller_global_transform != null:

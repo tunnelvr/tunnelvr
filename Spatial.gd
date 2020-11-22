@@ -199,6 +199,8 @@ func _ready():
 		pass
 	playerMe.global_transform.origin.y += 5
 	setmsaa()
+	$GuiSystem/GUIPanel3D.updateplayerlist()
+
 
 func nextplayernetworkidinringskippingdoppelganger(deletedid):
 	for i in range($Players.get_child_count()):
@@ -228,6 +230,7 @@ func _player_connected(id):
 		playerOther.visible = false
 		$Players.add_child(playerOther)
 		
+	$GuiSystem/GUIPanel3D.updateplayerlist()
 	playerMe.bouncetestnetworkID = nextplayernetworkidinringskippingdoppelganger(0)
 	Tglobal.morethanoneplayer = $Players.get_child_count() >= 2
 	print(" playerMe networkID ", playerMe.networkID, " ", get_tree().get_network_unique_id())
@@ -249,6 +252,7 @@ func _player_connected(id):
 			$SketchSystem.rpc_id(id, "actsketchchangeL", xcdatachunk)
 			yield(get_tree().create_timer(0.2), "timeout")
 	
+	
 func _player_disconnected(id):
 	print("_player_disconnected ", id)
 	if id in deferred_player_connected_list:
@@ -263,6 +267,7 @@ func _player_disconnected(id):
 	if playerOther != null:
 		Tglobal.soundsystem.quicksound("PlayerDepart", playerOther.get_node("HeadCam").global_transform.origin)
 		playerOther.queue_free()
+	$GuiSystem/GUIPanel3D.updateplayerlist()
 	playerMe.bouncetestnetworkID = nextplayernetworkidinringskippingdoppelganger(id)
 	$GuiSystem/GUIPanel3D/Viewport/GUI/Panel/Label.text = "player "+String(id)+" disconnected"
 		
