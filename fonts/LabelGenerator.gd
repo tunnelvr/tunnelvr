@@ -17,7 +17,8 @@ var stationnodematerial = null
 func _ready():
 	var materialsystem = get_node("/root/Spatial/MaterialSystem")
 	stationnodematerial = materialsystem.nodematerial("station")
-
+	set_process(false)
+			
 var commonroot = null
 func addnodestolabeltask(centrelinedrawing):
 	for xcn in centrelinedrawing.get_node("XCnodes").get_children():
@@ -44,10 +45,11 @@ func addnodestolabeltaskN(centrelinedrawing):
 
 	
 func restartlabelmakingprocess(lsortdfunctorigin):
-	sortdfunctorigin = lsortdfunctorigin
-	if len(remainingxcnodenames) != 0:
-		remainingxcnodenames.sort_custom(self, "sortdfunc")
-		set_process(true)
+	if get_node("/root/Spatial").playerMe.playerplatform != "Server":
+		sortdfunctorigin = lsortdfunctorigin
+		if len(remainingxcnodenames) != 0:
+			remainingxcnodenames.sort_custom(self, "sortdfunc")
+			set_process(true)
 
 func _process(delta):
 	if workingxcnodename == null:

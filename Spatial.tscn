@@ -1001,12 +1001,12 @@ shader_param/uv1_offset = null
 shader_param/uv_borderwidth = 0.02
 shader_param/albedo_border = Color( 0.231373, 0.262745, 0.364706, 1 )
 
-[sub_resource type="CylinderMesh" id=182]
+[sub_resource type="CylinderMesh" id=145]
 height = 0.02
 radial_segments = 32
 rings = 1
 
-[sub_resource type="SpatialMaterial" id=183]
+[sub_resource type="SpatialMaterial" id=146]
 flags_transparent = true
 params_cull_mode = 2
 albedo_color = Color( 0, 1, 0.901961, 0.439216 )
@@ -1015,12 +1015,12 @@ metallic_specular = 0.22
 roughness = 0.74
 uv1_scale = Vector3( 1.5, 1.5, 1 )
 
-[sub_resource type="CylinderMesh" id=184]
+[sub_resource type="CylinderMesh" id=147]
 height = 0.02
 radial_segments = 32
 rings = 1
 
-[sub_resource type="SpatialMaterial" id=185]
+[sub_resource type="SpatialMaterial" id=148]
 flags_transparent = true
 params_cull_mode = 2
 albedo_color = Color( 0, 1, 0.25098, 0.439216 )
@@ -1029,106 +1029,106 @@ metallic_specular = 0.22
 roughness = 0.74
 uv1_scale = Vector3( 1.5, 1.5, 1 )
 
-[sub_resource type="QuadMesh" id=145]
+[sub_resource type="QuadMesh" id=149]
 size = Vector2( 1, 0.2 )
 
-[sub_resource type="SpatialMaterial" id=146]
+[sub_resource type="SpatialMaterial" id=150]
 params_cull_mode = 2
 albedo_color = Color( 0.835294, 0.498039, 0.105882, 1 )
 metallic = 0.8
 roughness = 0.67
 
-[sub_resource type="QuadMesh" id=147]
+[sub_resource type="QuadMesh" id=151]
 size = Vector2( 1, 0.2 )
 
-[sub_resource type="SpatialMaterial" id=148]
+[sub_resource type="SpatialMaterial" id=152]
 flags_no_depth_test = true
 params_cull_mode = 2
 albedo_color = Color( 0.866667, 0.498039, 0.105882, 1 )
 metallic = 0.45
 roughness = 0.42
 
-[sub_resource type="QuadMesh" id=149]
+[sub_resource type="QuadMesh" id=153]
 size = Vector2( 1, 0.2 )
 
-[sub_resource type="SpatialMaterial" id=150]
+[sub_resource type="SpatialMaterial" id=154]
 params_cull_mode = 2
 albedo_color = Color( 0.180392, 0.835294, 0.105882, 1 )
 metallic = 0.8
 roughness = 0.67
 
-[sub_resource type="CapsuleMesh" id=151]
+[sub_resource type="CapsuleMesh" id=155]
 radius = 0.1
 mid_height = 0.5
 
-[sub_resource type="SpatialMaterial" id=152]
+[sub_resource type="SpatialMaterial" id=156]
 albedo_color = Color( 0.980392, 0.47451, 0.435294, 1 )
 metallic = 0.14
 roughness = 0.33
 transmission_enabled = true
 transmission = Color( 0.113725, 0.164706, 0.968627, 1 )
 
-[sub_resource type="SpatialMaterial" id=153]
+[sub_resource type="SpatialMaterial" id=157]
 albedo_color = Color( 0.482353, 0.976471, 0.52549, 1 )
 metallic = 0.32
 roughness = 0.62
-
-[sub_resource type="PlaneMesh" id=154]
-size = Vector2( 1, 0.5 )
-
-[sub_resource type="SpatialMaterial" id=155]
-albedo_texture = ExtResource( 49 )
-
-[sub_resource type="StreamTexture" id=156]
-flags = 23
-load_path = "res://.import/installbuttonimg.png-8fb848fba3cb6148f17f410e139b2dd7.s3tc.stex"
-
-[sub_resource type="SpatialMaterial" id=157]
-albedo_texture = SubResource( 156 )
 
 [sub_resource type="PlaneMesh" id=158]
 size = Vector2( 1, 0.5 )
 
 [sub_resource type="SpatialMaterial" id=159]
+albedo_texture = ExtResource( 49 )
+
+[sub_resource type="StreamTexture" id=160]
+flags = 23
+load_path = "res://.import/installbuttonimg.png-8fb848fba3cb6148f17f410e139b2dd7.s3tc.stex"
+
+[sub_resource type="SpatialMaterial" id=161]
+albedo_texture = SubResource( 160 )
+
+[sub_resource type="PlaneMesh" id=162]
+size = Vector2( 1, 0.5 )
+
+[sub_resource type="SpatialMaterial" id=163]
 albedo_texture = ExtResource( 51 )
 
-[sub_resource type="AudioStreamMicrophone" id=160]
+[sub_resource type="AudioStreamMicrophone" id=164]
 
-[sub_resource type="DynamicFont" id=161]
+[sub_resource type="DynamicFont" id=165]
 font_data = ExtResource( 40 )
 
-[sub_resource type="DynamicFont" id=162]
+[sub_resource type="DynamicFont" id=166]
 font_data = ExtResource( 39 )
 
-[sub_resource type="PlaneMesh" id=163]
+[sub_resource type="PlaneMesh" id=167]
 size = Vector2( 2, 0.1 )
 
-[sub_resource type="ViewportTexture" id=164]
+[sub_resource type="ViewportTexture" id=168]
 viewport_path = NodePath("LabelGenerator/Viewport")
 
-[sub_resource type="SpatialMaterial" id=165]
+[sub_resource type="SpatialMaterial" id=169]
 resource_local_to_scene = true
 flags_unshaded = true
 flags_no_depth_test = true
 flags_do_not_receive_shadows = true
 params_cull_mode = 2
-albedo_texture = SubResource( 164 )
+albedo_texture = SubResource( 168 )
 
-[sub_resource type="BoxShape" id=166]
+[sub_resource type="BoxShape" id=170]
 
-[sub_resource type="SpatialMaterial" id=167]
+[sub_resource type="SpatialMaterial" id=171]
 params_specular_mode = 2
 params_cull_mode = 2
 albedo_texture = ExtResource( 7 )
 roughness = 0.43
 uv1_scale = Vector3( 20, 20, 1 )
 
-[sub_resource type="PlaneMesh" id=168]
-material = SubResource( 167 )
+[sub_resource type="PlaneMesh" id=172]
+material = SubResource( 171 )
 subdivide_width = 4
 subdivide_depth = 4
 
-[sub_resource type="Shader" id=169]
+[sub_resource type="Shader" id=173]
 code = "shader_type spatial;
 render_mode blend_mix,depth_draw_opaque,cull_back,diffuse_burley,specular_schlick_ggx;
 uniform vec4 albedo : hint_color;
@@ -1159,10 +1159,10 @@ void fragment() {
 }
 "
 
-[sub_resource type="ProxyTexture" id=170]
+[sub_resource type="ProxyTexture" id=174]
 
-[sub_resource type="ShaderMaterial" id=171]
-shader = SubResource( 169 )
+[sub_resource type="ShaderMaterial" id=175]
+shader = SubResource( 173 )
 shader_param/albedo = Color( 0.435294, 0.215686, 0.141176, 0.454902 )
 shader_param/specular = 0.5
 shader_param/metallic = 0.48
@@ -1170,42 +1170,42 @@ shader_param/roughness = 0.71
 shader_param/point_size = 1.0
 shader_param/uv1_scale = Vector3( 3, 1, 1 )
 shader_param/uv1_offset = Vector3( 0, 0, 0 )
-shader_param/texture_albedo = SubResource( 170 )
+shader_param/texture_albedo = SubResource( 174 )
 
-[sub_resource type="PlaneMesh" id=172]
-material = SubResource( 171 )
+[sub_resource type="PlaneMesh" id=176]
+material = SubResource( 175 )
 size = Vector2( 4, 2 )
 
-[sub_resource type="SpatialMaterial" id=173]
+[sub_resource type="SpatialMaterial" id=177]
 albedo_color = Color( 1, 0.992157, 0.992157, 1 )
 metallic = 0.41
 roughness = 0.55
 
-[sub_resource type="CylinderMesh" id=174]
+[sub_resource type="CylinderMesh" id=178]
 top_radius = 2.0
 bottom_radius = 4.0
 height = 5.0
 
-[sub_resource type="SphereMesh" id=175]
+[sub_resource type="SphereMesh" id=179]
 radius = 4.0
 height = 6.0
 
-[sub_resource type="CubeMesh" id=176]
+[sub_resource type="CubeMesh" id=180]
 size = Vector3( 4, 2, 2 )
 
-[sub_resource type="SpatialMaterial" id=177]
+[sub_resource type="SpatialMaterial" id=181]
 albedo_color = Color( 0.364706, 0.878431, 0.105882, 1 )
 metallic = 0.42
 roughness = 0.48
 
-[sub_resource type="GIProbeData" id=178]
+[sub_resource type="GIProbeData" id=182]
 
-[sub_resource type="CylinderMesh" id=179]
+[sub_resource type="CylinderMesh" id=183]
 height = 1.1
 
-[sub_resource type="SpatialMaterial" id=180]
+[sub_resource type="SpatialMaterial" id=184]
 
-[sub_resource type="SpatialMaterial" id=181]
+[sub_resource type="SpatialMaterial" id=185]
 albedo_color = Color( 0.168627, 0.972549, 0.027451, 1 )
 
 [node name="Spatial" type="Spatial"]
@@ -1291,21 +1291,14 @@ collision_layer = 8
 collision_mask = 0
 script = ExtResource( 14 )
 
-[node name="Viewport" type="Viewport" parent="GuiSystem/GUIPanel3D"]
-size = Vector2( 380, 280 )
-hdr = false
-usage = 0
-render_target_v_flip = true
-render_target_update_mode = 3
-
-[node name="ViewportFake" type="Control" parent="GuiSystem/GUIPanel3D"]
+[node name="Viewport" type="Control" parent="GuiSystem/GUIPanel3D"]
 margin_right = 40.0
 margin_bottom = 40.0
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="GUI" type="Control" parent="GuiSystem/GUIPanel3D/ViewportFake"]
+[node name="GUI" type="Control" parent="GuiSystem/GUIPanel3D/Viewport"]
 margin_right = 380.0
 margin_bottom = 280.0
 mouse_filter = 1
@@ -1314,7 +1307,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Panel" type="Panel" parent="GuiSystem/GUIPanel3D/ViewportFake/GUI"]
+[node name="Panel" type="Panel" parent="GuiSystem/GUIPanel3D/Viewport/GUI"]
 anchor_right = 1.0
 anchor_bottom = 1.0
 rect_pivot_offset = Vector2( 167.043, 64.2911 )
@@ -1322,14 +1315,14 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Label" type="Label" parent="GuiSystem/GUIPanel3D/ViewportFake/GUI/Panel"]
+[node name="Label" type="Label" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
 margin_left = 23.4939
 margin_top = 15.6863
 margin_right = 113.494
 margin_bottom = 37.6863
 text = "GUI Controls"
 
-[node name="ButtonLoad" type="Button" parent="GuiSystem/GUIPanel3D/ViewportFake/GUI/Panel"]
+[node name="ButtonLoad" type="Button" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
 margin_left = 22.4949
 margin_top = 43.9439
 margin_right = 79.4949
@@ -1339,7 +1332,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ButtonSave" type="Button" parent="GuiSystem/GUIPanel3D/ViewportFake/GUI/Panel"]
+[node name="ButtonSave" type="Button" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
 margin_left = 266.118
 margin_top = 42.0561
 margin_right = 320.118
@@ -1350,7 +1343,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Savegamefilename" type="OptionButton" parent="GuiSystem/GUIPanel3D/ViewportFake/GUI/Panel"]
+[node name="Savegamefilename" type="OptionButton" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
 margin_left = 79.0
 margin_top = 43.0
 margin_right = 196.0
@@ -1362,7 +1355,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Networkstate" type="OptionButton" parent="GuiSystem/GUIPanel3D/ViewportFake/GUI/Panel"]
+[node name="Networkstate" type="OptionButton" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
 margin_left = 145.665
 margin_top = 79.9548
 margin_right = 324.665
@@ -1375,7 +1368,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ButtonPlanView" type="CheckBox" parent="GuiSystem/GUIPanel3D/ViewportFake/GUI/Panel"]
+[node name="ButtonPlanView" type="CheckBox" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
 margin_left = 17.0
 margin_top = 109.0
 margin_right = 124.0
@@ -1387,7 +1380,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ButtonRecord" type="Button" parent="GuiSystem/GUIPanel3D/ViewportFake/GUI/Panel"]
+[node name="ButtonRecord" type="Button" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
 margin_left = 158.0
 margin_top = 215.0
 margin_right = 217.0
@@ -1398,7 +1391,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ButtonChoke" type="Button" parent="GuiSystem/GUIPanel3D/ViewportFake/GUI/Panel"]
+[node name="ButtonChoke" type="Button" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
 margin_left = 290.0
 margin_top = 216.0
 margin_right = 349.0
@@ -1409,7 +1402,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ButtonPlay" type="Button" parent="GuiSystem/GUIPanel3D/ViewportFake/GUI/Panel"]
+[node name="ButtonPlay" type="Button" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
 margin_left = 224.0
 margin_top = 215.0
 margin_right = 283.0
@@ -1420,7 +1413,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ButtonHeadtorch" type="CheckBox" parent="GuiSystem/GUIPanel3D/ViewportFake/GUI/Panel"]
+[node name="ButtonHeadtorch" type="CheckBox" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
 margin_left = 17.0
 margin_top = 127.0
 margin_right = 130.0
@@ -1429,7 +1422,7 @@ rect_pivot_offset = Vector2( 138.61, -8.13628 )
 hint_tooltip = "test tooltip"
 text = "Headtorch"
 
-[node name="ButtonDoppelganger" type="CheckBox" parent="GuiSystem/GUIPanel3D/ViewportFake/GUI/Panel"]
+[node name="ButtonDoppelganger" type="CheckBox" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
 margin_left = 15.0
 margin_top = 162.0
 margin_right = 141.0
@@ -1441,7 +1434,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ButtonLockControls" type="CheckBox" parent="GuiSystem/GUIPanel3D/ViewportFake/GUI/Panel"]
+[node name="ButtonLockControls" type="CheckBox" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
 margin_left = 16.0
 margin_top = 187.0
 margin_right = 140.0
@@ -1453,7 +1446,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="FlyWalkReversed" type="CheckBox" parent="GuiSystem/GUIPanel3D/ViewportFake/GUI/Panel"]
+[node name="FlyWalkReversed" type="CheckBox" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
 margin_left = 17.0
 margin_top = 214.0
 margin_right = 120.0
@@ -1465,7 +1458,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ButtonSwapControllers" type="Button" parent="GuiSystem/GUIPanel3D/ViewportFake/GUI/Panel"]
+[node name="ButtonSwapControllers" type="Button" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
 margin_left = 22.336
 margin_top = 79.8284
 margin_right = 140.336
@@ -1477,7 +1470,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Centreline" type="Label" parent="GuiSystem/GUIPanel3D/ViewportFake/GUI/Panel"]
+[node name="Centreline" type="Label" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
 margin_left = 160.056
 margin_top = 110.449
 margin_right = 238.056
@@ -1487,7 +1480,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="CentrelineVisibility" type="OptionButton" parent="GuiSystem/GUIPanel3D/ViewportFake/GUI/Panel"]
+[node name="CentrelineVisibility" type="OptionButton" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
 margin_left = 234.0
 margin_top = 109.0
 margin_right = 291.0
@@ -1499,29 +1492,29 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="XCdrawing" type="Label" parent="GuiSystem/GUIPanel3D/ViewportFake/GUI/Panel"]
+[node name="MSAA" type="Label" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
 margin_left = 166.933
 margin_top = 144.168
 margin_right = 224.933
 margin_bottom = 166.168
-text = "XCdraw:"
+text = "MSAA:"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="XCdrawingVisibility" type="OptionButton" parent="GuiSystem/GUIPanel3D/ViewportFake/GUI/Panel"]
+[node name="MSAAstatus" type="OptionButton" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
 margin_left = 232.0
 margin_top = 142.0
 margin_right = 289.0
 margin_bottom = 169.0
-text = "hide"
-items = [ "hide", null, false, 0, null, "hide2", null, false, 1, null, "show", null, false, 2, null, "only", null, false, 3, null ]
+text = "none"
+items = [ "none", null, false, 0, null, "2x", null, false, 1, null, "4x", null, false, 2, null ]
 selected = 0
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="WorldScaleLabel" type="Label" parent="GuiSystem/GUIPanel3D/ViewportFake/GUI/Panel"]
+[node name="WorldScaleLabel" type="Label" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
 margin_left = 150.0
 margin_top = 167.0
 margin_right = 237.0
@@ -1531,7 +1524,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="WorldScale" type="OptionButton" parent="GuiSystem/GUIPanel3D/ViewportFake/GUI/Panel"]
+[node name="WorldScale" type="OptionButton" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
 margin_left = 245.0
 margin_top = 166.0
 margin_right = 294.0
@@ -1543,14 +1536,14 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ColorRect" type="ColorRect" parent="GuiSystem/GUIPanel3D/ViewportFake/GUI/Panel"]
+[node name="ColorRect" type="ColorRect" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
 margin_left = 126.965
 margin_top = 215.801
 margin_right = 151.965
 margin_bottom = 240.801
 color = Color( 1, 0, 0, 1 )
 
-[node name="TextureRect" type="TextureRect" parent="GuiSystem/GUIPanel3D/ViewportFake/GUI/Panel"]
+[node name="TextureRect" type="TextureRect" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
@@ -1564,6 +1557,13 @@ expand = true
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="ViewportReal" type="Viewport" parent="GuiSystem/GUIPanel3D"]
+size = Vector2( 380, 280 )
+hdr = false
+usage = 0
+render_target_v_flip = true
+render_target_update_mode = 3
 
 [node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GUIPanel3D"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.01 )
@@ -2001,6 +2001,7 @@ transform = Transform( 1, 0, 0, 0, 0.819152, 0.573577, 0, -0.573577, 0.819152, -
 collision_layer = 8
 
 [node name="Viewport" type="Control" parent="PlanViewSystem/PlanView"]
+visible = false
 margin_right = 40.0
 margin_bottom = 40.0
 __meta__ = {
@@ -2841,69 +2842,69 @@ material/0 = SubResource( 144 )
 transform = Transform( 0.2, 0, 0, 0, 0.801484, -0.119603, 0, 0.598017, 0.160297, -0.211185, 0.142775, 5.37143 )
 layers = 2
 cast_shadow = 0
-mesh = SubResource( 182 )
-material/0 = SubResource( 183 )
+mesh = SubResource( 145 )
+material/0 = SubResource( 146 )
 
 [node name="intermediateplanehighlight" type="MeshInstance" parent="MaterialSystem/xcdrawingmaterials"]
 transform = Transform( 0.2, 0, 0, 0, 0.801484, -0.119603, 0, 0.598017, 0.160297, 0.290855, 0.142775, 5.37143 )
 layers = 2
 cast_shadow = 0
-mesh = SubResource( 184 )
-material/0 = SubResource( 185 )
+mesh = SubResource( 147 )
+material/0 = SubResource( 148 )
 
 [node name="pathlines" type="Spatial" parent="MaterialSystem"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -3.72305, 0, 1.04259 )
 
 [node name="normal" type="MeshInstance" parent="MaterialSystem/pathlines"]
 transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, 0.00409698, 0.0395899, -0.194405 )
-mesh = SubResource( 145 )
-material/0 = SubResource( 146 )
+mesh = SubResource( 149 )
+material/0 = SubResource( 150 )
 
 [node name="nodepthtest" type="MeshInstance" parent="MaterialSystem/pathlines"]
 transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, 0, 0, -0.578178 )
-mesh = SubResource( 147 )
-material/0 = SubResource( 148 )
+mesh = SubResource( 151 )
+material/0 = SubResource( 152 )
 
 [node name="centreline" type="MeshInstance" parent="MaterialSystem/pathlines"]
 transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, -0.0245323, -0.0287361, -0.990627 )
-mesh = SubResource( 149 )
-material/0 = SubResource( 150 )
+mesh = SubResource( 153 )
+material/0 = SubResource( 154 )
 
 [node name="handmaterials" type="Spatial" parent="MaterialSystem"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -3.78539, 0, 1.47726 )
 
 [node name="handleft" type="MeshInstance" parent="MaterialSystem/handmaterials"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.321026, 0, 0.121136 )
-mesh = SubResource( 151 )
-material/0 = SubResource( 152 )
+mesh = SubResource( 155 )
+material/0 = SubResource( 156 )
 
 [node name="handright" type="MeshInstance" parent="MaterialSystem/handmaterials"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0500312, 0, 0.121136 )
-mesh = SubResource( 151 )
-material/0 = SubResource( 153 )
+mesh = SubResource( 155 )
+material/0 = SubResource( 157 )
 
 [node name="buttonmaterials" type="Spatial" parent="MaterialSystem"]
 
 [node name="FetchButton" type="MeshInstance" parent="MaterialSystem/buttonmaterials"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -3.67453, 0, 2.38567 )
-mesh = SubResource( 154 )
-material/0 = SubResource( 155 )
+mesh = SubResource( 158 )
+material/0 = SubResource( 159 )
 
 [node name="InstallButton" type="MeshInstance" parent="MaterialSystem/buttonmaterials"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -3.67453, 0, 3.02779 )
-mesh = SubResource( 154 )
-material/0 = SubResource( 157 )
+mesh = SubResource( 158 )
+material/0 = SubResource( 161 )
 
 [node name="ClearCacheButton" type="MeshInstance" parent="MaterialSystem/buttonmaterials"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -3.67453, 0, 3.66715 )
-mesh = SubResource( 158 )
-material/0 = SubResource( 159 )
+mesh = SubResource( 162 )
+material/0 = SubResource( 163 )
 
 [node name="SoundSystem" type="Spatial" parent="."]
 script = ExtResource( 19 )
 
 [node name="AudioStreamRecord" type="AudioStreamPlayer" parent="SoundSystem"]
-stream = SubResource( 160 )
+stream = SubResource( 164 )
 autoplay = true
 bus = "Record"
 
@@ -2967,8 +2968,8 @@ render_target_v_flip = true
 margin_right = 430.0
 margin_bottom = 46.0
 size_flags_stretch_ratio = 0.0
-custom_fonts/mono_font = SubResource( 161 )
-custom_fonts/normal_font = SubResource( 162 )
+custom_fonts/mono_font = SubResource( 165 )
+custom_fonts/normal_font = SubResource( 166 )
 bbcode_enabled = true
 bbcode_text = "testing"
 text = "testing"
@@ -2980,8 +2981,8 @@ __meta__ = {
 [node name="ViewportLabelPreview" type="MeshInstance" parent="LabelGenerator"]
 transform = Transform( 1, 0, 0, 0, 0.655202, -0.755453, 0, 0.755453, 0.655202, 2.27374e-13, -2.8247, -4.59181 )
 visible = false
-mesh = SubResource( 163 )
-material/0 = SubResource( 165 )
+mesh = SubResource( 167 )
+material/0 = SubResource( 169 )
 
 [node name="ImageSystem" type="Node" parent="."]
 script = ExtResource( 17 )
@@ -2993,11 +2994,11 @@ collision_mask = 0
 
 [node name="CollisionShape" type="CollisionShape" parent="underfloor"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0 )
-shape = SubResource( 166 )
+shape = SubResource( 170 )
 
 [node name="Mesh" type="MeshInstance" parent="underfloor"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.000645752, -0.0155334, 0.000241013 )
-mesh = SubResource( 168 )
+mesh = SubResource( 172 )
 material/0 = null
 
 [node name="BoulderClutter" type="Spatial" parent="."]
@@ -3006,7 +3007,7 @@ material/0 = null
 transform = Transform( 1, 0, 0, 0, 0.697453, 0.716631, 0, -0.716631, 0.697453, 2.42691, 1.16181, 1.94417 )
 visible = false
 material_override = ExtResource( 3 )
-mesh = SubResource( 172 )
+mesh = SubResource( 176 )
 material/0 = ExtResource( 3 )
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
@@ -3047,27 +3048,27 @@ visible = false
 
 [node name="CSGMesh" type="CSGMesh" parent="LightingExperiments"]
 transform = Transform( 0.392096, 0, 0.919924, 0, 1, 0, -0.919924, 0, 0.392096, 0, 2.91049, -14.6547 )
-material_override = SubResource( 173 )
+material_override = SubResource( 177 )
 use_in_baked_light = true
-mesh = SubResource( 174 )
+mesh = SubResource( 178 )
 
 [node name="CSGMesh" type="CSGMesh" parent="LightingExperiments/CSGMesh"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.45282, 1.58561 )
 use_in_baked_light = true
 operation = 2
-mesh = SubResource( 175 )
+mesh = SubResource( 179 )
 
 [node name="MeshInstance" type="MeshInstance" parent="LightingExperiments"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.92343, 0.110373, -16.1766 )
 use_in_baked_light = true
-mesh = SubResource( 176 )
-material/0 = SubResource( 177 )
+mesh = SubResource( 180 )
+material/0 = SubResource( 181 )
 
 [node name="GIProbe" type="GIProbe" parent="LightingExperiments"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.687242, 4.07743, -13.0581 )
 extents = Vector3( 10, 5.1816, 10 )
 interior = true
-data = SubResource( 178 )
+data = SubResource( 182 )
 
 [node name="OmniLight" type="OmniLight" parent="LightingExperiments"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 1.42038, 2.36254, -16.309 )
@@ -3077,11 +3078,11 @@ omni_range = 18.5
 [node name="MeshInstance2" type="MeshInstance" parent="LightingExperiments"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -1.52614, 1.0228, -13.1769 )
 use_in_baked_light = true
-mesh = SubResource( 179 )
-material/0 = SubResource( 180 )
+mesh = SubResource( 183 )
+material/0 = SubResource( 184 )
 
 [node name="MeshInstance3" type="MeshInstance" parent="LightingExperiments"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.409035, 2.78001, -15.0808 )
 use_in_baked_light = true
-mesh = SubResource( 179 )
-material/0 = SubResource( 181 )
+mesh = SubResource( 183 )
+material/0 = SubResource( 185 )

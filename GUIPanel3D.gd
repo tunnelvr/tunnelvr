@@ -123,6 +123,8 @@ func _on_xcdrawingvisibility_selected(index):
 	sketchsystem.updateworkingshell()
 	$Viewport/GUI/Panel/Label.text = "XCdrawings: "+cvsel
 
+func _on_msaa_selected(index):
+	get_node("/root/Spatial").setmsaa()
 
 func _on_buttonswapcontrollers_pressed():
 	get_node("/root/Spatial").playerMe.swapcontrollers()
@@ -151,11 +153,14 @@ const clientips = [ "144.76.167.54 Alex",  # alex server
 					"192.168.43.172 JGT", 
 					"192.168.43.118" ]
 func _ready():
-	var fgui = $ViewportFake.get_node_or_null("GUI")
-	if fgui != null:
-		$ViewportFake.remove_child(fgui)
-		$Viewport.add_child(fgui)
-	
+	if has_node("ViewportReal"):
+		var fgui = $Viewport/GUI
+		$Viewport.remove_child(fgui)
+		$ViewportReal.add_child(fgui)
+		$Viewport.set_name("ViewportFake")
+		$ViewportReal.set_name("Viewport")
+		$Quad.get_surface_material(0).albedo_texture = $Viewport.get_texture()
+		
 	for clientip in clientips:
 		$Viewport/GUI/Panel/Networkstate.add_item("Client->"+clientip)
 	
@@ -173,7 +178,7 @@ func _ready():
 	$Viewport/GUI/Panel/ButtonChoke.connect("pressed", self, "_on_buttonload_choke")
 	
 	$Viewport/GUI/Panel/CentrelineVisibility.connect("item_selected", self, "_on_centrelinevisibility_selected")
-	$Viewport/GUI/Panel/XCdrawingVisibility.connect("item_selected", self, "_on_xcdrawingvisibility_selected")
+	$Viewport/GUI/Panel/MSAAstatus.connect("item_selected", self, "_on_msaa_selected")
 	$Viewport/GUI/Panel/WorldScale.connect("item_selected", self, "_on_worldscale_selected")
 	$Viewport/GUI/Panel/Networkstate.connect("item_selected", self, "_on_networkstate_selected")
 

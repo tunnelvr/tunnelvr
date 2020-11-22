@@ -6,7 +6,7 @@ extends EditorScript
 # *******
 
 func _run():
-	print(Transform()*Vector3(1,0,0))
+	print(OS.time(true))
 
 var zi = [ ]
 var zi1 = [ 0.48, 0.66 ]

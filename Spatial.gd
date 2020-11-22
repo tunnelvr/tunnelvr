@@ -140,9 +140,11 @@ func _ready():
 			Engine.iterations_per_second = 90
 			OS.vsync_enabled = false;
 			print("  Success initializing OpenVR Interface.");
+			playerMe.playerplatform = "Vive"
 		else:
 			Tglobal.arvrinterface = null
-		playerMe.playerplatform = "Vive"
+			Tglobal.arvrinterfacename = "none"
+			playerMe.playerplatform = "PC"
 				
 	elif enablevr and false and checkloadinterface("Native mobile"):
 		print("found nativemobile, initializing")
@@ -173,7 +175,7 @@ func _ready():
 			
 	else:
 		playerMe.initkeyboardcontroltrackingnow()
-		print("*** VR not working")
+		print("*** VR not operating")
 		
 	print("*-*-*-*  requesting permissions: ", OS.request_permissions())
 	# this relates to Android permissions: 	change_wifi_multicast_state, internet, 
@@ -196,7 +198,7 @@ func _ready():
 	else:
 		pass
 	playerMe.global_transform.origin.y += 5
-
+	setmsaa()
 
 func nextplayernetworkidinringskippingdoppelganger(deletedid):
 	for i in range($Players.get_child_count()):
@@ -282,6 +284,14 @@ func _connected_to_server():
 		print("Now calling deferred _player_connected on id ", id)
 		call_deferred("_player_connected", id)
 	
+func setmsaa():
+	var msaaval = $GuiSystem/GUIPanel3D/Viewport/GUI/Panel/MSAAstatus.get_selected_id()
+	if msaaval == 0:
+		get_node("/root").msaa = Viewport.MSAA_DISABLED
+	elif msaaval == 1:
+		get_node("/root").msaa = Viewport.MSAA_2X
+	elif msaaval == 2:
+		get_node("/root").msaa = Viewport.MSAA_4X
 
 func _process(_delta):
 	if !perform_runtime_config:
