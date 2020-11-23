@@ -240,6 +240,14 @@ func mergexcrpcdata(xcdata):
 		
 	if "onepathpairs" in xcdata:   # full overwrite
 		onepathpairs = xcdata["onepathpairs"]
+		var i = len(onepathpairs) - 2
+		while i > 0:
+			if onepathpairs[i] == onepathpairs[i+1]:
+				print("Deleting loop edge in onepathpairs on input")
+				onepathpairs[i] = onepathpairs[-2]
+				onepathpairs[i+1] = onepathpairs[-1]
+				onepathpairs.resize(len(onepathpairs)-2)
+			i -= 2
 	
 	if "prevonepathpairs" in xcdata:  # diff case 
 		var onepathpairsErase = xcdata["prevonepathpairs"]

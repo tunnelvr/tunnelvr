@@ -24,7 +24,6 @@ static func makexcdpolys(nodepoints, onepathpairs, discardsinglenodepaths):
 			print("Suppressing loop edge in onepathpairs (how did it get here?) polynet function would fail as it relies on orientation")
 			opvisits2.append(-1)
 			opvisits2.append(-1)
-
 		
 	for pathvectorseq in Lpathvectorseq.values():
 		pathvectorseq.sort_custom(sd0class, "sd0")

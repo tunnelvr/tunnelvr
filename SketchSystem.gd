@@ -78,7 +78,10 @@ func changetubedxcsvizmode(xcdrawings=null):
 func sketchsystemtodict():
 	var xcdrawingsData = [ ]
 	for xcdrawing in $XCdrawings.get_children():
-		xcdrawingsData.append(xcdrawing.exportxcrpcdata())
+		if xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING and len(xcdrawing.nodepoints) == 0:
+			print("Discarding xcdrawing on save ", xcdrawing.get_name())
+		else:
+			xcdrawingsData.append(xcdrawing.exportxcrpcdata())
 	var xctubesData = [ ]
 	for xctube in $XCtubes.get_children():
 		xctubesData.append(xctube.exportxctrpcdata())
@@ -116,20 +119,18 @@ func actsketchchange(xcdatalist):
 	xcdatalist[0]["networkIDsource"] = playerMe.networkID
 	xcdatalist[0]["datetime"] = OS.get_datetime()
 
-	actsketchchangeL(xcdatalist)  # <--- the main function you want to step into
-	if true or Tglobal.connectiontoserveractive:
-		var sendrpc = true
+	if xcdatalist[0].get("rpcoptional", 0) == 1:
 		if combinabletransformposchange(xcdatalist):  # made from targetwalltransformpos()
-			if xcdatalist[0].get("rpcoptional", 0) == 1:
-				if xcdatalist[0].get("timestamp", 0) - prevcombinabletransformposchangetimestamp < sendrpctransformthinningdelta:
-					sendrpc = false
-				else:
-					prevcombinabletransformposchangetimestamp = xcdatalist[0].get("timestamp", 0)
-		if sendrpc and Tglobal.connectiontoserveractive:
-			assert(playerMe.networkID != 0)
-			#print("Delaying transmission by 20 seconds to simulate bad connections")
-			#yield(get_tree().create_timer(20), "timeout")
-			rpc("actsketchchangeL", xcdatalist)
+			if xcdatalist[0].get("timestamp", 0) - prevcombinabletransformposchangetimestamp > sendrpctransformthinningdelta:
+				xcdatalist[0]["rpcoptional"] = 0
+				prevcombinabletransformposchangetimestamp = xcdatalist[0].get("timestamp", 0)
+
+	actsketchchangeL(xcdatalist)  # <--- the main function you want to step into
+	if Tglobal.connectiontoserveractive and not (xcdatalist[0].get("rpcoptional", 0) == 1):
+		assert(playerMe.networkID != 0)
+		#print("Delaying transmission by 20 seconds to simulate bad connections")
+		#yield(get_tree().create_timer(20), "timeout")
+		rpc("actsketchchangeL", xcdatalist)
 
 func clearentirecaveworld():
 	get_node("/root/Spatial").clearallprocessactivityforreload()
@@ -215,7 +216,11 @@ remote func actsketchchangeL(xcdatalist):
 		if fromremotecall:
 			var playerOther = get_node("/root/Spatial/Players").get_node_or_null("NetworkedPlayer"+String(xcdatalist[0]["networkIDsource"]))
 			if playerOther != null:
-				playerOther.get_node("AnimationPlayer_actsketchchange").play("actsketchchange_flash")
+				if "overridingxcdrawing" in xcdatalist[0]:
+					print("overridingxcdrawing ", xcdatalist[0].get("name"))
+					playerOther.get_node("AnimationPlayer_actsketchchange_fixbad").play("actsketchchange_flash")
+				else:
+					playerOther.get_node("AnimationPlayer_actsketchchange").play("actsketchchange_flash")
 		elif playerMe.doppelganger != null:
 			playerMe.doppelganger.get_node("AnimationPlayer_actsketchchange").play("actsketchchange_flash")
 		if combinabletransformposchange(xcdatalist):
@@ -414,10 +419,11 @@ func xcdrawingfromdata(xcdata, fromremotecall):
 		else:
 			xcdrawing = newXCuniquedrawing(xcdata["drawingtype"], xcdata["name"])
 	
-	elif Tglobal.printxcdrawingfromdatamessages:
-		print("update xcdrawing ", xcdata.get("name"))
+	elif Tglobal.printxcdrawingfromdatamessages and not (xcdata.get("rpcoptional", 0) == 1):
+		print("update xcdrawing ", xcdata.get("name"), " ", xcdrawing.xcchangesequence)
 
-	xcdrawing.xcchangesequence += 1
+	if not (xcdata.get("rpcoptional", 0) == 1):
+		xcdrawing.xcchangesequence += 1
 	if not fromremotecall:
 		xcdata["xcchangesequence"] = xcdrawing.xcchangesequence
 	elif "xcchangesequence" in xcdata and xcdata["xcchangesequence"] != xcdrawing.xcchangesequence:
@@ -431,7 +437,7 @@ func xcdrawingfromdata(xcdata, fromremotecall):
 	xcdrawing.mergexcrpcdata(xcdata)
 	var dt = OS.get_ticks_msec() - t0
 	if dt > 100:
-		print("    Warning: long mergexcrpcdata operation happened for ", xcdata["name"], " of ", dt, " msecs")
+		print("    Warning: long mergexcrpcdata operation happened for ", xcdata["name"], " of ", dt, " msecs", " nodes ", len(xcdrawing.nodepoints))
 		
 	if xcdrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE or xcdrawing.drawingtype == DRAWING_TYPE.DT_PAPERTEXTURE:
 		if "xcresource" in xcdata:
@@ -487,7 +493,8 @@ func sketchdicttochunks(sketchdatadict):
 			xcdatachunkL = [ { "caveworldchunk":len(xcdatachunks) } ]
 			xcdatachunks.push_back(xcdatachunkL)
 			nnodesL = 0
-		if xcdrawingD["drawingtype"] == DRAWING_TYPE.DT_XCDRAWING and len(xcdrawingD.nodepoints) == 0:
+		#if xcdrawingD["drawingtype"] == DRAWING_TYPE.DT_XCDRAWING and len(xcdrawingD.nodepoints) == 0:
+		#	print("Discarding xcdrawing ", xcdrawingD["name"])
 			continue
 		xcdatachunkL.push_back(xcdrawingD)
 		nnodesL += len(xcdrawingD.nodepoints)

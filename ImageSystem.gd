@@ -239,7 +239,7 @@ func _process(delta):
 		httprequestduration += delta
 
 	else:
-		pass # set_process(false)
+		set_process(false)
 	var dt = OS.get_ticks_msec() - t0
 	if dt > 50:
 		print("Long image system process ", dt, " ", pt)

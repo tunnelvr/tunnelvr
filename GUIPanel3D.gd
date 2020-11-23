@@ -5,13 +5,14 @@ var collision_point := Vector3(0, 0, 0)
 var viewport_point := Vector2(0, 0)
 var viewport_mousedown := false
 onready var sketchsystem = get_node("/root/Spatial/SketchSystem")
+onready var playerMe = get_node("/root/Spatial/Players/PlayerMe")
 
 func _on_buttonload_pressed():
 	var savegamefileid = $Viewport/GUI/Panel/Savegamefilename.get_selected_id()
 	var savegamefilename = $Viewport/GUI/Panel/Savegamefilename.get_item_text(savegamefileid)
 	if savegamefilename.begins_with("server/"):
 		savegamefilename = savegamefilename.replace("server/", "")
-		if Tglobal.connectiontoserveractive and get_node("/root/Spatial").playerMe.networkID != 1:
+		if Tglobal.connectiontoserveractive and playerMe.networkID != 1:
 			sketchsystem.rpc_id(1, "loadsketchsystemL", "user://"+savegamefilename)
 			$Viewport/GUI/Panel/Label.text = "Loading server sketch"
 			return
@@ -30,7 +31,7 @@ func _on_buttonsave_pressed():
 	var savegamefilename = $Viewport/GUI/Panel/Savegamefilename.get_item_text(savegamefileid)
 	if savegamefilename.begins_with("server/"):
 		savegamefilename = savegamefilename.replace("server/", "")
-		if Tglobal.connectiontoserveractive and get_node("/root/Spatial").playerMe.networkID != 1:
+		if Tglobal.connectiontoserveractive and playerMe.networkID != 1:
 			sketchsystem.rpc_id(1, "savesketchsystem", "user://"+savegamefilename)
 			$Viewport/GUI/Panel/Label.text = "Saving server sketch"
 			return
@@ -64,13 +65,13 @@ func _on_buttonplanview_pressed():
 		toggleguipanelvisibility(null)
 	
 func _on_buttonheadtorch_toggled(button_pressed):
-	get_node("/root/Spatial").playerMe.setheadtorchlight(button_pressed)
+	playerMe.setheadtorchlight(button_pressed)
 	$Viewport/GUI/Panel/Label.text = "Headtorch on" if button_pressed else "Headtorch off"
 	if not Tglobal.controlslocked:
 		toggleguipanelvisibility(null)
 
 func _on_buttondoppelganger_toggled(button_pressed):
-	get_node("/root/Spatial").playerMe.setdoppelganger(button_pressed)
+	playerMe.setdoppelganger(button_pressed)
 	$Viewport/GUI/Panel/Label.text = "Doppelganger on" if button_pressed else "Doppelganger off"
 	if not Tglobal.controlslocked:
 		toggleguipanelvisibility(null)
@@ -105,7 +106,7 @@ func _on_centrelinevisibility_selected(index):
 
 func _on_worldscale_selected(index):
 	var newworldscale = int($Viewport/GUI/Panel/WorldScale.get_item_text(index))
-	get_node("/root/Spatial").playerMe.world_scale = newworldscale
+	playerMe.world_scale = newworldscale
 	#get_node("/root/Spatial/GuiSystem").scale = Vector3(newworldscale, newworldscale, newworldscale)
 
 func _on_xcdrawingvisibility_selected(index):
@@ -127,7 +128,7 @@ func _on_msaa_selected(index):
 	get_node("/root/Spatial").setmsaa()
 
 func _on_buttonswapcontrollers_pressed():
-	get_node("/root/Spatial").playerMe.swapcontrollers()
+	playerMe.swapcontrollers()
 	$Viewport/GUI/Panel/Label.text = "Controllers swapped"
 	Tglobal.soundsystem.quicksound("MenuClick", collision_point)
 
@@ -195,14 +196,15 @@ func _on_playerlist_selected(index):
 	var player = get_node("/root/Spatial/Players").get_child(index)
 	if player != null:
 		selectedplayernetworkid = player.networkID
-		$Viewport/GUI/Panel/PlayerInfo.text = String(selectedplayernetworkid)
+		$Viewport/GUI/Panel/PlayerInfo.text = "%s:%d" % [player.playerplatform, selectedplayernetworkid]
+		netlinkstatstimer = -0.8
+		networkmetricsreceived = null
 	else:
 		selectedplayernetworkid = -1
 		$Viewport/GUI/Panel/PlayerInfo.text = String("updating")
 		updateplayerlist()
 	
 func updateplayerlist():
-	var playerMe = get_node("/root/Spatial").playerMe
 	var selectedplayerindex = 0
 	$Viewport/GUI/Panel/PlayerList.clear()
 	for player in get_node("/root/Spatial/Players").get_children():
@@ -216,7 +218,6 @@ func updateplayerlist():
 		else:
 			playername = "player%d" % player.get_index()
 		$Viewport/GUI/Panel/PlayerList.add_item(playername)
-		print("adding player to list: ", playername)
 		
 		if player.networkID == selectedplayernetworkid:
 			selectedplayerindex = player.get_index()
@@ -462,10 +463,44 @@ func _server_disconnected():
 	if $Viewport/GUI/Panel/Networkstate.selected != 0:
 		$Viewport/GUI/Panel/Networkstate.selected = 0
 	
+var networkmetricsreceived = null
+remote func recordnetworkmetrics(lnetworkmetricsreceived):
+	lnetworkmetricsreceived["ticksback"] = OS.get_ticks_msec()
+	networkmetricsreceived = lnetworkmetricsreceived
+	print("recordnetworkmetrics ", networkmetricsreceived)
+	
+remote func sendbacknetworkmetrics(lnetworkmetrics, networkIDsource):
+	var playerOthername = "NetworkedPlayer"+String(networkIDsource) if networkIDsource != -11 else "Doppelganger"
+	var playerOther = get_node("/root/Spatial/Players").get_node_or_null(playerOthername)
+	if playerOther != null and len(playerOther.puppetpositionstack) != 0:
+		lnetworkmetrics["stackduration"] = playerOther.puppetpositionstack[-1]["Ltimestamp"] - playerOther.puppetpositionstack[0]["Ltimestamp"]
+	else:
+		lnetworkmetrics["stackduration"] = 0.0
+	lnetworkmetrics["unixtime"] = OS.get_unix_time()
+	if networkIDsource >= 0:
+		rpc_id(networkIDsource, "recordnetworkmetrics", lnetworkmetrics)
+	elif networkIDsource == -11:
+		call_deferred("recordnetworkmetrics", lnetworkmetrics)
+
+				
+const netlinkstatstimeinterval = 1.1
+var netlinkstatstimer = 0.0
 func _process(delta):
-	if websocketserver != null and websocketserver.is_listening():
-		websocketserver.poll()
-	if websocketclient != null and (websocketclient.get_connection_status() == NetworkedMultiplayerPeer.CONNECTION_CONNECTED or websocketclient.get_connection_status() == NetworkedMultiplayerPeer.CONNECTION_CONNECTING):
-		websocketclient.poll()
-
-
+	if websocketserver != null:
+		if websocketserver.is_listening():
+			websocketserver.poll()
+		if (websocketclient.get_connection_status() == NetworkedMultiplayerPeer.CONNECTION_CONNECTED or websocketclient.get_connection_status() == NetworkedMultiplayerPeer.CONNECTION_CONNECTING):
+			websocketclient.poll()
+	if visible and Tglobal.connectiontoserveractive:
+		netlinkstatstimer += delta
+		if netlinkstatstimer > netlinkstatstimeinterval:
+			if networkmetricsreceived != null:
+				var stacktime = networkmetricsreceived["stackduration"]
+				var bouncetime = (networkmetricsreceived["ticksback"] - networkmetricsreceived["ticksout"])*0.001
+				$Viewport/GUI/Panel/PlayerInfo.text = "bounce:%.3f stack:%.3f" % [bouncetime, stacktime]
+				networkmetricsreceived = null
+			if selectedplayernetworkid >= 0:
+				rpc_id(selectedplayernetworkid, "sendbacknetworkmetrics", { "ticksout":OS.get_ticks_msec() }, playerMe.networkID)
+			elif selectedplayernetworkid == -10:
+				call_deferred("sendbacknetworkmetrics", { "ticksout":OS.get_ticks_msec() }, -11)
+			netlinkstatstimer = 0.0

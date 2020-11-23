@@ -50,7 +50,8 @@ func setdoppelganger(doppelgangeron):
 			doppelganger.get_node("HeadCam/csgheadmesh/skullcomponent").material.albedo_color = get_node("HeadCam/csgheadmesh/skullcomponent").material.albedo_color
 			get_parent().add_child(doppelganger)
 			doppelganger.initplayerappearance(playerplatform, get_node("HeadCam/csgheadmesh/skullcomponent").material.albedo_color)
-
+			doppelganger.networkID = -10
+			
 		doppelganger.visible = true
 		doppelganger.global_transform.origin = $HeadCam.global_transform.origin - 3*Vector3($HeadCam.global_transform.basis.z.x, 0, $HeadCam.global_transform.basis.z.z).normalized()
 		Tglobal.soundsystem.quicksound("PlayerArrive", doppelganger.global_transform.origin)
@@ -59,7 +60,8 @@ func setdoppelganger(doppelgangeron):
 		Tglobal.soundsystem.quicksound("PlayerDepart", doppelganger.global_transform.origin)
 		doppelganger.queue_free()
 		doppelganger = null	
-
+	get_node("/root/Spatial/GuiSystem/GUIPanel3D").updateplayerlist()
+	
 func _ready():
 	pass
 

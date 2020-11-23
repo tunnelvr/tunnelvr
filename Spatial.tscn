@@ -1518,6 +1518,9 @@ margin_left = 22.0
 margin_top = 230.0
 margin_right = 99.0
 margin_bottom = 253.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="PlayerInfo" type="Label" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
 margin_left = 116.227

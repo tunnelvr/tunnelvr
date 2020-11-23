@@ -1,22 +1,22 @@
-[gd_scene load_steps=23 format=2]
+[gd_scene load_steps=24 format=2]
 
 [ext_resource path="res://nodescenes/PlayerPuppet.gd" type="Script" id=1]
 [ext_resource path="res://HandScript.gd" type="Script" id=2]
 [ext_resource path="res://guimeshes/headmesh.tscn" type="PackedScene" id=3]
 
-[sub_resource type="SpatialMaterial" id=54]
+[sub_resource type="SpatialMaterial" id=1]
 resource_local_to_scene = true
 albedo_color = Color( 0.105882, 0.188235, 0.509804, 1 )
 
-[sub_resource type="SpatialMaterial" id=55]
-albedo_color = Color( 0.933333, 0.796078, 0.0666667, 1 )
+[sub_resource type="SpatialMaterial" id=2]
+albedo_color = Color( 0.342484, 0.296732, 0.0535948, 1 )
 
-[sub_resource type="CylinderMesh" id=56]
+[sub_resource type="CylinderMesh" id=3]
 top_radius = 0.025
 bottom_radius = 0.025
 height = 0.004
 
-[sub_resource type="SpatialMaterial" id=57]
+[sub_resource type="SpatialMaterial" id=4]
 albedo_color = Color( 0.027451, 0.027451, 0.027451, 1 )
 emission_enabled = true
 emission = Color( 0.0509804, 0.14902, 0.960784, 1 )
@@ -24,64 +24,64 @@ emission_energy = 1.0
 emission_operator = 0
 emission_on_uv2 = false
 
-[sub_resource type="CylinderMesh" id=58]
+[sub_resource type="CylinderMesh" id=5]
 top_radius = 0.04
 bottom_radius = 0.04
 height = 0.01
 
-[sub_resource type="SpatialMaterial" id=59]
+[sub_resource type="SpatialMaterial" id=6]
 emission_enabled = true
 emission = Color( 0.956863, 0.878431, 0.027451, 1 )
 emission_energy = 0.87
 emission_operator = 0
 emission_on_uv2 = false
 
-[sub_resource type="PrismMesh" id=60]
+[sub_resource type="PrismMesh" id=7]
 size = Vector3( 0.01, 0.01, 0.2 )
 
-[sub_resource type="SpatialMaterial" id=61]
+[sub_resource type="SpatialMaterial" id=8]
 resource_local_to_scene = true
 albedo_color = Color( 1, 0.0156863, 0.0156863, 1 )
 
-[sub_resource type="CubeMesh" id=62]
+[sub_resource type="CubeMesh" id=9]
 size = Vector3( 0.1, 50, 0.1 )
 
-[sub_resource type="SpatialMaterial" id=63]
+[sub_resource type="SpatialMaterial" id=10]
 flags_unshaded = true
 flags_do_not_receive_shadows = true
 albedo_color = Color( 0.956863, 0.835294, 0.0509804, 1 )
 
-[sub_resource type="CubeMesh" id=64]
+[sub_resource type="CubeMesh" id=11]
 size = Vector3( 0.002, 0.002, 1 )
 
-[sub_resource type="SpatialMaterial" id=65]
+[sub_resource type="SpatialMaterial" id=12]
 flags_unshaded = true
 flags_do_not_receive_shadows = true
 albedo_color = Color( 0.976471, 0.552941, 0.0117647, 1 )
 
-[sub_resource type="SpatialMaterial" id=41]
+[sub_resource type="SpatialMaterial" id=13]
 flags_unshaded = true
 flags_no_depth_test = true
 albedo_color = Color( 0.937255, 0.901961, 0.0431373, 0.67451 )
 
-[sub_resource type="CubeMesh" id=53]
-material = SubResource( 41 )
+[sub_resource type="CubeMesh" id=14]
+material = SubResource( 13 )
 size = Vector3( 0.01, 0.01, 1 )
 
-[sub_resource type="CubeMesh" id=70]
-material = SubResource( 65 )
+[sub_resource type="CubeMesh" id=15]
+material = SubResource( 12 )
 size = Vector3( 0.02, 0.02, 1 )
 
-[sub_resource type="QuadMesh" id=66]
+[sub_resource type="QuadMesh" id=16]
 size = Vector2( 0.6, 0.4 )
 
-[sub_resource type="SpatialMaterial" id=67]
+[sub_resource type="SpatialMaterial" id=17]
 params_cull_mode = 2
 albedo_color = Color( 0.0705882, 0.0862745, 0.0980392, 1 )
 metallic = 0.43
 roughness = 0.66
 
-[sub_resource type="Animation" id=68]
+[sub_resource type="Animation" id=18]
 length = 0.3
 tracks/0/type = "value"
 tracks/0/path = NodePath("HeadCam/headtorchcone/Inset:material/0:emission")
@@ -96,14 +96,14 @@ tracks/0/keys = {
 "values": [ Color( 0.0509804, 0.14902, 0.960784, 1 ), Color( 0.945098, 0.898039, 0.203922, 1 ) ]
 }
 
-[sub_resource type="Animation" id=69]
+[sub_resource type="Animation" id=19]
 length = 0.3
 tracks/0/type = "value"
 tracks/0/path = NodePath("HeadCam/headtorchcone:material:albedo_color")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/imported = false
-tracks/0/enabled = true
+tracks/0/enabled = false
 tracks/0/keys = {
 "times": PoolRealArray( 0, 0.3 ),
 "transitions": PoolRealArray( 1, 1 ),
@@ -123,6 +123,45 @@ tracks/1/keys = {
 "values": [ Vector3( 2, 1, 2 ), Vector3( 1, 1, 1 ) ]
 }
 
+[sub_resource type="Animation" id=20]
+length = 0.8
+tracks/0/type = "value"
+tracks/0/path = NodePath("HeadCam/headtorchcone:material:albedo_color")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = false
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.3 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ Color( 0.933333, 0.796078, 0.0666667, 1 ), Color( 0.0470588, 0.0470588, 0.0470588, 1 ) ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("HeadCam/headtorchcone:scale")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0, 0.4 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ Vector3( 2, 1, 2 ), Vector3( 1, 1, 1 ) ]
+}
+tracks/2/type = "value"
+tracks/2/path = NodePath("HeadCam/csgheadmesh:scale")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"times": PoolRealArray( 0, 0.7 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ Vector3( 2, 2, 2 ), Vector3( 1, 1, 1 ) ]
+}
+
 [node name="PlayerPuppet" type="Spatial"]
 transform = Transform( -1, 0, -3.25841e-07, 0, 1, 0, 3.25841e-07, 0, -1, 0, 0, -8 )
 script = ExtResource( 1 )
@@ -131,27 +170,27 @@ script = ExtResource( 1 )
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.691634, 0 )
 
 [node name="csgheadmesh" parent="HeadCam" instance=ExtResource( 3 )]
-material = SubResource( 54 )
+material = SubResource( 1 )
 
 [node name="headtorchcone" type="CSGCylinder" parent="HeadCam"]
-transform = Transform( 1, 0, 0, 0, 0.34202, -0.939693, 0, 0.939693, 0.34202, 0, 0.24, 0 )
+transform = Transform( 1.75, 0, 0, 0, 0.34202, -1.64446, 0, 0.939693, 0.598535, 0, 0.24, 0 )
 radius = 0.03
 height = 0.051
 sides = 16
 cone = true
-material = SubResource( 55 )
+material = SubResource( 2 )
 
 [node name="Inset" type="MeshInstance" parent="HeadCam/headtorchcone"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.029, 0 )
 cast_shadow = 0
-mesh = SubResource( 56 )
-material/0 = SubResource( 57 )
+mesh = SubResource( 3 )
+material/0 = SubResource( 4 )
 
 [node name="headtorchon" type="MeshInstance" parent="HeadCam/headtorchcone"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.01, 0 )
 visible = false
-mesh = SubResource( 58 )
-material/0 = SubResource( 59 )
+mesh = SubResource( 5 )
+material/0 = SubResource( 6 )
 
 [node name="SpotLight" type="SpotLight" parent="HeadCam/headtorchcone/headtorchon"]
 transform = Transform( 1, 0, 0, 0, -1.62921e-07, 1, 0, -1, -1.62921e-07, 0, 0, 0 )
@@ -169,16 +208,16 @@ __meta__ = {
 
 [node name="visorline" type="MeshInstance" parent="HeadCam"]
 transform = Transform( 2.65432e-14, -1.62921e-07, 1, -1, -1.62921e-07, 0, 1.62921e-07, -1, -1.62921e-07, 1.4521e-08, 0.0545774, -0.0445647 )
-mesh = SubResource( 60 )
-material/0 = SubResource( 61 )
+mesh = SubResource( 7 )
+material/0 = SubResource( 8 )
 
 [node name="headlocator" type="Spatial" parent="."]
 
 [node name="locatorline" type="MeshInstance" parent="headlocator"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 30, 0 )
 cast_shadow = 0
-mesh = SubResource( 62 )
-material/0 = SubResource( 63 )
+mesh = SubResource( 9 )
+material/0 = SubResource( 10 )
 
 [node name="HandLeft" type="Spatial" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.149729, 0.251003, 0 )
@@ -198,8 +237,8 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.411951, 0.678362, 0 )
 
 [node name="MeshInstance" type="MeshInstance" parent="LaserOrient/Length"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.5 )
-mesh = SubResource( 64 )
-material/0 = SubResource( 65 )
+mesh = SubResource( 11 )
+material/0 = SubResource( 12 )
 
 [node name="LaserSelectLine" type="Spatial" parent="."]
 transform = Transform( 0.387934, 0, 0.921687, 0, 1, 0, -0.921687, 0, 0.387934, -0.338186, 0, 0 )
@@ -209,7 +248,7 @@ visible = false
 
 [node name="Mesh" type="MeshInstance" parent="LaserSelectLine/Scale"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.5 )
-mesh = SubResource( 53 )
+mesh = SubResource( 14 )
 material/0 = null
 __meta__ = {
 "_editor_description_": ""
@@ -223,7 +262,7 @@ visible = false
 
 [node name="LaserVertical" type="MeshInstance" parent="PlanViewLaser/Length"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.5 )
-mesh = SubResource( 70 )
+mesh = SubResource( 15 )
 material/0 = null
 __meta__ = {
 "_editor_description_": ""
@@ -241,11 +280,14 @@ transform = Transform( 1, 1.54407e-07, 3.89076e-08, -1.54407e-07, 0.880593, 0.47
 visible = false
 
 [node name="Quad" type="MeshInstance" parent="FakeGuiSystem/GUIPanel3D"]
-mesh = SubResource( 66 )
-material/0 = SubResource( 67 )
+mesh = SubResource( 16 )
+material/0 = SubResource( 17 )
 
 [node name="AnimationPlayer_setavatarposition_flash" type="AnimationPlayer" parent="."]
-anims/setavatarposition_flash = SubResource( 68 )
+anims/setavatarposition_flash = SubResource( 18 )
 
 [node name="AnimationPlayer_actsketchchange" type="AnimationPlayer" parent="."]
-anims/actsketchchange_flash = SubResource( 69 )
+anims/actsketchchange_flash = SubResource( 19 )
+
+[node name="AnimationPlayer_actsketchchange_fixbad" type="AnimationPlayer" parent="."]
+anims/actsketchchange_flash = SubResource( 20 )
