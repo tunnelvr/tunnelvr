@@ -657,13 +657,7 @@ func slicerungsatintermediatetuberail(tuberail0, tuberail1, rung0k, rung1k):
 		tuberailk.push_back([intermedpointpos(tuberail0[i][0], tuberail1[i][0], dpi), lerp(tuberail0[i][1], tuberail1[i][1], x)])
 	return tuberailk
 
-func updatetubeshell(xcdrawings, makevisible):
-	if not makevisible:
-		$XCtubesectors.visible = false
-		for tubesector in $XCtubesectors.get_children():
-			tubesector.get_node("CollisionShape").disabled = true
-		return
-
+func updatetubeshell(xcdrawings):
 	if $XCtubesectors.get_child_count() != 0:
 		var xctubesectors_old = $XCtubesectors
 		xctubesectors_old.set_name("XCtubesectors_old")
@@ -735,15 +729,6 @@ func updatetubeshell(xcdrawings, makevisible):
 				xctubesector.get_node("MeshInstance").visible = false
 				xctubesector.get_node("CollisionShape").disabled = true
 		$XCtubesectors.add_child(xctubesector)
-
-	
-func xcdfullsetvisibilitycollision(bvisible):
-	visible = bvisible
-	for tubesector in $XCtubesectors.get_children():
-		if visible:
-			tubesector.get_node("CollisionShape").disabled = not tubesector.get_node("MeshInstance").visible
-		else:
-			tubesector.get_node("CollisionShape").disabled = true
 
 
 func makeplaneintersectionaxisvec(xcdrawing0, xcdrawing1):

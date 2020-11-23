@@ -66,6 +66,10 @@ func checkboxunshaded_pressed():
 		sketchsystem.actsketchchange([floorviz])
 			
 
+func buttondelpaper_pressed():
+	var sketchsystem = get_node("/root/Spatial/SketchSystem")
+	sketchsystem.actsketchchange([{ "xcvizstates":{ activetargetfloor.get_name():DRAWING_TYPE.VIZ_XCD_FLOOR_DELETED}} ])
+
 func defaultimgtrim():
 	return { "imgwidth":20, 
 			 "imgtrimleftdown":Vector2(-10, -10),
@@ -161,6 +165,13 @@ func checkboxtubesvisible_pressed():
 				   }
 	sketchsystem.actsketchchange([{"planview":pvchange}]) 
 
+func checkcentrelinesvisible_pressed():
+	var sketchsystem = get_node("/root/Spatial/SketchSystem")
+	var pvchange = { "visible":visible, 
+					 "planviewactive":planviewactive,
+					 "tubesvisible":planviewcontrols.get_node("CheckBoxTubesVisible").pressed 
+				   }
+	sketchsystem.actsketchchange([{"planview":pvchange}]) 
 
 		
 func _ready():
@@ -173,7 +184,9 @@ func _ready():
 	$RealPlanCamera.set_as_toplevel(true)
 	planviewcontrols.get_node("ZoomView/ButtonCentre").connect("pressed", self, "buttoncentre_pressed")
 	planviewcontrols.get_node("ButtonClosePlanView").connect("pressed", self, "buttonclose_pressed")
+	planviewcontrols.get_node("FloorMove/ButtonDelPaper").connect("pressed", self, "buttondelpaper_pressed")
 	planviewcontrols.get_node("CheckBoxTubesVisible").connect("pressed", self, "checkboxtubesvisible_pressed")
+	planviewcontrols.get_node("CheckBoxCentrelinesVisible").connect("pressed", self, "checkcentrelinesvisible_pressed")
 	planviewcontrols.get_node("FloorMove/CheckBoxUnshaded").connect("pressed", self, "checkboxunshaded_pressed")
 	planviewcontrols.get_node("CheckBoxFileTree").connect("toggled", self, "checkboxfiletree_toggled")
 	call_deferred("readydeferred")
@@ -192,7 +205,7 @@ func readydeferred():
 	buttonidxtoitem[idx] = root
 	
 
-func actplanviewvisibleactive(lvisible, lactive, tubesvisible):
+func actplanviewvisibleactive(lvisible, lactive, tubesvisible, centrelinesvisible):
 	if visible != lvisible:
 		visible = lvisible
 		for xccentreline in get_tree().get_nodes_in_group("gpcentrelinegeo"):
@@ -208,12 +221,29 @@ func actplanviewvisibleactive(lvisible, lactive, tubesvisible):
 			get_node("/root/Spatial/WorldEnvironment/DirectionalLight").visible = not get_node("/root/Spatial/GuiSystem/GUIPanel3D/Viewport/GUI/Panel/ButtonHeadtorch").pressed
 
 	planviewcontrols.get_node("CheckBoxTubesVisible").pressed = tubesvisible
-	if tubesvisible:
-		get_node("PlanView/Viewport/PlanGUI/Camera").cull_mask = CollisionLayer.VLCM_PlanViewCamera
-		get_node("RealPlanCamera/LaserScope/LaserOrient/RayCast").collision_mask = CollisionLayer.CLV_PlanRayAll
+	var plancameracullmask
+	var plancameraraycollisionmask
+	planviewcontrols.get_node("CheckBoxCentrelinesVisible").pressed = centrelinesvisible
+	var playermeheadcam = get_node("/root/Spatial").playerMe.get_node("HeadCam")
+	if centrelinesvisible:
+		playermeheadcam.cull_mask = CollisionLayer.VLCM_PlayerCamera
+		get_node("/root/Spatial/BodyObjects/LaserOrient/RayCast").collision_mask = CollisionLayer.CLV_MainRayAll
+		plancameracullmask = CollisionLayer.VLCM_PlanViewCamera
+		plancameraraycollisionmask = CollisionLayer.CLV_PlanRayAll
+		var labelgenerator = get_node("/root/Spatial/LabelGenerator")
+		if not labelgenerator.is_processing():
+			labelgenerator.restartlabelmakingprocess(playermeheadcam.global_transform.origin)
 	else:
-		get_node("PlanView/Viewport/PlanGUI/Camera").cull_mask = CollisionLayer.VLCM_PlanViewCameraNoTube
-		get_node("RealPlanCamera/LaserScope/LaserOrient/RayCast").collision_mask = CollisionLayer.CLV_PlanRayNoTube
+		playermeheadcam.cull_mask = CollisionLayer.VLCM_PlayerCameraNoCentreline
+		get_node("/root/Spatial/BodyObjects/LaserOrient/RayCast").collision_mask = CollisionLayer.CLV_MainRayAll
+		plancameraraycollisionmask = CollisionLayer.CLV_PlanRayNoCentreline
+		plancameracullmask = CollisionLayer.VLCM_PlanViewCameraNoCentreline
+
+	if not tubesvisible:
+		plancameracullmask &= CollisionLayer.VLCM_PlanViewCameraNoTube
+		plancameraraycollisionmask &= CollisionLayer.CLV_PlanRayNoTube
+	get_node("PlanView/Viewport/PlanGUI/Camera").cull_mask = plancameracullmask
+	get_node("RealPlanCamera/LaserScope/LaserOrient/RayCast").collision_mask = plancameraraycollisionmask
 	
 	var guipanel3d = get_node("/root/Spatial/GuiSystem/GUIPanel3D")
 	guipanel3d.get_node("Viewport/GUI/Panel/ButtonPlanView").pressed = visible

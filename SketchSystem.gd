@@ -53,17 +53,11 @@ func xctubefromdata(xctdata):
 func updateworkingshell():
 	for xctube in $XCtubes.get_children():
 		if not xctube.positioningtube:
-			xctube.updatetubeshell($XCdrawings, Tglobal.tubeshellsvisible)
+			xctube.updatetubeshell($XCdrawings)
 	for xcdrawing in $XCdrawings.get_children():
 		if xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
-			xcdrawing.updatexctubeshell($XCdrawings, Tglobal.tubeshellsvisible)
+			xcdrawing.updatexctubeshell($XCdrawings)
 
-func updatecentrelinevisibility():
-	get_tree().call_group("gpnoncentrelinegeo", "xcdfullsetvisibilitycollision", not Tglobal.centrelineonly)
-	get_tree().call_group("gpcentrelinegeo", "xcdfullsetvisibilitycollision", Tglobal.centrelinevisible)
-	if Tglobal.centrelinevisible:
-		var playerMe = get_node("/root/Spatial").playerMe
-		get_node("/root/Spatial/LabelGenerator").restartlabelmakingprocess(playerMe.get_node("HeadCam").global_transform.origin)
 	
 func changetubedxcsvizmode(xcdrawings=null):
 	if xcdrawings == null:
@@ -71,7 +65,7 @@ func changetubedxcsvizmode(xcdrawings=null):
 	for xcdrawing in xcdrawings:
 		if xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 			assert (xcdrawing.get_node("XCdrawingplane").visible != xcdrawing.get_node("XCdrawingplane/CollisionShape").disabled)
-			var xcsvisible = xcdrawing.get_node("XCdrawingplane").visible or Tglobal.tubedxcsvisible or len(xcdrawing.xctubesconn) == 0
+			var xcsvisible = xcdrawing.get_node("XCdrawingplane").visible or len(xcdrawing.xctubesconn) == 0
 			xcdrawing.get_node("XCnodes").visible = xcsvisible
 			xcdrawing.get_node("PathLines").visible = xcsvisible
 
@@ -79,7 +73,9 @@ func sketchsystemtodict():
 	var xcdrawingsData = [ ]
 	for xcdrawing in $XCdrawings.get_children():
 		if xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING and len(xcdrawing.nodepoints) == 0:
-			print("Discarding xcdrawing on save ", xcdrawing.get_name())
+			print("Discarding empty xcdrawing on save ", xcdrawing.get_name())
+		elif xcdrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE and xcdrawing.drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_FLOOR_DELETED:
+			print("Discarding hidden floortexture on save ", xcdrawing.get_name())
 		else:
 			xcdrawingsData.append(xcdrawing.exportxcrpcdata())
 	var xctubesData = [ ]
@@ -271,7 +267,8 @@ remote func actsketchchangeL(xcdatalist):
 			if "visible" in xcdata["planview"]:
 				planviewsystem.actplanviewvisibleactive(xcdata["planview"]["visible"], 
 														xcdata["planview"].get("planviewactive", true), 
-														xcdata["planview"].get("tubesvisible", planviewsystem.planviewcontrols.get_node("CheckBoxTubesVisible").pressed))
+														xcdata["planview"].get("tubesvisible", planviewsystem.planviewcontrols.get_node("CheckBoxTubesVisible").pressed),
+														xcdata["planview"].get("centrelinesvisible", planviewsystem.planviewcontrols.get_node("CheckBoxCentrelinesVisible").pressed))
 														
 		elif "xcvizstates" in xcdata:
 			if Tglobal.printxcdrawingfromdatamessages:
@@ -299,12 +296,12 @@ remote func actsketchchangeL(xcdatalist):
 					var xctube = findxctube(xct["xcname0"], xct["xcname1"])
 					#var xctube = $XCtubes.get_node_or_null(xct["xctubename"])
 					if xctube != null:
-						xctube.updatetubeshell($XCdrawings, Tglobal.tubeshellsvisible)
+						xctube.updatetubeshell($XCdrawings)
 			if "updatexcshells" in xcdata:
 				for xcdrawingname in xcdata["updatexcshells"]:
 					var xcdrawing = $XCdrawings.get_node_or_null(xcdrawingname)
 					if xcdrawing != null:
-						xcdrawing.updatexctubeshell($XCdrawings, Tglobal.tubeshellsvisible)
+						xcdrawing.updatexctubeshell($XCdrawings)
 						
 		else:  # xcdrawing
 			assert ("name" in xcdata)
@@ -359,11 +356,11 @@ remote func actsketchchangeL(xcdatalist):
 		changetubedxcsvizmode(xcdrawingstoupdate.values())
 		for xctube in xctubestoupdate.values():
 			if not xctube.positioningtube:
-				xctube.updatetubeshell($XCdrawings, Tglobal.tubeshellsvisible)
+				xctube.updatetubeshell($XCdrawings)
 				xctube.setxctubepathlinevisibility(self)
 		for xcdrawing in xcdrawingstoupdate.values():
 			if xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
-				xcdrawing.updatexctubeshell($XCdrawings, Tglobal.tubeshellsvisible)
+				xcdrawing.updatexctubeshell($XCdrawings)
 				
 		if xcdatalist[0]["caveworldchunk"] == xcdatalist[0]["caveworldchunkLast"]:
 			caveworldchunkI = -1
@@ -371,7 +368,6 @@ remote func actsketchchangeL(xcdatalist):
 			var xcdatalistReceivedDuringChunkingL = xcdatalistReceivedDuringChunking
 			xcdatalistReceivedDuringChunking = null
 			Tglobal.printxcdrawingfromdatamessages = true
-			updatecentrelinevisibility()
 			var flywalkreversed = get_node("/root/Spatial/GuiSystem/GUIPanel3D/Viewport/GUI/Panel/FlyWalkReversed").pressed
 			get_node("/root/Spatial/BodyObjects/PlayerDirections").flywalkreversed = flywalkreversed
 			if not flywalkreversed:
@@ -440,15 +436,12 @@ func xcdrawingfromdata(xcdata, fromremotecall):
 		print("    Warning: long mergexcrpcdata operation happened for ", xcdata["name"], " of ", dt, " msecs", " nodes ", len(xcdrawing.nodepoints))
 		
 	if xcdrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE or xcdrawing.drawingtype == DRAWING_TYPE.DT_PAPERTEXTURE:
-		if "xcresource" in xcdata:
+		if "xcresource" in xcdata and xcdrawing.drawingvisiblecode != DRAWING_TYPE.VIZ_XCD_FLOOR_HIDDEN and xcdrawing.drawingvisiblecode != DRAWING_TYPE.VIZ_XCD_FLOOR_DELETED:
 			get_node("/root/Spatial/ImageSystem").fetchpaperdrawing(xcdrawing)
 	if xcdrawing.drawingtype == DRAWING_TYPE.DT_CENTRELINE:
 		#assert (false)   # shouldn't happen, not to be updated!
 		var LabelGenerator = get_node("/root/Spatial/LabelGenerator")
 		LabelGenerator.addnodestolabeltaskN(xcdrawing)
-		if Tglobal.centrelinevisible:
-			var playerMe = get_node("/root/Spatial").playerMe
-			LabelGenerator.restartlabelmakingprocess(playerMe.get_node("HeadCam").global_transform.origin)
 	return xcdrawing
 
 var playeroriginXCSorter = Vector3(0, 0, 0)
@@ -550,7 +543,6 @@ func newXCuniquedrawing(drawingtype, sname):
 	get_node("XCdrawings").add_child(xcdrawing)
 	assert (sname == xcdrawing.get_name())
 	if drawingtype == DRAWING_TYPE.DT_XCDRAWING:
-		xcdrawing.add_to_group("gpnoncentrelinegeo")
 		xcdrawing.linewidth = 0.05
 		xcdrawing.drawingvisiblecode = DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE
 		
@@ -617,7 +609,6 @@ func newXCtube(xcdrawing0, xcdrawing1):
 	xcdrawing1.xctubesconn.append(xctube)
 	assert (not $XCtubes.has_node(xctube.get_name()))
 	$XCtubes.add_child(xctube)
-	xctube.add_to_group("gpnoncentrelinegeo")
 	return xctube
 	
 func removeXCtube(xctube):

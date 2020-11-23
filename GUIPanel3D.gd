@@ -90,39 +90,10 @@ func _on_buttonflywalkreversed_toggled(button_pressed):
 		toggleguipanelvisibility(null)
 
 
-func _on_centrelinevisibility_selected(index):
-	var cvsel = $Viewport/GUI/Panel/CentrelineVisibility.get_item_text(index)
-	if cvsel == "show":
-		Tglobal.centrelinevisible = true
-		Tglobal.centrelineonly = false
-	if cvsel == "only":
-		Tglobal.centrelinevisible = true
-		Tglobal.centrelineonly = true
-	if cvsel == "hide":
-		Tglobal.centrelinevisible = false
-		Tglobal.centrelineonly = false
-	sketchsystem.updatecentrelinevisibility()
-	$Viewport/GUI/Panel/Label.text = "Centrelines: "+cvsel
-
 func _on_worldscale_selected(index):
 	var newworldscale = int($Viewport/GUI/Panel/WorldScale.get_item_text(index))
 	playerMe.world_scale = newworldscale
 	#get_node("/root/Spatial/GuiSystem").scale = Vector3(newworldscale, newworldscale, newworldscale)
-
-func _on_xcdrawingvisibility_selected(index):
-	var cvsel = $Viewport/GUI/Panel/XCdrawingVisibility.get_item_text(index)
-	if cvsel == "show":
-		Tglobal.tubedxcsvisible = true
-		Tglobal.tubeshellsvisible = true
-	if cvsel == "only":
-		Tglobal.tubedxcsvisible = true
-		Tglobal.tubeshellsvisible = false
-	if cvsel == "hide" or cvsel == "hide2":
-		Tglobal.tubedxcsvisible = false
-		Tglobal.tubeshellsvisible = true
-	sketchsystem.changetubedxcsvizmode()
-	sketchsystem.updateworkingshell()
-	$Viewport/GUI/Panel/Label.text = "XCdrawings: "+cvsel
 
 func _on_msaa_selected(index):
 	get_node("/root/Spatial").setmsaa()
@@ -178,7 +149,6 @@ func _ready():
 	#$Viewport/GUI/Panel/ButtonPlay.connect("pressed", self, "_on_buttonplay_pressed")
 	$Viewport/GUI/Panel/ButtonChoke.connect("pressed", self, "_on_buttonload_choke")
 	
-	$Viewport/GUI/Panel/CentrelineVisibility.connect("item_selected", self, "_on_centrelinevisibility_selected")
 	$Viewport/GUI/Panel/MSAAstatus.connect("item_selected", self, "_on_msaa_selected")
 	$Viewport/GUI/Panel/PlayerList.connect("item_selected", self, "_on_playerlist_selected")
 	$Viewport/GUI/Panel/WorldScale.connect("item_selected", self, "_on_worldscale_selected")

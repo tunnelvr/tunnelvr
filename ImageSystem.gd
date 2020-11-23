@@ -251,6 +251,6 @@ func fetchunrolltree(fileviewtree, item, url):
 	set_process(true)
 
 func fetchpaperdrawing(paperdrawing):
-	paperdrawinglist.append(paperdrawing)
+	paperdrawinglist.push_back(paperdrawing)
 	set_process(true)
 	

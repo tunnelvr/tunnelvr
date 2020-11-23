@@ -56,7 +56,8 @@ func _process(delta):
 		if len(remainingxcnodenames) == 0:
 			set_process(false)
 			return
-		if not Tglobal.centrelinevisible and not get_node("/root/Spatial/PlanViewSystem").visible:
+		var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
+		if not planviewsystem.visible and not planviewsystem.planviewcontrols.get_node("CheckBoxTubesVisible").pressed:
 			set_process(false)
 			return
 

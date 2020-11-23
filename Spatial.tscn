@@ -1209,7 +1209,6 @@ albedo_color = Color( 0.168627, 0.972549, 0.027451, 1 )
 
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
-hostportnumber = 4547
 enablevr = false
 
 [node name="Players" type="Spatial" parent="."]
@@ -1221,7 +1220,7 @@ script = ExtResource( 18 )
 
 [node name="HeadCam" type="ARVRCamera" parent="Players/PlayerMe"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 1.70297e-07, 1.81351, -0.261318 )
-cull_mask = 1014783
+cull_mask = 938495
 far = 321.0
 
 [node name="HeadtorchLight" type="SpotLight" parent="Players/PlayerMe/HeadCam"]
@@ -1444,28 +1443,6 @@ margin_bottom = 107.828
 rect_pivot_offset = Vector2( 138.61, -8.13628 )
 hint_tooltip = "test tooltip"
 text = "Swap Controllers"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="Centreline" type="Label" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 160.056
-margin_top = 110.449
-margin_right = 238.056
-margin_bottom = 132.449
-text = "Centreline:"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="CentrelineVisibility" type="OptionButton" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 234.0
-margin_top = 109.0
-margin_right = 291.0
-margin_bottom = 136.0
-text = "hide"
-items = [ "hide", null, false, 0, null, "show", null, false, 1, null, "only", null, false, 2, null ]
-selected = 0
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -1975,7 +1952,6 @@ transform = Transform( 1, 0, 0, 0, 0.819152, 0.573577, 0, -0.573577, 0.819152, -
 collision_layer = 8
 
 [node name="Viewport" type="Control" parent="PlanViewSystem/PlanView"]
-visible = false
 margin_right = 40.0
 margin_bottom = 40.0
 __meta__ = {
@@ -2398,6 +2374,16 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="ButtonDelPaper" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorMove"]
+margin_left = 265.04
+margin_top = -2.07935
+margin_right = 335.04
+margin_bottom = 19.9207
+text = "DelPaper"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [node name="Scalebar" type="Control" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
 margin_left = 71.0
 margin_top = -36.0
@@ -2438,6 +2424,18 @@ margin_top = 51.0
 margin_right = 158.0
 margin_bottom = 51.0
 text = "tubes"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="CheckBoxCentrelinesVisible" type="CheckBox" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
+anchor_right = 0.015
+anchor_bottom = 0.24
+margin_left = 92.0
+margin_top = 75.0
+margin_right = 180.0
+margin_bottom = 75.0
+text = "centrelines"
 __meta__ = {
 "_edit_use_anchors_": false
 }

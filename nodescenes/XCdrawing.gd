@@ -29,7 +29,7 @@ func setxcdrawingvisiblehideL(hidenodes):
 	$XCdrawingplane.visible = false
 	$XCdrawingplane/CollisionShape.disabled = true
 	if hidenodes and drawingtype != DRAWING_TYPE.DT_CENTRELINE:
-		var rvisible = (Tglobal.tubedxcsvisible or (drawingtype != DRAWING_TYPE.DT_XCDRAWING) or (len(xctubesconn) == 0)) and (drawingtype != DRAWING_TYPE.DT_CENTRELINE)
+		var rvisible = (drawingtype != DRAWING_TYPE.DT_XCDRAWING) or (len(xctubesconn) == 0)
 		$XCnodes.visible = rvisible
 		$PathLines.visible = rvisible
 		for xcn in $XCnodes.get_children():
@@ -93,7 +93,7 @@ func setdrawingvisiblecode(ldrawingvisiblecode):
 			planviewsystem.setactivetargetfloor(self)
 			$XCdrawingplane.visible = true
 			$XCdrawingplane/CollisionShape.disabled = false
-		elif drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_FLOOR_HIDDEN:
+		elif drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_FLOOR_HIDDEN or drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_FLOOR_DELETED:
 			setxcdrawingvisiblehideL(true)
 			if planviewsystem.activetargetfloor == self:
 				 planviewsystem.setactivetargetfloor(null)
@@ -392,24 +392,20 @@ func makexctubeshell(xcdrawings):
 	surfaceTool.commit(arraymesh)
 	return arraymesh
 	
-func updatexctubeshell(xcdrawings, makevisible):
-	if makevisible:
-		var xctubeshellmesh = makexctubeshell(xcdrawings)
-		if xctubeshellmesh != null:
-			if not has_node("XCflatshell"):
-				var xcflatshell = preload("res://nodescenes/XCtubeshell.tscn").instance()
-				xcflatshell.set_name("XCflatshell")
-				xcflatshell.get_node("CollisionShape").shape = ConcavePolygonShape.new()
-				add_child(xcflatshell)
-			$XCflatshell/MeshInstance.mesh = xctubeshellmesh
-			$XCflatshell/CollisionShape.shape.set_faces(xctubeshellmesh.get_faces())
-			get_node("/root/Spatial/MaterialSystem").updatetubesectormaterial($XCflatshell, xcflatshellmaterial, false)
-		else:
-			if has_node("XCflatshell"):
-				$XCflatshell.queue_free()
-	elif has_node("XCflatshell"):
-		$XCflatshell.visible = false
-		$XCflatshell/CollisionShape.disabled = true
+func updatexctubeshell(xcdrawings):
+	var xctubeshellmesh = makexctubeshell(xcdrawings)
+	if xctubeshellmesh != null:
+		if not has_node("XCflatshell"):
+			var xcflatshell = preload("res://nodescenes/XCtubeshell.tscn").instance()
+			xcflatshell.set_name("XCflatshell")
+			xcflatshell.get_node("CollisionShape").shape = ConcavePolygonShape.new()
+			add_child(xcflatshell)
+		$XCflatshell/MeshInstance.mesh = xctubeshellmesh
+		$XCflatshell/CollisionShape.shape.set_faces(xctubeshellmesh.get_faces())
+		get_node("/root/Spatial/MaterialSystem").updatetubesectormaterial($XCflatshell, xcflatshellmaterial, false)
+	else:
+		if has_node("XCflatshell"):
+			$XCflatshell.queue_free()
 		
 func notubeconnections_so_delxcable():
 	for xctube in xctubesconn:
@@ -417,19 +413,3 @@ func notubeconnections_so_delxcable():
 			return false
 	return true
 
-func xcdfullsetvisibilitycollision(bvisible):
-	visible = bvisible
-	if drawingtype == DRAWING_TYPE.DT_CENTRELINE:
-		$PathLines.visible = bvisible
-		$XCnodes.visible = bvisible
-		for xcn in get_node("XCnodes").get_children():
-			xcn.get_node("CollisionShape").disabled = not bvisible
-	else:
-		if visible:
-			$XCdrawingplane/CollisionShape.disabled = not $XCdrawingplane.visible
-			if has_node("XCflatshell"):
-				$XCflatshell/CollisionShape.disabled = not $XCflatshell.visible
-		else:
-			$XCdrawingplane/CollisionShape.disabled = true
-			if has_node("XCflatshell"):
-				$XCflatshell/CollisionShape.disabled = true

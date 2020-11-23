@@ -127,6 +127,12 @@ func setactivetargetnode(newactivetargetnode):
 	activelaserroot.get_node("LaserSpot").set_surface_material(0, materialsystem.lasermaterial("spotselected"))
 	setpointertargetmaterial()
 
+func raynormalcollisionmask():
+	if planviewsystem.planviewcontrols.get_node("CheckBoxCentrelinesVisible").pressed:
+		return CollisionLayer.CLV_MainRayAll
+	else:
+		return CollisionLayer.CLV_MainRayAllNoCentreline
+
 func setactivetargetwall(newactivetargetwall):
 	if activetargetwall != null and activetargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		activetargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").set_surface_material(0, materialsystem.xcdrawingmaterial("normal"))
@@ -135,8 +141,8 @@ func setactivetargetwall(newactivetargetwall):
 			xcnode.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("selected" if xcnode == activetargetnode else clearednodematerialtype(xcnode, false)))
 		#for xctube in activetargetwall.xctubesconn:
 		#	if not xctube.positioningtube:
-		#		xctube.updatetubeshell(sketchsystem.get_node("XCdrawings"), Tglobal.tubeshellsvisible)
-		#activetargetwall.updatexctubeshell(sketchsystem.get_node("XCdrawings"), Tglobal.tubeshellsvisible)
+		#		xctube.updatetubeshell(sketchsystem.get_node("XCdrawings"))
+		#activetargetwall.updatexctubeshell(sketchsystem.get_node("XCdrawings"))
 	if activetargetwall != null and activetargetwall.drawingtype == DRAWING_TYPE.DT_PAPERTEXTURE:
 		activetargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").get_surface_material(0).albedo_color = Color("#FEF4D5")
 	
@@ -145,7 +151,7 @@ func setactivetargetwall(newactivetargetwall):
 	if (activetargetwall == get_node("/root/Spatial/PlanViewSystem")):
 		print("Waaat")
 	
-	LaserOrient.get_node("RayCast").collision_mask = CollisionLayer.CLV_MainRayAll
+	LaserOrient.get_node("RayCast").collision_mask = raynormalcollisionmask()
 	if activetargetwall != null and activetargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		if not activetargetwall.get_node("XCdrawingplane").visible:
 			sketchsystem.actsketchchange([{"xcvizstates":{activetargetwall.get_name():3}}])
@@ -237,6 +243,7 @@ func setpointertarget(laserroot, raycast):
 		pointertargettype = targettype(pointertarget)
 		pointertargetwall = targetwall(pointertarget, pointertargettype)
 		setpointertargetmaterial()
+		#print("ppp ", pointertargettype, " ", pointertarget, " ", pointertargetpoint)
 		
 		laserroot.get_node("LaserSpot").visible = (pointertargettype == "XCdrawing") or \
 												  (pointertargettype == "XCtubesector") or \
@@ -369,7 +376,7 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 	# reselection when selected on grip deletes the node		
 	elif gripbuttonheld and activetargetnode != null and pointertarget == activetargetnode and (activetargetnodewall.drawingtype != DRAWING_TYPE.DT_CENTRELINE):
 		if len(activetargetnodewall.nodepoints) == 1:
-			LaserOrient.get_node("RayCast").collision_mask = CollisionLayer.CL_Pointer | CollisionLayer.CL_PointerFloor | CollisionLayer.CL_CaveWall | CollisionLayer.CL_CaveWallTrans
+			LaserOrient.get_node("RayCast").collision_mask = raynormalcollisionmask()
 		var xcname = activetargetnodewall.get_name()
 		var nodename = activetargetnode.get_name()
 		var xcdata = { "name":xcname, 
@@ -476,7 +483,8 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 								"prevdrawinglinks":[ nodename0, nodename1, null, (null if intermediatepointpicked == null else [ intermediatepointpicked ]) ], 
 								"newdrawinglinks":[ nodename0, nodename1, null, (null if newintermediatepoint == null else [ newintermediatepoint ]) ] 
 							  }
-				sketchsystem.actsketchchange([xctdata])
+				var xctuberedraw = {"xcvizstates":{ }, "updatetubeshells":[{"tubename":intermediatepointplanetubename, "xcname0":splinepointplanetube.xcname0, "xcname1":splinepointplanetube.xcname1 }] }
+				sketchsystem.actsketchchange([xctdata, xctuberedraw])
 			clearintermediatepointplaneview()
 				
 	elif pointertargettype == "Papersheet" or pointertargettype == "PlanView":
@@ -522,7 +530,7 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 
 		elif (activetargetnode != null and activetargetnodewall == pointertargetwall) or len(pointertargetwall.nodepoints) == 0:
 			if len(pointertargetwall.nodepoints) == 0:
-				LaserOrient.get_node("RayCast").collision_mask = CollisionLayer.CL_Pointer | CollisionLayer.CL_PointerFloor 
+				LaserOrient.get_node("RayCast").collision_mask = CollisionLayer.CLV_MainRayXC 
 				
 			var newnodename = pointertargetwall.newuniquexcnodename()
 			var newnodepoint = pointertargetwall.global_transform.xform_inv(pointertargetpoint)
@@ -1003,7 +1011,7 @@ func clearintermediatepointplaneview():
 	IntermediatePointView.visible = false
 	IntermediatePointView.get_node("IntermediatePointPlane/CollisionShape").disabled = true
 	intermediatepointplanetubename = ""
-	LaserOrient.get_node("RayCast").collision_mask = CollisionLayer.CLV_MainRayAll
+	LaserOrient.get_node("RayCast").collision_mask = raynormalcollisionmask()
 	
 func buttonreleased_vrtrigger():
 	if activetargetwallgrabbedtransform != null:

@@ -18,8 +18,12 @@ enum {
 	
 	CLV_MainRayAll		=0b01000011111000,
 	CLV_MainRayXC		=0b01000000011000,
+	CLV_MainRayAllNoCentreline \
+						=0b01000001111000,
 
 	CLV_PlanRayAll		=0b00000101111000,
+	CLV_PlanRayNoCentreline \
+						=0b00000001111000,
 	CLV_PlanRayNoTube	=0b00000100011000
 }
 			
@@ -35,7 +39,7 @@ enum {
 	VL_xcshells							= 0b00000000000100000000,
 	VL_centrelinestations				= 0b00000000001000000000,
 	VL_centrelinestationsplanview		= 0b00000000010000000000,
-	VL_surveylegs						= 0b00000000100000000000,
+	VL_surveylegs						= 0b00000000100000000000,  # not used now
 	VL_overheadlight					= 0b00000001000000000000,
 	VL_centrelinestationslabel			= 0b00000010000000000000,
 	VL_floortextureplanview				= 0b00000100000000000000,
@@ -44,4 +48,8 @@ enum {
 	
 	VLCM_PlanViewCamera 				= 0b00011111110111111011,
 	VLCM_PlanViewCameraNoTube			= 0b00011101110011111011
+	VLCM_PlanViewCameraNoCentreline		= 0b00000111100111111011,
+
+	VLCM_PlayerCamera					= 0b00010111101111111111,
+	VLCM_PlayerCameraNoCentreline		= 0b00000111000111111111,
 }
