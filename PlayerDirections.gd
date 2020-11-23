@@ -41,7 +41,7 @@ func _process(delta):
 
 var joyposxrotsnaphysteresis = 0 
 func _physics_process(delta):
-	playerdirectedflight = (HandLeft.gripbuttonheld != flywalkreversed)
+	playerdirectedflight = ((HandLeft.gripbuttonheld or Input.is_action_pressed("lh_ctrl")) != flywalkreversed)
 	playerdirectedflightvelocity = Vector3(0,0,0)
 	playerdirectedwalkingvelocity = Vector3(0,0,0)
 

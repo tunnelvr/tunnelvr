@@ -453,6 +453,8 @@ func xcdrawingfromdata(xcdata, fromremotecall):
 
 var playeroriginXCSorter = Vector3(0, 0, 0)
 func xcsorterfunc(a, b):
+	if (b.drawingtype == DRAWING_TYPE.DT_CENTRELINE) != (a.drawingtype == DRAWING_TYPE.DT_CENTRELINE):
+		return b.drawingtype == DRAWING_TYPE.DT_CENTRELINE
 	return playeroriginXCSorter.distance_to(a.transformpos.origin) < playeroriginXCSorter.distance_to(b.transformpos.origin)
 	
 func sketchdicttochunks(sketchdatadict):

@@ -1209,6 +1209,7 @@ albedo_color = Color( 0.168627, 0.972549, 0.027451, 1 )
 
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
+hostportnumber = 4547
 enablevr = false
 
 [node name="Players" type="Spatial" parent="."]

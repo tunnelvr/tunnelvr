@@ -420,19 +420,22 @@ func networkstartasserver(fromgui):
 	var selfSpatial = get_node("/root/Spatial")	
 	get_tree().connect("network_peer_connected", selfSpatial, "_player_connected")
 	get_tree().connect("network_peer_disconnected", selfSpatial, "_player_disconnected")
-	Tglobal.connectiontoserveractive = true
 	if selfSpatial.usewebsockets:
 		websocketserver = WebSocketServer.new();
 		var e = websocketserver.listen(selfSpatial.hostportnumber, PoolStringArray(), true)
 		print("Websocketserverclient listen: ", e)
 		get_tree().set_network_peer(websocketserver)
+		Tglobal.connectiontoserveractive = true
 	else:
 		networkedmultiplayerenet = NetworkedMultiplayerENet.new()
 		var e = networkedmultiplayerenet.create_server(selfSpatial.hostportnumber, 9)
-		if e != 0:
+		if e == 0:
+			get_tree().set_network_peer(networkedmultiplayerenet)
+			Tglobal.connectiontoserveractive = true
+		else:
 			print("networkedmultiplayerenet createserver Error: ", {ERR_CANT_CREATE:"ERR_CANT_CREATE"}.get(e, e))
 			print("*** is there a server running on this port already? ", selfSpatial.hostportnumber)
-		get_tree().set_network_peer(networkedmultiplayerenet)
+			$Viewport/GUI/Panel/Networkstate.selected = 0
 
 	var lnetworkID = get_tree().get_network_unique_id()
 	selfSpatial.setnetworkidnamecolour(selfSpatial.playerMe, lnetworkID)
@@ -473,7 +476,8 @@ remote func sendbacknetworkmetrics(lnetworkmetrics, networkIDsource):
 	var playerOthername = "NetworkedPlayer"+String(networkIDsource) if networkIDsource != -11 else "Doppelganger"
 	var playerOther = get_node("/root/Spatial/Players").get_node_or_null(playerOthername)
 	if playerOther != null and len(playerOther.puppetpositionstack) != 0:
-		lnetworkmetrics["stackduration"] = playerOther.puppetpositionstack[-1]["Ltimestamp"] - playerOther.puppetpositionstack[0]["Ltimestamp"]
+		lnetworkmetrics["stackduration"] = playerOther.puppetpositionstack[-1]["Ltimestamp"] - OS.get_ticks_msec()*0.001
+		print(playerOthername, " stackduration is ", lnetworkmetrics["stackduration"])
 	else:
 		lnetworkmetrics["stackduration"] = 0.0
 	lnetworkmetrics["unixtime"] = OS.get_unix_time()
