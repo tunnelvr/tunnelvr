@@ -379,6 +379,8 @@ func _on_networkstate_selected(index):
 		$Viewport/GUI/Panel/Label.text = "connecting "+("websocket" if selfSpatial.usewebsockets else "ENET")
 
 func networkstartasserver(fromgui):
+	if not fromgui:
+		yield(get_tree().create_timer(2.0), "timeout")		
 	print("Starting as server, ipnumber list:")
 	for k in IP.get_local_interfaces():
 		var ipnum = ""
@@ -459,6 +461,9 @@ remote func sendbacknetworkmetrics(lnetworkmetrics, networkIDsource):
 				
 const netlinkstatstimeinterval = 1.1
 var netlinkstatstimer = 0.0
+var maxdelta = 0.0
+var sumdelta = 0.0
+var countframes = 0
 func _process(delta):
 	if websocketserver != null:
 		if websocketserver.is_listening():
@@ -467,12 +472,22 @@ func _process(delta):
 			websocketclient.poll()
 	if visible and Tglobal.connectiontoserveractive:
 		netlinkstatstimer += delta
+		maxdelta = max(delta, maxdelta)
+		sumdelta += delta
+		countframes += 1
+
 		if netlinkstatstimer > netlinkstatstimeinterval:
 			if networkmetricsreceived != null:
 				var stacktime = networkmetricsreceived["stackduration"]
 				var bouncetime = (networkmetricsreceived["ticksback"] - networkmetricsreceived["ticksout"])*0.001
 				$Viewport/GUI/Panel/PlayerInfo.text = "bounce:%.3f stack:%.3f" % [bouncetime, stacktime]
 				networkmetricsreceived = null
+			elif selectedplayernetworkid == 0 or selectedplayernetworkid == playerMe.networkID:
+				if countframes != 0:
+					$Viewport/GUI/Panel/PlayerInfo.text = "frame max:%.3f avg:%.3f" % [maxdelta, sumdelta/countframes]
+					maxdelta = 0.0
+					sumdelta = 0.0
+					countframes = 0
 			if selectedplayernetworkid >= 0:
 				rpc_id(selectedplayernetworkid, "sendbacknetworkmetrics", { "ticksout":OS.get_ticks_msec() }, playerMe.networkID)
 			elif selectedplayernetworkid == -10:

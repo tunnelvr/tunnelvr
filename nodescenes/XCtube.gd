@@ -464,6 +464,9 @@ func ConstructHoleXC(i, sketchsystem):
 	else:
 		xcdata["transformpos"] = Transform(Vector3(1,0,0), Vector3(0,0,-1), Vector3(0,1,0), avgpoint)
 
+
+	var shellcontour = extractshellcontour(sketchsystem.get_node("XCdrawings"), i)
+
 	var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(xcname0)
 	var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(xcname1)
 	var xcnsourcelist = [ ]
@@ -657,6 +660,7 @@ func slicerungsatintermediatetuberail(tuberail0, tuberail1, rung0k, rung1k):
 		tuberailk.push_back([intermedpointpos(tuberail0[i][0], tuberail1[i][0], dpi), lerp(tuberail0[i][1], tuberail1[i][1], x)])
 	return tuberailk
 
+
 func updatetubeshell(xcdrawings):
 	if $XCtubesectors.get_child_count() != 0:
 		var xctubesectors_old = $XCtubesectors
@@ -729,6 +733,34 @@ func updatetubeshell(xcdrawings):
 				xctubesector.get_node("MeshInstance").visible = false
 				xctubesector.get_node("CollisionShape").disabled = true
 		$XCtubesectors.add_child(xctubesector)
+
+func extractshellcontour(xcdrawings, i):
+	var xcdrawing0 = xcdrawings.get_node(xcname0)
+	var xcdrawing1 = xcdrawings.get_node(xcname1)
+	var mtpa = maketubepolyassociation_andreorder(xcdrawing0, xcdrawing1)
+	var poly0 = mtpa[0]
+	var poly1 = mtpa[1]
+	var ila = mtpa[2]
+	var xcnodes0 = xcdrawing0.get_node("XCnodes")
+	var xcnodes1 = xcdrawing1.get_node("XCnodes")
+
+	var ila0 = ila[i][0]
+	var ila0N = ila[i+1][0] - ila0  if i < len(ila)-1  else len(poly0) + ila[0][0] - ila0 
+	var ila1 = ila[i][1]
+	var ila1N = ila[(i+1)%len(ila)][1] - ila1
+	if ila1N < 0 or len(ila) == 1:   # there's a V-shaped case where this isn't good enough
+		ila1N += len(poly1)
+			
+	var tuberails = initialtuberails(xcnodes0, poly0, ila0, ila0N, xcnodes1, poly1, ila1, ila1N)
+	var tuberail0 = tuberails[0]
+	var tuberail1 = tuberails[1]
+	if xclinkintermediatenodes != null:
+		assert (len(ila) == len(xclinkintermediatenodes))
+		var xclinkintermediatenodesi = xclinkintermediatenodes[i]
+		var xclinkintermediatenodesi1 = xclinkintermediatenodes[(i+1)%len(ila)]
+		var railsequencerung0 = [ ]
+		var railsequencerung1 = [ ]
+		intermediaterailsequence(xclinkintermediatenodesi, xclinkintermediatenodesi1, railsequencerung0, railsequencerung1)
 
 
 func makeplaneintersectionaxisvec(xcdrawing0, xcdrawing1):

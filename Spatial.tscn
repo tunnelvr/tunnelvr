@@ -1,4 +1,4 @@
-[gd_scene load_steps=238 format=2]
+[gd_scene load_steps=242 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/default_env.tres" type="Environment" id=2]
@@ -10,6 +10,7 @@
 [ext_resource path="res://guimaterials/materialnames.png" type="Texture" id=8]
 [ext_resource path="res://sounds/switch7.wav" type="AudioStream" id=9]
 [ext_resource path="res://SketchSystem.gd" type="Script" id=10]
+[ext_resource path="res://guimaterials/installbuttonimg.png" type="Texture" id=11]
 [ext_resource path="res://guimeshes/headmesh.tscn" type="PackedScene" id=12]
 [ext_resource path="res://sounds/laser3.wav" type="AudioStream" id=13]
 [ext_resource path="res://GUIPanel3D.gd" type="Script" id=14]
@@ -1078,17 +1079,16 @@ size = Vector2( 1, 0.5 )
 [sub_resource type="SpatialMaterial" id=159]
 albedo_texture = ExtResource( 49 )
 
-[sub_resource type="StreamTexture" id=160]
-flags = 23
-load_path = "res://.import/installbuttonimg.png-8fb848fba3cb6148f17f410e139b2dd7.s3tc.stex"
-
-[sub_resource type="SpatialMaterial" id=161]
-albedo_texture = SubResource( 160 )
-
-[sub_resource type="PlaneMesh" id=162]
+[sub_resource type="PlaneMesh" id=189]
 size = Vector2( 1, 0.5 )
 
-[sub_resource type="SpatialMaterial" id=163]
+[sub_resource type="SpatialMaterial" id=190]
+albedo_texture = ExtResource( 11 )
+
+[sub_resource type="PlaneMesh" id=191]
+size = Vector2( 1, 0.5 )
+
+[sub_resource type="SpatialMaterial" id=192]
 albedo_texture = ExtResource( 51 )
 
 [sub_resource type="AudioStreamMicrophone" id=164]
@@ -1206,6 +1206,13 @@ height = 1.1
 
 [sub_resource type="SpatialMaterial" id=185]
 albedo_color = Color( 0.168627, 0.972549, 0.027451, 1 )
+
+[sub_resource type="QuadMesh" id=186]
+
+[sub_resource type="StreamTexture" id=187]
+
+[sub_resource type="SpatialMaterial" id=188]
+albedo_texture = SubResource( 187 )
 
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
@@ -2863,14 +2870,14 @@ mesh = SubResource( 158 )
 material/0 = SubResource( 159 )
 
 [node name="InstallButton" type="MeshInstance" parent="MaterialSystem/buttonmaterials"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -3.67453, 0, 3.02779 )
-mesh = SubResource( 158 )
-material/0 = SubResource( 161 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -3.66956, 0.00255632, 3.02332 )
+mesh = SubResource( 189 )
+material/0 = SubResource( 190 )
 
 [node name="ClearCacheButton" type="MeshInstance" parent="MaterialSystem/buttonmaterials"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -3.67453, 0, 3.66715 )
-mesh = SubResource( 162 )
-material/0 = SubResource( 163 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -3.67896, 0.00439954, 3.65971 )
+mesh = SubResource( 191 )
+material/0 = SubResource( 192 )
 
 [node name="SoundSystem" type="Spatial" parent="."]
 script = ExtResource( 19 )
@@ -3058,3 +3065,7 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.409035, 2.78001, -15.0808 )
 use_in_baked_light = true
 mesh = SubResource( 183 )
 material/0 = SubResource( 185 )
+
+[node name="test" type="MeshInstance" parent="."]
+mesh = SubResource( 186 )
+material/0 = SubResource( 188 )

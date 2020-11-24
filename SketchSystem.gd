@@ -57,18 +57,7 @@ func updateworkingshell():
 	for xcdrawing in $XCdrawings.get_children():
 		if xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 			xcdrawing.updatexctubeshell($XCdrawings)
-
 	
-func changetubedxcsvizmode(xcdrawings=null):
-	if xcdrawings == null:
-		xcdrawings = $XCdrawings.get_children()
-	for xcdrawing in xcdrawings:
-		if xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
-			assert (xcdrawing.get_node("XCdrawingplane").visible != xcdrawing.get_node("XCdrawingplane/CollisionShape").disabled)
-			var xcsvisible = xcdrawing.get_node("XCdrawingplane").visible or len(xcdrawing.xctubesconn) == 0
-			xcdrawing.get_node("XCnodes").visible = xcsvisible
-			xcdrawing.get_node("PathLines").visible = xcsvisible
-
 func sketchsystemtodict():
 	var xcdrawingsData = [ ]
 	for xcdrawing in $XCdrawings.get_children():
@@ -353,7 +342,9 @@ remote func actsketchchangeL(xcdatalist):
 		xctube.updatetubelinkpaths(self)
 
 	if caveworldchunkI != -1:
-		changetubedxcsvizmode(xcdrawingstoupdate.values())
+		for xcdrawing in xcdrawingstoupdate.values():
+			if xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
+				xcdrawing.setdrawingvisiblecode(DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE if len(xcdrawing.xctubesconn) == 0 else DRAWING_TYPE.VIZ_XCD_HIDE)
 		for xctube in xctubestoupdate.values():
 			if not xctube.positioningtube:
 				xctube.updatetubeshell($XCdrawings)
@@ -488,9 +479,6 @@ func sketchdicttochunks(sketchdatadict):
 			xcdatachunkL = [ { "caveworldchunk":len(xcdatachunks) } ]
 			xcdatachunks.push_back(xcdatachunkL)
 			nnodesL = 0
-		#if xcdrawingD["drawingtype"] == DRAWING_TYPE.DT_XCDRAWING and len(xcdrawingD.nodepoints) == 0:
-		#	print("Discarding xcdrawing ", xcdrawingD["name"])
-			continue
 		xcdatachunkL.push_back(xcdrawingD)
 		nnodesL += len(xcdrawingD.nodepoints)
 		for i in xcdrawingnamemapItubes.get(xcdrawingD["name"], []):
@@ -506,7 +494,7 @@ func sketchdicttochunks(sketchdatadict):
 				xctubesDmaphalfstaged[i] = xctubesarrayD[i]
 				xctubesarrayD[i] = null
 
-	var playerMe = get_node("/root/Spatial").playerMe				
+	var playerMe = get_node("/root/Spatial").playerMe
 	for i in range(len(xcdatachunks)):
 		xcdatachunks[i][0]["caveworldchunkLast"] = xcdatachunks[-1][0]["caveworldchunk"]
 		xcdatachunks[i][0]["networkIDsource"] = playerMe.networkID
