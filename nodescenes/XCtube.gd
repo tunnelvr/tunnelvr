@@ -18,7 +18,6 @@ var planeintersectaxisvec = null
 var planeintersectpoint = null
 var planealongvecwhenparallel = null
 
-var tubesectorptindexlists = [ ]
 
 const linewidth = 0.02
 
@@ -464,34 +463,18 @@ func ConstructHoleXC(i, sketchsystem):
 	else:
 		xcdata["transformpos"] = Transform(Vector3(1,0,0), Vector3(0,0,-1), Vector3(0,1,0), avgpoint)
 
-
-	var shellcontour = extractshellcontour(sketchsystem.get_node("XCdrawings"), i)
-
-	var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(xcname0)
-	var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(xcname1)
-	var xcnsourcelist = [ ]
-	for i0 in tubesectorptindexlists[i][0]:
-		xcnsourcelist.push_back(xcdrawing0.get_node("XCnodes").get_node(i0))
-	var xir = len(xcnsourcelist)
-	for j in range(len(tubesectorptindexlists[i][1])-1, -1, -1):
-		var i1 = tubesectorptindexlists[i][1][j]
-		xcnsourcelist.push_back(xcdrawing1.get_node("XCnodes").get_node(i1))
-
 	if xcdrawinghole != null:
 		xcdata["prevonepathpairs"] = xcdrawinghole.onepathpairs.duplicate()
 		xcdata["prevnodepoints"] = xcdrawinghole.nodepoints.duplicate()
-		
-	var prevname = "r1"+xcnsourcelist[-1].get_name()
-	for j in range(len(xcnsourcelist)):
-		var xcnsource = xcnsourcelist[j]
-		var name = ("r0" if j < xir else "r1")+xcnsource.get_name()
-		xcdata["nextnodepoints"][name] = xcdata["transformpos"].xform_inv(xcnsource.global_transform.origin)
+
+	var shellcontour = extractshellcontour(sketchsystem.get_node("XCdrawings"), i)
+	var prevname = shellcontour[-1][0]
+	for sc in shellcontour:
+		xcdata["nextnodepoints"][sc[0]] = xcdata["transformpos"].xform_inv(sc[1])
 		xcdata["newonepathpairs"].push_back(prevname)
-		xcdata["newonepathpairs"].push_back(name)
-		prevname = name
+		xcdata["newonepathpairs"].push_back(sc[0])
+		prevname = sc[0]
 	return xcdata
-
-
 
 
 func advanceuvFar(uvFixed, ptFixed, uvFar, ptFar, ptFarNew, bclockwise):
@@ -509,15 +492,6 @@ func advanceuvFar(uvFixed, ptFixed, uvFar, ptFar, ptFarNew, bclockwise):
 	var uvvecnew = uvvec*vecFarNewCos + uvperpvec*vecFarNewSin
 	var uvvecnewR = uvvecnew*vecFarFarNewRatio
 	return uvFixed + uvvecnewR
-
-func tubesectorindexll(poly0, ila0, ila0N, poly1, ila1, ila1N):
-	# used in holexc and should instead use the tuberail selected by single apature based on maketubepolyassociation_andreorder
-	var tubesectorindexl = [ [ poly0[ila0] ], [ poly1[ila1] ] ]
-	for j0 in range(ila0N):
-		tubesectorindexl[0].push_back(poly0[(ila0+j0+1)%len(poly0)])
-	for j1 in range(ila1N):
-		tubesectorindexl[1].push_back(poly1[(ila1+j1+1)%len(poly1)])
-	return tubesectorindexl
 
 func get_pt(xcnodes, poly, ila, i):
 	return xcnodes.get_node(poly[(ila+i)%len(poly)]).global_transform.origin
@@ -681,7 +655,6 @@ func updatetubeshell(xcdrawings):
 
 	var xcnodes0 = xcdrawing0.get_node("XCnodes")
 	var xcnodes1 = xcdrawing1.get_node("XCnodes")
-	tubesectorptindexlists.clear()
 	for i in range(len(ila)):
 		var ila0 = ila[i][0]
 		var ila0N = ila[i+1][0] - ila0  if i < len(ila)-1  else len(poly0) + ila[0][0] - ila0 
@@ -690,7 +663,6 @@ func updatetubeshell(xcdrawings):
 		if ila1N < 0 or len(ila) == 1:   # there's a V-shaped case where this isn't good enough
 			ila1N += len(poly1)
 			
-		tubesectorptindexlists.push_back(tubesectorindexll(poly0, ila0, ila0N, poly1, ila1, ila1N))
 		var tuberails = initialtuberails(xcnodes0, poly0, ila0, ila0N, xcnodes1, poly1, ila1, ila1N)
 		var tuberail0 = tuberails[0]
 		var tuberail1 = tuberails[1]
@@ -734,6 +706,23 @@ func updatetubeshell(xcdrawings):
 				xctubesector.get_node("CollisionShape").disabled = true
 		$XCtubesectors.add_child(xctubesector)
 
+
+func shellcontourxcside(xcdrawing, poly, ila, ilaN, pref):
+	var scc = [ ]
+	for j in range(ilaN+1):
+		var nodename = poly[(ila+j)%len(poly)]
+		scc.push_back([pref%nodename, xcdrawing.transform * xcdrawing.nodepoints[nodename]])
+	return scc
+	
+func shellcontourintermed(p0, p1, xclinkintermediatenodes, pref):
+	var scc = [ ]
+	for j in range(len(xclinkintermediatenodes)):
+		var dp = xclinkintermediatenodes[j]
+		var sp = lerp(p0, p1, dp.z)
+		var spbasis = intermedpointplanebasis(sp)
+		scc.push_back([pref%j, sp + spbasis.x*dp.x + spbasis.y*dp.y])
+	return scc
+	
 func extractshellcontour(xcdrawings, i):
 	var xcdrawing0 = xcdrawings.get_node(xcname0)
 	var xcdrawing1 = xcdrawings.get_node(xcname1)
@@ -741,8 +730,6 @@ func extractshellcontour(xcdrawings, i):
 	var poly0 = mtpa[0]
 	var poly1 = mtpa[1]
 	var ila = mtpa[2]
-	var xcnodes0 = xcdrawing0.get_node("XCnodes")
-	var xcnodes1 = xcdrawing1.get_node("XCnodes")
 
 	var ila0 = ila[i][0]
 	var ila0N = ila[i+1][0] - ila0  if i < len(ila)-1  else len(poly0) + ila[0][0] - ila0 
@@ -751,18 +738,20 @@ func extractshellcontour(xcdrawings, i):
 	if ila1N < 0 or len(ila) == 1:   # there's a V-shaped case where this isn't good enough
 		ila1N += len(poly1)
 			
-	var tuberails = initialtuberails(xcnodes0, poly0, ila0, ila0N, xcnodes1, poly1, ila1, ila1N)
-	var tuberail0 = tuberails[0]
-	var tuberail1 = tuberails[1]
+	var scc0 = shellcontourxcside(xcdrawing0, poly0, ila0, ila0N, "r0%s")
+	var scc1 = shellcontourxcside(xcdrawing1, poly1, ila1, ila1N, "r1%s")
+	var scctop
+	var sccbot
 	if xclinkintermediatenodes != null:
-		assert (len(ila) == len(xclinkintermediatenodes))
-		var xclinkintermediatenodesi = xclinkintermediatenodes[i]
-		var xclinkintermediatenodesi1 = xclinkintermediatenodes[(i+1)%len(ila)]
-		var railsequencerung0 = [ ]
-		var railsequencerung1 = [ ]
-		intermediaterailsequence(xclinkintermediatenodesi, xclinkintermediatenodesi1, railsequencerung0, railsequencerung1)
-
-
+		scctop = shellcontourintermed(scc0[-1][1], scc1[-1][1], xclinkintermediatenodes[(i+1)%len(ila)], "rt%d")
+		sccbot = shellcontourintermed(scc0[0][1], scc1[0][1], xclinkintermediatenodes[i], "rb%d")
+	else:
+		scctop = [ ]
+		sccbot = [ ]
+	scc1.invert()
+	sccbot.invert()
+	return scc0 + scctop + scc1 + sccbot
+	
 func makeplaneintersectionaxisvec(xcdrawing0, xcdrawing1):
 	var n0 = xcdrawing0.transform.basis.z
 	var n1 = xcdrawing1.transform.basis.z
