@@ -493,16 +493,16 @@ func advanceuvFar(uvFixed, ptFixed, uvFar, ptFar, ptFarNew, bclockwise):
 	var uvvecnewR = uvvecnew*vecFarFarNewRatio
 	return uvFixed + uvvecnewR
 
-func get_pt(xcnodes, poly, ila, i):
-	return xcnodes.get_node(poly[(ila+i)%len(poly)]).global_transform.origin
+func get_pt(xcdrawing, poly, ila, i):
+	return xcdrawing.transform * xcdrawing.nodepoints[poly[(ila+i)%len(poly)]]
 
-func initialtuberails(xcnodes0, poly0, ila0, ila0N, xcnodes1, poly1, ila1, ila1N):
+func initialtuberails(xcdrawing0, poly0, ila0, ila0N, xcdrawing1, poly1, ila1, ila1N):
 	var acc = -ila0N/2.0  if ila0N>=ila1N  else  ila1N/2
 	var i0 = 0
 	var i1 = 0
 
-	var pti0 = get_pt(xcnodes0, poly0, ila0, i0)
-	var pti1 = get_pt(xcnodes1, poly1, ila1, i1)
+	var pti0 = get_pt(xcdrawing0, poly0, ila0, i0)
+	var pti1 = get_pt(xcdrawing1, poly1, ila1, i1)
 	var uvi0 = Vector2(0, 0)
 	var uvi1 = Vector2(pti0.distance_to(pti1),0)
 
@@ -513,13 +513,13 @@ func initialtuberails(xcnodes0, poly0, ila0, ila0N, xcnodes1, poly1, ila1, ila1N
 		if i0 < ila0N and (acc - ila0N < 0 or i1 == ila1N):
 			acc += ila1N
 			i0 += 1
-			var pti0next = get_pt(xcnodes0, poly0, ila0, i0)
+			var pti0next = get_pt(xcdrawing0, poly0, ila0, i0)
 			uvi0 = advanceuvFar(uvi1, pti1, uvi0, pti0, pti0next, true)
 			pti0 = pti0next
 		if i1 < ila1N and (acc >= 0 or i0 == ila0N):
 			acc -= ila0N
 			i1 += 1
-			var pti1next = get_pt(xcnodes1, poly1, ila1, i1)
+			var pti1next = get_pt(xcdrawing1, poly1, ila1, i1)
 			uvi1 = advanceuvFar(uvi0, pti0, uvi1, pti1, pti1next, false)
 			pti1 = pti1next
 		tuberail0.push_back([pti0, uvi0, i0*1.0/ila0N if ila0N != 0 else 1.0])
@@ -663,7 +663,7 @@ func updatetubeshell(xcdrawings):
 		if ila1N < 0 or len(ila) == 1:   # there's a V-shaped case where this isn't good enough
 			ila1N += len(poly1)
 			
-		var tuberails = initialtuberails(xcnodes0, poly0, ila0, ila0N, xcnodes1, poly1, ila1, ila1N)
+		var tuberails = initialtuberails(xcdrawing0, poly0, ila0, ila0N, xcdrawing1, poly1, ila1, ila1N)
 		var tuberail0 = tuberails[0]
 		var tuberail1 = tuberails[1]
 		var surfaceTool = SurfaceTool.new()
