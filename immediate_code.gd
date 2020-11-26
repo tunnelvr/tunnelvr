@@ -6,7 +6,8 @@ extends EditorScript
 # *******
 
 func _run():
-	print(OS.time(true))
+	var a = { "a":99}
+	print(a.keys())
 
 var zi = [ ]
 var zi1 = [ 0.48, 0.66 ]

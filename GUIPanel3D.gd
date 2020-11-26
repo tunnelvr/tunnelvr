@@ -97,7 +97,9 @@ func _on_playerscale_selected(index):
 	playerMe.get_node("HandLeft").setcontrollerhandtransform(playerMe.playerscale)
 	playerMe.get_node("HandRight").setcontrollerhandtransform(playerMe.playerscale)
 	if playerMe.playerscale == 1.0:
-		get_node("/root/Spatial/BodyObjects/PlayerDirections").forceontogroundtimedown = 0.25
+		var PlayerDirections = get_node("/root/Spatial/BodyObjects/PlayerDirections")
+		PlayerDirections.forceontogroundtimedown = 0.75
+		PlayerDirections.floorprojectdistance = 50
 		playerMe.playerflyscale = 1.0
 	else:
 		if playerMe.playerscale >= 10:
@@ -174,15 +176,26 @@ func clickbuttonheadtorch():
 	_on_buttonheadtorch_toggled($Viewport/GUI/Panel/ButtonHeadtorch.pressed)
 
 
-var selectedplayernetworkid = 0
-var selectedplayerplatform = ""
-func _on_goto_pressed():
+
+
+remote func playerjumpgoto(puppetplayerid, lforcetogroundtimedown):
+	var puppetplayername = "NetworkedPlayer"+String(puppetplayerid)
+	var playerpuppet = get_node("/root/Spatial/Players").get_node_or_null(puppetplayername)
+	if playerpuppet != null:
+		get_node("/root/Spatial/BodyObjects/PlayerDirections").setasaudienceofpuppet(playerpuppet, playerpuppet.get_node("HeadCam").global_transform, 0.5)
+	else:
+		print("Not able to playerjumpto ", puppetplayername)
+
+func _on_buttongoto_pressed():
 	if selectedplayernetworkid == playerMe.networkID:
 		if playerMe.networkID != 1 and Tglobal.connectiontoserveractive:
-			playerMe.rpc_id(1, "playerjumpgoto", playerMe.networkID)
+			rpc_id(1, "playerjumpgoto", playerMe.networkID, 0.5)
 	elif selectedplayernetworkid != -1:
-		playerMe.playerjumpgoto(selectedplayernetworkid)
+		playerjumpgoto(selectedplayernetworkid, 0.5)
+	toggleguipanelvisibility(null)
 
+var selectedplayernetworkid = 0
+var selectedplayerplatform = ""
 func _on_playerlist_selected(index):
 	var player = get_node("/root/Spatial/Players").get_child(index)
 	if player != null:
@@ -320,14 +333,13 @@ func _input(event):
 	if event is InputEventKey and event.pressed:
 		if event.scancode == KEY_L:
 			_on_buttonload_pressed()
-		#elif event.scancode == KEY_S:
-		#	sketchsystem.savesketchsystem()
 		elif event.scancode == KEY_G:
 			$Viewport/GUI/Panel/ButtonDoppelganger.pressed = not $Viewport/GUI/Panel/ButtonDoppelganger.pressed
 			_on_buttondoppelganger_toggled($Viewport/GUI/Panel/ButtonDoppelganger.pressed)	
 		elif event.scancode == KEY_O:
 			_on_buttonswapcontrollers_pressed()
-
+		elif event.scancode == KEY_B:
+			call_deferred("_on_networkstate_selected", 3)
 
 #-------------networking system
 var websocketserver = null
@@ -398,7 +410,9 @@ func _on_networkstate_selected(index):
 			
 		else:
 			networkedmultiplayerenet = NetworkedMultiplayerENet.new()
-			var e = networkedmultiplayerenet.create_client(selfSpatial.hostipnumber, selfSpatial.hostportnumber)
+			var inbandwidth = 0
+			var outbandwidth = 0
+			var e = networkedmultiplayerenet.create_client(selfSpatial.hostipnumber, selfSpatial.hostportnumber, inbandwidth, outbandwidth)
 			print("networkedmultiplayerenet createclient: ", e)
 			get_tree().set_network_peer(networkedmultiplayerenet)
 		$Viewport/GUI/Panel/Label.text = "connecting "+("websocket" if selfSpatial.usewebsockets else "ENET")
@@ -475,7 +489,11 @@ remote func sendbacknetworkmetrics(lnetworkmetrics, networkIDsource):
 	if playerOther != null and len(playerOther.puppetpositionstack) != 0:
 		lnetworkmetrics["stackduration"] = playerOther.puppetpositionstack[-1]["Ltimestamp"] - OS.get_ticks_msec()*0.001
 		print(playerOthername, " stackduration is ", lnetworkmetrics["stackduration"])
+	elif playerOther == null:
+		print("Did not find ", playerOthername)
+		lnetworkmetrics["stackduration"] = -1.0
 	else:
+		print(playerOthername, " stack empty")
 		lnetworkmetrics["stackduration"] = 0.0
 	lnetworkmetrics["unixtime"] = OS.get_unix_time()
 	if networkIDsource >= 0:

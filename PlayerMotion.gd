@@ -7,6 +7,7 @@ onready var playerMe = get_node("/root/Spatial/Players/PlayerMe")
 onready var HeadCam = playerMe.get_node("HeadCam")
 onready var HeadCentre = HeadCam.get_node("HeadCentre")
 onready var HeadCollisionWarning = HeadCam.get_node("HeadCollisionWarning")
+onready var HeadFloorprojectWarning = HeadCam.get_node("HeadFloorprojectWarning")
 onready var playerheadbodyradius = $PlayerKinematicBody/PlayerBodyCapsule.shape.radius
 onready var PlayerDirections = get_node("../PlayerDirections")
 
@@ -78,6 +79,7 @@ const footstepduration = 0.5
 var prevfootsteptimestamp = 0
 var prevfootstepposition = Vector3(0, 0, 0)
 var physicsprocessTimeStamp = 0
+
 func _physics_process(delta):
 	physicsprocessTimeStamp += delta
 
@@ -87,6 +89,9 @@ func _physics_process(delta):
 		print(" skipping bad headcam position:", physicsprocessTimeStamp, " orientation ", HeadCam.global_transform.basis.x)
 		return
 
+	if PlayerDirections.nextphysicssetposition != null:
+		playerMe.global_transform.origin = PlayerDirections.nextphysicssetposition
+		PlayerDirections.nextphysicssetposition = null
 	if PlayerDirections.nextphysicsrotatestep != 0.0:
 		var t1 = Transform(Basis(), -HeadCam.transform.origin)
 		var t2 = Transform(Basis(), HeadCam.transform.origin)
@@ -116,14 +121,19 @@ func _physics_process(delta):
 	if $PlayerKinematicBody/PlayerBodyCapsule/CapsuleShapePreview.visible:  # VVV this consumes 15ms!!!
 		$PlayerKinematicBody/PlayerBodyCapsule/CapsuleShapePreview.mesh.mid_height = capsuleshaftheight
 	
-	if PlayerDirections.playerdirectedflight:
-		process_directedflight(delta, PlayerDirections.playerdirectedflightvelocity)
-		PlayerDirections.forceontogroundtimedown = 0
-	elif PlayerDirections.forceontogroundtimedown != 0:
+	if PlayerDirections.forceontogroundtimedown != 0:
 		PlayerDirections.forceontogroundtimedown -= delta
-		if PlayerDirections.forceontogroundtimedown < 0:
+		if PlayerDirections.playerdirectedflight and PlayerDirections.playerdirectedflightvelocity != Vector3(0, 0, 0):
+			HeadFloorprojectWarning.visible = false
 			PlayerDirections.forceontogroundtimedown = 0
-			process_projectontoground(delta, 50)
+		elif PlayerDirections.forceontogroundtimedown < 0:
+			HeadFloorprojectWarning.visible = false
+			PlayerDirections.forceontogroundtimedown = 0
+			process_projectontoground(delta, PlayerDirections.floorprojectdistance)
+		else:
+			HeadFloorprojectWarning.visible = true
+	elif PlayerDirections.playerdirectedflight:
+		process_directedflight(delta, PlayerDirections.playerdirectedflightvelocity)
 	elif playerinfreefall:
 		process_freefall(delta)
 	else:
@@ -371,10 +381,11 @@ func filter_playerposition_bandwidth(positiondict):
 		prevpositiondict = positiondict.duplicate(true)
 		return positiondict
 
-	if prevpositiondict["playerscale"] == positiondict["playerscale"]:
-		positiondict.erase("playerscale")
-	else:
-		prevpositiondict["playerscale"] = positiondict["playerscale"]
+	if positiondict.has("playerscale"):
+		if prevpositiondict["playerscale"] == positiondict["playerscale"]:
+			positiondict.erase("playerscale")
+		else:
+			prevpositiondict["playerscale"] = positiondict["playerscale"]
 	
 	if transformwithinrange(prevpositiondict["puppetbody"]["playertransform"], positiondict["puppetbody"]["playertransform"], headpositionchange, headanglechange) and \
 	   transformwithinrange(prevpositiondict["puppetbody"]["headcamtransform"], positiondict["puppetbody"]["headcamtransform"], headpositionchange, headanglechange):
@@ -410,6 +421,8 @@ func process_shareplayerposition():
 		positiondict = filter_playerposition_bandwidth(positiondict)
 		if positiondict != null:
 			if Tglobal.morethanoneplayer and Tglobal.connectiontoserveractive:
+				print("sending setavatarposition ", positiondict.keys())
+				#playerMe.rpc("setavatarposition", positiondict)
 				playerMe.rpc_unreliable("setavatarposition", positiondict)
 			if is_instance_valid(playerMe.doppelganger):
 				if positiondict.has("puppetbody") and positiondict["puppetbody"].has("playertransform"):

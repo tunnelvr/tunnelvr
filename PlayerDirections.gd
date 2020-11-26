@@ -8,11 +8,46 @@ onready var HandLeftController = playerMe.get_node("HandLeftController")
 var flyspeed = 5.0
 var walkspeed = 3.0
 var nextphysicsrotatestep = 0.0
+var nextphysicssetposition = null
 var playerdirectedflight = false
 var playerdirectedflightvelocity = Vector3(0,0,0)
 var playerdirectedwalkingvelocity = Vector3(0,0,0)
 var flywalkreversed = false
 var forceontogroundtimedown = 0
+var floorprojectdistance = 10
+
+const playeraudiencedistance = 5.0
+const playeraudiencesidedisplacement = 4.0
+const playerspawnoffsetheight = 3.0
+
+func setasaudienceofpuppet(playerpuppet, puppetheadtrans, lforceontogroundtimedown):
+	var puppetheadpos = puppetheadtrans.origin
+	var veceyes = Vector3(puppetheadtrans.basis.z.x, 0, puppetheadtrans.basis.z.z).normalized()
+	var vecperp = Vector3(veceyes.z, 0, -veceyes.x)
+	var cenpos = puppetheadtrans.origin - veceyes*(playeraudiencedistance*0.5)*playerpuppet.playerscale
+	var playerlam = (playerMe.networkID%10000)/10000.0
+	var playerheadbasis = puppetheadtrans.basis.rotated(Vector3(0,1,0), deg2rad(180))
+	var playerheadpos = cenpos - veceyes*(playeraudiencedistance*0.5)*playerMe.playerscale + \
+								 vecperp*(playerlam-0.5)*2*playeraudiencesidedisplacement
+	#  Solve: headtrans = playerMe.global_transform * playerMe.get_node("HeadCam").transform 
+	var backrelorigintrans = Transform(playerheadbasis, playerheadpos) * playerMe.get_node("HeadCam").transform.inverse()
+	var viewtopuppetvec = playerheadpos - puppetheadpos
+	var relang = Vector2(viewtopuppetvec.x, viewtopuppetvec.z).angle_to(Vector2(playerMe.global_transform.basis.z.x, playerMe.global_transform.basis.z.z))
+	#var angvec = Vector2(playerMe.global_transform.basis.x.dot(backrelorigintrans.basis.x), playerMe.global_transform.basis.z.dot(backrelorigintrans.basis.x))
+	nextphysicsrotatestep = -rad2deg(relang)
+	nextphysicssetposition = backrelorigintrans.origin + Vector3(0, playerspawnoffsetheight, 0)
+	forceontogroundtimedown = lforceontogroundtimedown
+	floorprojectdistance = playerspawnoffsetheight*2
+
+func setatheadtrans(headtrans, lforceontogroundtimedown):
+	#  Solve: headtrans = playerMe.global_transform * playerMe.get_node("HeadCam").transform 
+	var backrelorigintrans = headtrans * playerMe.get_node("HeadCam").transform.inverse()
+	var viewtopuppetvec = headtrans.basis.z
+	var relang = Vector2(viewtopuppetvec.x, viewtopuppetvec.z).angle_to(Vector2(playerMe.global_transform.basis.z.x, playerMe.global_transform.basis.z.z))
+	#var angvec = Vector2(playerMe.global_transform.basis.x.dot(backrelorigintrans.basis.x), playerMe.global_transform.basis.z.dot(backrelorigintrans.basis.x))
+	nextphysicsrotatestep = -rad2deg(relang)
+	nextphysicssetposition = backrelorigintrans.origin + Vector3(0, playerspawnoffsetheight, 0)
+	forceontogroundtimedown = lforceontogroundtimedown
 
 func initcontrollersignalconnections():
 	HandLeftController.connect("button_pressed", self, "_on_button_pressed")
@@ -32,6 +67,8 @@ func _process(delta):
 		print("WIP step_low_just_detected")
 	if WIP.step_high_just_detected:
 		print("WIP step_high_just_detected")
+
+
 
 var joyposxrotsnaphysteresis = 0 
 func _physics_process(delta):

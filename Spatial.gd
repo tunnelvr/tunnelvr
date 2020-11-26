@@ -229,6 +229,7 @@ func _player_connected(id):
 		setnetworkidnamecolour(playerOther, id)
 		playerOther.visible = false
 		$Players.add_child(playerOther)
+		print("Added ", playerothername, " to $Players")
 		
 	$GuiSystem/GUIPanel3D.updateplayerlist()
 	playerMe.bouncetestnetworkID = nextplayernetworkidinringskippingdoppelganger(0)
@@ -267,6 +268,7 @@ func _player_disconnected(id):
 	if playerOther != null:
 		Tglobal.soundsystem.quicksound("PlayerDepart", playerOther.get_node("HeadCam").global_transform.origin)
 		playerOther.queue_free()
+		print("Removing ", playerothername, " from $Players")
 	$GuiSystem/GUIPanel3D.updateplayerlist()
 	playerMe.bouncetestnetworkID = nextplayernetworkidinringskippingdoppelganger(id)
 	$GuiSystem/GUIPanel3D/Viewport/GUI/Panel/Label.text = "player "+String(id)+" disconnected"

@@ -172,13 +172,19 @@ remote func actsketchchangeL(xcdatalist):
 	var fromremotecall = ("networkIDsource" in xcdatalist[0]) and xcdatalist[0]["networkIDsource"] != playerMe.networkID
 	if "caveworldchunk" in xcdatalist[0]:
 		if xcdatalist[0]["caveworldchunk"] == 0:
+			var PlayerDirections = get_node("/root/Spatial/BodyObjects/PlayerDirections")
 			Tglobal.printxcdrawingfromdatamessages = false
 			clearentirecaveworld()
 			if "playerMe" in xcdatalist[0]:
 				spawnplayerme(xcdatalist[0]["playerMe"])
+				var playerserver = get_node_or_null("/root/Spatial/Players/NetworkedPlayer1")
+				if fromremotecall and playerserver != null and playerserver != playerMe:
+					PlayerDirections.setasaudienceofpuppet(playerserver, xcdatalist[0]["playerMe"]["headtrans"], 30)
+				else:
+					PlayerDirections.setatheadtrans(xcdatalist[0]["playerMe"]["headtrans"], 30)
 			caveworldchunking_networkIDsource = xcdatalist[0]["networkIDsource"]
 			xcdatalistReceivedDuringChunking = [ ]
-			get_node("/root/Spatial/BodyObjects/PlayerDirections").flywalkreversed = true
+			PlayerDirections.flywalkreversed = true
 		elif xcdatalist[0]["networkIDsource"] != caveworldchunking_networkIDsource:
 			return caveworldreceivechunkingfailed("mismatch in world chunk id source")
 		elif xcdatalist[0]["caveworldchunk"] != caveworldchunkI + 1:
@@ -360,9 +366,11 @@ remote func actsketchchangeL(xcdatalist):
 			xcdatalistReceivedDuringChunking = null
 			Tglobal.printxcdrawingfromdatamessages = true
 			var flywalkreversed = get_node("/root/Spatial/GuiSystem/GUIPanel3D/Viewport/GUI/Panel/FlyWalkReversed").pressed
-			get_node("/root/Spatial/BodyObjects/PlayerDirections").flywalkreversed = flywalkreversed
+			var PlayerDirections = get_node("/root/Spatial/BodyObjects/PlayerDirections")
+			PlayerDirections.flywalkreversed = flywalkreversed
 			if not flywalkreversed:
-				get_node("/root/Spatial/BodyObjects/PlayerDirections").forceontogroundtimedown = 0.25
+				if PlayerDirections.forceontogroundtimedown > 0:
+					PlayerDirections.forceontogroundtimedown = 0.25
 			if len(xcdatalistReceivedDuringChunkingL) != 0:
 				print("Now processing ", len(xcdatalistReceivedDuringChunkingL), " received during chunking")
 				for xcdatalistR in xcdatalistReceivedDuringChunkingL:

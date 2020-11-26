@@ -185,9 +185,6 @@ func _process(delta):
 		LaserOrient.visible = false
 
 
-func playerjumpgoto(gotoplayerid):
-	pass
-
 func initkeyboardcontroltrackingnow():
 	#$HandLeft.initkeyboardtracking()
 	$HandRight.initkeyboardtracking()

@@ -33,9 +33,11 @@ const maxstacklength = 80
 var playerscale = 1.0
 onready var guipanel3d = get_node("/root/Spatial/GuiSystem/GUIPanel3D")
 
+
 remote func setavatarposition(positiondict):
 	$AnimationPlayer_setavatarposition_flash.stop()
 	$AnimationPlayer_setavatarposition_flash.play("setavatarposition_flash")
+	print("received setavatarposition ", get_name(), positiondict.keys())
 	if not visible:
 		if "puppetbody" in positiondict:
 			global_transform = positiondict["puppetbody"]["playertransform"]
@@ -46,7 +48,6 @@ remote func setavatarposition(positiondict):
 	if guipanel3d.visible and guipanel3d.netlinkstatstimer < 0.0 and guipanel3d.selectedplayernetworkid == networkID:
 		guipanel3d.get_node("Viewport/GUI/Panel/PlayerInfo").text = "setavatarposition:%.3f"%positiondict["timestamp"]
 	
-
 	var t0 = OS.get_ticks_msec()*0.001
 	var reltime = t0 - positiondict["timestamp"]
 	if reltimebatchcount == 0 or reltime > relativetimemax:
@@ -85,7 +86,8 @@ remote func setavatarposition(positiondict):
 		while len(puppetpositionstack) > maxstacklength:
 			puppetpositionstack.pop_front()
 		puppetpositionstack.push_back(puppetbody)
-
+		print(" ", get_name(), " stacksize ", len(puppetpositionstack))
+		
 	if positiondict.has("laserpointer"):
 		var puppetpointerposition = positiondict["laserpointer"]
 		puppetpointerposition["timestamp"] = positiondict["timestamp"]
