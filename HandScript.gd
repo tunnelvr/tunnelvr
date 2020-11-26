@@ -17,9 +17,17 @@ var handmaterial_orgtransparency = false
 var handmaterial_orgtranslucency = 1
 var joypos = Vector2(0, 0)
 
-var controllerhandtransformleft = Transform(Basis(Vector3(0,0,1), deg2rad(45*0)), Vector3(0,0,0))*Transform(Vector3(0,0,-1), Vector3(0,-1,0), Vector3(-1,0,0), Vector3(0,0,0.1))
-var controllerhandtransformright = Transform(Basis(Vector3(0,0,1), deg2rad(-45*0)), Vector3(0,0,0))*Transform(Vector3(0,0,1), Vector3(0,1,0), Vector3(-1,0,0), Vector3(0,0,0.1))
 var controllerhandtransform = null
+func setcontrollerhandtransform(playerscale):
+	if islefthand:
+		controllerhandtransform = Transform(Basis(Vector3(0,0,1), deg2rad(45*0)), Vector3(0,0,0)) * \
+								  Transform(Vector3(0,0,-1), Vector3(0,-1,0), Vector3(-1,0,0), Vector3(0,0,0.1*playerscale))
+	else:
+		controllerhandtransform = Transform(Basis(Vector3(0,0,1), deg2rad(-45*0)), Vector3(0,0,0)) * \
+								  Transform(Vector3(0,0,1), Vector3(0,1,0), Vector3(-1,0,0), Vector3(0,0,0.1*playerscale))
+	handmodel.scale = Vector3(1,1,1)*playerscale*ovrhandscale
+
+	
 var mousecontrollermotioncumulative = Vector2(0, 0)
 var gripbuttonheld := false
 var triggerbuttonheld = false
@@ -28,7 +36,7 @@ var indexfingerpinchbutton = null
 var middlefingerpinchbutton = null
 var middleringbutton = null
 
-var handscale = 0.0
+var ovrhandscale = 1.0
 var handconfidence = 0
 var handvalid = false
 var hand_boneorientations = [ Quat( 0, 0, 0, 1 ), Quat( 0, 0, 0, 1 ), Quat( 0.467562, 0.371268, 0.0784822, 0.798365 ), Quat( 0.253112, 0.141304, 0.155991, 0.944264 ), Quat( -0.0820883, -0.0530134, 0.190872, 0.976739 ), Quat( 0.0813293, 0.0570069, 0.0396865, 0.994264 ), Quat( 0.0443113, 0.0529943, 0.211373, 0.974961 ), Quat( -0.0262251, 0.000635884, 0.291161, 0.956315 ), Quat( -0.0167604, -0.0247861, 0.0716335, 0.996982 ), Quat( -0.0144094, -0.0484558, 0.17288, 0.983645 ), Quat( -0.0127633, -0.000258344, 0.341284, 0.939874 ), Quat( -0.0484786, 0.00163537, 0.0500899, 0.997566 ), Quat( -0.0682813, -0.113321, 0.185936, 0.973614 ), Quat( -0.0401938, 0.00888745, 0.348554, 0.936384 ), Quat( -0.0114638, 0.0296684, 0.146252, 0.988736 ), Quat( -0.207036, -0.140343, 0.0183118, 0.968042 ), Quat( 0.0544313, -0.108607, 0.254061, 0.959528 ), Quat( -0.0522058, -0.0357106, 0.158563, 0.985321 ), Quat( 0.00130541, 0.0483228, 0.170572, 0.984159 ), Quat( 0, 0, 0, 1 ), Quat( 0, 0, 0, 1 ), Quat( 0, 0, 0, 1 ), Quat( 0, 0, 0, 1 ), Quat( 0, 0, 0, 1 ) ]
@@ -60,8 +68,6 @@ var handpositionstack = [ ]  # [ { "Ltimestamp", "valid", "transform", "boneorie
 
 func _ready():
 	islefthand = (get_name() == "HandLeft")
-	controllerhandtransform = controllerhandtransformleft if islefthand else controllerhandtransformright
-	transform = controllerhandtransform
 	var handmodelfile = handmodelfile1 if islefthand else handmodelfile2
 	var handmodelres = load(handmodelfile)
 	if handmodelres == null:
@@ -69,7 +75,8 @@ func _ready():
 	handmodel = handmodelres.instance()
 	add_child(handmodel)
 	handmodel.visible = false
-	#handmodel.translation = Vector3(-0.2 if islefthand else 0.2, 0.8, 0)
+	setcontrollerhandtransform(1.0)
+	transform = controllerhandtransform
 	handarmature = handmodel.get_child(0)
 	handskeleton = handarmature.get_node("Skeleton")
 	for i in range(0, handskeleton.get_bone_count()):
@@ -115,9 +122,10 @@ func initovrhandtracking(lovr_hand_tracking, lhandcontroller):
 	ovr_hand_tracking = lovr_hand_tracking
 	handcontroller = lhandcontroller
 	controller_id = handcontroller.controller_id
-	handscale = ovr_hand_tracking.get_hand_scale(controller_id)
-	if handscale > 0:
-		handmodel.scale = Vector3(handscale, handscale, handscale)
+	var lovrhandscale = ovr_hand_tracking.get_hand_scale(controller_id)
+	if lovrhandscale > 0:
+		ovrhandscale = lovrhandscale
+	handmodel.scale = Vector3(ovrhandscale, ovrhandscale, ovrhandscale)
 	handmaterial.albedo_color.a = 0.4
 	handmodel.visible = false
 	handmaterial.flags_transparent = true
@@ -253,22 +261,22 @@ func process_normalvrtracking(delta):
 	gripbuttonheld = handcontroller.is_button_pressed(BUTTONS.VR_GRIP)
 	triggerbuttonheld = handcontroller.is_button_pressed(BUTTONS.VR_TRIGGER)
 	vrbybuttonheld = handcontroller.is_button_pressed(BUTTONS.VR_BUTTON_BY)
-	transform = handcontroller.transform*controllerhandtransform
+	transform = handcontroller.transform * controllerhandtransform
 	pointervalid = true
-	pointerposearvrorigin = handcontroller.transform*controllerpointerposetransform
+	pointerposearvrorigin = handcontroller.transform * controllerpointerposetransform
 	indexfingerpinchbutton.get_node("MeshInstance").get_surface_material(0).emission_energy = 1 if triggerbuttonheld else 0
 	middlefingerpinchbutton.get_node("MeshInstance").get_surface_material(0).emission_energy = 1 if gripbuttonheld else 0
 	process_handgesturefromcontrol()
 
-func process_keyboardcontroltracking(headcam, dmousecontrollermotioncumulative):
+func process_keyboardcontroltracking(headcam, dmousecontrollermotioncumulative, playerscale):
 	mousecontrollermotioncumulative = Vector2(clamp(mousecontrollermotioncumulative.x + dmousecontrollermotioncumulative.x, -1.0, 1.0), 
 											  clamp(mousecontrollermotioncumulative.y + dmousecontrollermotioncumulative.y, -1.0, 1.0))
 	var ht = headcam.transform
 	ht = ht*Transform().rotated(Vector3(1,0,0), deg2rad(-mousecontrollermotioncumulative.y*30))*Transform().rotated(Vector3(0,1,0), deg2rad(-mousecontrollermotioncumulative.x*50-10))
-	ht.origin += -0.5*ht.basis.z
+	ht.origin += -0.5*playerscale*ht.basis.z
 	pointervalid = true
 	ht = ht*Transform().rotated(Vector3(1,0,0), deg2rad(45))*Transform().rotated(Vector3(0,1,0), deg2rad(30))
-	transform = ht*controllerhandtransform
+	transform = ht * controllerhandtransform
 	pointerposearvrorigin = ht*controllerpointerposetransform
 	indexfingerpinchbutton.get_node("MeshInstance").get_surface_material(0).emission_energy = 1 if triggerbuttonheld else 0
 	middlefingerpinchbutton.get_node("MeshInstance").get_surface_material(0).emission_energy = 1 if gripbuttonheld else 0

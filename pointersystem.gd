@@ -1073,7 +1073,7 @@ func _input(event):
 
 	elif event is InputEventMouseMotion:
 		if not Tglobal.VRoperating: # or playerMe.arvrinterface.get_tracking_status() == ARVRInterface.ARVR_NOT_TRACKING:
-			handright.process_keyboardcontroltracking(headcam, event.relative*0.005)
+			handright.process_keyboardcontroltracking(headcam, event.relative*0.005, playerMe.playerscale)
 			
 	elif event is InputEventMouseButton:
 		if event.button_index == BUTTON_RIGHT:

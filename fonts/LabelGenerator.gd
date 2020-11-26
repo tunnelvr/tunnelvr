@@ -5,6 +5,7 @@ var remainingxcnodenames = [ ]  # [ (centrelinedrawingnamme, name, position) ]
 var workingxccentrelinedrawingname = null
 var workingxcnodename = null
 const XCnode_centreline = preload("res://nodescenes/XCnode_centreline.tscn")
+const XCnode_centrelineplanview = preload("res://nodescenes/XCnode_centrelineplanview.tscn")
 
 const textlabelcountdowntime = 0.2
 var textlabelcountdowntimer = 0.0
@@ -29,6 +30,8 @@ func addnodestolabeltask(centrelinedrawing):
 			while commonroot != "" and not xcn.get_name().begins_with(commonroot):
 				commonroot = commonroot.left(len(commonroot)-1)
 	commonroot = commonroot.left(commonroot.find_last(",")+1)
+	if commonroot == "":
+		commonroot = "Ireby2,"
 	sortdfunctorigin = get_node("/root/Spatial").playerMe.get_node("HeadCam").global_transform.origin
 
 func addnodestolabeltaskN(centrelinedrawing):
@@ -104,7 +107,7 @@ func _process(delta):
 
 			var workingxcnodeplanview = workingxccentrelinedrawing.get_node("XCnodes_PlanView").get_node_or_null(workingxcnodename)
 			if workingxcnodeplanview == null:
-				workingxcnodeplanview = XCnode_centreline.instance()
+				workingxcnodeplanview = XCnode_centrelineplanview.instance()
 				workingxcnodeplanview.set_name(workingxcnodename)
 				workingxcnodeplanview.get_node("CollisionShape/MeshInstance").layers = CollisionLayer.VL_centrelinestationsplanview
 				workingxcnodeplanview.get_node("StationLabel").layers = CollisionLayer.VL_centrelinestationslabelplanview

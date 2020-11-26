@@ -30,6 +30,8 @@ var remotetimegapmin = 0
 var relativetimemax = 0
 var remotetimegap_dtmax = 0.8  # copied from PlayerMotion.gd
 const maxstacklength = 80
+var playerscale = 1.0
+onready var guipanel3d = get_node("/root/Spatial/GuiSystem/GUIPanel3D")
 
 remote func setavatarposition(positiondict):
 	$AnimationPlayer_setavatarposition_flash.stop()
@@ -41,6 +43,9 @@ remote func setavatarposition(positiondict):
 			$headlocator.transform.origin = $HeadCam.transform.origin
 			visible = true
 			Tglobal.soundsystem.quicksound("PlayerArrive", global_transform.origin)
+	if guipanel3d.visible and guipanel3d.netlinkstatstimer < 0.0 and guipanel3d.selectedplayernetworkid == networkID:
+		guipanel3d.get_node("Viewport/GUI/Panel/PlayerInfo").text = "setavatarposition:%.3f"%positiondict["timestamp"]
+	
 
 	var t0 = OS.get_ticks_msec()*0.001
 	var reltime = t0 - positiondict["timestamp"]
@@ -67,6 +72,12 @@ remote func setavatarposition(positiondict):
 		dt = relativetimeminmax + remotetimegap_dtmax + 0.05  # was remotetimegapmaxmin, but only gets smooth when it gets to that value
 	
 	var Ltimestamp = positiondict["timestamp"] + dt
+	if positiondict.has("playerscale"):
+		if playerscale != positiondict["playerscale"]:
+			playerscale = positiondict["playerscale"]
+			get_node("HandLeft").setcontrollerhandtransform(playerscale)
+			get_node("HandRight").setcontrollerhandtransform(playerscale)
+		
 	if positiondict.has("puppetbody"):
 		var puppetbody = positiondict["puppetbody"]
 		puppetbody["timestamp"] = positiondict["timestamp"]
@@ -157,7 +168,7 @@ func process_puppetpositionstack(delta):
 		if pp.has("playertransform"):
 			global_transform = pp["playertransform"]
 		if pp.has("headcamtransform"):
-			$HeadCam.transform = pp["headcamtransform"]
+			$HeadCam.transform = Transform(pp["headcamtransform"].basis.scaled(Vector3(playerscale, playerscale, playerscale)), pp["headcamtransform"].origin)
 			$headlocator.transform.origin = $HeadCam.transform.origin
 		puppetpositionstack.pop_front()
 		
@@ -173,7 +184,7 @@ func process_puppetpositionstack(delta):
 				print("Baaad ", Dx)
 		if pp.has("headcamtransform") and pp1.has("headcamtransform"):
 			Dx = var2str(pp["headcamtransform"].basis)
-			$HeadCam.transform = Transform(pp["headcamtransform"].basis.slerp(pp1["headcamtransform"].basis, lam), 
+			$HeadCam.transform = Transform(pp["headcamtransform"].basis.slerp(pp1["headcamtransform"].basis, lam).scaled(Vector3(playerscale, playerscale, playerscale)), 
 										   lerp(pp["headcamtransform"].origin, pp1["headcamtransform"].origin, lam))
 			$headlocator.transform.origin = $HeadCam.transform.origin
 		if pp1.has("footstepcount") and pp1["footstepcount"] != prevfootstepcount:

@@ -4,6 +4,8 @@ var doppelganger = null
 
 var networkID = 0
 var playerplatform = ""
+var playerscale = 1.0
+var playerflyscale = 1.0
 
 var bouncetestnetworkID = 0
 onready var LaserOrient = get_node("/root/Spatial/BodyObjects/LaserOrient")
@@ -124,6 +126,7 @@ func puppetbodydict():
 func playerpositiondict():
 	var t0 = OS.get_ticks_msec()*0.001
 	return { "timestamp": t0, 
+			 "playerscale":playerscale,
 			 "puppetbody": puppetbodydict(),
 			 "handleft": $HandLeft.handpositiondict(t0), 
 			 "handright": $HandRight.handpositiondict(t0), 
@@ -173,7 +176,7 @@ func _process(delta):
 			#$HeadCam.rotation_degrees.y = 0
 			$HeadCam.rotation_degrees.x = clamp($HeadCam.rotation_degrees.x + 90*delta*lhkeyvec.y, -89, 89)
 
-		$HandRight.process_keyboardcontroltracking($HeadCam, Vector2(hx*0.033, 0))
+		$HandRight.process_keyboardcontroltracking($HeadCam, Vector2(hx*0.033, 0), playerscale)
 	if $HandRight.pointervalid:
 		LaserOrient.global_transform = global_transform*$HandRight.pointerposearvrorigin
 		var gg = LaserOrient.get_node("RayCast").get_collider()
@@ -181,6 +184,9 @@ func _process(delta):
 	else:
 		LaserOrient.visible = false
 
+
+func playerjumpgoto(gotoplayerid):
+	pass
 
 func initkeyboardcontroltrackingnow():
 	#$HandLeft.initkeyboardtracking()

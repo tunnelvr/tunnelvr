@@ -20,12 +20,6 @@ func initcontrollersignalconnections():
 func initquesthandcontrollersignalconnections():
 	pass
 
-func _input(event):
-	#if event is InputEventKey and event.pressed and not Input.is_action_pressed("lh_shift"):
-	#	if event.is_action_pressed("lh_left"):  nextphysicsrotatestep += -22.5
-	#	if event.is_action_pressed("lh_right"): nextphysicsrotatestep += 22.5
-	pass
-
 var prevgait = ""
 func _process(delta):
 	return
@@ -41,7 +35,8 @@ func _process(delta):
 
 var joyposxrotsnaphysteresis = 0 
 func _physics_process(delta):
-	playerdirectedflight = ((HandLeft.gripbuttonheld or Input.is_action_pressed("lh_ctrl")) != flywalkreversed)
+	playerdirectedflight = ((HandLeft.gripbuttonheld or Input.is_action_pressed("lh_ctrl")) != flywalkreversed) or \
+							(playerMe.playerscale != 1.0)
 	playerdirectedflightvelocity = Vector3(0,0,0)
 	playerdirectedwalkingvelocity = Vector3(0,0,0)
 
@@ -64,7 +59,7 @@ func _physics_process(delta):
 	if HandLeft.triggerbuttonheld and HandLeft.pointervalid and not Tglobal.controlslocked:
 		var vec = -(playerMe.global_transform*HandLeft.pointerposearvrorigin).basis.z
 		if playerdirectedflight:
-			playerdirectedflightvelocity = vec.normalized()*flyspeed
+			playerdirectedflightvelocity = vec.normalized()*flyspeed*playerMe.playerflyscale
 		else:
 			playerdirectedwalkingvelocity = Vector3(vec.x, 0, vec.z).normalized()*walkspeed
 			var vang = rad2deg(Vector2(Vector2(vec.x, vec.z).length(), vec.y).angle())
@@ -73,11 +68,11 @@ func _physics_process(delta):
 				playerdirectedwalkingvelocity = Vector3(HeadCam.global_transform.basis.z.x, 0, HeadCam.global_transform.basis.z.z).normalized()*walkspeed
 
 	elif not Tglobal.questhandtrackingactive and not Tglobal.controlslocked and abs(joypos.y) > 0.2:
-		if not playerdirectedflight: 
+		if playerdirectedflight: 
+			playerdirectedflightvelocity = HeadCam.global_transform.basis.z*(-joypos.y*flyspeed)*playerMe.playerscale
+		else:
 			var dir = Vector3(HeadCam.global_transform.basis.z.x, 0, HeadCam.global_transform.basis.z.z)
 			playerdirectedwalkingvelocity = dir.normalized()*(-joypos.y*walkspeed)
-		else:
-			playerdirectedflightvelocity = HeadCam.global_transform.basis.z*(-joypos.y*flyspeed)
 			
 func _on_button_pressed(p_button):
 	if p_button == BUTTONS.VR_PAD:

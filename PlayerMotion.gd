@@ -123,7 +123,7 @@ func _physics_process(delta):
 		PlayerDirections.forceontogroundtimedown -= delta
 		if PlayerDirections.forceontogroundtimedown < 0:
 			PlayerDirections.forceontogroundtimedown = 0
-			process_ontoground(delta)
+			process_projectontoground(delta, 50)
 	elif playerinfreefall:
 		process_freefall(delta)
 	else:
@@ -263,11 +263,11 @@ func process_freefall(delta):
 			endfreefallmode()
 	playerbodycentre_prev = playerbodycentre
 
-func process_ontoground(delta):
+func process_projectontoground(delta, metresdistancecount):
 	playerbodycentre = HeadCentre.global_transform.origin - Vector3(0, playerheadcentreabovebodycentreheight, 0) + Ddebugvisualoffset
 	$PlayerKinematicBody.global_transform.origin = playerbodycentre
 	var Dplayerbodycentre = playerbodycentre
-	for i in range(10):
+	for i in range(metresdistancecount):
 		var kincol = $PlayerKinematicBody.move_and_collide(Vector3(0, -1, 0))
 		if kincol != null:
 			break
@@ -299,10 +299,16 @@ func process_directedflight(delta, playerdirectedflightvelocity):
 	$PlayerEnlargedKinematicBody/PlayerBodyCapsule.shape.height = capsuleshaftheight
 	$PlayerEnlargedKinematicBody.global_transform.origin = playerbodycentre
 	if playerdirectedflightvelocity != Vector3(0,0,0):
-		playerfreefallbodyvelocity = $PlayerEnlargedKinematicBody.move_and_slide(playerdirectedflightvelocity, Vector3(0, 1, 0))
-		if playerfreefallbodyvelocity.normalized().dot(playerdirectedflightvelocity.normalized()) < 0.86:
-			pass # Tglobal.soundsystem.quicksoundonpositionchange("GlancingMotion", playerbodycentre + Vector3(0,3,0), 0)			
-		playerbodycentre = $PlayerEnlargedKinematicBody.global_transform.origin
+		if playerMe.playerscale == 1.0:
+			playerfreefallbodyvelocity = $PlayerEnlargedKinematicBody.move_and_slide(playerdirectedflightvelocity, Vector3(0, 1, 0))
+			if playerfreefallbodyvelocity.normalized().dot(playerdirectedflightvelocity.normalized()) < 0.86:
+				pass # Tglobal.soundsystem.quicksoundonpositionchange("GlancingMotion", playerbodycentre + Vector3(0,3,0), 0)			
+			playerbodycentre = $PlayerEnlargedKinematicBody.global_transform.origin
+		else:
+			playerbodycentre += playerdirectedflightvelocity*delta
+			playerfreefallbodyvelocity = playerdirectedflightvelocity
+	else:
+		playerfreefallbodyvelocity = Vector3(0,0,0)
 	playerMe.global_transform.origin = -Ddebugvisualoffset + playerbodycentre + Vector3(0, playerheadcentreabovebodycentreheight, 0) - headcentrefromvroriginvector
 	addplayervelocitystack((playerbodycentre - playerbodycentre_prev)/delta)
 	playerbodycentre_prev = playerbodycentre
@@ -364,6 +370,12 @@ func filter_playerposition_bandwidth(positiondict):
 	if dt > dtmax:
 		prevpositiondict = positiondict.duplicate(true)
 		return positiondict
+
+	if prevpositiondict["playerscale"] == positiondict["playerscale"]:
+		positiondict.erase("playerscale")
+	else:
+		prevpositiondict["playerscale"] = positiondict["playerscale"]
+	
 	if transformwithinrange(prevpositiondict["puppetbody"]["playertransform"], positiondict["puppetbody"]["playertransform"], headpositionchange, headanglechange) and \
 	   transformwithinrange(prevpositiondict["puppetbody"]["headcamtransform"], positiondict["puppetbody"]["headcamtransform"], headpositionchange, headanglechange):
 		positiondict.erase("puppetbody")

@@ -170,7 +170,6 @@ func applytrimmedpaperuvscale():
 	m.set_shader_param("uv1_scale", Vector3((imgtrimrightup.x - imgtrimleftdown.x)/imgwidth, (imgtrimrightup.y - imgtrimleftdown.y)/imgheight, 1))
 	m.set_shader_param("uv1_offset", Vector3((imgtrimleftdown.x - (-imgwidth*0.5))/imgwidth, -(imgtrimrightup.y - (imgheight*0.5))/imgheight, 0))
 
-const deferconstructionofcentrelinenodes = true
 func mergexcrpcdata(xcdata):
 	assert ((get_name() == xcdata["name"]) and (not ("drawingtype" in xcdata) or drawingtype == xcdata["drawingtype"]))
 	if "transformpos" in xcdata:
@@ -208,25 +207,7 @@ func mergexcrpcdata(xcdata):
 			nodepoints[nA] = nodepointsAdd[nA]
 			var xcn = $XCnodes.get_node_or_null(nA)
 			if xcn == null:
-				if drawingtype == DRAWING_TYPE.DT_CENTRELINE:
-					if not deferconstructionofcentrelinenodes:
-						var materialsystem = get_node("/root/Spatial/MaterialSystem")
-						xcn = XCnode_centreline.instance()
-						xcn.get_node("CollisionShape/MeshInstance").layers = CollisionLayer.VL_centrelinestations
-						xcn.get_node("StationLabel").layers = CollisionLayer.VL_centrelinestationslabel
-						xcn.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("station"))
-						xcn.set_name(nA)
-						$XCnodes.add_child(xcn)
-						xcn.translation = nodepointsAdd[nA]
-						var xcnpv = XCnode_centreline.instance()
-						xcnpv.set_name(nA)
-						xcnpv.get_node("CollisionShape/MeshInstance").layers = CollisionLayer.VL_centrelinestationsplanview
-						xcnpv.get_node("StationLabel").layers = CollisionLayer.VL_centrelinestationslabelplanview
-						xcnpv.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("station"))
-						xcnpv.collision_layer = CollisionLayer.CL_CentrelineStationPlanView
-						$XCnodes_PlanView.add_child(xcnpv)
-						xcnpv.translation = nodepointsAdd[nA]
-				else:
+				if drawingtype != DRAWING_TYPE.DT_CENTRELINE:
 					xcn = XCnode.instance()
 					if nA.begins_with("r"):
 						var materialsystem = get_node("/root/Spatial/MaterialSystem")

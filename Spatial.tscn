@@ -816,6 +816,7 @@ emission_on_uv2 = false
 size = Vector3( 0.2, 0.2, 0.2 )
 
 [sub_resource type="SpatialMaterial" id=126]
+flags_do_not_receive_shadows = true
 albedo_color = Color( 0.831373, 0.180392, 0.905882, 1 )
 
 [sub_resource type="CylinderMesh" id=127]
@@ -1079,16 +1080,16 @@ size = Vector2( 1, 0.5 )
 [sub_resource type="SpatialMaterial" id=159]
 albedo_texture = ExtResource( 49 )
 
-[sub_resource type="PlaneMesh" id=189]
+[sub_resource type="PlaneMesh" id=160]
 size = Vector2( 1, 0.5 )
 
-[sub_resource type="SpatialMaterial" id=190]
+[sub_resource type="SpatialMaterial" id=161]
 albedo_texture = ExtResource( 11 )
 
-[sub_resource type="PlaneMesh" id=191]
+[sub_resource type="PlaneMesh" id=162]
 size = Vector2( 1, 0.5 )
 
-[sub_resource type="SpatialMaterial" id=192]
+[sub_resource type="SpatialMaterial" id=163]
 albedo_texture = ExtResource( 51 )
 
 [sub_resource type="AudioStreamMicrophone" id=164]
@@ -1492,17 +1493,32 @@ margin_top = 166.0
 margin_right = 294.0
 margin_bottom = 193.0
 text = "1x"
-items = [ "1x", null, false, 0, null, "10x", null, false, 1, null, "100x", null, false, 2, null ]
+items = [ "1x", null, false, 0, null, "2x", null, false, 1, null, "10x", null, false, 2, null ]
 selected = 0
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="PlayerList" type="OptionButton" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 22.0
-margin_top = 230.0
-margin_right = 99.0
-margin_bottom = 253.0
+margin_left = 26.0
+margin_top = 208.0
+margin_right = 103.0
+margin_bottom = 231.0
+text = "server"
+items = [ "server", null, false, 0, null ]
+selected = 0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ButtonGoto" type="Button" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
+margin_left = 31.0
+margin_top = 233.0
+margin_right = 74.0
+margin_bottom = 261.0
+rect_pivot_offset = Vector2( 111.073, 28.0005 )
+disabled = true
+text = "Goto"
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -1959,7 +1975,8 @@ transform = Transform( 1, 0, 0, 0, 0.819152, 0.573577, 0, -0.573577, 0.819152, -
 collision_layer = 8
 
 [node name="Viewport" type="Control" parent="PlanViewSystem/PlanView"]
-margin_right = 40.0
+margin_left = 600.0
+margin_right = 640.0
 margin_bottom = 40.0
 __meta__ = {
 "_edit_use_anchors_": false
@@ -2871,13 +2888,13 @@ material/0 = SubResource( 159 )
 
 [node name="InstallButton" type="MeshInstance" parent="MaterialSystem/buttonmaterials"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -3.66956, 0.00255632, 3.02332 )
-mesh = SubResource( 189 )
-material/0 = SubResource( 190 )
+mesh = SubResource( 160 )
+material/0 = SubResource( 161 )
 
 [node name="ClearCacheButton" type="MeshInstance" parent="MaterialSystem/buttonmaterials"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -3.67896, 0.00439954, 3.65971 )
-mesh = SubResource( 191 )
-material/0 = SubResource( 192 )
+mesh = SubResource( 162 )
+material/0 = SubResource( 163 )
 
 [node name="SoundSystem" type="Spatial" parent="."]
 script = ExtResource( 19 )

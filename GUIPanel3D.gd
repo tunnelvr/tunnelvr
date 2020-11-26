@@ -90,11 +90,22 @@ func _on_buttonflywalkreversed_toggled(button_pressed):
 		toggleguipanelvisibility(null)
 
 
-func _on_worldscale_selected(index):
-	var newworldscale = int($Viewport/GUI/Panel/WorldScale.get_item_text(index))
-	playerMe.world_scale = newworldscale
-	#get_node("/root/Spatial/GuiSystem").scale = Vector3(newworldscale, newworldscale, newworldscale)
-
+func _on_playerscale_selected(index):
+	var newplayerscale = float($Viewport/GUI/Panel/WorldScale.get_item_text(index))
+	ARVRServer.world_scale = newplayerscale
+	playerMe.playerscale = newplayerscale
+	playerMe.get_node("HandLeft").setcontrollerhandtransform(playerMe.playerscale)
+	playerMe.get_node("HandRight").setcontrollerhandtransform(playerMe.playerscale)
+	if playerMe.playerscale == 1.0:
+		get_node("/root/Spatial/BodyObjects/PlayerDirections").forceontogroundtimedown = 0.25
+		playerMe.playerflyscale = 1.0
+	else:
+		if playerMe.playerscale >= 10:
+			playerMe.playerflyscale = playerMe.playerscale*0.2
+		else:
+			playerMe.playerflyscale = playerMe.playerscale*0.75
+	toggleguipanelvisibility(null)
+	
 func _on_msaa_selected(index):
 	get_node("/root/Spatial").setmsaa()
 
@@ -151,7 +162,8 @@ func _ready():
 	
 	$Viewport/GUI/Panel/MSAAstatus.connect("item_selected", self, "_on_msaa_selected")
 	$Viewport/GUI/Panel/PlayerList.connect("item_selected", self, "_on_playerlist_selected")
-	$Viewport/GUI/Panel/WorldScale.connect("item_selected", self, "_on_worldscale_selected")
+	$Viewport/GUI/Panel/ButtonGoto.connect("pressed", self, "_on_buttongoto_pressed")
+	$Viewport/GUI/Panel/WorldScale.connect("item_selected", self, "_on_playerscale_selected")
 	$Viewport/GUI/Panel/Networkstate.connect("item_selected", self, "_on_networkstate_selected")
 
 	if $Viewport/GUI/Panel/Networkstate.selected != 0:  # could record saved settings on disk
@@ -161,18 +173,33 @@ func clickbuttonheadtorch():
 	$Viewport/GUI/Panel/ButtonHeadtorch.pressed = not $Viewport/GUI/Panel/ButtonHeadtorch.pressed
 	_on_buttonheadtorch_toggled($Viewport/GUI/Panel/ButtonHeadtorch.pressed)
 
+
 var selectedplayernetworkid = 0
+var selectedplayerplatform = ""
+func _on_goto_pressed():
+	if selectedplayernetworkid == playerMe.networkID:
+		if playerMe.networkID != 1 and Tglobal.connectiontoserveractive:
+			playerMe.rpc_id(1, "playerjumpgoto", playerMe.networkID)
+	elif selectedplayernetworkid != -1:
+		playerMe.playerjumpgoto(selectedplayernetworkid)
+
 func _on_playerlist_selected(index):
 	var player = get_node("/root/Spatial/Players").get_child(index)
 	if player != null:
 		selectedplayernetworkid = player.networkID
-		$Viewport/GUI/Panel/PlayerInfo.text = "%s:%d" % [player.playerplatform, selectedplayernetworkid]
-		netlinkstatstimer = -0.8
+		selectedplayerplatform = player.playerplatform
+		$Viewport/GUI/Panel/PlayerInfo.text = "%s:%d" % [selectedplayerplatform, selectedplayernetworkid]
+		netlinkstatstimer = -3.0
 		networkmetricsreceived = null
+		$Viewport/GUI/Panel/ButtonGoto.disabled = selectedplayernetworkid == playerMe.networkID and playerMe.networkID == 1
+
 	else:
 		selectedplayernetworkid = -1
+		selectedplayerplatform = ""
 		$Viewport/GUI/Panel/PlayerInfo.text = String("updating")
 		updateplayerlist()
+		$Viewport/GUI/Panel/ButtonGoto.disabled = true
+		
 	
 func updateplayerlist():
 	var selectedplayerindex = 0
@@ -300,8 +327,6 @@ func _input(event):
 			_on_buttondoppelganger_toggled($Viewport/GUI/Panel/ButtonDoppelganger.pressed)	
 		elif event.scancode == KEY_O:
 			_on_buttonswapcontrollers_pressed()
-
-
 
 
 #-------------networking system
@@ -442,7 +467,7 @@ var networkmetricsreceived = null
 remote func recordnetworkmetrics(lnetworkmetricsreceived):
 	lnetworkmetricsreceived["ticksback"] = OS.get_ticks_msec()
 	networkmetricsreceived = lnetworkmetricsreceived
-	print("recordnetworkmetrics ", networkmetricsreceived)
+	#print("recordnetworkmetrics ", networkmetricsreceived)
 	
 remote func sendbacknetworkmetrics(lnetworkmetrics, networkIDsource):
 	var playerOthername = "NetworkedPlayer"+String(networkIDsource) if networkIDsource != -11 else "Doppelganger"
@@ -471,6 +496,8 @@ func _process(delta):
 		if (websocketclient.get_connection_status() == NetworkedMultiplayerPeer.CONNECTION_CONNECTED or websocketclient.get_connection_status() == NetworkedMultiplayerPeer.CONNECTION_CONNECTING):
 			websocketclient.poll()
 	if visible and Tglobal.connectiontoserveractive:
+		if netlinkstatstimer < 0.0 and netlinkstatstimer + delta >= 0:
+			$Viewport/GUI/Panel/PlayerInfo.text = "%s:%d" % [selectedplayerplatform, selectedplayernetworkid]
 		netlinkstatstimer += delta
 		maxdelta = max(delta, maxdelta)
 		sumdelta += delta
