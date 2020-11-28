@@ -10,7 +10,6 @@ var xcsectormaterials = [ ]  # [ 0material, 1material, ... ]
 var xclinkintermediatenodes = null 		 # [ 0[Vector3(u,v,lambda), Vector3, Vector3], 1[ ], 2[ ] ] parallel to the drawinglinks, if it is set
 
 # derived data
-var positioningtube = false
 var pickedpolyindex0 = -1
 var pickedpolyindex1 = -1
 
@@ -90,7 +89,6 @@ func mergexctrpcdata(xctdata):
 				xcdrawinglink.push_back(drawinglinksAdd[iA*rN+m1])
 				xcsectormaterials.push_back(drawinglinksAdd[iA*rN+2])
 
-
 				if xclinkintermediatenodes != null:
 					xclinkintermediatenodes.push_back(drawinglinksAdd[iA*rN+3] if drawinglinksAdd[iA*rN+3] != null else [])
 				elif drawinglinksAdd[iA*rN+3] != null:
@@ -114,7 +112,9 @@ func setxctubepathlinevisibility(sketchsystem):
 	var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(xcname1)
 	#var pathlinesvisible = xcdrawing0.get_node("PathLines").visible or xcdrawing1.get_node("PathLines").visible
 	var pathlinesvisible = (xcdrawing0.drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE) or \
-						   (xcdrawing1.drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE)
+						   (xcdrawing1.drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE) or \
+						   ($XCtubesectors.get_child_count() == 0) or \
+						   (xcdrawing1.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE)
 	$PathLines.visible = pathlinesvisible
 	for inode in $PathLines.get_children():
 		inode.visible = pathlinesvisible
@@ -165,6 +165,7 @@ func centrelineconnectionfloortransformpos(sketchsystem):
 							"previmgtrim": { "imgwidth":d.imgwidth, "imgtrimleftdown":d.imgtrimleftdown, "imgtrimrightup":d.imgtrimrightup },
 							"imgtrim": { "imgwidth":d.imgwidth*sca, "imgtrimleftdown":d.imgtrimleftdown*sca, "imgtrimrightup":d.imgtrimrightup*sca }
 						  }
+			print("Floormove ", transformpos)
 			xcdatalist = [ xcndata, txcdata ]
 
 	return xcdatalist
@@ -176,25 +177,60 @@ func decodeintermediatenodenamelinkindex(inodename):
 func decodeintermediatenodenamenodeindex(inodename):
 	return int(inodename.split("i")[1])
 
+func updatetubepositionlinks(sketchsystem):
+	var surfaceTool = SurfaceTool.new()
+	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(xcname0)
+	var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(xcname1)
+	assert(xcdrawing0.drawingtype == DRAWING_TYPE.DT_CENTRELINE and xcdrawing1.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE)
+	assert ((len(xcdrawinglink)%2) == 0)
+	for j in range(0, len(xcdrawinglink), 2):
+		var p0 = xcdrawing0.transform * xcdrawing0.nodepoints[xcdrawinglink[j]]
+		var p1 = xcdrawing1.transform * xcdrawing1.nodepoints[xcdrawinglink[j+1]]
+		var vec = p1 - p0
+		var veclen = max(0.01, vec.length())
+		var perp = xcdrawing1.global_transform.basis.x
+		var arrowlen = min(0.4, veclen*0.5)
+		var p0m = p0
+		var p0mleft = p0m - linewidth*perp
+		var p0mright = p0m + linewidth*perp
+		var jb = j/2
+		var p1m = p1
+		var p1mtrans = null
+		var p1mleft = p1m - linewidth*perp
+		var p1mright = p1m + linewidth*perp
+		surfaceTool.add_vertex(p0mleft)
+		surfaceTool.add_vertex(p1mleft)
+		surfaceTool.add_vertex(p0mright)
+		surfaceTool.add_vertex(p0mright)
+		surfaceTool.add_vertex(p1mleft)
+		surfaceTool.add_vertex(p1mright)
+		var pa = p1m - (p1m - p0m).normalized()*arrowlen
+		var arrowfac = max(2*linewidth, arrowlen/2)
+		surfaceTool.add_vertex(p1m)
+		surfaceTool.add_vertex(pa + arrowfac*perp)
+		surfaceTool.add_vertex(pa - arrowfac*perp)
+	surfaceTool.generate_normals()
+	$PathLines.mesh = surfaceTool.commit()
+	$PathLines.set_surface_material(0, get_node("/root/Spatial/MaterialSystem").pathlinematerial("normal"))
+	$PathLines.layers = CollisionLayer.VL_xctubeposlines
+	$PathLines.visible = true
+
 func updatetubelinkpaths(sketchsystem):
 	var surfaceTool = SurfaceTool.new()
 	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(xcname0)
 	var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(xcname1)
-	var xcdrawing0nodes = xcdrawing0.get_node("XCnodes")
-	var xcdrawing1nodes = xcdrawing1.get_node("XCnodes")
 	assert ((len(xcdrawinglink)%2) == 0)
 	for j in range(0, len(xcdrawinglink), 2):
 		var p0 = xcdrawing0.transform * xcdrawing0.nodepoints[xcdrawinglink[j]]
 		var p1 = xcdrawing1.transform * xcdrawing1.nodepoints[xcdrawinglink[j+1]]
-		#var p0 = xcdrawing0nodes.get_node(xcdrawinglink[j]).global_transform.origin
-		#var p1 = xcdrawing1nodes.get_node(xcdrawinglink[j+1]).global_transform.origin
 		var vec = p1 - p0
 		var veclen = max(0.01, vec.length())
 		var perp = Vector3(1, 0, 0)
 		if xcdrawing1.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 			perp = vec.cross(xcdrawing1.global_transform.basis.y).normalized()
-			if perp == Vector3(0, 0, 0) or positioningtube:
+			if perp == Vector3(0, 0, 0):
 				perp = xcdrawing1.global_transform.basis.x
 		var arrowlen = min(0.4, veclen*0.5)
 

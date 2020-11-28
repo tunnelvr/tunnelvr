@@ -139,10 +139,6 @@ func setactivetargetwall(newactivetargetwall):
 		activetargetwall.get_node("PathLines").set_surface_material(0, materialsystem.pathlinematerial("normal"))
 		for xcnode in activetargetwall.get_node("XCnodes").get_children():
 			xcnode.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("selected" if xcnode == activetargetnode else clearednodematerialtype(xcnode, false)))
-		#for xctube in activetargetwall.xctubesconn:
-		#	if not xctube.positioningtube:
-		#		xctube.updatetubeshell(sketchsystem.get_node("XCdrawings"))
-		#activetargetwall.updatexctubeshell(sketchsystem.get_node("XCdrawings"))
 	if activetargetwall != null and activetargetwall.drawingtype == DRAWING_TYPE.DT_PAPERTEXTURE:
 		activetargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").get_surface_material(0).albedo_color = Color("#FEF4D5")
 	
@@ -254,7 +250,7 @@ func setpointertarget(laserroot, raycast):
 				LaserSelectLine.visible = pointertargetwall != null and pointertargettype == "XCdrawing" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE
 			elif activetargetnodewall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 				if pointertargettype == "XCnode":
-					LaserSelectLine.visible = true
+					LaserSelectLine.visible = (pointertargetwall.drawingtype != DRAWING_TYPE.DT_CENTRELINE)
 				elif pointertargettype == "XCdrawing" and pointertargetwall == activetargetnodewall:
 					LaserSelectLine.visible = true
 				else:
@@ -916,8 +912,7 @@ func buttonreleased_vrgrip():
 		var updatexcshells = [ pointertargetwall.get_name() ]
 		var updatetubeshells = [ ]
 		for xctube in pointertargetwall.xctubesconn:
-			if not xctube.positioningtube:
-				updatetubeshells.push_back({ "tubename":xctube.get_name(), "xcname0":xctube.xcname0, "xcname1":xctube.xcname1 })
+			updatetubeshells.push_back({ "tubename":xctube.get_name(), "xcname0":xctube.xcname0, "xcname1":xctube.xcname1 })
 
 		sketchsystem.actsketchchange([{"xcvizstates":{ pointertargetwall.get_name():2 }, "updatetubeshells":updatetubeshells, "updatexcshells":updatexcshells }])
 		#if pointertargettype == activetargetwall:
@@ -933,8 +928,7 @@ func buttonreleased_vrgrip():
 		var updatexcshells = [ activetargetwall.get_name() ]
 		var updatetubeshells = [ ]
 		for xctube in activetargetwall.xctubesconn:
-			if not xctube.positioningtube:
-				updatetubeshells.push_back({ "tubename":xctube.get_name(), "xcname0":xctube.xcname0, "xcname1":xctube.xcname1 })
+			updatetubeshells.push_back({ "tubename":xctube.get_name(), "xcname0":xctube.xcname0, "xcname1":xctube.xcname1 })
 		sketchsystem.actsketchchange([{"xcvizstates":{ }, "updatetubeshells":updatetubeshells, "updatexcshells":updatexcshells }])
 		setactivetargetwall(null)
 
@@ -1024,6 +1018,10 @@ func buttonreleased_vrtrigger():
 			LaserOrient.get_node("RayCast").collision_mask = CollisionLayer.CL_IntermediatePlane
 
 func _physics_process(delta):
+	if playerMe.handflickmotiongesture != 0:
+		Tglobal.controlslocked = (playerMe.handflickmotiongesture == 1)
+		playerMe.handflickmotiongesture = 0
+		
 	var planviewnothit = true
 	if LaserOrient.visible: 
 		var firstlasertarget = LaserOrient.get_node("RayCast").get_collider() if LaserOrient.get_node("RayCast").is_colliding() and not LaserOrient.get_node("RayCast").get_collider().is_queued_for_deletion() else null
@@ -1053,6 +1051,7 @@ func _physics_process(delta):
 		var txcdata = targetwalltransformpos(1)
 		sketchsystem.actsketchchange([ targetwalltransformpos(1) ])
 		
+	
 var rightmousebuttonheld = false
 func _input(event):
 	if event.is_action_pressed("ui_cancel"):

@@ -43,11 +43,7 @@ extends Spatial
 
 # * VR leads@skydeas1  and @brainonsilicon in Leeds (can do a trip there)
 
-# * systematically do the updatetubelinkpaths and updatetubelinkpaths recursion properly 
-
 # * Bring in XCdrawings that are hooked to the centreline that will highlight when they get it
-# * these cross sections are tied to the centrelinenodes and not the floor, and are prepopulated with the cross sections dimensions and tubes
-# * Load and move the floor on load
 
 # * clear up the laser pointer logic and materials
 

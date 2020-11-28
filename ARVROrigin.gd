@@ -64,12 +64,55 @@ func setdoppelganger(doppelgangeron):
 		doppelganger = null	
 	get_node("/root/Spatial/GuiSystem/GUIPanel3D").updateplayerlist()
 	
-func _ready():
-	pass
 
-func _physics_process(_delta):
+var handflickdistancestack = [ ]
+const handflickdistancestack_sizemax = 4
+const handflickvelocitylimit = 1.5
+const handflicktimerlimit = 0.07
+const handflickvelsumlimit = 0.013
+var handflickmotiontransit = 0
+var handflickmotiontimer = 0.0
+var handflickfacesum = 0.0
+var handflickvelsum = 0.0
+var handflickmotiongesture = 0
+func _physics_process(delta):
 	$HandLeft.middleringbutton.get_node("MeshInstance").get_surface_material(0).emission_energy = 1 if $HandLeft/RayCast.is_colliding() else 0
 	$HandRight.middleringbutton.get_node("MeshInstance").get_surface_material(0).emission_energy = 1 if $HandRight/RayCast.is_colliding() else 0
+
+	var handflickface = 0.0
+	if $HandRight.handvalid:
+		var handprojectionpoint = $HandRight.transform.origin + $HandRight.transform.basis.x*(-0.2)
+		var handflickpos = handprojectionpoint - $HeadCam.transform.origin
+		if len(handflickdistancestack) >= handflickdistancestack_sizemax:
+			handflickdistancestack.pop_front()
+		handflickdistancestack.push_back(handflickpos.length())
+		handflickface = handflickpos.dot($HandRight.transform.basis.y)
+	else:
+		handflickdistancestack.clear()
+		handflickmotiontransit = 0
+	if len(handflickdistancestack) == handflickdistancestack_sizemax:
+		var handflickvel = (handflickdistancestack[0] - handflickdistancestack[handflickdistancestack_sizemax-1])/(delta*handflickdistancestack_sizemax)
+		if abs(handflickvel) > handflickvelocitylimit:
+			#print("v ", handflickvel, " ", handflickmotiontimer+delta, " ", handflickface)
+			var lhandflickmotiontransit = (1 if handflickvel > 0 else -1)
+			if handflickmotiontransit == lhandflickmotiontransit:
+				handflickmotiontimer += delta
+				handflickfacesum += handflickface*delta
+				handflickvelsum = handflickvel*delta
+
+			else:
+				handflickmotiontimer = 0.0
+				handflickmotiontransit = lhandflickmotiontransit
+				handflickfacesum = 0.0
+				handflickvelsum = 0.0
+
+		elif handflickmotiontransit != 0:
+			if handflickmotiontimer > handflicktimerlimit and handflickfacesum > 0.0 and abs(handflickvelsum) > handflickvelsumlimit:
+				handflickmotiongesture = handflickmotiontransit
+				print("handflickgesture ", handflickmotiongesture, " ", handflickfacesum, "  ", handflickvelsum)
+			handflickdistancestack.clear()
+			handflickmotiontransit = 0
+
 
 remote func setavatarposition(positiondict):
 	print("ppt nope not master ", positiondict)
@@ -183,6 +226,7 @@ func _process(delta):
 		LaserOrient.visible = (not Tglobal.controlslocked) or (LaserOrient.get_node("RayCast").get_collider() == guipanel3d)
 	else:
 		LaserOrient.visible = false
+
 
 
 func initkeyboardcontroltrackingnow():

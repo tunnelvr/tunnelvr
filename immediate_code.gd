@@ -6,9 +6,9 @@ extends EditorScript
 # *******
 
 func _run():
-	var a = { "a":99}
-	print(a.keys())
-
+	var x = Rect2(0,0,5,5)
+	print(x)
+	
 var zi = [ ]
 var zi1 = [ 0.48, 0.66 ]
 

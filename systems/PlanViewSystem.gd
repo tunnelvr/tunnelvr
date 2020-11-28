@@ -208,9 +208,6 @@ func readydeferred():
 func actplanviewvisibleactive(lvisible, lactive, tubesvisible, centrelinesvisible):
 	if visible != lvisible:
 		visible = lvisible
-		for xccentreline in get_tree().get_nodes_in_group("gpcentrelinegeo"):
-			xccentreline.get_node("PathLines").visible = visible
-			xccentreline.get_node("XCnodes_PlanView").visible = visible
 		if visible:  # see also updatecentrelinevisibility()
 			get_node("PlanView/CollisionShape").disabled = false
 			var playerMe = get_node("/root/Spatial").playerMe

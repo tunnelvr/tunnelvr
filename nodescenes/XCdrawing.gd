@@ -1,7 +1,6 @@
 extends Spatial
 
 const XCnode = preload("res://nodescenes/XCnode.tscn")
-const XCnode_centreline = preload("res://nodescenes/XCnode_centreline.tscn")
 
 # primary data
 var xcresource = ""     # source file
@@ -207,7 +206,7 @@ func mergexcrpcdata(xcdata):
 			nodepoints[nA] = nodepointsAdd[nA]
 			var xcn = $XCnodes.get_node_or_null(nA)
 			if xcn == null:
-				if drawingtype != DRAWING_TYPE.DT_CENTRELINE:
+				if drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 					xcn = XCnode.instance()
 					if nA.begins_with("r"):
 						var materialsystem = get_node("/root/Spatial/MaterialSystem")
@@ -216,6 +215,15 @@ func mergexcrpcdata(xcdata):
 					maxnodepointnumber = max(maxnodepointnumber, int(nA))
 					$XCnodes.add_child(xcn)
 					xcn.translation = nodepointsAdd[nA]
+					xcn.get_node("CollisionShape/MeshInstance").layers = CollisionLayer.VL_xcdrawingnodes
+
+				elif drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
+					xcn = XCnode.instance()
+					xcn.set_name(nA)
+					maxnodepointnumber = max(maxnodepointnumber, int(nA))
+					$XCnodes.add_child(xcn)
+					xcn.translation = nodepointsAdd[nA]
+					xcn.get_node("CollisionShape/MeshInstance").layers = CollisionLayer.VL_xctubeposlines
 			else:
 				xcn.translation = nodepointsAdd[nA]
 		
@@ -329,15 +337,14 @@ func makexctubeshell(xcdrawings):
 	var forepolyindexes = [ ]
 	var backpolyindexes = [ ]
 	for xctube in xctubesconn:
-		if not xctube.positioningtube:
-			var polyindex = xctube.pickedpolyindex0 if xctube.xcname0 == get_name() else xctube.pickedpolyindex1
-			if polyindex != -1:
-				var xcdrawingOther = xcdrawings.get_node(xctube.xcname1 if xctube.xcname0 == get_name() else xctube.xcname0)
-				var ftubevec = xcdrawingOther.global_transform.origin - global_transform.origin
-				if 	global_transform.basis.z.dot(ftubevec) > 0:
-					forepolyindexes.append(polyindex)
-				else:
-					backpolyindexes.append(polyindex)
+		var polyindex = xctube.pickedpolyindex0 if xctube.xcname0 == get_name() else xctube.pickedpolyindex1
+		if polyindex != -1:
+			var xcdrawingOther = xcdrawings.get_node(xctube.xcname1 if xctube.xcname0 == get_name() else xctube.xcname0)
+			var ftubevec = xcdrawingOther.global_transform.origin - global_transform.origin
+			if 	global_transform.basis.z.dot(ftubevec) > 0:
+				forepolyindexes.append(polyindex)
+			else:
+				backpolyindexes.append(polyindex)
 	
 	var polypartial = null
 	if forepolyindexes == [ len(polys)-1 ]:

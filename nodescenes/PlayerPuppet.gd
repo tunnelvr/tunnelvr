@@ -9,6 +9,7 @@ var puppetpointerpositionstack = [ ]  # [ { "timestamp", "Ltimestamp", "orient",
 remote func initplayerappearance(lplayerplatform, headcolour):
 	playerplatform = lplayerplatform
 	get_node("HeadCam/csgheadmesh/skullcomponent").material.albedo_color = headcolour
+	get_node("headlocator/locatorline").get_surface_material(0).albedo_color = headcolour
 	#if playerplatform == "PC":
 	#	get_node("HeadCam/csgheadmesh").mesh.size.x = 0.15
 	if playerplatform == "Quest":
@@ -37,7 +38,7 @@ onready var guipanel3d = get_node("/root/Spatial/GuiSystem/GUIPanel3D")
 remote func setavatarposition(positiondict):
 	$AnimationPlayer_setavatarposition_flash.stop()
 	$AnimationPlayer_setavatarposition_flash.play("setavatarposition_flash")
-	print("received setavatarposition ", get_name(), positiondict.keys())
+	#print("received setavatarposition ", get_name(), positiondict.keys())
 	if not visible:
 		if "puppetbody" in positiondict:
 			global_transform = positiondict["puppetbody"]["playertransform"]
@@ -86,7 +87,7 @@ remote func setavatarposition(positiondict):
 		while len(puppetpositionstack) > maxstacklength:
 			puppetpositionstack.pop_front()
 		puppetpositionstack.push_back(puppetbody)
-		print(" ", get_name(), " stacksize ", len(puppetpositionstack))
+		#print(" ", get_name(), " stacksize ", len(puppetpositionstack))
 		
 	if positiondict.has("laserpointer"):
 		var puppetpointerposition = positiondict["laserpointer"]

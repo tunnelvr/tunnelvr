@@ -44,6 +44,7 @@ resource_local_to_scene = true
 albedo_color = Color( 1, 0.0156863, 0.0156863, 1 )
 
 [sub_resource type="CubeMesh" id=9]
+resource_local_to_scene = true
 size = Vector3( 0.1, 50, 0.1 )
 
 [sub_resource type="SpatialMaterial" id=10]

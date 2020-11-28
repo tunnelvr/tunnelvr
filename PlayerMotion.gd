@@ -152,6 +152,7 @@ func _physics_process(delta):
 		if playercentrevelocitylength > 0.01:
 			$MotionVectorPreview.global_transform = Transform(Basis(), playerbodycentre).looking_at(playerbodycentre - playercentrevelocity, Vector3(0,1,0) if abs(playercentrevelocity.y) < 0.8*playercentrevelocitylength else Vector3(1,0,0))
 		
+	
 
 func process_feet_on_floor(delta, playerdirectedwalkmovement):
 	playerbodycentre = HeadCentre.global_transform.origin - Vector3(0, playerheadcentreabovebodycentreheight, 0) + Ddebugvisualoffset
@@ -421,7 +422,7 @@ func process_shareplayerposition():
 		positiondict = filter_playerposition_bandwidth(positiondict)
 		if positiondict != null:
 			if Tglobal.morethanoneplayer and Tglobal.connectiontoserveractive:
-				print("sending setavatarposition ", positiondict.keys())
+				#print("sending setavatarposition ", positiondict.keys())
 				#playerMe.rpc("setavatarposition", positiondict)
 				playerMe.rpc_unreliable("setavatarposition", positiondict)
 			if is_instance_valid(playerMe.doppelganger):

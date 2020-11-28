@@ -39,7 +39,7 @@ enum {
 	VL_xcshells							= 0b00000000000100000000,
 	VL_centrelinestations				= 0b00000000001000000000,
 	VL_centrelinestationsplanview		= 0b00000000010000000000,
-	VL_surveylegs						= 0b00000000100000000000,  # not used now
+	VL_positioningnodelines				= 0b00000000100000000000,
 	VL_overheadlight					= 0b00000001000000000000,
 	VL_centrelinestationslabel			= 0b00000010000000000000,
 	VL_floortextureplanview				= 0b00000100000000000000,
@@ -47,9 +47,9 @@ enum {
 	VL_centrelinedrawinglines			= 0b00010000000000000000,
 	
 	VLCM_PlanViewCamera 				= 0b00011111110111111011,
-	VLCM_PlanViewCameraNoTube			= 0b00011101110011111011
-	VLCM_PlanViewCameraNoCentreline		= 0b00000111100111111011,
+	VLCM_PlanViewCameraNoTube			= 0b00011101110001001011
+	VLCM_PlanViewCameraNoCentreline		= 0b00000111000111111011,
 
 	VLCM_PlayerCamera					= 0b00010111101111111111,
-	VLCM_PlayerCameraNoCentreline		= 0b00000111000111111111,
+	VLCM_PlayerCameraNoCentreline		= 0b00000111000110111111,
 }

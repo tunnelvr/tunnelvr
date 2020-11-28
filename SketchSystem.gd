@@ -44,19 +44,13 @@ func xctubefromdata(xctdata):
 			xctube = newXCtube(xcdrawing0, xcdrawing1)
 		else:
 			xctube = newXCtube(xcdrawing1, xcdrawing0)
-		xctube.makeplaneintersectionaxisvec(xcdrawing0, xcdrawing1)
+		if xcdrawing0.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
+			xctube.makeplaneintersectionaxisvec(xcdrawing0, xcdrawing1)
 	else:
 		xctdata["m0"] = 1 if xctube.xcname0 == xctdata["xcname1"] else 0
 	xctube.mergexctrpcdata(xctdata)
 	return xctube
 
-func updateworkingshell():
-	for xctube in $XCtubes.get_children():
-		if not xctube.positioningtube:
-			xctube.updatetubeshell($XCdrawings)
-	for xcdrawing in $XCdrawings.get_children():
-		if xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
-			xcdrawing.updatexctubeshell($XCdrawings)
 	
 func sketchsystemtodict():
 	var xcdrawingsData = [ ]
@@ -241,7 +235,6 @@ remote func actsketchchangeL(xcdatalist):
 			if len(xctube.xcdrawinglink) == 0 and len(xctube.xcsectormaterials) == 0:
 				removeXCtube(xctube)
 				xctube.queue_free() 
-				#Tglobal.soundsystem.quicksound("BlipSound", xcdrawing.global_transform*tpos)
 			else:
 				xctubestoupdate[xctube.get_name()] = xctube
 				if "materialsectorschanged" in xcdata:
@@ -345,21 +338,25 @@ remote func actsketchchangeL(xcdatalist):
 	for xcdrawing in xcdrawingstoupdate.values():
 		xcdrawing.updatexcpaths()
 	for xctube in xctubestoupdate.values():
-		xctube.updatetubelinkpaths(self)
+		if $XCdrawings.get_node(xctube.xcname0).drawingtype == DRAWING_TYPE.DT_CENTRELINE:
+			xctube.updatetubepositionlinks(self)
+		else:
+			xctube.updatetubelinkpaths(self)
 
+		
 	if caveworldchunkI != -1:
 		for xcdrawing in xcdrawingstoupdate.values():
 			if xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 				xcdrawing.setdrawingvisiblecode(DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE if len(xcdrawing.xctubesconn) == 0 else DRAWING_TYPE.VIZ_XCD_HIDE)
 		for xctube in xctubestoupdate.values():
-			if not xctube.positioningtube:
+			if $XCdrawings.get_node(xctube.xcname0).drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 				xctube.updatetubeshell($XCdrawings)
 				xctube.setxctubepathlinevisibility(self)
-		for xcdrawing in xcdrawingstoupdate.values():
-			if xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
-				xcdrawing.updatexctubeshell($XCdrawings)
 				
 		if xcdatalist[0]["caveworldchunk"] == xcdatalist[0]["caveworldchunkLast"]:
+			for xcdrawing in $XCdrawings.get_children():
+				if xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
+					xcdrawing.updatexctubeshell($XCdrawings)
 			caveworldchunkI = -1
 			caveworldchunking_networkIDsource = -1
 			var xcdatalistReceivedDuringChunkingL = xcdatalistReceivedDuringChunking
@@ -599,7 +596,6 @@ func newXCtube(xcdrawing0, xcdrawing1):
 	var xctube = XCtube.instance()
 	xctube.xcname0 = xcdrawing0.get_name()
 	xctube.xcname1 = xcdrawing1.get_name()
-	xctube.positioningtube = xcdrawing0.drawingtype != DRAWING_TYPE.DT_XCDRAWING or xcdrawing1.drawingtype != DRAWING_TYPE.DT_XCDRAWING
 	xctube.set_name("XCtube_"+xctube.xcname0+"_"+xctube.xcname1)
 	xcdrawing0.xctubesconn.append(xctube)
 	xcdrawing1.xctubesconn.append(xctube)
