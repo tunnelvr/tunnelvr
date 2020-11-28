@@ -68,7 +68,7 @@ func setdoppelganger(doppelgangeron):
 var handflickdistancestack = [ ]
 const handflickdistancestack_sizemax = 4
 const handflickvelocitylimit = 1.5
-const handflicktimerlimit = 0.07
+const handflicktimerlimit = 0.05
 const handflickvelsumlimit = 0.013
 var handflickmotiontransit = 0
 var handflickmotiontimer = 0.0
@@ -110,6 +110,9 @@ func _physics_process(delta):
 			if handflickmotiontimer > handflicktimerlimit and handflickfacesum > 0.0 and abs(handflickvelsum) > handflickvelsumlimit:
 				handflickmotiongesture = handflickmotiontransit
 				print("handflickgesture ", handflickmotiongesture, " ", handflickfacesum, "  ", handflickvelsum)
+			else:
+				print("handflick f gesture ", handflickmotiontimer, " ", handflickfacesum, "  ", handflickvelsum)
+
 			handflickdistancestack.clear()
 			handflickmotiontransit = 0
 

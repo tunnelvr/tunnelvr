@@ -1021,6 +1021,7 @@ func _physics_process(delta):
 	if playerMe.handflickmotiongesture != 0:
 		Tglobal.controlslocked = (playerMe.handflickmotiongesture == 1)
 		playerMe.handflickmotiongesture = 0
+		playerMe.get_node("HandRight/PalmLight").visible = Tglobal.controlslocked
 		
 	var planviewnothit = true
 	if LaserOrient.visible: 

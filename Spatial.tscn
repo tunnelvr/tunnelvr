@@ -1,4 +1,4 @@
-[gd_scene load_steps=243 format=2]
+[gd_scene load_steps=242 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/default_env.tres" type="Environment" id=2]
@@ -77,20 +77,16 @@ flags_no_depth_test = true
 flags_do_not_receive_shadows = true
 albedo_color = Color( 0.211765, 0.207843, 0.207843, 0.568627 )
 
-[sub_resource type="CylinderMesh" id=188]
-top_radius = 0.02
-bottom_radius = 0.02
-height = 0.02
-radial_segments = 6
-rings = 1
+[sub_resource type="SphereMesh" id=188]
+radius = 0.02
+height = 0.04
+radial_segments = 8
+rings = 4
 
-[sub_resource type="SpatialMaterial" id=189]
-albedo_color = Color( 0.862745, 0.956863, 0.0352941, 1 )
-emission_enabled = true
-emission = Color( 0.85098, 0.964706, 0.0509804, 1 )
-emission_energy = 1.0
-emission_operator = 0
-emission_on_uv2 = false
+[sub_resource type="SpatialMaterial" id=45]
+albedo_color = Color( 0.984314, 0.0705882, 0.0705882, 1 )
+metallic = 0.46
+roughness = 0.28
 
 [sub_resource type="BoxShape" id=6]
 extents = Vector3( 0.3, 0.2, 0.01 )
@@ -338,11 +334,6 @@ size = Vector3( 0.002, 0.002, 1 )
 flags_unshaded = true
 flags_do_not_receive_shadows = true
 albedo_color = Color( 0.945098, 0.133333, 0.133333, 1 )
-
-[sub_resource type="SpatialMaterial" id=45]
-albedo_color = Color( 0.984314, 0.0705882, 0.0705882, 1 )
-metallic = 0.46
-roughness = 0.28
 
 [sub_resource type="SphereMesh" id=46]
 material = SubResource( 45 )
@@ -1307,11 +1298,11 @@ visible = false
 cast_to = Vector3( 0, 0, -0.2 )
 collision_mask = 40
 
-[node name="MeshInstance" type="MeshInstance" parent="Players/PlayerMe/HandRight"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 0 )
+[node name="PalmLight" type="MeshInstance" parent="Players/PlayerMe/HandRight"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.09, -0.02, 0 )
 visible = false
 mesh = SubResource( 188 )
-material/0 = SubResource( 189 )
+material/0 = SubResource( 45 )
 
 [node name="pointersystem" type="Node" parent="Players/PlayerMe"]
 script = ExtResource( 5 )
