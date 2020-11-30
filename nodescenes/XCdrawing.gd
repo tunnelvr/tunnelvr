@@ -7,6 +7,7 @@ var xcresource = ""     # source file
 var nodepoints = { }    # { nodename:Vector3 } in local coordinate system
 var onepathpairs = [ ]  # [ Anodename0, Anodename1, Bnodename0, Bnodename1, ... ]
 var drawingtype = DRAWING_TYPE.DT_XCDRAWING
+var drawingvisiblecode = DRAWING_TYPE.VIZ_XCD_HIDE
 var xcchangesequence = -1
 var xcflatshellmaterial = "simpledirt"
 
@@ -14,7 +15,6 @@ var imgwidth = 0
 var imgtrimleftdown = Vector2(0,0)
 var imgtrimrightup = Vector2(0,0)
 
-var drawingvisiblecode = DRAWING_TYPE.VIZ_XCD_HIDE
 
 # derived data
 var xctubesconn = [ ]   # references to xctubes that connect to here (could use their names instead)
@@ -54,7 +54,7 @@ func setxcdrawingvisibleL():
 	assert ($XCdrawingplane.visible != $XCdrawingplane/CollisionShape.disabled)
 
 func setdrawingvisiblecode(ldrawingvisiblecode):
-	var alreadynoshade = (drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE) or (drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE_ACTIVE)
+	var alreadynoshade = (drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE_B)
 	drawingvisiblecode = ldrawingvisiblecode
 	if drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		if (drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_PLANE_VISIBLE) != 0:
@@ -67,37 +67,52 @@ func setdrawingvisiblecode(ldrawingvisiblecode):
 	elif drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
 		var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
 		var mat = $XCdrawingplane/CollisionShape/MeshInstance.get_surface_material(0)
-		var noshade = (drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE) or (drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE_ACTIVE)
+		var noshade = (drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE_B)
 		if alreadynoshade != noshade:
-			var m = get_node("/root/Spatial/MaterialSystem").get_node("xcdrawingmaterials/floorunshaded" if noshade else "xcdrawingmaterials/floorbordered").get_surface_material(0).duplicate()
-			m.set_shader_param("texture_albedo", mat.get_shader_param("texture_albedo"))
-			mat = m
+			var matname = "xcdrawingmaterials/floorborderedunshaded" if noshade else "xcdrawingmaterials/floorbordered"
+			var newmat = get_node("/root/Spatial/MaterialSystem").get_node(matname).get_surface_material(0).duplicate()
+			newmat.set_shader_param("texture_albedo", mat.get_shader_param("texture_albedo"))
+			mat = newmat   # unshaded flag cannot be parametrized
 			$XCdrawingplane/CollisionShape/MeshInstance.set_surface_material(0, mat)
 			applytrimmedpaperuvscale()
 	
-		if drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_FLOOR_NORMAL or drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE:
-			setxcdrawingvisibleL()
-			var matc = get_node("/root/Spatial/MaterialSystem").get_node("xcdrawingmaterials/floorunshaded" if noshade else "xcdrawingmaterials/floorbordered").get_surface_material(0)
-			mat.set_shader_param("albedo", matc.get_shader_param("albedo"))
-			mat.set_shader_param("albedo_border", matc.get_shader_param("albedo_border"))
-			if planviewsystem.activetargetfloor == self:
-				 planviewsystem.setactivetargetfloor(null)
-			$XCdrawingplane.visible = true
-			$XCdrawingplane/CollisionShape.disabled = false
-		elif drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_FLOOR_ACTIVE or drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE_ACTIVE:
-			setxcdrawingvisibleL()
-			var matc = get_node("/root/Spatial/MaterialSystem").get_node("xcdrawingmaterials/floorborderedactive").get_surface_material(0)
-			mat.set_shader_param("albedo", matc.get_shader_param("albedo"))
-			mat.set_shader_param("albedo_border", matc.get_shader_param("albedo_border"))
-			planviewsystem.setactivetargetfloor(self)
-			$XCdrawingplane.visible = true
-			$XCdrawingplane/CollisionShape.disabled = false
-		elif drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_FLOOR_HIDDEN or drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_FLOOR_DELETED:
+		if (drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_HIDDEN) != 0:
 			setxcdrawingvisiblehideL(true)
 			if planviewsystem.activetargetfloor == self:
-				 planviewsystem.setactivetargetfloor(null)
+				planviewsystem.activetargetfloor = null
 			$XCdrawingplane.visible = false
 			$XCdrawingplane/CollisionShape.disabled = true
+
+		elif (drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_NORMAL) != 0:
+			setxcdrawingvisibleL()
+			var matname = "xcdrawingmaterials/floorbordered"
+			if (drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_ACTIVE_B) != 0:
+				planviewsystem.activetargetfloor = self
+				planviewsystem.planviewcontrols.get_node("FloorMove/CheckBoxUnshaded").pressed = ((drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE_B) != 0)
+				planviewsystem.planviewcontrols.get_node("FloorMove/LabelXCresource").text = xcresource.replace("%20", " ")
+				matname = "xcdrawingmaterials/floorborderedactive"
+			else:
+				if planviewsystem.activetargetfloor == self:
+					planviewsystem.activetargetfloor = null
+					planviewsystem.planviewcontrols.get_node("FloorMove/CheckBoxUnshaded").pressed = false
+					planviewsystem.planviewcontrols.get_node("FloorMove/LabelXCresource").text = ""
+				if (drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE_B) != 0:
+					matname = "xcdrawingmaterials/floorborderedunshaded"
+			var matc = get_node("/root/Spatial/MaterialSystem").get_node(matname).get_surface_material(0)
+			mat.set_shader_param("albedo", matc.get_shader_param("albedo"))
+			mat.set_shader_param("albedo_border", matc.get_shader_param("albedo_border"))
+
+			$XCdrawingplane.visible = true
+			$XCdrawingplane/CollisionShape.disabled = false
+
+#func setactivetargetfloor(lactivetargetfloor):
+#	activetargetfloor = lactivetargetfloor
+#	if activetargetfloor == null:
+#		planviewcontrols.get_node("FloorMove/CheckBoxUnshaded").pressed = false
+#		planviewcontrols.get_node("FloorMove/LabelXCresource").text = ""
+#	else:
+#		planviewcontrols.get_node("FloorMove/CheckBoxUnshaded").pressed = ((activetargetfloor.drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE_B) != 0)
+#		planviewcontrols.get_node("FloorMove/LabelXCresource").text = activetargetfloor.xcresource.replace("%20", " ")
 
 		
 func updateformetresquaresscaletexture():

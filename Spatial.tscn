@@ -2852,7 +2852,7 @@ transform = Transform( -0.999877, -2.55616e-09, -0.0156896, -0.0156896, 1.62901e
 mesh = SubResource( 138 )
 material/0 = SubResource( 140 )
 
-[node name="floorunshaded" type="MeshInstance" parent="MaterialSystem/xcdrawingmaterials"]
+[node name="floorborderedunshaded" type="MeshInstance" parent="MaterialSystem/xcdrawingmaterials"]
 transform = Transform( 1, 0, 0, 0, 0.0398178, 0.999207, 0, -0.999207, 0.0398178, -3.40198, -0.15873, 1.17233 )
 mesh = SubResource( 141 )
 material/0 = SubResource( 143 )

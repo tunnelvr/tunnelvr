@@ -21,45 +21,24 @@ func getactivetargetfloorViz(newactivetargetfloorname: String):
 	var xcviz = { "prevxcvizstates":{ }, "xcvizstates":{ } }
 	if activetargetfloor != null and newactivetargetfloorname != activetargetfloor.get_name():
 		xcviz["prevxcvizstates"][activetargetfloor.get_name()] = activetargetfloor.drawingvisiblecode
-		if activetargetfloor.drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE_ACTIVE:
-			xcviz["xcvizstates"][activetargetfloor.get_name()] = DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE
-		elif activetargetfloor.drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_FLOOR_ACTIVE:
-			xcviz["xcvizstates"][activetargetfloor.get_name()] = DRAWING_TYPE.VIZ_XCD_FLOOR_NORMAL
-
+		xcviz["xcvizstates"][activetargetfloor.get_name()] = activetargetfloor.drawingvisiblecode & \
+															 (DRAWING_TYPE.VIZ_XCD_FLOOR_NORMAL | DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE_B)
 	if newactivetargetfloorname != "":
 		var sketchsystem = get_node("/root/Spatial/SketchSystem")
 		var newactivetargetfloor = sketchsystem.get_node("XCdrawings").get_node_or_null(newactivetargetfloorname)
-		if newactivetargetfloor != null:
-			xcviz["prevxcvizstates"][newactivetargetfloorname] = newactivetargetfloor.drawingvisiblecode
-		xcviz["xcvizstates"][newactivetargetfloorname] = DRAWING_TYPE.VIZ_XCD_FLOOR_ACTIVE
-		if newactivetargetfloor != null and (newactivetargetfloor.drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE or newactivetargetfloor.drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE_ACTIVE):
-			xcviz["xcvizstates"][newactivetargetfloorname] = DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE_ACTIVE
-
+		xcviz["xcvizstates"][newactivetargetfloorname] = DRAWING_TYPE.VIZ_XCD_FLOOR_ACTIVE_B | \
+				(newactivetargetfloor.drawingvisiblecode if newactivetargetfloor != null else DRAWING_TYPE.VIZ_XCD_FLOOR_NORMAL)
+														  
 	return xcviz
 
-func setactivetargetfloor(lactivetargetfloor):
-	activetargetfloor = lactivetargetfloor
-	if activetargetfloor == null:
-		planviewcontrols.get_node("FloorMove/CheckBoxUnshaded").pressed = false
-		planviewcontrols.get_node("FloorMove/LabelXCresource").text = ""
-	else:
-		planviewcontrols.get_node("FloorMove/CheckBoxUnshaded").pressed = (activetargetfloor.drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE) or \
-																		  (activetargetfloor.drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE_ACTIVE)
-		planviewcontrols.get_node("FloorMove/LabelXCresource").text = activetargetfloor.xcresource.replace("%20", " ")
 
 func checkboxunshaded_pressed():
 	if activetargetfloor != null:
-		var newdrawingcode = activetargetfloor.drawingvisiblecode
+		var newdrawingcode = DRAWING_TYPE.VIZ_XCD_FLOOR_NORMAL
+		if (activetargetfloor.drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_ACTIVE_B) != 0:
+			newdrawingcode |= DRAWING_TYPE.VIZ_XCD_FLOOR_ACTIVE_B
 		if planviewcontrols.get_node("FloorMove/CheckBoxUnshaded").pressed:
-			if newdrawingcode == DRAWING_TYPE.VIZ_XCD_FLOOR_NORMAL:
-				newdrawingcode = DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE
-			if newdrawingcode == DRAWING_TYPE.VIZ_XCD_FLOOR_ACTIVE:
-				newdrawingcode = DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE_ACTIVE
-		else:
-			if newdrawingcode == DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE:
-				newdrawingcode = DRAWING_TYPE.VIZ_XCD_FLOOR_NORMAL
-			if newdrawingcode == DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE_ACTIVE:
-				newdrawingcode = DRAWING_TYPE.VIZ_XCD_FLOOR_ACTIVE
+			newdrawingcode |= DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE_B
 		var floorviz = { "prevxcvizstates":{ activetargetfloor.get_name():activetargetfloor.drawingvisiblecode  }, 
 						 "xcvizstates":{ activetargetfloor.get_name():newdrawingcode } }
 		var sketchsystem = get_node("/root/Spatial/SketchSystem")
