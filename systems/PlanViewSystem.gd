@@ -255,10 +255,6 @@ func actplanviewvisibleactive(lvisible, lactive, tubesvisible, centrelinesvisibl
 			var sketchsystem = get_node("/root/Spatial/SketchSystem")
 			sketchsystem.actsketchchange([getactivetargetfloorViz("")])
 
-func toggleplanviewactive():
-	var sketchsystem = get_node("/root/Spatial/SketchSystem")
-	sketchsystem.actsketchchange([{"planview": { "visible":true, "planviewactive":not planviewactive }} ])
-
 func planviewtransformpos(guidpaneltransform, guidpanelsize):
 	if guidpaneltransform != null:
 		var paneltrans = $PlanView.global_transform

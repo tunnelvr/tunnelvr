@@ -22,19 +22,6 @@ func _ready():
 			
 var commonroot = null
 func addnodestolabeltask(centrelinedrawing):
-	for xcn in centrelinedrawing.get_node("XCnodes").get_children():
-		remainingxcnodenames.append([centrelinedrawing.get_name(), xcn.get_name(), xcn.global_transform.origin])
-		if commonroot == null:
-			commonroot = xcn.get_name()
-		else:
-			while commonroot != "" and not xcn.get_name().begins_with(commonroot):
-				commonroot = commonroot.left(len(commonroot)-1)
-	commonroot = commonroot.left(commonroot.find_last(",")+1)
-	if commonroot == "":
-		commonroot = "Ireby2,"
-	sortdfunctorigin = get_node("/root/Spatial").playerMe.get_node("HeadCam").global_transform.origin
-
-func addnodestolabeltaskN(centrelinedrawing):
 	for xcname in centrelinedrawing.nodepoints:
 		remainingxcnodenames.append([centrelinedrawing.get_name(), xcname, centrelinedrawing.transform*centrelinedrawing.nodepoints[xcname]])
 		if commonroot == null:
@@ -43,6 +30,8 @@ func addnodestolabeltaskN(centrelinedrawing):
 			while commonroot != "" and not xcname.begins_with(commonroot):
 				commonroot = commonroot.left(len(commonroot)-1)
 	commonroot = commonroot.left(commonroot.find_last(",")+1)
+	if commonroot == "":
+		commonroot = "Ireby2,"
 	print("stationlabels common root: ", commonroot)
 	sortdfunctorigin = get_node("/root/Spatial").playerMe.get_node("HeadCam").global_transform.origin
 

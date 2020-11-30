@@ -437,7 +437,7 @@ func xcdrawingfromdata(xcdata, fromremotecall):
 	if xcdrawing.drawingtype == DRAWING_TYPE.DT_CENTRELINE:
 		#assert (false)   # shouldn't happen, not to be updated!
 		var LabelGenerator = get_node("/root/Spatial/LabelGenerator")
-		LabelGenerator.addnodestolabeltaskN(xcdrawing)
+		LabelGenerator.addnodestolabeltask(xcdrawing)
 	return xcdrawing
 
 var playeroriginXCSorter = Vector3(0, 0, 0)

@@ -44,6 +44,12 @@ var intermediatepointplanesectorindex = -1
 var intermediatepointplanelambda = -1.0
 var intermediatepointpicked = null
 
+var handflickmotiongestureposition = 0
+const handflickmotiongestureposition_normal = 0
+const handflickmotiongestureposition_shortpos = 1
+const handflickmotiongestureposition_shortpos_length = 0.25
+const handflickmotiongestureposition_gone = 2
+
 func clearpointertargetmaterial():
 	if pointertargettype == "XCnode" and pointertarget != null:
 		if pointertargetwall != null and pointertargetwall.drawingtype == DRAWING_TYPE.DT_CENTRELINE:
@@ -220,7 +226,7 @@ func clearpointertarget():
 	pointertargettype = "none"
 	pointertargetwall = null
 
-func setpointertarget(laserroot, raycast):
+func setpointertarget(laserroot, raycast, pointertargetshortdistance):
 	var newpointertarget = raycast.get_collider() if raycast != null else null
 	if newpointertarget != null:
 		if newpointertarget.is_queued_for_deletion():
@@ -229,11 +235,22 @@ func setpointertarget(laserroot, raycast):
 			newpointertarget = null
 		elif newpointertarget.get_parent().get_parent().is_queued_for_deletion():
 			newpointertarget = null
-	var newpointertargetpoint = raycast.get_collision_point() if newpointertarget != null else null
+	var newpointertargetpoint = null
+	if newpointertarget != null:
+		newpointertargetpoint = raycast.get_collision_point()
+		if pointertargetshortdistance != -1.0:
+			var pointertargetvector = newpointertargetpoint - raycast.global_transform.origin
+			var pointertargetdistance = (-raycast.global_transform.basis.z).dot(pointertargetvector)
+			if pointertargetdistance > pointertargetshortdistance:
+				newpointertargetpoint = raycast.global_transform.origin + (-raycast.global_transform.basis.z)*pointertargetshortdistance
+				newpointertarget = null
+			laserroot.get_node("LaserSpot").visible = true
+	elif pointertargetshortdistance != -1.0:
+		newpointertargetpoint = raycast.global_transform.origin + (-raycast.global_transform.basis.z)*pointertargetshortdistance
+		laserroot.get_node("LaserSpot").visible = true
 	if newpointertarget != pointertarget:
 		if pointertarget == guipanel3d:
 			guipanel3d.guipanelreleasemouse()
-		
 		clearpointertargetmaterial()
 		pointertarget = newpointertarget
 		pointertargettype = targettype(pointertarget)
@@ -243,7 +260,8 @@ func setpointertarget(laserroot, raycast):
 		
 		laserroot.get_node("LaserSpot").visible = (pointertargettype == "XCdrawing") or \
 												  (pointertargettype == "XCtubesector") or \
-												  (pointertargettype == "IntermediatePointView")
+												  (pointertargettype == "IntermediatePointView") or \
+												  (pointertargettype == "none" and pointertargetshortdistance != -1.0)
 		
 		if activetargetnode != null and pointertargetwall != null:
 			if activetargetnodewall.drawingtype == DRAWING_TYPE.DT_CENTRELINE:
@@ -320,8 +338,8 @@ func buttonpressed_vrby(gripbuttonheld):
 			guipanel3d.toggleguipanelvisibility(LaserOrient.global_transform)
 		else:
 			print("controls locked")
-	elif pointerplanviewtarget != null:
-		pointerplanviewtarget.toggleplanviewactive()
+	elif planviewsystem.visible:
+		sketchsystem.actsketchchange([{"planview": { "visible":true, "planviewactive":not planviewsystem.planviewactive }} ])
 	else:
 		guipanel3d.toggleguipanelvisibility(LaserOrient.global_transform)
 
@@ -1019,34 +1037,56 @@ func buttonreleased_vrtrigger():
 
 func _physics_process(delta):
 	if playerMe.handflickmotiongesture != 0:
-		Tglobal.controlslocked = (playerMe.handflickmotiongesture == 1)
+		if playerMe.handflickmotiongesture == 1:
+			handflickmotiongestureposition = min(handflickmotiongestureposition+1, handflickmotiongestureposition_gone)
+		else:
+			handflickmotiongestureposition = 0
+		playerMe.get_node("HandRight/PalmLight").visible = (handflickmotiongestureposition == handflickmotiongestureposition_gone)
 		playerMe.handflickmotiongesture = 0
-		playerMe.get_node("HandRight/PalmLight").visible = Tglobal.controlslocked
 		
-	var planviewnothit = true
-	if LaserOrient.visible: 
-		var firstlasertarget = LaserOrient.get_node("RayCast").get_collider() if LaserOrient.get_node("RayCast").is_colliding() and not LaserOrient.get_node("RayCast").get_collider().is_queued_for_deletion() else null
-		pointerplanviewtarget = planviewsystem if firstlasertarget != null and firstlasertarget.get_name() == "PlanView" and planviewsystem.checkplanviewinfront(LaserOrient) else null
-		if pointerplanviewtarget != null and pointerplanviewtarget.planviewactive:
+	if playerMe.get_node("HandRight").pointervalid:
+		var firstlasertarget = LaserOrient.get_node("RayCast").get_collider()
+		if firstlasertarget != null and firstlasertarget.is_queued_for_deletion():
+			firstlasertarget = null
+		if firstlasertarget == guipanel3d:
+			LaserOrient.visible = true
+			activelaserroot = LaserOrient
+			setpointertarget(activelaserroot, activelaserroot.get_node("RayCast"), -1.0)
+			pointerplanviewtarget = null
+		elif handflickmotiongestureposition == handflickmotiongestureposition_gone or Tglobal.controlslocked:
+			LaserOrient.visible = false
+			pointerplanviewtarget = null
+		elif handflickmotiongestureposition == handflickmotiongestureposition_shortpos and not (firstlasertarget != null and firstlasertarget.get_parent().get_parent().get_name() == "GripMenu"):
+			LaserOrient.visible = true
+			activelaserroot = LaserOrient
+			pointerplanviewtarget = null
+			setpointertarget(activelaserroot, activelaserroot.get_node("RayCast"), handflickmotiongestureposition_shortpos_length)
+		elif firstlasertarget != null and firstlasertarget.get_name() == "PlanView" and planviewsystem.checkplanviewinfront(LaserOrient) and planviewsystem.planviewactive:
+			pointerplanviewtarget = planviewsystem
+			LaserOrient.visible = true
 			var planviewcontactpoint = LaserOrient.get_node("RayCast").get_collision_point()
 			LaserOrient.get_node("LaserSpot").global_transform.origin = planviewcontactpoint
 			LaserOrient.get_node("Length").scale.z = -LaserOrient.get_node("LaserSpot").translation.z
 			LaserOrient.get_node("LaserSpot").visible = false
-			var inguipanel = pointerplanviewtarget.processplanviewpointing(planviewcontactpoint, (handrightcontroller.is_button_pressed(BUTTONS.HT_PINCH_INDEX_FINGER) if Tglobal.questhandtrackingactive else handrightcontroller.is_button_pressed(BUTTONS.VR_TRIGGER)) or Input.is_mouse_button_pressed(BUTTON_LEFT))
-			planviewnothit = false
-			activelaserroot = planviewsystem.get_node("RealPlanCamera/LaserScope/LaserOrient")
-			activelaserroot.get_node("LaserSpot").global_transform.basis = LaserOrient.global_transform.basis
-			if inguipanel:
-				setpointertarget(activelaserroot, null)
-			else:
-				activelaserroot.get_node("RayCast").force_raycast_update()
-				setpointertarget(activelaserroot, activelaserroot.get_node("RayCast"))
+			if planviewsystem.planviewactive:
+				var inguipanelsection = pointerplanviewtarget.processplanviewpointing(planviewcontactpoint, (handrightcontroller.is_button_pressed(BUTTONS.HT_PINCH_INDEX_FINGER) if Tglobal.questhandtrackingactive else handrightcontroller.is_button_pressed(BUTTONS.VR_TRIGGER)) or Input.is_mouse_button_pressed(BUTTON_LEFT))
+				activelaserroot = planviewsystem.get_node("RealPlanCamera/LaserScope/LaserOrient")
+				activelaserroot.get_node("LaserSpot").global_transform.basis = LaserOrient.global_transform.basis
+				if inguipanelsection:
+					setpointertarget(activelaserroot, null, -1.0)
+				else:
+					activelaserroot.get_node("RayCast").force_raycast_update()
+					setpointertarget(activelaserroot, activelaserroot.get_node("RayCast"), -1.0)
 		else:
-			planviewsystem.get_node("RealPlanCamera/LaserScope").visible = false
+			LaserOrient.visible = true
 			activelaserroot = LaserOrient
-			setpointertarget(activelaserroot, activelaserroot.get_node("RayCast"))
-	if planviewnothit and planviewsystem.viewport_mousedown:
-		planviewsystem.planviewguipanelreleasemouse()
+			pointerplanviewtarget = null
+			setpointertarget(activelaserroot, activelaserroot.get_node("RayCast"), -1.0)
+
+	if pointerplanviewtarget == null or not planviewsystem.planviewactive:
+		planviewsystem.get_node("RealPlanCamera/LaserScope").visible = false
+		if planviewsystem.viewport_mousedown:
+			planviewsystem.planviewguipanelreleasemouse()
 	
 	if activetargetwallgrabbedtransform != null:
 		var txcdata = targetwalltransformpos(1)

@@ -175,7 +175,7 @@ func mergexcrpcdata(xcdata):
 		set_transform(xcdata["transformpos"])
 
 	if drawingtype == DRAWING_TYPE.DT_CENTRELINE:
-		print("Centreline being now input")
+		print("Centreline now being merged: ", get_name())
 
 	if "imgtrim" in xcdata:
 		var imgtrim = xcdata["imgtrim"]
