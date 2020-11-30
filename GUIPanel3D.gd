@@ -42,24 +42,24 @@ func _on_buttonsave_pressed():
 	
 
 func _on_buttonplanview_pressed():
-	var pvchange = { "visible":$Viewport/GUI/Panel/ButtonPlanView.pressed }
+	var button_pressed = $Viewport/GUI/Panel/ButtonPlanView.pressed  # using toggled signal causes updates when programatically set
 	var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
-	if pvchange["visible"]:
+	if button_pressed:
+		var pvchange = planviewsystem.planviewtodict()
+		pvchange["visible"] = true
+		pvchange["planviewactive"] = true
 		var guidpaneltransform = global_transform
 		var guidpanelsize = $Quad.mesh.size
 		if not Tglobal.controlslocked:
 			toggleguipanelvisibility(null)
 			guidpaneltransform = null
 		pvchange["transformpos"] = planviewsystem.planviewtransformpos(guidpaneltransform, guidpanelsize)
-		pvchange["planviewactive"] = true
-		#pvchange[""]
 		sketchsystem.actsketchchange([{"planview":pvchange}])
+		$Viewport/GUI/Panel/Label.text = "Planview on"
 	else:
-		pvchange["planviewactive"] = false
-		#pvchange[""]
-		sketchsystem.actsketchchange([{"planview":pvchange}])
-	pvchange["tubesvisible"] = planviewsystem.planviewcontrols.get_node("CheckBoxTubesVisible").pressed 
-	$Viewport/GUI/Panel/Label.text = "Planview on" if pvchange["visible"] else "Planview off"
+		planviewsystem.buttonclose_pressed()
+		$Viewport/GUI/Panel/Label.text = "Planview off"
+
 	Tglobal.soundsystem.quicksound("MenuClick", collision_point)
 	if not Tglobal.controlslocked:
 		toggleguipanelvisibility(null)

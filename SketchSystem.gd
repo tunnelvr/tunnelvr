@@ -244,19 +244,7 @@ remote func actsketchchangeL(xcdatalist):
 			
 		elif "planview" in xcdata:
 			var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
-			var plancamera = planviewsystem.get_node("PlanView/Viewport/PlanGUI/Camera")			
-			if "plancamerapos" in xcdata["planview"]:
-				plancamera.translation = xcdata["planview"]["plancamerapos"]
-			if "plancamerasize" in xcdata["planview"]:
-				plancamera.size = xcdata["planview"]["plancamerasize"]
-				planviewsystem.get_node("RealPlanCamera/RealCameraBox").scale = Vector3(plancamera.size, 1.0, plancamera.size)
-			if "transformpos" in xcdata["planview"]:
-				planviewsystem.get_node("PlanView").global_transform = xcdata["planview"]["transformpos"]
-			if "visible" in xcdata["planview"]:
-				planviewsystem.actplanviewvisibleactive(xcdata["planview"]["visible"], 
-														xcdata["planview"].get("planviewactive", true), 
-														xcdata["planview"].get("tubesvisible", planviewsystem.planviewcontrols.get_node("CheckBoxTubesVisible").pressed),
-														xcdata["planview"].get("centrelinesvisible", planviewsystem.planviewcontrols.get_node("CheckBoxCentrelinesVisible").pressed))
+			planviewsystem.actplanviewdict(xcdata["planview"])
 														
 		elif "xcvizstates" in xcdata:
 			if Tglobal.printxcdrawingfromdatamessages:

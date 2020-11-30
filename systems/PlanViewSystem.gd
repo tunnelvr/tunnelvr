@@ -157,20 +157,17 @@ func transferintorealviewport(setascurrentcamera):
 		$PlanView/ViewportReal.set_name("Viewport")
 		$PlanView/ProjectionScreen.get_surface_material(0).albedo_texture = $PlanView/Viewport.get_texture()
 
+
 func checkboxtubesvisible_pressed():
+	var pvchange = planviewtodict()
+	pvchange["tubesvisible"] = planviewcontrols.get_node("CheckBoxTubesVisible").pressed 
 	var sketchsystem = get_node("/root/Spatial/SketchSystem")
-	var pvchange = { "visible":visible, 
-					 "planviewactive":planviewactive,
-					 "tubesvisible":planviewcontrols.get_node("CheckBoxTubesVisible").pressed 
-				   }
 	sketchsystem.actsketchchange([{"planview":pvchange}]) 
 
 func checkcentrelinesvisible_pressed():
+	var pvchange = planviewtodict()
+	pvchange["centrelinesvisible"] = planviewcontrols.get_node("CheckBoxCentrelinesVisible").pressed 
 	var sketchsystem = get_node("/root/Spatial/SketchSystem")
-	var pvchange = { "visible":visible, 
-					 "planviewactive":planviewactive,
-					 "tubesvisible":planviewcontrols.get_node("CheckBoxTubesVisible").pressed 
-				   }
 	sketchsystem.actsketchchange([{"planview":pvchange}]) 
 
 		
@@ -204,11 +201,31 @@ func readydeferred():
 	root.add_button(0, clearcachebuttontex, idx)
 	buttonidxtoitem[idx] = root
 	
+			
+func planviewtodict():
+	return { "visible":visible,
+			 "planviewactive":planviewactive, 
+			 "tubesvisible":(($PlanView/Viewport/PlanGUI/Camera.cull_mask & CollisionLayer.VL_xcshells) != 0),
+			 "centrelinesvisible":(($PlanView/Viewport/PlanGUI/Camera.cull_mask & CollisionLayer.VL_centrelinestationsplanview) != 0),
+			 "transformpos":$PlanView.global_transform,
+			 "plancamerapos":$PlanView/Viewport/PlanGUI/Camera.translation,
+			 "plancamerasize":$PlanView/Viewport/PlanGUI/Camera.size
+			}
 
-func actplanviewvisibleactive(lvisible, lactive, tubesvisible, centrelinesvisible):
-	if visible != lvisible:
-		visible = lvisible
-		if visible:  # see also updatecentrelinevisibility()
+
+func actplanviewdict(pvchange):
+	if "plancamerapos" in pvchange:
+		$PlanView/Viewport/PlanGUI/Camera.translation = pvchange["plancamerapos"]
+	if "plancamerasize" in pvchange:
+		$PlanView/Viewport/PlanGUI/Camera.size = pvchange["plancamerasize"]
+		$RealPlanCamera/RealCameraBox.scale = Vector3($PlanView/Viewport/PlanGUI/Camera.size, 1.0, $PlanView/Viewport/PlanGUI/Camera.size)
+	if "transformpos" in pvchange:
+		$PlanView.global_transform = pvchange["transformpos"]
+
+	var visiblechange = ("visible" in pvchange and visible != pvchange["visible"])
+	if visiblechange:
+		visible = pvchange["visible"]
+		if visible:
 			get_node("PlanView/CollisionShape").disabled = false
 			var playerMe = get_node("/root/Spatial").playerMe
 			get_node("/root/Spatial/LabelGenerator").restartlabelmakingprocess(playerMe.get_node("HeadCam").global_transform.origin)
@@ -216,44 +233,45 @@ func actplanviewvisibleactive(lvisible, lactive, tubesvisible, centrelinesvisibl
 		else:
 			get_node("PlanView/CollisionShape").disabled = true
 			get_node("/root/Spatial/WorldEnvironment/DirectionalLight").visible = not get_node("/root/Spatial/GuiSystem/GUIPanel3D/Viewport/GUI/Panel/ButtonHeadtorch").pressed
-
-	planviewcontrols.get_node("CheckBoxTubesVisible").pressed = tubesvisible
-	var plancameracullmask
-	var plancameraraycollisionmask
-	planviewcontrols.get_node("CheckBoxCentrelinesVisible").pressed = centrelinesvisible
-	var playermeheadcam = get_node("/root/Spatial").playerMe.get_node("HeadCam")
-	if centrelinesvisible:
-		playermeheadcam.cull_mask = CollisionLayer.VLCM_PlayerCamera
-		get_node("/root/Spatial/BodyObjects/LaserOrient/RayCast").collision_mask = CollisionLayer.CLV_MainRayAll
-		plancameracullmask = CollisionLayer.VLCM_PlanViewCamera
-		plancameraraycollisionmask = CollisionLayer.CLV_PlanRayAll
-		var labelgenerator = get_node("/root/Spatial/LabelGenerator")
-		if not labelgenerator.is_processing():
-			labelgenerator.restartlabelmakingprocess(playermeheadcam.global_transform.origin)
-	else:
-		playermeheadcam.cull_mask = CollisionLayer.VLCM_PlayerCameraNoCentreline
-		get_node("/root/Spatial/BodyObjects/LaserOrient/RayCast").collision_mask = CollisionLayer.CLV_MainRayAll
-		plancameraraycollisionmask = CollisionLayer.CLV_PlanRayNoCentreline
-		plancameracullmask = CollisionLayer.VLCM_PlanViewCameraNoCentreline
-
-	if not tubesvisible:
-		plancameracullmask &= CollisionLayer.VLCM_PlanViewCameraNoTube
-		plancameraraycollisionmask &= CollisionLayer.CLV_PlanRayNoTube
-	get_node("PlanView/Viewport/PlanGUI/Camera").cull_mask = plancameracullmask
-	get_node("RealPlanCamera/LaserScope/LaserOrient/RayCast").collision_mask = plancameraraycollisionmask
-	
 	var guipanel3d = get_node("/root/Spatial/GuiSystem/GUIPanel3D")
 	guipanel3d.get_node("Viewport/GUI/Panel/ButtonPlanView").pressed = visible
-	planviewactive = lactive
-	if planviewactive:
-		$PlanView/ProjectionScreen/ImageFrame.mesh.surface_get_material(0).emission_enabled = true
-		set_process(true)
-	else:
-		$PlanView/ProjectionScreen/ImageFrame.mesh.surface_get_material(0).emission_enabled = false
-		set_process(false)
-		if activetargetfloor != null:
-			var sketchsystem = get_node("/root/Spatial/SketchSystem")
-			sketchsystem.actsketchchange([getactivetargetfloorViz("")])
+
+	if "planviewactive" in pvchange and (visiblechange or planviewactive != pvchange["planviewactive"]):
+		planviewactive = pvchange["planviewactive"]
+		if planviewactive:
+			$PlanView/ProjectionScreen/ImageFrame.mesh.surface_get_material(0).emission_enabled = true
+			set_process(true)
+		else:
+			$PlanView/ProjectionScreen/ImageFrame.mesh.surface_get_material(0).emission_enabled = false
+			set_process(false)
+
+	if "centrelinesvisible" in pvchange:
+		planviewcontrols.get_node("CheckBoxCentrelinesVisible").pressed = pvchange["centrelinesvisible"]
+		planviewcontrols.get_node("CheckBoxTubesVisible").pressed = pvchange["tubesvisible"]
+
+		var plancameracullmask
+		var plancameraraycollisionmask
+		var playermeheadcam = get_node("/root/Spatial").playerMe.get_node("HeadCam")
+		if pvchange["centrelinesvisible"]:
+			playermeheadcam.cull_mask = CollisionLayer.VLCM_PlayerCamera
+			get_node("/root/Spatial/BodyObjects/LaserOrient/RayCast").collision_mask = CollisionLayer.CLV_MainRayAll
+			plancameracullmask = CollisionLayer.VLCM_PlanViewCamera
+			plancameraraycollisionmask = CollisionLayer.CLV_PlanRayAll
+			var labelgenerator = get_node("/root/Spatial/LabelGenerator")
+			if not labelgenerator.is_processing():
+				labelgenerator.restartlabelmakingprocess(playermeheadcam.global_transform.origin)
+		else:
+			playermeheadcam.cull_mask = CollisionLayer.VLCM_PlayerCameraNoCentreline
+			get_node("/root/Spatial/BodyObjects/LaserOrient/RayCast").collision_mask = CollisionLayer.CLV_MainRayAll
+			plancameraraycollisionmask = CollisionLayer.CLV_PlanRayNoCentreline
+			plancameracullmask = CollisionLayer.VLCM_PlanViewCameraNoCentreline
+		
+		if not pvchange["tubesvisible"]:
+			plancameracullmask &= CollisionLayer.VLCM_PlanViewCameraNoTube
+			plancameraraycollisionmask &= CollisionLayer.CLV_PlanRayNoTube
+		get_node("PlanView/Viewport/PlanGUI/Camera").cull_mask = plancameracullmask
+		get_node("RealPlanCamera/LaserScope/LaserOrient/RayCast").collision_mask = plancameraraycollisionmask
+
 
 func planviewtransformpos(guidpaneltransform, guidpanelsize):
 	if guidpaneltransform != null:
@@ -369,7 +387,9 @@ func buttoncentre_pressed():
 
 func buttonclose_pressed():
 	var sketchsystem = get_node("/root/Spatial/SketchSystem")
-	sketchsystem.actsketchchange([{"planview": { "visible":false, "planviewactive":false }} ])
+	sketchsystem.actsketchchange([ {"planview":{"visible":false, "planviewactive":false}}, 
+								   getactivetargetfloorViz("") 
+								 ])
 
 func checkplanviewinfront(handrightcontroller):
 	var planviewsystem = self
