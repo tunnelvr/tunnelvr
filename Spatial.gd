@@ -249,7 +249,8 @@ func _player_connected(id):
 		for xcdatachunk in xcdatachunks:
 			$SketchSystem.rpc_id(id, "actsketchchangeL", xcdatachunk)
 			yield(get_tree().create_timer(0.2), "timeout")
-	
+		$SketchSystem.rpc_id(id, "actsketchchangeL", [{"planview":$PlanViewSystem.planviewtodict()}]) 
+
 	
 func _player_disconnected(id):
 	print("_player_disconnected ", id)

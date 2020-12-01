@@ -145,8 +145,8 @@ func centrelineconnectionfloortransformpos(sketchsystem):
 		#var vxcang = Vector2(-vxc.x, -vxc.z).angle()
 		var vxclang = Vector2(-vxcl.x, vxcl.y).angle()
 
-		var vxlen = vx.length()
-		var vxclen = vxc.length()
+		var vxlen = Vector2(vx.x, vx.z).length()
+		var vxclen = Vector2(vxc.x, vxc.z).length()
 		if vxlen != 0 and vxclen != 0:
 			var sca = vxlen/vxclen
 			var transformpos = Transform(Vector3(1,0,0), Vector3(0,0,-1), Vector3(0,1,0), Vector3(0,0,0)).rotated(Vector3(0,1,0), vxclang - vxang)

@@ -506,7 +506,9 @@ remote func loadsketchsystemL(fname):
 		for xcdatachunk in xcdatachunks:
 			actsketchchange(xcdatachunk)
 			yield(get_tree().create_timer(0.2), "timeout")
-			
+		var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
+		actsketchchange([{"planview":planviewsystem.planviewtodict()}]) 
+				
 func uniqueXCname():
 	var largestxcdrawingnumber = 0
 	for xcdrawing in get_node("XCdrawings").get_children():
