@@ -1,4 +1,4 @@
-[gd_scene load_steps=242 format=2]
+[gd_scene load_steps=245 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/default_env.tres" type="Environment" id=2]
@@ -861,12 +861,21 @@ albedo_color = Color( 1, 0.156863, 0.156863, 0.741176 )
 
 [sub_resource type="QuadMesh" id=132]
 
+[sub_resource type="SpatialMaterial" id=189]
+flags_transparent = true
+params_cull_mode = 2
+albedo_color = Color( 0, 1, 0.901961, 0.439216 )
+albedo_texture = ExtResource( 16 )
+metallic = 0.03
+metallic_specular = 0.22
+roughness = 0.81
+
 [sub_resource type="QuadMesh" id=133]
 
 [sub_resource type="SpatialMaterial" id=134]
 flags_transparent = true
 params_cull_mode = 2
-albedo_color = Color( 0.960784, 0.980392, 0.368627, 0.435294 )
+albedo_color = Color( 0, 1, 0.901961, 0.439216 )
 albedo_texture = ExtResource( 16 )
 metallic = 0.03
 metallic_specular = 0.22
@@ -922,14 +931,18 @@ void fragment() {
 	vec2 base_uv = UV;
 	vec4 albedo_tex = texture(texture_albedo,base_uv);
 	ALBEDO = albedo.rgb * albedo_tex.rgb;
+	ALPHA = albedo.a;
 	if (uv_borderwidth != 0.0) {
 		float uvfromedge = min(min(uvorg.x, 1.0 - uvorg.x), min(uvorg.y, 1.0 - uvorg.y));
-		ALBEDO = mix(ALBEDO, albedo_border.rgb, max(uv_borderwidth - uvfromedge, 0.0)/uv_borderwidth);
+		float lambda = max(uv_borderwidth - uvfromedge, 0.0)/uv_borderwidth;
+		ALBEDO = mix(ALBEDO, albedo_border.rgb, lambda);
+		ALPHA = mix(albedo.a, albedo_border.a, lambda);
 	}
 	METALLIC = metallic;
 	ROUGHNESS = roughness;
 	SPECULAR = specular;
 }
+
 
 
 
@@ -975,10 +988,12 @@ void fragment() {
 	vec2 base_uv = UV;
 	vec4 albedo_tex = texture(texture_albedo,base_uv);
 	ALBEDO = albedo.rgb * albedo_tex.rgb;
+	ALPHA = albedo.a;
 	if (uv_borderwidth != 0.0) {
 		float uvfromedge = min(min(uvorg.x, 1.0 - uvorg.x), min(uvorg.y, 1.0 - uvorg.y));
-		if (uv_borderwidth > uvfromedge)
-			ALBEDO = albedo_border.rgb; 
+		float lambda = max(uv_borderwidth - uvfromedge, 0.0)/uv_borderwidth;
+		ALBEDO = mix(ALBEDO, albedo_border.rgb, lambda);
+		ALPHA = mix(albedo.a, albedo_border.a, lambda);
 	}
 	METALLIC = metallic;
 	ROUGHNESS = roughness;
@@ -1003,6 +1018,28 @@ shader_param/uv1_scale = null
 shader_param/uv1_offset = null
 shader_param/uv_borderwidth = 0.02
 shader_param/albedo_border = Color( 0.231373, 0.262745, 0.364706, 1 )
+
+[sub_resource type="ShaderMaterial" id=196]
+shader = SubResource( 142 )
+shader_param/albedo = Color( 0.788235, 0.764706, 0.698039, 0.0666667 )
+shader_param/specular = null
+shader_param/metallic = 0.0
+shader_param/roughness = 0.0
+shader_param/uv1_scale = null
+shader_param/uv1_offset = null
+shader_param/uv_borderwidth = 0.09
+shader_param/albedo_border = Color( 0.231373, 0.262745, 0.364706, 1 )
+
+[sub_resource type="ShaderMaterial" id=197]
+shader = SubResource( 142 )
+shader_param/albedo = Color( 0.960784, 0.615686, 0.607843, 0.298039 )
+shader_param/specular = null
+shader_param/metallic = 0.0
+shader_param/roughness = 0.0
+shader_param/uv1_scale = null
+shader_param/uv1_offset = null
+shader_param/uv_borderwidth = 0.09
+shader_param/albedo_border = Color( 0.980392, 0.321569, 0.0352941, 1 )
 
 [sub_resource type="CylinderMesh" id=144]
 height = 0.02
@@ -2365,10 +2402,10 @@ __meta__ = {
 }
 
 [node name="ButtonRotR" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorMove"]
-margin_left = 120.04
-margin_top = -3.07935
-margin_right = 166.04
-margin_bottom = 18.9207
+margin_left = 118.258
+margin_top = -3.97028
+margin_right = 164.258
+margin_bottom = 18.0298
 text = "RotR"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -2411,20 +2448,19 @@ margin_right = 478.0
 margin_bottom = 83.0
 autowrap = true
 
-[node name="CheckBoxUnshaded" type="CheckBox" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorMove"]
-margin_left = 169.441
-margin_top = -2.99594
-margin_right = 260.441
-margin_bottom = 21.0041
-text = "unshaded"
-__meta__ = {
-"_edit_use_anchors_": false
-}
+[node name="FloorStyle" type="OptionButton" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorMove"]
+margin_left = 169.0
+margin_top = -3.0
+margin_right = 242.0
+margin_bottom = 21.0
+text = "normal"
+items = [ "normal", null, false, 0, null, "unshaded", null, false, 1, null, "ghostly", null, false, 2, null ]
+selected = 0
 
 [node name="ButtonDelPaper" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorMove"]
-margin_left = 265.04
+margin_left = 255.24
 margin_top = -2.07935
-margin_right = 335.04
+margin_right = 325.24
 margin_bottom = 19.9207
 text = "DelPaper"
 __meta__ = {
@@ -2825,12 +2861,12 @@ mesh = SubResource( 130 )
 material/0 = SubResource( 131 )
 
 [node name="xcdrawingmaterials" type="Spatial" parent="MaterialSystem"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -1.56677, 0, -2.27581 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -1.56677, 0, -3.12992 )
 
 [node name="normal" type="MeshInstance" parent="MaterialSystem/xcdrawingmaterials"]
 transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, 0, 0, 0 )
 mesh = SubResource( 132 )
-material/0 = SubResource( 56 )
+material/0 = SubResource( 189 )
 
 [node name="active" type="MeshInstance" parent="MaterialSystem/xcdrawingmaterials"]
 transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, -1.16284, 0, 0 )
@@ -2838,34 +2874,44 @@ mesh = SubResource( 133 )
 material/0 = SubResource( 134 )
 
 [node name="highlight" type="MeshInstance" parent="MaterialSystem/xcdrawingmaterials"]
-transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, -2.262, 0, 0.156 )
+transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, -2.262, 0, 0.00685501 )
 mesh = SubResource( 135 )
 material/0 = SubResource( 136 )
 
 [node name="floorbordered" type="MeshInstance" parent="MaterialSystem/xcdrawingmaterials"]
-transform = Transform( -0.999877, -2.55616e-09, -0.0156896, -0.0156896, 1.62901e-07, 0.999877, 0, 1, -1.62921e-07, -2.26635, -0.00334668, 1.21531 )
+transform = Transform( -0.999877, -2.55616e-09, -0.0156896, -0.0156896, 1.62901e-07, 0.999877, 0, 1, -1.62921e-07, -1.21672, 0.0131235, 1.21531 )
 mesh = SubResource( 137 )
 material/0 = ExtResource( 53 )
 
 [node name="floorborderedactive" type="MeshInstance" parent="MaterialSystem/xcdrawingmaterials"]
-transform = Transform( -0.999877, -2.55616e-09, -0.0156896, -0.0156896, 1.62901e-07, 0.999877, 0, 1, -1.62921e-07, -1.16991, -2.38419e-07, 1.19085 )
+transform = Transform( -0.999877, -2.55616e-09, -0.0156896, -0.0156896, 1.62901e-07, 0.999877, 0, 1, -1.62921e-07, -0.113148, 0.016582, 1.19085 )
 mesh = SubResource( 138 )
 material/0 = SubResource( 140 )
 
 [node name="floorborderedunshaded" type="MeshInstance" parent="MaterialSystem/xcdrawingmaterials"]
-transform = Transform( 1, 0, 0, 0, 0.0398178, 0.999207, 0, -0.999207, 0.0398178, -3.40198, -0.15873, 1.17233 )
+transform = Transform( 1, 0, 0, 0, 0.0398178, 0.999207, 0, -0.999207, 0.0398178, -2.26133, -0.118988, 1.10957 )
 mesh = SubResource( 141 )
 material/0 = SubResource( 143 )
 
+[node name="floorborderedghostly" type="MeshInstance" parent="MaterialSystem/xcdrawingmaterials"]
+transform = Transform( 1, 0, 0, 0, 0.0398178, 0.999207, 0, -0.999207, 0.0398178, -2.26133, -0.166059, 2.2908 )
+mesh = SubResource( 141 )
+material/0 = SubResource( 196 )
+
+[node name="floorborderedghostlyactive" type="MeshInstance" parent="MaterialSystem/xcdrawingmaterials"]
+transform = Transform( 1, 0, 0, 0, 0.0398178, 0.999207, 0, -0.999207, 0.0398178, -1.15529, -0.166059, 2.2908 )
+mesh = SubResource( 141 )
+material/0 = SubResource( 197 )
+
 [node name="intermediateplane" type="MeshInstance" parent="MaterialSystem/xcdrawingmaterials"]
-transform = Transform( 0.2, 0, 0, 0, 0.801484, -0.119603, 0, 0.598017, 0.160297, -0.211185, 0.142775, 5.37143 )
+transform = Transform( 0.2, 0, 0, 0, 0.801484, -0.119603, 0, 0.598017, 0.160297, -1.18957, -0.151096, 3.56891 )
 layers = 2
 cast_shadow = 0
 mesh = SubResource( 144 )
 material/0 = SubResource( 145 )
 
 [node name="intermediateplanehighlight" type="MeshInstance" parent="MaterialSystem/xcdrawingmaterials"]
-transform = Transform( 0.2, 0, 0, 0, 0.801484, -0.119603, 0, 0.598017, 0.160297, 0.290855, 0.142775, 5.37143 )
+transform = Transform( 0.2, 0, 0, 0, 0.801484, -0.119603, 0, 0.598017, 0.160297, -0.709507, -0.154516, 3.58947 )
 layers = 2
 cast_shadow = 0
 mesh = SubResource( 146 )

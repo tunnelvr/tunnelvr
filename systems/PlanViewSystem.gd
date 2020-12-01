@@ -22,7 +22,7 @@ func getactivetargetfloorViz(newactivetargetfloorname: String):
 	if activetargetfloor != null and newactivetargetfloorname != activetargetfloor.get_name():
 		xcviz["prevxcvizstates"][activetargetfloor.get_name()] = activetargetfloor.drawingvisiblecode
 		xcviz["xcvizstates"][activetargetfloor.get_name()] = activetargetfloor.drawingvisiblecode & \
-															 (DRAWING_TYPE.VIZ_XCD_FLOOR_NORMAL | DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE_B)
+															 (DRAWING_TYPE.VIZ_XCD_FLOOR_NORMAL | DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE_B | DRAWING_TYPE.VIZ_XCD_FLOOR_GHOSTLY_B)
 	if newactivetargetfloorname != "":
 		var sketchsystem = get_node("/root/Spatial/SketchSystem")
 		var newactivetargetfloor = sketchsystem.get_node("XCdrawings").get_node_or_null(newactivetargetfloorname)
@@ -32,12 +32,14 @@ func getactivetargetfloorViz(newactivetargetfloorname: String):
 	return xcviz
 
 
-func checkboxunshaded_pressed():
+func floorstyle_itemselected(floorstyleid):
 	if activetargetfloor != null:
 		var newdrawingcode = DRAWING_TYPE.VIZ_XCD_FLOOR_NORMAL
 		if (activetargetfloor.drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_ACTIVE_B) != 0:
 			newdrawingcode |= DRAWING_TYPE.VIZ_XCD_FLOOR_ACTIVE_B
-		if planviewcontrols.get_node("FloorMove/CheckBoxUnshaded").pressed:
+		if floorstyleid == 2:
+			newdrawingcode |= DRAWING_TYPE.VIZ_XCD_FLOOR_GHOSTLY_B
+		elif floorstyleid == 1:
 			newdrawingcode |= DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE_B
 		var floorviz = { "prevxcvizstates":{ activetargetfloor.get_name():activetargetfloor.drawingvisiblecode  }, 
 						 "xcvizstates":{ activetargetfloor.get_name():newdrawingcode } }
@@ -163,7 +165,7 @@ func _ready():
 	planviewcontrols.get_node("FloorMove/ButtonDelPaper").connect("pressed", self, "buttondelpaper_pressed")
 	planviewcontrols.get_node("CheckBoxTubesVisible").connect("pressed", self, "checkboxtubesvisible_pressed")
 	planviewcontrols.get_node("CheckBoxCentrelinesVisible").connect("pressed", self, "checkcentrelinesvisible_pressed")
-	planviewcontrols.get_node("FloorMove/CheckBoxUnshaded").connect("pressed", self, "checkboxunshaded_pressed")
+	planviewcontrols.get_node("FloorMove/FloorStyle").connect("item_selected", self, "floorstyle_itemselected")
 	planviewcontrols.get_node("CheckBoxFileTree").connect("toggled", self, "checkboxfiletree_toggled")
 	call_deferred("readydeferred")
 	set_process(visible)

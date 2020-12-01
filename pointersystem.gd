@@ -338,7 +338,7 @@ func buttonpressed_vrby(gripbuttonheld):
 			guipanel3d.toggleguipanelvisibility(LaserOrient.global_transform)
 		else:
 			print("controls locked")
-	elif planviewsystem.visible:
+	elif planviewsystem.visible and (pointerplanviewtarget != null or pointertargettype == "PlanView"):
 		sketchsystem.actsketchchange([{"planview": { "visible":true, "planviewactive":not planviewsystem.planviewactive }} ])
 	else:
 		guipanel3d.toggleguipanelvisibility(LaserOrient.global_transform)

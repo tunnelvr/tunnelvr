@@ -78,6 +78,7 @@ func checkloadinterface(larvrinterfacename):
 				return true
 	return false
 
+
 func setnetworkidnamecolour(player, networkID):
 	player.networkID = networkID
 	player.set_network_master(networkID)

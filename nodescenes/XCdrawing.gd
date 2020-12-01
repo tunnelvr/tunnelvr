@@ -72,7 +72,7 @@ func setdrawingvisiblecode(ldrawingvisiblecode):
 			var matname = "xcdrawingmaterials/floorborderedunshaded" if noshade else "xcdrawingmaterials/floorbordered"
 			var newmat = get_node("/root/Spatial/MaterialSystem").get_node(matname).get_surface_material(0).duplicate()
 			newmat.set_shader_param("texture_albedo", mat.get_shader_param("texture_albedo"))
-			mat = newmat   # unshaded flag cannot be parametrized
+			mat = newmat   # unshaded flag cannot be parametrized, so make new and copy over image
 			$XCdrawingplane/CollisionShape/MeshInstance.set_surface_material(0, mat)
 			applytrimmedpaperuvscale()
 	
@@ -85,36 +85,42 @@ func setdrawingvisiblecode(ldrawingvisiblecode):
 
 		elif (drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_NORMAL) != 0:
 			setxcdrawingvisibleL()
-			var matname = "xcdrawingmaterials/floorbordered"
+			var matname
 			if (drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_ACTIVE_B) != 0:
 				planviewsystem.activetargetfloor = self
-				planviewsystem.planviewcontrols.get_node("FloorMove/CheckBoxUnshaded").pressed = ((drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE_B) != 0)
+				var floorstyleid = 0
+				if ((drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_GHOSTLY_B) != 0):
+					floorstyleid = 2
+				elif ((drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE_B) != 0):
+					floorstyleid = 1
+				planviewsystem.planviewcontrols.get_node("FloorMove/FloorStyle").selected = floorstyleid
 				planviewsystem.planviewcontrols.get_node("FloorMove/LabelXCresource").text = xcresource.replace("%20", " ")
-				matname = "xcdrawingmaterials/floorborderedactive"
+				if (drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_GHOSTLY_B) != 0:
+					matname = "xcdrawingmaterials/floorborderedghostlyactive"
+				else:
+					matname = "xcdrawingmaterials/floorborderedactive"
 			else:
 				if planviewsystem.activetargetfloor == self:
 					planviewsystem.activetargetfloor = null
-					planviewsystem.planviewcontrols.get_node("FloorMove/CheckBoxUnshaded").pressed = false
+					planviewsystem.planviewcontrols.get_node("FloorMove/FloorStyle").selected = 0
 					planviewsystem.planviewcontrols.get_node("FloorMove/LabelXCresource").text = ""
-				if (drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE_B) != 0:
+				if (drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_GHOSTLY_B) != 0:
+					matname = "xcdrawingmaterials/floorborderedghostly"
+				elif (drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE_B) != 0:
 					matname = "xcdrawingmaterials/floorborderedunshaded"
+				else:
+					matname = "xcdrawingmaterials/floorbordered"
 			var matc = get_node("/root/Spatial/MaterialSystem").get_node(matname).get_surface_material(0)
 			mat.set_shader_param("albedo", matc.get_shader_param("albedo"))
 			mat.set_shader_param("albedo_border", matc.get_shader_param("albedo_border"))
-
+			mat.set_shader_param("uv_borderwidth", matc.get_shader_param("uv_borderwidth"))
 			$XCdrawingplane.visible = true
 			$XCdrawingplane/CollisionShape.disabled = false
-
-#func setactivetargetfloor(lactivetargetfloor):
-#	activetargetfloor = lactivetargetfloor
-#	if activetargetfloor == null:
-#		planviewcontrols.get_node("FloorMove/CheckBoxUnshaded").pressed = false
-#		planviewcontrols.get_node("FloorMove/LabelXCresource").text = ""
-#	else:
-#		planviewcontrols.get_node("FloorMove/CheckBoxUnshaded").pressed = ((activetargetfloor.drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE_B) != 0)
-#		planviewcontrols.get_node("FloorMove/LabelXCresource").text = activetargetfloor.xcresource.replace("%20", " ")
-
-		
+			var cl = CollisionLayer.CL_PointerFloor
+			if not ((drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_GHOSTLY_B) != 0):
+				cl |= CollisionLayer.CL_Environment
+			$XCdrawingplane.collision_layer = cl
+			
 func updateformetresquaresscaletexture():
 	var mat = $XCdrawingplane/CollisionShape/MeshInstance.get_surface_material(0)
 	mat.uv1_scale = $XCdrawingplane.get_scale()
