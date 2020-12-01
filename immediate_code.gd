@@ -6,7 +6,8 @@ extends EditorScript
 # *******
 
 func _run():
-	var x = Rect2(0,0,5,5)
+	var x = {2:Rect2(0,0,5,5)}
+	x.clear()
 	print(x)
 	
 var zi = [ ]

@@ -52,7 +52,7 @@ func xctubefromdata(xctdata):
 	return xctube
 
 	
-func sketchsystemtodict():
+func sketchsystemtodict(include_xcchangesequence):
 	var xcdrawingsData = [ ]
 	for xcdrawing in $XCdrawings.get_children():
 		if xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING and len(xcdrawing.nodepoints) == 0:
@@ -60,7 +60,7 @@ func sketchsystemtodict():
 		elif xcdrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE and xcdrawing.drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_FLOOR_DELETED:
 			print("Discarding hidden floortexture on save ", xcdrawing.get_name())
 		else:
-			xcdrawingsData.append(xcdrawing.exportxcrpcdata())
+			xcdrawingsData.append(xcdrawing.exportxcrpcdata(include_xcchangesequence))
 	var xctubesData = [ ]
 	for xctube in $XCtubes.get_children():
 		xctubesData.append(xctube.exportxctrpcdata())
@@ -72,7 +72,7 @@ func sketchsystemtodict():
 	return sketchdatadict
 	
 remote func savesketchsystem(fname):
-	var sketchdatadict = sketchsystemtodict()
+	var sketchdatadict = sketchsystemtodict(false)
 	var sketchdatafile = File.new()
 	var fnamewriting = fname + "_WRITING"
 	sketchdatafile.open(fnamewriting, File.WRITE)
@@ -202,7 +202,6 @@ remote func actsketchchangeL(xcdatalist):
 			var playerOther = get_node("/root/Spatial/Players").get_node_or_null("NetworkedPlayer"+String(xcdatalist[0]["networkIDsource"]))
 			if playerOther != null:
 				if "overridingxcdrawing" in xcdatalist[0]:
-					print("overridingxcdrawing ", xcdatalist[0].get("name"))
 					playerOther.get_node("AnimationPlayer_actsketchchange_fixbad").play("actsketchchange_flash")
 				else:
 					playerOther.get_node("AnimationPlayer_actsketchchange").play("actsketchchange_flash")
@@ -289,6 +288,7 @@ remote func actsketchchangeL(xcdatalist):
 				assert(fromremotecall)
 				var xcd = $XCdrawings.get_node_or_null(xcdata["name"])
 				if xcd != null:
+					print("overridingxcdrawing ", xcdata.get("name"), " hereseq:", xcd.xcchangesequence, " remoteseq:", xcdata["overridingxcdrawing"])
 					xcd.xcchangesequence = -1
 			var xcdrawing = xcdrawingfromdata(xcdata, fromremotecall)
 			if xcdrawing == null:
@@ -377,9 +377,9 @@ remote func sendoverridingxcdrawingsdata(xcdrawingsrejected, playeridtoupdate):
 	for xcdrawingname in xcdrawingsrejected:
 		var xcdrawing = $XCdrawings.get_node_or_null(xcdrawingname)
 		if xcdrawingname != null:
-			var xcdata = xcdrawing.exportxcrpcdata()
+			var xcdata = xcdrawing.exportxcrpcdata(true)
 			xcdata["overridingxcdrawing"] = 1
-			xcdata["xcchangesequence"] = xcdrawing.xcchangesequence
+			#xcdata["xcchangesequence"] = xcdrawing.xcchangesequence
 			xcdata["networkIDsource"] = playerMe.networkID
 			xcdatalist.push_back(xcdata)
 	rpc_id(playeridtoupdate, "actsketchchangeL", xcdatalist)

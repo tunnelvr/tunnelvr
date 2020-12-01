@@ -54,7 +54,7 @@ func setxcdrawingvisibleL():
 	assert ($XCdrawingplane.visible != $XCdrawingplane/CollisionShape.disabled)
 
 func setdrawingvisiblecode(ldrawingvisiblecode):
-	var alreadynoshade = (drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE_B)
+	var drawingvisiblecode_old = drawingvisiblecode
 	drawingvisiblecode = ldrawingvisiblecode
 	if drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		if (drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_PLANE_VISIBLE) != 0:
@@ -67,12 +67,15 @@ func setdrawingvisiblecode(ldrawingvisiblecode):
 	elif drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
 		var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
 		var mat = $XCdrawingplane/CollisionShape/MeshInstance.get_surface_material(0)
-		var noshade = (drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE_B)
-		if alreadynoshade != noshade:
-			var matname = "xcdrawingmaterials/floorborderedunshaded" if noshade else "xcdrawingmaterials/floorbordered"
-			var newmat = get_node("/root/Spatial/MaterialSystem").get_node(matname).get_surface_material(0).duplicate()
-			newmat.set_shader_param("texture_albedo", mat.get_shader_param("texture_albedo"))
-			mat = newmat   # unshaded flag cannot be parametrized, so make new and copy over image
+		if (drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_FUNDAMENTALMATERIAL_MASK) != (drawingvisiblecode_old & DRAWING_TYPE.VIZ_XCD_FLOOR_FUNDAMENTALMATERIAL_MASK):
+			var fmatname = "xcdrawingmaterials/floorbordered"
+			if ((drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_GHOSTLY_B) != 0):
+				fmatname = "xcdrawingmaterials/floorborderedghostly"
+			elif ((drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE_B) != 0):
+				fmatname = "xcdrawingmaterials/floorborderedunshaded"
+			var fnewmat = get_node("/root/Spatial/MaterialSystem").get_node(fmatname).get_surface_material(0).duplicate()
+			fnewmat.set_shader_param("texture_albedo", mat.get_shader_param("texture_albedo"))
+			mat = fnewmat
 			$XCdrawingplane/CollisionShape/MeshInstance.set_surface_material(0, mat)
 			applytrimmedpaperuvscale()
 	
@@ -151,9 +154,10 @@ func expandxcdrawingfitxcdrawing(xcdrawing):
 		$XCdrawingplane.scale.y = ascay
 	updateformetresquaresscaletexture()
 	
-func exportxcrpcdata():
+func exportxcrpcdata(include_xcchangesequence):
+	var d
 	if drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
-		return { "name":get_name(), 
+		d = { "name":get_name(), 
 				 "xcresource":xcresource,
 				 "drawingtype":drawingtype,
 				 "transformpos":transform,
@@ -163,7 +167,8 @@ func exportxcrpcdata():
 				 "drawingvisiblecode":drawingvisiblecode
 			   }
 		
-	return { "name":get_name(), 
+	else:
+		d = { "name":get_name(), 
 			 "xcresource":xcresource,
 			 "drawingtype":drawingtype,
 			 #"prevtransformpos":
@@ -179,7 +184,10 @@ func exportxcrpcdata():
 			 "visible":$XCdrawingplane.visible, # to abolish
 			 "drawingvisiblecode":drawingvisiblecode
 		   }
-		
+	if include_xcchangesequence:
+		d["xcchangesequence"] = xcchangesequence
+	return d
+	
 func applytrimmedpaperuvscale():
 	get_node("XCdrawingplane").transform.origin = Vector3((imgtrimleftdown.x + imgtrimrightup.x)*0.5, (imgtrimleftdown.y + imgtrimrightup.y)*0.5, 0)
 	get_node("XCdrawingplane").scale = Vector3((imgtrimrightup.x - imgtrimleftdown.x)*0.5, (imgtrimrightup.y - imgtrimleftdown.y)*0.5, 1)

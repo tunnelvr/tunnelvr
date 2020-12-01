@@ -56,7 +56,8 @@ func clearpointertargetmaterial():
 			var pointertargetnonplan = pointertargetwall.get_node("XCnodes").get_node(pointertarget.get_name())
 			var pointertargetplanview = pointertargetwall.get_node("XCnodes_PlanView").get_node(pointertarget.get_name())
 			pointertargetnonplan.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("selected" if pointertarget == activetargetnode else "station"))
-			pointertargetnonplan.get_node("StationLabel").visible = false
+			if pointertarget != activetargetnode:
+				pointertargetnonplan.get_node("StationLabel").visible = false
 			pointertargetplanview.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("selected" if pointertarget == activetargetnode else "station"))
 		else:
 			pointertarget.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("selected" if pointertarget == activetargetnode else clearednodematerialtype(pointertarget, pointertargetwall == activetargetwall)))
@@ -117,6 +118,7 @@ func clearactivetargetnode():
 			var activetargetnodeplanview = activetargetnodewall.get_node("XCnodes_PlanView").get_node(activetargetnode.get_name())
 			activetargetnodenonplan.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("station"))
 			activetargetnodeplanview.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("station"))
+			activetargetnodenonplan.get_node("StationLabel").visible = false
 		else:
 			activetargetnode.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial(clearednodematerialtype(activetargetnode, activetargetnodewall == activetargetwall)))
 	activetargetnode = null
@@ -228,6 +230,7 @@ func clearpointertarget():
 
 func setpointertarget(laserroot, raycast, pointertargetshortdistance):
 	var newpointertarget = raycast.get_collider() if raycast != null else null
+	var pointertargetchanged = (newpointertarget != pointertarget)
 	if newpointertarget != null:
 		if newpointertarget.is_queued_for_deletion():
 			newpointertarget = null
@@ -244,11 +247,9 @@ func setpointertarget(laserroot, raycast, pointertargetshortdistance):
 			if pointertargetdistance > pointertargetshortdistance:
 				newpointertargetpoint = raycast.global_transform.origin + (-raycast.global_transform.basis.z)*pointertargetshortdistance
 				newpointertarget = null
-			laserroot.get_node("LaserSpot").visible = true
 	elif pointertargetshortdistance != -1.0:
 		newpointertargetpoint = raycast.global_transform.origin + (-raycast.global_transform.basis.z)*pointertargetshortdistance
-		laserroot.get_node("LaserSpot").visible = true
-	if newpointertarget != pointertarget:
+	if pointertargetchanged:
 		if pointertarget == guipanel3d:
 			guipanel3d.guipanelreleasemouse()
 		clearpointertargetmaterial()

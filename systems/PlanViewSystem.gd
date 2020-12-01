@@ -3,6 +3,7 @@ extends Spatial
 var planviewactive = false
 var drawingtype = DRAWING_TYPE.DT_PLANVIEW
 onready var ImageSystem = get_node("/root/Spatial/ImageSystem")
+onready var sketchsystem = get_node("/root/Spatial/SketchSystem")
 var activetargetfloor = null
 var activetargetfloortransformpos = null
 var activetargetfloorimgtrim = null
@@ -24,7 +25,6 @@ func getactivetargetfloorViz(newactivetargetfloorname: String):
 		xcviz["xcvizstates"][activetargetfloor.get_name()] = activetargetfloor.drawingvisiblecode & \
 															 (DRAWING_TYPE.VIZ_XCD_FLOOR_NORMAL | DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE_B | DRAWING_TYPE.VIZ_XCD_FLOOR_GHOSTLY_B)
 	if newactivetargetfloorname != "":
-		var sketchsystem = get_node("/root/Spatial/SketchSystem")
 		var newactivetargetfloor = sketchsystem.get_node("XCdrawings").get_node_or_null(newactivetargetfloorname)
 		xcviz["xcvizstates"][newactivetargetfloorname] = DRAWING_TYPE.VIZ_XCD_FLOOR_ACTIVE_B | \
 				(newactivetargetfloor.drawingvisiblecode if newactivetargetfloor != null else DRAWING_TYPE.VIZ_XCD_FLOOR_NORMAL)
@@ -43,12 +43,10 @@ func floorstyle_itemselected(floorstyleid):
 			newdrawingcode |= DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE_B
 		var floorviz = { "prevxcvizstates":{ activetargetfloor.get_name():activetargetfloor.drawingvisiblecode  }, 
 						 "xcvizstates":{ activetargetfloor.get_name():newdrawingcode } }
-		var sketchsystem = get_node("/root/Spatial/SketchSystem")
 		sketchsystem.actsketchchange([floorviz])
 			
 
 func buttondelpaper_pressed():
-	var sketchsystem = get_node("/root/Spatial/SketchSystem")
 	sketchsystem.actsketchchange([{ "xcvizstates":{ activetargetfloor.get_name():DRAWING_TYPE.VIZ_XCD_FLOOR_DELETED}} ])
 
 func defaultimgtrim():
@@ -57,7 +55,6 @@ func defaultimgtrim():
 			 "imgtrimrightup":Vector2(10, 10) }
 
 func fetchbuttonpressed(item, column, idx):
-	var sketchsystem = get_node("/root/Spatial/SketchSystem")
 	print("iii ", item, " ", column, "  ", idx)
 	if item == null:
 		print("fetchbuttonpressed item is null problem")
@@ -142,13 +139,11 @@ func transferintorealviewport(setascurrentcamera):
 func checkboxtubesvisible_pressed():
 	var pvchange = planviewtodict()
 	pvchange["tubesvisible"] = planviewcontrols.get_node("CheckBoxTubesVisible").pressed 
-	var sketchsystem = get_node("/root/Spatial/SketchSystem")
 	sketchsystem.actsketchchange([{"planview":pvchange}]) 
 
 func checkcentrelinesvisible_pressed():
 	var pvchange = planviewtodict()
 	pvchange["centrelinesvisible"] = planviewcontrols.get_node("CheckBoxCentrelinesVisible").pressed 
-	var sketchsystem = get_node("/root/Spatial/SketchSystem")
 	sketchsystem.actsketchchange([{"planview":pvchange}]) 
 
 		
@@ -274,6 +269,7 @@ func planviewtransformpos(guidpaneltransform, guidpanelsize):
 var slowviewportframeratecountdown = 1
 var slowviewupdatecentrelinesizeupdaterate = 1.5
 var prevcamerasize = 0
+var lastoptionaltxcdata = { }
 func _process(delta):
 	if Tglobal.arvrinterfacename == "OVRMobile" and visible:
 		slowviewportframeratecountdown -= delta
@@ -312,7 +308,6 @@ func _process(delta):
 		var plancamera = $PlanView/Viewport/PlanGUI/Camera
 		planviewpositiondict["plancamerasize"] = plancamera.size * zoomfac
 	if not planviewpositiondict.empty():
-		var sketchsystem = get_node("/root/Spatial/SketchSystem")
 		sketchsystem.actsketchchange([{"planview":planviewpositiondict}])
 
 	if activetargetfloor != null:
@@ -334,9 +329,15 @@ func _process(delta):
 			joygrow = 0
 			joyrot = Vector2(0, 0)
 		if joypostrimld != Vector2(0,0) or joypostrimru != Vector2(0,0) or joyposmove != Vector3(0,0,0) or joygrow != 0 or joyrot != Vector2(0, 0):
+			if "name" in lastoptionaltxcdata and lastoptionaltxcdata["name"] != activetargetfloor.get_name():
+				sketchsystem.actsketchchange([lastoptionaltxcdata])
+				lastoptionaltxcdata.clear()
 			var txcdata = { "name":activetargetfloor.get_name(), 
 							"rpcoptional":1,
 							"timestamp":OS.get_ticks_msec()*0.001 }
+			lastoptionaltxcdata["name"] = txcdata["name"]
+			lastoptionaltxcdata["timestamp"] = txcdata["timestamp"]
+
 			var d = activetargetfloor
 			var drawingplane = d.get_node("XCdrawingplane")
 			var sfac = delta*8
@@ -346,6 +347,8 @@ func _process(delta):
 				if joyrot != Vector2(0, 0):
 					tb = Basis(tb.get_euler() + Vector3(joyrot.y*delta, joyrot.x*delta, 0))
 				txcdata["transformpos"] = Transform(tb, d.transform.origin + Basis()*joyposmove*delta*8)
+				lastoptionaltxcdata["prevtransformpos"] = txcdata["prevtransformpos"]
+				lastoptionaltxcdata["transformpos"] = txcdata["transformpos"]
 
 			if joypostrimld != Vector2(0,0) or joypostrimru != Vector2(0,0) or joygrow != 0:
 				txcdata["previmgtrim"] = { "imgwidth":d.imgwidth, "imgtrimleftdown":d.imgtrimleftdown, "imgtrimrightup":d.imgtrimrightup }
@@ -357,17 +360,24 @@ func _process(delta):
 													 clamp(imgtrim["imgtrimleftdown"].y + joypostrimld.y*sfac, -imgheight*0.5, imgtrim["imgtrimrightup"].y-0.1))
 				imgtrim["imgtrimrightup"] = Vector2(clamp(imgtrim["imgtrimrightup"].x + joypostrimru.x*sfac, imgtrim["imgtrimleftdown"].x+0.1, imgtrim["imgwidth"]*0.5), 
 													clamp(imgtrim["imgtrimrightup"].y + joypostrimru.y*sfac, imgtrim["imgtrimleftdown"].y+0.1, imgheight*0.5))
-			var sketchsystem = get_node("/root/Spatial/SketchSystem")
+				lastoptionaltxcdata["previmgtrim"] = txcdata["previmgtrim"]
+				lastoptionaltxcdata["imgtrim"] = txcdata["imgtrim"]
+				lastoptionaltxcdata["imgtrimleftdown"] = txcdata["imgtrimleftdown"]
+				lastoptionaltxcdata["imgtrimrightup"] = txcdata["imgtrimrightup"]
+								
 			sketchsystem.actsketchchange([txcdata])
+		elif "name" in lastoptionaltxcdata:
+			print("sending lastoptionaltxcdata ", lastoptionaltxcdata["name"])
+			sketchsystem.actsketchchange([lastoptionaltxcdata])
+			lastoptionaltxcdata.clear()
+
 	
 func buttoncentre_pressed():
 	var headcam = get_node("/root/Spatial").playerMe.get_node("HeadCam")
 	var planviewpositiondict = { "plancamerapos":Vector3(headcam.global_transform.origin.x, $PlanView/Viewport/PlanGUI/Camera.translation.y, headcam.global_transform.origin.z) }
-	var sketchsystem = get_node("/root/Spatial/SketchSystem")		
 	sketchsystem.actsketchchange([{"planview":planviewpositiondict}])
 
 func buttonclose_pressed():
-	var sketchsystem = get_node("/root/Spatial/SketchSystem")
 	sketchsystem.actsketchchange([ {"planview":{"visible":false, "planviewactive":false}}, 
 								   getactivetargetfloorViz("") 
 								 ])

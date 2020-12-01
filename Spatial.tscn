@@ -1,4 +1,4 @@
-[gd_scene load_steps=245 format=2]
+[gd_scene load_steps=243 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/default_env.tres" type="Environment" id=2]
@@ -931,12 +931,10 @@ void fragment() {
 	vec2 base_uv = UV;
 	vec4 albedo_tex = texture(texture_albedo,base_uv);
 	ALBEDO = albedo.rgb * albedo_tex.rgb;
-	ALPHA = albedo.a;
 	if (uv_borderwidth != 0.0) {
 		float uvfromedge = min(min(uvorg.x, 1.0 - uvorg.x), min(uvorg.y, 1.0 - uvorg.y));
 		float lambda = max(uv_borderwidth - uvfromedge, 0.0)/uv_borderwidth;
 		ALBEDO = mix(ALBEDO, albedo_border.rgb, lambda);
-		ALPHA = mix(albedo.a, albedo_border.a, lambda);
 	}
 	METALLIC = metallic;
 	ROUGHNESS = roughness;
@@ -964,6 +962,51 @@ shader_param/uv_borderwidth = 0.05
 shader_param/albedo_border = Color( 0.980392, 0.321569, 0.0352941, 1 )
 
 [sub_resource type="QuadMesh" id=141]
+
+[sub_resource type="Shader" id=198]
+code = "shader_type spatial;
+render_mode blend_mix,depth_draw_opaque,cull_disabled,diffuse_burley,specular_schlick_ggx, unshaded;
+uniform vec4 albedo : hint_color;
+uniform sampler2D texture_albedo : hint_albedo;
+uniform float specular;
+uniform float metallic;
+uniform float roughness : hint_range(0,1);
+uniform vec3 uv1_scale;
+uniform vec3 uv1_offset;
+uniform float uv_borderwidth;
+uniform vec4 albedo_border : hint_color;
+varying vec2 uvorg;
+
+void vertex() {
+	uvorg = UV;
+	UV = UV*uv1_scale.xy+uv1_offset.xy;
+}
+
+void fragment() {
+	vec2 base_uv = UV;
+	vec4 albedo_tex = texture(texture_albedo,base_uv);
+	ALBEDO = albedo.rgb * albedo_tex.rgb;
+	if (uv_borderwidth != 0.0) {
+		float uvfromedge = min(min(uvorg.x, 1.0 - uvorg.x), min(uvorg.y, 1.0 - uvorg.y));
+		float lambda = max(uv_borderwidth - uvfromedge, 0.0)/uv_borderwidth;
+		ALBEDO = mix(ALBEDO, albedo_border.rgb, lambda);
+	}
+	METALLIC = metallic;
+	ROUGHNESS = roughness;
+	SPECULAR = specular;
+}
+"
+
+[sub_resource type="ShaderMaterial" id=143]
+shader = SubResource( 198 )
+shader_param/albedo = Color( 1, 1, 1, 1 )
+shader_param/specular = null
+shader_param/metallic = 0.0
+shader_param/roughness = 0.0
+shader_param/uv1_scale = null
+shader_param/uv1_offset = null
+shader_param/uv_borderwidth = 0.02
+shader_param/albedo_border = Color( 0.231373, 0.262745, 0.364706, 1 )
 
 [sub_resource type="Shader" id=142]
 code = "shader_type spatial;
@@ -999,29 +1042,11 @@ void fragment() {
 	ROUGHNESS = roughness;
 	SPECULAR = specular;
 }
-
-
-
-
-
-
-
 "
-
-[sub_resource type="ShaderMaterial" id=143]
-shader = SubResource( 142 )
-shader_param/albedo = Color( 1, 1, 1, 1 )
-shader_param/specular = null
-shader_param/metallic = 0.0
-shader_param/roughness = 0.0
-shader_param/uv1_scale = null
-shader_param/uv1_offset = null
-shader_param/uv_borderwidth = 0.02
-shader_param/albedo_border = Color( 0.231373, 0.262745, 0.364706, 1 )
 
 [sub_resource type="ShaderMaterial" id=196]
 shader = SubResource( 142 )
-shader_param/albedo = Color( 0.788235, 0.764706, 0.698039, 0.0666667 )
+shader_param/albedo = Color( 0.788235, 0.764706, 0.698039, 0.305882 )
 shader_param/specular = null
 shader_param/metallic = 0.0
 shader_param/roughness = 0.0
@@ -1247,16 +1272,8 @@ height = 1.1
 [sub_resource type="SpatialMaterial" id=184]
 albedo_color = Color( 0.168627, 0.972549, 0.027451, 1 )
 
-[sub_resource type="QuadMesh" id=185]
-
-[sub_resource type="StreamTexture" id=186]
-
-[sub_resource type="SpatialMaterial" id=187]
-albedo_texture = SubResource( 186 )
-
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
-enablevr = false
 
 [node name="Players" type="Spatial" parent="."]
 transform = Transform( -1, 0, -3.25841e-07, 0, 1, 0, 3.25841e-07, 0, -1, 0, 0, 0 )
@@ -3151,7 +3168,3 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.409035, 2.78001, -15.0808 )
 use_in_baked_light = true
 mesh = SubResource( 182 )
 material/0 = SubResource( 184 )
-
-[node name="test" type="MeshInstance" parent="."]
-mesh = SubResource( 185 )
-material/0 = SubResource( 187 )

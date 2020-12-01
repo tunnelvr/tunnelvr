@@ -98,6 +98,9 @@ func _ready():
 	pointermodel.get_node("Length/MeshInstance").set_surface_material(0, pointermaterial)
 	add_child(pointermodel)
 	pointermodel.visible = false
+	if not islefthand:
+		pointermodel.get_node("Length").visible = false
+
 	indexfingerpinchbutton = addfingerpinchbutton("index_null")
 	middlefingerpinchbutton = addfingerpinchbutton("middle_null")
 	if has_node("RayCast"):
@@ -105,6 +108,7 @@ func _ready():
 		middleringbutton.get_node("MeshInstance").transform.origin.y *= -2
 		internalhandray = $RayCast
 		boneattachmentmiddletip = addboneattachment("middle_null")
+	
 
 func addfingerpinchbutton(bname):
 	var boneattachment = addboneattachment(bname)
