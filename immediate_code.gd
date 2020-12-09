@@ -7,8 +7,8 @@ extends EditorScript
 
 
 func _run():
-	var uniqstring = OS.get_unique_id().replace("{", "").split("-")[0].to_upper()
-	print(uniqstring)
+	var x = "Hole;0;aab;ccd"
+	print(x.split(";"))
 	
 var zi = [ ]
 var zi1 = [ 0.48, 0.66 ]

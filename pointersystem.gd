@@ -158,7 +158,7 @@ func setactivetargetwall(newactivetargetwall):
 	LaserOrient.get_node("RayCast").collision_mask = raynormalcollisionmask()
 	if activetargetwall != null and activetargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		if not activetargetwall.get_node("XCdrawingplane").visible:
-			sketchsystem.actsketchchange([{"xcvizstates":{activetargetwall.get_name():3}}])
+			sketchsystem.actsketchchange([{"xcvizstates":{activetargetwall.get_name():DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE}}])
 		activetargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").set_surface_material(0, materialsystem.xcdrawingmaterial("active"))
 		activetargetwall.get_node("PathLines").set_surface_material(0, materialsystem.pathlinematerial("nodepthtest"))
 		for xcnode in activetargetwall.get_node("XCnodes").get_children():
@@ -500,6 +500,10 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 							  }
 				var xctuberedraw = {"xcvizstates":{ }, "updatetubeshells":[{"tubename":intermediatepointplanetubename, "xcname0":splinepointplanetube.xcname0, "xcname1":splinepointplanetube.xcname1 }] }
 				sketchsystem.actsketchchange([xctdata, xctuberedraw])
+				var xcdatashellholes = findconstructtubeshellholes([splinepointplanetube])
+				if xcdatashellholes != null:
+					sketchsystem.actsketchchange(xcdatashellholes)
+				
 			clearintermediatepointplaneview()
 				
 	elif pointertargettype == "Papersheet" or pointertargettype == "PlanView":
@@ -653,7 +657,7 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 				else:
 					xctdata["prevdrawinglinks"] = [ nodename0, nodename1, xctube.xcsectormaterials[j], (xctube.xclinkintermediatenodes[j] if xctube.xclinkintermediatenodes != null else null) ]
 					xctdata["newdrawinglinks"] = [ ]
-			var xcvdata = { "xcvizstates":{ pointertargetwall.get_name():3 } }
+			var xcvdata = { "xcvizstates":{ pointertargetwall.get_name():DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE } }
 			sketchsystem.actsketchchange([xctdata, xcvdata])
 		clearactivetargetnode()
 											
@@ -783,7 +787,7 @@ func buttonreleased_vrgrip():
 							   "transformpos":Transform(Basis().rotated(Vector3(0,-1,0), drawingwallangle), pt0) }
 				if not newxcvertplane:
 					xcdata["transformpos"] = Transform(Vector3(1,0,0), Vector3(0,0,-1), Vector3(0,1,0), pt0)
-				var xcviz = { "xcvizstates": { xcdata["name"]:3 } }
+				var xcviz = { "xcvizstates": { xcdata["name"]:DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE } }
 				sketchsystem.actsketchchange([xcdata, xcviz])
 				clearactivetargetnode()
 				var xcdrawing = sketchsystem.get_node("XCdrawings").get_node(xcdata["name"])
@@ -811,7 +815,7 @@ func buttonreleased_vrgrip():
 		elif is_instance_valid(gripmenu.gripmenupointertargetwall):
 			print("executing ", pointertarget.get_name(), " on ", gripmenu.gripmenupointertargetwall.get_name())
 			if pointertarget.get_name() == "SelectXC":
-				sketchsystem.actsketchchange([{"xcvizstates":{gripmenu.gripmenupointertargetwall.xcname0:3, gripmenu.gripmenupointertargetwall.xcname1:3}}])
+				sketchsystem.actsketchchange([{"xcvizstates":{gripmenu.gripmenupointertargetwall.xcname0:DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE, gripmenu.gripmenupointertargetwall.xcname1:DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE}}])
 				var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(gripmenu.gripmenupointertargetwall.xcname0)
 				var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(gripmenu.gripmenupointertargetwall.xcname1)
 				if xcdrawing0 != activetargetwall:
@@ -820,7 +824,7 @@ func buttonreleased_vrgrip():
 					setactivetargetwall(xcdrawing1)
 						
 			elif pointertarget.get_name() == "HideXC":
-				sketchsystem.actsketchchange([{ "xcvizstates":{gripmenu.gripmenupointertargetwall.xcname0:0, gripmenu.gripmenupointertargetwall.xcname1:0}} ])
+				sketchsystem.actsketchchange([{ "xcvizstates":{gripmenu.gripmenupointertargetwall.xcname0:DRAWING_TYPE.VIZ_XCD_HIDE, gripmenu.gripmenupointertargetwall.xcname1:DRAWING_TYPE.VIZ_XCD_HIDE}} ])
 				var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(gripmenu.gripmenupointertargetwall.xcname0)
 				var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(gripmenu.gripmenupointertargetwall.xcname1)
 				if xcdrawing0 == activetargetwall:
@@ -837,9 +841,9 @@ func buttonreleased_vrgrip():
 				if xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 					if xcdrawing.notubeconnections_so_delxcable():
 						var xcname = xcdrawing.get_name()
-						var nodename = xcdrawing.get_name()
-						var xcv = { "xcvizstates":{ xcdrawing.get_name():0 } }
-						var xcdata = { "name":xcdrawing.get_name(), 
+						var xcv = { "xcvizstates":{ xcname:DRAWING_TYPE.VIZ_XCD_PLANE_VISIBLE if xcdrawing.get_name().begins_with("Hole") else \
+														   DRAWING_TYPE.VIZ_XCD_HIDE } }
+						var xcdata = { "name":xcname, 
 									   "prevnodepoints":xcdrawing.nodepoints.duplicate(),
 									   "nextnodepoints":{ }, 
 									   "prevonepathpairs":xcdrawing.onepathpairs.duplicate(),
@@ -854,7 +858,7 @@ func buttonreleased_vrgrip():
 			elif pointertarget.get_name() == "DelTube":
 				if gripmenu.gripmenupointertargettype == "XCtubesector":
 					var xctube = gripmenu.gripmenupointertargetwall
-					var xcv = { "xcvizstates":{ xctube.xcname0:3, xctube.xcname1:3 } }
+					var xcv = { "xcvizstates":{ xctube.xcname0:DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE, xctube.xcname1:DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE } }
 					var prevdrawinglinks = [ ]
 					for j in range(0, len(xctube.xcdrawinglink), 2):
 						prevdrawinglinks.push_back(xctube.xcdrawinglink[j])
@@ -886,9 +890,9 @@ func buttonreleased_vrgrip():
 			elif pointertarget.get_name() == "HoleXC":
 				var xcdata = gripmenu.gripmenupointertargetwall.ConstructHoleXC(gripmenu.gripmenuactivetargettubesectorindex, sketchsystem)
 				sketchsystem.actsketchchange([xcdata, 
-						{"xcvizstates":{ gripmenu.gripmenupointertargetwall.xcname0:0, 
-										 gripmenu.gripmenupointertargetwall.xcname1:0,
-										 xcdata["name"]:2 }}])
+						{"xcvizstates":{ gripmenu.gripmenupointertargetwall.xcname0:DRAWING_TYPE.VIZ_XCD_HIDE, 
+										 gripmenu.gripmenupointertargetwall.xcname1:DRAWING_TYPE.VIZ_XCD_HIDE,
+										 xcdata["name"]:DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE }}])
 				setactivetargetwall(sketchsystem.get_node("XCdrawings").get_node(xcdata["name"]))
 													
 			elif pointertarget.get_name() == "DoSlice" and is_instance_valid(wasactivetargettube) and is_instance_valid(activetargetwall) and len(activetargetwall.nodepoints) == 0:
@@ -910,7 +914,7 @@ func buttonreleased_vrgrip():
 				if wasactivetargettube.slicetubetoxcdrawing(xcdrawing, xcdata, xctdatadel, xctdata0, xctdata1):
 					clearactivetargetnode()
 					clearpointertarget()
-					var xctdataviz = {"xcvizstates":{ xcdrawing.get_name():3 }, 
+					var xctdataviz = {"xcvizstates":{ xcdrawing.get_name():DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE }, 
 						"updatetubeshells":[
 							{ "tubename":xctdatadel["tubename"], "xcname0":xctdatadel["xcname0"], "xcname1":xctdatadel["xcname1"] },
 							{ "tubename":xctdata0["tubename"], "xcname0":xctdata0["xcname0"], "xcname1":xctdata0["xcname1"] },
@@ -929,11 +933,12 @@ func buttonreleased_vrgrip():
 	elif pointertargettype == "XCdrawing" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		clearpointertargetmaterial()
 		var updatexcshells = [ pointertargetwall.get_name() ]
-		var updatetubeshells = [ ]
-		for xctube in pointertargetwall.xctubesconn:
-			updatetubeshells.push_back({ "tubename":xctube.get_name(), "xcname0":xctube.xcname0, "xcname1":xctube.xcname1 })
-
-		sketchsystem.actsketchchange([{"xcvizstates":{ pointertargetwall.get_name():2 }, "updatetubeshells":updatetubeshells, "updatexcshells":updatexcshells }])
+		var updatetubeshells = pointertargetwall.updatetubeshellsconn()
+		sketchsystem.actsketchchange([{"xcvizstates":{ pointertargetwall.get_name():DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE }, "updatetubeshells":updatetubeshells, "updatexcshells":updatexcshells }])
+		var xcdatashellholes = findconstructtubeshellholes(pointertargetwall.xctubesconn)
+		if xcdatashellholes != null:
+			sketchsystem.actsketchchange(xcdatashellholes)
+		
 		#if pointertargettype == activetargetwall:
 		setactivetargetwall(null)
 		clearpointertarget()
@@ -945,9 +950,7 @@ func buttonreleased_vrgrip():
 		
 	elif activetargetwall != null and activetargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		var updatexcshells = [ activetargetwall.get_name() ]
-		var updatetubeshells = [ ]
-		for xctube in activetargetwall.xctubesconn:
-			updatetubeshells.push_back({ "tubename":xctube.get_name(), "xcname0":xctube.xcname0, "xcname1":xctube.xcname1 })
+		var updatetubeshells = activetargetwall.updatetubeshellsconn()
 		sketchsystem.actsketchchange([{"xcvizstates":{ }, "updatetubeshells":updatetubeshells, "updatexcshells":updatexcshells }])
 		setactivetargetwall(null)
 
@@ -958,6 +961,22 @@ func buttonreleased_vrgrip():
 		clearintermediatepointplaneview()
 
 	gripmenu.disableallgripmenus()
+
+func findconstructtubeshellholes(xctubes):
+	var xcdatashellholes = null
+	for xctube in xctubes:
+		var tubeshellholeindexes = xctube.gettubeshellholes(sketchsystem)
+		if tubeshellholeindexes != null:
+			var drawinghole = tubeshellholeindexes[0]
+			for j in range(1, len(tubeshellholeindexes)):
+				var i = tubeshellholeindexes[j]
+				if xcdatashellholes == null:
+					xcdatashellholes = [ ]
+				xcdatashellholes.push_back(xctube.ConstructHoleXC(i, sketchsystem))
+			var updatetubeshells = drawinghole.updatetubeshellsconn()
+			if len(updatetubeshells) != 0:
+				xcdatashellholes.push_back({"xcvizstates":{ }, "updatetubeshells":updatetubeshells})
+	return xcdatashellholes
 
 var targetwallvertplane = true
 var prevactivetargetwallgrabbedorgtransform = null

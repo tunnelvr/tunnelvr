@@ -470,6 +470,8 @@ func slicetubetoxcdrawing(xcdrawing, xcdata, xctdatadel, xctdata0, xctdata1):
 		return false
 	return true
 
+
+
 func HoleName(i):
 	return "Hole"+("" if i == 0 else ";"+str(i))+";"+xcname0+";"+xcname1
 
@@ -511,6 +513,18 @@ func ConstructHoleXC(i, sketchsystem):
 		xcdata["newonepathpairs"].push_back(sc[0])
 		prevname = sc[0]
 	return xcdata
+
+func gettubeshellholes(sketchsystem):
+	var tubeshellholeindexes = null
+	for i in range(len(xcsectormaterials)):
+		if xcsectormaterials[i] == "hole":
+			var xcdrawingholename = HoleName(i)
+			var xcdrawinghole = sketchsystem.get_node_or_null("XCdrawings").get_node(xcdrawingholename)
+			if xcdrawinghole != null:
+				if tubeshellholeindexes == null:
+					tubeshellholeindexes = [ xcdrawinghole ]
+				tubeshellholeindexes.push_back(i)
+	return tubeshellholeindexes
 
 
 func advanceuvFar(uvFixed, ptFixed, uvFar, ptFar, ptFarNew, bclockwise):
@@ -737,9 +751,10 @@ func updatetubeshell(xcdrawings):
 		if xcsectormaterials[i] == "hole":
 			var sketchsystem = get_node("/root/Spatial/SketchSystem")
 			var xcdrawinghole = sketchsystem.get_node_or_null("XCdrawings").get_node(HoleName(i))
-			if xcdrawinghole != null and len(xcdrawinghole.xctubesconn) != 0:
-				xctubesector.get_node("MeshInstance").visible = false
-				xctubesector.get_node("CollisionShape").disabled = true
+			if xcdrawinghole != null:
+				if (xcdrawinghole.drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_PLANE_VISIBLE) == 0:
+					xctubesector.get_node("MeshInstance").visible = false
+					xctubesector.get_node("CollisionShape").disabled = true
 		$XCtubesectors.add_child(xctubesector)
 
 

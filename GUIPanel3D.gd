@@ -124,6 +124,12 @@ func _on_switchtest(index):
 		for xctube in sketchsystem.get_node("XCtubes").get_children():
 			for xctubesector in xctube.get_node("XCtubesectors").get_children():
 				materialsystem.updatetubesectormaterial(xctubesector, "flatgrey", false)
+	
+	if index == 3:
+		sketchsystem.get_node("XCdrawings").visible = false
+	elif index == 0:
+		sketchsystem.get_node("XCdrawings").visible = true
+
 		
 func _on_buttonswapcontrollers_pressed():
 	playerMe.swapcontrollers()

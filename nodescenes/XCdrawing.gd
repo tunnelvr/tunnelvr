@@ -23,10 +23,38 @@ var imgheightwidthratio = 0  # known from the xcresource image (though could be 
 
 var linewidth = 0.05
 
+func DeHoleTubeShell(xcname):
+	var sketchsystem = get_node("/root/Spatial/SketchSystem")
+	var hxc = xcname.split(";")
+	assert (len(hxc) == 3 or len(hxc) == 4)
+	assert (hxc[0] == "Hole")
+	var i = 0 if len(hxc) == 3 else int(hxc[1])
+	var xcname0 = hxc[-2]
+	var xcname1 = hxc[-1]
+	var xctube = sketchsystem.findxctube(xcname0, xcname1)
+	if xctube != null and i < xctube.get_node("XCtubesectors").get_child_count():
+		return xctube.get_node("XCtubesectors").get_child(i)
+	return null
+		
+func updatetubeshellsconn():
+	var updatetubeshells = [ ]
+	for xctube in xctubesconn:
+		updatetubeshells.push_back({ "tubename":xctube.get_name(), "xcname0":xctube.xcname0, "xcname1":xctube.xcname1 })
+	return updatetubeshells
+
+		
 func setxcdrawingvisiblehideL(hidenodes):
 	assert ($XCdrawingplane.visible != $XCdrawingplane/CollisionShape.disabled)	
-	$XCdrawingplane.visible = false
-	$XCdrawingplane/CollisionShape.disabled = true
+	if drawingtype == DRAWING_TYPE.DT_XCDRAWING and get_name().begins_with("Hole"):
+		var xctubesector = DeHoleTubeShell(get_name())
+		if xctubesector != null:
+			xctubesector.visible = false
+			xctubesector.get_node("CollisionShape").disabled = true
+		$XCdrawingplane.visible = false
+		$XCdrawingplane/CollisionShape.disabled = true
+	else:
+		$XCdrawingplane.visible = false
+		$XCdrawingplane/CollisionShape.disabled = true
 	if hidenodes and drawingtype != DRAWING_TYPE.DT_CENTRELINE:
 		var rvisible = (drawingtype != DRAWING_TYPE.DT_XCDRAWING) or (len(xctubesconn) == 0)
 		$XCnodes.visible = rvisible
@@ -44,9 +72,16 @@ func setxcdrawingvisibleL():
 			scax = max(scax, abs(nodepoint.x))
 			scay = max(scay, abs(nodepoint.y))
 		$XCdrawingplane.set_scale(Vector3(scax + 2, scay + 2, 1.0))
-	if not (drawingtype == DRAWING_TYPE.DT_XCDRAWING and get_name().begins_with("Hole")):
+	if drawingtype == DRAWING_TYPE.DT_XCDRAWING and get_name().begins_with("Hole"):
+		var xctubesector = DeHoleTubeShell(get_name())
+		if xctubesector != null:
+			xctubesector.visible = true
+			xctubesector.get_node("CollisionShape").disabled = false
+	else:
 		$XCdrawingplane.visible = true
 		$XCdrawingplane/CollisionShape.disabled = false
+
+
 	$XCnodes.visible = true
 	$PathLines.visible = true
 	for xcn in $XCnodes.get_children():
