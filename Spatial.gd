@@ -66,6 +66,7 @@ var ovr_performance = null
 var ovr_hand_tracking = null
 
 onready var playerMe = $Players/PlayerMe
+onready var mqttsystem = $MQTTExperiment
 
 func checkloadinterface(larvrinterfacename):
 	var available_interfaces = ARVRServer.get_interfaces()
@@ -195,8 +196,8 @@ func _ready():
 	else:
 		pass
 	playerMe.global_transform.origin.y += 5
-	setmsaa()
 	$GuiSystem/GUIPanel3D.updateplayerlist()
+	get_node("/root").msaa = Viewport.MSAA_4X
 
 
 func nextplayernetworkidinringskippingdoppelganger(deletedid):
@@ -215,6 +216,7 @@ var deferred_player_connected_list = [ ]
 var players_connected_list = [ ]
 func _player_connected(id):
 	print("_player_connected ", id)
+	mqttsystem.mqttpublish("playerconnected", String(id))
 	if not Tglobal.connectiontoserveractive:
 		print("deferring playerconnect to after _connected_to_server() call: ", id)
 		deferred_player_connected_list.push_back(id)
@@ -254,6 +256,7 @@ func _player_connected(id):
 	
 func _player_disconnected(id):
 	print("_player_disconnected ", id)
+	mqttsystem.mqttpublish("playerdisconnected", String(id))
 	if id in deferred_player_connected_list:
 		print(" _player_disconnected id still in  deferred_player_connected_list")
 		deferred_player_connected_list.erase(id)
@@ -278,6 +281,7 @@ func _connected_to_server():
 		print("setting the newnetworkID: ", newnetworkID)
 		setnetworkidnamecolour(playerMe, newnetworkID)
 	$GuiSystem/GUIPanel3D/Viewport/GUI/Panel/Label.text = "connected as "+String(playerMe.networkID)
+	mqttsystem.mqttpublish("connectedtoserver", String(newnetworkID))
 
 	print("SETTING connectiontoserveractive true now")
 	Tglobal.connectiontoserveractive = true
@@ -289,14 +293,6 @@ func _connected_to_server():
 		print("Now calling deferred _player_connected on id ", id)
 		call_deferred("_player_connected", id)
 	
-func setmsaa():
-	var msaaval = $GuiSystem/GUIPanel3D/Viewport/GUI/Panel/MSAAstatus.get_selected_id()
-	if msaaval == 0:
-		get_node("/root").msaa = Viewport.MSAA_DISABLED
-	elif msaaval == 1:
-		get_node("/root").msaa = Viewport.MSAA_2X
-	elif msaaval == 2:
-		get_node("/root").msaa = Viewport.MSAA_4X
 
 func _process(_delta):
 	if !perform_runtime_config:

@@ -1,4 +1,4 @@
-[gd_scene load_steps=243 format=2]
+[gd_scene load_steps=244 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/default_env.tres" type="Environment" id=2]
@@ -547,6 +547,20 @@ period = 105.7
 seamless = true
 noise = SubResource( 86 )
 
+[sub_resource type="SpatialMaterial" id=90]
+params_cull_mode = 2
+albedo_color = Color( 0.639216, 0.647059, 0.647059, 1 )
+albedo_texture = SubResource( 85 )
+metallic = 0.49
+metallic_specular = 0.7
+roughness = 0.79
+ao_enabled = true
+ao_light_affect = 1.0
+ao_texture = SubResource( 87 )
+ao_on_uv2 = false
+ao_texture_channel = 0
+uv1_scale = Vector3( 0.1, 0.1, 1 )
+
 [sub_resource type="OpenSimplexNoise" id=88]
 octaves = 2
 period = 93.7
@@ -555,21 +569,6 @@ lacunarity = 1.36
 [sub_resource type="NoiseTexture" id=89]
 seamless = true
 noise = SubResource( 88 )
-
-[sub_resource type="SpatialMaterial" id=90]
-params_cull_mode = 2
-albedo_color = Color( 0.447059, 0.882353, 0.811765, 1 )
-albedo_texture = SubResource( 85 )
-metallic = 0.42
-metallic_specular = 0.7
-metallic_texture = SubResource( 89 )
-roughness = 0.43
-ao_enabled = true
-ao_light_affect = 1.0
-ao_texture = SubResource( 87 )
-ao_on_uv2 = false
-ao_texture_channel = 0
-uv1_scale = Vector3( 0.1, 0.1, 1 )
 
 [sub_resource type="SpatialMaterial" id=91]
 params_cull_mode = 2
@@ -720,6 +719,13 @@ flags_unshaded = true
 albedo_texture = ExtResource( 8 )
 uv1_scale = Vector3( 1, 0.05, 1 )
 uv1_offset = Vector3( 0, 0.31, 0 )
+
+[sub_resource type="SpatialMaterial" id=190]
+flags_vertex_lighting = true
+flags_do_not_receive_shadows = true
+flags_disable_ambient_light = true
+params_cull_mode = 2
+albedo_color = Color( 0.14902, 0.14902, 0.14902, 1 )
 
 [sub_resource type="SpatialMaterial" id=113]
 params_cull_mode = 2
@@ -1274,6 +1280,7 @@ albedo_color = Color( 0.168627, 0.972549, 0.027451, 1 )
 
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
+enablevr = false
 
 [node name="Players" type="Spatial" parent="."]
 transform = Transform( -1, 0, -3.25841e-07, 0, 1, 0, 3.25841e-07, 0, -1, 0, 0, 0 )
@@ -1532,24 +1539,14 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="MSAA" type="Label" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 166.092
-margin_top = 137.441
-margin_right = 224.092
-margin_bottom = 159.441
-text = "MSAA:"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="MSAAstatus" type="OptionButton" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 221.909
-margin_top = 136.114
-margin_right = 264.909
-margin_bottom = 163.114
-text = "4x"
-items = [ "disabled", null, false, 0, null, "2x", null, false, 1, null, "4x", null, false, 2, null ]
-selected = 2
+[node name="SwitchTest" type="OptionButton" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
+margin_left = 171.0
+margin_top = 136.0
+margin_right = 265.0
+margin_bottom = 163.0
+text = "normal"
+items = [ "normal", null, false, 0, null, "hide floors", null, false, 1, null, "all grey", null, false, 2, null ]
+selected = 0
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -2630,6 +2627,7 @@ material/0 = null
 
 [node name="MaterialSystem" type="Spatial" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 41.0922, 2.20853, 23.9465 )
+visible = false
 script = ExtResource( 36 )
 
 [node name="tubematerials" type="Spatial" parent="MaterialSystem"]
@@ -2737,6 +2735,11 @@ material/0 = SubResource( 111 )
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -3.35993 )
 mesh = SubResource( 76 )
 material/0 = SubResource( 112 )
+
+[node name="flatgrey" type="MeshInstance" parent="MaterialSystem/tubematerials"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 15.0863, 0, 0 )
+mesh = SubResource( 74 )
+material/0 = SubResource( 190 )
 
 [node name="tubematerials2" type="Spatial" parent="MaterialSystem"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 5.17274 )

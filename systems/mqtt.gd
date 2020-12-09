@@ -20,9 +20,9 @@ tool
 
 extends Node
 
-var server = "sensorcity.io"
+var server = ""
 var port = 1883
-var client_id = "client_id"
+var client_id = ""
 var client = null
 var ssl = false
 var ssl_params = null
@@ -69,7 +69,7 @@ func _recv_len():
 		sh += 7
 
 func set_last_will(topic, msg, retain=false, qos=0):
-	assert(0 <= qos <= 2)
+	assert((0 <= qos) and (qos <= 2))
 	assert(topic)
 	self.lw_topic = topic
 	self.lw_msg = msg
@@ -77,7 +77,9 @@ func set_last_will(topic, msg, retain=false, qos=0):
 	self.lw_retain = retain
 
 func connect_to_server(clean_session=true):
-
+	assert (server != "")
+	if client_id == "":
+		client_id = "rr%d" % randi()
 	self.client = StreamPeerTCP.new()
 	self.client.set_no_delay(true)
 	self.client.set_big_endian(true)

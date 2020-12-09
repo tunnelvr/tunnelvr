@@ -17,6 +17,8 @@ func _ready():
 		var tubematerial = tubematerials.get_child(i)
 		var materialbutton = MaterialButton.instance()
 		var materialname = tubematerial.get_name()
+		if materialname == "flatgrey":
+			continue
 		materialbutton.set_name(materialname)
 		var material = tubematerial.get_surface_material(0).duplicate()
 		material.flags_unshaded = true

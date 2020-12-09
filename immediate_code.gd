@@ -5,10 +5,10 @@ extends EditorScript
 # Control-Shift X to run this code in the editor
 # *******
 
+
 func _run():
-	var x = {2:Rect2(0,0,5,5)}
-	x.clear()
-	print(x)
+	var uniqstring = OS.get_unique_id().replace("{", "").split("-")[0].to_upper()
+	print(uniqstring)
 	
 var zi = [ ]
 var zi1 = [ 0.48, 0.66 ]

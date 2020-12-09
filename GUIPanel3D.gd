@@ -107,10 +107,24 @@ func _on_playerscale_selected(index):
 		else:
 			playerMe.playerflyscale = playerMe.playerscale*0.75
 	toggleguipanelvisibility(null)
-	
-func _on_msaa_selected(index):
-	get_node("/root/Spatial").setmsaa()
+	var selfSpatial = get_node("/root/Spatial")
+	selfSpatial.mqttsystem.mqttpublish("playerscale", String(newplayerscale))
 
+	
+func _on_switchtest(index):
+	var n = 0
+	for xcdrawing in sketchsystem.get_node("XCdrawings").get_children():
+		if xcdrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
+			if true or (xcdrawing.drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_GHOSTLY_B) != 0:
+				xcdrawing.get_node("XCdrawingplane").visible = (index == 0)
+				n += 1
+	print(("hiding " if index == 1 else "showing "), n, " ghostly drawings")
+	if index == 2:
+		var materialsystem = get_node("/root/Spatial/MaterialSystem")
+		for xctube in sketchsystem.get_node("XCtubes").get_children():
+			for xctubesector in xctube.get_node("XCtubesectors").get_children():
+				materialsystem.updatetubesectormaterial(xctubesector, "flatgrey", false)
+		
 func _on_buttonswapcontrollers_pressed():
 	playerMe.swapcontrollers()
 	$Viewport/GUI/Panel/Label.text = "Controllers swapped"
@@ -146,6 +160,7 @@ func _ready():
 		$ViewportReal.set_name("Viewport")
 		$Quad.get_surface_material(0).albedo_texture = $Viewport.get_texture()
 		
+	$Viewport.render_target_update_mode = Viewport.UPDATE_DISABLED
 	for clientip in clientips:
 		$Viewport/GUI/Panel/Networkstate.add_item("Client->"+clientip)
 	
@@ -162,7 +177,7 @@ func _ready():
 	#$Viewport/GUI/Panel/ButtonPlay.connect("pressed", self, "_on_buttonplay_pressed")
 	$Viewport/GUI/Panel/ButtonChoke.connect("pressed", self, "_on_buttonload_choke")
 	
-	$Viewport/GUI/Panel/MSAAstatus.connect("item_selected", self, "_on_msaa_selected")
+	$Viewport/GUI/Panel/SwitchTest.connect("item_selected", self, "_on_switchtest")
 	$Viewport/GUI/Panel/PlayerList.connect("item_selected", self, "_on_playerlist_selected")
 	$Viewport/GUI/Panel/ButtonGoto.connect("pressed", self, "_on_buttongoto_pressed")
 	$Viewport/GUI/Panel/WorldScale.connect("item_selected", self, "_on_playerscale_selected")
@@ -256,8 +271,11 @@ func toggleguipanelvisibility(controller_global_transform):
 		visible = true
 		$CollisionShape.disabled = false
 		Tglobal.soundsystem.quicksound("ShowGui", global_transform.origin)
+		$Viewport.render_target_update_mode = Viewport.UPDATE_WHEN_VISIBLE
+		
 	else:
 		visible = false	
+		$Viewport.render_target_update_mode = Viewport.UPDATE_DISABLED
 		$CollisionShape.disabled = true
 		var MQTTExperiment = get_node_or_null("/root/Spatial/MQTTExperiment")
 		if MQTTExperiment != null and MQTTExperiment.msg != "":
@@ -281,6 +299,8 @@ func toggleguipanelvisibility(controller_global_transform):
 
 	
 func guipanelsendmousemotion(lcollision_point, controller_global_transform, controller_trigger):
+	$Viewport.render_target_update_mode = Viewport.UPDATE_WHEN_VISIBLE
+	
 	collision_point = lcollision_point
 	var collider_transform = global_transform
 	if collider_transform.xform_inv(controller_global_transform.origin).z < 0:
@@ -328,6 +348,7 @@ func guipanelreleasemouse():
 		event.position = viewport_point
 		$Viewport.input(event)
 		viewport_mousedown = false
+	$Viewport.render_target_update_mode = Viewport.UPDATE_ONCE
 		
 func _input(event):
 	if event is InputEventKey and event.pressed:
@@ -451,10 +472,12 @@ func networkstartasserver(fromgui):
 	var lnetworkID = get_tree().get_network_unique_id()
 	selfSpatial.setnetworkidnamecolour(selfSpatial.playerMe, lnetworkID)
 	print("server networkID: ", selfSpatial.playerMe.networkID)
+	selfSpatial.mqttsystem.mqttpublish("startasserver", String(selfSpatial.playerMe.networkID))
 		
 func _connection_failed():
 	var selfSpatial = get_node("/root/Spatial")	
 	print("_connection_failed ", Tglobal.connectiontoserveractive, " ", websocketclient, " ", selfSpatial.players_connected_list)
+	selfSpatial.mqttsystem.mqttpublish("connectionfailed", String(playerMe.networkID))
 	websocketclient = null
 	if Tglobal.connectiontoserveractive:
 		_server_disconnected()
@@ -469,6 +492,7 @@ func _server_disconnected():
 	networkedmultiplayerenet = null
 	Tglobal.connectiontoserveractive = false
 	var selfSpatial = get_node("/root/Spatial")	
+	selfSpatial.mqttsystem.mqttpublish("serverdisconnected", String(playerMe.networkID))
 	selfSpatial.deferred_player_connected_list.clear()
 	$Viewport/GUI/Panel/Label.text = "server_disconnected"
 	for id in selfSpatial.players_connected_list:
