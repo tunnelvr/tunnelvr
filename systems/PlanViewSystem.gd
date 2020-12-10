@@ -292,14 +292,14 @@ func _process(delta):
 					xcdrawingcentreline.updatexcpaths()
 			slowviewupdatecentrelinesizeupdaterate = 1.6
 	
-	var viewslide = planviewcontrols.get_node("ViewSlide")
-	var joypos = Vector2((-1 if viewslide.get_node("ButtonSlideLeft").is_pressed() else 0) + (1 if viewslide.get_node("ButtonSlideRight").is_pressed() else 0), 
-						 (-1 if viewslide.get_node("ButtonSlideDown").is_pressed() else 0) + (1 if viewslide.get_node("ButtonSlideUp").is_pressed() else 0))
-
 	var planviewpositiondict = { }
-	if joypos != Vector2(0, 0):
+	var viewslide = planviewcontrols.get_node("ViewSlide")
+	var joypos = Vector3((-1 if viewslide.get_node("ButtonSlideLeft").is_pressed() else 0) + (1 if viewslide.get_node("ButtonSlideRight").is_pressed() else 0), 
+						 (-1 if viewslide.get_node("ButtonSlideDown").is_pressed() else 0) + (1 if viewslide.get_node("ButtonSlideUp").is_pressed() else 0),
+						 (-1 if viewslide.get_node("ButtonZoomDown").is_pressed() else 0) + (1 if viewslide.get_node("ButtonZoomUp").is_pressed() else 0))
+	if joypos != Vector3(0, 0, 0):
 		var plancamera = $PlanView/Viewport/PlanGUI/Camera
-		planviewpositiondict["plancamerapos"] = plancamera.translation + Vector3(joypos.x, 0, -joypos.y)*plancamera.size/2*delta
+		planviewpositiondict["plancamerapos"] = plancamera.translation + Vector3(joypos.x*plancamera.size/2, joypos.z*5, -joypos.y*plancamera.size/2)*delta
 	var zoomview = planviewcontrols.get_node("ZoomView")
 	var bzoomin = zoomview.get_node("ButtonZoomIn").is_pressed()
 	var bzoomout = zoomview.get_node("ButtonZoomOut").is_pressed()

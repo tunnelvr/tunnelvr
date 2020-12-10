@@ -25,13 +25,14 @@ func _ready():
 		
 
 func findxctube(xcname0, xcname1):
-	var xcdrawing0 = get_node("XCdrawings").get_node(xcname0)	
-	for xctube in xcdrawing0.xctubesconn:
-		assert (xctube.xcname0 == xcname0 or xctube.xcname1 == xcname0)
-		if xctube.xcname1 == xcname1:
-			return xctube
-		if xctube.xcname0 == xcname1:
-			return xctube
+	var xcdrawing0 = get_node_or_null("XCdrawings").get_node(xcname0)
+	if xcdrawing0 != null:
+		for xctube in xcdrawing0.xctubesconn:
+			assert (xctube.xcname0 == xcname0 or xctube.xcname1 == xcname0)
+			if xctube.xcname1 == xcname1:
+				return xctube
+			if xctube.xcname0 == xcname1:
+				return xctube
 	return null
 	
 func xctubefromdata(xctdata):

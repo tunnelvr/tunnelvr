@@ -2096,10 +2096,10 @@ __meta__ = {
 }
 
 [node name="Label" type="Label" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ViewSlide"]
-margin_left = 17.2179
-margin_top = 53.6522
-margin_right = 86.2179
-margin_bottom = 75.6522
+margin_left = 4.4823
+margin_top = 49.9065
+margin_right = 73.4823
+margin_bottom = 71.9065
 text = "ViewSlide"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -2136,10 +2136,30 @@ __meta__ = {
 }
 
 [node name="ButtonSlideUp" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ViewSlide"]
-margin_left = 38.7905
-margin_top = -0.9174
-margin_right = 61.7905
-margin_bottom = 25.0826
+margin_left = 39.5396
+margin_top = -1.66661
+margin_right = 62.5396
+margin_bottom = 24.3334
+text = "^"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ButtonZoomDown" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ViewSlide"]
+margin_left = 109.0
+margin_top = 55.0
+margin_right = 128.0
+margin_bottom = 77.0
+text = "v"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ButtonZoomUp" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ViewSlide"]
+margin_left = 134.471
+margin_top = 55.7491
+margin_right = 153.471
+margin_bottom = 77.7491
 text = "^"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -2516,10 +2536,10 @@ text = "X"
 [node name="CheckBoxTubesVisible" type="CheckBox" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
 anchor_right = 0.015
 anchor_bottom = 0.24
-margin_left = 106.0
-margin_top = 51.0
-margin_right = 158.0
-margin_bottom = 51.0
+margin_left = 470.838
+margin_top = 48.0034
+margin_right = 522.838
+margin_bottom = 48.0034
 text = "tubes"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -2528,10 +2548,10 @@ __meta__ = {
 [node name="CheckBoxCentrelinesVisible" type="CheckBox" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
 anchor_right = 0.015
 anchor_bottom = 0.24
-margin_left = 92.0
-margin_top = 75.0
-margin_right = 180.0
-margin_bottom = 75.0
+margin_left = 473.319
+margin_top = 68.2576
+margin_right = 561.319
+margin_bottom = 68.2576
 text = "centrelines"
 __meta__ = {
 "_edit_use_anchors_": false

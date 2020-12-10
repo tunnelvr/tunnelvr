@@ -119,6 +119,7 @@ func setxctubepathlinevisibility(sketchsystem):
 	for inode in $PathLines.get_children():
 		inode.visible = pathlinesvisible
 		inode.get_node("CollisionShape").disabled = not pathlinesvisible
+		
 
 func centrelineconnectionfloortransformpos(sketchsystem):
 	assert (len(xcdrawinglink) != 0)
