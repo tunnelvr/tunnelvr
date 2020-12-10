@@ -2066,6 +2066,7 @@ __meta__ = {
 
 [node name="Camera" type="Camera" parent="PlanViewSystem/PlanView/Viewport/PlanGUI"]
 transform = Transform( 1, 0, 0, 0, -1.62921e-07, 1, 0, -1, -1.62921e-07, -1, 50, -12 )
+keep_aspect = 0
 cull_mask = 2148421887
 environment = ExtResource( 20 )
 projection = 1
@@ -2515,6 +2516,9 @@ margin_top = 17.3981
 margin_right = 229.684
 margin_bottom = 32.3981
 color = Color( 0.0745098, 0.564706, 0.858824, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="scalelabel" type="Label" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/Scalebar"]
 margin_left = -72.3987
@@ -2525,6 +2529,9 @@ custom_colors/font_color = Color( 0, 0, 0, 1 )
 custom_colors/font_outline_modulate = Color( 0.984314, 0.933333, 0.933333, 1 )
 custom_colors/font_color_shadow = Color( 0.937255, 0.862745, 0.862745, 1 )
 text = "Scale: 1m"
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="ButtonClosePlanView" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
 margin_right = 20.0

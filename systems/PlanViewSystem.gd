@@ -195,6 +195,13 @@ func actplanviewdict(pvchange):
 	if "plancamerasize" in pvchange:
 		$PlanView/Viewport/PlanGUI/Camera.size = pvchange["plancamerasize"]
 		$RealPlanCamera/RealCameraBox.scale = Vector3($PlanView/Viewport/PlanGUI/Camera.size, 1.0, $PlanView/Viewport/PlanGUI/Camera.size)
+		var pixmetres = $PlanView/Viewport.size.x/$PlanView/Viewport/PlanGUI/Camera.size
+		var metres10 = 1
+		while pixmetres*metres10 < 30 and metres10 < 1000:
+			metres10 *= 10
+		$PlanView/Viewport/PlanGUI/PlanViewControls/Scalebar/scalelabel.text = "Scale: %dm" % metres10
+		$PlanView/Viewport/PlanGUI/PlanViewControls/Scalebar/scalerect.rect_size.x = pixmetres*metres10
+
 	if "transformpos" in pvchange:
 		$PlanView.global_transform = pvchange["transformpos"]
 
