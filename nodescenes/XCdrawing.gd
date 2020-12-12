@@ -1,6 +1,7 @@
 extends Spatial
 
 const XCnode = preload("res://nodescenes/XCnode.tscn")
+const XCnode_knot = preload("res://nodescenes/XCnode_knot.tscn")
 
 # primary data
 var xcresource = ""     # source file
@@ -99,6 +100,14 @@ func setdrawingvisiblecode(ldrawingvisiblecode):
 	elif drawingtype == DRAWING_TYPE.DT_CENTRELINE:
 		assert (drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_HIDE)
 		setxcdrawingvisiblehideL(true)
+
+	elif drawingtype == DRAWING_TYPE.DT_ROPEHANG:
+		var hidenodeshang = ((drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE) == 0)
+		updateropepaths(not hidenodeshang)
+		for xcn in $XCnodes.get_children():
+			xcn.visible = ((not hidenodeshang) or (xcn.get_name()[0] == "a"))
+			xcn.get_node("CollisionShape").disabled = not xcn.visible
+		
 	elif drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
 		var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
 		var mat = $XCdrawingplane/CollisionShape/MeshInstance.get_surface_material(0)
@@ -288,6 +297,17 @@ func mergexcrpcdata(xcdata):
 					$XCnodes.add_child(xcn)
 					xcn.translation = nodepointsAdd[nA]
 					xcn.get_node("CollisionShape/MeshInstance").layers = CollisionLayer.VL_xctubeposlines
+
+				elif drawingtype == DRAWING_TYPE.DT_ROPEHANG:
+					xcn = XCnode_knot.instance()
+					var materialsystem = get_node("/root/Spatial/MaterialSystem")
+					xcn.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("normalknot"))
+					xcn.set_name(nA)
+					maxnodepointnumber = max(maxnodepointnumber, int(nA))
+					$XCnodes.add_child(xcn)
+					xcn.translation = nodepointsAdd[nA]
+					xcn.get_node("CollisionShape/MeshInstance").layers = CollisionLayer.VL_xcdrawingnodes
+
 			else:
 				xcn.translation = nodepointsAdd[nA]
 		
@@ -326,7 +346,11 @@ func mergexcrpcdata(xcdata):
 			onepathpairs[j] = onepathpairs[-2]
 			onepathpairs[j+1] = onepathpairs[-1]
 
-	updatexcpaths()
+	if drawingtype == DRAWING_TYPE.DT_ROPEHANG:
+		updateropepaths(false)
+	else:
+		updatexcpaths()
+		
 	if "drawingvisiblecode" in xcdata or "visible" in xcdata:
 		if not ("drawingvisiblecode" in xcdata):
 			if drawingtype == DRAWING_TYPE.DT_XCDRAWING:
@@ -351,26 +375,80 @@ func pairpresentindex(i0, i1):
 			return j
 	return -1
 
-func newuniquexcnodename():
+func newuniquexcnodename(ch):
 	while true:
 		maxnodepointnumber += 1
-		var newnodename = "p"+String(maxnodepointnumber)
+		var newnodename = ch+String(maxnodepointnumber)
 		if not $XCnodes.has_node(newnodename):
 			return newnodename
-		
-func updatexcpaths():
-	if drawingtype == DRAWING_TYPE.DT_PAPERTEXTURE:
-		return
+
+const uvfacx = 0.2
+const uvfacy = 0.4
+func updateropepaths(hangingarc):
 	if len(onepathpairs) == 0:
 		$PathLines.mesh = null
 		return
+	var ropesequences = Polynets.makeropenodesequences(nodepoints, onepathpairs)
+	var surfaceTool = SurfaceTool.new()
+	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for ropeseq in ropesequences:
+		var p0 = nodepoints[ropeseq[0]]
+		var p1 = nodepoints[ropeseq[1]]
+		var perp0 = Vector3(-(p1.y - p0.y), p1.x - p0.x, 0).normalized()
+		var fperp0 = linewidth*perp0
+		var p0left = p0 - fperp0
+		var p0right = p0 + fperp0
+		var p0u = 0.0
+		var perp1 = perp0
+		for i in range(1, len(ropeseq)):
+			var p1u = p0u + (p1-p0).length()
+			var p2 = null
+			var perp2 = null
+			if i+1 < len(ropeseq):
+				p2 = nodepoints[ropeseq[i+1]]
+				perp2 = Vector3(-(p2.y - p1.y), p2.x - p1.x, 0).normalized()
+				perp1 = (perp0+perp2).normalized()
+			var fperp1 = linewidth*perp1
+			var p1left = p1 - fperp1
+			var p1right = p1 + fperp1
+			surfaceTool.add_uv(Vector2(p0u*uvfacx, 0.0))
+			surfaceTool.add_vertex(p0left)
+			surfaceTool.add_uv(Vector2(p1u*uvfacx, 0.0))
+			surfaceTool.add_vertex(p1left)
+			surfaceTool.add_uv(Vector2(p0u*uvfacx, uvfacy))
+			surfaceTool.add_vertex(p0right)
+			surfaceTool.add_uv(Vector2(p0u*uvfacx, uvfacy))
+			surfaceTool.add_vertex(p0right)
+			surfaceTool.add_uv(Vector2(p1u*uvfacx, 0.0))
+			surfaceTool.add_vertex(p1left)
+			surfaceTool.add_uv(Vector2(p1u*uvfacx, uvfacy))
+			surfaceTool.add_vertex(p1right)
+			
+			p0 = p1
+			p1 = p2
+			p0left = p1left
+			p0right = p1right
+			perp1 = perp2
+			p0u = p1u
+
+	surfaceTool.generate_normals()
+	var newmesh = surfaceTool.commit()
+	$PathLines.mesh = newmesh
+	var materialsystem = get_node("/root/Spatial/MaterialSystem")
+	$PathLines.set_surface_material(0, materialsystem.pathlinematerial("rope"))
+
 		
+func updatexcpaths():
 	var surfaceTool = SurfaceTool.new()
 	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
 	for j in range(0, len(onepathpairs), 2):
 		var p0 = nodepoints[onepathpairs[j]]
 		var p1 = nodepoints[onepathpairs[j+1]]
-		var perp = Vector3(-(p1.y - p0.y), p1.x - p0.x, 0) if drawingtype != DRAWING_TYPE.DT_CENTRELINE else Vector3(-(p1.z - p0.z), 0, p1.x - p0.x)
+		var perp
+		if drawingtype != DRAWING_TYPE.DT_CENTRELINE:
+			perp = Vector3(-(p1.y - p0.y), p1.x - p0.x, 0)
+		else:
+			perp = Vector3(-(p1.z - p0.z), 0, p1.x - p0.x)
 		var fperp = linewidth*perp.normalized()
 		var p0left = p0 - fperp
 		var p0right = p0 + fperp
@@ -387,7 +465,8 @@ func updatexcpaths():
 	if $PathLines.mesh == null:
 		$PathLines.mesh = newmesh
 		var materialsystem = get_node("/root/Spatial/MaterialSystem")
-		$PathLines.set_surface_material(0, materialsystem.pathlinematerial("centreline" if drawingtype == DRAWING_TYPE.DT_CENTRELINE else "normal"))
+		var matname = "centreline" if drawingtype == DRAWING_TYPE.DT_CENTRELINE else "normal"
+		$PathLines.set_surface_material(0, materialsystem.pathlinematerial(matname))
 	else:
 		var m = $PathLines.get_surface_material(0)
 		$PathLines.mesh = newmesh

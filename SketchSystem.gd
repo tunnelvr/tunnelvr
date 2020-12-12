@@ -82,7 +82,6 @@ remote func savesketchsystem(fname):
 	Directory.new().rename(fnamewriting, fname)
 	print("saved ", fname, " in C:/Users/ViveOne/AppData/Roaming/Godot/app_userdata/tunnelvr")
 
-
 func combinabletransformposchange(xcdatalist):
 	if len(actsketchchangeundostack) > 0 and len(actsketchchangeundostack[-1]) == 1 and len(xcdatalist) == 1:
 		var xcdataprev = actsketchchangeundostack[-1][0]
@@ -266,6 +265,10 @@ remote func actsketchchangeL(xcdatalist):
 
 					elif xcdrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
 						xcdrawing.setdrawingvisiblecode(xcdata["xcvizstates"][xcdrawingname])
+
+					elif xcdrawing.drawingtype == DRAWING_TYPE.DT_ROPEHANG:
+						xcdrawing.setdrawingvisiblecode(xcdata["xcvizstates"][xcdrawingname])
+
 						
 			if "updatetubeshells" in xcdata:
 				for xct in xcdata["updatetubeshells"]:
@@ -325,7 +328,11 @@ remote func actsketchchangeL(xcdatalist):
 					Tglobal.soundsystem.quicksound(sname, xcdrawing.global_transform*tpos)
 
 	for xcdrawing in xcdrawingstoupdate.values():
-		xcdrawing.updatexcpaths()
+		if xcdrawing.drawingtype == DRAWING_TYPE.DT_ROPEHANG:
+			xcdrawing.updateropepaths(false)
+		else:
+			xcdrawing.updatexcpaths()
+
 	for xctube in xctubestoupdate.values():
 		if $XCdrawings.get_node(xctube.xcname0).drawingtype == DRAWING_TYPE.DT_CENTRELINE:
 			xctube.updatetubepositionlinks(self)
@@ -395,7 +402,7 @@ func xcdrawingfromdata(xcdata, fromremotecall):
 			print("BAD new xcdrawingfromdata missing drawingtype ", xcdata)
 			assert(false)
 			return null
-		elif xcdata["drawingtype"] == DRAWING_TYPE.DT_FLOORTEXTURE or xcdata["drawingtype"] == DRAWING_TYPE.DT_PAPERTEXTURE:
+		elif xcdata["drawingtype"] == DRAWING_TYPE.DT_FLOORTEXTURE:
 			xcdrawing = newXCuniquedrawingPaperN(xcdata["xcresource"], xcdata["name"], xcdata["drawingtype"])
 		else:
 			xcdrawing = newXCuniquedrawing(xcdata["drawingtype"], xcdata["name"])
@@ -420,7 +427,7 @@ func xcdrawingfromdata(xcdata, fromremotecall):
 	if dt > 100:
 		print("    Warning: long mergexcrpcdata operation happened for ", xcdata["name"], " of ", dt, " msecs", " nodes ", len(xcdrawing.nodepoints))
 		
-	if xcdrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE or xcdrawing.drawingtype == DRAWING_TYPE.DT_PAPERTEXTURE:
+	if xcdrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
 		if "xcresource" in xcdata and xcdrawing.drawingvisiblecode != DRAWING_TYPE.VIZ_XCD_FLOOR_HIDDEN and xcdrawing.drawingvisiblecode != DRAWING_TYPE.VIZ_XCD_FLOOR_DELETED:
 			get_node("/root/Spatial/ImageSystem").fetchpaperdrawing(xcdrawing)
 	if xcdrawing.drawingtype == DRAWING_TYPE.DT_CENTRELINE:
@@ -510,14 +517,14 @@ remote func loadsketchsystemL(fname):
 		var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
 		actsketchchange([{"planview":planviewsystem.planviewtodict()}]) 
 				
-func uniqueXCname():
+func uniqueXCname(ch):
 	var largestxcdrawingnumber = 0
 	for xcdrawing in get_node("XCdrawings").get_children():
 		var xcname = xcdrawing.get_name()
-		var ns = xcname.find_last("s")
+		var ns = xcname.find_last(ch)
 		if ns != -1:
 			largestxcdrawingnumber = max(largestxcdrawingnumber, int(xcname.right(ns + 1)))
-	var sname = "s%d" % (largestxcdrawingnumber+1)
+	var sname = "%s%d" % [ch, largestxcdrawingnumber+1]
 	return sname
 	
 func newXCuniquedrawing(drawingtype, sname):
@@ -529,6 +536,12 @@ func newXCuniquedrawing(drawingtype, sname):
 	if drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		xcdrawing.linewidth = 0.05
 		xcdrawing.drawingvisiblecode = DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE
+
+	elif drawingtype == DRAWING_TYPE.DT_ROPEHANG:
+		xcdrawing.linewidth = 0.02
+		xcdrawing.drawingvisiblecode = DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE
+		var materialsystem = get_node("/root/Spatial/MaterialSystem")
+		xcdrawing.get_node("PathLines").set_surface_material(0, materialsystem.pathlinematerial("rope"))
 		
 	elif drawingtype == DRAWING_TYPE.DT_CENTRELINE:
 		var xcnodesplanview = Spatial.new()

@@ -79,5 +79,58 @@ static func makexcdpolys(nodepoints, onepathpairs, discardsinglenodepaths):
 	return polys
 
 
+static func makeropenodesequences(nodepoints, onepathpairs):
+	var Lpathvectorseq = { } 
+	for ii in nodepoints.keys():
+		Lpathvectorseq[ii] = [ ]
+	var Npaths = len(onepathpairs)/2
+	var opvisits = [ ]
+	for j in range(Npaths):
+		var i0 = onepathpairs[j*2]
+		var i1 = onepathpairs[j*2+1]
+		Lpathvectorseq[i0].append(j)
+		Lpathvectorseq[i1].append(j)
+		opvisits.append(0)
+	var ropesequences = [ ]
+	for j in range(Npaths):
+		if opvisits[j] != 0:
+			continue
+		opvisits[j] = len(ropesequences)+1
+		var ropeseq = [ onepathpairs[j*2], onepathpairs[j*2+1] ]
+		var j1 = j
+		while true:
+			var i1 = ropeseq[-1]
+			if len(Lpathvectorseq[i1]) != 2:
+				break
+			if i1[0] == "a":
+				break
+			assert (Lpathvectorseq[i1].has(j1))
+			j1 = Lpathvectorseq[i1][1] if Lpathvectorseq[i1][0] == j1 else Lpathvectorseq[i1][0]
+			if opvisits[j1] != 0:
+				assert (opvisits[j1] == len(ropesequences)+1)
+				break
+			opvisits[j1] = len(ropesequences)+1
+			assert ((i1 == onepathpairs[j1*2]) or (i1 == onepathpairs[j1*2+1]))
+			ropeseq.append(onepathpairs[j1*2+1] if (i1 == onepathpairs[j1*2]) else onepathpairs[j1*2])
+		ropeseq.invert()
+		j1 = j
+		while true:
+			var i1 = ropeseq[-1]
+			if len(Lpathvectorseq[i1]) != 2:
+				break
+			if i1[0] == "a":
+				break
+			assert (Lpathvectorseq[i1].has(j1))
+			j1 = Lpathvectorseq[i1][1] if Lpathvectorseq[i1][0] == j1 else Lpathvectorseq[i1][0]
+			if opvisits[j1] != 0:
+				assert (opvisits[j1] == len(ropesequences)+1)
+				assert (false)
+				break
+			opvisits[j1] = len(ropesequences)+1
+			assert ((i1 == onepathpairs[j1*2]) or (i1 == onepathpairs[j1*2+1]))
+			ropeseq.append(onepathpairs[j1*2+1] if (i1 == onepathpairs[j1*2]) else onepathpairs[j1*2])
+		if len(ropeseq) >= 2:
+			ropesequences.append(ropeseq)
+	return ropesequences
 
 

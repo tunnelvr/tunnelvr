@@ -44,7 +44,6 @@ var intermediatepointplanesectorindex = -1
 var intermediatepointplanelambda = -1.0
 var intermediatepointpicked = null
 
-var handflickmotiongestureposition = 0
 const handflickmotiongestureposition_normal = 0
 const handflickmotiongestureposition_shortpos = 1
 const handflickmotiongestureposition_shortpos_length = 0.25
@@ -100,14 +99,18 @@ func setpointertargetmaterial():
 		gripmenu.setgripmenupointer(pointertarget)
 
 func clearednodematerialtype(xcn, bwallactive):
-	var bholetype = xcn.get_name().begins_with("r")
+	var ch = xcn.get_name()[0]
 	if bwallactive:
-		if bholetype:
+		if ch == "r":
 			return "nodepthtesthole"
+		elif ch == "a" or ch == "k":
+			return "nodepthtestknot"
 		else:
 			return "nodepthtest"
-	if bholetype:
+	if ch == "r":
 		return "normalhole"
+	elif ch == "a" or ch == "k":
+		return "normalknot"
 	else:
 		return "normal"
 
@@ -147,8 +150,6 @@ func setactivetargetwall(newactivetargetwall):
 		activetargetwall.get_node("PathLines").set_surface_material(0, materialsystem.pathlinematerial("normal"))
 		for xcnode in activetargetwall.get_node("XCnodes").get_children():
 			xcnode.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("selected" if xcnode == activetargetnode else clearednodematerialtype(xcnode, false)))
-	if activetargetwall != null and activetargetwall.drawingtype == DRAWING_TYPE.DT_PAPERTEXTURE:
-		activetargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").get_surface_material(0).albedo_color = Color("#FEF4D5")
 	
 	activetargetwall = newactivetargetwall
 	activetargetwallgrabbedtransform = null
@@ -167,8 +168,6 @@ func setactivetargetwall(newactivetargetwall):
 		if len(activetargetwall.nodepoints) != 0:
 			LaserOrient.get_node("RayCast").collision_mask = CollisionLayer.CLV_MainRayXC
 
-	if activetargetwall != null and activetargetwall.drawingtype == DRAWING_TYPE.DT_PAPERTEXTURE:
-		activetargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").get_surface_material(0).albedo_color = Color("#DDFFCC")
 
 	if activetargetwall != null and activetargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
 		assert (false)
@@ -190,8 +189,6 @@ func targettype(target):
 	var targetparent = target.get_parent()
 	if targetname == "XCdrawingplane":
 		assert (targetparent.drawingtype != DRAWING_TYPE.DT_CENTRELINE)
-		if targetparent.drawingtype == DRAWING_TYPE.DT_PAPERTEXTURE:
-			return "Papersheet"
 		return "XCdrawing"
 	if targetparent.get_name() == "XCtubesectors":
 		return "XCtubesector"
@@ -269,15 +266,26 @@ func setpointertarget(laserroot, raycast, pointertargetshortdistance):
 				LaserSelectLine.visible = pointertargetwall != null and pointertargettype == "XCdrawing" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE
 			elif activetargetnodewall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 				if pointertargettype == "XCnode":
-					LaserSelectLine.visible = (pointertargetwall.drawingtype != DRAWING_TYPE.DT_CENTRELINE)
+					LaserSelectLine.visible = (pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING) and (pointertarget != activetargetnode)
 				elif pointertargettype == "XCdrawing" and pointertargetwall == activetargetnodewall:
 					LaserSelectLine.visible = true
+				else:
+					LaserSelectLine.visible = false
+			elif activetargetnodewall.drawingtype == DRAWING_TYPE.DT_ROPEHANG:
+				if pointertargettype == "XCnode":
+					LaserSelectLine.visible = (pointertargetwall.drawingtype == DRAWING_TYPE.DT_ROPEHANG) and (pointertarget != activetargetnode)
+				elif pointertargettype == "XCdrawing":
+					LaserSelectLine.visible = false
+				elif Tglobal.handflickmotiongestureposition == 1:
+					LaserSelectLine.visible = (pointertargettype == "none" or pointertargettype == "XCtubesector")
 				else:
 					LaserSelectLine.visible = false
 			else:
 				LaserSelectLine.visible = false
 		elif pointertargettype == "IntermediatePointView":
 			LaserSelectLine.visible = true
+		elif activetargetnodewall != null and activetargetnodewall.drawingtype == DRAWING_TYPE.DT_ROPEHANG:
+			LaserSelectLine.visible = (pointertargettype == "none" and Tglobal.handflickmotiongestureposition == 1)
 		else:
 			LaserSelectLine.visible = false
 			
@@ -297,6 +305,8 @@ func setpointertarget(laserroot, raycast, pointertargetshortdistance):
 			lslfrom = activetargetnode.global_transform.origin
 		elif pointertargettype == "IntermediatePointView":
 			lslfrom = get_node("/root/Spatial/BodyObjects/IntermediatePointView/IntermediatePointPlane").transform.origin
+		elif activetargetnode != null and pointertargettype == "none" and Tglobal.handflickmotiongestureposition == 1:
+			lslfrom = activetargetnode.global_transform.origin
 		else:
 			LaserSelectLine.visible = false
 		if lslfrom != null:
@@ -366,7 +376,21 @@ var initialsequencenodenameP = null
 func buttonpressed_vrtrigger(gripbuttonheld):
 	initialsequencenodenameP = initialsequencenodename
 	initialsequencenodename = null
-	if not is_instance_valid(pointertarget):
+
+	if Tglobal.handflickmotiongestureposition == 1 and activetargetnodewall != null and activetargetnodewall.drawingtype == DRAWING_TYPE.DT_ROPEHANG and \
+			(pointertargettype == "none" or pointertargettype == "XCtubesector" or pointertargettype == "XCflatshell"):
+		var newnodename = activetargetnodewall.newuniquexcnodename("k" if pointertargettype == "none" else "a")
+		var newnodepoint = activetargetnodewall.global_transform.xform_inv(pointertargetpoint)
+		var xcdata = { "name":activetargetnodewall.get_name(), 
+					   "prevnodepoints":{ }, 
+					   "nextnodepoints":{ newnodename:newnodepoint } 
+					 }
+		xcdata["prevonepathpairs"] = [ ]
+		xcdata["newonepathpairs"] = [ activetargetnode.get_name(), newnodename]
+		sketchsystem.actsketchchange([xcdata])
+		setactivetargetnode(activetargetnodewall.get_node("XCnodes").get_node(newnodename))
+
+	elif not is_instance_valid(pointertarget):
 		pass
 		
 	elif pointertarget == guipanel3d:
@@ -431,10 +455,20 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 		activelaserroot.get_node("LaserSpot").visible = false
 		sketchsystem.actsketchchange(xcdatalist)
 		#Tglobal.soundsystem.quicksound("BlipSound", pointertargetpoint)
-	
+
 	elif activetargetnode == null and activetargetnodewall == null and pointertargettype == "XCtubesector":
 		var pointertargettube = pointertargetwall
-		if pointertargettube.get_node("PathLines").visible:
+		if Tglobal.handflickmotiongestureposition == 1:
+			var xcdata = { "name":sketchsystem.uniqueXCname("r"), 
+						   "drawingtype":DRAWING_TYPE.DT_ROPEHANG,
+						   "transformpos":Transform(),
+						   "prevnodepoints":{ },
+						   "nextnodepoints":{"a0":pointertargetpoint} }
+			sketchsystem.actsketchchange([xcdata])
+			var xcrope = sketchsystem.get_node("XCdrawings").get_node(xcdata["name"])
+			setactivetargetnode(xcrope.get_node("XCnodes").get_node("a0"))
+
+		elif pointertargettube.get_node("PathLines").visible:
 			var ipbasis = pointertargettube.intermedpointplanebasis(pointertargetpoint)
 			intermediatepointplanesectorindex = pointertarget.get_index()
 			var j = intermediatepointplanesectorindex*2
@@ -551,7 +585,7 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 			if len(pointertargetwall.nodepoints) == 0:
 				LaserOrient.get_node("RayCast").collision_mask = CollisionLayer.CLV_MainRayXC 
 				
-			var newnodename = pointertargetwall.newuniquexcnodename()
+			var newnodename = pointertargetwall.newuniquexcnodename("p")
 			var newnodepoint = pointertargetwall.global_transform.xform_inv(pointertargetpoint)
 			newnodepoint.z = 0.0
 			var xcdata = { "name":pointertargetwall.get_name(), 
@@ -575,7 +609,7 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 	elif activetargetnode != null and activetargetnodewall.drawingtype == DRAWING_TYPE.DT_CENTRELINE \
 			and pointertargettype == "XCdrawing" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
 
-		var newnodename = pointertargetwall.newuniquexcnodename()
+		var newnodename = pointertargetwall.newuniquexcnodename("p")
 		var newnodepoint = pointertargetwall.global_transform.xform_inv(pointertargetpoint)
 		newnodepoint.z = 0.0
 		var xcndata = { "name":pointertargetwall.get_name(), 
@@ -621,8 +655,8 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 	elif activetargetnode != null and pointertarget == activetargetnode:
 		clearactivetargetnode()
 
-	elif activetargetnode != null and pointertargettype == "XCnode" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
-		if activetargetnodewall == pointertargetwall and activetargetnodewall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
+	elif activetargetnode != null and pointertargettype == "XCnode" and (pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING or pointertargetwall.drawingtype == DRAWING_TYPE.DT_ROPEHANG):
+		if activetargetnodewall == pointertargetwall and (activetargetnodewall.drawingtype == DRAWING_TYPE.DT_XCDRAWING or activetargetnodewall.drawingtype == DRAWING_TYPE.DT_ROPEHANG):
 			var xcdata = { "name":pointertargetwall.get_name() }
 			var i0 = activetargetnode.get_name()
 			var i1 = pointertarget.get_name()
@@ -636,6 +670,9 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 				else:   # ^^ rejoin and delete straight line
 					xcdata["prevonepathpairs"] = [ ]
 			sketchsystem.actsketchchange([xcdata])
+
+		elif activetargetnodewall != pointertargetwall and activetargetnodewall.drawingtype == DRAWING_TYPE.DT_ROPEHANG and pointertargetwall.drawingtype == DRAWING_TYPE.DT_ROPEHANG:
+			print("tube or merge two ropehang things here")
 
 		elif activetargetnodewall != pointertargetwall and activetargetnodewall.drawingtype == DRAWING_TYPE.DT_XCDRAWING and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 			var xcname0 = activetargetnodewall.get_name()
@@ -746,6 +783,7 @@ func buttonreleased_vrgrip():
 		pass  # the trigger was pulled during the grip operation
 	
 	elif pointertargettype == "GripMenuItem":
+				
 		if pointertarget.get_name() == "NewXC":
 			var pt0 = gripmenu.gripmenupointertargetpoint
 			var eyept0vec = pt0 - headcam.global_transform.origin
@@ -782,7 +820,7 @@ func buttonreleased_vrgrip():
 				pt0 = headcam.global_transform.origin + eyept0vec.normalized()*2.9
 			if pt0 != null:
 				var drawingwallangle = Vector2(eyept0vec.x, eyept0vec.z).angle() + deg2rad(90)					
-				var xcdata = { "name":sketchsystem.uniqueXCname(), 
+				var xcdata = { "name":sketchsystem.uniqueXCname("s"), 
 							   "drawingtype":DRAWING_TYPE.DT_XCDRAWING,
 							   "transformpos":Transform(Basis().rotated(Vector3(0,-1,0), drawingwallangle), pt0) }
 				if not newxcvertplane:
@@ -1059,10 +1097,10 @@ func buttonreleased_vrtrigger():
 func _physics_process(delta):
 	if playerMe.handflickmotiongesture != 0:
 		if playerMe.handflickmotiongesture == 1:
-			handflickmotiongestureposition = min(handflickmotiongestureposition+1, handflickmotiongestureposition_gone)
+			Tglobal.handflickmotiongestureposition = min(Tglobal.handflickmotiongestureposition+1, handflickmotiongestureposition_gone)
 		else:
-			handflickmotiongestureposition = 0
-		playerMe.get_node("HandRight/PalmLight").visible = (handflickmotiongestureposition == handflickmotiongestureposition_gone)
+			Tglobal.handflickmotiongestureposition = 0
+		playerMe.get_node("HandRight/PalmLight").visible = (Tglobal.handflickmotiongestureposition == handflickmotiongestureposition_gone)
 		playerMe.handflickmotiongesture = 0
 		
 	if playerMe.get_node("HandRight").pointervalid:
@@ -1074,10 +1112,10 @@ func _physics_process(delta):
 			activelaserroot = LaserOrient
 			setpointertarget(activelaserroot, activelaserroot.get_node("RayCast"), -1.0)
 			pointerplanviewtarget = null
-		elif handflickmotiongestureposition == handflickmotiongestureposition_gone or Tglobal.controlslocked:
+		elif Tglobal.handflickmotiongestureposition == handflickmotiongestureposition_gone or Tglobal.controlslocked:
 			LaserOrient.visible = false
 			pointerplanviewtarget = null
-		elif handflickmotiongestureposition == handflickmotiongestureposition_shortpos and not (firstlasertarget != null and firstlasertarget.get_parent().get_parent().get_name() == "GripMenu"):
+		elif Tglobal.handflickmotiongestureposition == handflickmotiongestureposition_shortpos and not (firstlasertarget != null and firstlasertarget.get_parent().get_parent().get_name() == "GripMenu"):
 			LaserOrient.visible = true
 			activelaserroot = LaserOrient
 			pointerplanviewtarget = null

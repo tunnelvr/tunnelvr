@@ -3,7 +3,7 @@ class_name DRAWING_TYPE
 enum { DT_XCDRAWING 	= 0, 
 	   DT_FLOORTEXTURE 	= 1, 
 	   DT_CENTRELINE 	= 2, 
-	   DT_PAPERTEXTURE 	= 3, 
+	   DT_ROPEHANG 		= 3, 
 	   DT_PLANVIEW 		= 4 }
 
 enum { VIZ_XCD_HIDE 				= 0

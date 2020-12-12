@@ -8,7 +8,7 @@ extends EditorScript
 
 func _run():
 	var x = "Hole;0;aab;ccd"
-	print(x.split(";"))
+	print(x[0] == "H")
 	
 var zi = [ ]
 var zi1 = [ 0.48, 0.66 ]

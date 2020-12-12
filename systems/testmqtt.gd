@@ -7,6 +7,7 @@ var topicstem
 
 func _ready():
 	uniqstring = OS.get_unique_id().replace("{", "").split("-")[0].to_upper()
+	print(uniqstring)
 	topicstem = "tunnelvr/u%s/" % uniqstring
 	$mqttnode.server = "mosquitto.doesliverpool.xyz"
 	$mqttnode.client_id = "u"+uniqstring

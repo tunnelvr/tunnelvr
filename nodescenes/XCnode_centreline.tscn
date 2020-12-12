@@ -10,6 +10,7 @@ resource_local_to_scene = true
 size = Vector3( 0.2, 0.2, 0.2 )
 
 [sub_resource type="SpatialMaterial" id=3]
+flags_do_not_receive_shadows = true
 albedo_color = Color( 0.286275, 0.87451, 0.145098, 1 )
 
 [sub_resource type="SpatialMaterial" id=4]
@@ -80,6 +81,7 @@ shape = SubResource( 1 )
 
 [node name="MeshInstance" type="MeshInstance" parent="CollisionShape"]
 layers = 513
+cast_shadow = 0
 mesh = SubResource( 2 )
 material/0 = SubResource( 3 )
 

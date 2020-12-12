@@ -420,7 +420,7 @@ func slicetubetoxcdrawing(xcdrawing, xcdata, xctdatadel, xctdata0, xctdata1):
 		while i0 < ila0N or i1 < ila1N:
 			var pt0 = xcnodes0.get_node(poly0[(ila0+i0)%len(poly0)]).global_transform.origin
 			var pt1 = xcnodes1.get_node(poly1[(ila1+i1)%len(poly1)]).global_transform.origin
-			var xcname = xcdrawing.newuniquexcnodename()
+			var xcname = xcdrawing.newuniquexcnodename("p")
 			if i0 == 0 and i1 == 0:
 				xctdatadel["prevdrawinglinks"].push_back(poly0[ila0])
 				xctdatadel["prevdrawinglinks"].push_back(poly1[ila1])

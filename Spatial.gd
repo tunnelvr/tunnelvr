@@ -113,7 +113,7 @@ func _ready():
 			Tglobal.arvrinterface = null
 		playerMe.playerplatform = "Quest"
 
-	elif enablevr and checkloadinterface("Oculus"):
+	elif false and enablevr and checkloadinterface("Oculus"):
 		print("  Found Oculus Interface.");
 		if Tglobal.arvrinterface.initialize():
 			get_viewport().arvr = true;
