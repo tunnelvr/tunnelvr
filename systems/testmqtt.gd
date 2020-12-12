@@ -11,18 +11,22 @@ func _ready():
 	topicstem = "tunnelvr/u%s/" % uniqstring
 	$mqttnode.server = "mosquitto.doesliverpool.xyz"
 	$mqttnode.client_id = "u"+uniqstring
+	#return
+	print("we need to fix why it crashes if not online")
 	call_deferred("connectmqtt")
 
 func mqttpublish(subtopic, payload):
 	$mqttnode.publish(topicstem+subtopic, payload)
 	
 func connectmqtt():
-	$mqttnode.connect_to_server()
-	$mqttnode.subscribe(topicstem+"cmd")
-	$mqttnode.connect("received_message", self, "received_message")
-	$mqttnode.publish(topicstem+"status", "starting", true)
-	$mqttnode.set_last_will(topicstem+"status", "stopped", true)
-	$mqttnode.subscribe(topicstem+"cmd")
+	if yield($mqttnode.connect_to_server(), "completed"):
+		$mqttnode.subscribe(topicstem+"cmd")
+		$mqttnode.connect("received_message", self, "received_message")
+		$mqttnode.publish(topicstem+"status", "starting", true)
+		$mqttnode.set_last_will(topicstem+"status", "stopped", true)
+		$mqttnode.subscribe(topicstem+"cmd")
+	else:
+		print("mqtt failed to connect")
 
 var msg = ""
 func received_message(topic, message):

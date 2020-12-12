@@ -242,6 +242,7 @@ func applytrimmedpaperuvscale():
 	m.set_shader_param("uv1_scale", Vector3((imgtrimrightup.x - imgtrimleftdown.x)/imgwidth, (imgtrimrightup.y - imgtrimleftdown.y)/imgheight, 1))
 	m.set_shader_param("uv1_offset", Vector3((imgtrimleftdown.x - (-imgwidth*0.5))/imgwidth, -(imgtrimrightup.y - (imgheight*0.5))/imgheight, 0))
 
+const knotyscale = 0.5
 func mergexcrpcdata(xcdata):
 	assert ((get_name() == xcdata["name"]) and (not ("drawingtype" in xcdata) or drawingtype == xcdata["drawingtype"]))
 	if "transformpos" in xcdata:
@@ -302,6 +303,8 @@ func mergexcrpcdata(xcdata):
 					xcn = XCnode_knot.instance()
 					var materialsystem = get_node("/root/Spatial/MaterialSystem")
 					xcn.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("normalknot"))
+					if nA[0] == "k":
+						xcn.scale.y = knotyscale
 					xcn.set_name(nA)
 					maxnodepointnumber = max(maxnodepointnumber, int(nA))
 					$XCnodes.add_child(xcn)

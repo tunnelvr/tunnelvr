@@ -379,16 +379,26 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 
 	if Tglobal.handflickmotiongestureposition == 1 and activetargetnodewall != null and activetargetnodewall.drawingtype == DRAWING_TYPE.DT_ROPEHANG and \
 			(pointertargettype == "none" or pointertargettype == "XCtubesector" or pointertargettype == "XCflatshell"):
-		var newnodename = activetargetnodewall.newuniquexcnodename("k" if pointertargettype == "none" else "a")
 		var newnodepoint = activetargetnodewall.global_transform.xform_inv(pointertargetpoint)
-		var xcdata = { "name":activetargetnodewall.get_name(), 
-					   "prevnodepoints":{ }, 
-					   "nextnodepoints":{ newnodename:newnodepoint } 
-					 }
-		xcdata["prevonepathpairs"] = [ ]
-		xcdata["newonepathpairs"] = [ activetargetnode.get_name(), newnodename]
-		sketchsystem.actsketchchange([xcdata])
-		setactivetargetnode(activetargetnodewall.get_node("XCnodes").get_node(newnodename))
+		if gripbuttonheld:
+			if activetargetnode.get_name()[0] == "k":
+				var movetopoint = activetargetnodewall.global_transform.xform_inv(pointertargetpoint)				
+				sketchsystem.actsketchchange([{
+					"name":activetargetnodewall.get_name(), 
+					"prevnodepoints":{ activetargetnode.get_name():activetargetnode.translation }, 
+					"nextnodepoints":{ activetargetnode.get_name():newnodepoint } 
+				}])
+				clearactivetargetnode()
+		else:
+			var newnodename = activetargetnodewall.newuniquexcnodename("k" if pointertargettype == "none" else "a")
+			var xcdata = { "name":activetargetnodewall.get_name(), 
+						   "prevnodepoints":{ }, 
+						   "nextnodepoints":{ newnodename:newnodepoint } 
+						 }
+			xcdata["prevonepathpairs"] = [ ]
+			xcdata["newonepathpairs"] = [ activetargetnode.get_name(), newnodename]
+			sketchsystem.actsketchchange([xcdata])
+			setactivetargetnode(activetargetnodewall.get_node("XCnodes").get_node(newnodename))
 
 	elif not is_instance_valid(pointertarget):
 		pass

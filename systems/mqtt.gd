@@ -77,6 +77,7 @@ func set_last_will(topic, msg, retain=false, qos=0):
 	self.lw_retain = retain
 
 func connect_to_server(clean_session=true):
+	var timeout = 30
 	assert (server != "")
 	if client_id == "":
 		client_id = "rr%d" % randi()
@@ -88,12 +89,17 @@ func connect_to_server(clean_session=true):
 #		import ussl
 #		self.sock = ussl.wrap_socket(self.sock, **self.ssl_params)
 	
-	# I don't think this test works...
+	var timestep = 0.2
 	while not self.client.is_connected_to_host():
-		pass
-	# todo: Add in a timeout
+		yield(get_tree().create_timer(timestep), "timeout")
+		timeout -= timestep
+		if timeout < 0:
+			return false
 	while self.client.get_status() != StreamPeerTCP.STATUS_CONNECTED:
-		pass
+		yield(get_tree().create_timer(timestep), "timeout")
+		timeout -= timestep
+		if timeout < 0:
+			return false
 	print("Connected to server")
 		
 	# May need a little delay after connecting to the server ?
@@ -151,7 +157,7 @@ func connect_to_server(clean_session=true):
 	_timer = Timer.new()
 	add_child(_timer)
 
-	_timer.connect("timeout", self, "_on_Timer_timeout")
+	_timer.connect("timeout", self, "check_msg")
 	_timer.set_wait_time(1.0)
 	_timer.set_one_shot(false) # Make sure it loops
 	_timer.start()
@@ -167,6 +173,10 @@ func ping():
 	self.client.put_u16(0xC000)
 
 func publish(topic, msg, retain=false, qos=0):
+	if(self.client == null):
+		return
+	if(!self.client.is_connected_to_host()):
+		return
 
 	var pkt = PoolByteArray()
 	# Must be an easier way of doing this...
@@ -305,5 +315,3 @@ func check_msg():
 #	self.sock.setblocking(false)
 	return self.wait_msg()
 
-func _on_Timer_timeout():
-	check_msg()
