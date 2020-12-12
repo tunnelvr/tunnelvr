@@ -465,7 +465,7 @@ func updatexcpaths():
 		surfaceTool.add_vertex(p1right)
 	surfaceTool.generate_normals()
 	var newmesh = surfaceTool.commit()
-	if $PathLines.mesh == null:
+	if $PathLines.mesh == null or $PathLines.get_surface_material_count() == 0:
 		$PathLines.mesh = newmesh
 		var materialsystem = get_node("/root/Spatial/MaterialSystem")
 		var matname = "centreline" if drawingtype == DRAWING_TYPE.DT_CENTRELINE else "normal"

@@ -521,7 +521,7 @@ func gettubeshellholes(sketchsystem):
 		if xcsectormaterials[i] == "hole":
 			var xcdrawingholename = HoleName(i)
 			var xcdrawinghole = sketchsystem.get_node_or_null("XCdrawings").get_node(xcdrawingholename)
-			if xcdrawinghole != null:
+			if xcdrawinghole != null and len(xcdrawinghole.nodepoints) != 0:
 				if tubeshellholeindexes == null:
 					tubeshellholeindexes = [ xcdrawinghole ]
 				tubeshellholeindexes.push_back(i)

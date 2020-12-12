@@ -380,7 +380,7 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 			(pointertargettype == "none" or pointertargettype == "XCtubesector" or pointertargettype == "XCflatshell"):
 		var newnodepoint = activetargetnodewall.global_transform.xform_inv(pointertargetpoint)
 		if gripbuttonheld:
-			if activetargetnode.get_name()[0] == "k":
+			if activetargetnode.get_name()[0] == ("k" if pointertargettype == "none" else "a"):
 				var movetopoint = activetargetnodewall.global_transform.xform_inv(pointertargetpoint)				
 				sketchsystem.actsketchchange([{
 					"name":activetargetnodewall.get_name(), 
@@ -397,8 +397,10 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 			xcdata["prevonepathpairs"] = [ ]
 			xcdata["newonepathpairs"] = [ activetargetnode.get_name(), newnodename]
 			sketchsystem.actsketchchange([xcdata])
-			setactivetargetnode(activetargetnodewall.get_node("XCnodes").get_node(newnodename))
-
+			if newnodename[0] == "k":
+				setactivetargetnode(activetargetnodewall.get_node("XCnodes").get_node(newnodename))
+			else:
+				clearactivetargetnode()
 	elif not is_instance_valid(pointertarget):
 		pass
 		
@@ -899,6 +901,8 @@ func buttonreleased_vrgrip():
 				var xcdrawing = gripmenu.gripmenupointertargetwall
 				if (xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING) or (xcdrawing.drawingtype == DRAWING_TYPE.DT_ROPEHANG):
 					if xcdrawing.notubeconnections_so_delxcable():
+						if activetargetnodewall == xcdrawing:
+							clearactivetargetnode()
 						var xcname = xcdrawing.get_name()
 						var xcv = { "xcvizstates":{ xcname:DRAWING_TYPE.VIZ_XCD_PLANE_VISIBLE if xcdrawing.get_name().begins_with("Hole") else \
 														   DRAWING_TYPE.VIZ_XCD_HIDE } }
@@ -909,7 +913,7 @@ func buttonreleased_vrgrip():
 									   "newonepathpairs": [ ]
 									 }
 						sketchsystem.actsketchchange([xcv, xcdata])
-									
+						
 					else:
 						print("not deleted xc nodes")
 				
