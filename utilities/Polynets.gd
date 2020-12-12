@@ -130,6 +130,10 @@ static func makeropenodesequences(nodepoints, onepathpairs):
 			assert ((i1 == onepathpairs[j1*2]) or (i1 == onepathpairs[j1*2+1]))
 			ropeseq.append(onepathpairs[j1*2+1] if (i1 == onepathpairs[j1*2]) else onepathpairs[j1*2])
 		if len(ropeseq) >= 2:
+			if ropeseq[-1][0] == "a":
+				ropeseq.invert()
+			elif len(Lpathvectorseq[ropeseq[0]]) == 1:
+				ropeseq.invert()
 			ropesequences.append(ropeseq)
 	return ropesequences
 

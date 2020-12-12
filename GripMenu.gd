@@ -108,7 +108,7 @@ func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointert
 			gmlist = ["DelTube", "NewXC", "SelectXC", "HideXC", "materials"]
 
 	elif gripmenupointertargettype == "XCnode":
-		gmlist = ["NewXC", "DelXC" if pointertargetwall.notubeconnections_so_delxcable() else ""]
+		gmlist = ["NewXC", "HideXC", "DelXC" if pointertargetwall.notubeconnections_so_delxcable() else ""]
 
 	else:
 		gmlist = ["NewXC", "Undo"]

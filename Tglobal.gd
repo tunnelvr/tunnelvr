@@ -12,5 +12,5 @@ var controlslocked = false
 var questhandtracking = false
 var questhandtrackingactive = false
 
-var handflickmotiongestureposition = 1
+var handflickmotiongestureposition = 0
 var soundsystem = null

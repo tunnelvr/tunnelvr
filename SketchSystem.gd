@@ -542,6 +542,7 @@ func newXCuniquedrawing(drawingtype, sname):
 		xcdrawing.drawingvisiblecode = DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE
 		var materialsystem = get_node("/root/Spatial/MaterialSystem")
 		xcdrawing.get_node("PathLines").set_surface_material(0, materialsystem.pathlinematerial("rope"))
+		xcdrawing.get_node("PathLines").cast_shadow = true
 		
 	elif drawingtype == DRAWING_TYPE.DT_CENTRELINE:
 		var xcnodesplanview = Spatial.new()

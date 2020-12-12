@@ -168,7 +168,6 @@ func setactivetargetwall(newactivetargetwall):
 		if len(activetargetwall.nodepoints) != 0:
 			LaserOrient.get_node("RayCast").collision_mask = CollisionLayer.CLV_MainRayXC
 
-
 	if activetargetwall != null and activetargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
 		assert (false)
 		
@@ -712,6 +711,9 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 		if pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 			if pointertargetwall != activetargetwall:
 				setactivetargetwall(pointertargetwall)
+		elif pointertargetwall.drawingtype == DRAWING_TYPE.DT_ROPEHANG:
+			if pointertargetwall.drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_HIDE:
+				sketchsystem.actsketchchange([{"xcvizstates":{pointertargetwall.get_name():DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE}}])
 		setactivetargetnode(pointertarget)
 		initialsequencenodename = pointertarget.get_name()
 
@@ -863,23 +865,31 @@ func buttonreleased_vrgrip():
 		elif is_instance_valid(gripmenu.gripmenupointertargetwall):
 			print("executing ", pointertarget.get_name(), " on ", gripmenu.gripmenupointertargetwall.get_name())
 			if pointertarget.get_name() == "SelectXC":
-				sketchsystem.actsketchchange([{"xcvizstates":{gripmenu.gripmenupointertargetwall.xcname0:DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE, 
-															  gripmenu.gripmenupointertargetwall.xcname1:DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE}}])
-				var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(gripmenu.gripmenupointertargetwall.xcname0)
-				var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(gripmenu.gripmenupointertargetwall.xcname1)
-				if xcdrawing0 != activetargetwall:
-					setactivetargetwall(xcdrawing0)
-				elif xcdrawing1 != activetargetwall:
-					setactivetargetwall(xcdrawing1)
+				if gripmenu.gripmenupointertargettype == "XCtubesector":
+					sketchsystem.actsketchchange([{"xcvizstates":{gripmenu.gripmenupointertargetwall.xcname0:DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE, 
+																  gripmenu.gripmenupointertargetwall.xcname1:DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE}}])
+					var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(gripmenu.gripmenupointertargetwall.xcname0)
+					var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(gripmenu.gripmenupointertargetwall.xcname1)
+					if xcdrawing0 != activetargetwall:
+						setactivetargetwall(xcdrawing0)
+					elif xcdrawing1 != activetargetwall:
+						setactivetargetwall(xcdrawing1)
 						
 			elif pointertarget.get_name() == "HideXC":
-				sketchsystem.actsketchchange([{ "xcvizstates":{gripmenu.gripmenupointertargetwall.xcname0:DRAWING_TYPE.VIZ_XCD_HIDE, gripmenu.gripmenupointertargetwall.xcname1:DRAWING_TYPE.VIZ_XCD_HIDE}} ])
-				var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(gripmenu.gripmenupointertargetwall.xcname0)
-				var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(gripmenu.gripmenupointertargetwall.xcname1)
-				if xcdrawing0 == activetargetwall:
-					setactivetargetwall(null)
-				if xcdrawing1 == activetargetwall:
-					setactivetargetwall(null)
+				if gripmenu.gripmenupointertargettype == "XCnode":
+					sketchsystem.actsketchchange([{ "xcvizstates":{gripmenu.gripmenupointertargetwall.get_name():DRAWING_TYPE.VIZ_XCD_HIDE}}])
+					if gripmenu.gripmenupointertargetwall == activetargetwall:
+						setactivetargetwall(null)
+				elif gripmenu.gripmenupointertargettype == "XCtubesector":
+					print(gripmenu.gripmenupointertargettype)
+					sketchsystem.actsketchchange([{ "xcvizstates":{gripmenu.gripmenupointertargetwall.xcname0:DRAWING_TYPE.VIZ_XCD_HIDE, 
+																   gripmenu.gripmenupointertargetwall.xcname1:DRAWING_TYPE.VIZ_XCD_HIDE}} ])
+					var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(gripmenu.gripmenupointertargetwall.xcname0)
+					var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(gripmenu.gripmenupointertargetwall.xcname1)
+					if xcdrawing0 == activetargetwall:
+						setactivetargetwall(null)
+					if xcdrawing1 == activetargetwall:
+						setactivetargetwall(null)
 
 			elif pointertarget.get_name() == "HideFloor":
 				var xcdrawing = gripmenu.gripmenupointertargetwall
@@ -887,7 +897,7 @@ func buttonreleased_vrgrip():
 
 			elif pointertarget.get_name() == "DelXC":
 				var xcdrawing = gripmenu.gripmenupointertargetwall
-				if xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
+				if (xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING) or (xcdrawing.drawingtype == DRAWING_TYPE.DT_ROPEHANG):
 					if xcdrawing.notubeconnections_so_delxcable():
 						var xcname = xcdrawing.get_name()
 						var xcv = { "xcvizstates":{ xcname:DRAWING_TYPE.VIZ_XCD_PLANE_VISIBLE if xcdrawing.get_name().begins_with("Hole") else \
@@ -1176,6 +1186,8 @@ func _input(event):
 				handright.vrbybuttonheld = event.pressed
 			if event.pressed:
 				buttonpressed_vrby(false)	
+		if event.pressed and event.scancode == KEY_H:
+			Tglobal.handflickmotiongestureposition = handflickmotiongestureposition_shortpos if Tglobal.handflickmotiongestureposition == handflickmotiongestureposition_normal else handflickmotiongestureposition_normal
 
 	elif Input.get_mouse_mode() != Input.MOUSE_MODE_CAPTURED:
 		pass
