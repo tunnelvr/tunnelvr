@@ -137,4 +137,15 @@ static func makeropenodesequences(nodepoints, onepathpairs):
 			ropesequences.append(ropeseq)
 	return ropesequences
 
-
+static func triangulatepolygon(poly):
+	var surfaceTool = SurfaceTool.new()
+	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var pv = PoolVector2Array()
+	for p in poly:
+		pv.append(Vector2(p.x, p.y))
+	var pi = Geometry.triangulate_polygon(pv)
+	for u in pi:
+		surfaceTool.add_uv(Vector2(poly[u].x, poly[u].z))
+		surfaceTool.add_vertex(poly[u])
+	surfaceTool.generate_normals()
+	return surfaceTool.commit()

@@ -1,4 +1,4 @@
-[gd_scene load_steps=24 format=2]
+[gd_scene load_steps=26 format=2]
 
 [ext_resource path="res://nodescenes/PlayerPuppet.gd" type="Script" id=1]
 [ext_resource path="res://HandScript.gd" type="Script" id=2]
@@ -81,6 +81,16 @@ params_cull_mode = 2
 albedo_color = Color( 0.0705882, 0.0862745, 0.0980392, 1 )
 metallic = 0.43
 roughness = 0.66
+
+[sub_resource type="PrismMesh" id=21]
+left_to_right = 0.1
+size = Vector3( 0.1, 0.2, 0.1 )
+
+[sub_resource type="SpatialMaterial" id=22]
+flags_do_not_receive_shadows = true
+albedo_color = Color( 0.341176, 0.411765, 0.976471, 1 )
+metallic = 0.41
+roughness = 0.45
 
 [sub_resource type="Animation" id=18]
 length = 0.3
@@ -283,6 +293,19 @@ visible = false
 [node name="Quad" type="MeshInstance" parent="FakeGuiSystem/GUIPanel3D"]
 mesh = SubResource( 16 )
 material/0 = SubResource( 17 )
+
+[node name="GuardianPoly" type="Spatial" parent="."]
+visible = false
+
+[node name="floorareamesh" type="MeshInstance" parent="GuardianPoly"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 0 )
+cast_shadow = 0
+
+[node name="floororigin" type="MeshInstance" parent="GuardianPoly"]
+transform = Transform( -1.62921e-07, 0, 1, 0, 1, 0, -1, 0, -1.62921e-07, 0, 0.3, 0 )
+cast_shadow = 0
+mesh = SubResource( 21 )
+material/0 = SubResource( 22 )
 
 [node name="AnimationPlayer_setavatarposition_flash" type="AnimationPlayer" parent="."]
 anims/setavatarposition_flash = SubResource( 18 )

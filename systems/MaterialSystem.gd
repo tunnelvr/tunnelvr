@@ -1,5 +1,8 @@
 extends Spatial
 
+func _ready():
+	visible = false
+
 func tubematerialnamefromnumber(n):
 	var mm = $tubematerials.get_child(n)
 	return mm.get_name()

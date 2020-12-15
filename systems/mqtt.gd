@@ -84,6 +84,7 @@ func connect_to_server(clean_session=true):
 	self.client = StreamPeerTCP.new()
 	self.client.set_no_delay(true)
 	self.client.set_big_endian(true)
+	print("Connecting to %s:%s" % [self.server, self.port])
 	self.client.connect_to_host(self.server, self.port)
 #	if self.ssl:
 #		import ussl

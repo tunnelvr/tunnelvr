@@ -2,11 +2,12 @@ extends Spatial
 
 var networkID = 0
 var playerplatform = ""
+var playerversion = ""
 
 var puppetpositionstack = [ ]         # [ { "timestamp", "Ltimestamp", "playertransform", "headcamtransform" } ] 
 var puppetpointerpositionstack = [ ]  # [ { "timestamp", "Ltimestamp", "orient", "length", "spotvisible" } ] 
 
-remote func initplayerappearance(lplayerplatform, headcolour):
+remote func initplayerappearance(lplayerplatform, headcolour):  # obsolete in later versions
 	playerplatform = lplayerplatform
 	get_node("HeadCam/csgheadmesh/skullcomponent").material.albedo_color = headcolour
 	get_node("headlocator/locatorline").get_surface_material(0).albedo_color = headcolour
@@ -20,6 +21,31 @@ remote func initplayerappearance(lplayerplatform, headcolour):
 		get_node("HeadCam/visorline").get_surface_material(0).albedo_color = Color(0, 0, 0.3)
 	else:
 		get_node("HeadCam/visorline").visible = false
+
+remote func initplayerappearanceJ(playerappearance):
+	playerplatform = playerappearance.get("playerplatform", "unknown")
+	var headcolour = playerappearance.get("headcolour", Color.white)
+	var playerversion = playerappearance.get("playerversion", "unknown")
+	puppetsetheadtorchlight(playerappearance.get("torchon", false))
+	var guardianpoly = playerappearance.get("guardianpoly", null)
+	if guardianpoly != null:
+		get_node("GuardianPoly/floorareamesh").mesh = Polynets.triangulatepolygon(guardianpoly)
+		get_node("GuardianPoly/floorareamesh").set_surface_material(0, get_node("/root/Spatial/MaterialSystem").xcdrawingmaterial("guardianpoly"))
+		get_node("GuardianPoly/floorareamesh").visible = true
+		
+	get_node("HeadCam/csgheadmesh/skullcomponent").material.albedo_color = headcolour
+	get_node("headlocator/locatorline").get_surface_material(0).albedo_color = headcolour
+	#if playerplatform == "PC":
+	#	get_node("HeadCam/csgheadmesh").mesh.size.x = 0.15
+	if playerplatform == "Quest":
+		get_node("HeadCam/visorline").visible = true
+		get_node("HeadCam/visorline").get_surface_material(0).albedo_color = headcolour
+	elif playerplatform == "Vive":
+		get_node("HeadCam/visorline").visible = true
+		get_node("HeadCam/visorline").get_surface_material(0).albedo_color = Color(0, 0, 0.3)
+	else:
+		get_node("HeadCam/visorline").visible = false
+
 	
 # reltime is localtime - remotetime.  More delay means message sent earlier, means bigger number. Find smallest filtering any outliers
 var relativetimeminmax = 0

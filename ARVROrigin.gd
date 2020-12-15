@@ -4,6 +4,8 @@ var doppelganger = null
 
 var networkID = 0
 var playerplatform = ""
+onready var playerversion = Tglobal.version
+var guardianpoly = null
 var playerscale = 1.0
 var playerflyscale = 1.0
 
@@ -12,6 +14,7 @@ onready var LaserOrient = get_node("/root/Spatial/BodyObjects/LaserOrient")
 onready var LaserSelectLine = get_node("/root/Spatial/BodyObjects/LaserSelectLine")
 onready var PlanViewSystem = get_node("/root/Spatial/PlanViewSystem")
 var ovr_hand_tracking = null
+var ovr_guardian_system = null
 onready var guipanel3d = get_node("/root/Spatial/GuiSystem/GUIPanel3D")
 
 func initplayerappearance_me():
@@ -21,6 +24,15 @@ func initplayerappearance_me():
 		headcolour = Color(0.01, 0.01, 0.05)
 	print("Head colour ", headcolour, " ", [OS.get_unique_id()])
 	get_node("HeadCam/csgheadmesh/skullcomponent").material.albedo_color = headcolour
+	if ovr_guardian_system != null:
+		guardianpoly = ovr_guardian_system.get_boundary_geometry()
+	else:
+		guardianpoly = PoolVector3Array([Vector3(1,0,1), Vector3(1,0,-1), Vector3(-1,0,-1), Vector3(-1,0,1)])
+	if guardianpoly != null:
+		get_node("GuardianPoly/floorareamesh").mesh = Polynets.triangulatepolygon(guardianpoly)
+		get_node("GuardianPoly/floorareamesh").set_surface_material(0, get_node("/root/Spatial/MaterialSystem").xcdrawingmaterial("guardianpoly"))
+		get_node("GuardianPoly/floorareamesh").visible = true
+	
 
 func setheadtorchlight(torchon):
 	if torchon:
@@ -52,6 +64,7 @@ func setdoppelganger(doppelgangeron):
 			doppelganger.get_node("HeadCam/csgheadmesh/skullcomponent").material.albedo_color = get_node("HeadCam/csgheadmesh/skullcomponent").material.albedo_color
 			get_parent().add_child(doppelganger)
 			doppelganger.initplayerappearance(playerplatform, get_node("HeadCam/csgheadmesh/skullcomponent").material.albedo_color)
+			doppelganger.initplayerappearanceJ(playerappearancedict())
 			doppelganger.networkID = -10
 			
 		doppelganger.visible = true
@@ -133,6 +146,8 @@ remote func puppetsetheadtorchlight(torchon):
 puppet func bouncedoppelgangerposition(bouncebackID, positiondict):
 	rpc_unreliable_id(bouncebackID, "setdoppelgangerposition", positiondict)
 
+
+
 func swapcontrollers():
 	var cidl = $HandLeftController.controller_id
 	var cidr = $HandRightController.controller_id
@@ -178,6 +193,14 @@ func playerpositiondict():
 			 "handright": $HandRight.handpositiondict(t0), 
 			 "laserpointer": laserpointerdict()
 		   }
+
+func playerappearancedict():
+	return { "playerplatform":playerplatform, 
+			 "playerheadcolour":get_node("HeadCam/csgheadmesh/skullcomponent").material.albedo_color, 
+			 "torchon":get_node("HeadCam/HeadtorchLight").visible, 
+			 "guardianpoly":guardianpoly
+			}
+
 
 var Dleftquesthandcontrollername = "unknown"
 var Drightquesthandcontrollername = "unknown"

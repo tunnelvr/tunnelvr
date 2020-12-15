@@ -11,9 +11,8 @@ func _ready():
 	topicstem = "tunnelvr/u%s/" % uniqstring
 	$mqttnode.server = "mosquitto.doesliverpool.xyz"
 	$mqttnode.client_id = "u"+uniqstring
-	#return
-	print("we need to fix why it crashes if not online")
-	call_deferred("connectmqtt")
+	print("disabling mqtt")
+	#call_deferred("connectmqtt")
 
 func mqttpublish(subtopic, payload):
 	$mqttnode.publish(topicstem+subtopic, payload)

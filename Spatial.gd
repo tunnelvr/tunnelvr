@@ -64,6 +64,7 @@ var perform_runtime_config = true
 var ovr_init_config = null
 var ovr_performance = null
 var ovr_hand_tracking = null
+var ovr_guardian_system = null
 
 onready var playerMe = $Players/PlayerMe
 onready var mqttsystem = $MQTTExperiment
@@ -102,6 +103,8 @@ func _ready():
 		ovr_init_config = load("res://addons/godot_ovrmobile/OvrInitConfig.gdns").new()
 		ovr_performance = load("res://addons/godot_ovrmobile/OvrPerformance.gdns").new()
 		ovr_hand_tracking = load("res://addons/godot_ovrmobile/OvrHandTracking.gdns").new();
+		ovr_guardian_system = load("res://addons/godot_ovrmobile/OvrGuardianSystem.gdns").new();
+		playerMe.ovr_guardian_system = ovr_guardian_system
 		perform_runtime_config = false
 		ovr_init_config.set_render_target_size_multiplier(1)
 		if Tglobal.arvrinterface.initialize():
@@ -199,6 +202,20 @@ func _ready():
 	$GuiSystem/GUIPanel3D.updateplayerlist()
 	get_node("/root").msaa = Viewport.MSAA_4X
 
+	var picturepalace = get_node_or_null("picturepalace")
+	if picturepalace != null and picturepalace.visible:
+		picturepalace.get_node("CollisionShape").shape = ConcavePolygonShape.new()		
+		var v = PoolVector3Array()
+		var nodestack = [ picturepalace.get_node("picturepalace") ]
+		while len(nodestack) != 0:
+			var node = nodestack.pop_back()
+			for n in node.get_children():
+				if n is MeshInstance:
+					v = v + n.mesh.get_faces()
+				else:
+					nodestack.push_back(n)
+		picturepalace.get_node("CollisionShape").shape.set_faces(v)
+		
 
 func nextplayernetworkidinringskippingdoppelganger(deletedid):
 	for i in range($Players.get_child_count()):
@@ -236,6 +253,7 @@ func _player_connected(id):
 	print(" playerMe networkID ", playerMe.networkID, " ", get_tree().get_network_unique_id())
 	assert(playerMe.networkID != 0)
 	playerMe.rpc_id(id, "initplayerappearance", playerMe.playerplatform, playerMe.get_node("HeadCam/csgheadmesh/skullcomponent").material.albedo_color)
+	playerMe.rpc_id(id, "initplayerappearanceJ", playerMe.playerappearancedict())
 	players_connected_list.push_back(id)
 	$GuiSystem/GUIPanel3D/Viewport/GUI/Panel/Label.text = "player "+String(id)+" connected"
 	if not Tglobal.controlslocked:
@@ -287,7 +305,8 @@ func _connected_to_server():
 	Tglobal.connectiontoserveractive = true
 	assert(playerMe.networkID != 0)
 	playerMe.rpc("initplayerappearance", playerMe.playerplatform, playerMe.get_node("HeadCam/csgheadmesh/skullcomponent").material.albedo_color)
-
+	playerMe.rpc("initplayerappearanceJ", playerMe.playerappearancedict())
+	
 	while len(deferred_player_connected_list) != 0:
 		var id = deferred_player_connected_list.pop_front()
 		print("Now calling deferred _player_connected on id ", id)

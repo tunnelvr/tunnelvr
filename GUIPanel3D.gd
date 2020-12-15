@@ -112,6 +112,12 @@ func _on_playerscale_selected(index):
 
 	
 func _on_switchtest(index):
+	if index == 4:
+		var guardianpolyvisible = not playerMe.get_node("GuardianPoly").visible
+		for player in get_node("/root/Spatial/Players").get_children():
+			player.get_node("GuardianPoly").visible = guardianpolyvisible
+		return
+
 	var n = 0
 	for xcdrawing in sketchsystem.get_node("XCdrawings").get_children():
 		if xcdrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
@@ -129,6 +135,7 @@ func _on_switchtest(index):
 		sketchsystem.get_node("XCdrawings").visible = false
 	elif index == 0:
 		sketchsystem.get_node("XCdrawings").visible = true
+	
 
 		
 func _on_buttonswapcontrollers_pressed():
@@ -152,10 +159,14 @@ func _on_buttonload_choke():
 	get_node("/root/Spatial/BodyObjects/PlayerMotion").makeboulderchoke(50)
 	$Viewport/GUI/Panel/Label.text = "Boulder choke!"
 	toggleguipanelvisibility(null)
+	
+	print(" ovr_guardian_system.get_boundary_geometry() == " + str(playerMe.ovr_guardian_system.get_boundary_geometry()));
+
+	
 
 const clientips = [ "144.76.167.54 Alex",  # alex server
-					"192.168.43.186 Quest2",  # quest on j's phone
-					"192.168.43.172 JGT", 
+					"192.168.8.104 Quest2",  # home wifi
+					"192.168.8.101 JGT",     # home wifi
 					"192.168.43.118" ]
 func _ready():
 	if has_node("ViewportReal"):

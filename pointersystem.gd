@@ -341,8 +341,40 @@ func _on_button_pressed(p_button):
 			buttonpressed_vrtrigger(gripbuttonheld)
 		elif p_button == BUTTONS.VR_PAD:
 			buttonpressed_vrpad(gripbuttonheld, handright.joypos)
+
+func _on_button_release(p_button):
+	if Tglobal.controlslocked:
+		print("Controls locked")
+	elif Tglobal.questhandtrackingactive:
+		if p_button == BUTTONS.HT_PINCH_MIDDLE_FINGER:
+			buttonreleased_vrgrip()
+		elif p_button == BUTTONS.HT_PINCH_INDEX_FINGER:
+			buttonreleased_vrtrigger()
+
+	else:
+		if p_button == BUTTONS.VR_GRIP:
+			buttonreleased_vrgrip()
+		elif p_button == BUTTONS.VR_TRIGGER:
+			buttonreleased_vrtrigger()
+		elif p_button == BUTTONS.VR_BUTTON_BY:
+			buttonreleased_vrby()
+
+
 	
+func buttonreleased_vrby():
+	print("we don't get here and I don't know why")
+	if playerMe.ovr_guardian_system != null:
+		playerMe.ovr_guardian_system.request_boundary_visible(false)
+
+
 func buttonpressed_vrby(gripbuttonheld):
+	#if playerMe.ovr_guardian_system != null:
+	#	print(" ovr_guardian_system.get_boundary_geometry() == " + str(playerMe.ovr_guardian_system.get_boundary_geometry()));
+	#	print(" ovr_guardian_system.get_boundary_visible() == " + str(playerMe.ovr_guardian_system.get_boundary_visible()));
+	#	playerMe.ovr_guardian_system.request_boundary_visible(true)
+	#	print(" ovr_guardian_system.get_boundary_oriented_bounding_box() == " + str(playerMe.ovr_guardian_system.get_boundary_oriented_bounding_box()));
+
+
 	if Tglobal.controlslocked:
 		if not guipanel3d.visible:
 			guipanel3d.toggleguipanelvisibility(LaserOrient.global_transform)
@@ -354,6 +386,7 @@ func buttonpressed_vrby(gripbuttonheld):
 		guipanel3d.toggleguipanelvisibility(LaserOrient.global_transform)
 
 func buttonpressed_vrgrip():
+	
 	gripbuttonpressused = false
 	if pointertargettype == "XCtubesector":
 		activetargettube = pointertargetwall
@@ -745,19 +778,6 @@ func buttonpressed_vrpad(gripbuttonheld, joypos):
 			pointertargetwall.get_node("XCdrawingplane").scale.x *= fs
 			pointertargetwall.get_node("XCdrawingplane").scale.y *= fs
 					
-func _on_button_release(p_button):
-	if Tglobal.controlslocked:
-		print("Controls locked")
-	elif Tglobal.questhandtrackingactive:
-		if p_button == BUTTONS.HT_PINCH_MIDDLE_FINGER:
-			buttonreleased_vrgrip()
-		elif p_button == BUTTONS.HT_PINCH_INDEX_FINGER:
-			buttonreleased_vrtrigger()
-	else:
-		if p_button == BUTTONS.VR_GRIP:
-			buttonreleased_vrgrip()
-		elif p_button == BUTTONS.VR_TRIGGER:
-			buttonreleased_vrtrigger()
 
 func exchdictptrs(xcdata, e0, e1):
 	if e0 in xcdata:
@@ -766,6 +786,7 @@ func exchdictptrs(xcdata, e0, e1):
 		xcdata[e1] = e0d
 
 func buttonreleased_vrgrip():
+		
 	var wasactivetargettube = activetargettube
 	if activetargettube != null:
 		if pointertargettype == "GripMenuItem" and pointertarget.get_parent().get_name() == "MaterialButtons":
