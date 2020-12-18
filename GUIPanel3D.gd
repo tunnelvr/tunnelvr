@@ -117,6 +117,12 @@ func _on_switchtest(index):
 		for player in get_node("/root/Spatial/Players").get_children():
 			player.get_node("GuardianPoly").visible = guardianpolyvisible
 		return
+	if index == 5:
+		var gliderscene = load("res://assets/glider1/glider1.glb").instance()
+		var boulderclutter = get_node("/root/Spatial/BoulderClutter")
+		boulderclutter.add_child(gliderscene)
+		gliderscene.global_transform.origin = playerMe.global_transform.origin
+		return
 
 	var n = 0
 	for xcdrawing in sketchsystem.get_node("XCdrawings").get_children():
@@ -552,8 +558,8 @@ func _process(delta):
 	if websocketserver != null:
 		if websocketserver.is_listening():
 			websocketserver.poll()
-		if (websocketclient.get_connection_status() == NetworkedMultiplayerPeer.CONNECTION_CONNECTED or websocketclient.get_connection_status() == NetworkedMultiplayerPeer.CONNECTION_CONNECTING):
-			websocketclient.poll()
+	if websocketclient != null:
+		websocketclient.poll()
 	if visible and Tglobal.connectiontoserveractive:
 		if netlinkstatstimer < 0.0 and netlinkstatstimer + delta >= 0:
 			$Viewport/GUI/Panel/PlayerInfo.text = "%s:%d" % [selectedplayerplatform, selectedplayernetworkid]

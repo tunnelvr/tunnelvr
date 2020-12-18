@@ -189,7 +189,9 @@ remote func actsketchchangeL(xcdatalist):
 	elif caveworldchunkI != -1:
 		if xcdatalist[0]["networkIDsource"] == caveworldchunking_networkIDsource:
 			return caveworldreceivechunkingfailed("non world chunk xcdata received from chunking source")
-		xcdatalistReceivedDuringChunking.push_back(xcdatalist)	
+		elif xcdatalist[0]["networkIDsource"] == playerMe.networkID:
+			return caveworldreceivechunkingfailed("player making edits during incomplete chunking")
+		xcdatalistReceivedDuringChunking.push_back(xcdatalist)
 		return
 
 	elif "undoact" in xcdatalist[0]:
@@ -442,6 +444,12 @@ func xcsorterfunc(a, b):
 		return b.drawingtype == DRAWING_TYPE.DT_CENTRELINE
 	return playeroriginXCSorter.distance_to(a.transformpos.origin) < playeroriginXCSorter.distance_to(b.transformpos.origin)
 	
+func subdictarray(d, a):
+	var r = { }
+	for x in a:
+		r[x] = d[x]
+	return r
+
 func sketchdicttochunks(sketchdatadict):
 	var xcdatachunkL = [ { "caveworldchunk":0 } ]
 	playeroriginXCSorter = Vector3(0, 0, 0)
@@ -476,12 +484,43 @@ func sketchdicttochunks(sketchdatadict):
 	var xctubesDmaphalfstaged = { }
 	for j in range(len(xcdrawingsD)):
 		var xcdrawingD = xcdrawingsD[j]
-		if len(xcdatachunkL) > 50 or nnodesL > 400 and j < len(xcdrawingsD) - 10:
+		if (len(xcdatachunkL) > 50  and j < len(xcdrawingsD) - 10) or nnodesL > 300:
 			xcdatachunkL = [ { "caveworldchunk":len(xcdatachunks) } ]
 			xcdatachunks.push_back(xcdatachunkL)
 			nnodesL = 0
-		xcdatachunkL.push_back(xcdrawingD)
-		nnodesL += len(xcdrawingD.nodepoints)
+		if nnodesL + len(xcdrawingD["nodepoints"]) > 350:
+			var Dnodepointstotal = len(xcdrawingD["nodepoints"])
+			var SxcdrawingD = xcdrawingD.duplicate()
+			var nodepointsdict = xcdrawingD["nodepoints"]
+			var remainingnodepoints = nodepointsdict.keys()
+			SxcdrawingD["nodepoints"] = subdictarray(xcdrawingD["nodepoints"], remainingnodepoints.slice(0, 301-nnodesL))
+			SxcdrawingD["onepathpairs"] = [ ]
+			xcdatachunkL.push_back(SxcdrawingD)
+			Dnodepointstotal -= len(SxcdrawingD["nodepoints"])
+			xcdatachunkL = [ { "caveworldchunk":len(xcdatachunks) } ]
+			xcdatachunks.push_back(xcdatachunkL)
+			remainingnodepoints = remainingnodepoints.slice(len(SxcdrawingD["nodepoints"]), len(xcdrawingD["nodepoints"]))
+			while len(remainingnodepoints) > 300:
+				SxcdrawingD = { "name":xcdrawingD["name"], 
+								"prevnodepoints":[], 
+								"nextnodepoints":subdictarray(xcdrawingD["nodepoints"], remainingnodepoints.slice(0, 300)) }
+				xcdatachunkL.push_back(SxcdrawingD)
+				Dnodepointstotal -= len(SxcdrawingD["nextnodepoints"])
+				xcdatachunkL = [ { "caveworldchunk":len(xcdatachunks) } ]
+				xcdatachunks.push_back(xcdatachunkL)
+				remainingnodepoints = remainingnodepoints.slice(len(SxcdrawingD["nextnodepoints"]), len(remainingnodepoints))
+			SxcdrawingD = { "name":xcdrawingD["name"], 
+							"prevnodepoints":[], 
+							"nextnodepoints":subdictarray(xcdrawingD["nodepoints"], remainingnodepoints), 
+							"prevonepathpairs":[],
+							"newonepathpairs":xcdrawingD["onepathpairs"] }
+			xcdatachunkL.push_back(SxcdrawingD)
+			Dnodepointstotal -= len(SxcdrawingD["nextnodepoints"])
+			assert (Dnodepointstotal == 0)
+			nnodesL = 400
+		else:
+			xcdatachunkL.push_back(xcdrawingD)
+			nnodesL += len(xcdrawingD["nodepoints"])
 		for i in xcdrawingnamemapItubes.get(xcdrawingD["name"], []):
 			var xctubeD = xctubesDmaphalfstaged.get(i)
 			if xctubeD != null:
@@ -541,7 +580,7 @@ func newXCuniquedrawing(drawingtype, sname):
 		xcdrawing.linewidth = 0.02
 		xcdrawing.drawingvisiblecode = DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE
 		var materialsystem = get_node("/root/Spatial/MaterialSystem")
-		xcdrawing.get_node("PathLines").set_surface_material(0, materialsystem.pathlinematerial("rope"))
+		#xcdrawing.get_node("PathLines").set_surface_material(0, materialsystem.pathlinematerial("rope"))
 		xcdrawing.get_node("PathLines").cast_shadow = true
 		
 	elif drawingtype == DRAWING_TYPE.DT_CENTRELINE:

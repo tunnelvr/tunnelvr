@@ -212,6 +212,7 @@ func _ready():
 			for n in node.get_children():
 				if n is MeshInstance:
 					v = v + n.mesh.get_faces()
+					n.cast_shadow = GeometryInstance.SHADOW_CASTING_SETTING_ON
 				else:
 					nodestack.push_back(n)
 		picturepalace.get_node("CollisionShape").shape.set_faces(v)

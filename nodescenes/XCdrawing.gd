@@ -442,6 +442,8 @@ func updateropepaths(hangingarc):
 
 		
 func updatexcpaths():
+	if len(onepathpairs) == 0:
+		return
 	var surfaceTool = SurfaceTool.new()
 	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
 	for j in range(0, len(onepathpairs), 2):
@@ -467,6 +469,7 @@ func updatexcpaths():
 	var newmesh = surfaceTool.commit()
 	if $PathLines.mesh == null or $PathLines.get_surface_material_count() == 0:
 		$PathLines.mesh = newmesh
+		assert($PathLines.get_surface_material_count() != 0)
 		var materialsystem = get_node("/root/Spatial/MaterialSystem")
 		var matname = "centreline" if drawingtype == DRAWING_TYPE.DT_CENTRELINE else "normal"
 		$PathLines.set_surface_material(0, materialsystem.pathlinematerial(matname))

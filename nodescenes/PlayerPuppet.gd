@@ -24,7 +24,7 @@ remote func initplayerappearance(lplayerplatform, headcolour):  # obsolete in la
 
 remote func initplayerappearanceJ(playerappearance):
 	playerplatform = playerappearance.get("playerplatform", "unknown")
-	var headcolour = playerappearance.get("headcolour", Color.white)
+	var headcolour = playerappearance.get("playerheadcolour", Color.white)
 	var playerversion = playerappearance.get("playerversion", "unknown")
 	puppetsetheadtorchlight(playerappearance.get("torchon", false))
 	var guardianpoly = playerappearance.get("guardianpoly", null)

@@ -17,13 +17,18 @@ var ovr_hand_tracking = null
 var ovr_guardian_system = null
 onready var guipanel3d = get_node("/root/Spatial/GuiSystem/GUIPanel3D")
 
+func _ready():
+	setheadtorchlight(guipanel3d.get_node("Viewport/GUI/Panel/ButtonHeadtorch").pressed)
+
 func initplayerappearance_me():
 	var d = hash(String(OS.get_unix_time())+"abc")
 	var headcolour = Color.from_hsv((d%10000)/10000.0, 0.5 + (d%2222)/6666.0, 0.75)
 	if playerplatform == "Server":
 		headcolour = Color(0.01, 0.01, 0.05)
 	print("Head colour ", headcolour, " ", [OS.get_unique_id()])
-	get_node("HeadCam/csgheadmesh/skullcomponent").material.albedo_color = headcolour
+	var mat = get_node("HeadCam/csgheadmesh/skullcomponent").material
+	mat.albedo_color = headcolour
+	print(mat.albedo_color)
 	if ovr_guardian_system != null:
 		guardianpoly = ovr_guardian_system.get_boundary_geometry()
 	else:
@@ -52,7 +57,8 @@ func setheadtorchlight(torchon):
 	#if dl != null:
 	#	dl.shadow_enabled = not torchon
 	get_node("/root/Spatial/SoundSystem").quicksound("ClickSound", $HeadCam.global_transform.origin + $HeadCam.global_transform.basis.y * 0.2)
-	rpc("puppetsetheadtorchlight", torchon)
+	if Tglobal.connectiontoserveractive:
+		rpc("puppetsetheadtorchlight", torchon)
 	if is_instance_valid(doppelganger):
 		doppelganger.puppetsetheadtorchlight(torchon)
 
