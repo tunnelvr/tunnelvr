@@ -107,6 +107,12 @@ func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointert
 		else:
 			gmlist = ["DelTube", "NewXC", "SelectXC", "HideXC", "materials"]
 
+	elif gripmenupointertargettype == "XCflatshell":
+		if activetargetwall == get_node("/root/Spatial/PlanViewSystem"):
+			pass
+		else:
+			gmlist = ["SelectXC", "NewXC", "HideXC", "materials"]
+
 	elif gripmenupointertargettype == "XCnode":
 		gmlist = ["NewXC", "HideXC", "DelXC" if pointertargetwall.notubeconnections_so_delxcable() else ""]
 

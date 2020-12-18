@@ -29,6 +29,7 @@ var activetargetnodewall = null
 var activetargetwall = null
 var activetargettube = null
 var activetargettubesectorindex = -1
+var activetargetxcflatshell = null
 
 var activetargetwallgrabbed = null
 var activetargetwallgrabbedtransform = null
@@ -210,6 +211,8 @@ func targetwall(target, targettype):
 		return target.get_parent().get_parent()
 	if targettype == "XCtubesector":
 		return target.get_parent().get_parent()
+	if targettype == "XCflatshell":
+		return target.get_parent()
 	if targettype == "PlanView":
 		return target.get_parent()
 	if targettype == "IntermediateNode":
@@ -257,6 +260,7 @@ func setpointertarget(laserroot, raycast, pointertargetshortdistance):
 		
 		laserroot.get_node("LaserSpot").visible = (pointertargettype == "XCdrawing") or \
 												  (pointertargettype == "XCtubesector") or \
+												  (pointertargettype == "XCflatshell") or \
 												  (pointertargettype == "IntermediatePointView") or \
 												  (pointertargettype == "none" and pointertargetshortdistance != -1.0)
 		
@@ -386,7 +390,6 @@ func buttonpressed_vrby(gripbuttonheld):
 		guipanel3d.toggleguipanelvisibility(LaserOrient.global_transform)
 
 func buttonpressed_vrgrip():
-	
 	gripbuttonpressused = false
 	if pointertargettype == "XCtubesector":
 		activetargettube = pointertargetwall
@@ -401,6 +404,12 @@ func buttonpressed_vrgrip():
 
 		else:
 			print("Wrong: sector index not match sectors in tubedata")
+
+	elif pointertargettype == "XCflatshell":
+		activetargetxcflatshell = pointertargetwall
+		var xcflatshellmaterialname = activetargetxcflatshell.xcflatshellmaterial
+		materialsystem.updatetubesectormaterial(activetargetxcflatshell.get_node("XCflatshell"), xcflatshellmaterialname, true)
+
 	gripmenu.gripmenuon(LaserOrient.global_transform, pointertargetpoint, pointertargetwall, pointertargettype, activetargettube, activetargettubesectorindex, activetargetwall, activetargetnode)
 	
 var initialsequencenodename = null
@@ -802,9 +811,9 @@ func buttonreleased_vrgrip():
 												"newdrawinglinks":[nodename0, nodename1, sectormaterialname, null]
 											 }])
 				gripmenu.disableallgripmenus()
-				return
 			else:
 				materialsystem.updatetubesectormaterial(activetargettube.get_node("XCtubesectors").get_child(activetargettubesectorindex), activetargettube.xcsectormaterials[activetargettubesectorindex], false)
+			activetargettube = null
 			return
 
 		if activetargettubesectorindex < len(activetargettube.xcsectormaterials):
@@ -813,6 +822,19 @@ func buttonreleased_vrgrip():
 			print("Wrong: activetargettubesectorindex >= activetargettube.xcsectormaterials ")
 		activetargettube.get_node("PathLines").set_surface_material(0, materialsystem.pathlinematerial("normal"))
 		activetargettube = null
+
+	if activetargetxcflatshell != null:
+		if pointertargettype == "GripMenuItem" and pointertarget.get_parent().get_name() == "MaterialButtons":
+			assert (gripmenu.gripmenupointertargettype == "XCflatshell") 
+			var newflatshellmaterialname = pointertarget.get_name()
+			sketchsystem.actsketchchange([{ "name":activetargetxcflatshell.get_name(), 
+											"prevxcflatshellmaterial":activetargetxcflatshell.xcflatshellmaterial,
+											"nextxcflatshellmaterial":newflatshellmaterialname
+										 }])
+			gripmenu.disableallgripmenus()
+			return
+		materialsystem.updatetubesectormaterial(activetargetxcflatshell.get_node("XCflatshell"), activetargetxcflatshell.xcflatshellmaterial, false)
+		activetargetxcflatshell = null
 	
 	if gripbuttonpressused:
 		pass  # the trigger was pulled during the grip operation
@@ -897,6 +919,11 @@ func buttonreleased_vrgrip():
 						setactivetargetwall(xcdrawing0)
 					elif xcdrawing1 != activetargetwall:
 						setactivetargetwall(xcdrawing1)
+
+				if gripmenu.gripmenupointertargettype == "XCflatshell":
+					sketchsystem.actsketchchange([{"xcvizstates":{gripmenu.gripmenupointertargetwall.get_name():DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE}}])
+					if gripmenu.gripmenupointertargetwall != activetargetwall:
+						setactivetargetwall(gripmenu.gripmenupointertargetwall)
 						
 			elif pointertarget.get_name() == "HideXC":
 				if gripmenu.gripmenupointertargettype == "XCnode":

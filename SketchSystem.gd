@@ -156,7 +156,7 @@ func caveworldreceivechunkingfailed(msg):
 	xcdatalistReceivedDuringChunking = null
 	var guipanel3d = get_node("/root/Spatial/GuiSystem/GUIPanel3D")
 	if guipanel3d.websocketclient != null:
-		guipanel3d.websocketclient. disconnect_from_host()
+		guipanel3d.websocketclient.disconnect_from_host()
 	if guipanel3d.networkedmultiplayerenet != null:
 		guipanel3d.networkedmultiplayerenet.close_connection()
 	return null
@@ -331,7 +331,7 @@ remote func actsketchchangeL(xcdatalist):
 
 	for xcdrawing in xcdrawingstoupdate.values():
 		if xcdrawing.drawingtype == DRAWING_TYPE.DT_ROPEHANG:
-			xcdrawing.updateropepaths(false)
+			xcdrawing.updatelinearropepaths()
 		else:
 			xcdrawing.updatexcpaths()
 

@@ -417,7 +417,7 @@ func _on_networkstate_selected(index):
 			# Note: The HTML5 export might not support all status codes. Please refer to browser-specific documentation for more details.
 			websocketserver = null
 		if websocketclient != null:
-			websocketclient. disconnect_from_host()
+			websocketclient.disconnect_from_host()
 			#websocketclient = null
 		if networkedmultiplayerenet != null:
 			networkedmultiplayerenet.close_connection()

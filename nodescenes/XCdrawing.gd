@@ -103,10 +103,16 @@ func setdrawingvisiblecode(ldrawingvisiblecode):
 
 	elif drawingtype == DRAWING_TYPE.DT_ROPEHANG:
 		var hidenodeshang = ((drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE) == 0)
-		updateropepaths(not hidenodeshang)
-		for xcn in $XCnodes.get_children():
-			xcn.visible = ((not hidenodeshang) or (xcn.get_name()[0] == "a"))
-			xcn.get_node("CollisionShape").disabled = not xcn.visible
+		if hidenodeshang:
+			var middlenodes = updatehangingropepaths()
+			for xcn in $XCnodes.get_children():
+				xcn.visible = ((xcn.get_name()[0] == "a") or (middlenodes.find(xcn.get_name()) == -1))
+				xcn.get_node("CollisionShape").disabled = not xcn.visible
+		else:
+			updatelinearropepaths()
+			for xcn in $XCnodes.get_children():
+				xcn.visible = true
+				xcn.get_node("CollisionShape").disabled = not xcn.visible
 		
 	elif drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
 		var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
@@ -225,9 +231,15 @@ func exportxcrpcdata(include_xcchangesequence):
 			 "onepathpairs":onepathpairs,
 			 # "prevonepathpairs":
 			 # "newonepathpairs"
+			 #"xcflatshellmaterial"
+			 # "prevxcflatshellmaterial"
+			 # "nextxcflatshellmaterial"
 			 "visible":$XCdrawingplane.visible, # to abolish
 			 "drawingvisiblecode":drawingvisiblecode
 		   }
+		if xcflatshellmaterial != "simpledirt":
+			d["xcflatshellmaterial"] = xcflatshellmaterial
+			
 	if include_xcchangesequence:
 		d["xcchangesequence"] = xcchangesequence
 	return d
@@ -245,6 +257,7 @@ func applytrimmedpaperuvscale():
 const knotyscale = 0.5
 func mergexcrpcdata(xcdata):
 	assert ((get_name() == xcdata["name"]) and (not ("drawingtype" in xcdata) or drawingtype == xcdata["drawingtype"]))
+	var updatexcflatshell = false
 	if "transformpos" in xcdata:
 		set_transform(xcdata["transformpos"])
 
@@ -340,6 +353,15 @@ func mergexcrpcdata(xcdata):
 				onepathpairs.push_back(onepathpairsAdd[i])
 				onepathpairs.push_back(onepathpairsAdd[i+1])
 
+	if "xcflatshellmaterial" in xcdata:
+		xcflatshellmaterial = xcdata["xcflatshellmaterial"]
+	if "prevxcflatshellmaterial" in xcdata:
+		xcflatshellmaterial = xcdata["nextxcflatshellmaterial"]
+		var xcflatshell = get_node_or_null("XCflatshell")
+		if xcflatshell != null:
+			var materialsystem = get_node("/root/Spatial/MaterialSystem")
+			materialsystem.updatetubesectormaterial(xcflatshell, xcflatshellmaterial, false)
+
 	for j in range(len(onepathpairs)-2, -1, -2):
 		var p0 = nodepoints.get(onepathpairs[j])
 		var p1 = nodepoints.get(onepathpairs[j+1])
@@ -350,7 +372,7 @@ func mergexcrpcdata(xcdata):
 			onepathpairs[j+1] = onepathpairs[-1]
 
 	if drawingtype == DRAWING_TYPE.DT_ROPEHANG:
-		updateropepaths(false)
+		updatelinearropepaths()
 	else:
 		updatexcpaths()
 		
@@ -387,10 +409,92 @@ func newuniquexcnodename(ch):
 
 const uvfacx = 0.2
 const uvfacy = 0.4
-func updateropepaths(hangingarc):
+
+func paraba(L, q):
+	var qsq = q*q
+	var qcu = q*qsq
+	var yc = 0.6846094267632553 + q*0.5490693560779955 + qsq*0.10155603064930156 + qcu*(-0.0065641284014727455)
+	var yb = 0.32724146179683267 + q*(-0.1282922369501835) + qsq*0.005644904325406289 + qcu*0.0005066041448132827
+	var ya = 0.014515220403965912 + q*0.005970564724231822 + qsq*(-0.00083630038220914)
+	return (-yb + sqrt(yb*yb - 4*ya*(yc-L)))/(2*ya)
+
+func updatehangingropepaths():
+	var middlenodes = [ ]
 	if len(onepathpairs) == 0:
 		$PathLines.mesh = null
-		return
+		return middlenodes
+
+	var ropesequences = Polynets.makeropenodesequences(nodepoints, onepathpairs)
+	var surfaceTool = SurfaceTool.new()
+	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for ropeseq in ropesequences:
+		var L = 0.0
+		for i in range(1, len(ropeseq)):
+			L += (nodepoints[ropeseq[i-1]] - nodepoints[ropeseq[i]]).length()
+			middlenodes.push_back(ropeseq[i])
+		var rpt0 = nodepoints[ropeseq[0]]
+		var vec = nodepoints[ropeseq[-1]] - rpt0
+		var H = Vector2(vec.x, vec.z).length()
+		var q = vec.y/H
+		var a = paraba(L/H, q)
+		var N = max(L/0.2, 4)
+		var rpts = [ ]
+		for i in range(N+1):
+			var x = i/N
+			var y = x*x*a + x*(q-a)
+			rpts.push_back(Vector3(rpt0.x + x*vec.x, rpt0.y + y*L, rpt0.z + x*vec.z))
+		
+		var p0 = rpts[0]
+		var p1 = rpts[1]
+		var perp0 = Vector3(-(p1.y - p0.y), p1.x - p0.x, 0).normalized()
+		var fperp0 = linewidth*perp0
+		var p0left = p0 - fperp0
+		var p0right = p0 + fperp0
+		var p0u = 0.0
+		var perp1 = perp0
+		for i in range(1, len(rpts)):
+			var p1u = p0u + (p1-p0).length()
+			var p2 = null
+			var perp2 = null
+			if i+1 < len(rpts):
+				p2 = rpts[i+1]
+				perp2 = Vector3(-(p2.y - p1.y), p2.x - p1.x, 0).normalized()
+				perp1 = (perp0+perp2).normalized()
+			var fperp1 = linewidth*perp1
+			var p1left = p1 - fperp1
+			var p1right = p1 + fperp1
+			surfaceTool.add_uv(Vector2(p0u*uvfacx, 0.0))
+			surfaceTool.add_vertex(p0left)
+			surfaceTool.add_uv(Vector2(p1u*uvfacx, 0.0))
+			surfaceTool.add_vertex(p1left)
+			surfaceTool.add_uv(Vector2(p0u*uvfacx, uvfacy))
+			surfaceTool.add_vertex(p0right)
+			surfaceTool.add_uv(Vector2(p0u*uvfacx, uvfacy))
+			surfaceTool.add_vertex(p0right)
+			surfaceTool.add_uv(Vector2(p1u*uvfacx, 0.0))
+			surfaceTool.add_vertex(p1left)
+			surfaceTool.add_uv(Vector2(p1u*uvfacx, uvfacy))
+			surfaceTool.add_vertex(p1right)
+			
+			p0 = p1
+			p1 = p2
+			p0left = p1left
+			p0right = p1right
+			perp1 = perp2
+			p0u = p1u
+
+	surfaceTool.generate_normals()
+	var newmesh = surfaceTool.commit()
+	$PathLines.mesh = newmesh
+	var materialsystem = get_node("/root/Spatial/MaterialSystem")
+	$PathLines.set_surface_material(0, materialsystem.pathlinematerial("rope"))
+	return middlenodes
+
+func updatelinearropepaths():
+	var middlenodes = [ ]
+	if len(onepathpairs) == 0:
+		$PathLines.mesh = null
+		return middlenodes
 	var ropesequences = Polynets.makeropenodesequences(nodepoints, onepathpairs)
 	var surfaceTool = SurfaceTool.new()
 	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
@@ -408,6 +512,7 @@ func updateropepaths(hangingarc):
 			var p2 = null
 			var perp2 = null
 			if i+1 < len(ropeseq):
+				middlenodes.push_back(ropeseq[i])
 				p2 = nodepoints[ropeseq[i+1]]
 				perp2 = Vector3(-(p2.y - p1.y), p2.x - p1.x, 0).normalized()
 				perp1 = (perp0+perp2).normalized()
@@ -439,6 +544,7 @@ func updateropepaths(hangingarc):
 	$PathLines.mesh = newmesh
 	var materialsystem = get_node("/root/Spatial/MaterialSystem")
 	$PathLines.set_surface_material(0, materialsystem.pathlinematerial("rope"))
+	return middlenodes
 
 		
 func updatexcpaths():
