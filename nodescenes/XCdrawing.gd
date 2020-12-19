@@ -480,19 +480,25 @@ func updatehangingropepaths():
 		var rptF = nodepoints[ropeseq[-1]]		
 		var vec = rptF - rpt0
 		var H = Vector2(vec.x, vec.z).length()
-		if H > 0.01:
+		var rpts = [ ]
+		var hangperpvec
+		if H < 0.01:
+			rpts = [rpt0, rptF]
+			hangperpvec = Vector3(1,0,0)
+		elif len(ropeseq) == 2:
+			rpts = [rpt0, rptF]
+			hangperpvec = Vector3(vec.z, 0, -vec.x)/H
+		else:
+			hangperpvec = Vector3(vec.z, 0, -vec.x)/H
 			var q = vec.y/H
 			var a = paraba(L/H, q)
 			var N = int(max(L/0.1, 4))
-			var rpts = [ ]
+			rpts = [ ]
 			for i in range(N+1):
 				var x = i*1.0/N
 				var y = x*x*a + x*(q-a)
 				rpts.push_back(Vector3(rpt0.x + x*vec.x, rpt0.y + y*H, rpt0.z + x*vec.z))
-			var hangperpvec = Vector3(vec.z, 0, -vec.x)/H
-			ropeseqtubesurface(surfaceTool, rpts, hangperpvec, linewidth/2, L)
-		else:
-			ropeseqtubesurface(surfaceTool, [rpt0, rptF], Vector3(1,0,0), linewidth/2, L)
+		ropeseqtubesurface(surfaceTool, rpts, hangperpvec, linewidth/2, L)
 	surfaceTool.generate_normals()
 	var newmesh = surfaceTool.commit()
 	$PathLines.mesh = newmesh
