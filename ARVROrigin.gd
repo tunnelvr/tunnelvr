@@ -186,7 +186,7 @@ func laserpointerdict():
 
 var footstepcount = 0
 func puppetbodydict():
-	return { "playertransform":global_transform, 
+	return { "playertransform":transform, 
 			 "headcamtransform":$HeadCam.transform, 
 			 "footstepcount":footstepcount }
 

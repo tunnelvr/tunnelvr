@@ -1297,10 +1297,8 @@ albedo_color = Color( 0.168627, 0.972549, 0.027451, 1 )
 
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
-enablevr = false
 
 [node name="Players" type="Spatial" parent="."]
-transform = Transform( -1, 0, -3.25841e-07, 0, 1, 0, 3.25841e-07, 0, -1, 0, 0, 0 )
 
 [node name="PlayerMe" type="ARVROrigin" parent="Players"]
 transform = Transform( -0.999994, 0, 0.00336815, 0, 1, 0, -0.00336815, 0, -0.999994, 5.95264e-10, 2, 6.412 )
@@ -1401,7 +1399,7 @@ mesh = SubResource( 8 )
 material/0 = SubResource( 9 )
 
 [node name="GuiSystem" type="Spatial" parent="."]
-transform = Transform( 0.999994, 0, -0.00336782, 0, 1, 0, 0.00336782, 0, 0.999994, -2.08989e-06, 2, -6.412 )
+transform = Transform( -0.999994, 0, 0.00336804, 0, 1, 0, -0.00336804, 0, -0.999994, 5.95264e-10, 2, 6.412 )
 
 [node name="GUIPanel3D" type="StaticBody" parent="GuiSystem"]
 visible = false

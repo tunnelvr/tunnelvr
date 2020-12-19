@@ -195,7 +195,7 @@ func process_puppetpositionstack(delta):
 	var pp = puppetpositionstack[0]
 	if len(puppetpositionstack) == 1:
 		if pp.has("playertransform"):
-			global_transform = pp["playertransform"]
+			transform = pp["playertransform"]
 		if pp.has("headcamtransform"):
 			$HeadCam.transform = Transform(pp["headcamtransform"].basis.scaled(Vector3(playerscale, playerscale, playerscale)), pp["headcamtransform"].origin)
 			$headlocator.transform.origin = $HeadCam.transform.origin
@@ -207,10 +207,10 @@ func process_puppetpositionstack(delta):
 		var Dx = ""
 		if pp.has("playertransform") and pp1.has("playertransform"):
 			Dx = var2str(pp["playertransform"].basis)
-			global_transform = Transform(pp["playertransform"].basis.slerp(pp1["playertransform"].basis, lam), 
-										 lerp(pp["playertransform"].origin, pp1["playertransform"].origin, lam))
+			transform = Transform(pp["playertransform"].basis.slerp(pp1["playertransform"].basis, lam), 
+								  lerp(pp["playertransform"].origin, pp1["playertransform"].origin, lam))
 			if Quat(pp["playertransform"].basis) == Quat(0,0,0,1):
-				print("Baaad ", Dx)
+				print("Baaad ", Dx, pp1["playertransform"].basis, lam)
 		if pp.has("headcamtransform") and pp1.has("headcamtransform"):
 			Dx = var2str(pp["headcamtransform"].basis)
 			$HeadCam.transform = Transform(pp["headcamtransform"].basis.slerp(pp1["headcamtransform"].basis, lam).scaled(Vector3(playerscale, playerscale, playerscale)), 

@@ -27,6 +27,7 @@ func setasaudienceofpuppet(playerpuppet, puppetheadtrans, lforceontogroundtimedo
 	var cenpos = puppetheadtrans.origin - veceyes*(playeraudiencedistance*0.5)*playerpuppet.playerscale
 	var playerlam = (playerMe.networkID%10000)/10000.0
 	var playerheadbasis = puppetheadtrans.basis.rotated(Vector3(0,1,0), deg2rad(180))
+	print("playerheadbasisplayerheadbasis ", playerheadbasis.determinant())
 	var playerheadpos = cenpos - veceyes*(playeraudiencedistance*0.5)*playerMe.playerscale + \
 								 vecperp*(playerlam-0.5)*2*playeraudiencesidedisplacement
 	#  Solve: headtrans = playerMe.global_transform * playerMe.get_node("HeadCam").transform 

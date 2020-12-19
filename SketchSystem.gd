@@ -331,7 +331,8 @@ remote func actsketchchangeL(xcdatalist):
 
 	for xcdrawing in xcdrawingstoupdate.values():
 		if xcdrawing.drawingtype == DRAWING_TYPE.DT_ROPEHANG:
-			xcdrawing.updatelinearropepaths()
+			if xcdrawing.drawingvisiblecode != DRAWING_TYPE.VIZ_XCD_HIDE:
+				xcdrawing.updatelinearropepaths()
 		else:
 			xcdrawing.updatexcpaths()
 
@@ -346,6 +347,8 @@ remote func actsketchchangeL(xcdatalist):
 		for xcdrawing in xcdrawingstoupdate.values():
 			if xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 				xcdrawing.setdrawingvisiblecode(DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE if len(xcdrawing.xctubesconn) == 0 else DRAWING_TYPE.VIZ_XCD_HIDE)
+			#elif xcdrawing.drawingtype == DRAWING_TYPE.DT_ROPEHANG:
+			#	xcdrawing.setdrawingvisiblecode(DRAWING_TYPE.VIZ_XCD_HIDE)
 		for xctube in xctubestoupdate.values():
 			if $XCdrawings.get_node(xctube.xcname0).drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 				xctube.updatetubeshell($XCdrawings)

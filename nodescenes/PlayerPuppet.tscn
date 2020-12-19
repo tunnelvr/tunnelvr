@@ -204,7 +204,7 @@ mesh = SubResource( 5 )
 material/0 = SubResource( 6 )
 
 [node name="SpotLight" type="SpotLight" parent="HeadCam/headtorchcone/headtorchon"]
-transform = Transform( 1, 0, 0, 0, -1.62921e-07, 1, 0, -1, -1.62921e-07, 0, 0, 0 )
+transform = Transform( 1, 0, 0, 0, -1.62921e-07, 1, 0, -1, -1.62921e-07, 0, -0.02, 0 )
 light_energy = 1.06
 light_indirect_energy = 7.26
 shadow_enabled = true

@@ -7,9 +7,13 @@ extends EditorScript
 
 
 func _run():
-	var x = {"a":9, "b":10}
-	for y in x:
-		print(y)
+	var b = str2var(" Basis( -0.993549, -0.00992271, -0.113034, -0.010347, 0.999949, 0.0031679, 0.112995, 0.00431701, -0.993586 )")
+	var b1 = str2var("Basis(0.007083, 0.000063, 1, -0.01082, 0.999941, 0.000014, -0.999916, -0.010821, 0.007083 )")
+# ((0.007083, 0.000063, 1), (-0.01082, 0.999941, 0.000014), (-0.999916, -0.010821, 0.007083))0.01125
+	print(b.orthonormalized().slerp(b1.orthonormalized(), 0.1))
+	#print(b.get_rotation_quat())
+	print(b.determinant())
+	print(b1.determinant())
 	
 var zi = [ ]
 var zi1 = [ 0.48, 0.66 ]

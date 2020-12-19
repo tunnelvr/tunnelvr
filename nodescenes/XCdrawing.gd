@@ -371,11 +371,6 @@ func mergexcrpcdata(xcdata):
 			onepathpairs[j] = onepathpairs[-2]
 			onepathpairs[j+1] = onepathpairs[-1]
 
-	if drawingtype == DRAWING_TYPE.DT_ROPEHANG:
-		updatelinearropepaths()
-	else:
-		updatexcpaths()
-		
 	if "drawingvisiblecode" in xcdata or "visible" in xcdata:
 		if not ("drawingvisiblecode" in xcdata):
 			if drawingtype == DRAWING_TYPE.DT_XCDRAWING:
@@ -385,6 +380,8 @@ func mergexcrpcdata(xcdata):
 			elif drawingtype == DRAWING_TYPE.DT_CENTRELINE:
 				xcdata["drawingvisiblecode"] = DRAWING_TYPE.VIZ_XCD_HIDE
 		setdrawingvisiblecode(xcdata["drawingvisiblecode"])
+	if drawingtype != DRAWING_TYPE.DT_ROPEHANG:
+		updatexcpaths()
 	
 func setxcnpoint(xcn, pt, planar):
 	xcn.global_transform.origin = pt
