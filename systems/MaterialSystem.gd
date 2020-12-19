@@ -30,6 +30,9 @@ func lasermaterial(mtype):
 	var mm = $lasermaterial.get_node(mtype)
 	return mm.get_surface_material(0)
 
+func lasermaterialN(itype):
+	return lasermaterial(["spot", "spotselected", "spotinair", "spotselectedinair"][itype])
+
 func pathlinematerial(mtype):
 	var mm = $pathlines.get_node(mtype)
 	return mm.get_surface_material(0)

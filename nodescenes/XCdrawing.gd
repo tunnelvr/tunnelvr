@@ -418,6 +418,49 @@ func paraba(L, q):
 	var ya = 0.014515220403965912 + q*0.005970564724231822 + qsq*(-0.00083630038220914)
 	return (-yb + sqrt(yb*yb - 4*ya*(yc-L)))/(2*ya)
 
+func genrpsquare(p, valong, hv, rad):
+	var pv = -hv.cross(valong)
+	var ps = p+pv*rad+hv*rad
+	return [ ps, p+pv*rad-hv*rad, p-pv*rad-hv*rad, p-pv*rad+hv*rad, ps ]
+
+func ropeseqtubesurface(surfaceTool, rpts, hangperpvec, rad, L):
+	var p0 = rpts[0]
+	var p1 = rpts[1]
+	var v0 = (p1 - p0).normalized()
+	var rps0 = genrpsquare(p0, v0, hangperpvec, rad)
+	var rtexv = [ 0.0, 0.25, 0.5, 0.75, 1.0 ]
+	var p0u = 0.0
+	var v1 = v0
+	for i in range(1, len(rpts)):
+		var p1u = p0u + (p1-p0).length()*uvfacx
+		var p2 = null
+		var v2 = null
+		if i+1 < len(rpts):
+			p2 = rpts[i+1]
+			v2 = (p2 - p1).normalized()
+			v1 = (v0 + v2).normalized()
+		var rps1 = genrpsquare(p1, v1, hangperpvec, rad)
+		for j in range(len(rtexv)-1):
+			surfaceTool.add_uv(Vector2(p0u, rtexv[j]))
+			surfaceTool.add_vertex(rps0[j])
+			surfaceTool.add_uv(Vector2(p1u, rtexv[j]))
+			surfaceTool.add_vertex(rps1[j])
+			surfaceTool.add_uv(Vector2(p0u, rtexv[j+1]))
+			surfaceTool.add_vertex(rps0[j+1])
+			surfaceTool.add_uv(Vector2(p0u, rtexv[j+1]))
+			surfaceTool.add_vertex(rps0[j+1])
+			surfaceTool.add_uv(Vector2(p1u, rtexv[j]))
+			surfaceTool.add_vertex(rps1[j])
+			surfaceTool.add_uv(Vector2(p1u, rtexv[j+1]))
+			surfaceTool.add_vertex(rps1[j+1])
+		
+		p0 = p1
+		p1 = p2
+		rps0 = rps1
+		v1 = v2
+		p0u = p1u
+	print("ropelength L=", L, " curveL=", p0u/uvfacx)
+
 func updatehangingropepaths():
 	var middlenodes = [ ]
 	if len(onepathpairs) == 0:
@@ -431,58 +474,25 @@ func updatehangingropepaths():
 		var L = 0.0
 		for i in range(1, len(ropeseq)):
 			L += (nodepoints[ropeseq[i-1]] - nodepoints[ropeseq[i]]).length()
-			middlenodes.push_back(ropeseq[i])
+			if i != len(ropeseq)-1:
+				middlenodes.push_back(ropeseq[i])
 		var rpt0 = nodepoints[ropeseq[0]]
-		var vec = nodepoints[ropeseq[-1]] - rpt0
+		var rptF = nodepoints[ropeseq[-1]]		
+		var vec = rptF - rpt0
 		var H = Vector2(vec.x, vec.z).length()
-		var q = vec.y/H
-		var a = paraba(L/H, q)
-		var N = max(L/0.2, 4)
-		var rpts = [ ]
-		for i in range(N+1):
-			var x = i/N
-			var y = x*x*a + x*(q-a)
-			rpts.push_back(Vector3(rpt0.x + x*vec.x, rpt0.y + y*L, rpt0.z + x*vec.z))
-		
-		var p0 = rpts[0]
-		var p1 = rpts[1]
-		var perp0 = Vector3(-(p1.y - p0.y), p1.x - p0.x, 0).normalized()
-		var fperp0 = linewidth*perp0
-		var p0left = p0 - fperp0
-		var p0right = p0 + fperp0
-		var p0u = 0.0
-		var perp1 = perp0
-		for i in range(1, len(rpts)):
-			var p1u = p0u + (p1-p0).length()
-			var p2 = null
-			var perp2 = null
-			if i+1 < len(rpts):
-				p2 = rpts[i+1]
-				perp2 = Vector3(-(p2.y - p1.y), p2.x - p1.x, 0).normalized()
-				perp1 = (perp0+perp2).normalized()
-			var fperp1 = linewidth*perp1
-			var p1left = p1 - fperp1
-			var p1right = p1 + fperp1
-			surfaceTool.add_uv(Vector2(p0u*uvfacx, 0.0))
-			surfaceTool.add_vertex(p0left)
-			surfaceTool.add_uv(Vector2(p1u*uvfacx, 0.0))
-			surfaceTool.add_vertex(p1left)
-			surfaceTool.add_uv(Vector2(p0u*uvfacx, uvfacy))
-			surfaceTool.add_vertex(p0right)
-			surfaceTool.add_uv(Vector2(p0u*uvfacx, uvfacy))
-			surfaceTool.add_vertex(p0right)
-			surfaceTool.add_uv(Vector2(p1u*uvfacx, 0.0))
-			surfaceTool.add_vertex(p1left)
-			surfaceTool.add_uv(Vector2(p1u*uvfacx, uvfacy))
-			surfaceTool.add_vertex(p1right)
-			
-			p0 = p1
-			p1 = p2
-			p0left = p1left
-			p0right = p1right
-			perp1 = perp2
-			p0u = p1u
-
+		if H > 0.01:
+			var q = vec.y/H
+			var a = paraba(L/H, q)
+			var N = int(max(L/0.1, 4))
+			var rpts = [ ]
+			for i in range(N+1):
+				var x = i*1.0/N
+				var y = x*x*a + x*(q-a)
+				rpts.push_back(Vector3(rpt0.x + x*vec.x, rpt0.y + y*H, rpt0.z + x*vec.z))
+			var hangperpvec = Vector3(vec.z, 0, -vec.x)/H
+			ropeseqtubesurface(surfaceTool, rpts, hangperpvec, linewidth/2, L)
+		else:
+			ropeseqtubesurface(surfaceTool, [rpt0, rptF], Vector3(1,0,0), linewidth/2, L)
 	surfaceTool.generate_normals()
 	var newmesh = surfaceTool.commit()
 	$PathLines.mesh = newmesh

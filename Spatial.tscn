@@ -1,4 +1,4 @@
-[gd_scene load_steps=246 format=2]
+[gd_scene load_steps=248 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/default_env.tres" type="Environment" id=2]
@@ -827,6 +827,30 @@ metallic_specular = 0.67
 roughness = 0.37
 emission_enabled = true
 emission = Color( 0.976471, 0.862745, 0.333333, 1 )
+emission_energy = 0.5
+emission_operator = 0
+emission_on_uv2 = false
+
+[sub_resource type="SpatialMaterial" id=197]
+flags_disable_ambient_light = true
+albedo_color = Color( 0.027451, 0.219608, 0.980392, 1 )
+metallic = 0.52
+metallic_specular = 0.67
+roughness = 0.37
+emission_enabled = true
+emission = Color( 0.976471, 0.862745, 0.333333, 1 )
+emission_energy = 0.5
+emission_operator = 0
+emission_on_uv2 = false
+
+[sub_resource type="SpatialMaterial" id=196]
+flags_disable_ambient_light = true
+albedo_color = Color( 0.126892, 0.211707, 0.902344, 1 )
+metallic = 0.52
+metallic_specular = 0.67
+roughness = 0.37
+emission_enabled = true
+emission = Color( 0.0901961, 0.101961, 0.807843, 1 )
 emission_energy = 0.5
 emission_operator = 0
 emission_on_uv2 = false
@@ -2845,6 +2869,16 @@ material/0 = null
 transform = Transform( 1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, -0.610968, 0, 0 )
 mesh = SubResource( 132 )
 material/0 = SubResource( 133 )
+
+[node name="spotselectedinair" type="MeshInstance" parent="MaterialSystem/lasermaterial"]
+transform = Transform( 1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, -0.610968, 0, 0 )
+mesh = SubResource( 132 )
+material/0 = SubResource( 197 )
+
+[node name="spotinair" type="MeshInstance" parent="MaterialSystem/lasermaterial"]
+transform = Transform( 1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, -0.610968, 0, 0 )
+mesh = SubResource( 132 )
+material/0 = SubResource( 196 )
 
 [node name="spike" type="MeshInstance" parent="MaterialSystem/lasermaterial"]
 transform = Transform( 1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, 0, 0.07, -0.07 )

@@ -127,7 +127,10 @@ func clearactivetargetnode():
 			activetargetnode.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial(clearednodematerialtype(activetargetnode, activetargetnodewall == activetargetwall)))
 	activetargetnode = null
 	activetargetnodewall = null
-	activelaserroot.get_node("LaserSpot").set_surface_material(0, materialsystem.lasermaterial("spot"))
+	activelaserroot.get_node("LaserSpot").set_surface_material(0, materialsystem.lasermaterialN((1 if activetargetnode != null else 0) + (2 if pointertarget == null else 0)))
+
+	activelaserroot.get_node("LaserSpot").set_surface_material(0, materialsystem.lasermaterialN((1 if activetargetnode != null else 0) + (2 if pointertarget == null else 0)))
+
 	
 func setactivetargetnode(newactivetargetnode):
 	clearactivetargetnode()
@@ -136,7 +139,7 @@ func setactivetargetnode(newactivetargetnode):
 	activetargetnodewall = targetwall(activetargetnode, "XCnode")
 	if activetargetnode != pointertarget:
 		activetargetnode.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("selected"))
-	activelaserroot.get_node("LaserSpot").set_surface_material(0, materialsystem.lasermaterial("spotselected"))
+	activelaserroot.get_node("LaserSpot").set_surface_material(0, materialsystem.lasermaterialN((1 if activetargetnode != null else 0) + (2 if pointertarget == null else 0)))
 	setpointertargetmaterial()
 
 func raynormalcollisionmask():
@@ -227,9 +230,15 @@ func clearpointertarget():
 	pointertargettype = "none"
 	pointertargetwall = null
 
+func set_handflickmotiongestureposition(lhandflickmotiongestureposition):
+	Tglobal.handflickmotiongestureposition = lhandflickmotiongestureposition
+	if Tglobal.handflickmotiongestureposition == 0:
+		activelaserroot.get_node("LaserSpot").visible = false
+	elif Tglobal.handflickmotiongestureposition == 1:
+		activelaserroot.get_node("LaserSpot").set_surface_material(0, materialsystem.lasermaterialN((1 if activetargetnode != null else 0) + 2))
+
 func setpointertarget(laserroot, raycast, pointertargetshortdistance):
 	var newpointertarget = raycast.get_collider() if raycast != null else null
-	var pointertargetchanged = (newpointertarget != pointertarget)
 	if newpointertarget != null:
 		if newpointertarget.is_queued_for_deletion():
 			newpointertarget = null
@@ -246,9 +255,11 @@ func setpointertarget(laserroot, raycast, pointertargetshortdistance):
 			if pointertargetdistance > pointertargetshortdistance:
 				newpointertargetpoint = raycast.global_transform.origin + (-raycast.global_transform.basis.z)*pointertargetshortdistance
 				newpointertarget = null
+				
 	elif pointertargetshortdistance != -1.0:
 		newpointertargetpoint = raycast.global_transform.origin + (-raycast.global_transform.basis.z)*pointertargetshortdistance
-	if pointertargetchanged:
+
+	if newpointertarget != pointertarget:
 		if pointertarget == guipanel3d:
 			guipanel3d.guipanelreleasemouse()
 		clearpointertargetmaterial()
@@ -263,7 +274,8 @@ func setpointertarget(laserroot, raycast, pointertargetshortdistance):
 												  (pointertargettype == "XCflatshell") or \
 												  (pointertargettype == "IntermediatePointView") or \
 												  (pointertargettype == "none" and pointertargetshortdistance != -1.0)
-		
+		laserroot.get_node("LaserSpot").set_surface_material(0, materialsystem.lasermaterialN((1 if activetargetnode != null else 0) + (2 if pointertarget == null else 0)))
+			
 		if activetargetnode != null and pointertargetwall != null:
 			if activetargetnodewall.drawingtype == DRAWING_TYPE.DT_CENTRELINE:
 				LaserSelectLine.visible = pointertargetwall != null and pointertargettype == "XCdrawing" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE
@@ -1169,9 +1181,9 @@ func buttonreleased_vrtrigger():
 func _physics_process(delta):
 	if playerMe.handflickmotiongesture != 0:
 		if playerMe.handflickmotiongesture == 1:
-			Tglobal.handflickmotiongestureposition = min(Tglobal.handflickmotiongestureposition+1, handflickmotiongestureposition_gone)
+			set_handflickmotiongestureposition(min(Tglobal.handflickmotiongestureposition+1, handflickmotiongestureposition_gone))
 		else:
-			Tglobal.handflickmotiongestureposition = 0
+			set_handflickmotiongestureposition(0)
 		playerMe.get_node("HandRight/PalmLight").visible = (Tglobal.handflickmotiongestureposition == handflickmotiongestureposition_gone)
 		playerMe.handflickmotiongesture = 0
 		
@@ -1239,7 +1251,7 @@ func _input(event):
 			if event.pressed:
 				buttonpressed_vrby(false)	
 		if event.pressed and event.scancode == KEY_H:
-			Tglobal.handflickmotiongestureposition = handflickmotiongestureposition_shortpos if Tglobal.handflickmotiongestureposition == handflickmotiongestureposition_normal else handflickmotiongestureposition_normal
+			set_handflickmotiongestureposition(handflickmotiongestureposition_shortpos if Tglobal.handflickmotiongestureposition == handflickmotiongestureposition_normal else handflickmotiongestureposition_normal)
 
 	elif Input.get_mouse_mode() != Input.MOUSE_MODE_CAPTURED:
 		pass
