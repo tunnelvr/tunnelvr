@@ -82,17 +82,17 @@ albedo_color = Color( 0.0705882, 0.0862745, 0.0980392, 1 )
 metallic = 0.43
 roughness = 0.66
 
-[sub_resource type="PrismMesh" id=21]
+[sub_resource type="PrismMesh" id=18]
 left_to_right = 0.1
 size = Vector3( 0.1, 0.2, 0.1 )
 
-[sub_resource type="SpatialMaterial" id=22]
+[sub_resource type="SpatialMaterial" id=19]
 flags_do_not_receive_shadows = true
 albedo_color = Color( 0.341176, 0.411765, 0.976471, 1 )
 metallic = 0.41
 roughness = 0.45
 
-[sub_resource type="Animation" id=18]
+[sub_resource type="Animation" id=20]
 length = 0.3
 tracks/0/type = "value"
 tracks/0/path = NodePath("HeadCam/headtorchcone/Inset:material/0:emission")
@@ -107,7 +107,7 @@ tracks/0/keys = {
 "values": [ Color( 0.0509804, 0.14902, 0.960784, 1 ), Color( 0.945098, 0.898039, 0.203922, 1 ) ]
 }
 
-[sub_resource type="Animation" id=19]
+[sub_resource type="Animation" id=21]
 length = 0.3
 tracks/0/type = "value"
 tracks/0/path = NodePath("HeadCam/headtorchcone:material:albedo_color")
@@ -134,7 +134,7 @@ tracks/1/keys = {
 "values": [ Vector3( 2, 1, 2 ), Vector3( 1, 1, 1 ) ]
 }
 
-[sub_resource type="Animation" id=20]
+[sub_resource type="Animation" id=22]
 length = 0.8
 tracks/0/type = "value"
 tracks/0/path = NodePath("HeadCam/headtorchcone:material:albedo_color")
@@ -304,14 +304,14 @@ cast_shadow = 0
 [node name="floororigin" type="MeshInstance" parent="GuardianPoly"]
 transform = Transform( -1.62921e-07, 0, 1, 0, 1, 0, -1, 0, -1.62921e-07, 0, 0.3, 0 )
 cast_shadow = 0
-mesh = SubResource( 21 )
-material/0 = SubResource( 22 )
+mesh = SubResource( 18 )
+material/0 = SubResource( 19 )
 
 [node name="AnimationPlayer_setavatarposition_flash" type="AnimationPlayer" parent="."]
-anims/setavatarposition_flash = SubResource( 18 )
+anims/setavatarposition_flash = SubResource( 20 )
 
 [node name="AnimationPlayer_actsketchchange" type="AnimationPlayer" parent="."]
-anims/actsketchchange_flash = SubResource( 19 )
+anims/actsketchchange_flash = SubResource( 21 )
 
 [node name="AnimationPlayer_actsketchchange_fixbad" type="AnimationPlayer" parent="."]
-anims/actsketchchange_flash = SubResource( 20 )
+anims/actsketchchange_flash = SubResource( 22 )

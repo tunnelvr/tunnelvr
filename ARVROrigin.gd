@@ -251,6 +251,11 @@ func _process(delta):
 			#$HeadCam.rotation_degrees.y = 0
 			$HeadCam.rotation_degrees.x = clamp($HeadCam.rotation_degrees.x + 90*delta*lhkeyvec.y, -89, 89)
 
+			var duckrise = 0
+			if Input.is_action_pressed("lh_duck"):  duckrise += -1
+			if Input.is_action_pressed("lh_rise"):  duckrise += 1
+			$HeadCam.translation.y = clamp($HeadCam.translation.y + duckrise*delta*1.1, 0.4, 1.8)
+
 		$HandRight.process_keyboardcontroltracking($HeadCam, Vector2(hx*0.033, 0), playerscale)
 	if $HandRight.pointervalid:
 		LaserOrient.global_transform = global_transform*$HandRight.pointerposearvrorigin

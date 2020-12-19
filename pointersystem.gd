@@ -378,10 +378,8 @@ func _on_button_release(p_button):
 
 	
 func buttonreleased_vrby():
-	print("we don't get here and I don't know why")
 	if playerMe.ovr_guardian_system != null:
 		playerMe.ovr_guardian_system.request_boundary_visible(false)
-
 
 func buttonpressed_vrby(gripbuttonheld):
 	#if playerMe.ovr_guardian_system != null:
