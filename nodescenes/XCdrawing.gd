@@ -104,7 +104,7 @@ func setdrawingvisiblecode(ldrawingvisiblecode):
 	elif drawingtype == DRAWING_TYPE.DT_ROPEHANG:
 		var hidenodeshang = ((drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE) == 0)
 		if hidenodeshang:
-			var middlenodes = updatehangingropepaths()
+			var middlenodes = updatehangingropepathsArrayMesh()
 			for xcn in $XCnodes.get_children():
 				xcn.visible = ((xcn.get_name()[0] == "a") or (middlenodes.find(xcn.get_name()) == -1))
 				xcn.get_node("CollisionShape").disabled = not xcn.visible
@@ -415,18 +415,22 @@ func paraba(L, q):
 	var ya = 0.014515220403965912 + q*0.005970564724231822 + qsq*(-0.00083630038220914)
 	return (-yb + sqrt(yb*yb - 4*ya*(yc-L)))/(2*ya)
 
-func genrpsquare(p, valong, hv, rad):
+func genrpsquareAM(verts, uvs, normals, p, vtexv, valong, hv, rad):
 	var pv = -hv.cross(valong)
-	var ps = p+pv*rad+hv*rad
-	return [ ps, p+pv*rad-hv*rad, p-pv*rad-hv*rad, p-pv*rad+hv*rad, ps ]
+	var pdirs = [ pv+hv, pv-hv, -pv-hv, -pv+hv ]
+	for i in range(4):
+		verts.append(p+pdirs[i]*rad)
+		normals.append(pdirs[i].normalized())
+		uvs.append(Vector2(i/4.0, vtexv))
 
-func ropeseqtubesurface(surfaceTool, rpts, hangperpvec, rad, L):
+const cN = 4
+func ropeseqtubesurfaceArrayMesh(verts, uvs, normals, indices, rpts, hangperpvec, rad, L):
 	var p0 = rpts[0]
 	var p1 = rpts[1]
 	var v0 = (p1 - p0).normalized()
-	var rps0 = genrpsquare(p0, v0, hangperpvec, rad)
-	var rtexv = [ 0.0, 0.25, 0.5, 0.75, 1.0 ]
 	var p0u = 0.0
+	var inoff = len(verts)
+	genrpsquareAM(verts, uvs, normals, p0, p0u, v0, hangperpvec, rad)
 	var v1 = v0
 	for i in range(1, len(rpts)):
 		var p1u = p0u + (p1-p0).length()*uvfacx
@@ -436,37 +440,33 @@ func ropeseqtubesurface(surfaceTool, rpts, hangperpvec, rad, L):
 			p2 = rpts[i+1]
 			v2 = (p2 - p1).normalized()
 			v1 = (v0 + v2).normalized()
-		var rps1 = genrpsquare(p1, v1, hangperpvec, rad)
-		for j in range(len(rtexv)-1):
-			surfaceTool.add_uv(Vector2(p0u, rtexv[j]))
-			surfaceTool.add_vertex(rps0[j])
-			surfaceTool.add_uv(Vector2(p1u, rtexv[j]))
-			surfaceTool.add_vertex(rps1[j])
-			surfaceTool.add_uv(Vector2(p0u, rtexv[j+1]))
-			surfaceTool.add_vertex(rps0[j+1])
-			surfaceTool.add_uv(Vector2(p0u, rtexv[j+1]))
-			surfaceTool.add_vertex(rps0[j+1])
-			surfaceTool.add_uv(Vector2(p1u, rtexv[j]))
-			surfaceTool.add_vertex(rps1[j])
-			surfaceTool.add_uv(Vector2(p1u, rtexv[j+1]))
-			surfaceTool.add_vertex(rps1[j+1])
+		genrpsquareAM(verts, uvs, normals, p1, p1u, v1, hangperpvec, rad)
+		for j in range(cN):
+			var j1 = (j+1)%cN
+			indices.append(inoff + (i-1)*cN + j)
+			indices.append(inoff + i*cN + j)
+			indices.append(inoff + i*cN + j1)
+			indices.append(inoff + (i-1)*cN + j)
+			indices.append(inoff + i*cN + j1)
+			indices.append(inoff + (i-1)*cN + j1)
 		
 		p0 = p1
 		p1 = p2
-		rps0 = rps1
 		v1 = v2
 		p0u = p1u
 	print("ropelength L=", L, " curveL=", p0u/uvfacx)
 
-func updatehangingropepaths():
+func updatehangingropepathsArrayMesh():
 	var middlenodes = [ ]
 	if len(onepathpairs) == 0:
 		$PathLines.mesh = null
 		return middlenodes
-
+	var verts = [] 
+	var uvs = []
+	var normals = []
+	var indices = []
+	
 	var ropesequences = Polynets.makeropenodesequences(nodepoints, onepathpairs)
-	var surfaceTool = SurfaceTool.new()
-	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
 	for ropeseq in ropesequences:
 		var L = 0.0
 		for i in range(1, len(ropeseq)):
@@ -495,13 +495,22 @@ func updatehangingropepaths():
 				var x = i*1.0/N
 				var y = x*x*a + x*(q-a)
 				rpts.push_back(Vector3(rpt0.x + x*vec.x, rpt0.y + y*H, rpt0.z + x*vec.z))
-		ropeseqtubesurface(surfaceTool, rpts, hangperpvec, linewidth/2, L)
-	surfaceTool.generate_normals()
-	var newmesh = surfaceTool.commit()
-	$PathLines.mesh = newmesh
+		ropeseqtubesurfaceArrayMesh(verts, uvs, normals, indices, rpts, hangperpvec, linewidth/2, L)
+
+	var arr = []
+	arr.resize(Mesh.ARRAY_MAX)
+	arr[Mesh.ARRAY_VERTEX] = PoolVector3Array(verts)
+	arr[Mesh.ARRAY_TEX_UV] = PoolVector2Array(uvs)
+	arr[Mesh.ARRAY_NORMAL] = PoolVector3Array(normals)
+	arr[Mesh.ARRAY_INDEX] = PoolIntArray(indices)
+	var arr_mesh = ArrayMesh.new()
+	arr_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+	$PathLines.mesh = arr_mesh
+	
 	var materialsystem = get_node("/root/Spatial/MaterialSystem")
 	$PathLines.set_surface_material(0, materialsystem.pathlinematerial("rope"))
 	return middlenodes
+
 
 func updatelinearropepaths():
 	var middlenodes = [ ]
