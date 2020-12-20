@@ -2,6 +2,7 @@ extends Spatial
 
 const XCdrawing = preload("res://nodescenes/XCdrawing.tscn")
 const XCtube = preload("res://nodescenes/XCtube.tscn")
+const RopeHang = preload("res://nodescenes/RopeHang.tscn")
 
 const linewidth = 0.05
 
@@ -584,7 +585,8 @@ func newXCuniquedrawing(drawingtype, sname):
 		xcdrawing.drawingvisiblecode = DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE
 		var materialsystem = get_node("/root/Spatial/MaterialSystem")
 		#xcdrawing.get_node("PathLines").set_surface_material(0, materialsystem.pathlinematerial("rope"))
-		xcdrawing.get_node("PathLines").cast_shadow = true
+		#xcdrawing.get_node("PathLines").cast_shadow = true
+		xcdrawing.add_child(RopeHang.instance())
 		
 	elif drawingtype == DRAWING_TYPE.DT_CENTRELINE:
 		var xcnodesplanview = Spatial.new()
