@@ -1,4 +1,4 @@
-[gd_scene load_steps=248 format=2]
+[gd_scene load_steps=249 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/default_env.tres" type="Environment" id=2]
@@ -29,6 +29,7 @@
 [ext_resource path="res://lightweighttextures/simpledirt_highlight.material" type="Material" id=27]
 [ext_resource path="res://sounds/sfx_step_grass_l.wav" type="AudioStream" id=28]
 [ext_resource path="res://lightweighttextures/seamlesspebbles1.jpg" type="Texture" id=29]
+[ext_resource path="res://VerletRopeSystem.gd" type="Script" id=30]
 [ext_resource path="res://lightweighttextures/mediumrock.jpg" type="Texture" id=32]
 [ext_resource path="res://lightweighttextures/simpledirt.material" type="Material" id=35]
 [ext_resource path="res://systems/MaterialSystem.gd" type="Script" id=36]
@@ -1297,7 +1298,6 @@ albedo_color = Color( 0.168627, 0.972549, 0.027451, 1 )
 
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
-enablevr = false
 
 [node name="Players" type="Spatial" parent="."]
 
@@ -3090,6 +3090,12 @@ material/0 = SubResource( 181 )
 
 [node name="ImageSystem" type="Node" parent="."]
 script = ExtResource( 17 )
+
+[node name="VerletRopeSystem" type="Node" parent="."]
+script = ExtResource( 30 )
+
+[node name="RayCast" type="RayCast" parent="VerletRopeSystem"]
+collision_mask = 48
 
 [node name="underfloor" type="StaticBody" parent="."]
 transform = Transform( 200, 0, 0, 0, 1, 0, 0, 0, 200, 0, -10.5, 0 )

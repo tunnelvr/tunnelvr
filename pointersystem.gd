@@ -796,8 +796,11 @@ func buttonpressed_vrpad(gripbuttonheld, joypos):
 				fs = 1/fs
 			pointertargetwall.get_node("XCdrawingplane").scale.x *= fs
 			pointertargetwall.get_node("XCdrawingplane").scale.y *= fs
-					
 
+	elif pointertargettype == "XCnode":
+		if pointertargetwall.drawingtype == DRAWING_TYPE.DT_ROPEHANG and pointertargetwall.drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_HIDE: 
+			pointertargetwall.get_node("RopeHang").iteratehangingrope_Verlet()
+			
 func exchdictptrs(xcdata, e0, e1):
 	if e0 in xcdata:
 		var e0d = xcdata[e0]

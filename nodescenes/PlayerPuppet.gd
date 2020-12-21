@@ -7,6 +7,7 @@ var playerversion = ""
 var puppetpositionstack = [ ]         # [ { "timestamp", "Ltimestamp", "playertransform", "headcamtransform" } ] 
 var puppetpointerpositionstack = [ ]  # [ { "timestamp", "Ltimestamp", "orient", "length", "spotvisible" } ] 
 
+# to abolish
 remote func initplayerappearance(lplayerplatform, headcolour):  # obsolete in later versions
 	playerplatform = lplayerplatform
 	get_node("HeadCam/csgheadmesh/skullcomponent").material.albedo_color = headcolour
@@ -140,6 +141,7 @@ remote func setavatarposition(positiondict):
 func _ready():
 	$HandLeft/LaserPointer.visible = false
 	$HandRight/LaserPointer.visible = false
+	get_node("headlocator/locatorline").set_surface_material(0, get_node("headlocator/locatorline").get_surface_material(0).duplicate())
 	call_deferred("copyfakeguisystem")
 
 func copyfakeguisystem():

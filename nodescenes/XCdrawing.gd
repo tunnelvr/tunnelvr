@@ -103,18 +103,25 @@ func setdrawingvisiblecode(ldrawingvisiblecode):
 
 	elif drawingtype == DRAWING_TYPE.DT_ROPEHANG:
 		var hidenodeshang = ((drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE) == 0)
-		if hidenodeshang:
-			var middlenodes = $RopeHang.updatehangingropepathsArrayMesh(nodepoints, onepathpairs)
+		if hidenodeshang and len(onepathpairs) != 0:
+			var middlenodes = $RopeHang.updatehangingropepathsArrayMesh_Verlet(nodepoints, onepathpairs)
+			#var middlenodes = $RopeHang.updatehangingropepathsArrayMesh(nodepoints, onepathpairs)
 			for xcn in $XCnodes.get_children():
 				xcn.visible = ((xcn.get_name()[0] == "a") or (middlenodes.find(xcn.get_name()) == -1))
 				xcn.get_node("CollisionShape").disabled = not xcn.visible
 			$RopeHang.visible = true
+			$PathLines.visible = false
+			get_node("/root/Spatial/VerletRopeSystem").addropehang($RopeHang)
+			
 		else:
+			for xcn in $XCnodes.get_children():
+				xcn.transform.origin = nodepoints[xcn.get_name()]
 			updatelinearropepaths()
 			for xcn in $XCnodes.get_children():
 				xcn.visible = true
 				xcn.get_node("CollisionShape").disabled = not xcn.visible
 			$RopeHang.visible = false
+			$PathLines.visible = true
 		
 	elif drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
 		var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
@@ -468,6 +475,7 @@ func updatelinearropepaths():
 		
 func updatexcpaths():
 	if len(onepathpairs) == 0:
+		$PathLines.mesh = null
 		return
 	var surfaceTool = SurfaceTool.new()
 	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
