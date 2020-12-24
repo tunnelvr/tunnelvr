@@ -332,8 +332,9 @@ remote func actsketchchangeL(xcdatalist):
 
 	for xcdrawing in xcdrawingstoupdate.values():
 		if xcdrawing.drawingtype == DRAWING_TYPE.DT_ROPEHANG:
-			if xcdrawing.drawingvisiblecode != DRAWING_TYPE.VIZ_XCD_HIDE:
-				xcdrawing.updatelinearropepaths()
+			pass
+			#if xcdrawing.drawingvisiblecode != DRAWING_TYPE.VIZ_XCD_HIDE:
+			#	xcdrawing.updatelinearropepaths()
 		else:
 			xcdrawing.updatexcpaths()
 

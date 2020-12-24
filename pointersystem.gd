@@ -973,8 +973,7 @@ func buttonreleased_vrgrip():
 									   "prevonepathpairs":xcdrawing.onepathpairs.duplicate(),
 									   "newonepathpairs": [ ]
 									 }
-						sketchsystem.actsketchchange([xcv, xcdata])
-						
+						sketchsystem.actsketchchange([xcdata, xcv])
 					else:
 						print("not deleted xc nodes")
 				
