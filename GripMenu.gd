@@ -10,24 +10,28 @@ var gripmenuactivetargetnode = null
 var previewtubematerials = { }
 var tubenamematerials = { }
 
+var materialmatrix = [ ["simpledirt"], ["partialrock"], ["rockwater"], ["pebbles"], ["mediumrock"], 
+					   ["bluewater", "bluewaterfore", "bluewaterback"], ["hole"] ]
+
 func _ready():
 	var tubematerials = get_node("/root/Spatial/MaterialSystem/tubematerials")
 	var MaterialButton = load("res://nodescenes/MaterialButton.tscn")
-	for i in range(tubematerials.get_child_count()):
-		var tubematerial = tubematerials.get_child(i)
-		var materialbutton = MaterialButton.instance()
-		var materialname = tubematerial.get_name()
-		if materialname == "flatgrey":
-			continue
-		materialbutton.set_name(materialname)
-		var material = tubematerial.get_surface_material(0).duplicate()
-		material.flags_unshaded = true
-		material.uv1_triplanar = false
-		previewtubematerials[materialname] = material
-		tubenamematerials[materialname] = tubematerial.get_node("name").get_surface_material(0)
-		materialbutton.get_node("MeshInstance").set_surface_material(0, material)
-		$MaterialButtons.add_child(materialbutton)
-		materialbutton.transform.origin = Vector3(0.25, 0.15 - i*0.11, 0)
+	for i in range(len(materialmatrix)):
+		var ncol = len(materialmatrix[i])
+		for j in range(ncol):
+			var materialname = materialmatrix[i][j]
+			var tubematerial = tubematerials.get_node(materialname)
+			var materialbutton = MaterialButton.instance()
+			materialbutton.set_name(materialname)
+			var material = tubematerial.get_surface_material(0).duplicate()
+			if materialname != "bluewaterfore" and materialname != "bluewaterback":
+				material.flags_unshaded = true
+			previewtubematerials[materialname] = material
+			tubenamematerials[materialname] = tubematerial.get_node("name").get_surface_material(0)
+			materialbutton.get_node("MeshInstance").set_surface_material(0, material)
+			materialbutton.scale.x = 1.0/ncol
+			$MaterialButtons.add_child(materialbutton)
+			materialbutton.transform.origin = Vector3(0.25 + 0.2*(j*1.0/ncol - (ncol-1)/4.0), 0.15 - i*0.11, 0)
 	call_deferred("disableallgripmenus")
 	
 func disableallgripmenus():

@@ -3,7 +3,7 @@ extends Spatial
 const uvfacx = 0.2
 const uvfacy = 0.4
 const roperad = 0.02
-const ropeseglen = 0.5
+const ropeseglen = 0.25
 
 func paraba(L, q):
 	var qsq = q*q
