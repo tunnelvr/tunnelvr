@@ -24,14 +24,14 @@ func _ready():
 			var materialbutton = MaterialButton.instance()
 			materialbutton.set_name(materialname)
 			var material = tubematerial.get_surface_material(0).duplicate()
-			if materialname != "bluewaterfore" and materialname != "bluewaterback":
-				material.flags_unshaded = true
+			#if materialname != "bluewaterfore" and materialname != "bluewaterback":
+			#	material.flags_unshaded = true
 			previewtubematerials[materialname] = material
 			tubenamematerials[materialname] = tubematerial.get_node("name").get_surface_material(0)
 			materialbutton.get_node("MeshInstance").set_surface_material(0, material)
-			materialbutton.scale.x = 1.0/ncol
+			materialbutton.scale.x = 1.0 if ncol == 1 else 0.9/ncol
 			$MaterialButtons.add_child(materialbutton)
-			materialbutton.transform.origin = Vector3(0.25 + 0.2*(j*1.0/ncol - (ncol-1)/4.0), 0.15 - i*0.11, 0)
+			materialbutton.transform.origin = Vector3(0.25 + 0.2/ncol*((j + 0.5) - ncol/2.0), 0.15 - i*0.11, 0)
 	call_deferred("disableallgripmenus")
 	
 func disableallgripmenus():
