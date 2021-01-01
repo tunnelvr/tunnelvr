@@ -6,15 +6,17 @@ var gripmenupointertargetwall = null
 var gripmenupointertargettype = ""
 var gripmenuactivetargettubesectorindex = 0
 var gripmenuactivetargetnode = null
+var tubesectormaterialname = ""
 
 var previewtubematerials = { }
 var tubenamematerials = { }
+onready var materialsystem = get_node("/root/Spatial/MaterialSystem")
 
 var materialmatrix = [ ["simpledirt"], ["partialrock"], ["rockwater"], ["pebbles"], ["mediumrock"], 
 					   ["bluewater", "bluewaterfore", "bluewaterback"], ["hole"] ]
 
 func _ready():
-	var tubematerials = get_node("/root/Spatial/MaterialSystem/tubematerials")
+	var tubematerials = materialsystem.get_node("tubematerials")
 	var MaterialButton = load("res://nodescenes/MaterialButton.tscn")
 	for i in range(len(materialmatrix)):
 		var ncol = len(materialmatrix[i])
@@ -24,8 +26,6 @@ func _ready():
 			var materialbutton = MaterialButton.instance()
 			materialbutton.set_name(materialname)
 			var material = tubematerial.get_surface_material(0).duplicate()
-			#if materialname != "bluewaterfore" and materialname != "bluewaterback":
-			#	material.flags_unshaded = true
 			previewtubematerials[materialname] = material
 			tubenamematerials[materialname] = tubematerial.get_node("name").get_surface_material(0)
 			materialbutton.get_node("MeshInstance").set_surface_material(0, material)
@@ -56,6 +56,7 @@ func disableallgripmenus():
 
 func cleargripmenupointer(pointertarget):
 	if pointertarget.get_parent().get_name() == "MaterialButtons":
+		print("clear material button ", pointertarget.get_name())
 		pointertarget.get_node("MeshInstance").set_surface_material(0, previewtubematerials[pointertarget.get_name()])
 	else:
 		pointertarget.get_node("MeshInstance").get_surface_material(0).albedo_color = Color("#E8D619")
@@ -85,6 +86,7 @@ func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointert
 	global_transform = paneltrans
 
 	var gmlist = [ ]
+	tubesectormaterialname = ""
 	if gripmenupointertargettype == "XCdrawing" and gripmenupointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
 		gmlist = ["NewXC"]
 		if get_node("/root/Spatial/PlanViewSystem").visible and pointertargetwall.notubeconnections_so_delxcable():
@@ -101,7 +103,7 @@ func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointert
 		gmlist = [ ]
 		
 	elif gripmenupointertargettype == "XCtubesector":
-		var tubesectormaterialname = gripmenupointertargetwall.xcsectormaterials[gripmenuactivetargettubesectorindex]
+		tubesectormaterialname = gripmenupointertargetwall.xcsectormaterials[gripmenuactivetargettubesectorindex]
 		if activetargetwall == get_node("/root/Spatial/PlanViewSystem"):
 			pass
 		elif is_instance_valid(activetargetwall) and len(activetargetwall.nodepoints) == 0:
@@ -127,6 +129,7 @@ func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointert
 		if g == "materials":
 			for s in $MaterialButtons.get_children():
 				s.get_node("MeshInstance").visible = true
+				s.get_node("MeshInstance").set_surface_material(0, materialsystem.tubematerial(s.get_name(), s.get_name() == tubesectormaterialname))
 				s.get_node("CollisionShape").disabled = false
 		elif g != "":
 			$WordButtons.get_node(g).get_node("MeshInstance").visible = true

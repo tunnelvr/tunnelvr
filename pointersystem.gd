@@ -808,7 +808,6 @@ func exchdictptrs(xcdata, e0, e1):
 		xcdata[e1] = e0d
 
 func buttonreleased_vrgrip():
-		
 	var wasactivetargettube = activetargettube
 	if activetargettube != null:
 		if pointertargettype == "GripMenuItem" and pointertarget.get_parent().get_name() == "MaterialButtons":

@@ -1,4 +1,4 @@
-[gd_scene load_steps=255 format=2]
+[gd_scene load_steps=252 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/default_env.tres" type="Environment" id=2]
@@ -33,6 +33,7 @@
 [ext_resource path="res://lightweighttextures/streamarrow_right.png" type="Texture" id=31]
 [ext_resource path="res://lightweighttextures/mediumrock.jpg" type="Texture" id=32]
 [ext_resource path="res://lightweighttextures/streamarrow_left.png" type="Texture" id=33]
+[ext_resource path="res://lightweighttextures/yellowchecker_five.png" type="Texture" id=34]
 [ext_resource path="res://lightweighttextures/simpledirt.material" type="Material" id=35]
 [ext_resource path="res://systems/MaterialSystem.gd" type="Script" id=36]
 [ext_resource path="res://lightweighttextures/yellowchecker.png" type="Texture" id=37]
@@ -363,27 +364,6 @@ height = 0.2
 radial_segments = 6
 rings = 1
 
-[sub_resource type="CylinderMesh" id=52]
-top_radius = 0.03
-bottom_radius = 0.03
-height = 0.02
-radial_segments = 30
-rings = 1
-
-[sub_resource type="SpatialMaterial" id=53]
-albedo_color = Color( 0.172549, 0.168627, 0.168627, 1 )
-
-[sub_resource type="SpatialMaterial" id=54]
-albedo_color = Color( 0.968627, 0.0156863, 0.0156863, 1 )
-
-[sub_resource type="CylinderMesh" id=55]
-material = SubResource( 54 )
-top_radius = 0.002
-bottom_radius = 0.002
-height = 0.068
-radial_segments = 6
-rings = 1
-
 [sub_resource type="CubeMesh" id=56]
 material = SubResource( 45 )
 size = Vector3( 0.01, 0.01, 1 )
@@ -530,7 +510,7 @@ emission = Color( 0, 0, 0, 1 )
 emission_energy = 0.31
 emission_operator = 0
 emission_on_uv2 = false
-emission_texture = ExtResource( 37 )
+emission_texture = ExtResource( 34 )
 uv1_scale = Vector3( 0.2, 0.2, 0.2 )
 
 [sub_resource type="SpatialMaterial" id=84]
@@ -598,7 +578,7 @@ emission_enabled = true
 emission = Color( 0, 0, 0, 1 )
 emission_energy = 0.52
 emission_operator = 0
-emission_on_uv2 = true
+emission_on_uv2 = false
 emission_texture = ExtResource( 37 )
 ao_enabled = true
 ao_light_affect = 1.0
@@ -630,10 +610,10 @@ emission_enabled = true
 emission = Color( 0, 0, 0, 1 )
 emission_energy = 0.5
 emission_operator = 0
-emission_on_uv2 = true
-emission_texture = ExtResource( 37 )
+emission_on_uv2 = false
+emission_texture = ExtResource( 34 )
 uv1_scale = Vector3( 0.2, 0.2, 0.2 )
-uv2_scale = Vector3( 20, 2, 2 )
+uv2_scale = Vector3( 20, 20, 2 )
 
 [sub_resource type="SpatialMaterial" id=101]
 flags_unshaded = true
@@ -2044,17 +2024,6 @@ material/0 = null
 [node name="LaserSpike" type="MeshInstance" parent="BodyObjects/LaserOrient/LaserSpot"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0 )
 mesh = SubResource( 51 )
-material/0 = null
-
-[node name="MeshDial" type="MeshInstance" parent="BodyObjects/LaserOrient"]
-transform = Transform( -1.62921e-07, -1, 0, 0.707107, -1.15202e-07, -0.707107, 0.707107, -1.15202e-07, 0.707107, -0.057, 0, 0 )
-visible = false
-mesh = SubResource( 52 )
-material/0 = SubResource( 53 )
-
-[node name="MeshDialArrow" type="MeshInstance" parent="BodyObjects/LaserOrient/MeshDial"]
-transform = Transform( -1.62921e-07, -0.707107, 0.707107, -1, 1.15202e-07, -1.15202e-07, 4.50002e-15, -0.707107, -0.707107, 0, 0.01, 0 )
-mesh = SubResource( 55 )
 material/0 = null
 
 [node name="LaserSelectLine" type="Spatial" parent="BodyObjects"]
