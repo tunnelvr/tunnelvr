@@ -46,7 +46,6 @@ void fragment() {
 "
 
 [sub_resource type="ShaderMaterial" id=4]
-resource_local_to_scene = true
 shader = SubResource( 3 )
 shader_param/albedo = Color( 1, 1, 1, 1 )
 shader_param/specular = 0.5

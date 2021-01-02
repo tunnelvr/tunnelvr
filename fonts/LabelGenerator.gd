@@ -41,12 +41,13 @@ func addnodestolabeltask(centrelinedrawing):
 	sortdfunctorigin = get_node("/root/Spatial").playerMe.get_node("HeadCam").global_transform.origin
 
 	
-func restartlabelmakingprocess(lsortdfunctorigin):
+func restartlabelmakingprocess(lsortdfunctorigin=null):
 	if get_node("/root/Spatial").playerMe.playerplatform != "Server":
 		if len(remainingxcnodenames) != 0 or len(remainingropelabels) != 0:
 			if lsortdfunctorigin != null:
 				sortdfunctorigin = lsortdfunctorigin
 				remainingxcnodenames.sort_custom(self, "sortdfunc")
+			print("restartlabelmakingprocess ", remainingropelabels, [workingropexcnodename, workingxcnodename])
 			set_process(true)
 
 func _process(delta):
@@ -80,6 +81,7 @@ func _process(delta):
 		$Viewport/RichTextLabel.rect_size.x = labelwidth
 		$Viewport.size.x = labelwidth
 		textlabelcountdowntimer = textlabelcountdowntime
+		print("labeltextlabeltext ", labeltext)
 		$Viewport.render_target_update_mode = Viewport.UPDATE_ONCE
 
 	elif textlabelcountdowntimer > 0.0:
@@ -99,7 +101,7 @@ func _process(delta):
 				mat.set_shader_param("texture_albedo", tex)
 				mat.set_shader_param("vertex_offset", Vector3(-(ropelabelpanel.mesh.size.x*0.5 + 0.15), ropelabelpanel.mesh.size.y*0.5, 0))
 				mat.set_shader_param("vertex_scale", 1.0)
-		workingropexcdrawing = null
+		workingropexcnodename = null
 
 	else:
 		var img = $Viewport.get_texture().get_data()

@@ -123,6 +123,7 @@ var nropeseqLengsMeasured = [ ]
 var nropeseqseglens = [ ]
 var oddropeverts = [ ]
 var totalropeleng = 0
+var totalstretchropeleng = 0
 
 func derivenverts(nodepoints, onepathpairs):
 	nodenamesArr = [ ]
@@ -174,6 +175,7 @@ func derivenverts(nodepoints, onepathpairs):
 	collidenormals = [ ]
 	for i in range(len(nverts)):
 		collidenormals.push_back(null)
+	totalstretchropeleng = totalropeleng
 	return middlenodes
 	
 func updatehangingropepathsArrayMesh_Verlet(nodepoints, onepathpairs):
@@ -206,14 +208,7 @@ func updatehangingropepathsArrayMesh_Verlet(nodepoints, onepathpairs):
 	
 	var materialsystem = get_node("/root/Spatial/MaterialSystem")
 	$RopeMesh.set_surface_material(0, materialsystem.pathlinematerial("rope"))
-
-	if len(oddropeverts) != 0:
-		oddropeverts
-		
-		#totalropeleng
-		#$LengthLabel.transform.origin = nropeseqs[0]
-		print("totalropeleng ", totalropeleng)
-
+	verletgravity = orgverletgravity
 
 	return middlenodes
 
@@ -264,14 +259,15 @@ func updatehangingrope_Verlet():
 		xcn.transform.origin = nverts[i]
 
 const verletfriction = 0.9
-var verletgravity = Vector3(0,-0.005,0)
+const orgverletgravity = -0.005
+var verletgravity = orgverletgravity
 func verletprojstep():
 	for i in range(nodenamesAnchorN, len(nverts)):
 		var nvec = nverts[i] - old_nverts[i]
 		old_nverts[i] = nverts[i] 
 		var nv = nverts[i] + nvec*verletfriction
 		if collidenormals[i] == null:
-			nv += verletgravity
+			nv += Vector3(0,verletgravity,0)
 		else:
 			nv = old_nverts[i]
 		nverts[i] = nv
@@ -317,11 +313,11 @@ var prevverletstretch = -1
 var verletiterations = 0
 func verletstretch():
 	var L = 0.0
-	var Lm = 0.0
+	totalstretchropeleng = 0.0
 	for i in range(len(nropeseqLengs)):
 		L += nropeseqLengs[i]
-		Lm += nropeseqLengsMeasured[i]
-	return Lm/L
+		totalstretchropeleng += nropeseqLengsMeasured[i]
+	return totalstretchropeleng/L
 
 func verletmaxvelocity():
 	var maxvel = 0.0
