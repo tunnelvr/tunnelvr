@@ -1,9 +1,14 @@
 extends Spatial
 
 const charwidth = 10
-var remainingxcnodenames = [ ]  # [ (centrelinedrawingnamme, name, position) ]
+var remainingxcnodenames = [ ]  # [ (centrelinedrawingname, name, position) ]
+var remainingropelabels = [ ]   # [ (ropexcname, ropenodename, ropelabel) ]
+
 var workingxccentrelinedrawingname = null
 var workingxcnodename = null
+var workingropexcdrawingname = null
+var workingropexcnodename = null
+
 const XCnode_centreline = preload("res://nodescenes/XCnode_centreline.tscn")
 const XCnode_centrelineplanview = preload("res://nodescenes/XCnode_centrelineplanview.tscn")
 
@@ -38,13 +43,14 @@ func addnodestolabeltask(centrelinedrawing):
 	
 func restartlabelmakingprocess(lsortdfunctorigin):
 	if get_node("/root/Spatial").playerMe.playerplatform != "Server":
-		sortdfunctorigin = lsortdfunctorigin
-		if len(remainingxcnodenames) != 0:
-			remainingxcnodenames.sort_custom(self, "sortdfunc")
+		if len(remainingxcnodenames) != 0 or len(remainingropelabels) != 0:
+			if lsortdfunctorigin != null:
+				sortdfunctorigin = lsortdfunctorigin
+				remainingxcnodenames.sort_custom(self, "sortdfunc")
 			set_process(true)
 
 func _process(delta):
-	if workingxcnodename == null:
+	if workingxcnodename == null and workingropexcnodename == null and len(remainingropelabels) == 0:
 		if len(remainingxcnodenames) == 0:
 			set_process(false)
 			return
@@ -53,14 +59,21 @@ func _process(delta):
 			set_process(false)
 			return
 
-	if workingxcnodename == null:
-		workingxccentrelinedrawingname = remainingxcnodenames.back()[0]
-		workingxcnodename = remainingxcnodenames.back()[1]
-		remainingxcnodenames.pop_back()
-		var labeltext = workingxcnodename
-		if commonroot != "":
-			labeltext = labeltext.right(len(commonroot))
-		labeltext = labeltext.replace(",", ".")
+	if workingropexcnodename == null and workingxcnodename == null:
+		var labeltext
+		if len(remainingropelabels) != 0:
+			workingropexcdrawingname = remainingropelabels.back()[0]
+			workingropexcnodename = remainingropelabels.back()[1]
+			labeltext = remainingropelabels.back()[2]
+			remainingropelabels.pop_back()
+		else:
+			workingxccentrelinedrawingname = remainingxcnodenames.back()[0]
+			workingxcnodename = remainingxcnodenames.back()[1]
+			remainingxcnodenames.pop_back()
+			labeltext = workingxcnodename
+			if commonroot != "":
+				labeltext = labeltext.right(len(commonroot))
+			labeltext = labeltext.replace(",", ".")
 		var numchars = len(labeltext)
 		var labelwidth = numchars*charwidth  # monospace font
 		$Viewport/RichTextLabel.bbcode_text = labeltext
@@ -68,12 +81,31 @@ func _process(delta):
 		$Viewport.size.x = labelwidth
 		textlabelcountdowntimer = textlabelcountdowntime
 		$Viewport.render_target_update_mode = Viewport.UPDATE_ONCE
+
 	elif textlabelcountdowntimer > 0.0:
 		textlabelcountdowntimer -= delta
+		
+	elif workingropexcnodename != null:
+		var img = $Viewport.get_texture().get_data()
+		var tex = ImageTexture.new()
+		tex.create_from_image(img)
+		var workingropexcdrawing = get_node("/root/Spatial/SketchSystem/XCdrawings").get_node_or_null(workingropexcdrawingname)
+		if workingropexcdrawing != null:
+			var workingropexcnode = workingropexcdrawing.get_node("XCnodes").get_node_or_null(workingropexcnodename)
+			if workingropexcnode != null:
+				var ropelabelpanel = workingropexcnode.get_node("RopeLabel")
+				ropelabelpanel.mesh.size.x = tex.get_width()*(ropelabelpanel.mesh.size.y/tex.get_height())
+				var mat = ropelabelpanel.get_surface_material(0)
+				mat.set_shader_param("texture_albedo", tex)
+				mat.set_shader_param("vertex_offset", Vector3(-(ropelabelpanel.mesh.size.x*0.5 + 0.15), ropelabelpanel.mesh.size.y*0.5, 0))
+				mat.set_shader_param("vertex_scale", 1.0)
+		workingropexcdrawing = null
+
 	else:
 		var img = $Viewport.get_texture().get_data()
 		var tex = ImageTexture.new()
 		tex.create_from_image(img)
+		
 		var workingxccentrelinedrawing = get_node("/root/Spatial/SketchSystem/XCdrawings").get_node_or_null(workingxccentrelinedrawingname)
 		if workingxccentrelinedrawing != null:
 			var workingxcnode = workingxccentrelinedrawing.get_node("XCnodes").get_node_or_null(workingxcnodename)
@@ -112,5 +144,4 @@ func _process(delta):
 			matp.set_shader_param("vertex_scale", 1.0)
 			matp.set_shader_param("uv1_scale", Vector3(1,-1,1))
 			xcnodelabelpanelp.visible = true
-
 		workingxcnodename = null

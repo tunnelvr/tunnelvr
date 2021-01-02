@@ -3141,6 +3141,7 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0 )
 shape = SubResource( 186 )
 
 [node name="Mesh" type="MeshInstance" parent="underfloor"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.000905189, 0.0301399, 0.000297317 )
 mesh = SubResource( 188 )
 material/0 = null
 

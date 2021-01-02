@@ -47,7 +47,6 @@ func ropeseqtubesurfaceArrayMesh(verts, uvs, normals, indices, rpts, hangperpvec
 			indices.append(inoff + (i-1)*cN + j)
 			indices.append(inoff + i*cN + j1)
 			indices.append(inoff + (i-1)*cN + j1)
-		
 		p0 = p1
 		p1 = p2
 		v1 = v2
@@ -110,7 +109,6 @@ func updatehangingropepathsArrayMesh(nodepoints, onepathpairs):
 	return middlenodes
 
 
-
 var nodenamesArr = [ ]
 var nodenamesAnchorN = 0
 var old_nverts = [ ]
@@ -123,7 +121,8 @@ var nropeseqs = [ ]
 var nropeseqLengs = [ ]
 var nropeseqLengsMeasured = [ ]
 var nropeseqseglens = [ ]
-
+var oddropeverts = [ ]
+var totalropeleng = 0
 
 func derivenverts(nodepoints, onepathpairs):
 	nodenamesArr = [ ]
@@ -146,7 +145,9 @@ func derivenverts(nodepoints, onepathpairs):
 	nropeseqs = [ ]
 	nropeseqLengs = [ ]
 	nropeseqseglens = [ ]
-	var ropesequences = Polynets.makeropenodesequences(nodepoints, onepathpairs)
+	oddropeverts = [ ]
+	totalropeleng = 0.0
+	var ropesequences = Polynets.makeropenodesequences(nodepoints, onepathpairs, oddropeverts)
 	for r in range(len(ropesequences)):
 		var ropeseq = ropesequences[r]
 		var nropeseq = [ nnodenames[ropeseq[0]] ]
@@ -166,6 +167,7 @@ func derivenverts(nodepoints, onepathpairs):
 		nropeseqs.push_back(nropeseq)
 		nropeseqLengs.push_back(L)
 		nropeseqseglens.push_back(L/(len(nropeseq)-1))
+		totalropeleng += L
 	old_nverts = nverts.duplicate()
 	prev_collideverts = nverts.duplicate()
 	nropeseqLengsMeasured = nropeseqLengs.duplicate()
@@ -204,6 +206,15 @@ func updatehangingropepathsArrayMesh_Verlet(nodepoints, onepathpairs):
 	
 	var materialsystem = get_node("/root/Spatial/MaterialSystem")
 	$RopeMesh.set_surface_material(0, materialsystem.pathlinematerial("rope"))
+
+	if len(oddropeverts) != 0:
+		oddropeverts
+		
+		#totalropeleng
+		#$LengthLabel.transform.origin = nropeseqs[0]
+		print("totalropeleng ", totalropeleng)
+
+
 	return middlenodes
 
 func genrpsquareMDT(mdt, j, p, valong, hv, rad):

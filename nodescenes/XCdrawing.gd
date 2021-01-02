@@ -105,14 +105,22 @@ func setdrawingvisiblecode(ldrawingvisiblecode):
 		var hidenodeshang = ((drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE) == 0)
 		if hidenodeshang and len(onepathpairs) != 0:
 			var middlenodes = $RopeHang.updatehangingropepathsArrayMesh_Verlet(nodepoints, onepathpairs)
-			#var middlenodes = $RopeHang.updatehangingropepathsArrayMesh(nodepoints, onepathpairs)
 			for xcn in $XCnodes.get_children():
 				xcn.visible = ((xcn.get_name()[0] == "a") or (middlenodes.find(xcn.get_name()) == -1))
 				xcn.get_node("CollisionShape").disabled = not xcn.visible
+				if xcn.has_node("RopeLabel"):
+					xcn.get_node("RopeLabel").visible = false
 			$RopeHang.visible = true
 			$PathLines.visible = false
+			var labelgenerator = get_node("/root/Spatial/LabelGenerator")
+			for oddnode in $RopeHang.oddropeverts:
+				var xcn = $XCnodes.get_node(oddnode)
+				if not xcn.has_node("RopeLabel"):
+					xcn.add_child($RopeHang/RopeLabel.duplicate())
+				xcn.get_node("RopeLabel").visible = true
+				labelgenerator.remainingropelabels.push_back([get_name(), oddnode, "%.2fm"%$RopeHang.totalropeleng])
+			labelgenerator.restartlabelmakingprocess(null)
 			get_node("/root/Spatial/VerletRopeSystem").addropehang($RopeHang)
-			
 		else:
 			for xcn in $XCnodes.get_children():
 				xcn.transform.origin = nodepoints[xcn.get_name()]
@@ -122,6 +130,9 @@ func setdrawingvisiblecode(ldrawingvisiblecode):
 				xcn.get_node("CollisionShape").disabled = not xcn.visible
 			$RopeHang.visible = false
 			$PathLines.visible = true
+		$XCdrawingplane.visible = false
+		$XCdrawingplane/CollisionShape.disabled = true
+
 		
 	elif drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
 		var planviewsystem = get_node("/root/Spatial/PlanViewSystem")

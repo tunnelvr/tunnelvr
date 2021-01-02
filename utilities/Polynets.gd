@@ -79,7 +79,7 @@ static func makexcdpolys(nodepoints, onepathpairs, discardsinglenodepaths):
 	return polys
 
 
-static func makeropenodesequences(nodepoints, onepathpairs):
+static func makeropenodesequences(nodepoints, onepathpairs, oddropeverts=null):
 	var Lpathvectorseq = { } 
 	for ii in nodepoints.keys():
 		Lpathvectorseq[ii] = [ ]
@@ -91,6 +91,12 @@ static func makeropenodesequences(nodepoints, onepathpairs):
 		Lpathvectorseq[i0].append(j)
 		Lpathvectorseq[i1].append(j)
 		opvisits.append(0)
+
+	if oddropeverts != null:
+		for ii in nodepoints.keys():
+			if (len(Lpathvectorseq[ii])%2) == 1:
+				oddropeverts.push_back(ii)
+	
 	var ropesequences = [ ]
 	for j in range(Npaths):
 		if opvisits[j] != 0:
