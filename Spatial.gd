@@ -322,11 +322,10 @@ func _process(_delta):
 		set_process(false)
 				
 func clearallprocessactivityforreload():
-	$LabelGenerator.clearalllabelactivity()
 	$VerletRopeSystem.clearallverletactivity()
-	$ImageSystem.fetcheddrawing = null
-	$ImageSystem.paperdrawinglist.clear()
-
+	$LabelGenerator.clearalllabelactivity()
+	$ImageSystem.clearallimageloadingactivity()
+	
 	if playerMe != null:
 		var pointersystem = playerMe.get_node("pointersystem")
 		pointersystem.clearactivetargetnode()  # clear all the objects before they are freed

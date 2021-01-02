@@ -1155,7 +1155,7 @@ roughness = 0.67
 
 [sub_resource type="SpatialMaterial" id=166]
 params_cull_mode = 2
-albedo_color = Color( 0.972549, 0.94902, 0.513726, 1 )
+albedo_color = Color( 0.890196, 0.94902, 0.501961, 1 )
 albedo_texture = ExtResource( 54 )
 roughness = 0.91
 

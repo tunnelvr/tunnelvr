@@ -60,7 +60,9 @@ func setropenodelabel(ropehang, ropenodename, labelstring):
 	var xcn = ropehang.get_node("../XCnodes").get_node(ropenodename)
 	if not xcn.has_node("RopeLabel"):
 		var noderopelabel = ropehang.get_node("RopeLabel").duplicate()
-		noderopelabel.set_surface_material(0, noderopelabel.get_surface_material(0).duplicate())
+		var mat = noderopelabel.get_surface_material(0).duplicate()
+		noderopelabel.mesh = noderopelabel.mesh.duplicate()
+		noderopelabel.set_surface_material(0, mat)
 		xcn.add_child(noderopelabel)
 	xcn.get_node("RopeLabel").visible = true
 	print(" labelstring ", labelstring)

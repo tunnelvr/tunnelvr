@@ -5,6 +5,7 @@ const uvfacy = 0.4
 const roperad = 0.02
 const ropeseglen = 0.25
 
+# to abolish
 func paraba(L, q):
 	var qsq = q*q
 	var qcu = q*qsq
@@ -54,6 +55,7 @@ func ropeseqtubesurfaceArrayMesh(verts, uvs, normals, indices, rpts, hangperpvec
 	print("ropelength L=", L, " curveL=", p0u/uvfacx)
 
 
+# to abolish
 func updatehangingropepathsArrayMesh(nodepoints, onepathpairs):
 	var middlenodes = [ ]
 	assert (len(onepathpairs) != 0)
@@ -105,7 +107,7 @@ func updatehangingropepathsArrayMesh(nodepoints, onepathpairs):
 	$RopeMesh.mesh = arr_mesh
 	
 	var materialsystem = get_node("/root/Spatial/MaterialSystem")
-	$RopeMesh.set_surface_material(0, materialsystem.pathlinematerial("rope"))
+	$RopeMesh.set_surface_material(0, ropematerialcolor)
 	return middlenodes
 
 
@@ -124,7 +126,16 @@ var nropeseqseglens = [ ]
 var oddropeverts = [ ]
 var totalropeleng = 0
 var totalstretchropeleng = 0
+var ropematerialcolor = null
 
+func setropematerialcolour(n):
+	var materialsystem = get_node("/root/Spatial/MaterialSystem")
+	ropematerialcolor = materialsystem.pathlinematerial("rope").duplicate()
+	var h = hash([n,n,n,n,n,"abcv"])+5000
+	var d = ((h%10000)/10000.0*(321-22)+22)/400
+	print(" ****** ", h, " ", n , " ", d)
+	ropematerialcolor.albedo_color = Color.from_hsv(d, 0.47, 0.97)
+	
 func derivenverts(nodepoints, onepathpairs):
 	nodenamesArr = [ ]
 	nodenamesAnchorN = 0
@@ -206,8 +217,7 @@ func updatehangingropepathsArrayMesh_Verlet(nodepoints, onepathpairs):
 	arr_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
 	$RopeMesh.mesh = arr_mesh
 	
-	var materialsystem = get_node("/root/Spatial/MaterialSystem")
-	$RopeMesh.set_surface_material(0, materialsystem.pathlinematerial("rope"))
+	$RopeMesh.set_surface_material(0, ropematerialcolor)
 	verletgravity = orgverletgravity
 
 	return middlenodes

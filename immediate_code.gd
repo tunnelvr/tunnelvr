@@ -7,5 +7,12 @@ extends EditorScript
 	
 	
 func _run():
-	print("%+.2f" % -84.5)
+	
+	print(hash("aaaaaaaaaaaaa"))
+	print(hash("bbbbbbbbbbbbb"))
+	var n = "mmmmmmmmmmmmm"
+	var d = ((hash(n)%10000)/10000.0*(181-22)+22)/400
+	
+	
+	print(Color.from_hsv(d, 0.47, 0.97))
 

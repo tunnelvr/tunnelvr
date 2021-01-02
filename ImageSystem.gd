@@ -69,6 +69,10 @@ func _exit_tree():
 func _ready():
 	imageloadingthread.start(self, "imageloadingthread_function")
 
+func clearallimageloadingactivity():
+	fetcheddrawing = null
+	paperdrawinglist.clear()
+
 func _http_request_completed(result, response_code, headers, body, httprequestdataobject):
 	if httprequestdataobject["httprequest"] != httprequest:
 		print("_http_request_completed ")

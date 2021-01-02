@@ -474,8 +474,7 @@ func updatelinearropepaths():
 	surfaceTool.generate_normals()
 	var newmesh = surfaceTool.commit()
 	$PathLines.mesh = newmesh
-	var materialsystem = get_node("/root/Spatial/MaterialSystem")
-	$PathLines.set_surface_material(0, materialsystem.pathlinematerial("rope"))
+	$PathLines.set_surface_material(0, get_node("RopeHang").ropematerialcolor)
 	return middlenodes
 
 		
