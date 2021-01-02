@@ -50,6 +50,12 @@ func restartlabelmakingprocess(lsortdfunctorigin=null):
 			print("restartlabelmakingprocess ", remainingropelabels, [workingropexcnodename, workingxcnodename])
 			set_process(true)
 
+func clearalllabelactivity():
+	workingxcnodename = null
+	remainingxcnodenames.clear()
+	workingropexcnodename = null
+	remainingxcnodenames.clear()
+
 func _process(delta):
 	if workingxcnodename == null and workingropexcnodename == null and len(remainingropelabels) == 0:
 		if len(remainingxcnodenames) == 0:

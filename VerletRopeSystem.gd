@@ -12,12 +12,17 @@ var threadtoexit = false
 var ropehangsinprocess = [ ]
 
 func _exit_tree():
+	finishveropthread()
+	
+func finishveropthread():
 	verropthreadmutex.lock()
 	verropropehang_in = null
 	threadtoexit = true
 	verropthreadmutex.unlock()
 	verropthreadsemaphore.post()
 	verropthread.wait_to_finish()
+	threadtoexit = false
+	verropthreadoperating = false
 
 func _ready():
 	verropthread.start(self, "verropthread_function")
@@ -25,7 +30,7 @@ func _ready():
 
 func verropthread_function(userdata):
 	print("verropthread_function started")
-	while true:
+	while not threadtoexit:
 		verropthreadsemaphore.wait()
 		verropthreadmutex.lock()
 		var lverropropehang = verropropehang_in
@@ -45,6 +50,10 @@ func verropthread_function(userdata):
 		verropthreadmutex.unlock()
 	print("verropthread_function stopped")
 
+func clearallverletactivity():
+	ropehangsinprocess.clear()
+	finishveropthread()
+	verropthread.start(self, "verropthread_function")
 
 func setropenodelabel(ropehang, ropenodename, labelstring):
 	var labelgenerator = get_node("/root/Spatial/LabelGenerator")
@@ -69,15 +78,15 @@ func addropehang(ropehang):
 	set_process(true)
 	
 func reportstretch(verropropehang):
-			var labelgenerator = get_node("/root/Spatial/LabelGenerator")
-			for oddnode in $RopeHang.oddropeverts:
-				var xcn = $XCnodes.get_node(oddnode)
-				if not xcn.has_node("RopeLabel"):
-					xcn.add_child($RopeHang/RopeLabel.duplicate())
-				xcn.get_node("RopeLabel").visible = true
-				labelgenerator.remainingropelabels.push_back([get_name(), oddnode, "%.2fm"%$RopeHang.totalropeleng])
-			if len($RopeHang.oddropeverts) != 0:
-				labelgenerator.restartlabelmakingprocess(null)
+	var labelgenerator = get_node("/root/Spatial/LabelGenerator")
+	for oddnode in $RopeHang.oddropeverts:
+		var xcn = $XCnodes.get_node(oddnode)
+		if not xcn.has_node("RopeLabel"):
+			xcn.add_child($RopeHang/RopeLabel.duplicate())
+		xcn.get_node("RopeLabel").visible = true
+		labelgenerator.remainingropelabels.push_back([get_name(), oddnode, "%.2fm"%$RopeHang.totalropeleng])
+	if len($RopeHang.oddropeverts) != 0:
+		labelgenerator.restartlabelmakingprocess(null)
 
 	
 var nFrame = 0

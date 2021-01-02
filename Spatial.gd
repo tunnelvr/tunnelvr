@@ -322,8 +322,8 @@ func _process(_delta):
 		set_process(false)
 				
 func clearallprocessactivityforreload():
-	$LabelGenerator.workingxcnodename = null
-	$LabelGenerator.remainingxcnodenames.clear()
+	$LabelGenerator.clearalllabelactivity()
+	$VerletRopeSystem.clearallverletactivity()
 	$ImageSystem.fetcheddrawing = null
 	$ImageSystem.paperdrawinglist.clear()
 
