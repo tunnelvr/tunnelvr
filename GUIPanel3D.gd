@@ -510,7 +510,7 @@ func _connection_failed():
 	$Viewport/GUI/Panel/Label.text = "connection_failed"
 	
 func _server_disconnected():
-	print("_server_disconnected ", websocketclient)
+	print("\n\n***_server_disconnected ", websocketclient, "\n\n")
 	websocketclient = null
 	networkedmultiplayerenet = null
 	Tglobal.connectiontoserveractive = false

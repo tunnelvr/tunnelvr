@@ -12,7 +12,7 @@ var ropehangsinprocess = [ ]
 
 func _exit_tree():
 	verropthreadmutex.lock()
-	verropropehang_in = null
+	verropropehang_in = "exit"
 	verropthreadmutex.unlock()
 	verropthreadsemaphore.post()
 	verropthread.wait_to_finish()
@@ -29,6 +29,8 @@ func verropthread_function(userdata):
 		var lverropropehang = verropropehang_in
 		verropropehang_in = null
 		verropthreadmutex.unlock()
+		if lverropropehang == "exit":
+			break
 		if lverropropehang != null:
 			for i in range(10):
 				lverropropehang.verletprojstep()
