@@ -335,7 +335,7 @@ remote func actsketchchangeL(xcdatalist):
 			if xcdrawing.drawingvisiblecode != DRAWING_TYPE.VIZ_XCD_HIDE:
 				xcdrawing.updatelinearropepaths()
 		else:
-			xcdrawing.updatexcpaths()
+			xcdrawing.updatexcpaths_part(xcdrawing.get_node("PathLines"), xcdrawing.linewidth)
 
 	for xctube in xctubestoupdate.values():
 		if $XCdrawings.get_node(xctube.xcname0).drawingtype == DRAWING_TYPE.DT_CENTRELINE:
@@ -590,12 +590,19 @@ func newXCuniquedrawing(drawingtype, sname):
 		var xcnodesplanview = Spatial.new()
 		xcnodesplanview.set_name("XCnodes_PlanView")
 		xcdrawing.add_child(xcnodesplanview)
+		var pathlinesplanview = MeshInstance.new()
+		pathlinesplanview.set_name("PathLines_PlanView")
+		xcdrawing.add_child(pathlinesplanview)
+
 		xcdrawing.add_to_group("gpcentrelinegeo")
 		xcdrawing.linewidth = 0.035
 		xcdrawing.drawingvisiblecode = DRAWING_TYPE.VIZ_XCD_HIDE
 		xcdrawing.get_node("PathLines").visible = true
 		xcdrawing.get_node("PathLines").layers = CollisionLayer.VL_centrelinedrawinglines
+		xcdrawing.get_node("PathLines_PlanView").visible = true
+		xcdrawing.get_node("PathLines_PlanView").layers = CollisionLayer.VL_centrelinedrawinglinesplanview
 		xcdrawing.get_node("XCnodes").visible = true
+		pathlinesplanview
 	
 	else:
 		assert (false)

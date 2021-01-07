@@ -130,7 +130,8 @@ func _process(delta):
 				if (verletmaxvelocity < 0.0002 and verropropehang.prevverletstretch != -1 and abs(verropropehang.prevverletstretch - verletstretch) < 0.01) or \
 						(verropropehang.verletiterations > 10):
 					if len(verropropehang.oddropeverts) == 2:
-						setropenodelabel(verropropehang, verropropehang.oddropeverts[-1], "stretch%+.2fm"%(verropropehang.totalstretchropeleng-verropropehang.totalropeleng))
+						var stretchratio = (verropropehang.totalstretchropeleng - verropropehang.totalropeleng)/verropropehang.totalropeleng
+						setropenodelabel(verropropehang, verropropehang.oddropeverts[-1], "%+.0f%%" % (stretchratio*100))
 					ropehangsinprocess.erase(verropropehang)
 
 				else:

@@ -223,6 +223,7 @@ func actplanviewdict(pvchange):
 		planviewactive = pvchange["planviewactive"]
 		if planviewactive:
 			$PlanView/ProjectionScreen/ImageFrame.mesh.surface_get_material(0).emission_enabled = true
+			prevcamerasize = -1
 			set_process(true)
 		else:
 			$PlanView/ProjectionScreen/ImageFrame.mesh.surface_get_material(0).emission_enabled = false
@@ -296,7 +297,8 @@ func _process(delta):
 						xcn.get_node("StationLabel").get_surface_material(0).set_shader_param("vertex_scale", labelsca)
 						xcn.get_node("CollisionShape").scale = Vector3(nodesca, nodesca, nodesca)
 					xcdrawingcentreline.linewidth = 0.035*nodesca
-					xcdrawingcentreline.updatexcpaths()
+					xcdrawingcentreline.updatexcpaths_part(xcdrawingcentreline.get_node("PathLines_PlanView"), 0.035*nodesca)
+					
 			slowviewupdatecentrelinesizeupdaterate = 1.6
 	
 	var planviewpositiondict = { }

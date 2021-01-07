@@ -45,9 +45,10 @@ enum {
 	VL_floortextureplanview				= 0b00000100000000000000,
 	VL_centrelinestationslabelplanview	= 0b00001000000000000000,
 	VL_centrelinedrawinglines			= 0b00010000000000000000,
+	VL_centrelinedrawinglinesplanview	= 0b00100000000000000000,
 	
-	VLCM_PlanViewCamera 				= 0b00011111110111111011,
-	VLCM_PlanViewCameraNoTube			= 0b00011101110001001011
+	VLCM_PlanViewCamera 				= 0b00101111110111111011,
+	VLCM_PlanViewCameraNoTube			= 0b00101101110001001011
 	VLCM_PlanViewCameraNoCentreline		= 0b00000111000111111011,
 
 	VLCM_PlayerCamera					= 0b00010111101111111111,

@@ -396,7 +396,7 @@ func mergexcrpcdata(xcdata):
 				xcdata["drawingvisiblecode"] = DRAWING_TYPE.VIZ_XCD_HIDE
 		setdrawingvisiblecode(xcdata["drawingvisiblecode"])
 	if drawingtype != DRAWING_TYPE.DT_ROPEHANG:
-		updatexcpaths()
+		updatexcpaths_part($PathLines, linewidth)
 	
 func setxcnpoint(xcn, pt, planar):
 	xcn.global_transform.origin = pt
@@ -477,10 +477,11 @@ func updatelinearropepaths():
 	$PathLines.set_surface_material(0, get_node("RopeHang").ropematerialcolor)
 	return middlenodes
 
-		
-func updatexcpaths():
+
+
+func updatexcpaths_part(pathlines, llinewidth):
 	if len(onepathpairs) == 0:
-		$PathLines.mesh = null
+		pathlines.mesh = null
 		return
 	var surfaceTool = SurfaceTool.new()
 	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
@@ -492,7 +493,7 @@ func updatexcpaths():
 			perp = Vector3(-(p1.y - p0.y), p1.x - p0.x, 0)
 		else:
 			perp = Vector3(-(p1.z - p0.z), 0, p1.x - p0.x)
-		var fperp = linewidth*perp.normalized()
+		var fperp = llinewidth*perp.normalized()
 		var p0left = p0 - fperp
 		var p0right = p0 + fperp
 		var p1left = p1 - fperp
@@ -505,16 +506,16 @@ func updatexcpaths():
 		surfaceTool.add_vertex(p1right)
 	surfaceTool.generate_normals()
 	var newmesh = surfaceTool.commit()
-	if $PathLines.mesh == null or $PathLines.get_surface_material_count() == 0:
-		$PathLines.mesh = newmesh
-		assert($PathLines.get_surface_material_count() != 0)
+	if pathlines.mesh == null or pathlines.get_surface_material_count() == 0:
+		pathlines.mesh = newmesh
+		assert(pathlines.get_surface_material_count() != 0)
 		var materialsystem = get_node("/root/Spatial/MaterialSystem")
 		var matname = "centreline" if drawingtype == DRAWING_TYPE.DT_CENTRELINE else "normal"
-		$PathLines.set_surface_material(0, materialsystem.pathlinematerial(matname))
+		pathlines.set_surface_material(0, materialsystem.pathlinematerial(matname))
 	else:
-		var m = $PathLines.get_surface_material(0)
-		$PathLines.mesh = newmesh
-		$PathLines.set_surface_material(0, m)
+		var m = pathlines.get_surface_material(0)
+		pathlines.mesh = newmesh
+		pathlines.set_surface_material(0, m)
 
 
 func makexctubeshell(xcdrawings):

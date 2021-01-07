@@ -166,6 +166,7 @@ lh_rise={
 3d_render/layer_15="floortexturesplanview"
 3d_render/layer_16="centrelinestationlabelplanview"
 3d_render/layer_17="centrelinedrawinglines"
+3d_render/layer_18="centrelinedrawinglinesplanview"
 
 [network]
 

@@ -127,14 +127,18 @@ var oddropeverts = [ ]
 var totalropeleng = 0
 var totalstretchropeleng = 0
 var ropematerialcolor = null
+var ropematerialsolidcolor = null
 
 func setropematerialcolour(n):
 	var materialsystem = get_node("/root/Spatial/MaterialSystem")
 	ropematerialcolor = materialsystem.pathlinematerial("rope").duplicate()
+	ropematerialsolidcolor = materialsystem.pathlinematerial("ropesolid").duplicate()
 	var h = hash([n,n,n,n,n,"abcv"])+5000
 	var d = ((h%10000)/10000.0*(321-22)+22)/400
 	print(" ****** ", h, " ", n , " ", d)
-	ropematerialcolor.albedo_color = Color.from_hsv(d, 0.47, 0.97)
+	var col = Color.from_hsv(d, 0.47, 0.97)
+	ropematerialcolor.albedo_color = col
+	ropematerialsolidcolor.albedo_color = col
 	
 func derivenverts(nodepoints, onepathpairs):
 	nodenamesArr = [ ]
@@ -217,7 +221,7 @@ func updatehangingropepathsArrayMesh_Verlet(nodepoints, onepathpairs):
 	arr_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
 	$RopeMesh.mesh = arr_mesh
 	
-	$RopeMesh.set_surface_material(0, ropematerialcolor)
+	$RopeMesh.set_surface_material(0, ropematerialsolidcolor)
 	verletgravity = orgverletgravity
 
 	return middlenodes
@@ -343,12 +347,3 @@ func iteratehangingrope_Verlet():
 	updatehangingrope_Verlet()
 	print("nropeseqLengsM ", nropeseqLengsMeasured)
 	
-
-func _input(event):
-	if event is InputEventKey:
-		if event.scancode == KEY_V:
-			iteratehangingrope_Verlet()
-	if event is InputEventKey:
-		if event.scancode == KEY_C:
-			verletgravity *= 0.5
-			print("verletgravity  ", verletgravity)
