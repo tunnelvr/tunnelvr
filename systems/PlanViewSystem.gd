@@ -274,6 +274,38 @@ func planviewtransformpos(guidpaneltransform, guidpanelsize):
 		return paneltrans
 
 
+var updateplanviewentitysizes_working = false
+func updateplanviewentitysizes():
+	prevcamerasize = $PlanView/Viewport/PlanGUI/Camera.size
+	var nodesca = $PlanView/Viewport/PlanGUI/Camera.size/70.0*5
+	var labelsca = nodesca*1.2
+	var labelrects = [ ]
+	var rectrecttests = 0
+	var rectrecttestt0 = OS.get_ticks_msec()
+	for xcdrawingcentreline in get_tree().get_nodes_in_group("gpcentrelinegeo"):
+		xcdrawingcentreline.updatexcpaths_part(xcdrawingcentreline.get_node("PathLines_PlanView"), 0.035*nodesca)
+		for xcn in xcdrawingcentreline.get_node("XCnodes_PlanView").get_children():
+			xcn.get_node("CollisionShape").scale = Vector3(nodesca, nodesca, nodesca)
+			var stationlabel = xcn.get_node("StationLabel")
+			stationlabel.get_surface_material(0).set_shader_param("vertex_scale", labelsca)
+			var labelcentre = stationlabel.global_transform.origin + stationlabel.get_surface_material(0).get_shader_param("vertex_offset")
+			var xcnrect = Rect2(-(xcn.transform.origin.x + 0.15), xcn.transform.origin.y, stationlabel.mesh.size.x*nodesca, stationlabel.mesh.size.y*nodesca)
+			var xcnrect_overlapping = false
+			for r in labelrects:
+				if xcnrect.intersects(r):
+					xcnrect_overlapping = true
+					break
+				rectrecttests += 1
+			xcn.visible = not xcnrect_overlapping
+			if not xcnrect_overlapping:
+				labelrects.push_back(xcnrect)
+			if rectrecttests > 10000:
+				print("rectrecttests ", rectrecttests, OS.get_ticks_msec() - rectrecttestt0)
+				yield(get_tree().create_timer(0.2), "timeout")
+				rectrecttests = 0
+				rectrecttestt0 = OS.get_ticks_msec()
+	updateplanviewentitysizes_working = false
+
 var slowviewportframeratecountdown = 1
 var slowviewupdatecentrelinesizeupdaterate = 1.5
 var prevcamerasize = 0
@@ -288,17 +320,9 @@ func _process(delta):
 	if visible:
 		slowviewupdatecentrelinesizeupdaterate -= delta
 		if slowviewupdatecentrelinesizeupdaterate < 0:
-			if prevcamerasize != $PlanView/Viewport/PlanGUI/Camera.size:
-				prevcamerasize = $PlanView/Viewport/PlanGUI/Camera.size
-				var nodesca = $PlanView/Viewport/PlanGUI/Camera.size/70.0*5
-				var labelsca = nodesca*1.2
-				for xcdrawingcentreline in get_tree().get_nodes_in_group("gpcentrelinegeo"):
-					for xcn in xcdrawingcentreline.get_node("XCnodes_PlanView").get_children():
-						xcn.get_node("StationLabel").get_surface_material(0).set_shader_param("vertex_scale", labelsca)
-						xcn.get_node("CollisionShape").scale = Vector3(nodesca, nodesca, nodesca)
-					xcdrawingcentreline.linewidth = 0.035*nodesca
-					xcdrawingcentreline.updatexcpaths_part(xcdrawingcentreline.get_node("PathLines_PlanView"), 0.035*nodesca)
-					
+			if prevcamerasize != $PlanView/Viewport/PlanGUI/Camera.size and not updateplanviewentitysizes_working:
+				updateplanviewentitysizes_working = true
+				call_deferred("updateplanviewentitysizes")
 			slowviewupdatecentrelinesizeupdaterate = 1.6
 	
 	var planviewpositiondict = { }
