@@ -282,6 +282,7 @@ func updateplanviewentitysizes():
 	var labelrects = [ ]
 	var rectrecttests = 0
 	var rectrecttestt0 = OS.get_ticks_msec()
+	#print("\nstarting labeloverlaps\n")
 	for xcdrawingcentreline in get_tree().get_nodes_in_group("gpcentrelinegeo"):
 		xcdrawingcentreline.updatexcpaths_part(xcdrawingcentreline.get_node("PathLines_PlanView"), 0.035*nodesca)
 		for xcn in xcdrawingcentreline.get_node("XCnodes_PlanView").get_children():
@@ -289,21 +290,23 @@ func updateplanviewentitysizes():
 			var stationlabel = xcn.get_node("StationLabel")
 			stationlabel.get_surface_material(0).set_shader_param("vertex_scale", labelsca)
 			var labelcentre = stationlabel.global_transform.origin + stationlabel.get_surface_material(0).get_shader_param("vertex_offset")
-			var xcnrect = Rect2(-(xcn.transform.origin.x + 0.15), xcn.transform.origin.y, stationlabel.mesh.size.x*nodesca, stationlabel.mesh.size.y*nodesca)
+			var xcnrect = Rect2(-(xcn.transform.origin.x + 0.15), -xcn.transform.origin.z, stationlabel.mesh.size.x*labelsca, stationlabel.mesh.size.y*labelsca)
 			var xcnrect_overlapping = false
 			for r in labelrects:
 				if xcnrect.intersects(r):
 					xcnrect_overlapping = true
 					break
 				rectrecttests += 1
-			xcn.visible = not xcnrect_overlapping
+			xcn.get_node("StationLabel").visible = not xcnrect_overlapping
+			#print(xcn.get_name(), " overlapping ", xcnrect_overlapping, " ", xcnrect)
 			if not xcnrect_overlapping:
 				labelrects.push_back(xcnrect)
-			if rectrecttests > 10000:
-				print("rectrecttests ", rectrecttests, OS.get_ticks_msec() - rectrecttestt0)
+			if rectrecttests > 1000:
+				print("rectrecttests ", rectrecttests, " ms:", OS.get_ticks_msec() - rectrecttestt0)
 				yield(get_tree().create_timer(0.2), "timeout")
 				rectrecttests = 0
 				rectrecttestt0 = OS.get_ticks_msec()
+	print("rectrecttests final ", rectrecttests, " ms:", OS.get_ticks_msec() - rectrecttestt0)
 	updateplanviewentitysizes_working = false
 
 var slowviewportframeratecountdown = 1

@@ -12,7 +12,7 @@ var workingropexcnodename = null
 const XCnode_centreline = preload("res://nodescenes/XCnode_centreline.tscn")
 const XCnode_centrelineplanview = preload("res://nodescenes/XCnode_centrelineplanview.tscn")
 
-const textlabelcountdowntime = 0.2
+const textlabelcountdowntime = 0.12
 var textlabelcountdowntimer = 0.0
 
 var sortdfunctorigin = Vector3(0,0,0)
@@ -30,13 +30,13 @@ func addnodestolabeltask(centrelinedrawing):
 	for xcname in centrelinedrawing.nodepoints:
 		remainingxcnodenames.append([centrelinedrawing.get_name(), xcname, centrelinedrawing.transform*centrelinedrawing.nodepoints[xcname]])
 		if commonroot == null:
-			commonroot = xcname
+			commonroot = xcname.to_lower()
 		else:
-			while commonroot != "" and not xcname.begins_with(commonroot):
+			while commonroot != "" and not xcname.to_lower().begins_with(commonroot):
 				commonroot = commonroot.left(len(commonroot)-1)
 	commonroot = commonroot.left(commonroot.find_last(",")+1)
 	if commonroot == "":
-		commonroot = "Ireby2,"
+		commonroot = "ireby2,"
 	print("stationlabels common root: ", commonroot)
 	sortdfunctorigin = get_node("/root/Spatial").playerMe.get_node("HeadCam").global_transform.origin
 
@@ -78,7 +78,7 @@ func _process(delta):
 			workingxcnodename = remainingxcnodenames.back()[1]
 			remainingxcnodenames.pop_back()
 			labeltext = workingxcnodename
-			if commonroot != "":
+			if commonroot != "" and labeltext.to_lower().begins_with(commonroot):
 				labeltext = labeltext.right(len(commonroot))
 			labeltext = labeltext.replace(",", ".")
 		var numchars = len(labeltext)
