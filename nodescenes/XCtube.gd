@@ -405,8 +405,8 @@ func slicetubetoxcdrawing(xcdrawing, xcdata, xctdatadel, xctdata0, xctdata1):
 	var xcnamefirst = null	
 	var xcnamelast = null
 	var lamoutofrange = false
-	var xcnormal = xcdrawing.global_transform.basis.z
-	var xcdot = xcnormal.dot(xcdrawing.global_transform.origin)
+	var xcnormal = xcdrawing.transform.basis.z
+	var xcdot = xcnormal.dot(xcdrawing.transform.origin)
 	var sliceclearancedist = 0.02
 	for i in range(len(ila)):
 		var ila0 = ila[i][0]
@@ -422,23 +422,6 @@ func slicetubetoxcdrawing(xcdrawing, xcdata, xctdatadel, xctdata0, xctdata1):
 		while i0 < ila0N or i1 < ila1N:
 			var pt0 = xcnodes0.get_node(poly0[(ila0+i0)%len(poly0)]).global_transform.origin
 			var pt1 = xcnodes1.get_node(poly1[(ila1+i1)%len(poly1)]).global_transform.origin
-			var xcname = xcdrawing.newuniquexcnodename("p")
-			if i0 == 0 and i1 == 0:
-				xctdatadel["prevdrawinglinks"].push_back(poly0[ila0])
-				xctdatadel["prevdrawinglinks"].push_back(poly1[ila1])
-				xctdatadel["prevdrawinglinks"].push_back(xcsectormaterials[i])
-				xctdatadel["prevdrawinglinks"].push_back(xclinkintermediatenodes[i] if xclinkintermediatenodes != null else null)
-
-				xctdata0["newdrawinglinks"].push_back(poly0[ila0])
-				xctdata0["newdrawinglinks"].push_back(xcname)
-				xctdata0["newdrawinglinks"].push_back(xcsectormaterials[i])
-				xctdata0["newdrawinglinks"].push_back(xclinkintermediatenodes[i] if xclinkintermediatenodes != null else null)
-
-				xctdata1["newdrawinglinks"].push_back(xcname)
-				xctdata1["newdrawinglinks"].push_back(poly1[ila1])
-				xctdata1["newdrawinglinks"].push_back(xcsectormaterials[i])
-				xctdata1["newdrawinglinks"].push_back(null)
-			
 			# 0 = xcdrawing.global_transform.basis.z.dot(pt0 + lam*(pt1 - pt0) - xcdrawing.global_transform.origin)
 			# lam*xcdrawing.global_transform.basis.z.dot(pt0 - pt1) = xcdrawing.global_transform.basis.z.dot(pt0 - xcdrawing.global_transform.origin)
 			var ptvec = pt0 - pt1
@@ -447,8 +430,41 @@ func slicetubetoxcdrawing(xcdrawing, xcdata, xctdatadel, xctdata0, xctdata1):
 			if lam < 0.0 or lamfromedge*ptvec.length() < sliceclearancedist:
 				print("Slice point out of range ", lam)
 				lamoutofrange = true
-			var xcpoint = xcdrawing.global_transform.xform_inv(lerp(pt0, pt1, lam))
+			var xcpoint = xcdrawing.transform.xform_inv(lerp(pt0, pt1, lam))
 			xcpoint.z = 0.0
+
+			var xcname = xcdrawing.newuniquexcnodename("p")
+			if i0 == 0 and i1 == 0:
+				xctdatadel["prevdrawinglinks"].push_back(poly0[ila0])
+				xctdatadel["prevdrawinglinks"].push_back(poly1[ila1])
+				xctdatadel["prevdrawinglinks"].push_back(xcsectormaterials[i])
+				xctdatadel["prevdrawinglinks"].push_back(xclinkintermediatenodes[i] if xclinkintermediatenodes != null else null)
+
+				var iin = 0
+
+				xctdata0["newdrawinglinks"].push_back(poly0[ila0])
+				xctdata0["newdrawinglinks"].push_back(xcname)
+				xctdata0["newdrawinglinks"].push_back(xcsectormaterials[i])
+				if xclinkintermediatenodes != null:
+					xctdata0["newdrawinglinks"].push_back([])
+					while iin < len(xclinkintermediatenodes[i]) and xclinkintermediatenodes[i][iin].z < lam-0.01:
+						xctdata0["newdrawinglinks"].back().push_back(Vector3(xclinkintermediatenodes[i][iin].x, xclinkintermediatenodes[i][iin].y, inverse_lerp(0, lam, xclinkintermediatenodes[i][iin].z)))
+						iin += 1
+				else:
+					xctdata0["newdrawinglinks"].push_back(null)
+
+				xctdata1["newdrawinglinks"].push_back(xcname)
+				xctdata1["newdrawinglinks"].push_back(poly1[ila1])
+				xctdata1["newdrawinglinks"].push_back(xcsectormaterials[i])
+				if xclinkintermediatenodes != null:
+					xctdata1["newdrawinglinks"].push_back([])
+					while iin < len(xclinkintermediatenodes[i]):
+						if xclinkintermediatenodes[i][iin].z > lam+0.01:
+							xctdata1["newdrawinglinks"].back().push_back(Vector3(xclinkintermediatenodes[i][iin].x, xclinkintermediatenodes[i][iin].y, inverse_lerp(lam, 1, xclinkintermediatenodes[i][iin].z)))
+						iin += 1
+				else:
+					xctdata1["newdrawinglinks"].push_back(null)
+			
 			xcdata["nextnodepoints"][xcname] = xcpoint
 			assert (i0 <= ila0N and i1 <= ila1N)
 			if i0 < ila0N and (acc - ila0N < 0 or i1 == ila1N):
