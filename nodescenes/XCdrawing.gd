@@ -20,6 +20,9 @@ var imgtrimrightup = Vector2(0,0)
 # derived data
 var xctubesconn = [ ]   # references to xctubes that connect to here (could use their names instead)
 var maxnodepointnumber = 0
+var nodepointmean = Vector3(0,0,0)
+var nodepointylo = 0.0
+var nodepointyhi = 0.0
 var imgheightwidthratio = 0  # known from the xcresource image (though could be cached)
 
 var linewidth = 0.05
@@ -341,6 +344,19 @@ func mergexcrpcdata(xcdata):
 
 			else:
 				xcn.translation = nodepointsAdd[nA]
+
+		var nodepointsum = Vector3(0,0,0)
+		nodepointylo = 0.0
+		nodepointyhi = 0.0
+		var firstnodepoint = true
+		for p in nodepoints.values():
+			nodepointsum += p
+			if p.y < nodepointylo or firstnodepoint:
+				nodepointylo = p.y
+			if p.y > nodepointyhi or firstnodepoint:
+				nodepointyhi = p.y
+				firstnodepoint = false
+		nodepointmean = nodepointsum/max(1, len(nodepoints))
 		
 	if "onepathpairs" in xcdata:   # full overwrite
 		onepathpairs = xcdata["onepathpairs"]
@@ -395,7 +411,9 @@ func mergexcrpcdata(xcdata):
 			elif drawingtype == DRAWING_TYPE.DT_CENTRELINE:
 				xcdata["drawingvisiblecode"] = DRAWING_TYPE.VIZ_XCD_HIDE
 		setdrawingvisiblecode(xcdata["drawingvisiblecode"])
-	if drawingtype != DRAWING_TYPE.DT_ROPEHANG:
+	if drawingtype == DRAWING_TYPE.DT_CENTRELINE:
+		updatexcpaths_centreline($PathLines, linewidth)
+	elif drawingtype != DRAWING_TYPE.DT_ROPEHANG:
 		updatexcpaths_part($PathLines, linewidth)
 	
 func setxcnpoint(xcn, pt, planar):
@@ -488,11 +506,7 @@ func updatexcpaths_part(pathlines, llinewidth):
 	for j in range(0, len(onepathpairs), 2):
 		var p0 = nodepoints[onepathpairs[j]]
 		var p1 = nodepoints[onepathpairs[j+1]]
-		var perp
-		if drawingtype != DRAWING_TYPE.DT_CENTRELINE:
-			perp = Vector3(-(p1.y - p0.y), p1.x - p0.x, 0)
-		else:
-			perp = Vector3(-(p1.z - p0.z), 0, p1.x - p0.x)
+		var perp = Vector3(-(p1.y - p0.y), p1.x - p0.x, 0)
 		var fperp = llinewidth*perp.normalized()
 		var p0left = p0 - fperp
 		var p0right = p0 + fperp
@@ -510,12 +524,54 @@ func updatexcpaths_part(pathlines, llinewidth):
 		pathlines.mesh = newmesh
 		assert(pathlines.get_surface_material_count() != 0)
 		var materialsystem = get_node("/root/Spatial/MaterialSystem")
-		var matname = "centreline" if drawingtype == DRAWING_TYPE.DT_CENTRELINE else "normal"
-		pathlines.set_surface_material(0, materialsystem.pathlinematerial(matname))
+		pathlines.set_surface_material(0, materialsystem.pathlinematerial("normal"))
 	else:
 		var m = pathlines.get_surface_material(0)
 		pathlines.mesh = newmesh
 		pathlines.set_surface_material(0, m)
+
+func updatexcpaths_centreline(pathlines, llinewidth):
+	if len(onepathpairs) == 0:
+		pathlines.mesh = null
+		return
+	var surfaceTool = SurfaceTool.new()
+	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for j in range(0, len(onepathpairs), 2):
+		var p0 = nodepoints[onepathpairs[j]]
+		var p1 = nodepoints[onepathpairs[j+1]]
+		var q0 = inverse_lerp(nodepointylo, nodepointyhi, p0.y)
+		var q1 = inverse_lerp(nodepointylo, nodepointyhi, p1.y)
+		var perp = Vector3(-(p1.z - p0.z), 0, p1.x - p0.x)
+		var fperp = llinewidth*perp.normalized()
+		var p0left = p0 - fperp
+		var p0right = p0 + fperp
+		var p1left = p1 - fperp
+		var p1right = p1 + fperp
+		surfaceTool.add_uv(Vector2(q0, 0.0))
+		surfaceTool.add_vertex(p0left)
+		surfaceTool.add_uv(Vector2(q1, 0.0))
+		surfaceTool.add_vertex(p1left)
+		surfaceTool.add_uv(Vector2(q0, 1.0))
+		surfaceTool.add_vertex(p0right)
+		surfaceTool.add_uv(Vector2(q0, 1.0))
+		surfaceTool.add_vertex(p0right)
+		surfaceTool.add_uv(Vector2(q1, 0.0))
+		surfaceTool.add_vertex(p1left)
+		surfaceTool.add_uv(Vector2(q1, 1.0))
+		surfaceTool.add_vertex(p1right)
+	surfaceTool.generate_normals()
+	var newmesh = surfaceTool.commit()
+	if pathlines.mesh == null or pathlines.get_surface_material_count() == 0:
+		pathlines.mesh = newmesh
+		assert(pathlines.get_surface_material_count() != 0)
+		var materialsystem = get_node("/root/Spatial/MaterialSystem")
+		pathlines.set_surface_material(0, materialsystem.pathlinematerial("centreline"))
+	else:
+		var m = pathlines.get_surface_material(0)
+		pathlines.mesh = newmesh
+		pathlines.set_surface_material(0, m)
+
+
 
 
 func makexctubeshell(xcdrawings):

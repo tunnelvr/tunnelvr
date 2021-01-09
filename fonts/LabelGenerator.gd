@@ -47,7 +47,7 @@ func restartlabelmakingprocess(lsortdfunctorigin=null):
 			if lsortdfunctorigin != null:
 				sortdfunctorigin = lsortdfunctorigin
 				remainingxcnodenames.sort_custom(self, "sortdfunc")
-			print("restartlabelmakingprocess ", remainingropelabels, [workingropexcnodename, workingxcnodename])
+			#print("restartlabelmakingprocess ", remainingropelabels, [workingropexcnodename, workingxcnodename])
 			set_process(true)
 
 func clearalllabelactivity():

@@ -323,7 +323,9 @@ func maketubepolyassociation_andreorder(xcdrawing0, xcdrawing1):
 		print("no connecting poly available", polys0, polys1)
 		return [[], [], []]
 
-	var tubevec = xcdrawing1.global_transform.origin - xcdrawing0.global_transform.origin
+	#var tubevec = xcdrawing1.global_transform.origin - xcdrawing0.global_transform.origin
+	var tubevec = xcdrawing1.transform.xform(xcdrawing1.nodepointmean) - xcdrawing0.transform.xform(xcdrawing0.nodepointmean)
+	#print(" ", tubevec, " t ", ltubevec)
 	var tubevecdot0 = xcdrawing0.global_transform.basis.z.dot(tubevec)
 	var tubevecdot1 = xcdrawing1.global_transform.basis.z.dot(tubevec)
 	var polyinvert0 = (tubevecdot0 <= 0) == (pickedpolyindex0 != len(polys0) - 1)

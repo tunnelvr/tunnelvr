@@ -1,4 +1,4 @@
-[gd_scene load_steps=254 format=2]
+[gd_scene load_steps=256 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/default_env.tres" type="Environment" id=2]
@@ -1147,11 +1147,18 @@ roughness = 0.42
 [sub_resource type="QuadMesh" id=164]
 size = Vector2( 1, 0.2 )
 
+[sub_resource type="Gradient" id=200]
+offsets = PoolRealArray( 0, 0.00325733, 0.169381, 0.442997, 0.693811, 1 )
+colors = PoolColorArray( 0, 0, 0, 1, 0.32198, 0.015564, 0.996094, 1, 0.0230713, 0.105683, 0.984375, 1, 0.011673, 0.996094, 0.488502, 1, 0.946522, 0.976563, 0.0152588, 1, 0.992188, 0.0155029, 0.0155029, 1 )
+
+[sub_resource type="GradientTexture" id=201]
+gradient = SubResource( 200 )
+
 [sub_resource type="SpatialMaterial" id=165]
 params_cull_mode = 2
-albedo_color = Color( 0.180392, 0.835294, 0.105882, 1 )
-metallic = 0.31
-roughness = 0.67
+albedo_texture = SubResource( 201 )
+metallic = 0.26
+roughness = 0.83
 
 [sub_resource type="SpatialMaterial" id=166]
 params_cull_mode = 2
@@ -2116,6 +2123,7 @@ environment = ExtResource( 20 )
 projection = 1
 fov = 87.5304
 size = 70.0
+far = 200.0
 
 [node name="toRealPlanCamera" type="RemoteTransform" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/Camera"]
 transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, 0, 0, 0 )

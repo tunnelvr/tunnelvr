@@ -7,6 +7,6 @@ extends EditorScript
 	
 	
 func _run():
-	var a = Rect2(0,0,10,10)
-	print(a.intersects(Rect2(-4.1,0,5,1)))	
+	var a = { "a":2}
+	print(a.values())
 

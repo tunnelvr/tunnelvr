@@ -98,7 +98,7 @@ var ropehangprocessindex = 0
 
 var sortdfunctorigin = Vector3(0,0,0)
 func sortdfunc(a, b):
-	return sortdfunctorigin.distance_squared_to(a.positionvertforprocessing) < sortdfunctorigin.distance_squared_to(b.positionvertforprocessing)
+	return sortdfunctorigin.distance_squared_to(a.get_parent().nodepointmean) < sortdfunctorigin.distance_squared_to(b.get_parent().nodepointmean)
 
 func _process(delta):
 	nFrame += 1
@@ -113,8 +113,6 @@ func _process(delta):
 				sortdfunctorigin = get_node("/root/Spatial").playerMe.get_node("HeadCam").global_transform.origin
 				ropehangsinprocess.sort_custom(self, "sortdfunc")
 				ropehangprocessindex = 0
-				for Dr in ropehangsinprocess:
-					print("DDD  ", Dr, " ", sortdfunctorigin.distance_to(Dr.positionvertforprocessing))
 			verropthreadmutex.lock()
 			verropropehang_in = ropehangsinprocess[ropehangprocessindex]
 			verropthreadmutex.unlock()

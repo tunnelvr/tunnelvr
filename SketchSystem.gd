@@ -334,6 +334,8 @@ remote func actsketchchangeL(xcdatalist):
 		if xcdrawing.drawingtype == DRAWING_TYPE.DT_ROPEHANG:
 			if xcdrawing.drawingvisiblecode != DRAWING_TYPE.VIZ_XCD_HIDE:
 				xcdrawing.updatelinearropepaths()
+		elif xcdrawing.drawingtype == DRAWING_TYPE.DT_CENTRELINE:
+			xcdrawing.updatexcpaths_centreline(xcdrawing.get_node("PathLines"), xcdrawing.linewidth)
 		else:
 			xcdrawing.updatexcpaths_part(xcdrawing.get_node("PathLines"), xcdrawing.linewidth)
 

@@ -128,7 +128,6 @@ var totalropeleng = 0
 var totalstretchropeleng = 0
 var ropematerialcolor = null
 var ropematerialsolidcolor = null
-var positionvertforprocessing = Vector3(0,0,0)
 
 func setropematerialcolour(n):
 	var materialsystem = get_node("/root/Spatial/MaterialSystem")
@@ -136,7 +135,6 @@ func setropematerialcolour(n):
 	ropematerialsolidcolor = materialsystem.pathlinematerial("ropesolid").duplicate()
 	var h = hash([n,n,n,n,n,"abcv"])+5000
 	var d = ((h%10000)/10000.0*(321-22)+22)/400
-	print(" ****** ", h, " ", n , " ", d)
 	var col = Color.from_hsv(d, 0.47, 0.97)
 	ropematerialcolor.albedo_color = col
 	ropematerialsolidcolor.albedo_color = col
@@ -165,7 +163,6 @@ func derivenverts(nodepoints, onepathpairs):
 	oddropeverts = [ ]
 	totalropeleng = 0.0
 	var ropesequences = Polynets.makeropenodesequences(nodepoints, onepathpairs, oddropeverts)
-	positionvertforprocessing = nodepoints[ropesequences[0][0]] if len(ropesequences) != 0 else Vector3(0,0,0)
 	for r in range(len(ropesequences)):
 		var ropeseq = ropesequences[r]
 		var nropeseq = [ nnodenames[ropeseq[0]] ]

@@ -284,7 +284,8 @@ func updateplanviewentitysizes():
 	var rectrecttestt0 = OS.get_ticks_msec()
 	#print("\nstarting labeloverlaps\n")
 	for xcdrawingcentreline in get_tree().get_nodes_in_group("gpcentrelinegeo"):
-		xcdrawingcentreline.updatexcpaths_part(xcdrawingcentreline.get_node("PathLines_PlanView"), 0.035*nodesca)
+		xcdrawingcentreline.updatexcpaths_centreline(xcdrawingcentreline.get_node("PathLines_PlanView"), 0.035*nodesca)
+
 		for xcn in xcdrawingcentreline.get_node("XCnodes_PlanView").get_children():
 			xcn.get_node("CollisionShape").scale = Vector3(nodesca, nodesca, nodesca)
 			var stationlabel = xcn.get_node("StationLabel")
