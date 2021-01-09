@@ -76,7 +76,7 @@ func addropehang(ropehang):
 		ropehangsinprocess.push_back(ropehang)
 	ropehang.prevverletstretch = -1.0
 	ropehang.verletiterations = 0
-	print("addropehang ", ropehang.get_parent().get_name())
+	#print("addropehang ", ropehang.get_parent().get_name())
 	set_process(true)
 	
 func reportstretch(verropropehang):
@@ -95,6 +95,11 @@ var nFrame = 0
 var verropcountdowntimer = 0.0
 var verropcountdowntime = 0.5
 var ropehangprocessindex = 0
+
+var sortdfunctorigin = Vector3(0,0,0)
+func sortdfunc(a, b):
+	return sortdfunctorigin.distance_squared_to(a.positionvertforprocessing) < sortdfunctorigin.distance_squared_to(b.positionvertforprocessing)
+
 func _process(delta):
 	nFrame += 1
 	if verropcountdowntimer > 0.0:
@@ -104,6 +109,12 @@ func _process(delta):
 	if not verropthreadoperating:
 		if len(ropehangsinprocess) != 0:
 			ropehangprocessindex = (ropehangprocessindex+1)%len(ropehangsinprocess)
+			if ropehangprocessindex == 3:
+				sortdfunctorigin = get_node("/root/Spatial").playerMe.get_node("HeadCam").global_transform.origin
+				ropehangsinprocess.sort_custom(self, "sortdfunc")
+				ropehangprocessindex = 0
+				for Dr in ropehangsinprocess:
+					print("DDD  ", Dr, " ", sortdfunctorigin.distance_to(Dr.positionvertforprocessing))
 			verropthreadmutex.lock()
 			verropropehang_in = ropehangsinprocess[ropehangprocessindex]
 			verropthreadmutex.unlock()

@@ -52,7 +52,7 @@ func ropeseqtubesurfaceArrayMesh(verts, uvs, normals, indices, rpts, hangperpvec
 		p1 = p2
 		v1 = v2
 		p0u = p1u
-	print("ropelength L=", L, " curveL=", p0u/uvfacx)
+	#print("ropelength L=", L, " curveL=", p0u/uvfacx)
 
 
 # to abolish
@@ -128,6 +128,7 @@ var totalropeleng = 0
 var totalstretchropeleng = 0
 var ropematerialcolor = null
 var ropematerialsolidcolor = null
+var positionvertforprocessing = Vector3(0,0,0)
 
 func setropematerialcolour(n):
 	var materialsystem = get_node("/root/Spatial/MaterialSystem")
@@ -164,6 +165,7 @@ func derivenverts(nodepoints, onepathpairs):
 	oddropeverts = [ ]
 	totalropeleng = 0.0
 	var ropesequences = Polynets.makeropenodesequences(nodepoints, onepathpairs, oddropeverts)
+	positionvertforprocessing = nodepoints[ropesequences[0][0]] if len(ropesequences) != 0 else Vector3(0,0,0)
 	for r in range(len(ropesequences)):
 		var ropeseq = ropesequences[r]
 		var nropeseq = [ nnodenames[ropeseq[0]] ]
@@ -196,7 +198,7 @@ func derivenverts(nodepoints, onepathpairs):
 func updatehangingropepathsArrayMesh_Verlet(nodepoints, onepathpairs):
 	assert (len(onepathpairs) != 0)
 	var middlenodes = derivenverts(nodepoints, onepathpairs)
-	print("nropeseqLengs ", nropeseqLengs)
+	#print("nropeseqLengs ", nropeseqLengs)
 	
 	var verts = [] 
 	var normals = []

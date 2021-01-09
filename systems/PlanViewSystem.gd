@@ -301,7 +301,7 @@ func updateplanviewentitysizes():
 			#print(xcn.get_name(), " overlapping ", xcnrect_overlapping, " ", xcnrect)
 			if not xcnrect_overlapping:
 				labelrects.push_back(xcnrect)
-			if rectrecttests > 1000:
+			if rectrecttests > 10000:
 				print("rectrecttests ", rectrecttests, " ms:", OS.get_ticks_msec() - rectrecttestt0)
 				yield(get_tree().create_timer(0.2), "timeout")
 				rectrecttests = 0

@@ -12,7 +12,7 @@ var workingropexcnodename = null
 const XCnode_centreline = preload("res://nodescenes/XCnode_centreline.tscn")
 const XCnode_centrelineplanview = preload("res://nodescenes/XCnode_centrelineplanview.tscn")
 
-const textlabelcountdowntime = 0.12
+const textlabelcountdowntime = 0.2
 var textlabelcountdowntimer = 0.0
 
 var sortdfunctorigin = Vector3(0,0,0)
