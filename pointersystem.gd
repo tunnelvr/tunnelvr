@@ -314,6 +314,21 @@ func setpointertarget(laserroot, raycast, pointertargetshortdistance):
 	else:
 		laserroot.get_node("Length").scale.z = -laserroot.get_node("RayCast").cast_to.z
 		
+	if laserroot == LaserOrient:
+		var FloorLaserSpot = get_node("/root/Spatial/BodyObjects/FloorLaserSpot")
+		if FloorLaserSpot.visible:
+			if not (pointertargettype == "XCdrawing" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE):
+				FloorLaserSpot.get_node("RayCast").transform.origin = pointertargetpoint
+				FloorLaserSpot.get_node("RayCast").force_raycast_update()
+				if FloorLaserSpot.get_node("RayCast").is_colliding():
+					FloorLaserSpot.get_node("FloorSpot").transform.origin = FloorLaserSpot.get_node("RayCast").get_collision_point()
+					FloorLaserSpot.get_node("FloorSpot").visible = true
+				else:
+					FloorLaserSpot.get_node("FloorSpot").visible = false
+			else:
+				FloorLaserSpot.get_node("FloorSpot").visible = false
+
+		
 	if LaserSelectLine.visible:
 		var lslfrom = null
 		if pointertarget != null and activetargetnode != null:
@@ -1210,6 +1225,7 @@ func _physics_process(delta):
 			LaserOrient.get_node("LaserSpot").global_transform.origin = planviewcontactpoint
 			LaserOrient.get_node("Length").scale.z = -LaserOrient.get_node("LaserSpot").translation.z
 			LaserOrient.get_node("LaserSpot").visible = false
+			LaserOrient.get_node("LaserSpot/FloorLaserSpot/FloorSpot").visible = false
 			if planviewsystem.planviewactive:
 				var inguipanelsection = pointerplanviewtarget.processplanviewpointing(planviewcontactpoint, (handrightcontroller.is_button_pressed(BUTTONS.HT_PINCH_INDEX_FINGER) if Tglobal.questhandtrackingactive else handrightcontroller.is_button_pressed(BUTTONS.VR_TRIGGER)) or Input.is_mouse_button_pressed(BUTTON_LEFT))
 				activelaserroot = planviewsystem.get_node("RealPlanCamera/LaserScope/LaserOrient")
