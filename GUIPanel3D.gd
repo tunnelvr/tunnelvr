@@ -112,11 +112,46 @@ func _on_playerscale_selected(index):
 
 	
 func _on_switchtest(index):
-	if index == 4:
+	var nssel = $Viewport/GUI/Panel/SwitchTest.get_item_text(index)
+	print(" _on_switchtest ", nssel, " ", index)
+	#normal
+	#hide floors
+	#all grey
+	#hide xc
+	#toggle guardian
+	#add glider
+	if nssel == "hide walls":
+		Tglobal.hidecavewallstoseefloors = true
+		for xcdrawing in sketchsystem.get_node("XCdrawings").get_children():
+			if xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
+				xcdrawing.get_node("PathLines").visible = true
+				if xcdrawing.has_node("XCflatshell"):
+					xcdrawing.get_node("XCflatshell").visible = false
+		for xctube in sketchsystem.get_node("XCtubes").get_children():
+			for xctubesector in xctube.get_node("XCtubesectors").get_children():
+				xctubesector.visible = false
+			xctube.get_node("PathLines").visible = true
+		toggleguipanelvisibility(null)
+		return
+		
+	elif Tglobal.hidecavewallstoseefloors:
+		Tglobal.hidecavewallstoseefloors = false
+		for xcdrawing in sketchsystem.get_node("XCdrawings").get_children():
+			if xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
+				xcdrawing.setdrawingvisiblecode(xcdrawing.drawingvisiblecode)
+				if xcdrawing.has_node("XCflatshell"):
+					xcdrawing.get_node("XCflatshell").visible = true
+		for xctube in sketchsystem.get_node("XCtubes").get_children():
+			for xctubesector in xctube.get_node("XCtubesectors").get_children():
+				xctubesector.visible = true
+			xctube.setxctubepathlinevisibility(sketchsystem)
+
+	if index == 4:  # "toggle guardian"
 		var guardianpolyvisible = not playerMe.get_node("GuardianPoly").visible
 		for player in get_node("/root/Spatial/Players").get_children():
 			player.get_node("GuardianPoly").visible = guardianpolyvisible
 		return
+		
 	if index == 5:
 		var gliderscene = load("res://assets/glider1/glider1.glb").instance()
 		var boulderclutter = get_node("/root/Spatial/BoulderClutter")
@@ -165,8 +200,7 @@ func _on_buttonload_choke():
 	get_node("/root/Spatial/BodyObjects/PlayerMotion").makeboulderchoke(50)
 	$Viewport/GUI/Panel/Label.text = "Boulder choke!"
 	toggleguipanelvisibility(null)
-	
-	print(" ovr_guardian_system.get_boundary_geometry() == " + str(playerMe.ovr_guardian_system.get_boundary_geometry()));
+	print(" ovr_guardian_system.get_boundary_geometry() == " + str(playerMe.ovr_guardian_system.get_boundary_geometry() if playerMe.ovr_guardian_system != null else "null"));
 
 	
 

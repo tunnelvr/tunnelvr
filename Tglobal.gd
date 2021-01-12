@@ -15,3 +15,5 @@ var questhandtrackingactive = false
 var handflickmotiongestureposition = 0
 var soundsystem = null
 const version = "v0.5.3"
+
+var hidecavewallstoseefloors = false

@@ -30,6 +30,7 @@ var activetargetwall = null
 var activetargettube = null
 var activetargettubesectorindex = -1
 var activetargetxcflatshell = null
+var prevactivetargettubetohideonsecondselect = null
 
 var activetargetwallgrabbed = null
 var activetargetwallgrabbedtransform = null
@@ -98,6 +99,7 @@ func setpointertargetmaterial():
 		pointertargetwall.updateformetresquaresscaletexture()
 	if pointertargettype == "GripMenuItem":
 		gripmenu.setgripmenupointer(pointertarget)
+
 
 func clearednodematerialtype(xcn, bwallactive):
 	var ch = xcn.get_name()[0]
@@ -317,7 +319,7 @@ func setpointertarget(laserroot, raycast, pointertargetshortdistance):
 	if laserroot == LaserOrient:
 		var FloorLaserSpot = get_node("/root/Spatial/BodyObjects/FloorLaserSpot")
 		if FloorLaserSpot.visible:
-			if not (pointertargettype == "XCdrawing" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE):
+			if pointertargetpoint != null and not (pointertargettype == "XCdrawing" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE):
 				FloorLaserSpot.get_node("RayCast").transform.origin = pointertargetpoint
 				FloorLaserSpot.get_node("RayCast").force_raycast_update()
 				if FloorLaserSpot.get_node("RayCast").is_colliding():
@@ -426,7 +428,12 @@ func buttonpressed_vrgrip():
 				activetargettube.updatetubelinkpaths(sketchsystem)
 			activetargettube.get_node("PathLines").visible = true
 			activetargettube.get_node("PathLines").set_surface_material(0, materialsystem.pathlinematerial("nodepthtest"))
-
+			if Tglobal.hidecavewallstoseefloors:
+				if prevactivetargettubetohideonsecondselect != null:
+					prevactivetargettubetohideonsecondselect.visible = false
+				pointertarget.visible = true
+				prevactivetargettubetohideonsecondselect = pointertarget
+				
 		else:
 			print("Wrong: sector index not match sectors in tubedata")
 
@@ -1225,7 +1232,7 @@ func _physics_process(delta):
 			LaserOrient.get_node("LaserSpot").global_transform.origin = planviewcontactpoint
 			LaserOrient.get_node("Length").scale.z = -LaserOrient.get_node("LaserSpot").translation.z
 			LaserOrient.get_node("LaserSpot").visible = false
-			LaserOrient.get_node("LaserSpot/FloorLaserSpot/FloorSpot").visible = false
+			get_node("/root/Spatial/BodyObjects/FloorLaserSpot/FloorSpot").visible = false
 			if planviewsystem.planviewactive:
 				var inguipanelsection = pointerplanviewtarget.processplanviewpointing(planviewcontactpoint, (handrightcontroller.is_button_pressed(BUTTONS.HT_PINCH_INDEX_FINGER) if Tglobal.questhandtrackingactive else handrightcontroller.is_button_pressed(BUTTONS.VR_TRIGGER)) or Input.is_mouse_button_pressed(BUTTON_LEFT))
 				activelaserroot = planviewsystem.get_node("RealPlanCamera/LaserScope/LaserOrient")

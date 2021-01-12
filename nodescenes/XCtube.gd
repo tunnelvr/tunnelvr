@@ -775,6 +775,8 @@ func updatetubeshell(xcdrawings):
 					xctubesector.get_node("MeshInstance").visible = false
 					xctubesector.get_node("CollisionShape").disabled = true
 		$XCtubesectors.add_child(xctubesector)
+		if Tglobal.hidecavewallstoseefloors:
+			xctubesector.visible = false
 
 
 func shellcontourxcside(xcdrawing, poly, ila, ilaN, pref):
