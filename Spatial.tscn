@@ -1,4 +1,4 @@
-[gd_scene load_steps=261 format=2]
+[gd_scene load_steps=260 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/default_env.tres" type="Environment" id=2]
@@ -54,6 +54,7 @@
 [ext_resource path="res://sounds/menu_taping.wav" type="AudioStream" id=52]
 [ext_resource path="res://guimaterials/borderedfloor.material" type="Material" id=53]
 [ext_resource path="res://lightweighttextures/rope.jpg" type="Texture" id=54]
+[ext_resource path="res://lightweighttextures/croppedscallop.jpg" type="Texture" id=55]
 
 [sub_resource type="CubeMesh" id=1]
 size = Vector3( 0.35, 0.01, 0.01 )
@@ -544,14 +545,6 @@ uv1_offset = Vector3( 0, 0.06, 0 )
 
 [sub_resource type="PlaneMesh" id=86]
 
-[sub_resource type="OpenSimplexNoise" id=87]
-octaves = 1
-period = 11.1
-
-[sub_resource type="NoiseTexture" id=88]
-seamless = true
-noise = SubResource( 87 )
-
 [sub_resource type="OpenSimplexNoise" id=89]
 octaves = 1
 period = 105.7
@@ -570,10 +563,9 @@ noise = SubResource( 91 )
 [sub_resource type="SpatialMaterial" id=93]
 params_specular_mode = 2
 params_cull_mode = 2
-albedo_color = Color( 0.811765, 0.513726, 0.0901961, 1 )
-albedo_texture = SubResource( 88 )
+albedo_texture = ExtResource( 55 )
 metallic_specular = 0.41
-roughness = 0.72
+roughness = 0.75
 roughness_texture = SubResource( 92 )
 ao_enabled = true
 ao_light_affect = 1.0
@@ -592,8 +584,7 @@ noise = SubResource( 94 )
 
 [sub_resource type="SpatialMaterial" id=96]
 params_cull_mode = 2
-albedo_color = Color( 0.980392, 0.552941, 0.054902, 1 )
-albedo_texture = SubResource( 88 )
+albedo_texture = ExtResource( 55 )
 metallic = 0.56
 metallic_texture = SubResource( 95 )
 roughness = 0.53
