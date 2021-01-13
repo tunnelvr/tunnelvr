@@ -92,16 +92,23 @@ func _on_buttonflywalkreversed_toggled(button_pressed):
 
 func _on_playerscale_selected(index):
 	var newplayerscale = float($Viewport/GUI/Panel/WorldScale.get_item_text(index))
+	var oldplayerscale = playerMe.playerscale
+	print("transorig ", playerMe.get_node("HeadCam").transform.origin)
+	var headcamvec = playerMe.get_node("HeadCam").transform.origin
+	var newplayermetransformheadfixed = playerMe.transform.origin + headcamvec - headcamvec*newplayerscale/oldplayerscale
 	ARVRServer.world_scale = newplayerscale
 	playerMe.playerscale = newplayerscale
 	playerMe.get_node("HandLeft").setcontrollerhandtransform(playerMe.playerscale)
 	playerMe.get_node("HandRight").setcontrollerhandtransform(playerMe.playerscale)
 	if playerMe.playerscale == 1.0:
 		var PlayerDirections = get_node("/root/Spatial/BodyObjects/PlayerDirections")
+		playerMe.transform.origin = newplayermetransformheadfixed + Vector3(0,2,0)
 		PlayerDirections.forceontogroundtimedown = 0.75
 		PlayerDirections.floorprojectdistance = 50
 		playerMe.playerflyscale = 1.0
+
 	else:
+		playerMe.transform.origin = newplayermetransformheadfixed
 		if playerMe.playerscale >= 10:
 			playerMe.playerflyscale = playerMe.playerscale*0.2
 		else:
