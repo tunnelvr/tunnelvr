@@ -62,7 +62,7 @@ func _process(delta):
 			set_process(false)
 			return
 		var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
-		if not planviewsystem.visible and not planviewsystem.planviewcontrols.get_node("CheckBoxTubesVisible").pressed:
+		if not planviewsystem.planviewcontrols.get_node("CheckBoxCentrelinesVisible").pressed:
 			set_process(false)
 			return
 

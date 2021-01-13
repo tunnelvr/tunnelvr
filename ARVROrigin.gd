@@ -94,18 +94,19 @@ var handflickmotiontimer = 0.0
 var handflickfacesum = 0.0
 var handflickvelsum = 0.0
 var handflickmotiongesture = 0
+
 func _physics_process(delta):
 	$HandLeft.middleringbutton.get_node("MeshInstance").get_surface_material(0).emission_energy = 1 if $HandLeft/RayCast.is_colliding() else 0
 	$HandRight.middleringbutton.get_node("MeshInstance").get_surface_material(0).emission_energy = 1 if $HandRight/RayCast.is_colliding() else 0
 
 	var handflickface = 0.0
 	if $HandRight.handvalid:
-		var handprojectionpoint = $HandRight.transform.origin + $HandRight.transform.basis.x*(-0.2)
-		var handflickpos = handprojectionpoint - $HeadCam.transform.origin
+		var handprojectionpoint = $HandRight.global_transform.origin + $HandRight.global_transform.basis.x*(-0.2)
+		var handflickpos = handprojectionpoint - $HeadCam.global_transform.origin
 		if len(handflickdistancestack) >= handflickdistancestack_sizemax:
 			handflickdistancestack.pop_front()
 		handflickdistancestack.push_back(handflickpos.length())
-		handflickface = handflickpos.dot($HandRight.transform.basis.y)
+		handflickface = handflickpos.dot($HandRight/HandFlickFaceY.global_transform.basis.y)
 	else:
 		handflickdistancestack.clear()
 		handflickmotiontransit = 0

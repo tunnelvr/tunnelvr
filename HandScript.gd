@@ -119,6 +119,7 @@ func addfingerpinchbutton(bname):
 		fingerpinchbutton.get_node("MeshInstance").transform.origin *= -1
 	fingerpinchbutton.get_node("MeshInstance").set_surface_material(0, fingerpinchbutton.get_node("MeshInstance").get_surface_material(0).duplicate())
 	boneattachment.add_child(fingerpinchbutton)
+	fingerpinchbutton.set_name(bname)
 	return fingerpinchbutton
 	
 func initovrhandtracking(lovr_hand_tracking, lhandcontroller):
@@ -176,6 +177,7 @@ func addboneattachment(bname):
 	var boneattachment = BoneAttachment.new()
 	boneattachment.bone_name = ("b_l_" if islefthand else "b_r_") + bname
 	handskeleton.add_child(boneattachment)
+	boneattachment.set_name(bname)
 	return boneattachment
 
 func addremotetransform(bname, node, rtransform):
