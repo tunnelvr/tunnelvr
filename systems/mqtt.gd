@@ -1,5 +1,4 @@
-tool
-#extends EditorPlugin
+extends Node
 
 # Copyright (c) 2019, Pycom Limited.
 # Some parts copyright (c) 2020, Dynamic Devices Ltd
@@ -11,18 +10,17 @@ tool
 #
 #
 # Ported to gdscript by Alex J Lennon <ajlennon@dynamicdevices.co.uk>
+# from https://github.com/pycom/pycom-libraries/blob/master/lib/mqtt/mqtt.py
 #
 # - ssl not implemented yet
-# - lwt not tested
 # - qos 1,2 may not work
 #
 # Code should be considered ALPHA
 
-extends Node
+export var server = "test.mosquitto.org"
+export var port = 1883
+export var client_id = ""
 
-var server = ""
-var port = 1883
-var client_id = ""
 var client = null
 var ssl = false
 var ssl_params = null
@@ -35,27 +33,26 @@ var lw_msg = null
 var lw_qos = 0
 var lw_retain = false
 
-var _timer = null
-
 signal received_message(topic, message)
 
-#func _init(client_id, server, port=0, user=null, password=null, keepalive=0,ssl=false, ssl_params={}):
-#	self.server = server
-#	if port == 0:
-#		port = 8883 if ssl else 1883
-#	self.port = port
-#	self.client_id = client_id
-#	self.client = null
-#	self.ssl = ssl
-#	self.ssl_params = ssl_params
-#	self.pid = 0
-#	self.user = user
-#	self.pswd = password
-#	self.keepalive = keepalive
-#	self.lw_topic = null
-#	self.lw_msg = null
-#	self.lw_qos = 0
-#	self.lw_retain = false
+func get_data_bytes_async(n, client=null):
+	var timeout = 10
+	var timestep = 0.2
+	if client == null:
+		client = self.client
+	yield(get_tree(), "idle_frame") 
+	while client.get_available_bytes() < n:
+		yield(get_tree().create_timer(timestep), "timeout")
+		timeout -= timestep
+		if timeout < 0:
+			print("get_data_bytes_async ", n, " timed out")
+			return null
+	return client.get_data(n)
+
+func _ready():
+	if client_id == "":
+		client_id = OS.get_unique_id()
+
 
 func _recv_len():
 	var n = 0
@@ -81,22 +78,22 @@ func connect_to_server(clean_session=true):
 	assert (server != "")
 	if client_id == "":
 		client_id = "rr%d" % randi()
-	self.client = StreamPeerTCP.new()
-	self.client.set_no_delay(true)
-	self.client.set_big_endian(true)
+	var lclient = StreamPeerTCP.new()
+	lclient.set_no_delay(true)
+	lclient.set_big_endian(true)
 	print("Connecting to %s:%s" % [self.server, self.port])
-	self.client.connect_to_host(self.server, self.port)
+	lclient.connect_to_host(self.server, self.port)
 #	if self.ssl:
 #		import ussl
 #		self.sock = ussl.wrap_socket(self.sock, **self.ssl_params)
 	
 	var timestep = 0.2
-	while not self.client.is_connected_to_host():
+	while not lclient.is_connected_to_host():
 		yield(get_tree().create_timer(timestep), "timeout")
 		timeout -= timestep
 		if timeout < 0:
 			return false
-	while self.client.get_status() != StreamPeerTCP.STATUS_CONNECTED:
+	while lclient.get_status() != StreamPeerTCP.STATUS_CONNECTED:
 		yield(get_tree().create_timer(timestep), "timeout")
 		timeout -= timestep
 		if timeout < 0:
@@ -135,7 +132,11 @@ func connect_to_server(clean_session=true):
 	msg.append(self.client_id.length() & 0xFF)
 	msg.append_array(self.client_id.to_ascii())
 	if self.lw_topic:
+		msg.append(self.lw_topic.length() >> 8)
+		msg.append(self.lw_topic.length() & 0xFF)
 		msg.append_array(self.lw_topic.to_ascii())
+		msg.append(self.lw_msg.length() >> 8)
+		msg.append(self.lw_msg.length() & 0xFF)
 		msg.append_array(self.lw_msg.to_ascii())
 	if self.user != null:
 		msg.append(self.user.length() >> 8)
@@ -144,9 +145,12 @@ func connect_to_server(clean_session=true):
 		msg.append(self.pswd.length() >> 8)
 		msg.append(self.pswd.length() & 0xFF)
 		msg.append_array(self.pswd.to_ascii())
-	self.client.put_data(msg)
+	lclient.put_data(msg)
 	
-	var ret = self.client.get_data(4)
+	var ret = yield(get_data_bytes_async(4, lclient), "completed")
+	if ret == null:
+		self.client = null
+		return false
 	var error = ret[0]
 	assert(error == 0)
 	var data = ret[1]
@@ -154,26 +158,21 @@ func connect_to_server(clean_session=true):
 	if data[3] != 0:
 		push_error(data[3])
 
-	# Setup timer to check for incoming messages
-	_timer = Timer.new()
-	add_child(_timer)
-
-	_timer.connect("timeout", self, "check_msg")
-	_timer.set_wait_time(1.0)
-	_timer.set_one_shot(false) # Make sure it loops
-	_timer.start()
-
-	return data[2] & 1
+	self.client = lclient
+	$Timer.start()
+	#return data[2] & 1
+	return true
 
 func disconnect_from_server():
 	self.client.put_u16(0xE000)
 	self.client.disconnect_from_host()
-	_timer.stop()
+	$Timer.stop()
 	
 func ping():
 	self.client.put_u16(0xC000)
 
 func publish(topic, msg, retain=false, qos=0):
+	print("publishing ", topic, " ", msg)
 	if(self.client == null):
 		return
 	if(!self.client.is_connected_to_host()):
@@ -206,7 +205,6 @@ func publish(topic, msg, retain=false, qos=0):
 		pkt.append(self.pid & 0xFF)
 
 	pkt.append_array(msg.to_ascii())
-	
 	self.client.put_data(pkt)
 	
 	if qos == 1:
@@ -238,30 +236,44 @@ func subscribe(topic, qos=0):
 	
 	self.client.put_data(msg)
 	
-	while 1:
+	while 0:
 		var op = self.wait_msg()
 		if op == 0x90:
-			var ret = self.client.get_data(4)
+			var ret = yield(get_data_bytes_async(4), "completed")
 			var error = ret[0]
 			assert(error == 0)
 			var data = ret[1]
-			assert(data[1] == (self.pid >> 8)  and data[2] == (self.pid & 0x0F))
+			assert(data[1] == (self.pid >> 8) and data[2] == (self.pid & 0x0F))
 			if data[3] == 0x80:
 				push_error(data[3])
 			return
+
+var in_wait_msg = false
+func _on_Timer_timeout():
+	if in_wait_msg:
+		return
+	if(self.client == null):
+		return
+	if(!self.client.is_connected_to_host()):
+		return
+	if(self.client.get_available_bytes() <= 0):
+		return
+	in_wait_msg = true
+	while self.client.get_available_bytes() > 0:
+		yield(wait_msg(), "completed")
+	in_wait_msg = false
+	
 
 # Wait for a single incoming MQTT message and process it.
 # Subscribed messages are delivered to a callback previously
 # set by .set_callback() method. Other (internal) MQTT
 # messages processed internally.
 func wait_msg():
-	
+	yield(get_tree(), "idle_frame") 
 	if(self.client == null):
 		return
-		
 	if(!self.client.is_connected_to_host()):
 		return
-		
 	if(self.client.get_available_bytes() <= 0):
 		return
 		
@@ -280,15 +292,16 @@ func wait_msg():
 		return op
 	var sz = _recv_len()
 	var topic_len = self.client.get_u16()
-	var ret = self.client.get_data(topic_len)
+	var ret = yield(get_data_bytes_async(topic_len), "completed")
 	var error = ret[0]
 	assert(error == 0)
 	var topic = ret[1].get_string_from_ascii()
 	sz -= topic_len + 2
+	var pid
 	if op & 6:
-		var pid = self.sock.get_u16()
+		pid = self.sock.get_u16()
 		sz -= 2
-	ret  = self.client.get_data(sz)
+	ret  = yield(get_data_bytes_async(sz), "completed")
 	error = ret[0]
 	assert(error == 0)
 	# warn: May not want to convert payload as ascii
@@ -299,13 +312,11 @@ func wait_msg():
 #	self.cb(topic, msg)
 	if op & 6 == 2:
 		var pkt = PoolByteArray()
-		# Must be an easier way of doing this...
 		pkt.append(0x40);
 		pkt.append(0x02);
-		pkt.append(0x00);
-		pkt.append(0x00);
-#		struct.pack_into("!H", pkt, 2, pid)
-#		self.sock.write(pkt)
+		pkt.append(pid >> 8);
+		pkt.append(pid & 0xFF);
+		self.sock.write(pkt)
 	elif op & 6 == 4:
 		assert(0)
 

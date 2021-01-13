@@ -3260,6 +3260,9 @@ script = ExtResource( 50 )
 [node name="mqttnode" type="Node" parent="MQTTExperiment"]
 script = ExtResource( 48 )
 
+[node name="Timer" type="Timer" parent="MQTTExperiment/mqttnode"]
+wait_time = 0.17
+
 [node name="LightingExperiments" type="Spatial" parent="."]
 visible = false
 
@@ -3311,3 +3314,4 @@ collision_layer = 32
 collision_mask = 0
 
 [node name="CollisionShape" type="CollisionShape" parent="picturepalace"]
+[connection signal="timeout" from="MQTTExperiment/mqttnode/Timer" to="MQTTExperiment/mqttnode" method="_on_Timer_timeout"]

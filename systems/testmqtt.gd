@@ -11,18 +11,20 @@ func _ready():
 	topicstem = "tunnelvr/u%s/" % uniqstring
 	$mqttnode.server = "mosquitto.doesliverpool.xyz"
 	$mqttnode.client_id = "u"+uniqstring
-	print("disabling mqtt")
-	#call_deferred("connectmqtt")
+	$mqttnode.connect("received_message", self, "received_message")
+	if true:
+		call_deferred("connectmqtt")
+	else:
+		print("disabling mqtt")
 
 func mqttpublish(subtopic, payload):
 	$mqttnode.publish(topicstem+subtopic, payload)
 	
 func connectmqtt():
+	$mqttnode.set_last_will(topicstem+"status", "stopped", true)
 	if yield($mqttnode.connect_to_server(), "completed"):
-		$mqttnode.subscribe(topicstem+"cmd")
-		$mqttnode.connect("received_message", self, "received_message")
-		$mqttnode.publish(topicstem+"status", "starting", true)
-		$mqttnode.set_last_will(topicstem+"status", "stopped", true)
+		$mqttnode.publish(topicstem+"status", "connected", true)
+		print("subscribing to ", topicstem)
 		$mqttnode.subscribe(topicstem+"cmd")
 	else:
 		print("mqtt failed to connect")
