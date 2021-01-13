@@ -127,31 +127,6 @@ func _on_switchtest(index):
 	#hide xc
 	#toggle guardian
 	#add glider
-	if nssel == "hide walls":
-		Tglobal.hidecavewallstoseefloors = true
-		for xcdrawing in sketchsystem.get_node("XCdrawings").get_children():
-			if xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
-				xcdrawing.get_node("PathLines").visible = true
-				if xcdrawing.has_node("XCflatshell"):
-					xcdrawing.get_node("XCflatshell").visible = false
-		for xctube in sketchsystem.get_node("XCtubes").get_children():
-			for xctubesector in xctube.get_node("XCtubesectors").get_children():
-				xctubesector.visible = false
-			xctube.get_node("PathLines").visible = true
-		toggleguipanelvisibility(null)
-		return
-		
-	elif Tglobal.hidecavewallstoseefloors:
-		Tglobal.hidecavewallstoseefloors = false
-		for xcdrawing in sketchsystem.get_node("XCdrawings").get_children():
-			if xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
-				xcdrawing.setdrawingvisiblecode(xcdrawing.drawingvisiblecode)
-				if xcdrawing.has_node("XCflatshell"):
-					xcdrawing.get_node("XCflatshell").visible = true
-		for xctube in sketchsystem.get_node("XCtubes").get_children():
-			for xctubesector in xctube.get_node("XCtubesectors").get_children():
-				xctubesector.visible = true
-			xctube.setxctubepathlinevisibility(sketchsystem)
 
 	if index == 4:  # "toggle guardian"
 		var guardianpolyvisible = not playerMe.get_node("GuardianPoly").visible
@@ -253,9 +228,6 @@ func _ready():
 func clickbuttonheadtorch():
 	$Viewport/GUI/Panel/ButtonHeadtorch.pressed = not $Viewport/GUI/Panel/ButtonHeadtorch.pressed
 	_on_buttonheadtorch_toggled($Viewport/GUI/Panel/ButtonHeadtorch.pressed)
-
-
-
 
 remote func playerjumpgoto(puppetplayerid, lforcetogroundtimedown):
 	var puppetplayername = "NetworkedPlayer"+String(puppetplayerid)

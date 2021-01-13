@@ -136,9 +136,14 @@ func transferintorealviewport(setascurrentcamera):
 		$PlanView/ProjectionScreen.get_surface_material(0).albedo_texture = $PlanView/Viewport.get_texture()
 
 
-func checkboxtubesvisible_pressed():
+func checkboxplantubesvisible_pressed():
 	var pvchange = planviewtodict()
-	pvchange["tubesvisible"] = planviewcontrols.get_node("CheckBoxTubesVisible").pressed 
+	pvchange["plantubesvisible"] = planviewcontrols.get_node("CheckBoxPlanTubesVisible").pressed 
+	sketchsystem.actsketchchange([{"planview":pvchange}]) 
+
+func checkboxrealtubesvisible_pressed():
+	var pvchange = planviewtodict()
+	pvchange["realtubesvisible"] = planviewcontrols.get_node("CheckBoxRealTubesVisible").pressed
 	sketchsystem.actsketchchange([{"planview":pvchange}]) 
 
 func checkcentrelinesvisible_pressed():
@@ -158,7 +163,8 @@ func _ready():
 	planviewcontrols.get_node("ZoomView/ButtonCentre").connect("pressed", self, "buttoncentre_pressed")
 	planviewcontrols.get_node("ButtonClosePlanView").connect("pressed", self, "buttonclose_pressed")
 	planviewcontrols.get_node("FloorMove/ButtonDelPaper").connect("pressed", self, "buttondelpaper_pressed")
-	planviewcontrols.get_node("CheckBoxTubesVisible").connect("pressed", self, "checkboxtubesvisible_pressed")
+	planviewcontrols.get_node("CheckBoxPlanTubesVisible").connect("pressed", self, "checkboxplantubesvisible_pressed")
+	planviewcontrols.get_node("CheckBoxRealTubesVisible").connect("pressed", self, "checkboxrealtubesvisible_pressed")
 	planviewcontrols.get_node("CheckBoxCentrelinesVisible").connect("pressed", self, "checkcentrelinesvisible_pressed")
 	planviewcontrols.get_node("FloorMove/FloorStyle").connect("item_selected", self, "floorstyle_itemselected")
 	planviewcontrols.get_node("CheckBoxFileTree").connect("toggled", self, "checkboxfiletree_toggled")
@@ -181,11 +187,16 @@ func readydeferred():
 func planviewtodict():
 	return { "visible":visible,
 			 "planviewactive":planviewactive, 
-			 "tubesvisible":(($PlanView/Viewport/PlanGUI/Camera.cull_mask & CollisionLayer.VL_xcshells) != 0),
+			 "plantubesvisible":(($PlanView/Viewport/PlanGUI/Camera.cull_mask & CollisionLayer.VL_xcshells) != 0),
+			 "realtubesvisible":(not Tglobal.hidecavewallstoseefloors),
 			 "centrelinesvisible":(($PlanView/Viewport/PlanGUI/Camera.cull_mask & CollisionLayer.VL_centrelinestationsplanview) != 0),
 			 "transformpos":$PlanView.global_transform,
 			 "plancamerapos":$PlanView/Viewport/PlanGUI/Camera.translation,
-			 "plancamerasize":$PlanView/Viewport/PlanGUI/Camera.size
+			 "plancamerasize":$PlanView/Viewport/PlanGUI/Camera.size,
+			
+			# to abolish
+			 "tubesvisible":(($PlanView/Viewport/PlanGUI/Camera.cull_mask & CollisionLayer.VL_xcshells) != 0),
+
 			}
 
 
@@ -231,7 +242,8 @@ func actplanviewdict(pvchange):
 
 	if "centrelinesvisible" in pvchange:
 		planviewcontrols.get_node("CheckBoxCentrelinesVisible").pressed = pvchange["centrelinesvisible"]
-		planviewcontrols.get_node("CheckBoxTubesVisible").pressed = pvchange["tubesvisible"]
+		planviewcontrols.get_node("CheckBoxPlanTubesVisible").pressed = pvchange["plantubesvisible"]
+		planviewcontrols.get_node("CheckBoxRealTubesVisible").pressed = pvchange["realtubesvisible"]
 
 		var plancameracullmask
 		var plancameraraycollisionmask
@@ -250,9 +262,40 @@ func actplanviewdict(pvchange):
 			plancameraraycollisionmask = CollisionLayer.CLV_PlanRayNoCentreline
 			plancameracullmask = CollisionLayer.VLCM_PlanViewCameraNoCentreline
 		
-		if not pvchange["tubesvisible"]:
+		if not pvchange["plantubesvisible"]:
 			plancameracullmask &= CollisionLayer.VLCM_PlanViewCameraNoTube
 			plancameraraycollisionmask &= CollisionLayer.CLV_PlanRayNoTube
+			
+		if Tglobal.hidecavewallstoseefloors != (not pvchange["realtubesvisible"]):
+			Tglobal.hidecavewallstoseefloors = (not pvchange["realtubesvisible"])
+			if Tglobal.hidecavewallstoseefloors:
+				for xcdrawing in sketchsystem.get_node("XCdrawings").get_children():
+					if xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
+						xcdrawing.get_node("PathLines").visible = true
+						if xcdrawing.has_node("XCflatshell"):
+							xcdrawing.get_node("XCflatshell").visible = false
+				for xctube in sketchsystem.get_node("XCtubes").get_children():
+					for xctubesector in xctube.get_node("XCtubesectors").get_children():
+						xctubesector.visible = false
+					xctube.get_node("PathLines").visible = true
+		
+			else:
+				for xcdrawing in sketchsystem.get_node("XCdrawings").get_children():
+					if xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
+						xcdrawing.setdrawingvisiblecode(xcdrawing.drawingvisiblecode)
+						if xcdrawing.has_node("XCflatshell"):
+							xcdrawing.get_node("XCflatshell").visible = true
+				for xctube in sketchsystem.get_node("XCtubes").get_children():
+					for xctubesector in xctube.get_node("XCtubesectors").get_children():
+						xctubesector.visible = true
+					xctube.setxctubepathlinevisibility(sketchsystem)
+
+
+
+
+
+			
+		
 		get_node("PlanView/Viewport/PlanGUI/Camera").cull_mask = plancameracullmask
 		get_node("RealPlanCamera/LaserScope/LaserOrient/RayCast").collision_mask = plancameraraycollisionmask
 
