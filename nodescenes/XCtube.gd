@@ -298,9 +298,10 @@ func updatetubelinkpaths(sketchsystem):
 	$PathLines.set_surface_material(0, get_node("/root/Spatial/MaterialSystem").pathlinematerial("normal"))
 
 
-func pickpolysindex(polys, xcdrawinglink, j):
+func pickpolysindex(polys, xcdrawinglink, js):
 	for i in range(len(polys)):
 		var meetsallnodes = true
+		var j = js
 		while j < len(xcdrawinglink):
 			var meetnodename = xcdrawinglink[j]
 			if not polys[i].has(meetnodename):

@@ -242,8 +242,9 @@ func actplanviewdict(pvchange):
 
 	if "centrelinesvisible" in pvchange:
 		planviewcontrols.get_node("CheckBoxCentrelinesVisible").pressed = pvchange["centrelinesvisible"]
-		planviewcontrols.get_node("CheckBoxPlanTubesVisible").pressed = pvchange["plantubesvisible"]
-		planviewcontrols.get_node("CheckBoxRealTubesVisible").pressed = pvchange["realtubesvisible"]
+
+		if "tubesvisible" in pvchange and (not ("plantubesvisible" in pvchange)): # to abolish
+			pvchange["plantubesvisible"] = pvchange["tubesvisible"]
 
 		var plancameracullmask
 		var plancameraraycollisionmask
@@ -265,40 +266,32 @@ func actplanviewdict(pvchange):
 		if not pvchange["plantubesvisible"]:
 			plancameracullmask &= CollisionLayer.VLCM_PlanViewCameraNoTube
 			plancameraraycollisionmask &= CollisionLayer.CLV_PlanRayNoTube
-			
-		if Tglobal.hidecavewallstoseefloors != (not pvchange["realtubesvisible"]):
-			Tglobal.hidecavewallstoseefloors = (not pvchange["realtubesvisible"])
-			if Tglobal.hidecavewallstoseefloors:
-				for xcdrawing in sketchsystem.get_node("XCdrawings").get_children():
-					if xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
-						xcdrawing.get_node("PathLines").visible = true
-						if xcdrawing.has_node("XCflatshell"):
-							xcdrawing.get_node("XCflatshell").visible = false
-				for xctube in sketchsystem.get_node("XCtubes").get_children():
-					for xctubesector in xctube.get_node("XCtubesectors").get_children():
-						xctubesector.visible = false
-					xctube.get_node("PathLines").visible = true
-		
-			else:
-				for xcdrawing in sketchsystem.get_node("XCdrawings").get_children():
-					if xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
-						xcdrawing.setdrawingvisiblecode(xcdrawing.drawingvisiblecode)
-						if xcdrawing.has_node("XCflatshell"):
-							xcdrawing.get_node("XCflatshell").visible = true
-				for xctube in sketchsystem.get_node("XCtubes").get_children():
-					for xctubesector in xctube.get_node("XCtubesectors").get_children():
-						xctubesector.visible = true
-					xctube.setxctubepathlinevisibility(sketchsystem)
-
-
-
-
-
-			
-		
 		get_node("PlanView/Viewport/PlanGUI/Camera").cull_mask = plancameracullmask
 		get_node("RealPlanCamera/LaserScope/LaserOrient/RayCast").collision_mask = plancameraraycollisionmask
-
+			
+	if "realtubesvisible" in pvchange and Tglobal.hidecavewallstoseefloors != (not pvchange["realtubesvisible"]):
+		Tglobal.hidecavewallstoseefloors = (not pvchange["realtubesvisible"])
+		if Tglobal.hidecavewallstoseefloors:
+			for xcdrawing in sketchsystem.get_node("XCdrawings").get_children():
+				if xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
+					xcdrawing.get_node("PathLines").visible = true
+					if xcdrawing.has_node("XCflatshell"):
+						xcdrawing.get_node("XCflatshell").visible = false
+			for xctube in sketchsystem.get_node("XCtubes").get_children():
+				for xctubesector in xctube.get_node("XCtubesectors").get_children():
+					xctubesector.visible = false
+				xctube.get_node("PathLines").visible = true
+	
+		else:
+			for xcdrawing in sketchsystem.get_node("XCdrawings").get_children():
+				if xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
+					xcdrawing.setdrawingvisiblecode(xcdrawing.drawingvisiblecode)
+					if xcdrawing.has_node("XCflatshell"):
+						xcdrawing.get_node("XCflatshell").visible = true
+			for xctube in sketchsystem.get_node("XCtubes").get_children():
+				for xctubesector in xctube.get_node("XCtubesectors").get_children():
+					xctubesector.visible = true
+				xctube.setxctubepathlinevisibility(sketchsystem)
 
 func planviewtransformpos(guidpaneltransform, guidpanelsize):
 	if guidpaneltransform != null:
