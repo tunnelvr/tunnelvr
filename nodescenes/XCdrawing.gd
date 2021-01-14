@@ -222,7 +222,7 @@ func expandxcdrawingfitxcdrawing(xcdrawing):
 		$XCdrawingplane.scale.y = ascay
 	updateformetresquaresscaletexture()
 	
-func exportxcrpcdata(include_xcchangesequence):
+func exportxcrpcdata(stripruntimedataforsaving):
 	var d
 	if drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
 		d = { "name":get_name(), 
@@ -258,7 +258,7 @@ func exportxcrpcdata(include_xcchangesequence):
 		if xcflatshellmaterial != "simpledirt":
 			d["xcflatshellmaterial"] = xcflatshellmaterial
 			
-	if include_xcchangesequence:
+	if not stripruntimedataforsaving:
 		d["xcchangesequence"] = xcchangesequence
 	return d
 	

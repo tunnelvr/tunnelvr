@@ -10,34 +10,42 @@ onready var playerMe = get_node("/root/Spatial/Players/PlayerMe")
 func _on_buttonload_pressed():
 	var savegamefileid = $Viewport/GUI/Panel/Savegamefilename.get_selected_id()
 	var savegamefilename = $Viewport/GUI/Panel/Savegamefilename.get_item_text(savegamefileid)
-	if savegamefilename.begins_with("server/"):
+	if savegamefilename == "cleargame":
+		sketchsystem.loadsketchsystemL("cleargame")
+		$Viewport/GUI/Panel/Label.text = "Clearing game"
+	elif savegamefilename.begins_with("server/"):
 		savegamefilename = savegamefilename.replace("server/", "")
 		if Tglobal.connectiontoserveractive and playerMe.networkID != 1:
 			sketchsystem.rpc_id(1, "loadsketchsystemL", "user://"+savegamefilename)
 			$Viewport/GUI/Panel/Label.text = "Loading server sketch"
-			return
-	var savegamefilenameU = "user://"+savegamefilename
-	if File.new().file_exists(savegamefilenameU):
-		sketchsystem.loadsketchsystemL(savegamefilenameU)
-		$Viewport/GUI/Panel/Label.text = "Sketch Loaded"
-		if not Tglobal.controlslocked:
-			toggleguipanelvisibility(null)
+		else:
+			$Viewport/GUI/Panel/Label.text = "*server not connected"
 	else:
-		$Viewport/GUI/Panel/Label.text = savegamefilename + " does not exist"
+		var savegamefilenameU = "user://"+savegamefilename
+		if File.new().file_exists(savegamefilenameU):
+			sketchsystem.loadsketchsystemL(savegamefilenameU)
+			$Viewport/GUI/Panel/Label.text = "Sketch Loaded"
+		else:
+			$Viewport/GUI/Panel/Label.text = "*" + savegamefilename + " does not exist"
+					
+	if not $Viewport/GUI/Panel/Label.text.begins_with("*") and not Tglobal.controlslocked:
+		toggleguipanelvisibility(null)
 	Tglobal.soundsystem.quicksound("MenuClick", collision_point)
 	
 func _on_buttonsave_pressed():
 	var savegamefileid = $Viewport/GUI/Panel/Savegamefilename.get_selected_id()
 	var savegamefilename = $Viewport/GUI/Panel/Savegamefilename.get_item_text(savegamefileid)
-	if savegamefilename.begins_with("server/"):
+	if savegamefilename == "cleargame":
+		$Viewport/GUI/Panel/Label.text = "Cannot oversave cleargame"
+	elif savegamefilename.begins_with("server/"):
 		savegamefilename = savegamefilename.replace("server/", "")
 		if Tglobal.connectiontoserveractive and playerMe.networkID != 1:
 			sketchsystem.rpc_id(1, "savesketchsystem", "user://"+savegamefilename)
 			$Viewport/GUI/Panel/Label.text = "Saving server sketch"
-			return
-	var savegamefilenameU = "user://"+savegamefilename
-	sketchsystem.savesketchsystem(savegamefilenameU)
-	$Viewport/GUI/Panel/Label.text = "Sketch Saved"
+	else:
+		var savegamefilenameU = "user://"+savegamefilename
+		sketchsystem.savesketchsystem(savegamefilenameU)
+		$Viewport/GUI/Panel/Label.text = "Sketch Saved"
 	Tglobal.soundsystem.quicksound("MenuClick", collision_point)
 	
 
@@ -189,7 +197,7 @@ func _on_buttonload_choke():
 const clientips = [ "144.76.167.54 Alex",  # alex server
 					"192.168.8.104 Quest2",  # home wifi
 					"192.168.8.101 JGT",     # home wifi
-					"192.168.43.118" ]
+					"192.168.43.186 Quest2S9" ]
 func _ready():
 	if has_node("ViewportReal"):
 		var fgui = $Viewport/GUI

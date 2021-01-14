@@ -54,15 +54,15 @@ func xctubefromdata(xctdata):
 	return xctube
 
 	
-func sketchsystemtodict(include_xcchangesequence):
+func sketchsystemtodict(stripruntimedataforsaving):
 	var xcdrawingsData = [ ]
 	for xcdrawing in $XCdrawings.get_children():
-		if xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING and len(xcdrawing.nodepoints) == 0:
+		if xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING and len(xcdrawing.nodepoints) == 0 and stripruntimedataforsaving:
 			print("Discarding empty xcdrawing on save ", xcdrawing.get_name())
 		elif xcdrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE and xcdrawing.drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_FLOOR_DELETED:
 			print("Discarding hidden floortexture on save ", xcdrawing.get_name())
 		else:
-			xcdrawingsData.append(xcdrawing.exportxcrpcdata(include_xcchangesequence))
+			xcdrawingsData.append(xcdrawing.exportxcrpcdata(stripruntimedataforsaving))
 	var xctubesData = [ ]
 	for xctube in $XCtubes.get_children():
 		xctubesData.append(xctube.exportxctrpcdata())
@@ -74,7 +74,7 @@ func sketchsystemtodict(include_xcchangesequence):
 	return sketchdatadict
 	
 remote func savesketchsystem(fname):
-	var sketchdatadict = sketchsystemtodict(false)
+	var sketchdatadict = sketchsystemtodict(true)
 	var sketchdatafile = File.new()
 	var fnamewriting = fname + "_WRITING"
 	sketchdatafile.open(fnamewriting, File.WRITE)
@@ -393,7 +393,7 @@ remote func sendoverridingxcdrawingsdata(xcdrawingsrejected, playeridtoupdate):
 	for xcdrawingname in xcdrawingsrejected:
 		var xcdrawing = $XCdrawings.get_node_or_null(xcdrawingname)
 		if xcdrawingname != null:
-			var xcdata = xcdrawing.exportxcrpcdata(true)
+			var xcdata = xcdrawing.exportxcrpcdata(false)
 			xcdata["overridingxcdrawing"] = 1
 			#xcdata["xcchangesequence"] = xcdrawing.xcchangesequence
 			xcdata["networkIDsource"] = playerMe.networkID
@@ -548,19 +548,30 @@ func sketchdicttochunks(sketchdatadict):
 	
 remote func loadsketchsystemL(fname):
 	var sketchdatafile = File.new()
-	if sketchdatafile.file_exists(fname):
+	var sketchdatadict = null
+	if fname == "cleargame":
+		sketchdatadict = { "xcdrawings":[], "xctubes":[] }
+		if $XCdrawings.get_child_count() != 1:
+			for xcdrawing in $XCdrawings.get_children():
+				if xcdrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
+					sketchdatadict["xcdrawings"].append(xcdrawing.exportxcrpcdata(true))
+					break
+	elif sketchdatafile.file_exists(fname):
 		print("Loading sketchsystemtodict from ", fname)
 		sketchdatafile.open(fname, File.READ)
-		var sketchdatadict = sketchdatafile.get_var()
+		sketchdatadict = sketchdatafile.get_var()
 		sketchdatafile.close()
-		print("Generating sketchdicttochunks")
-		var xcdatachunks = sketchdicttochunks(sketchdatadict)
-		print("Generated ", len(xcdatachunks), " chunks")
-		for xcdatachunk in xcdatachunks:
-			actsketchchange(xcdatachunk)
-			yield(get_tree().create_timer(0.2), "timeout")
-		var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
-		actsketchchange([{"planview":planviewsystem.planviewtodict()}]) 
+	else:
+		return
+		
+	print("Generating sketchdicttochunks")
+	var xcdatachunks = sketchdicttochunks(sketchdatadict)
+	print("Generated ", len(xcdatachunks), " chunks")
+	for xcdatachunk in xcdatachunks:
+		actsketchchange(xcdatachunk)
+		yield(get_tree().create_timer(0.2), "timeout")
+	var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
+	actsketchchange([{"planview":planviewsystem.planviewtodict()}]) 
 				
 func uniqueXCname(ch):
 	var largestxcdrawingnumber = 0

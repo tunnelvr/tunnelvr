@@ -1252,6 +1252,7 @@ albedo_texture = SubResource( 187 )
 [sub_resource type="SpatialMaterial" id=190]
 params_specular_mode = 2
 params_cull_mode = 2
+params_depth_draw_mode = 1
 albedo_texture = ExtResource( 7 )
 roughness = 0.43
 uv1_scale = Vector3( 20, 20, 1 )
@@ -1520,7 +1521,7 @@ margin_top = 43.0
 margin_right = 196.0
 margin_bottom = 70.0
 text = "savegame.res"
-items = [ "savegame.res", null, false, 0, null, "savegame2.res", null, false, 1, null, "savegame3.res", null, false, 2, null, "server/savegame.res", null, false, 3, null, "server/savegame2.res", null, false, 4, null, "server/savegame3.res", null, false, 5, null, "savegame4.res", null, false, 6, null ]
+items = [ "savegame.res", null, false, 0, null, "savegame2.res", null, false, 1, null, "savegame3.res", null, false, 2, null, "server/savegame.res", null, false, 3, null, "server/savegame2.res", null, false, 4, null, "server/savegame3.res", null, false, 5, null, "savegame4.res", null, false, 6, null, "cleargame", null, false, 7, null ]
 selected = 0
 __meta__ = {
 "_edit_use_anchors_": false

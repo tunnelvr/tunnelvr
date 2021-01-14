@@ -262,7 +262,7 @@ func _player_connected(id):
 
 	if playerMe.networkID == 1:
 		print("Converting sketchsystemtodict")
-		var sketchdatadict = $SketchSystem.sketchsystemtodict(true)
+		var sketchdatadict = $SketchSystem.sketchsystemtodict(false)
 		assert(playerMe.networkID != 0)
 		print("Generating sketchdicttochunks")
 		var xcdatachunks = $SketchSystem.sketchdicttochunks(sketchdatadict)
