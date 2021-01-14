@@ -7,6 +7,7 @@ extends EditorScript
 	
 	
 func _run():
-	var a = { "a":2}
-	print(a.values())
+	var a = [10,20,30]
+	a.remove(1)
+	print(a)
 

@@ -299,6 +299,7 @@ func updatetubelinkpaths(sketchsystem):
 
 
 func pickpolysindex(polys, xcdrawinglink, js):
+	var pickpolyindex = -1
 	for i in range(len(polys)):
 		var meetsallnodes = true
 		var j = js
@@ -309,8 +310,14 @@ func pickpolysindex(polys, xcdrawinglink, js):
 				break
 			j += 2
 		if meetsallnodes:
-			return i
-	return -1
+			pickpolyindex = i
+			break
+	if len(polys) == 1 and pickpolyindex == 0:
+		var meetnodenames = xcdrawinglink.slice(js, len(xcdrawinglink), 2)
+		if (not meetnodenames.has(polys[0][0])) or (not meetnodenames.has(polys[0][-1])):
+			pickpolyindex = -1
+			
+	return pickpolyindex
 
 func fa(a, b):
 	return a[0] < b[0] or (a[0] == b[0] and a[1] < b[1])
@@ -319,8 +326,8 @@ func maketubepolyassociation_andreorder(xcdrawing0, xcdrawing1):
 	assert ((xcdrawing0.get_name() == xcname0) and (xcdrawing1.get_name() == xcname1))
 	var polys0 = Polynets.makexcdpolys(xcdrawing0.nodepoints, xcdrawing0.onepathpairs)
 	var polys1 = Polynets.makexcdpolys(xcdrawing1.nodepoints, xcdrawing1.onepathpairs)
-	assert ((len(polys0) != 1) or (len(polys0[0]) == 0))
-	assert ((len(polys1) != 1) or (len(polys1[0]) == 0))
+	#assert ((len(polys0) != 1) or (len(polys0[0]) == 0))
+	#assert ((len(polys1) != 1) or (len(polys1[0]) == 0))
 	pickedpolyindex0 = pickpolysindex(polys0, xcdrawinglink, 0)
 	pickedpolyindex1 = pickpolysindex(polys1, xcdrawinglink, 1)
 	
@@ -353,7 +360,7 @@ func maketubepolyassociation_andreorder(xcdrawing0, xcdrawing1):
 	xcsectormaterials.resize(len(xcdrawinglink)/2)
 
 	# get all the connections in here between the polygons but in the right order
-	var ila = [ ]  # [ [ il0, il1 ] ]
+	var ila = [ ]  # [ [il0, il1] ] then [ {"il0", "il1", "j", "il0N", il1N" ] ]
 	var xcdrawinglinkneedsreorder = false
 	var missingjvals = [ ]
 	for j in range(0, len(xcdrawinglink), 2):
@@ -390,7 +397,31 @@ func maketubepolyassociation_andreorder(xcdrawing0, xcdrawing1):
 			var sketchsystem = get_node("/root/Spatial/SketchSystem")
 			updatetubelinkpaths(sketchsystem)
 
-	return [poly0, poly1, ila]
+	var ilaM = [ ]  #  [ {"i", "i1", "il0", "il1", "il0N", il1N" ] ]
+	for i in range(len(ila)):
+		var ila0 = ila[i][0]
+		var ila0N = ila[i+1][0] - ila0  if i < len(ila)-1  else len(poly0) + ila[0][0] - ila0 
+		var ila1 = ila[i][1]
+		var ila1N = ila[(i+1)%len(ila)][1] - ila1
+		if ila1N < 0 or len(ila) == 1:   # there's a V-shaped case where this isn't good enough
+			ila1N += len(poly1)
+		var i1 = (i+1)%len(ila)
+		ilaM.append({"i":i, "i1":i1, "ila0":ila0, "ila1":ila1, "ila0N":ila0N, "ila1N":ila1N})
+
+	if len(polys0) == 1:
+		assert (pickedpolyindex0 == 0)
+		for j in range(len(ilaM)):
+			if ilaM[j]["ila0"] == len(poly0)-1 and ilaM[j]["ila0N"] == 1:
+				ilaM[j]["opensector"] = true
+				break
+	if len(polys1) == 1:
+		assert (pickedpolyindex0 == 0)
+		for j in range(len(ilaM)):
+			if ilaM[j]["ila1"] == len(poly1)-1 and ilaM[j]["ila1N"] == 1:
+				ilaM[j]["opensector"] = true
+				break
+	return [poly0, poly1, ilaM]
+	
 	
 func slicetubetoxcdrawing(xcdrawing, xcdata, xctdatadel, xctdata0, xctdata1):
 	var xcdrawings = get_node("/root/Spatial/SketchSystem/XCdrawings")
@@ -399,8 +430,8 @@ func slicetubetoxcdrawing(xcdrawing, xcdata, xctdatadel, xctdata0, xctdata1):
 	var mtpa = maketubepolyassociation_andreorder(xcdrawing0, xcdrawing1)
 	var poly0 = mtpa[0]
 	var poly1 = mtpa[1]
-	var ila = mtpa[2]
-	if len(ila) == 0:
+	var ilaM = mtpa[2]
+	if len(ilaM) == 0:
 		return false
 	
 	var xcnodes0 = xcdrawing0.get_node("XCnodes")
@@ -411,14 +442,16 @@ func slicetubetoxcdrawing(xcdrawing, xcdata, xctdatadel, xctdata0, xctdata1):
 	var xcnormal = xcdrawing.transform.basis.z
 	var xcdot = xcnormal.dot(xcdrawing.transform.origin)
 	var sliceclearancedist = 0.02
-	for i in range(len(ila)):
-		var ila0 = ila[i][0]
-		var ila0N = ila[i+1][0] - ila0  if i < len(ila)-1  else len(poly0) + ila[0][0] - ila0 
-		var ila1 = ila[i][1]
-		var ila1N = ila[(i+1)%len(ila)][1] - ila1
-		if ila1N < 0 or len(ila) == 1:   # there's a V-shaped case where this isn't good enough
-			ila1N += len(poly1)
-			
+	var prevpathisopensector = true
+	var opensectornodepoints = [ ]
+	for li in range(len(ilaM)):
+		var i = ilaM[li]["i"]
+		assert (i == li)
+		var ila0 = ilaM[li]["ila0"]
+		var ila0N = ilaM[li]["ila0N"]
+		var ila1 = ilaM[li]["ila1"]
+		var ila1N = ilaM[li]["ila1N"]
+		var isopensector = ilaM[li].get("opensector", false)
 		var acc = -ila0N/2.0  if ila0N>=ila1N  else  ila1N/2.0
 		var i0 = 0
 		var i1 = 0
@@ -477,17 +510,31 @@ func slicetubetoxcdrawing(xcdrawing, xcdata, xctdatadel, xctdata0, xctdata1):
 				acc -= ila0N
 				i1 += 1
 			if xcnamelast != null:
-				xcdata["newonepathpairs"].push_back(xcnamelast)
-				xcdata["newonepathpairs"].push_back(xcname)
+				if not prevpathisopensector:
+					xcdata["newonepathpairs"].push_back(xcnamelast)
+					xcdata["newonepathpairs"].push_back(xcname)
+				else:
+					opensectornodepoints.push_back(xcnamelast)
+					opensectornodepoints.push_back(xcname)
 			xcnamelast = xcname
+			prevpathisopensector = isopensector
 			if xcnamefirst == null:
 				xcnamefirst = xcname
-
-	xcdata["newonepathpairs"].push_back(xcnamelast)
-	xcdata["newonepathpairs"].push_back(xcnamefirst)
-	# undo mysterious advancing of the sector links
-	#xcdrawinglink1.push_back(xcdrawinglink1.pop_front())
-	#xcdrawinglink1.push_back(xcdrawinglink1.pop_front())
+	if not prevpathisopensector:
+		xcdata["newonepathpairs"].push_back(xcnamelast)
+		xcdata["newonepathpairs"].push_back(xcnamefirst)
+	else:
+		opensectornodepoints.push_back(xcnamelast)
+		opensectornodepoints.push_back(xcnamefirst)
+		
+	if len(opensectornodepoints) != 0:
+		opensectornodepoints.sort()
+		while len(opensectornodepoints) >= 2:
+			if opensectornodepoints[-2] == opensectornodepoints[-1]:
+				xcdata["nextnodepoints"].erase(opensectornodepoints[-1])
+				opensectornodepoints.pop_back()
+			opensectornodepoints.pop_back()
+	
 	if lamoutofrange:
 		return false
 	return true
@@ -723,17 +770,19 @@ func updatetubeshell(xcdrawings):
 	var mtpa = maketubepolyassociation_andreorder(xcdrawing0, xcdrawing1)
 	var poly0 = mtpa[0]
 	var poly1 = mtpa[1]
-	var ila = mtpa[2]
+	var ilaM = mtpa[2]
 
 	var xcnodes0 = xcdrawing0.get_node("XCnodes")
 	var xcnodes1 = xcdrawing1.get_node("XCnodes")
-	for i in range(len(ila)):
-		var ila0 = ila[i][0]
-		var ila0N = ila[i+1][0] - ila0  if i < len(ila)-1  else len(poly0) + ila[0][0] - ila0 
-		var ila1 = ila[i][1]
-		var ila1N = ila[(i+1)%len(ila)][1] - ila1
-		if ila1N < 0 or len(ila) == 1:   # there's a V-shaped case where this isn't good enough
-			ila1N += len(poly1)
+	for li in range(len(ilaM)):
+		if ilaM[li].get("opensector", false):
+			continue
+		var i = ilaM[li]["i"]
+		var i1 = ilaM[li]["i1"]
+		var ila0 = ilaM[li]["ila0"]
+		var ila0N = ilaM[li]["ila0N"]
+		var ila1 = ilaM[li]["ila1"]
+		var ila1N = ilaM[li]["ila1N"]
 			
 		var tuberails = initialtuberails(xcdrawing0, poly0, ila0, ila0N, xcdrawing1, poly1, ila1, ila1N)
 		var tuberail0 = tuberails[0]
@@ -741,9 +790,9 @@ func updatetubeshell(xcdrawings):
 		var surfaceTool = SurfaceTool.new()
 		surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
 		if xclinkintermediatenodes != null:
-			assert (len(ila) == len(xclinkintermediatenodes))
+			assert (len(ilaM) <= len(xclinkintermediatenodes))
 			var xclinkintermediatenodesi = xclinkintermediatenodes[i]
-			var xclinkintermediatenodesi1 = xclinkintermediatenodes[(i+1)%len(ila)]
+			var xclinkintermediatenodesi1 = xclinkintermediatenodes[i1]
 			var railsequencerung0 = [ ]
 			var railsequencerung1 = [ ]
 			intermediaterailsequence(xclinkintermediatenodesi, xclinkintermediatenodesi1, railsequencerung0, railsequencerung1)
@@ -798,27 +847,27 @@ func shellcontourintermed(p0, p1, xclinkintermediatenodes, pref):
 		scc.push_back([pref%j, sp + spbasis.x*dp.x + spbasis.y*dp.y])
 	return scc
 	
-func extractshellcontourforholexc(xcdrawings, i):
+func extractshellcontourforholexc(xcdrawings, li):
 	var xcdrawing0 = xcdrawings.get_node(xcname0)
 	var xcdrawing1 = xcdrawings.get_node(xcname1)
 	var mtpa = maketubepolyassociation_andreorder(xcdrawing0, xcdrawing1)
 	var poly0 = mtpa[0]
 	var poly1 = mtpa[1]
-	var ila = mtpa[2]
+	var ilaM = mtpa[2]
 
-	var ila0 = ila[i][0]
-	var ila0N = ila[i+1][0] - ila0  if i < len(ila)-1  else len(poly0) + ila[0][0] - ila0 
-	var ila1 = ila[i][1]
-	var ila1N = ila[(i+1)%len(ila)][1] - ila1
-	if ila1N < 0 or len(ila) == 1:   # there's a V-shaped case where this isn't good enough
-		ila1N += len(poly1)
-			
+	var i = ilaM[li]["i"]
+	var i1 = ilaM[li]["i1"]
+	var ila0 = ilaM[li]["ila0"]
+	var ila0N = ilaM[li]["ila0N"]
+	var ila1 = ilaM[li]["ila1"]
+	var ila1N = ilaM[li]["ila1N"]
+
 	var scc0 = shellcontourxcside(xcdrawing0, poly0, ila0, ila0N, "r0%s")
 	var scc1 = shellcontourxcside(xcdrawing1, poly1, ila1, ila1N, "r1%s")
 	var scctop
 	var sccbot
 	if xclinkintermediatenodes != null:
-		scctop = shellcontourintermed(scc0[-1][1], scc1[-1][1], xclinkintermediatenodes[(i+1)%len(ila)], "rt%d")
+		scctop = shellcontourintermed(scc0[-1][1], scc1[-1][1], xclinkintermediatenodes[i1], "rt%d")
 		sccbot = shellcontourintermed(scc0[0][1], scc1[0][1], xclinkintermediatenodes[i], "rb%d")
 	else:
 		scctop = [ ]
