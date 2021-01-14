@@ -298,13 +298,15 @@ func updatetubelinkpaths(sketchsystem):
 	$PathLines.set_surface_material(0, get_node("/root/Spatial/MaterialSystem").pathlinematerial("normal"))
 
 
-func pickpolysindex(polys, meetnodenames):
+func pickpolysindex(polys, xcdrawinglink, j):
 	for i in range(len(polys)):
 		var meetsallnodes = true
-		for meetnodename in meetnodenames:
+		while j < len(xcdrawinglink):
+			var meetnodename = xcdrawinglink[j]
 			if not polys[i].has(meetnodename):
 				meetsallnodes = false
 				break
+			j += 2
 		if meetsallnodes:
 			return i
 	return -1
@@ -314,18 +316,18 @@ func fa(a, b):
 
 func maketubepolyassociation_andreorder(xcdrawing0, xcdrawing1):
 	assert ((xcdrawing0.get_name() == xcname0) and (xcdrawing1.get_name() == xcname1))
-	var polys0 = Polynets.makexcdpolys(xcdrawing0.nodepoints, xcdrawing0.onepathpairs, true)
-	var polys1 = Polynets.makexcdpolys(xcdrawing1.nodepoints, xcdrawing1.onepathpairs, true)
-	pickedpolyindex0 = pickpolysindex(polys0, xcdrawinglink.slice(0, len(xcdrawinglink), 2))
-	pickedpolyindex1 = pickpolysindex(polys1, xcdrawinglink.slice(1, len(xcdrawinglink), 2))
+	var polys0 = Polynets.makexcdpolys(xcdrawing0.nodepoints, xcdrawing0.onepathpairs)
+	var polys1 = Polynets.makexcdpolys(xcdrawing1.nodepoints, xcdrawing1.onepathpairs)
+	assert ((len(polys0) != 1) or (len(polys0[0]) == 0))
+	assert ((len(polys1) != 1) or (len(polys1[0]) == 0))
+	pickedpolyindex0 = pickpolysindex(polys0, xcdrawinglink, 0)
+	pickedpolyindex1 = pickpolysindex(polys1, xcdrawinglink, 1)
 	
 	if pickedpolyindex0 == -1 or pickedpolyindex1 == -1:
 		print("no connecting poly available", polys0, polys1)
 		return [[], [], []]
 
-	#var tubevec = xcdrawing1.global_transform.origin - xcdrawing0.global_transform.origin
 	var tubevec = xcdrawing1.transform.xform(xcdrawing1.nodepointmean) - xcdrawing0.transform.xform(xcdrawing0.nodepointmean)
-	#print(" ", tubevec, " t ", ltubevec)
 	var tubevecdot0 = xcdrawing0.global_transform.basis.z.dot(tubevec)
 	var tubevecdot1 = xcdrawing1.global_transform.basis.z.dot(tubevec)
 	var polyinvert0 = (tubevecdot0 <= 0) == (pickedpolyindex0 != len(polys0) - 1)
@@ -524,7 +526,7 @@ func ConstructHoleXC(i, sketchsystem):
 		xcdata["prevonepathpairs"] = xcdrawinghole.onepathpairs.duplicate()
 		xcdata["prevnodepoints"] = xcdrawinghole.nodepoints.duplicate()
 
-	var shellcontour = extractshellcontour(sketchsystem.get_node("XCdrawings"), i)
+	var shellcontour = extractshellcontourforholexc(sketchsystem.get_node("XCdrawings"), i)
 	var prevname = shellcontour[-1][0]
 	for sc in shellcontour:
 		xcdata["nextnodepoints"][sc[0]] = xcdata["transformpos"].xform_inv(sc[1])
@@ -795,7 +797,7 @@ func shellcontourintermed(p0, p1, xclinkintermediatenodes, pref):
 		scc.push_back([pref%j, sp + spbasis.x*dp.x + spbasis.y*dp.y])
 	return scc
 	
-func extractshellcontour(xcdrawings, i):
+func extractshellcontourforholexc(xcdrawings, i):
 	var xcdrawing0 = xcdrawings.get_node(xcname0)
 	var xcdrawing1 = xcdrawings.get_node(xcname1)
 	var mtpa = maketubepolyassociation_andreorder(xcdrawing0, xcdrawing1)

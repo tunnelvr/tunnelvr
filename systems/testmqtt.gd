@@ -24,7 +24,7 @@ func connectmqtt():
 	$mqttnode.set_last_will(topicstem+"status", "stopped", true)
 	if yield($mqttnode.connect_to_server(), "completed"):
 		$mqttnode.publish(topicstem+"status", "connected", true)
-		print("subscribing to ", topicstem)
+		print("subscribing to ", topicstem+"cmd")
 		$mqttnode.subscribe(topicstem+"cmd")
 	else:
 		print("mqtt failed to connect")

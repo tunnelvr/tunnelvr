@@ -575,7 +575,7 @@ func updatexcpaths_centreline(pathlines, llinewidth):
 
 
 func makexctubeshell(xcdrawings):
-	var polys = Polynets.makexcdpolys(nodepoints, onepathpairs, true)
+	var polys = Polynets.makexcdpolys(nodepoints, onepathpairs)
 	if len(polys) == 2:
 		return null
 	var forepolyindexes = [ ]

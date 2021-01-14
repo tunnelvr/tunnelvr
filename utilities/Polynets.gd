@@ -4,7 +4,7 @@ class sd0class:
 	static func sd0(a, b):
 		return a[0] < b[0]
 
-static func makexcdpolys(nodepoints, onepathpairs, discardsinglenodepaths):
+static func makexcdpolys(nodepoints, onepathpairs):
 	var Lpathvectorseq = { } 
 	for i in nodepoints.keys():
 		Lpathvectorseq[i] = [ ]  # [ (arg, pathindex) ]
@@ -67,7 +67,7 @@ static func makexcdpolys(nodepoints, onepathpairs, discardsinglenodepaths):
 		var angBack = Vector2(ptblBack.x-ptbl.x, ptblBack.y-ptbl.y).angle()
 		
 		# add in the trailing two settings into the poly array
-		if Nsinglenodes == 0 or not discardsinglenodepaths:
+		if Nsinglenodes == 0:
 			if not (angBack < angFore):
 				if outerpoly != null:
 					print(" *** extra outer poly ", outerpoly, poly)
@@ -75,6 +75,8 @@ static func makexcdpolys(nodepoints, onepathpairs, discardsinglenodepaths):
 				outerpoly = poly
 			else:
 				polys.append(poly)
+		else:
+			print("Nsinglenodes ", Nsinglenodes, " ", poly)
 	polys.append(outerpoly if outerpoly != null else [])
 	return polys
 
