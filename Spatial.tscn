@@ -1,4 +1,4 @@
-[gd_scene load_steps=260 format=2]
+[gd_scene load_steps=261 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/default_env.tres" type="Environment" id=2]
@@ -379,6 +379,11 @@ rings = 1
 [sub_resource type="CubeMesh" id=55]
 material = SubResource( 47 )
 size = Vector3( 0.01, 0.01, 1 )
+
+[sub_resource type="SpatialMaterial" id=205]
+albedo_color = Color( 0.984314, 0.92549, 0.0705882, 1 )
+metallic = 0.46
+roughness = 0.28
 
 [sub_resource type="SpatialMaterial" id=56]
 albedo_color = Color( 0.0823529, 0.0117647, 0.0117647, 1 )
@@ -2080,7 +2085,7 @@ material/0 = null
 transform = Transform( 1, -4.60809e-07, 4.60809e-07, 0, 0.707107, 0.707107, -6.51682e-07, -0.707107, 0.707107, 0.615074, -0.372118, -10.7241 )
 visible = false
 mesh = SubResource( 52 )
-material/0 = null
+material/0 = SubResource( 205 )
 
 [node name="LaserSpike" type="MeshInstance" parent="BodyObjects/GripLaserSpot"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0 )

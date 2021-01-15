@@ -754,7 +754,10 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 					xcdata["prevonepathpairs"] = [ initialsequencenodenameP, pointertarget.get_name() ]
 				else:   # ^^ rejoin and delete straight line
 					xcdata["prevonepathpairs"] = [ ]
-			sketchsystem.actsketchchange([xcdata])
+			var xcdatalist = [xcdata]
+			if pointertargetwall.drawingvisiblecode != DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE:
+				xcdatalist.push_back({"xcvizstates":{ pointertargetwall.get_name():DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE } })
+			sketchsystem.actsketchchange(xcdatalist)
 
 		elif activetargetnodewall != pointertargetwall and activetargetnodewall.drawingtype == DRAWING_TYPE.DT_ROPEHANG and pointertargetwall.drawingtype == DRAWING_TYPE.DT_ROPEHANG:
 			print("tube or merge two ropehang things here")
@@ -779,8 +782,11 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 				else:
 					xctdata["prevdrawinglinks"] = [ nodename0, nodename1, xctube.xcsectormaterials[j], (xctube.xclinkintermediatenodes[j] if xctube.xclinkintermediatenodes != null else null) ]
 					xctdata["newdrawinglinks"] = [ ]
-			var xcvdata = { "xcvizstates":{ pointertargetwall.get_name():DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE } }
-			sketchsystem.actsketchchange([xctdata, xcvdata])
+					
+			var xctdatalist = [xctdata]
+			if pointertargetwall.drawingvisiblecode != DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE and activetargetnodewall.drawingvisiblecode != DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE and xctube != null:
+				xctdatalist.push_back({ "xcvizstates":{ }, "updatetubeshells":[{"tubename":xctube.get_name(), "xcname0": xcname0, "xcname1":xcname1 }] })
+			sketchsystem.actsketchchange(xctdatalist)
 		clearactivetargetnode()
 											
 	elif activetargetnode == null and pointertargettype == "XCnode":
