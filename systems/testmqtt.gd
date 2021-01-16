@@ -33,18 +33,4 @@ var msg = ""
 func received_message(topic, message):
 	print("MQTT RECEIVED: ", topic, ": ", message)
 	msg = message
-	
-const checkmessageinterval = 0.4
-var checkmessagetimer = checkmessageinterval
-const framerateinterval = 1.1
-var frameratetimer = framerateinterval
-func _process(delta):
-	checkmessagetimer -= delta
-	if checkmessagetimer < 0:
-		$mqttnode.check_msg()
-		checkmessagetimer = checkmessageinterval
-	frameratetimer -= delta
-	if frameratetimer < 0:
-		$mqttnode.publish(topicstem+"fps", String(Performance.get_monitor(Performance.TIME_FPS)))
-		frameratetimer = framerateinterval
 		

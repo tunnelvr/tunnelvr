@@ -339,13 +339,14 @@ remote func actsketchchangeL(xcdatalist):
 		else:
 			xcdrawing.updatexcpaths_part(xcdrawing.get_node("PathLines"), xcdrawing.linewidth)
 
+
 	for xctube in xctubestoupdate.values():
 		if $XCdrawings.get_node(xctube.xcname0).drawingtype == DRAWING_TYPE.DT_CENTRELINE:
 			xctube.updatetubepositionlinks(self)
 		else:
 			xctube.updatetubelinkpaths(self)
+		xctube.setxctubepathlinevisibility(self)
 
-		
 	if caveworldchunkI != -1:
 		for xcdrawing in xcdrawingstoupdate.values():
 			if xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING:

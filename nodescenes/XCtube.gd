@@ -111,8 +111,8 @@ func setxctubepathlinevisibility(sketchsystem):
 	var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(xcname0)
 	var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(xcname1)
 	#var pathlinesvisible = xcdrawing0.get_node("PathLines").visible or xcdrawing1.get_node("PathLines").visible
-	var pathlinesvisible = (xcdrawing0.drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE) or \
-						   (xcdrawing1.drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE) or \
+	var pathlinesvisible = ((xcdrawing0.drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE) != 0) or \
+						   ((xcdrawing1.drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE) != 0) or \
 						   ($XCtubesectors.get_child_count() == 0) or \
 						   (xcdrawing1.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE)
 	$PathLines.visible = pathlinesvisible

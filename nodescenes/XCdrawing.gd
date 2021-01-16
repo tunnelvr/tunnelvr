@@ -59,12 +59,11 @@ func setxcdrawingvisiblehideL(hidenodes):
 	else:
 		$XCdrawingplane.visible = false
 		$XCdrawingplane/CollisionShape.disabled = true
-	if hidenodes and drawingtype != DRAWING_TYPE.DT_CENTRELINE:
-		var rvisible = (drawingtype != DRAWING_TYPE.DT_XCDRAWING) or (len(xctubesconn) == 0)
-		$XCnodes.visible = rvisible
-		$PathLines.visible = rvisible
-		for xcn in $XCnodes.get_children():
-			xcn.get_node("CollisionShape").disabled = not rvisible
+	var rnodesvisible = (not hidenodes) or (drawingtype != DRAWING_TYPE.DT_XCDRAWING) or (len(xctubesconn) == 0)
+	$XCnodes.visible = rnodesvisible
+	$PathLines.visible = rnodesvisible
+	for xcn in $XCnodes.get_children():
+		xcn.get_node("CollisionShape").disabled = not rnodesvisible
 	assert ($XCdrawingplane.visible != $XCdrawingplane/CollisionShape.disabled)
 
 func setxcdrawingvisibleL():
@@ -85,12 +84,19 @@ func setxcdrawingvisibleL():
 		$XCdrawingplane.visible = true
 		$XCdrawingplane/CollisionShape.disabled = false
 
-
 	$XCnodes.visible = true
 	$PathLines.visible = true
 	for xcn in $XCnodes.get_children():
 		xcn.get_node("CollisionShape").disabled = false
 	assert ($XCdrawingplane.visible != $XCdrawingplane/CollisionShape.disabled)
+
+
+func xcconnectstoshell():
+	for xctubeconn in xctubesconn:
+		if xctubeconn.get_node("XCtubesectors").get_child_count() != 0:
+			return true
+	return false
+
 
 func setdrawingvisiblecode(ldrawingvisiblecode):
 	var drawingvisiblecode_old = drawingvisiblecode

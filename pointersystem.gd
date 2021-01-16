@@ -784,8 +784,8 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 					xctdata["newdrawinglinks"] = [ ]
 					
 			var xctdatalist = [xctdata]
-			if pointertargetwall.drawingvisiblecode != DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE and activetargetnodewall.drawingvisiblecode != DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE and xctube != null:
-				xctdatalist.push_back({ "xcvizstates":{ }, "updatetubeshells":[{"tubename":xctube.get_name(), "xcname0": xcname0, "xcname1":xcname1 }] })
+			if pointertargetwall.drawingvisiblecode != DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE and activetargetnodewall.drawingvisiblecode != DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE:
+				xctdatalist.push_back({ "xcvizstates":{ }, "updatetubeshells":[{"tubename":xctube.get_name() if xctube != null else "**notset", "xcname0": xcname0, "xcname1":xcname1 }] })
 			sketchsystem.actsketchchange(xctdatalist)
 		clearactivetargetnode()
 											
@@ -966,8 +966,9 @@ func buttonreleased_vrgrip():
 						setactivetargetwall(gripmenu.gripmenupointertargetwall)
 						
 			elif pointertarget.get_name() == "HideXC":
-				if gripmenu.gripmenupointertargettype == "XCnode":
-					sketchsystem.actsketchchange([{ "xcvizstates":{gripmenu.gripmenupointertargetwall.get_name():DRAWING_TYPE.VIZ_XCD_HIDE}}])
+				if gripmenu.gripmenupointertargettype == "XCnode" or gripmenu.gripmenupointertargettype == "XCflatshell":
+					if gripmenu.gripmenupointertargetwall.drawingtype == DRAWING_TYPE.DT_ROPEHANG or gripmenu.gripmenupointertargetwall.xcconnectstoshell():
+						sketchsystem.actsketchchange([{ "xcvizstates":{ gripmenu.gripmenupointertargetwall.get_name():DRAWING_TYPE.VIZ_XCD_HIDE }}])
 					if gripmenu.gripmenupointertargetwall == activetargetwall:
 						setactivetargetwall(null)
 				elif gripmenu.gripmenupointertargettype == "XCtubesector":
@@ -992,14 +993,15 @@ func buttonreleased_vrgrip():
 						if activetargetnodewall == xcdrawing:
 							clearactivetargetnode()
 						var xcname = xcdrawing.get_name()
-						var xcv = { "xcvizstates":{ xcname:DRAWING_TYPE.VIZ_XCD_PLANE_VISIBLE if xcdrawing.get_name().begins_with("Hole") else \
-														   DRAWING_TYPE.VIZ_XCD_HIDE } }
 						var xcdata = { "name":xcname, 
 									   "prevnodepoints":xcdrawing.nodepoints.duplicate(),
 									   "nextnodepoints":{ }, 
 									   "prevonepathpairs":xcdrawing.onepathpairs.duplicate(),
 									   "newonepathpairs": [ ]
 									 }
+						var xcv = { "xcvizstates":{ xcname:DRAWING_TYPE.VIZ_XCD_PLANE_VISIBLE if xcdrawing.get_name().begins_with("Hole") else \
+															 DRAWING_TYPE.VIZ_XCD_HIDE }, 
+									"updatexcshells":[xcname] }
 						sketchsystem.actsketchchange([xcdata, xcv])
 					else:
 						print("not deleted xc nodes")

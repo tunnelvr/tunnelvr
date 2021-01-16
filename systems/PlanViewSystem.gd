@@ -277,6 +277,10 @@ func actplanviewdict(pvchange):
 					xcdrawing.get_node("PathLines").visible = true
 					if xcdrawing.has_node("XCflatshell"):
 						xcdrawing.get_node("XCflatshell").visible = false
+					if xcdrawing.drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_HIDE:
+						if not xcdrawing.xcconnectstoshell():
+							xcdrawing.setxcdrawingvisiblehideL(false)
+				 
 			for xctube in sketchsystem.get_node("XCtubes").get_children():
 				for xctubesector in xctube.get_node("XCtubesectors").get_children():
 					xctubesector.visible = false

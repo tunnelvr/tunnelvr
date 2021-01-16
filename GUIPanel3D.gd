@@ -6,7 +6,8 @@ var viewport_point := Vector2(0, 0)
 var viewport_mousedown := false
 onready var sketchsystem = get_node("/root/Spatial/SketchSystem")
 onready var playerMe = get_node("/root/Spatial/Players/PlayerMe")
-
+onready var selfSpatial = get_node("/root/Spatial")
+	
 func _on_buttonload_pressed():
 	var savegamefileid = $Viewport/GUI/Panel/Savegamefilename.get_selected_id()
 	var savegamefilename = $Viewport/GUI/Panel/Savegamefilename.get_item_text(savegamefileid)
@@ -122,7 +123,6 @@ func _on_playerscale_selected(index):
 		else:
 			playerMe.playerflyscale = playerMe.playerscale*0.75
 	toggleguipanelvisibility(null)
-	var selfSpatial = get_node("/root/Spatial")
 	selfSpatial.mqttsystem.mqttpublish("playerscale", String(newplayerscale))
 
 	
@@ -325,7 +325,6 @@ func toggleguipanelvisibility(controller_global_transform):
 		if MQTTExperiment != null and MQTTExperiment.msg != "":
 			$Viewport/GUI/Panel/Label.text = MQTTExperiment.msg
 
-	var selfSpatial = get_node("/root/Spatial")
 	if Tglobal.connectiontoserveractive:
 		print("nnnnn ", get_tree().get_network_unique_id())
 		assert(selfSpatial.playerMe.networkID != 0)
@@ -413,7 +412,6 @@ var networkedmultiplayerenet = null
 
 func _on_networkstate_selected(index):
 	var nssel = $Viewport/GUI/Panel/Networkstate.get_item_text(index)
-	var selfSpatial = get_node("/root/Spatial")
 	print("Select networkstate: ", nssel)
 	if nssel == "Check IPnum":
 		print("IP local interfaces: ")
@@ -493,7 +491,6 @@ func networkstartasserver(fromgui):
 				ipnum = l
 		print(k["friendly"] + ": " + ipnum)
 	
-	var selfSpatial = get_node("/root/Spatial")	
 	get_tree().connect("network_peer_connected", selfSpatial, "_player_connected")
 	get_tree().connect("network_peer_disconnected", selfSpatial, "_player_disconnected")
 	if selfSpatial.usewebsockets:
@@ -519,7 +516,6 @@ func networkstartasserver(fromgui):
 	selfSpatial.mqttsystem.mqttpublish("startasserver", String(selfSpatial.playerMe.networkID))
 		
 func _connection_failed():
-	var selfSpatial = get_node("/root/Spatial")	
 	print("_connection_failed ", Tglobal.connectiontoserveractive, " ", websocketclient, " ", selfSpatial.players_connected_list)
 	selfSpatial.mqttsystem.mqttpublish("connectionfailed", String(playerMe.networkID))
 	websocketclient = null
@@ -535,7 +531,6 @@ func _server_disconnected():
 	websocketclient = null
 	networkedmultiplayerenet = null
 	Tglobal.connectiontoserveractive = false
-	var selfSpatial = get_node("/root/Spatial")	
 	selfSpatial.mqttsystem.mqttpublish("serverdisconnected", String(playerMe.networkID))
 	selfSpatial.deferred_player_connected_list.clear()
 	$Viewport/GUI/Panel/Label.text = "server_disconnected"
@@ -549,8 +544,11 @@ var networkmetricsreceived = null
 remote func recordnetworkmetrics(lnetworkmetricsreceived):
 	lnetworkmetricsreceived["ticksback"] = OS.get_ticks_msec()
 	networkmetricsreceived = lnetworkmetricsreceived
+	var bouncetimems = networkmetricsreceived["ticksback"] - networkmetricsreceived["ticksout"]
 	#print("recordnetworkmetrics ", networkmetricsreceived)
-	
+	selfSpatial.mqttsystem.mqttpublish("fpsbounce", "%d %d" % [Performance.get_monitor(Performance.TIME_FPS), bouncetimems])
+
+		
 remote func sendbacknetworkmetrics(lnetworkmetrics, networkIDsource):
 	var playerOthername = "NetworkedPlayer"+String(networkIDsource) if networkIDsource != -11 else "Doppelganger"
 	var playerOther = get_node("/root/Spatial/Players").get_node_or_null(playerOthername)
@@ -581,14 +579,13 @@ func _process(delta):
 			websocketserver.poll()
 	if websocketclient != null:
 		websocketclient.poll()
-	if visible and Tglobal.connectiontoserveractive:
-		if netlinkstatstimer < 0.0 and netlinkstatstimer + delta >= 0:
+	if Tglobal.connectiontoserveractive:
+		if visible and netlinkstatstimer < 0.0 and netlinkstatstimer + delta >= 0:
 			$Viewport/GUI/Panel/PlayerInfo.text = "%s:%d" % [selectedplayerplatform, selectedplayernetworkid]
 		netlinkstatstimer += delta
 		maxdelta = max(delta, maxdelta)
 		sumdelta += delta
 		countframes += 1
-
 		if netlinkstatstimer > netlinkstatstimeinterval:
 			if networkmetricsreceived != null:
 				var stacktime = networkmetricsreceived["stackduration"]
@@ -597,7 +594,8 @@ func _process(delta):
 				networkmetricsreceived = null
 			elif selectedplayernetworkid == 0 or selectedplayernetworkid == playerMe.networkID:
 				if countframes != 0:
-					$Viewport/GUI/Panel/PlayerInfo.text = "frame max:%.3f avg:%.3f" % [maxdelta, sumdelta/countframes]
+					if visible:
+						$Viewport/GUI/Panel/PlayerInfo.text = "frame max:%.3f avg:%.3f" % [maxdelta, sumdelta/countframes]
 					maxdelta = 0.0
 					sumdelta = 0.0
 					countframes = 0
