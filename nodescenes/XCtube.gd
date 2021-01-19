@@ -326,6 +326,9 @@ func maketubepolyassociation_andreorder(xcdrawing0, xcdrawing1):
 	assert ((xcdrawing0.get_name() == xcname0) and (xcdrawing1.get_name() == xcname1))
 	var polys0 = Polynets.makexcdpolys(xcdrawing0.nodepoints, xcdrawing0.onepathpairs)
 	var polys1 = Polynets.makexcdpolys(xcdrawing1.nodepoints, xcdrawing1.onepathpairs)
+	var polys0islinearpath = (len(polys0) == 1)
+	var polys1islinearpath = (len(polys1) == 1)
+	
 	#assert ((len(polys0) != 1) or (len(polys0[0]) == 0))
 	#assert ((len(polys1) != 1) or (len(polys1[0]) == 0))
 	pickedpolyindex0 = pickpolysindex(polys0, xcdrawinglink, 0)
@@ -348,12 +351,12 @@ func maketubepolyassociation_andreorder(xcdrawing0, xcdrawing1):
 	if polyinvert0:
 		poly0.invert()
 	var ilp0 = poly0.find(xcdrawinglink[0])
-	if ilp0 != 0:
+	if ilp0 != 0 and not polys0islinearpath:
 		poly0 = poly0.slice(ilp0, len(poly0)-1) + poly0.slice(0, ilp0-1)
 	if polyinvert1:
 		poly1.invert()
 	var ilp1 = poly1.find(xcdrawinglink[1])
-	if ilp1 != 0:
+	if ilp1 != 0 and not polys1islinearpath:
 		poly1 = poly1.slice(ilp1, len(poly1)-1) + poly1.slice(0, ilp1-1)
 
 	
@@ -414,13 +417,13 @@ func maketubepolyassociation_andreorder(xcdrawing0, xcdrawing1):
 		var i1 = (i+1)%len(ila)
 		ilaM.append({"i":i, "i1":i1, "ila0":ila0, "ila1":ila1, "ila0N":ila0N, "ila1N":ila1N})
 
-	if len(polys0) == 1:
+	if polys0islinearpath:
 		assert (pickedpolyindex0 == 0)
 		for j in range(len(ilaM)):
 			if ilaM[j]["ila0"] == len(poly0)-1 and ilaM[j]["ila0N"] == 1:
 				ilaM[j]["opensector"] = true
 				break
-	if len(polys1) == 1:
+	if polys1islinearpath:
 		assert (pickedpolyindex0 == 0)
 		for j in range(len(ilaM)):
 			if ilaM[j]["ila1"] == len(poly1)-1 and ilaM[j]["ila1N"] == 1:
