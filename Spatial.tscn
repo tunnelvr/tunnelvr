@@ -2124,6 +2124,11 @@ cast_shadow = 0
 mesh = SubResource( 59 )
 material/0 = SubResource( 60 )
 
+[node name="IntermediatePointPlaneStartingMarker" type="MeshInstance" parent="BodyObjects/IntermediatePointView"]
+transform = Transform( 1, 0, 0, 0, 0.598017, 0.801484, 0, -0.801484, 0.598017, 0, 0, 0 )
+mesh = SubResource( 52 )
+material/0 = SubResource( 205 )
+
 [node name="SketchSystem" type="Spatial" parent="."]
 script = ExtResource( 10 )
 

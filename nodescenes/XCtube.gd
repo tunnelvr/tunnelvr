@@ -937,5 +937,18 @@ func insertxclinkintermediatenode(j, dv):
 	else:
 		xclinkintermediatenodes[j].insert(i, dv)
 		
+func intermediatenodelerp(j, dvz):
+	if xclinkintermediatenodes == null:
+		return Vector3(0, 0, dvz)
+	var i = 0
+	while i < len(xclinkintermediatenodes[j]) and xclinkintermediatenodes[j][i].z <= dvz:
+		i += 1
+	var xcl0 = Vector3(0, 0, 0) if i == 0 else xclinkintermediatenodes[j][i-1]
+	var xcl1 = Vector3(0, 0, 1) if i == len(xclinkintermediatenodes[j]) else xclinkintermediatenodes[j][i]
+	var llam = inverse_lerp(xcl0.z, xcl1.z, dvz)
+	var res = lerp(xcl0, xcl1, llam)
+	assert (is_equal_approx(res.z, dvz))
+	res.z = dvz
+	return res
 	
 	
