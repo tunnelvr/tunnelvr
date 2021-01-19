@@ -131,8 +131,6 @@ func clearactivetargetnode():
 	activetargetnodewall = null
 	activelaserroot.get_node("LaserSpot").set_surface_material(0, materialsystem.lasermaterialN((1 if activetargetnode != null else 0) + (2 if pointertarget == null else 0)))
 
-	activelaserroot.get_node("LaserSpot").set_surface_material(0, materialsystem.lasermaterialN((1 if activetargetnode != null else 0) + (2 if pointertarget == null else 0)))
-
 	
 func setactivetargetnode(newactivetargetnode):
 	clearactivetargetnode()
@@ -161,6 +159,11 @@ func setactivetargetwall(newactivetargetwall):
 	activetargetwallgrabbedtransform = null
 	if (activetargetwall == get_node("/root/Spatial/PlanViewSystem")):
 		print("Waaat")
+
+	if activetargetwall != null and activetargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
+		print("newactivetargetwall ", activetargetwall, " nodes ", activetargetwall.get_node("XCnodes").get_child_count())
+	else:
+		print("newactivetargetwall notdrawing ", activetargetwall)
 	
 	LaserOrient.get_node("RayCast").collision_mask = raynormalcollisionmask()
 	if activetargetwall != null and activetargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
@@ -269,7 +272,10 @@ func setpointertarget(laserroot, raycast, pointertargetshortdistance):
 		pointertargettype = targettype(pointertarget)
 		pointertargetwall = targetwall(pointertarget, pointertargettype)
 		setpointertargetmaterial()
-		#print("ppp ", pointertargettype, " ", pointertarget, " ", pointertargetpoint)
+		
+		if activetargetwall == null and pointertargettype == "XCdrawing" and len(pointertargetwall.nodepoints) == 0 and activetargetnode == null:
+			print("setting blank wall active")
+			setactivetargetwall(pointertargetwall)
 		
 		laserroot.get_node("LaserSpot").visible = (pointertargettype == "XCdrawing") or \
 												  (pointertargettype == "XCtubesector") or \
@@ -319,7 +325,7 @@ func setpointertarget(laserroot, raycast, pointertargetshortdistance):
 	if laserroot == LaserOrient:
 		var FloorLaserSpot = get_node("/root/Spatial/BodyObjects/FloorLaserSpot")
 		if FloorLaserSpot.visible:
-			if pointertargetpoint != null and not (pointertargettype == "XCdrawing" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE):
+			if pointertargetpoint != null and not (pointertargettype == "XCdrawing" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE) and (pointertarget != guipanel3d) and (pointertargettype != "PlanView"):
 				FloorLaserSpot.get_node("RayCast").transform.origin = pointertargetpoint
 				FloorLaserSpot.get_node("RayCast").force_raycast_update()
 				if FloorLaserSpot.get_node("RayCast").is_colliding():
@@ -784,8 +790,8 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 					xctdata["newdrawinglinks"] = [ ]
 					
 			var xctdatalist = [xctdata]
-			if pointertargetwall.drawingvisiblecode != DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE and activetargetnodewall.drawingvisiblecode != DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE:
-				xctdatalist.push_back({ "xcvizstates":{ }, "updatetubeshells":[{"tubename":xctube.get_name() if xctube != null else "**notset", "xcname0": xcname0, "xcname1":xcname1 }] })
+			#if pointertargetwall.drawingvisiblecode != DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE and activetargetnodewall.drawingvisiblecode != DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE:
+			xctdatalist.push_back({ "xcvizstates":{ }, "updatetubeshells":[{"tubename":xctube.get_name() if xctube != null else "**notset", "xcname0": xcname0, "xcname1":xcname1 }] })
 			sketchsystem.actsketchchange(xctdatalist)
 		clearactivetargetnode()
 											
@@ -1048,7 +1054,7 @@ func buttonreleased_vrgrip():
 				setactivetargetwall(sketchsystem.get_node("XCdrawings").get_node(xcdata["name"]))
 													
 			elif pointertarget.get_name() == "DoSlice" and is_instance_valid(wasactivetargettube) and is_instance_valid(activetargetwall) and len(activetargetwall.nodepoints) == 0:
-				print(wasactivetargettube, " ", len(activetargetwall.nodepoints))
+				print("doslice ", wasactivetargettube, " ", len(activetargetwall.nodepoints))
 				var xcdrawing = activetargetwall
 				var xcdata = { "name":xcdrawing.get_name(), "prevnodepoints":{}, "nextnodepoints":{}, "prevonepathpairs":[], "newonepathpairs":[] }
 				var xctdatadel = { "tubename":wasactivetargettube.get_name(), 
@@ -1082,7 +1088,7 @@ func buttonreleased_vrgrip():
 		if guipanel3d.visible:
 			guipanel3d.toggleguipanelvisibility(null)
 
-	elif pointertargettype == "XCdrawing" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
+	elif pointertargettype == "XCdrawing" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING and len(pointertargetwall.nodepoints) != 0:
 		clearpointertargetmaterial()
 		var updatexcshells = [ pointertargetwall.get_name() ]
 		var updatetubeshells = pointertargetwall.updatetubeshellsconn()
@@ -1090,8 +1096,6 @@ func buttonreleased_vrgrip():
 		var xcdatashellholes = findconstructtubeshellholes(pointertargetwall.xctubesconn)
 		if xcdatashellholes != null:
 			sketchsystem.actsketchchange(xcdatashellholes)
-		
-		#if pointertargettype == activetargetwall:
 		setactivetargetwall(null)
 		clearpointertarget()
 		activelaserroot.get_node("LaserSpot").visible = false

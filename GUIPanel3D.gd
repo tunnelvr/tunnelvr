@@ -579,7 +579,7 @@ func _process(delta):
 			websocketserver.poll()
 	if websocketclient != null:
 		websocketclient.poll()
-	if Tglobal.connectiontoserveractive:
+	if Tglobal.connectiontoserveractive and not OS.has_feature("Server"):
 		if visible and netlinkstatstimer < 0.0 and netlinkstatstimer + delta >= 0:
 			$Viewport/GUI/Panel/PlayerInfo.text = "%s:%d" % [selectedplayerplatform, selectedplayernetworkid]
 		netlinkstatstimer += delta
@@ -599,6 +599,7 @@ func _process(delta):
 					maxdelta = 0.0
 					sumdelta = 0.0
 					countframes = 0
+
 			if selectedplayernetworkid >= 0:
 				rpc_id(selectedplayernetworkid, "sendbacknetworkmetrics", { "ticksout":OS.get_ticks_msec() }, playerMe.networkID)
 			elif selectedplayernetworkid == -10:

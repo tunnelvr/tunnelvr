@@ -156,7 +156,8 @@ func connect_to_server(clean_session=true):
 	var data = ret[1]
 	assert(data[0] == 0x20 and data[1] == 0x02)
 	if data[3] != 0:
-		push_error(data[3])
+		print("MQTT exception ", data[3])
+		return false
 
 	self.client = lclient
 	$Timer.start()
@@ -245,8 +246,9 @@ func subscribe(topic, qos=0):
 			var data = ret[1]
 			assert(data[1] == (self.pid >> 8) and data[2] == (self.pid & 0x0F))
 			if data[3] == 0x80:
-				push_error(data[3])
-			return
+				print("MQTT exception ", data[3])
+				return false
+			return true
 
 var in_wait_msg = false
 func _on_Timer_timeout():
@@ -282,7 +284,7 @@ func wait_msg():
 	if res == null:
 		return null
 	if res == 0:
-		push_error("-1")
+		return false # raise OSError(-1)
 	if res == 0xD0:  # PINGRESP
 		var sz = self.client.get_u8()
 		assert(sz == 0)

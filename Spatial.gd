@@ -234,7 +234,6 @@ var deferred_player_connected_list = [ ]
 var players_connected_list = [ ]
 func _player_connected(id):
 	print("_player_connected ", id)
-	mqttsystem.mqttpublish("playerconnected", String(id))
 	if not Tglobal.connectiontoserveractive:
 		print("deferring playerconnect to after _connected_to_server() call: ", id)
 		deferred_player_connected_list.push_back(id)
@@ -271,6 +270,7 @@ func _player_connected(id):
 			$SketchSystem.rpc_id(id, "actsketchchangeL", xcdatachunk)
 			yield(get_tree().create_timer(0.2), "timeout")
 		$SketchSystem.rpc_id(id, "actsketchchangeL", [{"planview":$PlanViewSystem.planviewtodict()}]) 
+	mqttsystem.mqttpublish("playercount/add", "%d %d" % [$Players.get_child_count(), id])
 
 	
 func _player_disconnected(id):
@@ -292,6 +292,7 @@ func _player_disconnected(id):
 	$GuiSystem/GUIPanel3D.updateplayerlist()
 	playerMe.bouncetestnetworkID = nextplayernetworkidinringskippingdoppelganger(id)
 	$GuiSystem/GUIPanel3D/Viewport/GUI/Panel/Label.text = "player "+String(id)+" disconnected"
+	mqttsystem.mqttpublish("playercount/remove", "%d %d" % [$Players.get_child_count(), id])
 		
 func _connected_to_server():
 	print("_connected_to_server")

@@ -331,7 +331,7 @@ func maketubepolyassociation_andreorder(xcdrawing0, xcdrawing1):
 	pickedpolyindex0 = pickpolysindex(polys0, xcdrawinglink, 0)
 	pickedpolyindex1 = pickpolysindex(polys1, xcdrawinglink, 1)
 	
-	if pickedpolyindex0 == -1 or pickedpolyindex1 == -1:
+	if pickedpolyindex0 == -1 or pickedpolyindex1 == -1 or len(xcdrawinglink) == 0:
 		print("no connecting poly available", polys0, polys1)
 		return [[], [], []]
 
@@ -347,9 +347,15 @@ func maketubepolyassociation_andreorder(xcdrawing0, xcdrawing1):
 	var poly1 = polys1[pickedpolyindex1].duplicate()
 	if polyinvert0:
 		poly0.invert()
+	var ilp0 = poly0.find(xcdrawinglink[0])
+	if ilp0 != 0:
+		poly0 = poly0.slice(ilp0, len(poly0)-1) + poly0.slice(0, ilp0-1)
 	if polyinvert1:
 		poly1.invert()
-	#print("opopolys", poly0, poly1)
+	var ilp1 = poly1.find(xcdrawinglink[1])
+	if ilp1 != 0:
+		poly1 = poly1.slice(ilp1, len(poly1)-1) + poly1.slice(0, ilp1-1)
+
 	
 	#if xcdrawing0.global_transform.basis.z.dot(xcdrawing1.global_transform.basis.z) < 0:
 	#	poly1.invert()
