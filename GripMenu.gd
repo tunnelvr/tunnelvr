@@ -13,7 +13,7 @@ var tubenamematerials = { }
 onready var materialsystem = get_node("/root/Spatial/MaterialSystem")
 
 var materialmatrix = [ ["simpledirt"], ["partialrock"], ["rockwater"], ["pebbles"], ["mediumrock"], 
-					   ["bluewater", "bluewaterfore", "bluewaterback"], ["hole"] ]
+					   ["bluewater", "bluewaterfore", "bluewaterback"], ["hole", "holegap"] ]
 
 func _ready():
 	var tubematerials = materialsystem.get_node("tubematerials")
@@ -108,7 +108,7 @@ func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointert
 			pass
 		elif is_instance_valid(activetargetwall) and len(activetargetwall.nodepoints) == 0:
 			gmlist = ["DoSlice", "SelectXC", "HideXC", "materials"]
-		elif tubesectormaterialname == "hole":
+		elif tubesectormaterialname == "hole" or tubesectormaterialname == "holegap":
 			gmlist = ["HoleXC", "SelectXC", "HideXC", "materials"]
 		else:
 			gmlist = ["DelTube", "NewXC", "SelectXC", "HideXC", "materials"]

@@ -359,11 +359,6 @@ func maketubepolyassociation_andreorder(xcdrawing0, xcdrawing1):
 	if ilp1 != 0 and not polys1islinearpath:
 		poly1 = poly1.slice(ilp1, len(poly1)-1) + poly1.slice(0, ilp1-1)
 
-	
-	#if xcdrawing0.global_transform.basis.z.dot(xcdrawing1.global_transform.basis.z) < 0:
-	#	poly1.invert()
-	#	print("reversssing poly1", xcdrawing0.global_transform.basis.z, xcdrawing1.global_transform.basis.z, poly1)
-
 	while len(xcsectormaterials) < len(xcdrawinglink)/2:
 		xcsectormaterials.append(get_node("/root/Spatial/MaterialSystem").tubematerialnamefromnumber(0 if ((len(xcsectormaterials)%2) == 0) else 1))
 	xcsectormaterials.resize(len(xcdrawinglink)/2)
@@ -553,6 +548,7 @@ func slicetubetoxcdrawing(xcdrawing, xcdata, xctdatadel, xctdata0, xctdata1):
 func HoleName(i):
 	return "Hole"+("" if i == 0 else ";"+str(i))+";"+xcname0+";"+xcname1
 
+
 func ConstructHoleXC(i, sketchsystem):
 	assert (xcsectormaterials[i] == "hole")
 	var xcdrawingholename = HoleName(i)
@@ -583,7 +579,9 @@ func ConstructHoleXC(i, sketchsystem):
 		xcdata["prevonepathpairs"] = xcdrawinghole.onepathpairs.duplicate()
 		xcdata["prevnodepoints"] = xcdrawinghole.nodepoints.duplicate()
 
-	var shellcontour = extractshellcontourforholexc(sketchsystem.get_node("XCdrawings"), i)
+	var shellcontour = extractshellcontourforholexc(sketchsystem, i)
+	if shellcontour == null:
+		return null
 	var prevname = shellcontour[-1][0]
 	for sc in shellcontour:
 		xcdata["nextnodepoints"][sc[0]] = xcdata["transformpos"].xform_inv(sc[1])
@@ -856,7 +854,8 @@ func shellcontourintermed(p0, p1, xclinkintermediatenodes, pref):
 		scc.push_back([pref%j, sp + spbasis.x*dp.x + spbasis.y*dp.y])
 	return scc
 	
-func extractshellcontourforholexc(xcdrawings, li):
+func extractshellcontourforholexc(sketchsystem, li):
+	var xcdrawings = sketchsystem.get_node("XCdrawings")
 	var xcdrawing0 = xcdrawings.get_node(xcname0)
 	var xcdrawing1 = xcdrawings.get_node(xcname1)
 	var mtpa = maketubepolyassociation_andreorder(xcdrawing0, xcdrawing1)
@@ -884,6 +883,151 @@ func extractshellcontourforholexc(xcdrawings, li):
 	scc1.invert()
 	sccbot.invert()
 	return scc0 + scctop + scc1 + sccbot
+
+
+func xctubetransitivechain(sketchsystem, xcdrawing0, nodename0, xcdrawing1, nodename1):
+	assert (xcdrawing0.get_name() == xcname0)
+	assert (xcdrawing1.get_name() == xcname1)
+	var nodepoint0 = xcdrawing0.transform.xform(xcdrawing0.nodepoints[nodename0])
+	var nodepoint1 = xcdrawing1.transform.xform(xcdrawing1.nodepoints[nodename1])
+	var nodepointvec = nodepoint1 - nodepoint0
+	var nodepointvecsq = nodepointvec.length_squared()
+	var xcnamei = xcname0
+	var nodenamej = nodename0
+	var nodepointi = nodepoint0
+	var lami = 0.0
+	var xcdrawingi = xcdrawing0
+	var ptseq = [ nodepoint0 ]
+	var excltube = self
+	for k in range(5):
+		var xctubei = null
+		var xcnamei1 = null
+		var xcdrawingi1 = null
+		var dlinki = -1
+		var nodenamej1 = null
+		var lami1 = 0.0
+		var nodepointi1 = null
+		for xctubeconn in xcdrawingi.xctubesconn:
+			if xctubeconn != excltube:
+				if xctubeconn.xcname0 == xcnamei:
+					xcnamei1 = xctubeconn.xcname1
+					for i in range(0, len(xctubeconn.xcdrawinglink), len(xctubeconn.xcdrawinglink)-2):
+						if xctubeconn.xcdrawinglink[i] == nodenamej:
+							dlinki = int(i/2)
+							nodenamej1 = xctubeconn.xcdrawinglink[i+1]
+				else:
+					assert (xctubeconn.xcname1 == xcnamei)
+					xcnamei1 = xctubeconn.xcname0
+					for i in range(0, len(xctubeconn.xcdrawinglink), len(xctubeconn.xcdrawinglink)-2):
+						if xctubeconn.xcdrawinglink[i+1] == nodenamej:
+							dlinki = int(i/2)
+							nodenamej1 = xctubeconn.xcdrawinglink[i]
+				if nodenamej1 != null:
+					xcdrawingi1 = sketchsystem.get_node("XCdrawings").get_node(xcnamei1)
+					nodepointi1 = xcdrawingi1.transform.xform(xcdrawingi1.nodepoints[nodenamej1])
+					lami1 = nodepointvec.dot(nodepointi1 - nodepoint0)/nodepointvecsq
+					if xcnamei1 == xcname1 or (lami1 > lami and lami1 < 1.0):
+						assert (xcnamei1 != xcname1 or is_equal_approx(lami1, 1.0))
+						xctubei = xctubeconn
+						break
+		if xctubei == null:
+			return null
+
+		if xctubei.xclinkintermediatenodes != null:
+			var transintermednodes = xctubei.xclinkintermediatenodes[dlinki]
+			print(xctubei.xcdrawinglink, transintermednodes)
+			if xctubei.xcname0 == xcnamei:
+				assert (xctubei.xcdrawinglink[dlinki*2+1] == nodenamej1)
+				for dp in transintermednodes:
+					ptseq.push_back(xctubei.intermedpointpos(nodepointi, nodepointi1, dp))
+			else:
+				assert (xctubei.xcname1 == xcnamei)
+				assert (xctubei.xcdrawinglink[dlinki*2] == nodenamej1)
+				for l in range(len(transintermednodes)-1, -1, -1):
+					ptseq.push_back(xctubei.intermedpointpos(nodepointi1, nodepointi, transintermednodes[l]))
+
+		if xcnamei1 == xcname1:
+			if nodenamej1 == nodename1:
+				assert (nodepointi1.is_equal_approx(nodepoint1))
+				ptseq.push_back(nodepoint1)
+				return ptseq
+			else:
+				return null
+
+		lami = lami1
+		xcnamei = xcnamei1
+		xcdrawingi = xcdrawingi1
+		nodenamej = nodenamej1
+		nodepointi = nodepointi1
+		ptseq.push_back(nodepointi1)
+		excltube = xctubei
+		
+	print("failed to transitive chain in 5 steps")
+	return null
+
+func remaptransitivechaintointermediates(transchain):
+	var intermediatepoints = [ ]
+	var p0 = transchain[0]
+	var p1 = transchain[-1]
+	var pvec = p1 - p0
+	var pveclensq = pvec.length_squared()
+	for i in range(1, len(transchain)-1):
+		var p = transchain[i]
+		var ipbasis = intermedpointplanebasis(p)
+		var l0 = ipbasis.z.dot(p0)
+		var l1 = ipbasis.z.dot(p1)
+		var lp = ipbasis.z.dot(p)
+		var intermediatepointplanelambda = inverse_lerp(l0, l1, lp)
+		var pc = intermedpointpos(p0, p1, Vector3(0, 0, intermediatepointplanelambda))
+		var ix = ipbasis.x.dot(p - pc)
+		var iy = ipbasis.y.dot(p - pc)
+		var dp = Vector3(ix, iy, intermediatepointplanelambda)
+		var Dp = intermedpointpos(p0, p1, dp)
+		print(p, Dp)
+		assert (p.is_equal_approx(intermedpointpos(p0, p1, dp)))
+		intermediatepoints.push_back(dp)
+	return intermediatepoints
+
+func CopyHoleGapShape(li, sketchsystem):
+	assert (xcsectormaterials[li] == "holegap")
+
+	var xcdrawings = sketchsystem.get_node("XCdrawings")
+	var xcdrawing0 = xcdrawings.get_node(xcname0)
+	var xcdrawing1 = xcdrawings.get_node(xcname1)
+	var mtpa = maketubepolyassociation_andreorder(xcdrawing0, xcdrawing1)
+	var poly0 = mtpa[0]
+	var poly1 = mtpa[1]
+	var ilaM = mtpa[2]
+
+	var i = ilaM[li]["i"]
+	var i1 = ilaM[li]["i1"]
+	assert (i == li)
+
+	var transchain0 = xctubetransitivechain(sketchsystem, xcdrawing0, xcdrawinglink[i*2], xcdrawing1, xcdrawinglink[i*2+1])
+	var transchain1 = xctubetransitivechain(sketchsystem, xcdrawing0, xcdrawinglink[i1*2], xcdrawing1, xcdrawinglink[i1*2+1])
+	if transchain0 == null or transchain1 == null:
+		return null
+		
+	var prevdrawinglinks = [ xcdrawinglink[i*2], xcdrawinglink[i*2+1], null, xclinkintermediatenodes[i].duplicate() if xclinkintermediatenodes != null else [], 
+							 xcdrawinglink[i1*2], xcdrawinglink[i1*2+1], null, xclinkintermediatenodes[i1].duplicate() if xclinkintermediatenodes != null else [] ]
+							
+	var newdrawinglinks = [ xcdrawinglink[i*2], xcdrawinglink[i*2+1], null, remaptransitivechaintointermediates(transchain0), 
+							xcdrawinglink[i1*2], xcdrawinglink[i1*2+1], null, remaptransitivechaintointermediates(transchain1) ]
+	var xctdata = { "tubename":get_name(),
+					"xcname0":xcname0,
+					"xcname1":xcname1,
+					"prevdrawinglinks":prevdrawinglinks,
+					"newdrawinglinks":newdrawinglinks
+				  }
+
+	return xctdata
+
+
+
+
+
+
+
 	
 func makeplaneintersectionaxisvec(xcdrawing0, xcdrawing1):
 	var n0 = xcdrawing0.transform.basis.z

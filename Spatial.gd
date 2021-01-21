@@ -259,6 +259,7 @@ func _player_connected(id):
 	if not Tglobal.controlslocked:
 		$GuiSystem/GUIPanel3D.toggleguipanelvisibility(null)
 
+	mqttsystem.mqttpublish("playercount/add", "%d %d" % [$Players.get_child_count(), id])
 	if playerMe.networkID == 1:
 		print("Converting sketchsystemtodict")
 		var sketchdatadict = $SketchSystem.sketchsystemtodict(false)
@@ -270,9 +271,15 @@ func _player_connected(id):
 			$SketchSystem.rpc_id(id, "actsketchchangeL", xcdatachunk)
 			yield(get_tree().create_timer(0.2), "timeout")
 		$SketchSystem.rpc_id(id, "actsketchchangeL", [{"planview":$PlanViewSystem.planviewtodict()}]) 
-	mqttsystem.mqttpublish("playercount/add", "%d %d" % [$Players.get_child_count(), id])
+		var xcvizstates = { }
+		for xcdrawing in $SketchSystem/XCdrawings.get_children():
+			if xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING and xcdrawing.drawingvisiblecode != DRAWING_TYPE.VIZ_XCD_HIDE:
+				xcvizstates[xcdrawing.get_name()] = xcdrawing.drawingvisiblecode
+		if xcvizstates:
+			print("sending out vizstates ", xcvizstates)
+			$SketchSystem.rpc_id(id, "actsketchchangeL", [{"prevxcvizstates":{}, "xcvizstates":xcvizstates}])
+	# {dukest1resurvey2009,12s0:2, s12009211:2}
 
-	
 func _player_disconnected(id):
 	print("_player_disconnected ", id)
 	mqttsystem.mqttpublish("playerdisconnected", String(id))

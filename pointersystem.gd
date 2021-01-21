@@ -273,7 +273,7 @@ func setpointertarget(laserroot, raycast, pointertargetshortdistance):
 		pointertargetwall = targetwall(pointertarget, pointertargettype)
 		setpointertargetmaterial()
 		
-		if activetargetwall == null and pointertargettype == "XCdrawing" and len(pointertargetwall.nodepoints) == 0 and activetargetnode == null:
+		if activetargetwall == null and pointertargettype == "XCdrawing" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING and len(pointertargetwall.nodepoints) == 0 and activetargetnode == null:
 			print("setting blank wall active")
 			setactivetargetwall(pointertargetwall)
 		
@@ -1068,12 +1068,23 @@ func buttonreleased_vrgrip():
 											}])
 
 			elif pointertarget.get_name() == "HoleXC":
-				var xcdata = gripmenu.gripmenupointertargetwall.ConstructHoleXC(gripmenu.gripmenuactivetargettubesectorindex, sketchsystem)
-				sketchsystem.actsketchchange([xcdata, 
-						{"xcvizstates":{ gripmenu.gripmenupointertargetwall.xcname0:DRAWING_TYPE.VIZ_XCD_HIDE, 
-										 gripmenu.gripmenupointertargetwall.xcname1:DRAWING_TYPE.VIZ_XCD_HIDE,
-										 xcdata["name"]:DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE }}])
-				setactivetargetwall(sketchsystem.get_node("XCdrawings").get_node(xcdata["name"]))
+				var xcsectormaterial = gripmenu.gripmenupointertargetwall.xcsectormaterials[gripmenu.gripmenuactivetargettubesectorindex]
+				if xcsectormaterial == "hole":
+					var xcdata = gripmenu.gripmenupointertargetwall.ConstructHoleXC(gripmenu.gripmenuactivetargettubesectorindex, sketchsystem)
+					if xcdata != null:
+						sketchsystem.actsketchchange([xcdata, 
+								{"xcvizstates":{ gripmenu.gripmenupointertargetwall.xcname0:DRAWING_TYPE.VIZ_XCD_HIDE, 
+												 gripmenu.gripmenupointertargetwall.xcname1:DRAWING_TYPE.VIZ_XCD_HIDE,
+												 xcdata["name"]:DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE }}])
+						setactivetargetwall(sketchsystem.get_node("XCdrawings").get_node(xcdata["name"]))
+				elif xcsectormaterial == "holegap":
+					var xcdata = gripmenu.gripmenupointertargetwall.CopyHoleGapShape(gripmenu.gripmenuactivetargettubesectorindex, sketchsystem)
+					if xcdata != null:
+						sketchsystem.actsketchchange([xcdata, 
+								{ "xcvizstates":{ }, 
+								  "updatetubeshells":[ 
+									{ "tubename":gripmenu.gripmenupointertargetwall.get_name(), "xcname0":gripmenu.gripmenupointertargetwall.xcname0, "xcname1":gripmenu.gripmenupointertargetwall.xcname1 }
+													 ] } ] )
 													
 			elif pointertarget.get_name() == "DoSlice" and is_instance_valid(wasactivetargettube) and is_instance_valid(activetargetwall) and len(activetargetwall.nodepoints) == 0:
 				print("doslice ", wasactivetargettube, " ", len(activetargetwall.nodepoints))
@@ -1148,9 +1159,11 @@ func findconstructtubeshellholes(xctubes):
 			var drawinghole = tubeshellholeindexes[0]
 			for j in range(1, len(tubeshellholeindexes)):
 				var i = tubeshellholeindexes[j]
-				if xcdatashellholes == null:
-					xcdatashellholes = [ ]
-				xcdatashellholes.push_back(xctube.ConstructHoleXC(i, sketchsystem))
+				var xcdatashell = xctube.ConstructHoleXC(i, sketchsystem)
+				if xcdatashell != null:
+					if xcdatashellholes == null:
+						xcdatashellholes = [ ]
+					xcdatashellholes.push_back(xcdatashell)
 			var updatetubeshells = drawinghole.updatetubeshellsconn()
 			if len(updatetubeshells) != 0:
 				xcdatashellholes.push_back({"xcvizstates":{ }, "updatetubeshells":updatetubeshells})
