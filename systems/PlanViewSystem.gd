@@ -439,8 +439,6 @@ func _process(delta):
 													clamp(imgtrim["imgtrimrightup"].y + joypostrimru.y*sfac, imgtrim["imgtrimleftdown"].y+0.1, imgheight*0.5))
 				lastoptionaltxcdata["previmgtrim"] = txcdata["previmgtrim"]
 				lastoptionaltxcdata["imgtrim"] = txcdata["imgtrim"]
-				lastoptionaltxcdata["imgtrimleftdown"] = txcdata["imgtrimleftdown"]
-				lastoptionaltxcdata["imgtrimrightup"] = txcdata["imgtrimrightup"]
 								
 			sketchsystem.actsketchchange([txcdata])
 		elif "name" in lastoptionaltxcdata:

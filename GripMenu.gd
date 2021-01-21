@@ -13,7 +13,7 @@ var tubenamematerials = { }
 onready var materialsystem = get_node("/root/Spatial/MaterialSystem")
 
 var materialmatrix = [ ["simpledirt"], ["partialrock"], ["rockwater"], ["pebbles"], ["mediumrock"], 
-					   ["bluewater", "bluewaterfore", "bluewaterback"], ["hole", "holegap"] ]
+					   ["bluewater", "bluewaterfore", "bluewaterback"], ["hole"] ] # + , "holegap"]
 
 func _ready():
 	var tubematerials = materialsystem.get_node("tubematerials")
