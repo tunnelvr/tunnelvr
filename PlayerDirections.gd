@@ -80,8 +80,7 @@ func _physics_process(delta):
 
 	var joypos = HandLeft.joypos
 	if not Input.is_action_pressed("lh_shift"):
-		if Input.is_action_pressed("lh_forward"):
-			joypos.y += 1
+		if Input.is_action_pressed("lh_forward"):   joypos.y += 1
 		if Input.is_action_pressed("lh_backward"):  joypos.y += -1
 		if Input.is_action_pressed("lh_left"):      joypos.x += -1
 		if Input.is_action_pressed("lh_right"):     joypos.x += 1
@@ -97,7 +96,8 @@ func _physics_process(delta):
 	if HandLeft.triggerbuttonheld and HandLeft.pointervalid and not Tglobal.controlslocked:
 		var vec = -(playerMe.global_transform*HandLeft.pointerposearvrorigin).basis.z
 		if playerdirectedflight:
-			playerdirectedflightvelocity = vec.normalized()*flyspeed*playerMe.playerflyscale
+			var flyacceleration = lerp(1.0, 5.0, (joypos.y-0.7)/0.3) if joypos.y>0.8 else 1.0
+			playerdirectedflightvelocity = vec.normalized()*flyspeed*flyacceleration*playerMe.playerflyscale
 		else:
 			playerdirectedwalkingvelocity = Vector3(vec.x, 0, vec.z).normalized()*walkspeed
 			var vang = rad2deg(Vector2(Vector2(vec.x, vec.z).length(), vec.y).angle())
