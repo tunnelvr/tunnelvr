@@ -1656,7 +1656,7 @@ margin_top = 166.0
 margin_right = 294.0
 margin_bottom = 193.0
 text = "1x"
-items = [ "1x", null, false, 0, null, "2x", null, false, 1, null, "10x", null, false, 2, null ]
+items = [ "1x", null, false, 0, null, "0.25x", null, false, 1, null, "10x", null, false, 2, null ]
 selected = 0
 __meta__ = {
 "_edit_use_anchors_": false
@@ -3239,7 +3239,7 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0 )
 shape = SubResource( 190 )
 
 [node name="Mesh" type="MeshInstance" parent="underfloor"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.000905189, 0.0301399, 0.000297317 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.000599841, 0.0301399, 0.00032361 )
 mesh = SubResource( 192 )
 material/0 = null
 

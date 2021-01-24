@@ -74,7 +74,7 @@ func _process(delta):
 var joyposxrotsnaphysteresis = 0 
 func _physics_process(delta):
 	playerdirectedflight = ((HandLeft.gripbuttonheld or Input.is_action_pressed("lh_ctrl")) != flywalkreversed) or \
-							(playerMe.playerscale != 1.0)
+							(playerMe.playerscale > 1.0)
 	playerdirectedflightvelocity = Vector3(0,0,0)
 	playerdirectedwalkingvelocity = Vector3(0,0,0)
 
@@ -99,18 +99,18 @@ func _physics_process(delta):
 			var flyacceleration = lerp(1.0, 5.0, (joypos.y-0.7)/0.3) if joypos.y>0.8 else 1.0
 			playerdirectedflightvelocity = vec.normalized()*flyspeed*flyacceleration*playerMe.playerflyscale
 		else:
-			playerdirectedwalkingvelocity = Vector3(vec.x, 0, vec.z).normalized()*walkspeed
+			playerdirectedwalkingvelocity = Vector3(vec.x, 0, vec.z).normalized()*walkspeed*playerMe.playerwalkscale
 			var vang = rad2deg(Vector2(Vector2(vec.x, vec.z).length(), vec.y).angle())
 			if vang > 45:
 				#playerdirectedwalkingvelocity = -playerdirectedwalkingvelocity
-				playerdirectedwalkingvelocity = Vector3(HeadCam.global_transform.basis.z.x, 0, HeadCam.global_transform.basis.z.z).normalized()*walkspeed
+				playerdirectedwalkingvelocity = Vector3(HeadCam.global_transform.basis.z.x, 0, HeadCam.global_transform.basis.z.z).normalized()*walkspeed*playerMe.playerwalkscale
 
 	elif not Tglobal.questhandtrackingactive and not Tglobal.controlslocked and abs(joypos.y) > 0.2:
 		if playerdirectedflight: 
 			playerdirectedflightvelocity = HeadCam.global_transform.basis.z*(-joypos.y*flyspeed)*playerMe.playerscale
 		else:
 			var dir = Vector3(HeadCam.global_transform.basis.z.x, 0, HeadCam.global_transform.basis.z.z)
-			playerdirectedwalkingvelocity = dir.normalized()*(-joypos.y*walkspeed)
+			playerdirectedwalkingvelocity = dir.normalized()*(-joypos.y*walkspeed*playerMe.playerwalkscale)
 			
 func _on_button_pressed(p_button):
 	if p_button == BUTTONS.VR_PAD:

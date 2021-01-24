@@ -109,12 +109,25 @@ func _on_playerscale_selected(index):
 	playerMe.playerscale = newplayerscale
 	playerMe.get_node("HandLeft").setcontrollerhandtransform(playerMe.playerscale)
 	playerMe.get_node("HandRight").setcontrollerhandtransform(playerMe.playerscale)
+	var PlayerDirections = get_node("/root/Spatial/BodyObjects/PlayerDirections")
+	var PlayerMotion = get_node("/root/Spatial/BodyObjects/PlayerMotion")
+	var pscavec = Vector3(playerMe.playerscale, playerMe.playerscale, playerMe.playerscale)
+	PlayerMotion.get_node("PlayerKinematicBody").scale = pscavec
+	PlayerMotion.get_node("PlayerEnlargedKinematicBody").scale = pscavec
+	PlayerMotion.get_node("PlayerHeadKinematicBody").scale = pscavec
 	if playerMe.playerscale == 1.0:
-		var PlayerDirections = get_node("/root/Spatial/BodyObjects/PlayerDirections")
 		playerMe.transform.origin = newplayermetransformheadfixed + Vector3(0,2,0)
 		PlayerDirections.forceontogroundtimedown = 0.75
 		PlayerDirections.floorprojectdistance = 50
 		playerMe.playerflyscale = 1.0
+		playerMe.playerwalkscale = 1.0
+
+	elif playerMe.playerscale < 1.0:
+		playerMe.transform.origin = newplayermetransformheadfixed
+		PlayerDirections.forceontogroundtimedown = 0.75
+		PlayerDirections.floorprojectdistance = 5
+		playerMe.playerflyscale = (playerMe.playerscale+1.0)*0.5
+		playerMe.playerwalkscale = (playerMe.playerscale*2+1.0)/3
 
 	else:
 		playerMe.transform.origin = newplayermetransformheadfixed
@@ -122,6 +135,7 @@ func _on_playerscale_selected(index):
 			playerMe.playerflyscale = playerMe.playerscale*0.2
 		else:
 			playerMe.playerflyscale = playerMe.playerscale*0.75
+		playerMe.playerwalkscale = 1.0
 	toggleguipanelvisibility(null)
 	selfSpatial.mqttsystem.mqttpublish("playerscale", String(newplayerscale))
 

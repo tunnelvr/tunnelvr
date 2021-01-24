@@ -8,6 +8,7 @@ onready var playerversion = Tglobal.version
 var guardianpoly = null
 var playerscale = 1.0
 var playerflyscale = 1.0
+var playerwalkscale = 1.0
 
 var bouncetestnetworkID = 0
 onready var LaserOrient = get_node("/root/Spatial/BodyObjects/LaserOrient")
