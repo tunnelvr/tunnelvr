@@ -337,7 +337,7 @@ remote func actsketchchangeL(xcdatalist):
 		elif xcdrawing.drawingtype == DRAWING_TYPE.DT_CENTRELINE:
 			xcdrawing.updatexcpaths_centreline(xcdrawing.get_node("PathLines"), xcdrawing.linewidth)
 		else:
-			xcdrawing.updatexcpaths_part(xcdrawing.get_node("PathLines"), xcdrawing.linewidth)
+			xcdrawing.updatexcpaths()
 
 
 	for xctube in xctubestoupdate.values():

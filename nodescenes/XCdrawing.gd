@@ -24,6 +24,8 @@ var nodepointmean = Vector3(0,0,0)
 var nodepointylo = 0.0
 var nodepointyhi = 0.0
 var imgheightwidthratio = 0  # known from the xcresource image (though could be cached)
+var shortestpathseglength = 0.0
+var closewidthsca = 1.0
 
 var linewidth = 0.05
 
@@ -324,6 +326,7 @@ func mergexcrpcdata(xcdata):
 						xcn.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("normalhole"))
 					xcn.set_name(nA)
 					maxnodepointnumber = max(maxnodepointnumber, int(nA))
+					xcn.scale = Vector3(closewidthsca, closewidthsca, closewidthsca)
 					$XCnodes.add_child(xcn)
 					xcn.translation = nodepointsAdd[nA]
 					xcn.get_node("CollisionShape/MeshInstance").layers = CollisionLayer.VL_xcdrawingnodes
@@ -332,6 +335,7 @@ func mergexcrpcdata(xcdata):
 					xcn = XCnode.instance()
 					xcn.set_name(nA)
 					maxnodepointnumber = max(maxnodepointnumber, int(nA))
+					xcn.scale = Vector3(closewidthsca, closewidthsca, closewidthsca)
 					$XCnodes.add_child(xcn)
 					xcn.translation = nodepointsAdd[nA]
 					xcn.get_node("CollisionShape/MeshInstance").layers = CollisionLayer.VL_xctubeposlines
@@ -344,6 +348,7 @@ func mergexcrpcdata(xcdata):
 						xcn.scale.y = knotyscale
 					xcn.set_name(nA)
 					maxnodepointnumber = max(maxnodepointnumber, int(nA))
+					xcn.scale = Vector3(closewidthsca, closewidthsca, closewidthsca)
 					$XCnodes.add_child(xcn)
 					xcn.translation = nodepointsAdd[nA]
 					xcn.get_node("CollisionShape/MeshInstance").layers = CollisionLayer.VL_xcdrawingnodes
@@ -363,7 +368,7 @@ func mergexcrpcdata(xcdata):
 				nodepointyhi = p.y
 				firstnodepoint = false
 		nodepointmean = nodepointsum/max(1, len(nodepoints))
-		
+
 	if "onepathpairs" in xcdata:   # full overwrite
 		onepathpairs = xcdata["onepathpairs"]
 		var i = len(onepathpairs) - 2
@@ -399,14 +404,21 @@ func mergexcrpcdata(xcdata):
 			var materialsystem = get_node("/root/Spatial/MaterialSystem")
 			materialsystem.updatetubesectormaterial(xcflatshell, xcflatshellmaterial, false)
 
-	for j in range(len(onepathpairs)-2, -1, -2):
-		var p0 = nodepoints.get(onepathpairs[j])
-		var p1 = nodepoints.get(onepathpairs[j+1])
-		if p0 == null or p1 == null:
-			print("Deleting unknown point from onepathpairs ", (onepathpairs[j] if p0 == null else ""), "  ", (onepathpairs[j+1] if p1 == null else ""))
-			assert (false)  # assert (fromremotecall)
-			onepathpairs[j] = onepathpairs[-2]
-			onepathpairs[j+1] = onepathpairs[-1]
+	if "nodepoints" in xcdata or "prevnodepoints" in xcdata or "onepathpairs" in xcdata or "prevonepathpairs" in xcdata:
+		var shortestpathseglengthsq = -1.0
+		for j in range(0, len(onepathpairs), 2):
+			var p0 = nodepoints.get(onepathpairs[j])
+			var p1 = nodepoints.get(onepathpairs[j+1])
+			if p0 == null or p1 == null:
+				print("Deleting unknown point from onepathpairs ", (onepathpairs[j] if p0 == null else ""), "  ", (onepathpairs[j+1] if p1 == null else ""))
+				assert (false)  # assert (fromremotecall)
+				onepathpairs[j] = onepathpairs[-2]
+				onepathpairs[j+1] = onepathpairs[-1]
+			else:
+				var vlensq = p0.distance_squared_to(p1)
+				if shortestpathseglengthsq == -1.0 or vlensq < shortestpathseglengthsq:
+					shortestpathseglengthsq = vlensq
+		shortestpathseglength = sqrt(max(0, shortestpathseglengthsq))
 
 	if "drawingvisiblecode" in xcdata or "visible" in xcdata:
 		if not ("drawingvisiblecode" in xcdata):
@@ -420,7 +432,7 @@ func mergexcrpcdata(xcdata):
 	if drawingtype == DRAWING_TYPE.DT_CENTRELINE:
 		updatexcpaths_centreline($PathLines, linewidth)
 	elif drawingtype != DRAWING_TYPE.DT_ROPEHANG:
-		updatexcpaths_part($PathLines, linewidth)
+		updatexcpaths()
 	
 func setxcnpoint(xcn, pt, planar):
 	xcn.global_transform.origin = pt
@@ -502,11 +514,23 @@ func updatelinearropepaths():
 	return middlenodes
 
 
+func updatexcpaths():
+	var lclosewidthsca = 1.0
+	if shortestpathseglength != 0.0 and shortestpathseglength < linewidth*5:
+		lclosewidthsca = 0.5
+		if shortestpathseglength < linewidth*5*closewidthsca:
+			lclosewidthsca = 0.25
+	if closewidthsca != lclosewidthsca:
+		closewidthsca = lclosewidthsca
+		for xcn in $XCnodes.get_children():
+			xcn.scale = Vector3(closewidthsca, closewidthsca, closewidthsca)
 
-func updatexcpaths_part(pathlines, llinewidth):
+	var pathlines = $PathLines
+	var llinewidth = linewidth*closewidthsca
 	if len(onepathpairs) == 0:
 		pathlines.mesh = null
 		return
+	
 	var surfaceTool = SurfaceTool.new()
 	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
 	for j in range(0, len(onepathpairs), 2):
