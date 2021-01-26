@@ -23,6 +23,7 @@ var pointertargettype = "none"
 var pointertargetwall = null
 var pointertargetpoint = Vector3(0, 0, 0)
 var gripbuttonpressused = false
+var laserselectlinelogicallyvisible = false
 
 var activetargetnode = null
 var activetargetnodewall = null
@@ -31,6 +32,7 @@ var activetargettube = null
 var activetargettubesectorindex = -1
 var activetargetxcflatshell = null
 var prevactivetargettubetohideonsecondselect = null
+var activetargetnodetriggerpulling = false
 
 var activetargetwallgrabbed = null
 var activetargetwallgrabbedtransform = null
@@ -285,33 +287,27 @@ func setpointertarget(laserroot, raycast, pointertargetshortdistance):
 		laserroot.get_node("LaserSpot").set_surface_material(0, materialsystem.lasermaterialN((1 if activetargetnode != null else 0) + (2 if pointertarget == null else 0)))
 			
 		if activetargetnode != null and pointertargetwall != null:
+			laserselectlinelogicallyvisible = false
 			if activetargetnodewall.drawingtype == DRAWING_TYPE.DT_CENTRELINE:
-				LaserSelectLine.visible = pointertargetwall != null and pointertargettype == "XCdrawing" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE
+				laserselectlinelogicallyvisible = pointertargetwall != null and pointertargettype == "XCdrawing" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE
 			elif activetargetnodewall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 				if pointertargettype == "XCnode":
-					LaserSelectLine.visible = (pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING) and (pointertarget != activetargetnode)
+					laserselectlinelogicallyvisible = (pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING) and (pointertarget != activetargetnode)
 				elif pointertargettype == "XCdrawing" and pointertargetwall == activetargetnodewall:
-					LaserSelectLine.visible = true
-				else:
-					LaserSelectLine.visible = false
+					laserselectlinelogicallyvisible = true
 			elif activetargetnodewall.drawingtype == DRAWING_TYPE.DT_ROPEHANG:
 				if pointertargettype == "XCnode":
-					LaserSelectLine.visible = (pointertargetwall.drawingtype == DRAWING_TYPE.DT_ROPEHANG) and (pointertarget != activetargetnode)
+					laserselectlinelogicallyvisible = (pointertargetwall.drawingtype == DRAWING_TYPE.DT_ROPEHANG) and (pointertarget != activetargetnode)
 				elif pointertargettype == "XCdrawing":
-					LaserSelectLine.visible = false
+					laserselectlinelogicallyvisible = false
 				elif Tglobal.handflickmotiongestureposition == 1:
-					LaserSelectLine.visible = (pointertargettype == "none" or pointertargettype == "XCtubesector")
-				else:
-					LaserSelectLine.visible = false
-			else:
-				LaserSelectLine.visible = false
+					laserselectlinelogicallyvisible = (pointertargettype == "none" or pointertargettype == "XCtubesector")
 		elif pointertargettype == "IntermediatePointView":
-			LaserSelectLine.visible = true
+			laserselectlinelogicallyvisible = true
 		elif activetargetnodewall != null and activetargetnodewall.drawingtype == DRAWING_TYPE.DT_ROPEHANG:
-			LaserSelectLine.visible = (pointertargettype == "none" and Tglobal.handflickmotiongestureposition == 1)
-		else:
-			LaserSelectLine.visible = false
-			
+			laserselectlinelogicallyvisible = (pointertargettype == "none" and Tglobal.handflickmotiongestureposition == 1)
+		LaserSelectLine.visible = laserselectlinelogicallyvisible
+		
 	pointertargetpoint = newpointertargetpoint
 	if is_instance_valid(pointertarget) and pointertarget == guipanel3d:
 		guipanel3d.guipanelsendmousemotion(pointertargetpoint, LaserOrient.global_transform, (handrightcontroller.is_button_pressed(BUTTONS.HT_PINCH_INDEX_FINGER) if Tglobal.questhandtrackingactive else handrightcontroller.is_button_pressed(BUTTONS.VR_TRIGGER)) or Input.is_mouse_button_pressed(BUTTON_LEFT))
@@ -336,8 +332,33 @@ func setpointertarget(laserroot, raycast, pointertargetshortdistance):
 			else:
 				FloorLaserSpot.get_node("FloorSpot").visible = false
 
+	if activetargetnodetriggerpulling:
+		# solve activetargetnode.global_transform.origin + a*activetargetnode.global_transform.basis.z = LaserOrient.transform.origin - b*LaserOrient.transform.basis.z
+		var gp = LaserOrient.transform.origin - activetargetnode.global_transform.origin
+		# solve gp = a*activetargetnode.global_transform.basis.z + b*LaserOrient.transform.basis.z
+		#gp . activetargetnode.global_transform.basis.z = a + b*LaserOrient.transform.basis.z . activetargetnode.global_transform.basis.z
+		#gp . LaserOrient.transform.basis.z = a*activetargetnode.global_transform.basis.z . LaserOrient.transform.basis.z + b
+		var ldots = activetargetnode.global_transform.basis.z.dot(LaserOrient.transform.basis.z)
+		var gpdnd = gp.dot(activetargetnode.global_transform.basis.z)
+		var gpdlz = gp.dot(LaserOrient.transform.basis.z)
+		# gpdnd = a + b*ldots; gpdlz = a*ldots + b
+		# gpdnd = a + gpdlz*ldots - a*ldots*ldots
+		# a*(1 - ldots*ldots) = gpdnd - gpdlz*ldots
+		var aden = 1 - ldots*ldots
+		if abs(aden) > 0.01:
+			var a = (gpdnd - gpdlz*ldots)/aden
+			var b = gpdlz - a*ldots
+			var av = activetargetnode.global_transform.origin + a*activetargetnode.global_transform.basis.z
+			var bv = LaserOrient.transform.origin - b*LaserOrient.transform.basis.z
+			var skewdist = av.distance_to(bv)
+			LaserSelectLine.transform = activetargetnode.global_transform
+			LaserSelectLine.get_node("Scale").scale.z = -a
+			LaserSelectLine.visible = (skewdist < 0.1)
+		else:
+			LaserSelectLine.visible = false
 		
-	if LaserSelectLine.visible:
+	elif laserselectlinelogicallyvisible:
+		LaserSelectLine.visible = not activetargetnodetriggerpulling
 		var lslfrom = null
 		if pointertarget != null and activetargetnode != null:
 			lslfrom = activetargetnode.global_transform.origin
@@ -547,6 +568,9 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 		sketchsystem.actsketchchange(xcdatalist)
 		#Tglobal.soundsystem.quicksound("BlipSound", pointertargetpoint)
 
+	elif activetargetnode != null and pointertarget == activetargetnode:
+		clearactivetargetnode()
+
 	elif activetargetnode == null and activetargetnodewall == null and pointertargettype == "XCtubesector":
 		var pointertargettube = pointertargetwall
 		if Tglobal.handflickmotiongestureposition == 1:
@@ -711,6 +735,7 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 			setactivetargetnode(pointertargetwall.get_node("XCnodes").get_node(newnodename))
 			if pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 				pointertargetwall.expandxcdrawingscale(pointertargetpoint)
+				activetargetnodetriggerpulling = true
 			#Tglobal.soundsystem.quicksound("ClickSound", pointertargetpoint)
 			initialsequencenodename = initialsequencenodenameP
 	
@@ -764,8 +789,6 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 		else:
 			sketchsystem.actsketchchange([planviewsystem.getactivetargetfloorViz(pointertargetwall.get_name())])
 
-	elif activetargetnode != null and pointertarget == activetargetnode:
-		clearactivetargetnode()
 
 	elif activetargetnode != null and pointertargettype == "XCnode" and (pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING or pointertargetwall.drawingtype == DRAWING_TYPE.DT_ROPEHANG):
 		if activetargetnodewall == pointertargetwall and (activetargetnodewall.drawingtype == DRAWING_TYPE.DT_XCDRAWING or activetargetnodewall.drawingtype == DRAWING_TYPE.DT_ROPEHANG):
@@ -820,6 +843,7 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 		if pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 			if pointertargetwall != activetargetwall:
 				setactivetargetwall(pointertargetwall)
+				activetargetnodetriggerpulling = true
 		elif pointertargetwall.drawingtype == DRAWING_TYPE.DT_ROPEHANG:
 			if pointertargetwall.drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_HIDE:
 				sketchsystem.actsketchchange([{"xcvizstates":{pointertargetwall.get_name():DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE}}])
@@ -1238,6 +1262,8 @@ func clearintermediatepointplaneview():
 	intermediatepointplanetubename = ""
 	LaserOrient.get_node("RayCast").collision_mask = raynormalcollisionmask()
 	
+
+
 func buttonreleased_vrtrigger():
 	if activetargetwallgrabbedtransform != null:
 		sketchsystem.actsketchchange([ targetwalltransformpos(0) ])
@@ -1247,6 +1273,9 @@ func buttonreleased_vrtrigger():
 			clearintermediatepointplaneview()
 		else:
 			LaserOrient.get_node("RayCast").collision_mask = CollisionLayer.CL_IntermediatePlane
+	if activetargetnodetriggerpulling:
+		activetargetnodetriggerpulling = false
+		LaserSelectLine.visible = false
 
 func _physics_process(delta):
 	if playerMe.handflickmotiongesture != 0:
@@ -1306,7 +1335,8 @@ func _physics_process(delta):
 		var txcdata = targetwalltransformpos(1)
 		sketchsystem.actsketchchange([ targetwalltransformpos(1) ])
 		
-	
+
+		
 var rightmousebuttonheld = false
 func _input(event):
 	if event.is_action_pressed("ui_cancel") or event.is_action_pressed("ui_mousecapture"):

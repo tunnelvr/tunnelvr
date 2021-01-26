@@ -260,7 +260,7 @@ func _process(delta):
 
 		$HandRight.process_keyboardcontroltracking($HeadCam, Vector2(hx*0.033, 0), playerscale)
 	if $HandRight.pointervalid:
-		LaserOrient.global_transform = global_transform*$HandRight.pointerposearvrorigin
+		LaserOrient.transform = global_transform*$HandRight.pointerposearvrorigin
 	else:
 		LaserOrient.visible = false
 
