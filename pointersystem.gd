@@ -996,7 +996,9 @@ func buttonreleased_vrgrip():
 			elif pointertarget.get_name() == "HideXC":
 				if gripmenu.gripmenupointertargettype == "XCnode" or gripmenu.gripmenupointertargettype == "XCflatshell":
 					if gripmenu.gripmenupointertargetwall.drawingtype == DRAWING_TYPE.DT_ROPEHANG or gripmenu.gripmenupointertargetwall.xcconnectstoshell():
-						sketchsystem.actsketchchange([{ "xcvizstates":{ gripmenu.gripmenupointertargetwall.get_name():DRAWING_TYPE.VIZ_XCD_HIDE }}])
+						var updatexcshells = [ gripmenu.gripmenupointertargetwall.get_name() ]
+						var updatetubeshells = gripmenu.gripmenupointertargetwall.updatetubeshellsconn()
+						sketchsystem.actsketchchange([{ "xcvizstates":{ gripmenu.gripmenupointertargetwall.get_name():DRAWING_TYPE.VIZ_XCD_HIDE }, "updatetubeshells":updatetubeshells, "updatexcshells":updatexcshells }])
 					if gripmenu.gripmenupointertargetwall == activetargetwall:
 						setactivetargetwall(null)
 				elif gripmenu.gripmenupointertargettype == "XCtubesector":
