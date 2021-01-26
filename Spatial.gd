@@ -201,21 +201,6 @@ func _ready():
 	playerMe.global_transform.origin.y += 5
 	$GuiSystem/GUIPanel3D.updateplayerlist()
 	get_node("/root").msaa = Viewport.MSAA_4X
-
-	var picturepalace = get_node_or_null("picturepalace")
-	if picturepalace != null and picturepalace.visible:
-		picturepalace.get_node("CollisionShape").shape = ConcavePolygonShape.new()		
-		var v = PoolVector3Array()
-		var nodestack = [ picturepalace.get_node("picturepalace") ]
-		while len(nodestack) != 0:
-			var node = nodestack.pop_back()
-			for n in node.get_children():
-				if n is MeshInstance:
-					v = v + n.mesh.get_faces()
-					n.cast_shadow = GeometryInstance.SHADOW_CASTING_SETTING_ON
-				else:
-					nodestack.push_back(n)
-		picturepalace.get_node("CollisionShape").shape.set_faces(v)
 		
 
 func nextplayernetworkidinringskippingdoppelganger(deletedid):

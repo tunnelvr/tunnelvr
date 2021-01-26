@@ -143,12 +143,35 @@ func _on_playerscale_selected(index):
 func _on_switchtest(index):
 	var nssel = $Viewport/GUI/Panel/SwitchTest.get_item_text(index)
 	print(" _on_switchtest ", nssel, " ", index)
+	if nssel == "add picturepalace":
+		var picturepalace = get_node_or_null("/root/Spatial/picturepalace")
+		if picturepalace != null and not picturepalace.visible:
+			picturepalace.visible = true
+			picturepalace.get_node("CollisionShape").shape = ConcavePolygonShape.new()		
+			var v = PoolVector3Array()
+			var picturepalacenode = picturepalace.get_node("picturepalace")
+			if picturepalacenode == null:
+				picturepalacenode = load("res://assets/picturepalace/picturepalace.gltf").instance()
+				picturepalace.add_child(picturepalacenode)
+			var nodestack = [ picturepalacenode ]
+			while len(nodestack) != 0:
+				var node = nodestack.pop_back()
+				for n in node.get_children():
+					if n is MeshInstance:
+						v = v + n.mesh.get_faces()
+						n.cast_shadow = GeometryInstance.SHADOW_CASTING_SETTING_ON
+					else:
+						nodestack.push_back(n)
+			picturepalace.get_node("CollisionShape").shape.set_faces(v)
+			return
+
 	#normal
 	#hide floors
 	#all grey
 	#hide xc
 	#toggle guardian
 	#add glider
+	#add picturepalace
 
 	if index == 4:  # "toggle guardian"
 		var guardianpolyvisible = not playerMe.get_node("GuardianPoly").visible
