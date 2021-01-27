@@ -173,7 +173,7 @@ func ping():
 	self.client.put_u16(0xC000)
 
 func publish(topic, msg, retain=false, qos=0):
-	print("publishing ", topic, " ", msg)
+	#print("publishing ", topic, " ", msg)
 	if(self.client == null):
 		return
 	if(!self.client.is_connected_to_host()):

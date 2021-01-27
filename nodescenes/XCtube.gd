@@ -224,6 +224,14 @@ func updatetubelinkpaths(sketchsystem):
 	var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(xcname1)
 	assert ((len(xcdrawinglink)%2) == 0)
 	for j in range(0, len(xcdrawinglink), 2):
+		var lp0 = xcdrawing0.nodepoints.get(xcdrawinglink[j])
+		var lp1 = xcdrawing1.nodepoints.get(xcdrawinglink[j+1])
+		if lp0 == null:
+			print(" *** Error: tube ", get_name(), " link node ", xcdrawinglink[j], " missing from ", xcname0)
+			continue
+		if lp1 == null:
+			print(" *** Error: tube ", get_name(), " link node ", xcdrawinglink[j+1], " missing from ", xcname1)
+			continue
 		var p0 = xcdrawing0.transform * xcdrawing0.nodepoints[xcdrawinglink[j]]
 		var p1 = xcdrawing1.transform * xcdrawing1.nodepoints[xcdrawinglink[j+1]]
 		var vec = p1 - p0
@@ -335,7 +343,10 @@ func maketubepolyassociation_andreorder(xcdrawing0, xcdrawing1):
 	pickedpolyindex1 = pickpolysindex(polys1, xcdrawinglink, 1)
 	
 	if pickedpolyindex0 == -1 or pickedpolyindex1 == -1 or len(xcdrawinglink) == 0:
-		print("no connecting poly available", polys0, polys1)
+		if pickedpolyindex0 == -1:
+			print(" *** no connecting poly available ", xcname0, polys0, " 0:", xcdrawinglink)
+		if pickedpolyindex1 == -1:
+			print(" *** no connecting poly available ", xcname1, polys1, " 1:", xcdrawinglink)
 		return [[], [], []]
 
 	var tubevec = xcdrawing1.transform.xform(xcdrawing1.nodepointmean) - xcdrawing0.transform.xform(xcdrawing0.nodepointmean)
