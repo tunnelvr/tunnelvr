@@ -704,7 +704,7 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 			
 		if gripbuttonheld:
 			pointertargetwall.expandxcdrawingscale(pointertargetpoint)
-			if len(pointertargetwall.nodepoints) == 0:
+			if true or len(pointertargetwall.nodepoints) == 0:
 				clearactivetargetnode()
 				var alaserspot = activelaserroot.get_node("LaserSpot")
 				alaserspot.global_transform.origin = pointertargetpoint
@@ -927,6 +927,11 @@ func buttonreleased_vrgrip():
 			return
 		materialsystem.updatetubesectormaterial(activetargetxcflatshell.get_node("XCflatshell"), activetargetxcflatshell.xcflatshellmaterial, false)
 		activetargetxcflatshell = null
+
+	if activetargetwallgrabbedtransform != null:
+		sketchsystem.actsketchchange([ targetwalltransformpos(2) ])
+		activetargetwallgrabbedtransform = null
+		assert (gripbuttonpressused)
 	
 	if gripbuttonpressused:
 		pass  # the trigger was pulled during the grip operation
@@ -1197,7 +1202,7 @@ func findconstructtubeshellholes(xctubes):
 
 var targetwallvertplane = true
 var prevactivetargetwallgrabbedorgtransform = null
-func targetwalltransformpos(rpcoptional):
+func targetwalltransformpos(optionalrevertcode):
 	if activetargetwallgrabbed.get_name() == "PlanView" or activetargetwallgrabbed.drawingtype != DRAWING_TYPE.DT_XCDRAWING:
 		var newtrans = null
 		if activetargetwallgrabbedpoint != null:
@@ -1205,53 +1210,60 @@ func targetwalltransformpos(rpcoptional):
 			newtrans.origin += activetargetwallgrabbedpoint - newtrans * activetargetwallgrabbedlocalpoint
 		else:
 			newtrans = activelaserroot.get_node("LaserSpot").global_transform * activetargetwallgrabbedtransform
+			
 		if activetargetwallgrabbed.get_name() == "PlanView":
 			var txcdata = { "planview":{ "transformpos":newtrans },
-							"rpcoptional":rpcoptional,
+							"rpcoptional":(0 if optionalrevertcode else 1),
 							"timestamp":OS.get_ticks_msec()*0.001,
 						  }
 			return txcdata
 		elif activetargetwallgrabbed.drawingtype != DRAWING_TYPE.DT_XCDRAWING:
 			var txcdata = { "name":activetargetwallgrabbed.get_name(), 
-							"rpcoptional":rpcoptional,
+							"rpcoptional":(0 if optionalrevertcode else 1),
 							"timestamp":OS.get_ticks_msec()*0.001,
 							"prevtransformpos":activetargetwallgrabbed.transform,
 							"transformpos":newtrans }
 			return txcdata
 	
-	
+	assert (activetargetwallgrabbed.drawingtype == DRAWING_TYPE.DT_XCDRAWING)	
+	var rotateonly = (len(activetargetwallgrabbed.nodepoints) != 0)
 	var txcdata = { "name":activetargetwallgrabbed.get_name(), 
-					"rpcoptional":rpcoptional,
+					"rpcoptional":(0 if optionalrevertcode else 1),
 					"timestamp":OS.get_ticks_msec()*0.001,
 					"prevtransformpos":activetargetwallgrabbed.transform, }
 	if prevactivetargetwallgrabbedorgtransform == null or prevactivetargetwallgrabbedorgtransform != activetargetwallgrabbedorgtransform:
 		targetwallvertplane = abs(activetargetwallgrabbedorgtransform.basis.z.y) < 0.3
 		prevactivetargetwallgrabbedorgtransform = activetargetwallgrabbedorgtransform
+
 	var laserrelvec = activelaserroot.global_transform.basis.xform_inv(activetargetwallgrabbedlaserroottrans.basis.z)
 	var angh = asin(activelaserroot.global_transform.basis.z.y)
-	if targetwallvertplane and abs(angh) > deg2rad(60):
+	if rotateonly:
+		pass
+	elif targetwallvertplane and abs(angh) > deg2rad(60):
 		targetwallvertplane = false
 	elif (not targetwallvertplane) and abs(angh) < deg2rad(20):
 		targetwallvertplane = true
 	
-	if targetwallvertplane:
+	if optionalrevertcode == 2:
+		txcdata["transformpos"] = activetargetwallgrabbedorgtransform
+	elif targetwallvertplane:
 		var angy = -Vector2(laserrelvec.z, laserrelvec.x).angle()
 		if abs(activetargetwallgrabbedorgtransform.basis.z.y) < 0.3:  # should be 0 or 1 for vertical or horiz
 			txcdata["transformpos"] = activetargetwallgrabbedorgtransform.rotated(Vector3(0,1,0), angy)
-			var angpush =-(activetargetwallgrabbedlaserroottrans.origin.y - activelaserroot.global_transform.origin.y)
+			var angpush = 0 if rotateonly else -(activetargetwallgrabbedlaserroottrans.origin.y - activelaserroot.global_transform.origin.y)
 			var activetargetwallgrabbedpointmoved = activetargetwallgrabbedpoint + 20*angpush*activetargetwallgrabbeddispvector.normalized()
 			txcdata["transformpos"].origin += activetargetwallgrabbedpointmoved - txcdata["transformpos"]*activetargetwallgrabbedlocalpoint
 		else:
 			var angt = Vector2(activetargetwallgrabbeddispvector.x, activetargetwallgrabbeddispvector.z).angle() + deg2rad(90) - angy
 			txcdata["transformpos"] = Transform(Basis().rotated(Vector3(0,-1,0), angt), activetargetwallgrabbedorgtransform.origin)
-			var angpush =-(activetargetwallgrabbedlaserroottrans.origin.y - activelaserroot.global_transform.origin.y)
+			var angpush = 0 if rotateonly else -(activetargetwallgrabbedlaserroottrans.origin.y - activelaserroot.global_transform.origin.y)
 			var activetargetwallgrabbedpointmoved = activetargetwallgrabbedpoint + 20*angpush*Vector3(activetargetwallgrabbeddispvector.x, 0, activetargetwallgrabbeddispvector.z).normalized()
 			txcdata["transformpos"].origin += activetargetwallgrabbedpointmoved - txcdata["transformpos"]*activetargetwallgrabbedlocalpoint
 	else:
 		var angy = -Vector2(laserrelvec.z, laserrelvec.x).angle()
 		#txcdata["transformpos"] = Transform().rotated(Vector3(1,0,0), deg2rad(-90)).rotated(Vector3(0,1,0), angy)
 		txcdata["transformpos"] = Transform(Vector3(1,0,0), Vector3(0,0,-1), Vector3(0,1,0), Vector3(0,0,0)) # .rotated(Vector3(0,1,0), angy)
-		var angpush =-(activetargetwallgrabbedlaserroottrans.origin.y - activelaserroot.global_transform.origin.y)
+		var angpush = 0 if rotateonly else -(activetargetwallgrabbedlaserroottrans.origin.y - activelaserroot.global_transform.origin.y)
 		txcdata["transformpos"].origin = activetargetwallgrabbedpoint + Vector3(0, 20*angpush, 0)
 	return txcdata
 
@@ -1266,7 +1278,7 @@ func clearintermediatepointplaneview():
 
 func buttonreleased_vrtrigger():
 	if activetargetwallgrabbedtransform != null:
-		sketchsystem.actsketchchange([ targetwalltransformpos(0) ])
+		sketchsystem.actsketchchange([ targetwalltransformpos(1) ])
 		activetargetwallgrabbedtransform = null
 	if intermediatepointplanetubename != "":
 		if pointertargettype != "IntermediatePointView":
@@ -1332,9 +1344,7 @@ func _physics_process(delta):
 			planviewsystem.planviewguipanelreleasemouse()
 	
 	if activetargetwallgrabbedtransform != null:
-		var txcdata = targetwalltransformpos(1)
-		sketchsystem.actsketchchange([ targetwalltransformpos(1) ])
-		
+		sketchsystem.actsketchchange([ targetwalltransformpos(0) ])
 
 		
 var rightmousebuttonheld = false
