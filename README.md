@@ -22,8 +22,8 @@ For other platforms you may need to edit "Spatial.gd" to get the right initializ
 
 ## Objective
 
-This is intended to be the OpenStreetmap for caves, where cave explorers can conveniently 
-edit a 3D model of the caves they know about to build up an accurate map.
+This should work like an OpenStreetmap for caves, where cave explorers can conveniently 
+edit and share common 3D models of the caves direcly on the web with the least effort.
 
 Note that laser point scan to 1mm accuracy is not a map, any more than a satellite photograph is a map.  
 A map is a representation of the landscape that shows the details that are important for what it is used for.
@@ -36,42 +36,48 @@ The cave map is intended to be used for:
 a landscape that is purely made up.
 
 TunnelVR is multiplayer so that two or people can interact, either as a tourist and guide, 
-a teacher and student of the editing tools, or collaborators on improving the representation of 
+a teacher and student of the editing tools, or collaborators improving the representation of 
 a particular area of the cave.
 
 
 ## Controls
 
-The control binding is a challenge and is evolving.  Owing to a lack of artistic ability, 
-the hands and head are made using CSG subtraction or union of a box and a sphere.
+Controllers and hand tracking works.  Controller buttons animates the hands to the appropriate gesture: 
+* thumb and forefinger pinch is same as trigger button, 
+* thumb and middle finger pinch is grip button
+* thumb and pinky and ring finger at same time is menu button
 
-*Left hand* is for movement.
+### *Left hand* is for movement.
 * Thumb touchpad -- slides forward or backward in direction of view
 * Thumb touchpad click left or right -- rotates view 45 degrees left or right
 * Grip -- turns off gravity
 * Grip+Trigger -- Flies in direction of controller axis
-* Grip+Touchpad+Trigger -- Flies in direction of controller at 3x speed.
+* Grip+Touchpad+Trigger -- Flies in direction of controller at 5x speed.
 
-*Right hand* is for drawing.
-Note that there is a laser pointer coming out of the palm with a range of 50m.
-* Trigger on floor or transparent XC pane -- draw a new node (which is selected)
+### *Right hand* is for drawing.
+Cave walls are done by creating polygons in vertical (sometimes horizontal) XC panes and then joining nodes between these polygons to create tubes that are divided into sectors.
+There is a laser pointer coming out of the palm with a range of 50m.
 * Trigger on unselected node -- selects node and draws or deletes a line if there is a previously selected node.  
 If it is part of an unselected XC pane, then it selects the pane and the pointer will see through walls to reach it.
 * Trigger on selected node -- deselects node
-* Grip+Trigger on floor or XC pane -- Moves node
+* Trigger on XC pane with node selected -- continues drawing a sequence
+* Grip+Trigger on XC pane -- Moves selected node
 * Grip+Trigger on selected node -- Deletes node
 * Grip+ungrip on selected XC pane -- deselects XC pane
 * Grip+ungrip otherwise -- deselects selected node
-* Trigger on tube -- Selects tube and sector of tube
-* Thumb touch pad click left or right on selected tube -- advances the selected sector
-* Thumb touch pad click up or down on selected tube -- advances the material within the selected sector
-
+* Trigger on an active tube, then release on disk then click a point on the disk -- Creates an intermediate node which distorts the wall of the tube
+* Grip on target+select menu option+release -- executes a context sensitive command or changes material
 * Menu button (above touchpad) -- Open dialog window with further controls
-The important options is the Update Tubes if the tubes aren't being built properly.  
 
-*Gestures*
-* Right controller held horizontal above and to right of forehead when click menu button -- toggle the headtorch light
-* Left controller pointed towards palm so a dial appears, then left grip and rotate -- changes the angle of the laser.
+### Grip menu options
+* SelectXC
+* HideXC
+* DeleteXC
+* DeleteTube
+
+### Gestures
+* Right hand twisted to the right and moved rapidly towards face -- shorten laser pointer to enter rope drawing mode
+* Right hand twisted to the right and moved rapidly away from face -- return to normal pointer mode
 
 ## Geometric principle
 
@@ -86,5 +92,13 @@ to handle a difficult junction area.  In the extreme case, the cave could be mod
 CAT scan with 1mm thick layers all perpendicular to the X-axis.  However, capability to 
 change the orientation of the slices makes the modelling more symetrical.
 
+## Input data
+Cave data is sourced from [Cave-Registry](http://cave-registry.org.uk/) [NorthernEngland](http://cave-registry.org.uk/svn/NorthernEngland/)
+First execute:
+* "C:\Program Files (x86)\Survex\aven.exe" Ireby\Ireby2\Ireby2.svx
+to process the data into a .3d file Then process this file (after first editing the input and output file names)
+* python surveyscans\convertdmptojson.py
+Now edit the call to `xcdatalistfromcentreline` in the tunnelvr source code and enabled it to load the centreline and tubes on load.  
+Save and use as normal
 
 ![Screenshot](screenshot.png)
