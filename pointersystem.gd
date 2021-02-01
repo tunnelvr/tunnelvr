@@ -482,7 +482,6 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 		var newnodepoint = activetargetnodewall.global_transform.xform_inv(pointertargetpoint)
 		if gripbuttonheld:
 			if activetargetnode.get_name()[0] == ("k" if pointertargettype == "none" else "a"):
-				var movetopoint = activetargetnodewall.global_transform.xform_inv(pointertargetpoint)				
 				sketchsystem.actsketchchange([{
 					"name":activetargetnodewall.get_name(), 
 					"prevnodepoints":{ activetargetnode.get_name():activetargetnode.translation }, 
@@ -661,12 +660,12 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 			var nodename0 = splinepointplanetube["xcdrawinglink"][intermediatepointplanesectorindex*2]
 			var nodename1 = splinepointplanetube["xcdrawinglink"][intermediatepointplanesectorindex*2+1]
 			var newintermediatepoint = Vector3(dvd.x, dvd.y, intermediatepointplanelambda) if not gripbuttonheld else null
-			if intermediatepointpicked != null or newintermediatepoint != null:
+			if (intermediatepointpicked != null) or (newintermediatepoint != null):
 				var xctdata = { "tubename":intermediatepointplanetubename,
 								"xcname0":splinepointplanetube.xcname0,
 								"xcname1":splinepointplanetube.xcname1,
-								"prevdrawinglinks":[ nodename0, nodename1, null, (null if intermediatepointpicked == null else [ intermediatepointpicked ]) ], 
-								"newdrawinglinks":[ nodename0, nodename1, null, (null if newintermediatepoint == null else [ newintermediatepoint ]) ] 
+								"prevdrawinglinks":[ nodename0, nodename1, null, (null if (intermediatepointpicked == null) else [ intermediatepointpicked ]) ], 
+								"newdrawinglinks":[ nodename0, nodename1, null, (null if (newintermediatepoint == null) else [ newintermediatepoint ]) ] 
 							  }
 				var xctuberedraw = {"xcvizstates":{ }, "updatetubeshells":[{"tubename":intermediatepointplanetubename, "xcname0":splinepointplanetube.xcname0, "xcname1":splinepointplanetube.xcname1 }] }
 				sketchsystem.actsketchchange([xctdata, xctuberedraw])
@@ -1260,7 +1259,7 @@ func targetwalltransformpos(optionalrevertcode):
 			var activetargetwallgrabbedpointmoved = activetargetwallgrabbedpoint + 20*angpush*Vector3(activetargetwallgrabbeddispvector.x, 0, activetargetwallgrabbeddispvector.z).normalized()
 			txcdata["transformpos"].origin += activetargetwallgrabbedpointmoved - txcdata["transformpos"]*activetargetwallgrabbedlocalpoint
 	else:
-		var angy = -Vector2(laserrelvec.z, laserrelvec.x).angle()
+		#var angy = -Vector2(laserrelvec.z, laserrelvec.x).angle()
 		#txcdata["transformpos"] = Transform().rotated(Vector3(1,0,0), deg2rad(-90)).rotated(Vector3(0,1,0), angy)
 		txcdata["transformpos"] = Transform(Vector3(1,0,0), Vector3(0,0,-1), Vector3(0,1,0), Vector3(0,0,0)) # .rotated(Vector3(0,1,0), angy)
 		var angpush = 0 if rotateonly else -(activetargetwallgrabbedlaserroottrans.origin.y - activelaserroot.global_transform.origin.y)

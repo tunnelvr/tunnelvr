@@ -1349,6 +1349,7 @@ albedo_color = Color( 0.168627, 0.972549, 0.027451, 1 )
 
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
+enablevr = false
 
 [node name="Players" type="Spatial" parent="."]
 
@@ -1634,7 +1635,7 @@ margin_top = 136.0
 margin_right = 265.0
 margin_bottom = 163.0
 text = "normal"
-items = [ "normal", null, false, 0, null, "hide floors", null, false, 1, null, "all grey", null, false, 2, null, "hide xc", null, false, 3, null, "toggle guardian", null, false, 4, null, "add glider", null, false, 5, null, "add picturepalace", null, false, 6, null ]
+items = [ "normal", null, false, 0, null, "hide floors", null, false, 1, null, "all grey", null, false, 2, null, "hide xc", null, false, 3, null, "toggle guardian", null, false, 4, null, "add glider", null, false, 5, null, "add picturepalace", null, false, 6, null, "export STL", null, false, 7, null ]
 selected = 0
 __meta__ = {
 "_edit_use_anchors_": false

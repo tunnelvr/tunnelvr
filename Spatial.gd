@@ -204,7 +204,7 @@ func _ready():
 		
 
 func nextplayernetworkidinringskippingdoppelganger(deletedid):
-	for i in range($Players.get_child_count()):
+	for _i in range($Players.get_child_count()):
 		var nextringplayer = $Players.get_child((playerMe.get_index()+1)%$Players.get_child_count())
 		if deletedid == 0 or nextringplayer.networkID != deletedid:
 			if nextringplayer.networkID != 0:

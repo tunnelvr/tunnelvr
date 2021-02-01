@@ -283,7 +283,6 @@ func applytrimmedpaperuvscale():
 const knotyscale = 0.5
 func mergexcrpcdata(xcdata):
 	assert ((get_name() == xcdata["name"]) and (not ("drawingtype" in xcdata) or drawingtype == xcdata["drawingtype"]))
-	var updatexcflatshell = false
 	if "transformpos" in xcdata:
 		set_transform(xcdata["transformpos"])
 

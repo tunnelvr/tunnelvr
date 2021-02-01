@@ -839,7 +839,7 @@ func updatetubeshell(xcdrawings):
 
 		if xcsectormaterials[i] == "hole":
 			var sketchsystem = get_node("/root/Spatial/SketchSystem")
-			var xcdrawinghole = sketchsystem.get_node_or_null("XCdrawings").get_node(HoleName(i))
+			var xcdrawinghole = sketchsystem.get_node("XCdrawings").get_node_or_null(HoleName(i))
 			if xcdrawinghole != null:
 				if (xcdrawinghole.drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_PLANE_VISIBLE) == 0:
 					xctubesector.get_node("MeshInstance").visible = false

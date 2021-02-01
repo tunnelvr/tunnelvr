@@ -7,4 +7,5 @@ extends EditorScript
 	
 	
 func _run():
-	print(1 if a else )
+	var a = 2
+	print(1 if a == 2 else "aaa")

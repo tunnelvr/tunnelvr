@@ -26,7 +26,7 @@ func _ready():
 		
 
 func findxctube(xcname0, xcname1):
-	var xcdrawing0 = get_node_or_null("XCdrawings").get_node(xcname0)
+	var xcdrawing0 = get_node("XCdrawings").get_node_or_null(xcname0)
 	if xcdrawing0 != null:
 		for xctube in xcdrawing0.xctubesconn:
 			assert (xctube.xcname0 == xcname0 or xctube.xcname1 == xcname0)
@@ -82,6 +82,7 @@ remote func savesketchsystem(fname):
 	sketchdatafile.close()
 	Directory.new().rename(fnamewriting, fname)
 	print("saved ", fname, " in C:/Users/ViveOne/AppData/Roaming/Godot/app_userdata/tunnelvr")
+
 
 func combinabletransformposchange(xcdatalist):
 	if len(actsketchchangeundostack) > 0 and len(actsketchchangeundostack[-1]) == 1 and len(xcdatalist) == 1:

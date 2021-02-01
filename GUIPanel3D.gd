@@ -139,10 +139,51 @@ func _on_playerscale_selected(index):
 	toggleguipanelvisibility(null)
 	selfSpatial.mqttsystem.mqttpublish("playerscale", String(newplayerscale))
 
-	
+
+func exportSTL():
+	var fname = "user://export.stl"
+	var vfaces = [ ]
+	var vmathashs = [ ]
+	var nfaces = 0
+	for xctube in sketchsystem.get_node("XCtubes").get_children():
+		for i in range(xctube.get_node("XCtubesectors").get_child_count()):
+			var xctubesector = xctube.get_node("XCtubesectors").get_child(i)
+			var xcmaterial = xctube.xcsectormaterials[i]
+			if xcmaterial != "hole":
+				var xcmathash = hash(xcmaterial)
+				var mesh = xctubesector.get_node("MeshInstance").mesh
+				var faces = mesh.get_faces()
+				vfaces.append(faces)
+				vmathashs.append(xcmathash)
+				nfaces += int(len(faces)/3)
+
+	var fout = File.new()
+	fout.open(fname, File.WRITE)
+	var header = "TunnelVR out".to_utf8()
+	while len(header) < 80:
+		header.append(0x20)
+	fout.store_buffer(header)
+	fout.store_32(nfaces)
+	for faces in vfaces:
+		for i in range(0, len(faces), 3):
+			var n = Vector3(0,0,1)
+			fout.store_float(n.x); fout.store_float(-n.z); fout.store_float(n.y)
+			fout.store_float(faces[i].x); fout.store_float(-faces[i].z); fout.store_float(faces[i].y)
+			fout.store_float(faces[i+1].x); fout.store_float(-faces[i+1].z); fout.store_float(faces[i+1].y)
+			fout.store_float(faces[i+2].x); fout.store_float(-faces[i+2].z); fout.store_float(faces[i+2].y)
+			fout.store_16(vmathashs[int(i/3)]%65536)
+	fout.close()
+	print("saved ", fname, " in C:/Users/ViveOne/AppData/Roaming/Godot/app_userdata/tunnelvr")
+	$Viewport/GUI/Panel/Label.text = "Sketch Saved"
+
+
 func _on_switchtest(index):
 	var nssel = $Viewport/GUI/Panel/SwitchTest.get_item_text(index)
 	print(" _on_switchtest ", nssel, " ", index)
+	if nssel == "export STL":
+		exportSTL()
+		return
+
 	if nssel == "add picturepalace":
 		var picturepalace = get_node_or_null("/root/Spatial/picturepalace")
 		if picturepalace != null and not picturepalace.visible:
