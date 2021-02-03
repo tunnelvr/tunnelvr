@@ -140,7 +140,56 @@ func _on_playerscale_selected(index):
 	selfSpatial.mqttsystem.mqttpublish("playerscale", String(newplayerscale))
 
 
+func exportOBJ():
+	if not Directory.new().dir_exists("user://objexport"):
+		Directory.new().make_dir("user://objexport")
+	var fout = File.new()
+	fout.open("user://objexport/cave.obj", File.WRITE)
+	var materialsystem = get_node("/root/Spatial/MaterialSystem")
+	var materialdict = { }
+	var joff = 1
+	for xctube in sketchsystem.get_node("XCtubes").get_children():
+		for i in range(xctube.get_node("XCtubesectors").get_child_count()):
+			var xctubesector = xctube.get_node("XCtubesectors").get_child(i)
+			var xcmaterialname = xctube.xcsectormaterials[i]
+			if xcmaterialname == "hole":
+				continue
+			if not materialdict.has(xcmaterialname):
+				 materialdict[xcmaterialname] = materialsystem.tubematerial(xcmaterialname, false)
+			var uvscale = materialdict[xcmaterialname].uv1_scale
+			fout.store_line("o %s_%d"%[xctube.get_name(), i])
+			var mesh = xctubesector.get_node("MeshInstance").mesh
+			var sarrays = mesh.surface_get_arrays(0)
+			for p in sarrays[0]:
+				fout.store_line("v %f %f %f"%[p.x, p.y, p.z])
+			for n in sarrays[4]:
+				fout.store_line("vt %f %f"%[n.x*uvscale.x, n.y*uvscale.y])
+			#fout.store_line("usemtl %s"%xcmaterialname)
+			#fout.store_line("s off")
+			for j in range(0, len(sarrays[0]), 3):
+				fout.store_line("f %d %d %d"%[j+joff, j+joff+1, j+joff+2])
+			joff += len(sarrays[0])
+			
+	fout.close()
+	print("exported to C:/Users/ViveOne/AppData/Roaming/Godot/app_userdata/tunnelvr/objexport")
+	$Viewport/GUI/Panel/Label.text = "Cave exported"
+
+#v 0 0 0
+#v 0 1 0
+#v 1 0 0
+#v 1 1 0
+#usemtl 0.231373_0.380392_0.705882_0.000000_0.000000
+#s off
+#f 1 2 4
+#usemtl Material.001
+#f 1 4 3
+
+
 func exportSTL():
+	exportOBJ()
+	return
+
+
 	var fname = "user://export.stl"
 	var vfaces = [ ]
 	var vmathashs = [ ]
@@ -152,6 +201,10 @@ func exportSTL():
 			if xcmaterial != "hole":
 				var xcmathash = hash(xcmaterial)
 				var mesh = xctubesector.get_node("MeshInstance").mesh
+				var g = mesh.get_surface_count()
+				var x = mesh.surface_get_arrays(0)
+				if i == 0:
+					print(x, g)
 				var faces = mesh.get_faces()
 				vfaces.append(faces)
 				vmathashs.append(xcmathash)
@@ -174,7 +227,7 @@ func exportSTL():
 			fout.store_16(vmathashs[int(i/3)]%65536)
 	fout.close()
 	print("saved ", fname, " in C:/Users/ViveOne/AppData/Roaming/Godot/app_userdata/tunnelvr")
-	$Viewport/GUI/Panel/Label.text = "Sketch Saved"
+	$Viewport/GUI/Panel/Label.text = "Cave exported"
 
 
 func _on_switchtest(index):
