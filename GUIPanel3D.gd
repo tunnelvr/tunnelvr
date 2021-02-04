@@ -143,8 +143,11 @@ func _on_playerscale_selected(index):
 func exportOBJ():
 	if not Directory.new().dir_exists("user://objexport"):
 		Directory.new().make_dir("user://objexport")
+	var fobjname = "user://objexport/cave.obj"
+	var fmtlname = "user://objexport/cave.mtl"
 	var fout = File.new()
-	fout.open("user://objexport/cave.obj", File.WRITE)
+	fout.open(fobjname, File.WRITE)
+	fout.store_line("mtllib cave.mtl")
 	var materialsystem = get_node("/root/Spatial/MaterialSystem")
 	var materialdict = { }
 	var joff = 1
@@ -164,32 +167,35 @@ func exportOBJ():
 				fout.store_line("v %f %f %f"%[p.x, p.y, p.z])
 			for n in sarrays[4]:
 				fout.store_line("vt %f %f"%[n.x*uvscale.x, n.y*uvscale.y])
-			#fout.store_line("usemtl %s"%xcmaterialname)
-			#fout.store_line("s off")
+			fout.store_line("usemtl %s"%xcmaterialname)
+			fout.store_line("s off")
 			for j in range(0, len(sarrays[0]), 3):
-				fout.store_line("f %d %d %d"%[j+joff, j+joff+1, j+joff+2])
+				fout.store_line("f %d/%d %d/%d %d/%d"%[j+joff,j+joff,  j+joff+1,j+joff+1,  j+joff+2,j+joff+2])
 			joff += len(sarrays[0])
 			
 	fout.close()
 	print("exported to C:/Users/ViveOne/AppData/Roaming/Godot/app_userdata/tunnelvr/objexport")
 	$Viewport/GUI/Panel/Label.text = "Cave exported"
 
-#v 0 0 0
-#v 0 1 0
-#v 1 0 0
-#v 1 1 0
-#usemtl 0.231373_0.380392_0.705882_0.000000_0.000000
-#s off
-#f 1 2 4
-#usemtl Material.001
-#f 1 4 3
-
+	var fmtl = File.new()
+	fmtl.open(fmtlname, File.WRITE)
+	var textureroot = "res://lightweighttextures/"
+	for materialname in materialdict:
+		var mat = materialdict[materialname]
+		fmtl.store_line("newmtl %s"%materialname)
+		fmtl.store_line("  Ka %f %f %f"%[mat.albedo_color.r, mat.albedo_color.g, mat.albedo_color.b])
+		fmtl.store_line("  Kd %f %f %f"%[mat.albedo_color.r, mat.albedo_color.g, mat.albedo_color.b])
+		fmtl.store_line("  Ks %f %f %f"%[mat.metallic, mat.metallic, mat.metallic])
+		fmtl.store_line("  Ns %f"%101)
+		if mat.albedo_texture:
+			if mat.albedo_texture.resource_path.begins_with(textureroot):
+				fmtl.store_line("  map_Kd %s"%mat.albedo_texture.resource_path.replace(textureroot, ""))
+		fmtl.store_line("  illum 2")
+		fmtl.store_line("")
+	fmtl.close()
+	
 
 func exportSTL():
-	exportOBJ()
-	return
-
-
 	var fname = "user://export.stl"
 	var vfaces = [ ]
 	var vmathashs = [ ]
@@ -235,6 +241,9 @@ func _on_switchtest(index):
 	print(" _on_switchtest ", nssel, " ", index)
 	if nssel == "export STL":
 		exportSTL()
+		return
+	if nssel == "export OBJ":
+		exportOBJ()
 		return
 
 	if nssel == "add picturepalace":
