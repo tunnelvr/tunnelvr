@@ -1,4 +1,4 @@
-[gd_scene load_steps=261 format=2]
+[gd_scene load_steps=262 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/default_env.tres" type="Environment" id=2]
@@ -55,6 +55,7 @@
 [ext_resource path="res://guimaterials/borderedfloor.material" type="Material" id=53]
 [ext_resource path="res://lightweighttextures/rope.jpg" type="Texture" id=54]
 [ext_resource path="res://lightweighttextures/croppedscallop.jpg" type="Texture" id=55]
+[ext_resource path="res://sounds/click04.wav" type="AudioStream" id=56]
 
 [sub_resource type="CubeMesh" id=1]
 size = Vector3( 0.35, 0.01, 0.01 )
@@ -1349,7 +1350,6 @@ albedo_color = Color( 0.168627, 0.972549, 0.027451, 1 )
 
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
-enablevr = false
 
 [node name="Players" type="Spatial" parent="."]
 
@@ -3149,6 +3149,10 @@ bus = "Record"
 
 [node name="ClickSound" type="AudioStreamPlayer3D" parent="SoundSystem/quicksounds"]
 stream = ExtResource( 9 )
+unit_db = 9.032
+
+[node name="PopSound" type="AudioStreamPlayer3D" parent="SoundSystem/quicksounds"]
+stream = ExtResource( 56 )
 unit_db = 9.032
 
 [node name="MenuClick" type="AudioStreamPlayer3D" parent="SoundSystem/quicksounds"]

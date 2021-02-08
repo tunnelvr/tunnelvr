@@ -9,6 +9,9 @@ var nowrecording = false
 var quicksoundlastsoundposition = { "GentleCollide":Vector3(0,0,0),
 									"GlancingMotion":Vector3(0,0,0) }
 
+onready var HandLeftController = get_node("/root/Spatial/Players/PlayerMe/HandLeftController")
+onready var HandRightController = get_node("/root/Spatial/Players/PlayerMe/HandRightController")
+
 func _ready():
 	Tglobal.soundsystem = self
 
@@ -55,4 +58,23 @@ func playmyvoicerecording():
 			playerMe.rpc("playvoicerecording", recording.get_data())
 
 
+var rumblecountdownleft = 0
+var rumblecountdownright = 0
+func _process(delta):
+	rumblecountdownleft -= delta
+	rumblecountdownright -= delta
+	if rumblecountdownleft <= 0:
+		HandLeftController.rumble = 0.0
+	if rumblecountdownright <= 0:
+		HandRightController.rumble = 0.0
+	if rumblecountdownleft <= 0 and rumblecountdownright <= 0:
+		set_process(false)
 
+func shortvibrate(leftright, duration, intensity):
+	if leftright:
+		HandLeftController.rumble = intensity
+		rumblecountdownleft = duration
+	else:
+		HandRightController.rumble = intensity
+		rumblecountdownright = duration
+	set_process(true)

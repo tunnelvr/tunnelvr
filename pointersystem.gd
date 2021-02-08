@@ -275,6 +275,10 @@ func setpointertarget(laserroot, raycast, pointertargetshortdistance):
 		pointertargetwall = targetwall(pointertarget, pointertargettype)
 		setpointertargetmaterial()
 		
+		if pointertargettype == "XCnode" or pointertargettype == "IntermediateNode":
+			Tglobal.soundsystem.quicksound("PopSound", LaserOrient.global_transform.origin)
+			Tglobal.soundsystem.shortvibrate(false, 0.02, 1.0)
+		
 		if activetargetwall == null and pointertargettype == "XCdrawing" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING and len(pointertargetwall.nodepoints) == 0 and activetargetnode == null:
 			print("setting blank wall active")
 			setactivetargetwall(pointertargetwall)
