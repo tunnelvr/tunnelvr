@@ -1,4 +1,4 @@
-[gd_scene load_steps=262 format=2]
+[gd_scene load_steps=263 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/default_env.tres" type="Environment" id=2]
@@ -56,6 +56,7 @@
 [ext_resource path="res://lightweighttextures/rope.jpg" type="Texture" id=54]
 [ext_resource path="res://lightweighttextures/croppedscallop.jpg" type="Texture" id=55]
 [ext_resource path="res://sounds/click04.wav" type="AudioStream" id=56]
+[ext_resource path="res://lightweighttextures/waternoise.jpg" type="Texture" id=57]
 
 [sub_resource type="CubeMesh" id=1]
 size = Vector3( 0.35, 0.01, 0.01 )
@@ -669,15 +670,6 @@ uv1_offset = Vector3( 0, 0.21, 0 )
 
 [sub_resource type="PlaneMesh" id=106]
 
-[sub_resource type="OpenSimplexNoise" id=107]
-period = 71.9
-persistence = 0.407
-lacunarity = 3.15
-
-[sub_resource type="NoiseTexture" id=108]
-seamless = true
-noise = SubResource( 107 )
-
 [sub_resource type="OpenSimplexNoise" id=109]
 period = 24.3
 
@@ -689,9 +681,18 @@ noise = SubResource( 109 )
 params_specular_mode = 2
 params_cull_mode = 2
 albedo_color = Color( 0.12549, 0.258824, 0.890196, 1 )
-albedo_texture = SubResource( 108 )
+albedo_texture = ExtResource( 57 )
 metallic_specular = 0.55
 roughness_texture = SubResource( 110 )
+
+[sub_resource type="OpenSimplexNoise" id=107]
+period = 71.9
+persistence = 0.407
+lacunarity = 3.15
+
+[sub_resource type="NoiseTexture" id=108]
+seamless = true
+noise = SubResource( 107 )
 
 [sub_resource type="SpatialMaterial" id=112]
 params_cull_mode = 2
