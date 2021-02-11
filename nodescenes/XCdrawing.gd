@@ -559,15 +559,20 @@ func updatexcpaths():
 		pathlines.mesh = newmesh
 		pathlines.set_surface_material(0, m)
 
-func updatexcpaths_centreline(pathlines, llinewidth):
+
+func updatexcpaths_centreline(pathlines, mlinewidth):
 	if len(onepathpairs) == 0:
 		pathlines.mesh = null
 		return
 	var surfaceTool = SurfaceTool.new()
 	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
 	for j in range(0, len(onepathpairs), 2):
-		var p0 = nodepoints[onepathpairs[j]]
-		var p1 = nodepoints[onepathpairs[j+1]]
+		var s0 = onepathpairs[j]
+		var s1 = onepathpairs[j+1]
+		var issplaysegline = Tglobal.splaystationnoderegex.search(s0) or Tglobal.splaystationnoderegex.search(s1)
+		var llinewidth = mlinewidth*0.5 if issplaysegline else mlinewidth
+		var p0 = nodepoints[s0]
+		var p1 = nodepoints[s1]
 		var q0 = inverse_lerp(nodepointylo, nodepointyhi, p0.y)
 		var q1 = inverse_lerp(nodepointylo, nodepointyhi, p1.y)
 		var perp = Vector3(-(p1.z - p0.z), 0, p1.x - p0.x)

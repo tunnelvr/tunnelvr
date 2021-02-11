@@ -317,15 +317,14 @@ func planviewtransformpos(guidpaneltransform, guidpanelsize):
 var updateplanviewentitysizes_working = false
 func updateplanviewentitysizes():
 	prevcamerasize = $PlanView/Viewport/PlanGUI/Camera.size
-	var nodesca = $PlanView/Viewport/PlanGUI/Camera.size/70.0*5
-	var labelsca = nodesca*1.2
+	var nodesca = $PlanView/Viewport/PlanGUI/Camera.size/70.0*2.5
+	var labelsca = nodesca*2.4
 	var labelrects = [ ]
 	var rectrecttests = 0
 	var rectrecttestt0 = OS.get_ticks_msec()
 	#print("\nstarting labeloverlaps\n")
 	for xcdrawingcentreline in get_tree().get_nodes_in_group("gpcentrelinegeo"):
-		xcdrawingcentreline.updatexcpaths_centreline(xcdrawingcentreline.get_node("PathLines_PlanView"), 0.035*nodesca)
-
+		xcdrawingcentreline.updatexcpaths_centreline(xcdrawingcentreline.get_node("PathLines_PlanView"), 0.05*nodesca)
 		for xcn in xcdrawingcentreline.get_node("XCnodes_PlanView").get_children():
 			xcn.get_node("CollisionShape").scale = Vector3(nodesca, nodesca, nodesca)
 			var stationlabel = xcn.get_node("StationLabel")
@@ -338,7 +337,8 @@ func updateplanviewentitysizes():
 					xcnrect_overlapping = true
 					break
 				rectrecttests += 1
-			xcn.get_node("StationLabel").visible = not xcnrect_overlapping
+			xcn.visible = not xcnrect_overlapping
+			#xcn.get_node("StationLabel").visible = not xcnrect_overlapping
 			#print(xcn.get_name(), " overlapping ", xcnrect_overlapping, " ", xcnrect)
 			if not xcnrect_overlapping:
 				labelrects.push_back(xcnrect)

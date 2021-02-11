@@ -3,7 +3,7 @@
 [sub_resource type="CubeMesh" id=1]
 size = Vector3( 0.2, 0.1, 0.1 )
 
-[sub_resource type="SpatialMaterial" id=2]
+[sub_resource type="SpatialMaterial" id=4]
 resource_local_to_scene = true
 albedo_color = Color( 0.105882, 0.188235, 0.509804, 1 )
 
@@ -13,15 +13,15 @@ height = 0.3
 radial_segments = 24
 rings = 24
 
-[sub_resource type="SpatialMaterial" id=4]
+[sub_resource type="SpatialMaterial" id=5]
 resource_local_to_scene = true
 albedo_color = Color( 0.74, 0.62345, 0.5846, 1 )
 
 [node name="csgheadmesh" type="CSGMesh"]
 mesh = SubResource( 1 )
-material = SubResource( 2 )
+material = SubResource( 4 )
 
 [node name="skullcomponent" type="CSGMesh" parent="."]
 transform = Transform( 0.9, 0, 0, 0, 1, 0, 0, 0, 0.98, 0, -0.051, 0.085 )
 mesh = SubResource( 3 )
-material = SubResource( 4 )
+material = SubResource( 5 )

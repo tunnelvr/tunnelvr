@@ -320,7 +320,7 @@ func verletcollidestep(raycast):
 		else:
 			prev_collideverts[i] = nverts[i]
 	if ncollisions != 0:
-		print("verlet collidesteps ", ncollisions)
+		pass #print("verlet collidesteps ", ncollisions)
 	
 var prevverletstretch = -1
 var verletiterations = 0

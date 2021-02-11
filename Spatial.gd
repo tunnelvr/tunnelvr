@@ -185,14 +185,19 @@ func _ready():
 	var perm = OS.get_granted_permissions()
 	print("Granted permissions: ", perm)
 
-	if false:
+	if true:
 		#var centrelinefile = "res://surveyscans/dukest1resurvey2009json.res"
 		#var centrelinefile = "res://surveyscans/Ireby/Ireby2/Ireby2.json"
-		var centrelinefile = "res://surveyscans/LambTrap1.json"
+		#var centrelinefile = "res://surveyscans/LambTrap1.json"
+		var centrelinefile = "res://surveyscans/cusseypot/Cussey_Pot_Master.json"
+		
 		var xcdatalist = Centrelinedata.xcdatalistfromcentreline(centrelinefile)
 		Tglobal.printxcdrawingfromdatamessages = false
 		$SketchSystem.actsketchchange(xcdatalist)
 		Tglobal.printxcdrawingfromdatamessages = true
+		playerMe.transform.origin.y += 10
+		$BodyObjects/PlayerDirections.floorprojectdistance = 20
+		$BodyObjects/PlayerDirections.forceontogroundtimedown = 2.25
 		
 	elif true:
 		$SketchSystem.loadsketchsystemL("res://surveyscans/smallirebysave.res")

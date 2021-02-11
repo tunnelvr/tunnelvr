@@ -135,7 +135,7 @@ func _process(delta):
 				var verletmaxvelocity = verropropehang.verletmaxvelocity()
 				if verropropehang.verletiterations == 5:
 					verropropehang.verletgravity *= 0.4
-				print(" verletmaxvelocity ", verletmaxvelocity, " verletstretch ", verletstretch, " g", verropropehang.verletgravity)
+				#print(" verletmaxvelocity ", verletmaxvelocity, " verletstretch ", verletstretch, " g", verropropehang.verletgravity)
 				if (verletmaxvelocity < 0.0002 and verropropehang.prevverletstretch != -1 and abs(verropropehang.prevverletstretch - verletstretch) < 0.01) or \
 						(verropropehang.verletiterations > 10):
 					if len(verropropehang.oddropeverts) == 2:

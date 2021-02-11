@@ -53,7 +53,8 @@ static func xcdatalistfromcentreline(centrelinefile):
 								"newonepathpairs":centrelinelegs, 
 							  }
 	var xcdrawinglist = [ xcdrawingcentreline ]
-	var xcvizstates = { xcdrawingcentreline["name"]:DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE }
+	#var xcvizstates = { xcdrawingcentreline["name"]:DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE }
+	var xcvizstates = { xcdrawingcentreline["name"]:DRAWING_TYPE.VIZ_XCD_HIDE }
 	var updatetubeshells = [ ]
 
 	var xsectgps = centrelinedata.xsectgps
