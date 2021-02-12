@@ -317,8 +317,8 @@ func planviewtransformpos(guidpaneltransform, guidpanelsize):
 var updateplanviewentitysizes_working = false
 func updateplanviewentitysizes():
 	prevcamerasize = $PlanView/Viewport/PlanGUI/Camera.size
-	var nodesca = $PlanView/Viewport/PlanGUI/Camera.size/70.0*2.5
-	var labelsca = nodesca*2.4
+	var nodesca = $PlanView/Viewport/PlanGUI/Camera.size/70.0*3.0
+	var labelsca = nodesca*2.0
 	var labelrects = [ ]
 	var rectrecttests = 0
 	var rectrecttestt0 = OS.get_ticks_msec()

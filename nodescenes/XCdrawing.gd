@@ -569,7 +569,7 @@ func updatexcpaths_centreline(pathlines, mlinewidth):
 	for j in range(0, len(onepathpairs), 2):
 		var s0 = onepathpairs[j]
 		var s1 = onepathpairs[j+1]
-		var issplaysegline = Tglobal.splaystationnoderegex.search(s0) or Tglobal.splaystationnoderegex.search(s1)
+		var issplaysegline = Tglobal.splaystationnoderegex != null and (Tglobal.splaystationnoderegex.search(s0) or Tglobal.splaystationnoderegex.search(s1))
 		var llinewidth = mlinewidth*0.5 if issplaysegline else mlinewidth
 		var p0 = nodepoints[s0]
 		var p1 = nodepoints[s1]

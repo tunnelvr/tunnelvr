@@ -7,9 +7,8 @@ extends EditorScript
 var regex = RegEx.new()
 
 func _run():
-	regex.compile(".*[^\\d]$")
-	var x = regex.search("3453a")
-	if x:
-		print("splay")
-	else:
-		print("not splay")
+	var s = ["asd", "sdf", "999"]
+	s = []
+	var g = PoolStringArray(s).join("\n")
+	print([g])
+	

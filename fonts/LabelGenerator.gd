@@ -1,11 +1,15 @@
 extends Spatial
 
-const charwidth = 10
+const monospacefontcharwidth = 10
+const monospacefontcharheight = 21
+const maxlabelstorenderperimage = 20
+
 var remainingxcnodenames = [ ]  # [ (centrelinedrawingname, name, position) ]
 var remainingropelabels = [ ]   # [ (ropexcname, ropenodename, ropelabel) ]
 
 var workingxccentrelinedrawingname = null
-var workingxcnodename = null
+var workingxcnodenamelist = [ ]
+var numcharsofeachline = [ ]
 var workingropexcdrawingname = null
 var workingropexcnodename = null
 
@@ -28,12 +32,13 @@ func _ready():
 var commonroot = null
 func addnodestolabeltask(centrelinedrawing):
 	for xcname in centrelinedrawing.nodepoints:
-		remainingxcnodenames.append([centrelinedrawing.get_name(), xcname, centrelinedrawing.transform*centrelinedrawing.nodepoints[xcname]])
-		if commonroot == null:
-			commonroot = xcname.to_lower()
-		else:
-			while commonroot != "" and not xcname.to_lower().begins_with(commonroot):
-				commonroot = commonroot.left(len(commonroot)-1)
+		if Tglobal.splaystationnoderegex == null or not Tglobal.splaystationnoderegex.search(xcname):
+			remainingxcnodenames.append([centrelinedrawing.get_name(), xcname, centrelinedrawing.transform*centrelinedrawing.nodepoints[xcname]])
+			if commonroot == null:
+				commonroot = xcname.to_lower()
+			else:
+				while commonroot != "" and not xcname.to_lower().begins_with(commonroot):
+					commonroot = commonroot.left(len(commonroot)-1)
 	commonroot = commonroot.left(commonroot.find_last(",")+1)
 	if commonroot == "":
 		commonroot = "ireby2,"
@@ -51,13 +56,14 @@ func restartlabelmakingprocess(lsortdfunctorigin=null):
 			set_process(true)
 
 func clearalllabelactivity():
-	workingxcnodename = null
+	workingxcnodenamelist.clear()
+	numcharsofeachline.clear()
 	remainingxcnodenames.clear()
 	workingropexcnodename = null
 	remainingxcnodenames.clear()
 
 func _process(delta):
-	if workingxcnodename == null and workingropexcnodename == null and len(remainingropelabels) == 0:
+	if len(workingxcnodenamelist) == 0 and workingropexcnodename == null and len(remainingropelabels) == 0:
 		if len(remainingxcnodenames) == 0:
 			set_process(false)
 			return
@@ -66,28 +72,41 @@ func _process(delta):
 			set_process(false)
 			return
 
-	if workingropexcnodename == null and workingxcnodename == null:
+	if workingropexcnodename == null and len(workingxcnodenamelist) == 0:
 		var labeltext
+		numcharsofeachline = [ ]
+		var maxnumchars = 0
 		if len(remainingropelabels) != 0:
 			workingropexcdrawingname = remainingropelabels.back()[0]
 			workingropexcnodename = remainingropelabels.back()[1]
 			labeltext = remainingropelabels.back()[2]
 			remainingropelabels.pop_back()
+			maxnumchars = len(labeltext)
+			numcharsofeachline.push_back(maxnumchars)
 		else:
 			workingxccentrelinedrawingname = remainingxcnodenames.back()[0]
-			workingxcnodename = remainingxcnodenames.back()[1]
-			remainingxcnodenames.pop_back()
-			labeltext = workingxcnodename
-			if commonroot != "" and labeltext.to_lower().begins_with(commonroot):
-				labeltext = labeltext.right(len(commonroot))
-			labeltext = labeltext.replace(",", ".")
-		var numchars = len(labeltext)
-		var labelwidth = numchars*charwidth  # monospace font
+			while len(workingxcnodenamelist) < maxlabelstorenderperimage and len(remainingxcnodenames) != 0 and workingxccentrelinedrawingname == remainingxcnodenames.back()[0]:
+				workingxcnodenamelist.push_back(remainingxcnodenames.back()[1])
+				remainingxcnodenames.pop_back()
+
+			var labeltextlines = [ ]
+			maxnumchars = 0
+			for lnodelabel in workingxcnodenamelist:
+				if commonroot != "" and lnodelabel.to_lower().begins_with(commonroot):
+					lnodelabel = lnodelabel.right(len(commonroot))
+				lnodelabel = lnodelabel.replace(",", ".")
+				labeltextlines.push_back(lnodelabel)
+				numcharsofeachline.push_back(len(lnodelabel))
+				maxnumchars = max(maxnumchars, len(lnodelabel))
+			labeltext = PoolStringArray(labeltextlines).join("\n")
+
 		$Viewport/RichTextLabel.bbcode_text = labeltext
-		$Viewport/RichTextLabel.rect_size.x = labelwidth
-		$Viewport.size.x = labelwidth
+		$Viewport.size.x = maxnumchars*monospacefontcharwidth  # monospace font
+		$Viewport.size.y = monospacefontcharheight*len(numcharsofeachline)
+		$Viewport/RichTextLabel.rect_size.x = $Viewport.size.x
+		$Viewport/RichTextLabel.rect_size.y = $Viewport.size.y
 		textlabelcountdowntimer = textlabelcountdowntime
-		print("labeltextlabeltext ", labeltext)
+		print("labeltextlabeltext ", len(workingxcnodenamelist), " of remaining ", len(remainingxcnodenames))
 		$Viewport.render_target_update_mode = Viewport.UPDATE_ONCE
 
 	elif textlabelcountdowntimer > 0.0:
@@ -111,45 +130,54 @@ func _process(delta):
 
 	else:
 		var img = $Viewport.get_texture().get_data()
+		if len(workingxcnodenamelist) == maxlabelstorenderperimage:   img.save_png("user://test.png")
 		var tex = ImageTexture.new()
 		tex.create_from_image(img)
 		
 		var workingxccentrelinedrawing = get_node("/root/Spatial/SketchSystem/XCdrawings").get_node_or_null(workingxccentrelinedrawingname)
 		if workingxccentrelinedrawing != null:
-			var workingxcnode = workingxccentrelinedrawing.get_node("XCnodes").get_node_or_null(workingxcnodename)
-			if workingxcnode == null:
-				workingxcnode = XCnode_centreline.instance()
-				workingxcnode.set_name(workingxcnodename)
-				workingxcnode.get_node("CollisionShape/MeshInstance").layers = CollisionLayer.VL_centrelinestations
-				workingxcnode.get_node("StationLabel").layers = CollisionLayer.VL_centrelinestationslabel
-				workingxcnode.get_node("CollisionShape/MeshInstance").set_surface_material(0, stationnodematerial)
-				workingxcnode.collision_layer = CollisionLayer.CL_CentrelineStation
-				workingxcnode.translation = workingxccentrelinedrawing.nodepoints[workingxcnodename]
-				workingxccentrelinedrawing.get_node("XCnodes").add_child(workingxcnode)
-			var xcnodelabelpanel = workingxcnode.get_node("StationLabel")
-			xcnodelabelpanel.mesh.size.x = tex.get_width()*(xcnodelabelpanel.mesh.size.y/tex.get_height())
-			var mat = xcnodelabelpanel.get_surface_material(0)
-			mat.set_shader_param("texture_albedo", tex)
-			mat.set_shader_param("vertex_offset", Vector3(-(xcnodelabelpanel.mesh.size.x*0.5 + 0.15), xcnodelabelpanel.mesh.size.y*0.5, 0))
-			mat.set_shader_param("vertex_scale", 1.0)
-			xcnodelabelpanel.visible = false
+			for i in range(len(workingxcnodenamelist)):
+				var workingxcnodename = workingxcnodenamelist[i]
+				var lineimgwidth = numcharsofeachline[i]*monospacefontcharwidth
+				var workingxcnode = workingxccentrelinedrawing.get_node("XCnodes").get_node_or_null(workingxcnodename)
+				if workingxcnode == null:
+					workingxcnode = XCnode_centreline.instance()
+					workingxcnode.set_name(workingxcnodename)
+					workingxcnode.get_node("CollisionShape/MeshInstance").layers = CollisionLayer.VL_centrelinestations
+					workingxcnode.get_node("StationLabel").layers = CollisionLayer.VL_centrelinestationslabel
+					workingxcnode.get_node("CollisionShape/MeshInstance").set_surface_material(0, stationnodematerial)
+					workingxcnode.collision_layer = CollisionLayer.CL_CentrelineStation
+					workingxcnode.translation = workingxccentrelinedrawing.nodepoints[workingxcnodename]
+					workingxccentrelinedrawing.get_node("XCnodes").add_child(workingxcnode)
+				var xcnodelabelpanel = workingxcnode.get_node("StationLabel")
+				xcnodelabelpanel.mesh.size.x = lineimgwidth*(xcnodelabelpanel.mesh.size.y/monospacefontcharheight)
+				var mat = xcnodelabelpanel.get_surface_material(0)
+				mat.set_shader_param("texture_albedo", tex)
+				mat.set_shader_param("vertex_offset", Vector3(-(xcnodelabelpanel.mesh.size.x*0.5 + 0.15), xcnodelabelpanel.mesh.size.y*0.5, 0))
+				mat.set_shader_param("vertex_scale", 1.0)
+				mat.set_shader_param("uv1_scale", Vector3(lineimgwidth*1.0/tex.get_width(),1.0/len(workingxcnodenamelist),1))
+				mat.set_shader_param("uv1_offset", Vector3(0,i*1.0/len(workingxcnodenamelist),0))
 
-			var workingxcnodeplanview = workingxccentrelinedrawing.get_node("XCnodes_PlanView").get_node_or_null(workingxcnodename)
-			if workingxcnodeplanview == null:
-				workingxcnodeplanview = XCnode_centrelineplanview.instance()
-				workingxcnodeplanview.set_name(workingxcnodename)
-				workingxcnodeplanview.get_node("CollisionShape/MeshInstance").layers = CollisionLayer.VL_centrelinestationsplanview
-				workingxcnodeplanview.get_node("StationLabel").layers = CollisionLayer.VL_centrelinestationslabelplanview
-				workingxcnodeplanview.get_node("CollisionShape/MeshInstance").set_surface_material(0, stationnodematerial)
-				workingxcnodeplanview.collision_layer = CollisionLayer.CL_CentrelineStationPlanView
-				workingxcnodeplanview.translation = workingxccentrelinedrawing.nodepoints[workingxcnodename]
-				workingxccentrelinedrawing.get_node("XCnodes_PlanView").add_child(workingxcnodeplanview)
-			var xcnodelabelpanelp = workingxcnodeplanview.get_node("StationLabel")
-			xcnodelabelpanelp.mesh.size.x = tex.get_width()*(xcnodelabelpanelp.mesh.size.y/tex.get_height())
-			var matp = xcnodelabelpanelp.get_surface_material(0)
-			matp.set_shader_param("texture_albedo", tex)
-			matp.set_shader_param("vertex_offset", Vector3(-(xcnodelabelpanelp.mesh.size.x*0.5 + 0.15), xcnodelabelpanel.mesh.size.y*0.5, 0))
-			matp.set_shader_param("vertex_scale", 1.0)
-			matp.set_shader_param("uv1_scale", Vector3(1,-1,1))
-			xcnodelabelpanelp.visible = true
-		workingxcnodename = null
+				xcnodelabelpanel.visible = false
+
+				var workingxcnodeplanview = workingxccentrelinedrawing.get_node("XCnodes_PlanView").get_node_or_null(workingxcnodename)
+				if workingxcnodeplanview == null:
+					workingxcnodeplanview = XCnode_centrelineplanview.instance()
+					workingxcnodeplanview.set_name(workingxcnodename)
+					workingxcnodeplanview.get_node("CollisionShape/MeshInstance").layers = CollisionLayer.VL_centrelinestationsplanview
+					workingxcnodeplanview.get_node("StationLabel").layers = CollisionLayer.VL_centrelinestationslabelplanview
+					workingxcnodeplanview.get_node("CollisionShape/MeshInstance").set_surface_material(0, stationnodematerial)
+					workingxcnodeplanview.collision_layer = CollisionLayer.CL_CentrelineStationPlanView
+					workingxcnodeplanview.translation = workingxccentrelinedrawing.nodepoints[workingxcnodename]
+					workingxccentrelinedrawing.get_node("XCnodes_PlanView").add_child(workingxcnodeplanview)
+				var xcnodelabelpanelp = workingxcnodeplanview.get_node("StationLabel")
+				xcnodelabelpanelp.mesh.size.x = lineimgwidth*(xcnodelabelpanelp.mesh.size.y/monospacefontcharheight)
+				var matp = xcnodelabelpanelp.get_surface_material(0)
+				matp.set_shader_param("texture_albedo", tex)
+				matp.set_shader_param("vertex_offset", Vector3(-(xcnodelabelpanelp.mesh.size.x*0.5 + 0.15), xcnodelabelpanel.mesh.size.y*0.5, 0))
+				matp.set_shader_param("vertex_scale", 1.0)
+				#matp.set_shader_param("uv1_scale", Vector3(1,-1,1))
+				matp.set_shader_param("uv1_scale", Vector3(lineimgwidth*1.0/tex.get_width(),-1.0/len(workingxcnodenamelist),1))
+				matp.set_shader_param("uv1_offset", Vector3(0,(i+1)*1.0/len(workingxcnodenamelist),0))
+				xcnodelabelpanelp.visible = true
+		workingxcnodenamelist.clear()

@@ -19,7 +19,8 @@ var soundsystem = null
 
 var hidecavewallstoseefloors = false
 
-var splaystationnoderegex = RegEx.new()
+var splaystationnoderegex = null
 func _ready():
+	splaystationnoderegex = RegEx.new()
 	splaystationnoderegex.compile(".*[^\\d]$")
 	
