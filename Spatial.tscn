@@ -1565,6 +1565,7 @@ margin_top = 184.887
 margin_right = 170.73
 margin_bottom = 212.887
 rect_pivot_offset = Vector2( 111.073, 28.0005 )
+toggle_mode = true
 text = "Choke"
 __meta__ = {
 "_edit_use_anchors_": false

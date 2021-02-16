@@ -306,11 +306,31 @@ func _on_buttonplay_pressed():
 	Tglobal.soundsystem.playmyvoicerecording()
 	$Viewport/GUI/Panel/Label.text = "Play voice"
 	
-func _on_buttonload_choke():
-	get_node("/root/Spatial/BodyObjects/PlayerMotion").makeboulderchoke(50)
+func _on_buttonload_choke(pressed):
 	$Viewport/GUI/Panel/Label.text = "Boulder choke!"
 	toggleguipanelvisibility(null)
-	print(" ovr_guardian_system.get_boundary_geometry() == " + str(playerMe.ovr_guardian_system.get_boundary_geometry() if playerMe.ovr_guardian_system != null else "null"));
+	var Nboulders = 50
+	var boulderclutter = get_node("/root/Spatial/BoulderClutter")
+	if pressed:
+		var HandRight = playerMe.get_node("HandRight")
+		for i in range(Nboulders):
+			yield(get_tree().create_timer(0.1), "timeout")
+			if HandRight.pointervalid:
+				var markernode = null
+				if ((i%5) == 1):
+					markernode = preload("res://assets/objectscenes/log.tscn").instance()
+				else:
+					markernode = preload("res://assets/objectscenes/boulder.tscn").instance()
+					if ((i%2) == 0):
+						markernode.scale = Vector3(0.5, 0.5, 0.5)
+				var handrightpointertrans = playerMe.global_transform*HandRight.pointerposearvrorigin
+				markernode.global_transform.origin = handrightpointertrans.origin - 0.9*handrightpointertrans.basis.z
+				markernode.linear_velocity = -5.1*handrightpointertrans.basis.z
+				boulderclutter.add_child(markernode)
+	else:
+		for markernode in boulderclutter.get_children():
+			markernode.queue_free()
+
 
 	
 
@@ -342,7 +362,7 @@ func _ready():
 	#$Viewport/GUI/Panel/ButtonRecord.connect("button_down", self, "_on_buttonrecord_down")
 	#$Viewport/GUI/Panel/ButtonRecord.connect("button_up", self, "_on_buttonrecord_up")
 	#$Viewport/GUI/Panel/ButtonPlay.connect("pressed", self, "_on_buttonplay_pressed")
-	$Viewport/GUI/Panel/ButtonChoke.connect("pressed", self, "_on_buttonload_choke")
+	$Viewport/GUI/Panel/ButtonChoke.connect("toggled", self, "_on_buttonload_choke")
 	
 	$Viewport/GUI/Panel/SwitchTest.connect("item_selected", self, "_on_switchtest")
 	$Viewport/GUI/Panel/PlayerList.connect("item_selected", self, "_on_playerlist_selected")

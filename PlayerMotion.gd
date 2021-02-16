@@ -439,20 +439,4 @@ func process_shareplayerposition():
 						positiondict["handleft"] = positiondict["handleft"].duplicate(true)
 					doppelganger.setavatarposition(positiondict)
 
-func makeboulderchoke(N):
-	var boulderclutter = get_node("/root/Spatial/BoulderClutter")
-	var HandRight = playerMe.get_node("HandRight")
-	for i in range(N):
-		yield(get_tree().create_timer(0.1), "timeout")
-		if HandRight.pointervalid:
-			var markernode = null
-			if ((i%5) == 1):
-				markernode = preload("res://assets/objectscenes/log.tscn").instance()
-			else:
-				markernode = preload("res://assets/objectscenes/boulder.tscn").instance()
-				if ((i%2) == 0):
-					markernode.scale = Vector3(0.5, 0.5, 0.5)
-			var handrightpointertrans = playerMe.global_transform*HandRight.pointerposearvrorigin
-			markernode.global_transform.origin = handrightpointertrans.origin - 0.9*handrightpointertrans.basis.z
-			markernode.linear_velocity = -5.1*handrightpointertrans.basis.z
-			boulderclutter.add_child(markernode)
+
