@@ -185,7 +185,7 @@ func _ready():
 	var perm = OS.get_granted_permissions()
 	print("Granted permissions: ", perm)
 
-	if false:
+	if false:  # loadcentreline
 		#var centrelinefile = "res://surveyscans/dukest1resurvey2009json.res"
 		#var centrelinefile = "res://surveyscans/Ireby/Ireby2/Ireby2.json"
 		#var centrelinefile = "res://surveyscans/LambTrap1.json"

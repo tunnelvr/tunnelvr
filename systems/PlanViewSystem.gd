@@ -178,7 +178,8 @@ func readydeferred():
 	root.set_tooltip(0, "**clear-cache**")
 	#addsubitem(root, "Ireby", "http://cave-registry.org.uk/svn/NorthernEngland/ThreeCountiesArea/rawscans/Ireby/")
 	#addsubitem(root, "rawscans", "http://cave-registry.org.uk/svn/NorthernEngland/ThreeCountiesArea/rawscans/")
-	addsubitem(root, "rawscans", "http://cave-registry.org.uk/svn/NorthernEngland/ThreeCountiesArea/")
+	#addsubitem(root, "rawscans", "http://cave-registry.org.uk/svn/NorthernEngland/ThreeCountiesArea/")
+	addsubitem(root, "NorthernEngland", "http://cave-registry.org.uk/svn/NorthernEngland/")
 	var idx = len(buttonidxtoitem)
 	root.add_button(0, clearcachebuttontex, idx)
 	buttonidxtoitem[idx] = root
