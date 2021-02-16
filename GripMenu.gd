@@ -89,8 +89,6 @@ func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointert
 	tubesectormaterialname = ""
 	if gripmenupointertargettype == "XCdrawing" and gripmenupointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
 		gmlist = ["NewXC"]
-		if get_node("/root/Spatial/PlanViewSystem").visible and not pointertargetwall.notubeconnections_so_delxcable():
-			gmlist.push_back("HideFloor")
 			
 	elif gripmenupointertargettype == "XCdrawing" and gripmenupointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		var draggable = (gripmenuactivetargetnode != null) and (activetargetwall == pointertargetwall)

@@ -182,7 +182,6 @@ func setdrawingvisiblecode(ldrawingvisiblecode):
 			else:
 				if planviewsystem.activetargetfloor == self:
 					planviewsystem.activetargetfloor = null
-					planviewsystem.planviewcontrols.get_node("FloorMove/FloorStyle").selected = 0
 					planviewsystem.planviewcontrols.get_node("ColorRect").visible = false
 					planviewsystem.planviewcontrols.get_node("ColorRect/LabelXCresource").text = ""
 				if (drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_GHOSTLY_B) != 0:
@@ -201,6 +200,10 @@ func setdrawingvisiblecode(ldrawingvisiblecode):
 			if not ((drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_GHOSTLY_B) != 0):
 				cl |= CollisionLayer.CL_Environment
 			$XCdrawingplane.collision_layer = cl
+		planviewsystem.planviewcontrols.get_node("FloorMove/FloorStyle").disabled = (planviewsystem.activetargetfloor == null)
+		if planviewsystem.planviewcontrols.get_node("FloorMove/FloorStyle").disabled:
+			planviewsystem.planviewcontrols.get_node("FloorMove/FloorStyle").selected = 0
+
 			
 func updateformetresquaresscaletexture():
 	var mat = $XCdrawingplane/CollisionShape/MeshInstance.get_surface_material(0)

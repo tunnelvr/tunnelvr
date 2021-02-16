@@ -41,13 +41,14 @@ func floorstyle_itemselected(floorstyleid):
 			newdrawingcode |= DRAWING_TYPE.VIZ_XCD_FLOOR_GHOSTLY_B
 		elif floorstyleid == 1:
 			newdrawingcode |= DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE_B
+		elif floorstyleid == 3:
+			newdrawingcode = DRAWING_TYPE.VIZ_XCD_FLOOR_HIDDEN
+		elif floorstyleid == 4:
+			newdrawingcode = DRAWING_TYPE.VIZ_XCD_FLOOR_DELETED
+			
 		var floorviz = { "prevxcvizstates":{ activetargetfloor.get_name():activetargetfloor.drawingvisiblecode  }, 
 						 "xcvizstates":{ activetargetfloor.get_name():newdrawingcode } }
 		sketchsystem.actsketchchange([floorviz])
-			
-
-func buttondelpaper_pressed():
-	sketchsystem.actsketchchange([{ "xcvizstates":{ activetargetfloor.get_name():DRAWING_TYPE.VIZ_XCD_FLOOR_DELETED}} ])
 
 func defaultimgtrim():
 	return { "imgwidth":20, 
@@ -162,7 +163,6 @@ func _ready():
 	$RealPlanCamera.set_as_toplevel(true)
 	planviewcontrols.get_node("ZoomView/ButtonCentre").connect("pressed", self, "buttoncentre_pressed")
 	planviewcontrols.get_node("ButtonClosePlanView").connect("pressed", self, "buttonclose_pressed")
-	planviewcontrols.get_node("FloorMove/ButtonDelPaper").connect("pressed", self, "buttondelpaper_pressed")
 	planviewcontrols.get_node("CheckBoxPlanTubesVisible").connect("pressed", self, "checkboxplantubesvisible_pressed")
 	planviewcontrols.get_node("CheckBoxRealTubesVisible").connect("pressed", self, "checkboxrealtubesvisible_pressed")
 	planviewcontrols.get_node("CheckBoxCentrelinesVisible").connect("pressed", self, "checkcentrelinesvisible_pressed")
@@ -235,7 +235,7 @@ func actplanviewdict(pvchange):
 		planviewactive = pvchange["planviewactive"]
 		if planviewactive:
 			$PlanView/ProjectionScreen/ImageFrame.mesh.surface_get_material(0).emission_enabled = true
-			prevcamerasize = -1
+			prevcamerasizeforupdateplanviewentitysizes = -1
 			set_process(true)
 		else:
 			$PlanView/ProjectionScreen/ImageFrame.mesh.surface_get_material(0).emission_enabled = false
@@ -255,6 +255,7 @@ func actplanviewdict(pvchange):
 			get_node("/root/Spatial/BodyObjects/LaserOrient/RayCast").collision_mask = CollisionLayer.CLV_MainRayAll
 			plancameracullmask = CollisionLayer.VLCM_PlanViewCamera
 			plancameraraycollisionmask = CollisionLayer.CLV_PlanRayAll
+			prevcamerasizeforupdateplanviewentitysizes = -1
 			var labelgenerator = get_node("/root/Spatial/LabelGenerator")
 			if not labelgenerator.is_processing():
 				labelgenerator.restartlabelmakingprocess(playermeheadcam.global_transform.origin)
@@ -317,13 +318,13 @@ func planviewtransformpos(guidpaneltransform, guidpanelsize):
 
 var updateplanviewentitysizes_working = false
 func updateplanviewentitysizes():
-	prevcamerasize = $PlanView/Viewport/PlanGUI/Camera.size
 	var nodesca = $PlanView/Viewport/PlanGUI/Camera.size/70.0*3.0
 	var labelsca = nodesca*2.0
+	get_node("/root/Spatial/LabelGenerator").currentplannodesca = nodesca
+	get_node("/root/Spatial/LabelGenerator").currentplanlabelsca = labelsca
 	var labelrects = [ ]
 	var rectrecttests = 0
 	var rectrecttestt0 = OS.get_ticks_msec()
-	#print("\nstarting labeloverlaps\n")
 	for xcdrawingcentreline in get_tree().get_nodes_in_group("gpcentrelinegeo"):
 		xcdrawingcentreline.updatexcpaths_centreline(xcdrawingcentreline.get_node("PathLines_PlanView"), 0.05*nodesca)
 		for xcn in xcdrawingcentreline.get_node("XCnodes_PlanView").get_children():
@@ -353,7 +354,7 @@ func updateplanviewentitysizes():
 
 var slowviewportframeratecountdown = 1
 var slowviewupdatecentrelinesizeupdaterate = 1.5
-var prevcamerasize = 0
+var prevcamerasizeforupdateplanviewentitysizes = 0
 var lastoptionaltxcdata = { }
 func _process(delta):
 	if Tglobal.arvrinterfacename == "OVRMobile" and visible:
@@ -364,8 +365,9 @@ func _process(delta):
 
 	if visible:
 		slowviewupdatecentrelinesizeupdaterate -= delta
-		if slowviewupdatecentrelinesizeupdaterate < 0:
-			if prevcamerasize != $PlanView/Viewport/PlanGUI/Camera.size and not updateplanviewentitysizes_working:
+		if slowviewupdatecentrelinesizeupdaterate < 0 or prevcamerasizeforupdateplanviewentitysizes == -1:
+			if prevcamerasizeforupdateplanviewentitysizes != $PlanView/Viewport/PlanGUI/Camera.size and not updateplanviewentitysizes_working:
+				prevcamerasizeforupdateplanviewentitysizes = $PlanView/Viewport/PlanGUI/Camera.size
 				updateplanviewentitysizes_working = true
 				call_deferred("updateplanviewentitysizes")
 			slowviewupdatecentrelinesizeupdaterate = 1.6

@@ -1044,10 +1044,6 @@ func buttonreleased_vrgrip():
 					if xcdrawing1 == activetargetwall:
 						setactivetargetwall(null)
 
-			elif pointertarget.get_name() == "HideFloor":
-				var xcdrawing = gripmenu.gripmenupointertargetwall
-				sketchsystem.actsketchchange([{ "xcvizstates":{xcdrawing.get_name():DRAWING_TYPE.VIZ_XCD_FLOOR_HIDDEN}} ])
-
 			elif pointertarget.get_name() == "ShowFloor":
 				var xcdrawing = gripmenu.gripmenupointertargetwall
 				sketchsystem.actsketchchange([{ "xcvizstates":{xcdrawing.get_name():DRAWING_TYPE.VIZ_XCD_FLOOR_NORMAL}} ])

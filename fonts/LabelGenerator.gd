@@ -18,6 +18,9 @@ const XCnode_centrelineplanview = preload("res://nodescenes/XCnode_centrelinepla
 
 const textlabelcountdowntime = 0.2
 var textlabelcountdowntimer = 0.0
+var currentplanlabelsca = 1.0
+var currentplannodesca = 1.0
+
 
 var sortdfunctorigin = Vector3(0,0,0)
 func sortdfunc(a, b):
@@ -157,7 +160,6 @@ func _process(delta):
 				mat.set_shader_param("vertex_scale", 1.0)
 				mat.set_shader_param("uv1_scale", Vector3(lineimgwidth*1.0/tex.get_width(),1.0/len(workingxcnodenamelist),1))
 				mat.set_shader_param("uv1_offset", Vector3(0,i*1.0/len(workingxcnodenamelist),0))
-
 				xcnodelabelpanel.visible = false
 
 				var workingxcnodeplanview = workingxccentrelinedrawing.get_node("XCnodes_PlanView").get_node_or_null(workingxcnodename)
@@ -170,12 +172,14 @@ func _process(delta):
 					workingxcnodeplanview.collision_layer = CollisionLayer.CL_CentrelineStationPlanView
 					workingxcnodeplanview.translation = workingxccentrelinedrawing.nodepoints[workingxcnodename]
 					workingxccentrelinedrawing.get_node("XCnodes_PlanView").add_child(workingxcnodeplanview)
+				workingxcnodeplanview.get_node("CollisionShape").scale = Vector3(currentplannodesca, currentplannodesca, currentplannodesca)
 				var xcnodelabelpanelp = workingxcnodeplanview.get_node("StationLabel")
 				xcnodelabelpanelp.mesh.size.x = lineimgwidth*(xcnodelabelpanelp.mesh.size.y/monospacefontcharheight)
 				var matp = xcnodelabelpanelp.get_surface_material(0)
 				matp.set_shader_param("texture_albedo", tex)
 				matp.set_shader_param("vertex_offset", Vector3(-(xcnodelabelpanelp.mesh.size.x*0.5 + 0.15), xcnodelabelpanel.mesh.size.y*0.5, 0))
 				matp.set_shader_param("vertex_scale", 1.0)
+				matp.set_shader_param("vertex_scale", currentplanlabelsca)
 				#matp.set_shader_param("uv1_scale", Vector3(1,-1,1))
 				matp.set_shader_param("uv1_scale", Vector3(lineimgwidth*1.0/tex.get_width(),-1.0/len(workingxcnodenamelist),1))
 				matp.set_shader_param("uv1_offset", Vector3(0,(i+1)*1.0/len(workingxcnodenamelist),0))

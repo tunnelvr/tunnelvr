@@ -2205,7 +2205,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Label" type="Label" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ViewSlide"]
+[node name="LabelViewSlide" type="Label" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ViewSlide"]
 margin_left = 4.4823
 margin_top = 49.9065
 margin_right = 73.4823
@@ -2335,7 +2335,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Label" type="Label" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorTrim"]
+[node name="LabelFloor" type="Label" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorTrim"]
 margin_left = 5.40929
 margin_top = 6.44543
 margin_right = 42.4093
@@ -2345,7 +2345,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Label2" type="Label" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorTrim"]
+[node name="LabelTrim" type="Label" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorTrim"]
 margin_left = 9.64716
 margin_top = 70.0133
 margin_right = 46.6472
@@ -2445,22 +2445,22 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Label" type="Label" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorMove"]
+[node name="LabelGrow" type="Label" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorMove"]
 margin_left = -11.8988
 margin_top = 1.48016
 margin_right = 33.1012
 margin_bottom = 23.4802
-text = "Grow"
+text = "Grow:"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Label2" type="Label" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorMove"]
+[node name="LabelMove" type="Label" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorMove"]
 margin_left = -37.6165
 margin_top = 67.2705
 margin_right = 6.38354
 margin_bottom = 89.2705
-text = "Move"
+text = "Move:"
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -2586,20 +2586,21 @@ __meta__ = {
 }
 
 [node name="FloorStyle" type="OptionButton" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorMove"]
-margin_left = 169.0
-margin_top = -3.0
-margin_right = 242.0
-margin_bottom = 21.0
+margin_left = 221.973
+margin_top = -5.11896
+margin_right = 294.973
+margin_bottom = 18.881
+disabled = true
 text = "normal"
-items = [ "normal", null, false, 0, null, "unshaded", null, false, 1, null, "ghostly", null, false, 2, null, "hide", null, false, 3, null ]
+items = [ "normal", null, false, 0, null, "unshaded", null, false, 1, null, "ghostly", null, false, 2, null, "hide", null, false, 3, null, "delete", null, false, 4, null ]
 selected = 0
 
-[node name="ButtonDelPaper" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorMove"]
-margin_left = 255.24
-margin_top = -2.07935
-margin_right = 325.24
-margin_bottom = 19.9207
-text = "DelPaper"
+[node name="LabelPaper" type="Label" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorMove"]
+margin_left = 172.0
+margin_top = -5.0
+margin_right = 220.0
+margin_bottom = 17.0
+text = "Paper:"
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -2641,6 +2642,9 @@ margin_bottom = 22.0
 hint_tooltip = "Close Plan View
 "
 text = "X"
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="CheckBoxPlanTubesVisible" type="CheckBox" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
 anchor_right = 0.015
