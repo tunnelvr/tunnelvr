@@ -98,7 +98,7 @@ func connect_to_server(clean_session=true):
 		timeout -= timestep
 		if timeout < 0:
 			return false
-	print("Connected to server")
+	print("Connected to mqtt broker ", self.server)
 		
 	# May need a little delay after connecting to the server ?
 	

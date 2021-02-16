@@ -263,26 +263,12 @@ func _on_switchtest(index):
 		exportOBJ()
 		return
 
-
-	#normal
-	#hide floors
-	#all grey
-	#hide xc
-	#toggle guardian
-	#add glider
-
-	if index == 4:  # "toggle guardian"
+	if nssel == "toggle guardian":
 		var guardianpolyvisible = not playerMe.get_node("GuardianPoly").visible
 		for player in get_node("/root/Spatial/Players").get_children():
 			player.get_node("GuardianPoly").visible = guardianpolyvisible
 		return
 		
-	if index == 5:
-		var gliderscene = load("res://assets/glider1/glider1.glb").instance()
-		var boulderclutter = get_node("/root/Spatial/BoulderClutter")
-		boulderclutter.add_child(gliderscene)
-		gliderscene.global_transform.origin = playerMe.global_transform.origin
-		return
 
 	var n = 0
 	for xcdrawing in sketchsystem.get_node("XCdrawings").get_children():
@@ -291,15 +277,14 @@ func _on_switchtest(index):
 				xcdrawing.get_node("XCdrawingplane").visible = (index == 0)
 				n += 1
 	print(("hiding " if index == 1 else "showing "), n, " ghostly drawings")
-	if index == 2:
+	if nssel == "all grey":
 		var materialsystem = get_node("/root/Spatial/MaterialSystem")
 		for xctube in sketchsystem.get_node("XCtubes").get_children():
 			for xctubesector in xctube.get_node("XCtubesectors").get_children():
 				materialsystem.updatetubesectormaterial(xctubesector, "flatgrey", false)
-	
-	if index == 3:
+	if nssel == "hide xc":
 		sketchsystem.get_node("XCdrawings").visible = false
-	elif index == 0:
+	elif nssel == "normal":
 		sketchsystem.get_node("XCdrawings").visible = true
 	
 
