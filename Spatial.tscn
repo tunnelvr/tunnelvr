@@ -1724,6 +1724,7 @@ script = ExtResource( 15 )
 
 [node name="Up5" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
 transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, 0.000293921, -0.2, 0 )
+visible = false
 collision_layer = 8
 collision_mask = 0
 
@@ -1737,6 +1738,7 @@ shape = SubResource( 17 )
 
 [node name="Down5" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
 transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, 0, -0.342082, 0 )
+visible = false
 collision_layer = 8
 collision_mask = 0
 
@@ -1750,6 +1752,7 @@ shape = SubResource( 17 )
 
 [node name="toPaper" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
 transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, 0.25, -0.2, 0 )
+visible = false
 collision_layer = 8
 collision_mask = 0
 
@@ -1763,6 +1766,7 @@ shape = SubResource( 17 )
 
 [node name="NewSlice" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
 transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, -0.25, -0.2, 0 )
+visible = false
 collision_layer = 8
 collision_mask = 0
 
@@ -1788,7 +1792,7 @@ material/0 = SubResource( 21 )
 shape = SubResource( 17 )
 
 [node name="DelXC" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
-transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, 0.25, -0.2, 0 )
+transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 1.74623e-10, 0, 1, 0.25, -0.2, 0 )
 collision_layer = 8
 collision_mask = 0
 
@@ -1801,7 +1805,7 @@ material/0 = SubResource( 22 )
 shape = SubResource( 17 )
 
 [node name="SelectXC" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
-transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, 0.000563572, -0.2, 0 )
+transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 5.82077e-11, 0, 1, 0.000563573, -0.2, 0 )
 collision_layer = 8
 collision_mask = 0
 
@@ -1828,6 +1832,7 @@ shape = SubResource( 17 )
 
 [node name="ghost" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
 transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, 0, -0.2, 0 )
+visible = false
 collision_layer = 8
 collision_mask = 0
 
@@ -1841,6 +1846,7 @@ shape = SubResource( 17 )
 
 [node name="FloorTex" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
 transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, 0.25, -0.2, 0 )
+visible = false
 collision_layer = 8
 collision_mask = 0
 
@@ -1854,6 +1860,7 @@ shape = SubResource( 17 )
 
 [node name="toSolid" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
 transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, -0.25, -0.2, 0 )
+visible = false
 collision_layer = 8
 collision_mask = 0
 
@@ -1866,7 +1873,7 @@ material/0 = SubResource( 27 )
 shape = SubResource( 17 )
 
 [node name="HideFloor" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
-transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 2.32831e-10, 0, 1, -0.00721074, -0.2, 0.0277643 )
+transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 2.91038e-10, 0, 1, -0.00721074, -0.2, 0.0277643 )
 collision_layer = 8
 collision_mask = 0
 
@@ -1878,21 +1885,22 @@ material/0 = SubResource( 28 )
 [node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/HideFloor"]
 shape = SubResource( 17 )
 
-[node name="toFloor" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
-transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, 0, -0.2, 0 )
+[node name="ShowFloor" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
+transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 3.49246e-10, 0, 1, 0.269588, -0.2, -0.0059557 )
 collision_layer = 8
 collision_mask = 0
 
-[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/toFloor"]
+[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/ShowFloor"]
 cast_shadow = 0
 mesh = SubResource( 15 )
 material/0 = SubResource( 29 )
 
-[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/toFloor"]
+[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/ShowFloor"]
 shape = SubResource( 17 )
 
 [node name="toBig" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
 transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, 0.25, -0.2, 0 )
+visible = false
 collision_layer = 8
 collision_mask = 0
 
@@ -2577,20 +2585,13 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="LabelXCresource" type="Label" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorMove"]
-margin_left = 173.0
-margin_top = 24.0
-margin_right = 478.0
-margin_bottom = 83.0
-autowrap = true
-
 [node name="FloorStyle" type="OptionButton" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorMove"]
 margin_left = 169.0
 margin_top = -3.0
 margin_right = 242.0
 margin_bottom = 21.0
 text = "normal"
-items = [ "normal", null, false, 0, null, "unshaded", null, false, 1, null, "ghostly", null, false, 2, null ]
+items = [ "normal", null, false, 0, null, "unshaded", null, false, 1, null, "ghostly", null, false, 2, null, "hide", null, false, 3, null ]
 selected = 0
 
 [node name="ButtonDelPaper" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorMove"]
@@ -2676,6 +2677,27 @@ margin_top = 27.8946
 margin_right = 558.796
 margin_bottom = 27.8946
 text = "centrelines"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ColorRect" type="ColorRect" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
+visible = false
+margin_left = 473.0
+margin_top = 30.0
+margin_right = 785.0
+margin_bottom = 94.0
+color = Color( 0.176471, 0.227451, 0.396078, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="LabelXCresource" type="Label" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ColorRect"]
+margin_left = -1.0
+margin_top = -1.0
+margin_right = 304.0
+margin_bottom = 58.0
+autowrap = true
 __meta__ = {
 "_edit_use_anchors_": false
 }

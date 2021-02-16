@@ -173,7 +173,8 @@ func setdrawingvisiblecode(ldrawingvisiblecode):
 				elif ((drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE_B) != 0):
 					floorstyleid = 1
 				planviewsystem.planviewcontrols.get_node("FloorMove/FloorStyle").selected = floorstyleid
-				planviewsystem.planviewcontrols.get_node("FloorMove/LabelXCresource").text = xcresource.replace("%20", " ")
+				planviewsystem.planviewcontrols.get_node("ColorRect/LabelXCresource").text = xcresource.replace("%20", " ")
+				planviewsystem.planviewcontrols.get_node("ColorRect").visible = true
 				if (drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_GHOSTLY_B) != 0:
 					matname = "xcdrawingmaterials/floorborderedghostlyactive"
 				else:
@@ -182,7 +183,8 @@ func setdrawingvisiblecode(ldrawingvisiblecode):
 				if planviewsystem.activetargetfloor == self:
 					planviewsystem.activetargetfloor = null
 					planviewsystem.planviewcontrols.get_node("FloorMove/FloorStyle").selected = 0
-					planviewsystem.planviewcontrols.get_node("FloorMove/LabelXCresource").text = ""
+					planviewsystem.planviewcontrols.get_node("ColorRect").visible = false
+					planviewsystem.planviewcontrols.get_node("ColorRect/LabelXCresource").text = ""
 				if (drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_GHOSTLY_B) != 0:
 					matname = "xcdrawingmaterials/floorborderedghostly"
 				elif (drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE_B) != 0:

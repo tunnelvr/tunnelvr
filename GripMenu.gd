@@ -89,7 +89,7 @@ func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointert
 	tubesectormaterialname = ""
 	if gripmenupointertargettype == "XCdrawing" and gripmenupointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
 		gmlist = ["NewXC"]
-		if get_node("/root/Spatial/PlanViewSystem").visible and pointertargetwall.notubeconnections_so_delxcable():
+		if get_node("/root/Spatial/PlanViewSystem").visible and not pointertargetwall.notubeconnections_so_delxcable():
 			gmlist.push_back("HideFloor")
 			
 	elif gripmenupointertargettype == "XCdrawing" and gripmenupointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
@@ -119,8 +119,13 @@ func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointert
 		else:
 			gmlist = ["SelectXC", "NewXC", "HideXC", "materials"]
 
+	elif gripmenupointertargettype == "XCnode" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
+		gmlist = ["NewXC", "ShowFloor"]
+
 	elif gripmenupointertargettype == "XCnode":
-		gmlist = ["NewXC", "HideXC", "DelXC" if pointertargetwall.notubeconnections_so_delxcable() else ""]
+		gmlist = ["NewXC", "HideXC"]
+		if pointertargetwall.notubeconnections_so_delxcable():
+			gmlist.push_back("DelXC")
 
 	else:
 		gmlist = ["NewXC", "Undo"]
@@ -147,9 +152,9 @@ Z+5
 Z-5
 to Paper
 to Solid
-to Gas
-to Floor
-to Big
+HideFloor
+ShowFloor
+toBig
 new Slice
 do Slice
 deleteXC

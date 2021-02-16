@@ -1048,6 +1048,10 @@ func buttonreleased_vrgrip():
 				var xcdrawing = gripmenu.gripmenupointertargetwall
 				sketchsystem.actsketchchange([{ "xcvizstates":{xcdrawing.get_name():DRAWING_TYPE.VIZ_XCD_FLOOR_HIDDEN}} ])
 
+			elif pointertarget.get_name() == "ShowFloor":
+				var xcdrawing = gripmenu.gripmenupointertargetwall
+				sketchsystem.actsketchchange([{ "xcvizstates":{xcdrawing.get_name():DRAWING_TYPE.VIZ_XCD_FLOOR_NORMAL}} ])
+
 			elif pointertarget.get_name() == "DelXC":
 				var xcdrawing = gripmenu.gripmenupointertargetwall
 				if (xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING) or (xcdrawing.drawingtype == DRAWING_TYPE.DT_ROPEHANG):
