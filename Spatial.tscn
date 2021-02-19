@@ -793,29 +793,29 @@ albedo_color = Color( 0.180392, 0.905882, 0.243137, 1 )
 [sub_resource type="SpatialMaterial" id=125]
 albedo_color = Color( 0.866667, 0.494118, 0.0117647, 1 )
 
-[sub_resource type="CylinderMesh" id=206]
+[sub_resource type="CylinderMesh" id=126]
 top_radius = 0.1
 bottom_radius = 0.1
 height = 0.2
 radial_segments = 6
 rings = 1
 
-[sub_resource type="SpatialMaterial" id=207]
-albedo_color = Color( 0.984314, 0.556863, 0.72549, 1 )
-
-[sub_resource type="SpatialMaterial" id=126]
-flags_no_depth_test = true
-albedo_color = Color( 0.180392, 0.482353, 0.905882, 1 )
-
 [sub_resource type="SpatialMaterial" id=127]
-flags_no_depth_test = true
-albedo_color = Color( 0.180392, 0.905882, 0.243137, 1 )
+albedo_color = Color( 0.984314, 0.556863, 0.72549, 1 )
 
 [sub_resource type="SpatialMaterial" id=128]
 flags_no_depth_test = true
-albedo_color = Color( 0.866667, 0.494118, 0.0117647, 1 )
+albedo_color = Color( 0.180392, 0.482353, 0.905882, 1 )
 
 [sub_resource type="SpatialMaterial" id=129]
+flags_no_depth_test = true
+albedo_color = Color( 0.180392, 0.905882, 0.243137, 1 )
+
+[sub_resource type="SpatialMaterial" id=130]
+flags_no_depth_test = true
+albedo_color = Color( 0.866667, 0.494118, 0.0117647, 1 )
+
+[sub_resource type="SpatialMaterial" id=131]
 flags_no_depth_test = true
 params_grow = true
 params_grow_amount = 0.02
@@ -826,11 +826,11 @@ emission_energy = 1.0
 emission_operator = 0
 emission_on_uv2 = false
 
-[sub_resource type="SpatialMaterial" id=130]
+[sub_resource type="SpatialMaterial" id=132]
 flags_no_depth_test = true
 albedo_color = Color( 0.854902, 1, 0.172549, 1 )
 
-[sub_resource type="SpatialMaterial" id=131]
+[sub_resource type="SpatialMaterial" id=133]
 flags_no_depth_test = true
 params_grow = true
 params_grow_amount = 0.02
@@ -841,30 +841,30 @@ emission_energy = 0.47
 emission_operator = 0
 emission_on_uv2 = false
 
-[sub_resource type="CubeMesh" id=132]
+[sub_resource type="CubeMesh" id=134]
 size = Vector3( 0.2, 0.2, 0.2 )
 
-[sub_resource type="SpatialMaterial" id=133]
+[sub_resource type="SpatialMaterial" id=135]
 flags_do_not_receive_shadows = true
 albedo_color = Color( 0.831373, 0.180392, 0.905882, 1 )
 
-[sub_resource type="CylinderMesh" id=134]
+[sub_resource type="CylinderMesh" id=136]
 top_radius = 0.001
 bottom_radius = 0.075
 height = 0.15
 radial_segments = 6
 rings = 1
 
-[sub_resource type="SpatialMaterial" id=135]
+[sub_resource type="SpatialMaterial" id=137]
 albedo_color = Color( 0.713726, 0.180392, 0.905882, 1 )
 
-[sub_resource type="SphereMesh" id=136]
+[sub_resource type="SphereMesh" id=138]
 radius = 0.05
 height = 0.1
 radial_segments = 8
 rings = 4
 
-[sub_resource type="SpatialMaterial" id=137]
+[sub_resource type="SpatialMaterial" id=139]
 flags_no_depth_test = true
 flags_disable_ambient_light = true
 albedo_color = Color( 0.980392, 0.741176, 0.027451, 1 )
@@ -877,7 +877,7 @@ emission_energy = 0.5
 emission_operator = 0
 emission_on_uv2 = false
 
-[sub_resource type="SpatialMaterial" id=138]
+[sub_resource type="SpatialMaterial" id=140]
 flags_disable_ambient_light = true
 albedo_color = Color( 0.027451, 0.219608, 0.980392, 1 )
 metallic = 0.52
@@ -889,7 +889,7 @@ emission_energy = 0.5
 emission_operator = 0
 emission_on_uv2 = false
 
-[sub_resource type="SpatialMaterial" id=139]
+[sub_resource type="SpatialMaterial" id=141]
 flags_disable_ambient_light = true
 albedo_color = Color( 0.126892, 0.211707, 0.902344, 1 )
 metallic = 0.52
@@ -901,18 +901,18 @@ emission_energy = 0.5
 emission_operator = 0
 emission_on_uv2 = false
 
-[sub_resource type="CubeMesh" id=140]
+[sub_resource type="CubeMesh" id=142]
 resource_local_to_scene = true
 size = Vector3( 0.002, 0.002, 1 )
 
-[sub_resource type="SpatialMaterial" id=141]
+[sub_resource type="SpatialMaterial" id=143]
 flags_unshaded = true
 params_diffuse_mode = 1
 albedo_color = Color( 1, 0.156863, 0.156863, 0.741176 )
 
-[sub_resource type="QuadMesh" id=142]
+[sub_resource type="QuadMesh" id=144]
 
-[sub_resource type="SpatialMaterial" id=143]
+[sub_resource type="SpatialMaterial" id=145]
 flags_transparent = true
 params_cull_mode = 2
 albedo_color = Color( 0, 1, 0.901961, 0.439216 )
@@ -921,9 +921,9 @@ metallic = 0.03
 metallic_specular = 0.22
 roughness = 0.81
 
-[sub_resource type="QuadMesh" id=144]
+[sub_resource type="QuadMesh" id=146]
 
-[sub_resource type="SpatialMaterial" id=145]
+[sub_resource type="SpatialMaterial" id=147]
 flags_transparent = true
 params_cull_mode = 2
 albedo_color = Color( 0.929412, 0.980392, 0.0352941, 0.623529 )
@@ -937,9 +937,9 @@ emission_operator = 1
 emission_on_uv2 = false
 emission_texture = ExtResource( 16 )
 
-[sub_resource type="QuadMesh" id=146]
+[sub_resource type="QuadMesh" id=148]
 
-[sub_resource type="SpatialMaterial" id=147]
+[sub_resource type="SpatialMaterial" id=149]
 flags_transparent = true
 params_cull_mode = 2
 albedo_color = Color( 0.980392, 0.596078, 0.635294, 0.486275 )
@@ -954,11 +954,11 @@ emission_operator = 0
 emission_on_uv2 = false
 emission_texture = ExtResource( 16 )
 
-[sub_resource type="QuadMesh" id=148]
+[sub_resource type="QuadMesh" id=150]
 
-[sub_resource type="QuadMesh" id=149]
+[sub_resource type="QuadMesh" id=151]
 
-[sub_resource type="Shader" id=150]
+[sub_resource type="Shader" id=152]
 code = "shader_type spatial;
 render_mode blend_mix,depth_draw_opaque,cull_disabled,diffuse_burley,specular_schlick_ggx;
 uniform vec4 albedo : hint_color;
@@ -1000,8 +1000,8 @@ void fragment() {
 
 "
 
-[sub_resource type="ShaderMaterial" id=151]
-shader = SubResource( 150 )
+[sub_resource type="ShaderMaterial" id=153]
+shader = SubResource( 152 )
 shader_param/albedo = Color( 0.960784, 0.615686, 0.607843, 1 )
 shader_param/specular = null
 shader_param/metallic = 0.0
@@ -1011,9 +1011,9 @@ shader_param/uv1_offset = null
 shader_param/uv_borderwidth = 0.05
 shader_param/albedo_border = Color( 0.980392, 0.321569, 0.0352941, 1 )
 
-[sub_resource type="QuadMesh" id=152]
+[sub_resource type="QuadMesh" id=154]
 
-[sub_resource type="Shader" id=153]
+[sub_resource type="Shader" id=155]
 code = "shader_type spatial;
 render_mode blend_mix,depth_draw_opaque,cull_disabled,diffuse_burley,specular_schlick_ggx, unshaded;
 uniform vec4 albedo : hint_color;
@@ -1047,8 +1047,8 @@ void fragment() {
 }
 "
 
-[sub_resource type="ShaderMaterial" id=154]
-shader = SubResource( 153 )
+[sub_resource type="ShaderMaterial" id=156]
+shader = SubResource( 155 )
 shader_param/albedo = Color( 1, 1, 1, 1 )
 shader_param/specular = null
 shader_param/metallic = 0.0
@@ -1058,7 +1058,7 @@ shader_param/uv1_offset = null
 shader_param/uv_borderwidth = 0.02
 shader_param/albedo_border = Color( 0.231373, 0.262745, 0.364706, 1 )
 
-[sub_resource type="Shader" id=155]
+[sub_resource type="Shader" id=157]
 code = "shader_type spatial;
 render_mode blend_mix,depth_draw_opaque,cull_disabled,diffuse_burley,specular_schlick_ggx, unshaded;
 uniform vec4 albedo : hint_color;
@@ -1094,8 +1094,8 @@ void fragment() {
 }
 "
 
-[sub_resource type="ShaderMaterial" id=156]
-shader = SubResource( 155 )
+[sub_resource type="ShaderMaterial" id=158]
+shader = SubResource( 157 )
 shader_param/albedo = Color( 0.788235, 0.764706, 0.698039, 0.305882 )
 shader_param/specular = null
 shader_param/metallic = 0.0
@@ -1105,8 +1105,8 @@ shader_param/uv1_offset = null
 shader_param/uv_borderwidth = 0.09
 shader_param/albedo_border = Color( 0.231373, 0.262745, 0.364706, 1 )
 
-[sub_resource type="ShaderMaterial" id=157]
-shader = SubResource( 155 )
+[sub_resource type="ShaderMaterial" id=159]
+shader = SubResource( 157 )
 shader_param/albedo = Color( 0.960784, 0.615686, 0.607843, 0.298039 )
 shader_param/specular = null
 shader_param/metallic = 0.0
@@ -1116,20 +1116,6 @@ shader_param/uv1_offset = null
 shader_param/uv_borderwidth = 0.09
 shader_param/albedo_border = Color( 0.980392, 0.321569, 0.0352941, 1 )
 
-[sub_resource type="CylinderMesh" id=158]
-height = 0.02
-radial_segments = 32
-rings = 1
-
-[sub_resource type="SpatialMaterial" id=159]
-flags_transparent = true
-params_cull_mode = 2
-albedo_color = Color( 0, 1, 0.901961, 0.439216 )
-metallic = 0.44
-metallic_specular = 0.22
-roughness = 0.74
-uv1_scale = Vector3( 1.5, 1.5, 1 )
-
 [sub_resource type="CylinderMesh" id=160]
 height = 0.02
 radial_segments = 32
@@ -1138,15 +1124,29 @@ rings = 1
 [sub_resource type="SpatialMaterial" id=161]
 flags_transparent = true
 params_cull_mode = 2
+albedo_color = Color( 0, 1, 0.901961, 0.439216 )
+metallic = 0.44
+metallic_specular = 0.22
+roughness = 0.74
+uv1_scale = Vector3( 1.5, 1.5, 1 )
+
+[sub_resource type="CylinderMesh" id=162]
+height = 0.02
+radial_segments = 32
+rings = 1
+
+[sub_resource type="SpatialMaterial" id=163]
+flags_transparent = true
+params_cull_mode = 2
 albedo_color = Color( 0, 1, 0.25098, 0.439216 )
 metallic = 0.44
 metallic_specular = 0.22
 roughness = 0.74
 uv1_scale = Vector3( 1.5, 1.5, 1 )
 
-[sub_resource type="QuadMesh" id=162]
+[sub_resource type="QuadMesh" id=164]
 
-[sub_resource type="SpatialMaterial" id=163]
+[sub_resource type="SpatialMaterial" id=165]
 params_cull_mode = 2
 metallic_specular = 0.22
 emission_enabled = true
@@ -1156,117 +1156,117 @@ emission_operator = 1
 emission_on_uv2 = false
 emission_texture = ExtResource( 16 )
 
-[sub_resource type="QuadMesh" id=164]
+[sub_resource type="QuadMesh" id=166]
 size = Vector2( 1, 0.2 )
 
-[sub_resource type="SpatialMaterial" id=165]
+[sub_resource type="SpatialMaterial" id=167]
 params_cull_mode = 2
 albedo_color = Color( 0.835294, 0.498039, 0.105882, 1 )
 metallic = 0.8
 roughness = 0.67
 
-[sub_resource type="QuadMesh" id=166]
+[sub_resource type="QuadMesh" id=168]
 size = Vector2( 1, 0.2 )
 
-[sub_resource type="SpatialMaterial" id=167]
+[sub_resource type="SpatialMaterial" id=169]
 flags_no_depth_test = true
 params_cull_mode = 2
 albedo_color = Color( 0.866667, 0.498039, 0.105882, 1 )
 metallic = 0.45
 roughness = 0.42
 
-[sub_resource type="QuadMesh" id=168]
+[sub_resource type="QuadMesh" id=170]
 size = Vector2( 1, 0.2 )
 
-[sub_resource type="Gradient" id=169]
+[sub_resource type="Gradient" id=171]
 offsets = PoolRealArray( 0, 0.00325733, 0.169381, 0.442997, 0.693811, 1 )
 colors = PoolColorArray( 0, 0, 0, 1, 0.32198, 0.015564, 0.996094, 1, 0.0230713, 0.105683, 0.984375, 1, 0.011673, 0.996094, 0.488502, 1, 0.946522, 0.976563, 0.0152588, 1, 0.992188, 0.0155029, 0.0155029, 1 )
 
-[sub_resource type="GradientTexture" id=170]
-gradient = SubResource( 169 )
+[sub_resource type="GradientTexture" id=172]
+gradient = SubResource( 171 )
 
-[sub_resource type="SpatialMaterial" id=171]
+[sub_resource type="SpatialMaterial" id=173]
 params_cull_mode = 2
-albedo_texture = SubResource( 170 )
+albedo_texture = SubResource( 172 )
 metallic = 0.26
 roughness = 0.83
 
-[sub_resource type="SpatialMaterial" id=172]
+[sub_resource type="SpatialMaterial" id=174]
 params_cull_mode = 2
 albedo_color = Color( 0.890196, 0.94902, 0.501961, 1 )
 albedo_texture = ExtResource( 54 )
 roughness = 0.91
 
-[sub_resource type="QuadMesh" id=173]
+[sub_resource type="QuadMesh" id=175]
 size = Vector2( 1, 0.2 )
 
-[sub_resource type="SpatialMaterial" id=174]
+[sub_resource type="SpatialMaterial" id=176]
 params_specular_mode = 2
 albedo_color = Color( 0.890196, 0.94902, 0.501961, 1 )
 albedo_texture = ExtResource( 54 )
 metallic = 0.12
 roughness = 0.77
 
-[sub_resource type="CapsuleMesh" id=175]
+[sub_resource type="CapsuleMesh" id=177]
 radius = 0.1
 mid_height = 0.5
 
-[sub_resource type="SpatialMaterial" id=176]
+[sub_resource type="SpatialMaterial" id=178]
 albedo_color = Color( 0.980392, 0.47451, 0.435294, 1 )
 metallic = 0.14
 roughness = 0.33
 transmission_enabled = true
 transmission = Color( 0.113725, 0.164706, 0.968627, 1 )
 
-[sub_resource type="SpatialMaterial" id=177]
+[sub_resource type="SpatialMaterial" id=179]
 params_cull_mode = 2
 albedo_color = Color( 0.482353, 0.976471, 0.52549, 1 )
 metallic = 0.32
 roughness = 0.62
 
-[sub_resource type="PlaneMesh" id=178]
-size = Vector2( 1, 0.5 )
-
-[sub_resource type="SpatialMaterial" id=179]
-albedo_texture = ExtResource( 49 )
-
 [sub_resource type="PlaneMesh" id=180]
 size = Vector2( 1, 0.5 )
 
 [sub_resource type="SpatialMaterial" id=181]
-albedo_texture = ExtResource( 11 )
+albedo_texture = ExtResource( 49 )
 
 [sub_resource type="PlaneMesh" id=182]
 size = Vector2( 1, 0.5 )
 
 [sub_resource type="SpatialMaterial" id=183]
+albedo_texture = ExtResource( 11 )
+
+[sub_resource type="PlaneMesh" id=184]
+size = Vector2( 1, 0.5 )
+
+[sub_resource type="SpatialMaterial" id=185]
 albedo_texture = ExtResource( 51 )
 
-[sub_resource type="AudioStreamMicrophone" id=184]
+[sub_resource type="AudioStreamMicrophone" id=186]
 
-[sub_resource type="DynamicFont" id=185]
+[sub_resource type="DynamicFont" id=187]
 font_data = ExtResource( 40 )
 
-[sub_resource type="DynamicFont" id=186]
+[sub_resource type="DynamicFont" id=188]
 font_data = ExtResource( 39 )
 
-[sub_resource type="PlaneMesh" id=187]
+[sub_resource type="PlaneMesh" id=189]
 size = Vector2( 2, 0.1 )
 
-[sub_resource type="ViewportTexture" id=188]
+[sub_resource type="ViewportTexture" id=190]
 viewport_path = NodePath("LabelGenerator/Viewport")
 
-[sub_resource type="SpatialMaterial" id=189]
+[sub_resource type="SpatialMaterial" id=191]
 resource_local_to_scene = true
 flags_unshaded = true
 flags_no_depth_test = true
 flags_do_not_receive_shadows = true
 params_cull_mode = 2
-albedo_texture = SubResource( 188 )
+albedo_texture = SubResource( 190 )
 
-[sub_resource type="BoxShape" id=190]
+[sub_resource type="BoxShape" id=192]
 
-[sub_resource type="SpatialMaterial" id=191]
+[sub_resource type="SpatialMaterial" id=193]
 params_specular_mode = 2
 params_cull_mode = 2
 params_depth_draw_mode = 1
@@ -1274,12 +1274,12 @@ albedo_texture = ExtResource( 7 )
 roughness = 0.43
 uv1_scale = Vector3( 20, 20, 1 )
 
-[sub_resource type="PlaneMesh" id=192]
-material = SubResource( 191 )
+[sub_resource type="PlaneMesh" id=194]
+material = SubResource( 193 )
 subdivide_width = 4
 subdivide_depth = 4
 
-[sub_resource type="Shader" id=193]
+[sub_resource type="Shader" id=195]
 code = "shader_type spatial;
 render_mode blend_mix,depth_draw_opaque,cull_back,diffuse_burley,specular_schlick_ggx;
 uniform vec4 albedo : hint_color;
@@ -1310,10 +1310,10 @@ void fragment() {
 }
 "
 
-[sub_resource type="ProxyTexture" id=194]
+[sub_resource type="ProxyTexture" id=196]
 
-[sub_resource type="ShaderMaterial" id=195]
-shader = SubResource( 193 )
+[sub_resource type="ShaderMaterial" id=197]
+shader = SubResource( 195 )
 shader_param/albedo = Color( 0.435294, 0.215686, 0.141176, 0.454902 )
 shader_param/specular = 0.5
 shader_param/metallic = 0.48
@@ -1321,42 +1321,42 @@ shader_param/roughness = 0.71
 shader_param/point_size = 1.0
 shader_param/uv1_scale = Vector3( 3, 1, 1 )
 shader_param/uv1_offset = Vector3( 0, 0, 0 )
-shader_param/texture_albedo = SubResource( 194 )
+shader_param/texture_albedo = SubResource( 196 )
 
-[sub_resource type="PlaneMesh" id=196]
-material = SubResource( 195 )
+[sub_resource type="PlaneMesh" id=198]
+material = SubResource( 197 )
 size = Vector2( 4, 2 )
 
-[sub_resource type="SpatialMaterial" id=197]
+[sub_resource type="SpatialMaterial" id=199]
 albedo_color = Color( 1, 0.992157, 0.992157, 1 )
 metallic = 0.41
 roughness = 0.55
 
-[sub_resource type="CylinderMesh" id=198]
+[sub_resource type="CylinderMesh" id=200]
 top_radius = 2.0
 bottom_radius = 4.0
 height = 5.0
 
-[sub_resource type="SphereMesh" id=199]
+[sub_resource type="SphereMesh" id=201]
 radius = 4.0
 height = 6.0
 
-[sub_resource type="CubeMesh" id=200]
+[sub_resource type="CubeMesh" id=202]
 size = Vector3( 4, 2, 2 )
 
-[sub_resource type="SpatialMaterial" id=201]
+[sub_resource type="SpatialMaterial" id=203]
 albedo_color = Color( 0.364706, 0.878431, 0.105882, 1 )
 metallic = 0.42
 roughness = 0.48
 
-[sub_resource type="GIProbeData" id=202]
+[sub_resource type="GIProbeData" id=204]
 
-[sub_resource type="CylinderMesh" id=203]
+[sub_resource type="CylinderMesh" id=205]
 height = 1.1
 
-[sub_resource type="SpatialMaterial" id=204]
+[sub_resource type="SpatialMaterial" id=206]
 
-[sub_resource type="SpatialMaterial" id=205]
+[sub_resource type="SpatialMaterial" id=207]
 albedo_color = Color( 0.168627, 0.972549, 0.027451, 1 )
 
 [node name="Spatial" type="Spatial"]
@@ -2984,48 +2984,48 @@ material/0 = SubResource( 125 )
 
 [node name="normalfloorpos" type="MeshInstance" parent="MaterialSystem/nodematerial"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0733414, 0, 0.797792 )
-mesh = SubResource( 206 )
-material/0 = SubResource( 207 )
+mesh = SubResource( 126 )
+material/0 = SubResource( 127 )
 
 [node name="nodepthtest" type="MeshInstance" parent="MaterialSystem/nodematerial"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.633877, 0, -0.261196 )
 mesh = SubResource( 122 )
-material/0 = SubResource( 126 )
+material/0 = SubResource( 128 )
 
 [node name="nodepthtesthole" type="MeshInstance" parent="MaterialSystem/nodematerial"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.593304, 0, 0.0741062 )
 mesh = SubResource( 122 )
-material/0 = SubResource( 127 )
+material/0 = SubResource( 129 )
 
 [node name="nodepthtestknot" type="MeshInstance" parent="MaterialSystem/nodematerial"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.6451, 0, 0.411036 )
 mesh = SubResource( 122 )
-material/0 = SubResource( 128 )
+material/0 = SubResource( 130 )
 
 [node name="highlight" type="MeshInstance" parent="MaterialSystem/nodematerial"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0111227, 0, -0.62862 )
 mesh = SubResource( 122 )
-material/0 = SubResource( 129 )
+material/0 = SubResource( 131 )
 
 [node name="selected" type="MeshInstance" parent="MaterialSystem/nodematerial"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.696095, 0, -0.631187 )
 mesh = SubResource( 122 )
-material/0 = SubResource( 130 )
+material/0 = SubResource( 132 )
 
 [node name="selected_highlight" type="MeshInstance" parent="MaterialSystem/nodematerial"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.00370264, 0, -1.20633 )
 mesh = SubResource( 122 )
-material/0 = SubResource( 131 )
+material/0 = SubResource( 133 )
 
 [node name="station" type="MeshInstance" parent="MaterialSystem/nodematerial"]
 transform = Transform( 0.707107, 0.5, 0.5, 0, 0.707107, -0.707107, -0.707107, 0.5, 0.5, -0.636623, -0.00165558, -1.21666 )
-mesh = SubResource( 132 )
-material/0 = SubResource( 133 )
+mesh = SubResource( 134 )
+material/0 = SubResource( 135 )
 
 [node name="nodeintermediate" type="MeshInstance" parent="MaterialSystem/nodematerial"]
 transform = Transform( -1.62921e-07, 1, 0, -1, -1.62921e-07, 0, 0, 0, 1, -0.579151, -0.107192, -0.95727 )
-mesh = SubResource( 134 )
-material/0 = SubResource( 135 )
+mesh = SubResource( 136 )
+material/0 = SubResource( 137 )
 
 [node name="lasermaterial" type="Spatial" parent="MaterialSystem"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -1.22997, 0, -1.16549 )
@@ -3037,18 +3037,18 @@ material/0 = null
 
 [node name="spotselected" type="MeshInstance" parent="MaterialSystem/lasermaterial"]
 transform = Transform( 1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, -0.610968, 0, 0 )
-mesh = SubResource( 136 )
-material/0 = SubResource( 137 )
+mesh = SubResource( 138 )
+material/0 = SubResource( 139 )
 
 [node name="spotselectedinair" type="MeshInstance" parent="MaterialSystem/lasermaterial"]
 transform = Transform( 1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, -0.610968, 0, 0 )
-mesh = SubResource( 136 )
-material/0 = SubResource( 138 )
+mesh = SubResource( 138 )
+material/0 = SubResource( 140 )
 
 [node name="spotinair" type="MeshInstance" parent="MaterialSystem/lasermaterial"]
 transform = Transform( 1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, -0.610968, 0, 0 )
-mesh = SubResource( 136 )
-material/0 = SubResource( 139 )
+mesh = SubResource( 138 )
+material/0 = SubResource( 141 )
 
 [node name="spike" type="MeshInstance" parent="MaterialSystem/lasermaterial"]
 transform = Transform( 1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, 0, 0.07, -0.07 )
@@ -3058,134 +3058,134 @@ material/0 = null
 [node name="laser" type="MeshInstance" parent="MaterialSystem/lasermaterial"]
 transform = Transform( 1, 0, 0, 0, 0.707107, 0.353553, 0, -0.707107, 0.353553, 0, 0.14, 0.14 )
 cast_shadow = 0
-mesh = SubResource( 140 )
-material/0 = SubResource( 141 )
+mesh = SubResource( 142 )
+material/0 = SubResource( 143 )
 
 [node name="xcdrawingmaterials" type="Spatial" parent="MaterialSystem"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -1.56677, 0, -3.12992 )
 
 [node name="normal" type="MeshInstance" parent="MaterialSystem/xcdrawingmaterials"]
 transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, 0, 0, 0 )
-mesh = SubResource( 142 )
-material/0 = SubResource( 143 )
-
-[node name="active" type="MeshInstance" parent="MaterialSystem/xcdrawingmaterials"]
-transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, -1.16284, 0, 0 )
 mesh = SubResource( 144 )
 material/0 = SubResource( 145 )
 
-[node name="highlight" type="MeshInstance" parent="MaterialSystem/xcdrawingmaterials"]
-transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, -2.262, 0, 0.00685501 )
+[node name="active" type="MeshInstance" parent="MaterialSystem/xcdrawingmaterials"]
+transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, -1.16284, 0, 0 )
 mesh = SubResource( 146 )
 material/0 = SubResource( 147 )
 
+[node name="highlight" type="MeshInstance" parent="MaterialSystem/xcdrawingmaterials"]
+transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, -2.262, 0, 0.00685501 )
+mesh = SubResource( 148 )
+material/0 = SubResource( 149 )
+
 [node name="floorbordered" type="MeshInstance" parent="MaterialSystem/xcdrawingmaterials"]
 transform = Transform( -0.999877, -2.55616e-09, -0.0156896, -0.0156896, 1.62901e-07, 0.999877, 0, 1, -1.62921e-07, -1.21672, 0.0131235, 1.21531 )
-mesh = SubResource( 148 )
+mesh = SubResource( 150 )
 material/0 = ExtResource( 53 )
 
 [node name="floorborderedactive" type="MeshInstance" parent="MaterialSystem/xcdrawingmaterials"]
 transform = Transform( -0.999877, -2.55616e-09, -0.0156896, -0.0156896, 1.62901e-07, 0.999877, 0, 1, -1.62921e-07, -0.113148, 0.016582, 1.19085 )
-mesh = SubResource( 149 )
-material/0 = SubResource( 151 )
+mesh = SubResource( 151 )
+material/0 = SubResource( 153 )
 
 [node name="floorborderedunshaded" type="MeshInstance" parent="MaterialSystem/xcdrawingmaterials"]
 transform = Transform( 1, 0, 0, 0, 0.0398178, 0.999207, 0, -0.999207, 0.0398178, -2.26133, -0.118988, 1.10957 )
-mesh = SubResource( 152 )
-material/0 = SubResource( 154 )
+mesh = SubResource( 154 )
+material/0 = SubResource( 156 )
 
 [node name="floorborderedghostly" type="MeshInstance" parent="MaterialSystem/xcdrawingmaterials"]
 transform = Transform( 1, 0, 0, 0, 0.0398178, 0.999207, 0, -0.999207, 0.0398178, -2.26133, -0.166059, 2.2908 )
-mesh = SubResource( 152 )
-material/0 = SubResource( 156 )
+mesh = SubResource( 154 )
+material/0 = SubResource( 158 )
 
 [node name="floorborderedghostlyactive" type="MeshInstance" parent="MaterialSystem/xcdrawingmaterials"]
 transform = Transform( 1, 0, 0, 0, 0.0398178, 0.999207, 0, -0.999207, 0.0398178, -1.15529, -0.166059, 2.2908 )
-mesh = SubResource( 152 )
-material/0 = SubResource( 157 )
+mesh = SubResource( 154 )
+material/0 = SubResource( 159 )
 
 [node name="intermediateplane" type="MeshInstance" parent="MaterialSystem/xcdrawingmaterials"]
 transform = Transform( 0.2, 0, 0, 0, 0.801484, -0.119603, 0, 0.598017, 0.160297, -1.18957, -0.151096, 3.56891 )
 layers = 2
 cast_shadow = 0
-mesh = SubResource( 158 )
-material/0 = SubResource( 159 )
+mesh = SubResource( 160 )
+material/0 = SubResource( 161 )
 
 [node name="intermediateplanehighlight" type="MeshInstance" parent="MaterialSystem/xcdrawingmaterials"]
 transform = Transform( 0.2, 0, 0, 0, 0.801484, -0.119603, 0, 0.598017, 0.160297, -0.709507, -0.154516, 3.58947 )
 layers = 2
 cast_shadow = 0
-mesh = SubResource( 160 )
-material/0 = SubResource( 161 )
+mesh = SubResource( 162 )
+material/0 = SubResource( 163 )
 
 [node name="guardianpoly" type="MeshInstance" parent="MaterialSystem/xcdrawingmaterials"]
 transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, -3.44114, 0, 0 )
-mesh = SubResource( 162 )
-material/0 = SubResource( 163 )
+mesh = SubResource( 164 )
+material/0 = SubResource( 165 )
 
 [node name="pathlines" type="Spatial" parent="MaterialSystem"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -3.72305, 0, 1.04259 )
 
 [node name="normal" type="MeshInstance" parent="MaterialSystem/pathlines"]
 transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, 0.00409698, 0.0395899, -0.194405 )
-mesh = SubResource( 164 )
-material/0 = SubResource( 165 )
-
-[node name="nodepthtest" type="MeshInstance" parent="MaterialSystem/pathlines"]
-transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, 0, 0, -0.578178 )
 mesh = SubResource( 166 )
 material/0 = SubResource( 167 )
 
+[node name="nodepthtest" type="MeshInstance" parent="MaterialSystem/pathlines"]
+transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, 0, 0, -0.578178 )
+mesh = SubResource( 168 )
+material/0 = SubResource( 169 )
+
 [node name="centreline" type="MeshInstance" parent="MaterialSystem/pathlines"]
 transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, -0.0245323, -0.0287361, -0.990627 )
-mesh = SubResource( 168 )
-material/0 = SubResource( 171 )
+mesh = SubResource( 170 )
+material/0 = SubResource( 173 )
 
 [node name="rope" type="MeshInstance" parent="MaterialSystem/pathlines"]
 transform = Transform( 1, 0, 0, 0, -1.62921e-07, 1, 0, -1, -1.62921e-07, 1.07032, 0.0395899, -0.194405 )
-mesh = SubResource( 164 )
-material/0 = SubResource( 172 )
+mesh = SubResource( 166 )
+material/0 = SubResource( 174 )
 
 [node name="ropesolid" type="MeshInstance" parent="MaterialSystem/pathlines"]
 transform = Transform( 1, 0, 0, 0, -1.62921e-07, 1, 0, -1, -1.62921e-07, 1.07032, 0.0395899, 0.188023 )
-mesh = SubResource( 173 )
-material/0 = SubResource( 174 )
+mesh = SubResource( 175 )
+material/0 = SubResource( 176 )
 
 [node name="handmaterials" type="Spatial" parent="MaterialSystem"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -3.78539, 0, 1.47726 )
 
 [node name="handleft" type="MeshInstance" parent="MaterialSystem/handmaterials"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.321026, 0, 0.121136 )
-mesh = SubResource( 175 )
-material/0 = SubResource( 176 )
+mesh = SubResource( 177 )
+material/0 = SubResource( 178 )
 
 [node name="handright" type="MeshInstance" parent="MaterialSystem/handmaterials"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0500312, 0, 0.121136 )
-mesh = SubResource( 175 )
-material/0 = SubResource( 177 )
+mesh = SubResource( 177 )
+material/0 = SubResource( 179 )
 
 [node name="buttonmaterials" type="Spatial" parent="MaterialSystem"]
 
 [node name="FetchButton" type="MeshInstance" parent="MaterialSystem/buttonmaterials"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -3.67453, 0, 2.38567 )
-mesh = SubResource( 178 )
-material/0 = SubResource( 179 )
-
-[node name="InstallButton" type="MeshInstance" parent="MaterialSystem/buttonmaterials"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -3.66956, 0.00255632, 3.02332 )
 mesh = SubResource( 180 )
 material/0 = SubResource( 181 )
 
-[node name="ClearCacheButton" type="MeshInstance" parent="MaterialSystem/buttonmaterials"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -3.67896, 0.00439954, 3.65971 )
+[node name="InstallButton" type="MeshInstance" parent="MaterialSystem/buttonmaterials"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -3.66956, 0.00255632, 3.02332 )
 mesh = SubResource( 182 )
 material/0 = SubResource( 183 )
+
+[node name="ClearCacheButton" type="MeshInstance" parent="MaterialSystem/buttonmaterials"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -3.67896, 0.00439954, 3.65971 )
+mesh = SubResource( 184 )
+material/0 = SubResource( 185 )
 
 [node name="SoundSystem" type="Spatial" parent="."]
 script = ExtResource( 19 )
 
 [node name="AudioStreamRecord" type="AudioStreamPlayer" parent="SoundSystem"]
-stream = SubResource( 184 )
+stream = SubResource( 186 )
 autoplay = true
 bus = "Record"
 
@@ -3251,8 +3251,8 @@ render_target_v_flip = true
 
 [node name="RichTextLabel" type="RichTextLabel" parent="LabelGenerator/Viewport"]
 size_flags_stretch_ratio = 0.0
-custom_fonts/mono_font = SubResource( 185 )
-custom_fonts/normal_font = SubResource( 186 )
+custom_fonts/mono_font = SubResource( 187 )
+custom_fonts/normal_font = SubResource( 188 )
 bbcode_enabled = true
 bbcode_text = "testing"
 text = "testing"
@@ -3264,8 +3264,8 @@ __meta__ = {
 [node name="ViewportLabelPreview" type="MeshInstance" parent="LabelGenerator"]
 transform = Transform( 1, 0, 0, 0, 0.655202, -0.755453, 0, 0.755453, 0.655202, 2.27374e-13, -2.8247, -4.59181 )
 visible = false
-mesh = SubResource( 187 )
-material/0 = SubResource( 189 )
+mesh = SubResource( 189 )
+material/0 = SubResource( 191 )
 
 [node name="ImageSystem" type="Node" parent="."]
 script = ExtResource( 17 )
@@ -3283,11 +3283,11 @@ collision_mask = 0
 
 [node name="CollisionShape" type="CollisionShape" parent="underfloor"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0 )
-shape = SubResource( 190 )
+shape = SubResource( 192 )
 
 [node name="Mesh" type="MeshInstance" parent="underfloor"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.00067521, 0.0301399, 0.000480108 )
-mesh = SubResource( 192 )
+mesh = SubResource( 194 )
 material/0 = null
 
 [node name="BoulderClutter" type="Spatial" parent="."]
@@ -3296,7 +3296,7 @@ material/0 = null
 transform = Transform( 1, 0, 0, 0, 0.697453, 0.716631, 0, -0.716631, 0.697453, 2.42691, 1.16181, 1.94417 )
 visible = false
 material_override = ExtResource( 3 )
-mesh = SubResource( 196 )
+mesh = SubResource( 198 )
 material/0 = ExtResource( 3 )
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
@@ -3341,27 +3341,27 @@ visible = false
 
 [node name="CSGMesh" type="CSGMesh" parent="LightingExperiments"]
 transform = Transform( 0.392096, 0, 0.919924, 0, 1, 0, -0.919924, 0, 0.392096, 0, 2.91049, -14.6547 )
-material_override = SubResource( 197 )
+material_override = SubResource( 199 )
 use_in_baked_light = true
-mesh = SubResource( 198 )
+mesh = SubResource( 200 )
 
 [node name="CSGMesh" type="CSGMesh" parent="LightingExperiments/CSGMesh"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.45282, 1.58561 )
 use_in_baked_light = true
 operation = 2
-mesh = SubResource( 199 )
+mesh = SubResource( 201 )
 
 [node name="MeshInstance" type="MeshInstance" parent="LightingExperiments"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.92343, 0.110373, -16.1766 )
 use_in_baked_light = true
-mesh = SubResource( 200 )
-material/0 = SubResource( 201 )
+mesh = SubResource( 202 )
+material/0 = SubResource( 203 )
 
 [node name="GIProbe" type="GIProbe" parent="LightingExperiments"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.687242, 4.07743, -13.0581 )
 extents = Vector3( 10, 5.1816, 10 )
 interior = true
-data = SubResource( 202 )
+data = SubResource( 204 )
 
 [node name="OmniLight" type="OmniLight" parent="LightingExperiments"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 1.42038, 2.36254, -16.309 )
@@ -3371,14 +3371,14 @@ omni_range = 18.5
 [node name="MeshInstance2" type="MeshInstance" parent="LightingExperiments"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -1.52614, 1.0228, -13.1769 )
 use_in_baked_light = true
-mesh = SubResource( 203 )
-material/0 = SubResource( 204 )
+mesh = SubResource( 205 )
+material/0 = SubResource( 206 )
 
 [node name="MeshInstance3" type="MeshInstance" parent="LightingExperiments"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.409035, 2.78001, -15.0808 )
 use_in_baked_light = true
-mesh = SubResource( 203 )
-material/0 = SubResource( 205 )
+mesh = SubResource( 205 )
+material/0 = SubResource( 207 )
 
 [node name="picturepalace" type="StaticBody" parent="."]
 transform = Transform( 1, 0, 0, 0, -1.62921e-07, 1, 0, -1, -1.62921e-07, 0, -10.4624, -54.4313 )

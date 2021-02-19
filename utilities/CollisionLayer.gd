@@ -39,7 +39,7 @@ enum {
 	VL_xcshells							= 0b00000000000100000000,
 	VL_centrelinestations				= 0b00000000001000000000,
 	VL_centrelinestationsplanview		= 0b00000000010000000000,
-	VL_positioningnodelines				= 0b00000000100000000000,
+	VL_positioningnodelines				= 0b00000000100000000000, # obsolete: now is VL_xctubeposlines
 	VL_overheadlight					= 0b00000001000000000000,
 	VL_centrelinestationslabel			= 0b00000010000000000000,
 	VL_floortextureplanview				= 0b00000100000000000000,

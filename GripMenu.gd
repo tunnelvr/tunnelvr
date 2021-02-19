@@ -118,7 +118,9 @@ func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointert
 			gmlist = ["SelectXC", "NewXC", "HideXC", "materials"]
 
 	elif gripmenupointertargettype == "XCnode" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
-		gmlist = ["NewXC", "ShowFloor"]
+		gmlist = ["NewXC"]
+		if pointertargetwall.drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_FLOOR_HIDDEN or pointertargetwall.drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_FLOOR_DELETED:
+			gmlist.push_back("NewXC")
 
 	elif gripmenupointertargettype == "XCnode":
 		gmlist = ["NewXC", "HideXC"]

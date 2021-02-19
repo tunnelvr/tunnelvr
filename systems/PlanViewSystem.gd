@@ -261,7 +261,7 @@ func actplanviewdict(pvchange):
 				labelgenerator.restartlabelmakingprocess(playermeheadcam.global_transform.origin)
 		else:
 			playermeheadcam.cull_mask = CollisionLayer.VLCM_PlayerCameraNoCentreline
-			get_node("/root/Spatial/BodyObjects/LaserOrient/RayCast").collision_mask = CollisionLayer.CLV_MainRayAll
+			get_node("/root/Spatial/BodyObjects/LaserOrient/RayCast").collision_mask = CollisionLayer.CLV_MainRayAllNoCentreline
 			plancameraraycollisionmask = CollisionLayer.CLV_PlanRayNoCentreline
 			plancameracullmask = CollisionLayer.VLCM_PlanViewCameraNoCentreline
 		
