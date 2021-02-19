@@ -129,7 +129,8 @@ func _physics_process(delta):
 		elif PlayerDirections.forceontogroundtimedown < 0:
 			HeadFloorprojectWarning.visible = false
 			PlayerDirections.forceontogroundtimedown = 0
-			process_projectontoground(delta, PlayerDirections.floorprojectdistance)
+			if not PlayerDirections.playerdirectedflight:
+				process_projectontoground(delta, PlayerDirections.floorprojectdistance)
 		else:
 			HeadFloorprojectWarning.visible = true
 	elif PlayerDirections.playerdirectedflight:

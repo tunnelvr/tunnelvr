@@ -2138,6 +2138,7 @@ collision_mask = 0
 [node name="CollisionShape" type="CollisionShape" parent="BodyObjects/IntermediatePointView/IntermediatePointPlane"]
 transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, 0, 0, 0 )
 shape = SubResource( 59 )
+disabled = true
 
 [node name="MeshInstance" type="MeshInstance" parent="BodyObjects/IntermediatePointView/IntermediatePointPlane/CollisionShape"]
 layers = 2

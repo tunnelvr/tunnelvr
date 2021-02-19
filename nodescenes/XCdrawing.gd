@@ -164,6 +164,8 @@ func setdrawingvisiblecode(ldrawingvisiblecode):
 
 		elif (drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_NORMAL) != 0:
 			setxcdrawingvisibleL()
+			if (drawingvisiblecode_old & DRAWING_TYPE.VIZ_XCD_FLOOR_HIDDEN) != 0:
+				get_node("/root/Spatial/ImageSystem").fetchpaperdrawing(self)
 			var matname
 			if (drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_ACTIVE_B) != 0:
 				planviewsystem.activetargetfloor = self
@@ -200,9 +202,12 @@ func setdrawingvisiblecode(ldrawingvisiblecode):
 			if not ((drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_GHOSTLY_B) != 0):
 				cl |= CollisionLayer.CL_Environment
 			$XCdrawingplane.collision_layer = cl
-		planviewsystem.planviewcontrols.get_node("FloorMove/FloorStyle").disabled = (planviewsystem.activetargetfloor == null)
-		if planviewsystem.planviewcontrols.get_node("FloorMove/FloorStyle").disabled:
-			planviewsystem.planviewcontrols.get_node("FloorMove/FloorStyle").selected = 0
+		var FloorStyle = planviewsystem.planviewcontrols.get_node("FloorMove/FloorStyle")
+		FloorStyle.disabled = (planviewsystem.activetargetfloor == null)
+		if FloorStyle.disabled:
+			FloorStyle.selected = 0
+		else:
+			FloorStyle.set_item_disabled(4, not notubeconnections_so_delxcable())
 
 			
 func updateformetresquaresscaletexture():

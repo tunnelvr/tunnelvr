@@ -371,9 +371,9 @@ remote func actsketchchangeL(xcdatalist):
 			var flywalkreversed = get_node("/root/Spatial/GuiSystem/GUIPanel3D/Viewport/GUI/Panel/FlyWalkReversed").pressed
 			var PlayerDirections = get_node("/root/Spatial/BodyObjects/PlayerDirections")
 			PlayerDirections.flywalkreversed = flywalkreversed
-			if not flywalkreversed:
-				if PlayerDirections.forceontogroundtimedown > 0:
-					PlayerDirections.forceontogroundtimedown = 0.25
+			if PlayerDirections.forceontogroundtimedown > 0:
+				PlayerDirections.forceontogroundtimedown = 0.25
+				
 			if len(xcdatalistReceivedDuringChunkingL) != 0:
 				print("Now processing ", len(xcdatalistReceivedDuringChunkingL), " received during chunking")
 				for xcdatalistR in xcdatalistReceivedDuringChunkingL:
@@ -542,6 +542,8 @@ func sketchdicttochunks(sketchdatadict):
 				xctubesDmaphalfstaged[i] = xctubesarrayD[i]
 				xctubesarrayD[i] = null
 
+	if len(xctubesDmaphalfstaged) != 0:
+		print("tubes with missing xcdrawings during chunking ", xctubesDmaphalfstaged)
 	var playerMe = get_node("/root/Spatial").playerMe
 	for i in range(len(xcdatachunks)):
 		xcdatachunks[i][0]["caveworldchunkLast"] = xcdatachunks[-1][0]["caveworldchunk"]
@@ -661,7 +663,7 @@ func newXCtube(xcdrawing0, xcdrawing1):
 	assert ((xcdrawing0.drawingtype == DRAWING_TYPE.DT_XCDRAWING and xcdrawing1.drawingtype == DRAWING_TYPE.DT_XCDRAWING) or
 			(xcdrawing0.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE and xcdrawing1.drawingtype == DRAWING_TYPE.DT_XCDRAWING) or
 			(xcdrawing0.drawingtype == DRAWING_TYPE.DT_CENTRELINE and xcdrawing1.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE))
-
+		
 	var xctube = XCtube.instance()
 	xctube.xcname0 = xcdrawing0.get_name()
 	xctube.xcname1 = xcdrawing1.get_name()
