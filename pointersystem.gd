@@ -33,6 +33,10 @@ var activetargettubesectorindex = -1
 var activetargetxcflatshell = null
 var prevactivetargettubetohideonsecondselect = null
 var activetargetnodetriggerpulling = false
+var nodetriggerpullinglimit = 1.0
+var nodetriggerpullingmin = 0.2
+var nodetriggerpulledmaxd = 0.0
+var activetargetnodetriggerpulledz = 0.0
 
 var activetargetwallgrabbed = null
 var activetargetwallgrabbedtransform = null
@@ -133,6 +137,7 @@ func clearactivetargetnode():
 			activetargetnode.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial(clearednodematerialtype(activetargetnode, (activetargetnodewall == activetargetwall), activetargetnodewall.drawingtype)))
 	activetargetnode = null
 	activetargetnodewall = null
+	activetargetnodetriggerpulling = false
 	activelaserroot.get_node("LaserSpot").set_surface_material(0, materialsystem.lasermaterialN((1 if activetargetnode != null else 0) + (2 if pointertarget == null else 0)))
 
 	
@@ -339,13 +344,15 @@ func setpointertarget(laserroot, raycast, pointertargetshortdistance):
 				FloorLaserSpot.get_node("FloorSpot").visible = false
 
 	if activetargetnodetriggerpulling:
-		# solve activetargetnode.global_transform.origin + a*activetargetnode.global_transform.basis.z = LaserOrient.transform.origin - b*LaserOrient.transform.basis.z
-		var gp = LaserOrient.transform.origin - activetargetnode.global_transform.origin
-		# solve gp = a*activetargetnode.global_transform.basis.z + b*LaserOrient.transform.basis.z
-		#gp . activetargetnode.global_transform.basis.z = a + b*LaserOrient.transform.basis.z . activetargetnode.global_transform.basis.z
-		#gp . LaserOrient.transform.basis.z = a*activetargetnode.global_transform.basis.z . LaserOrient.transform.basis.z + b
-		var ldots = activetargetnode.global_transform.basis.z.dot(LaserOrient.transform.basis.z)
-		var gpdnd = gp.dot(activetargetnode.global_transform.basis.z)
+		# solve tpnodepoint + a*activetargetnodewall.transform.basis.z = LaserOrient.transform.origin - b*LaserOrient.transform.basis.z
+		var tpnodepoint = activetargetnodewall.nodepoints[activetargetnode.get_name()]
+		var nodezerozposition = activetargetnodewall.transform.xform(Vector3(tpnodepoint.x, tpnodepoint.y, 0))
+		var gp = LaserOrient.transform.origin - nodezerozposition
+		# solve gp = a*activetargetnodewall.transform.basis.z + b*LaserOrient.transform.basis.z
+		#gp . activetargetnodewall.transform.basis.z = a + b*LaserOrient.transform.basis.z . activetargetnodewall.transform.basis.z
+		#gp . LaserOrient.transform.basis.z = a*activetargetnodewall.transform.basis.z . LaserOrient.transform.basis.z + b
+		var ldots = activetargetnodewall.transform.basis.z.dot(LaserOrient.transform.basis.z)
+		var gpdnd = gp.dot(activetargetnodewall.transform.basis.z)
 		var gpdlz = gp.dot(LaserOrient.transform.basis.z)
 		# gpdnd = a + b*ldots; gpdlz = a*ldots + b
 		# gpdnd = a + gpdlz*ldots - a*ldots*ldots
@@ -354,12 +361,14 @@ func setpointertarget(laserroot, raycast, pointertargetshortdistance):
 		if abs(aden) > 0.01:
 			var a = (gpdnd - gpdlz*ldots)/aden
 			var b = gpdlz - a*ldots
-			var av = activetargetnode.global_transform.origin + a*activetargetnode.global_transform.basis.z
+			var av = nodezerozposition + a*activetargetnodewall.transform.basis.z
 			var bv = LaserOrient.transform.origin - b*LaserOrient.transform.basis.z
 			var skewdist = av.distance_to(bv)
-			LaserSelectLine.transform = activetargetnode.global_transform
-			LaserSelectLine.get_node("Scale").scale.z = -a
-			LaserSelectLine.visible = (skewdist < 0.1)
+			LaserSelectLine.transform = Transform(activetargetnodewall.transform.basis, nodezerozposition)
+			LaserSelectLine.get_node("Scale").scale = Vector3(8, 8, -a)
+			nodetriggerpulledmaxd = max(nodetriggerpulledmaxd, abs(activetargetnodetriggerpulledz - tpnodepoint.z))
+			LaserSelectLine.visible = (skewdist < 0.1) and (abs(a) < nodetriggerpullinglimit) and (nodetriggerpulledmaxd > nodetriggerpullingmin)
+			activetargetnodetriggerpulledz = a
 		else:
 			LaserSelectLine.visible = false
 		
@@ -375,9 +384,9 @@ func setpointertarget(laserroot, raycast, pointertargetshortdistance):
 		else:
 			LaserSelectLine.visible = false
 		if lslfrom != null:
-			LaserSelectLine.global_transform.origin = pointertargetpoint
+			LaserSelectLine.transform.origin = pointertargetpoint
 			LaserSelectLine.get_node("Scale").scale.z = pointertargetpoint.distance_to(lslfrom)
-			LaserSelectLine.global_transform = laserroot.get_node("LaserSpot").global_transform.looking_at(lslfrom, Vector3(0,1,0))
+			LaserSelectLine.transform = laserroot.get_node("LaserSpot").global_transform.looking_at(lslfrom, Vector3(0,1,0))
 
 func _on_button_pressed(p_button):
 	var gripbuttonheld = handright.gripbuttonheld
@@ -741,6 +750,7 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 			if pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 				pointertargetwall.expandxcdrawingscale(pointertargetpoint)
 				activetargetnodetriggerpulling = true
+				nodetriggerpulledmaxd = 0.0
 			#Tglobal.soundsystem.quicksound("ClickSound", pointertargetpoint)
 			initialsequencenodename = initialsequencenodenameP
 	
@@ -848,11 +858,14 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 		if pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 			if pointertargetwall != activetargetwall:
 				setactivetargetwall(pointertargetwall)
-				activetargetnodetriggerpulling = true
-		elif pointertargetwall.drawingtype == DRAWING_TYPE.DT_ROPEHANG:
-			if pointertargetwall.drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_HIDE:
-				sketchsystem.actsketchchange([{"xcvizstates":{pointertargetwall.get_name():DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE}}])
-		setactivetargetnode(pointertarget)
+			setactivetargetnode(pointertarget)
+			activetargetnodetriggerpulling = true
+			nodetriggerpulledmaxd = 0.0
+		else:
+			if pointertargetwall.drawingtype == DRAWING_TYPE.DT_ROPEHANG:
+				if pointertargetwall.drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_HIDE:
+					sketchsystem.actsketchchange([{"xcvizstates":{pointertargetwall.get_name():DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE}}])
+			setactivetargetnode(pointertarget)
 		initialsequencenodename = pointertarget.get_name()
 
 		
@@ -1291,8 +1304,16 @@ func buttonreleased_vrtrigger():
 		else:
 			LaserOrient.get_node("RayCast").collision_mask = CollisionLayer.CL_IntermediatePlane
 	if activetargetnodetriggerpulling:
-		activetargetnodetriggerpulling = false
+		if LaserSelectLine.visible:
+			sketchsystem.actsketchchange([{
+						"name":activetargetnodewall.get_name(), 
+						"prevnodepoints":{ activetargetnode.get_name():activetargetnode.translation }, 
+						"nextnodepoints":{ activetargetnode.get_name():Vector3(activetargetnode.translation.x, activetargetnode.translation.y, activetargetnodetriggerpulledz) } 
+					}])
+			clearactivetargetnode()
 		LaserSelectLine.visible = false
+		activetargetnodetriggerpulling = false
+		LaserSelectLine.get_node("Scale").scale = Vector3(1, 1, 1)
 
 func _physics_process(delta):
 	if playerMe.handflickmotiongesture != 0:

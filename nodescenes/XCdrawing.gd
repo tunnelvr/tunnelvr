@@ -560,6 +560,20 @@ func updatexcpaths():
 		surfaceTool.add_vertex(p0right)
 		surfaceTool.add_vertex(p1left)
 		surfaceTool.add_vertex(p1right)
+	for npname in nodepoints:
+		var np = nodepoints[npname]
+		if np.z != 0:
+			var p0up = Vector3(np.x, np.y + llinewidth, 0)
+			var p0down = Vector3(np.x, np.y - llinewidth*0.1, 0)
+			var p1up = Vector3(np.x, np.y + llinewidth, np.z)
+			var p1down = Vector3(np.x, np.y - llinewidth*0.1, np.z)
+			surfaceTool.add_vertex(p0up)
+			surfaceTool.add_vertex(p1up)
+			surfaceTool.add_vertex(p0down)
+			surfaceTool.add_vertex(p0down)
+			surfaceTool.add_vertex(p1up)
+			surfaceTool.add_vertex(p1down)
+			
 	surfaceTool.generate_normals()
 	var newmesh = surfaceTool.commit()
 	if pathlines.mesh == null or pathlines.get_surface_material_count() == 0:
