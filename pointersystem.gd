@@ -34,9 +34,12 @@ var activetargetxcflatshell = null
 var prevactivetargettubetohideonsecondselect = null
 var activetargetnodetriggerpulling = false
 var nodetriggerpullinglimit = 1.0
-var nodetriggerpullingmin = 0.2
+var nodetriggerpullingmind = 0.2
+var nodetriggerpullingminduration = 0.8
 var nodetriggerpulledmaxd = 0.0
+var nodetriggerpulledtimestamp = 0.0
 var activetargetnodetriggerpulledz = 0.0
+
 
 var activetargetwallgrabbed = null
 var activetargetwallgrabbedtransform = null
@@ -367,7 +370,8 @@ func setpointertarget(laserroot, raycast, pointertargetshortdistance):
 			LaserSelectLine.transform = Transform(activetargetnodewall.transform.basis, nodezerozposition)
 			LaserSelectLine.get_node("Scale").scale = Vector3(8, 8, -a)
 			nodetriggerpulledmaxd = max(nodetriggerpulledmaxd, abs(activetargetnodetriggerpulledz - tpnodepoint.z))
-			LaserSelectLine.visible = (skewdist < 0.1) and (abs(a) < nodetriggerpullinglimit) and (nodetriggerpulledmaxd > nodetriggerpullingmin)
+			LaserSelectLine.visible = (skewdist < 0.1) and (abs(a) < nodetriggerpullinglimit) and \
+					(nodetriggerpulledmaxd > nodetriggerpullingmind) and (OS.get_ticks_msec()*0.001 - nodetriggerpulledtimestamp > nodetriggerpullingminduration)
 			activetargetnodetriggerpulledz = a
 		else:
 			LaserSelectLine.visible = false
@@ -751,6 +755,7 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 				pointertargetwall.expandxcdrawingscale(pointertargetpoint)
 				activetargetnodetriggerpulling = true
 				nodetriggerpulledmaxd = 0.0
+				nodetriggerpulledtimestamp = OS.get_ticks_msec()*0.001
 			#Tglobal.soundsystem.quicksound("ClickSound", pointertargetpoint)
 			initialsequencenodename = initialsequencenodenameP
 	
@@ -861,6 +866,7 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 			setactivetargetnode(pointertarget)
 			activetargetnodetriggerpulling = true
 			nodetriggerpulledmaxd = 0.0
+			nodetriggerpulledtimestamp = OS.get_ticks_msec()*0.001
 		else:
 			if pointertargetwall.drawingtype == DRAWING_TYPE.DT_ROPEHANG:
 				if pointertargetwall.drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_HIDE:
@@ -1292,8 +1298,6 @@ func clearintermediatepointplaneview():
 	intermediatepointplanetubename = ""
 	LaserOrient.get_node("RayCast").collision_mask = raynormalcollisionmask()
 	
-
-
 func buttonreleased_vrtrigger():
 	if activetargetwallgrabbedtransform != null:
 		sketchsystem.actsketchchange([ targetwalltransformpos(1) ])
