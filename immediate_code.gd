@@ -7,8 +7,6 @@ extends EditorScript
 var regex = RegEx.new()
 
 func _run():
-	var s = ["asd", "sdf", "999"]
-	s = []
-	var g = PoolStringArray(s).join("\n")
-	print([g])
+	for i in range(3, 5):
+		print(i)
 	

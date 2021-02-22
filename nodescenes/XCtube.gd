@@ -330,6 +330,21 @@ func pickpolysindex(polys, xcdrawinglink, js):
 func fa(a, b):
 	return a[0] < b[0] or (a[0] == b[0] and a[1] < b[1])
 
+func reordersecondvalstoavoiddoublelooping(ila):
+	var im1 = len(ila)-1
+	for i in range(len(ila)):
+		if ila[i][1] != ila[im1][1]:
+			var i1 = i
+			while i1 < len(ila) - 1 and ila[i1+1][0] == ila[i][0]:
+				i1 += 1
+			var i1p1 = (i1+1)%len(ila)
+			if ila[im1][1] > ila[i][1] and ila[i1][1] > ila[i1p1][1] and i1 != i:
+				var ilai = ila[i]
+				for j in range(i, i1):
+					ila[j] = ila[j+1]
+				ila[i1] = ilai
+		im1 = i
+
 func maketubepolyassociation_andreorder(xcdrawing0, xcdrawing1):
 	assert ((xcdrawing0.get_name() == xcname0) and (xcdrawing1.get_name() == xcname1))
 	var polys0 = Polynets.makexcdpolys(xcdrawing0.nodepoints, xcdrawing0.onepathpairs)
@@ -378,17 +393,35 @@ func maketubepolyassociation_andreorder(xcdrawing0, xcdrawing1):
 	var ila = [ ]  # [ [il0, il1] ] then [ {"il0", "il1", "j", "il0N", il1N" ] ]
 	var xcdrawinglinkneedsreorder = false
 	var missingjvals = [ ]
+	var il0coincident = true
+	var il1coincident = true
+	var loops1 = 0
 	for j in range(0, len(xcdrawinglink), 2):
 		var il0 = poly0.find(xcdrawinglink[j])
 		var il1 = poly1.find(xcdrawinglink[j+1])
+		if j != 0:
+			if il0 != ila[-1][0]:
+				il0coincident = false
+			if il1 != ila[-1][1]:
+				il1coincident = false
 		if il0 != -1 and il1 != -1:
+			if j != 0 and len(ila) != 0:
+				if ila[-1][0] > il0:
+					xcdrawinglinkneedsreorder = true
+				if ila[-1][1] > il1:
+					loops1 += 1
 			ila.append([il0, il1, j])
 		else:
 			missingjvals.append(j)
-		if j != 0 and not fa(ila[-2], ila[-1]):
-			xcdrawinglinkneedsreorder = true
+	if ila[-1][1] > ila[0][1]:
+		loops1 += 1
+	assert ((loops1 == 0) == il1coincident)
+	if loops1 == 2:
+		xcdrawinglinkneedsreorder = true
+	
 	if xcdrawinglinkneedsreorder or (len(missingjvals) != 0 and (missingjvals.min() < len(xcdrawinglink) - 2*len(missingjvals))):
 		ila.sort_custom(self, "fa")
+		reordersecondvalstoavoiddoublelooping(ila)
 		var newxcdrawinglink = [ ]
 		var newxcsectormaterials = [ ]
 		var newxclinkintermediatenodes = null if xclinkintermediatenodes == null else [ ]
@@ -412,17 +445,27 @@ func maketubepolyassociation_andreorder(xcdrawing0, xcdrawing1):
 			var sketchsystem = get_node("/root/Spatial/SketchSystem")
 			updatetubelinkpaths(sketchsystem)
 
-	var ilaM = [ ]  #  [ {"i", "i1", "il0", "il1", "il0N", il1N" ] ]
+	var ilaM = [ ]  #  [ {"il0", "il0N",  "il1", "il1N",    "i", "i1" ] ]
+	var sum0N = 0
+	var sum1N = 0
 	for i in range(len(ila)):
-		var ila0 = ila[i][0]
-		var ila0N = ila[i+1][0] - ila0  if i < len(ila)-1  else len(poly0) + ila[0][0] - ila0 
-		var ila1 = ila[i][1]
-		var ila1N = ila[(i+1)%len(ila)][1] - ila1
-		if ila1N < 0 or len(ila) == 1:   # there's a V-shaped case where this isn't good enough
-			ila1N += len(poly1)
 		var i1 = (i+1)%len(ila)
-		ilaM.append({"i":i, "i1":i1, "ila0":ila0, "ila1":ila1, "ila0N":ila0N, "ila1N":ila1N})
-
+		var ila0 = ila[i][0]
+		var ila0N = ila[i1][0] - ila0
+		if i1 == 0:
+			ila0N += len(poly0)
+		assert (ila0N >= 0)
+		var ila1 = ila[i][1]
+		var ila1N = ila[i1][1] - ila1
+		if (ila1N < 0) or (il1coincident and i1 == 0):
+			ila1N += len(poly1)
+		sum0N += ila0N
+		sum1N += ila1N
+		ilaM.append({"ila0":ila0, "ila0N":ila0N,   "ila1":ila1, "ila1N":ila1N,   "i":i, "i1":i1})
+	if sum0N != len(poly0) or sum1N != len(poly1):
+		print("warning wrong looped polys ", [sum0N, len(poly0)], [sum1N, len(poly1)])
+		reordersecondvalstoavoiddoublelooping(ila)
+		
 	if polys0islinearpath:
 		assert (pickedpolyindex0 == 0)
 		for j in range(len(ilaM)):
