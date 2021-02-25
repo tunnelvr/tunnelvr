@@ -86,6 +86,11 @@ func setnetworkidnamecolour(player, networkID):
 	player.set_network_master(networkID)
 	player.set_name("NetworkedPlayer"+String(networkID))
 	
+func ovrconfig():
+	ovr_performance.set_clock_levels(1, 1)
+	ovr_performance.set_extra_latency_mode(1)
+	
+	
 func _ready():
 	print("  Available Interfaces are %s: " % str(ARVRServer.get_interfaces()));
 	print("Initializing VR" if enablevr else "VR disabled");
@@ -105,7 +110,8 @@ func _ready():
 		ovr_hand_tracking = load("res://addons/godot_ovrmobile/OvrHandTracking.gdns").new();
 		ovr_guardian_system = load("res://addons/godot_ovrmobile/OvrGuardianSystem.gdns").new();
 		playerMe.ovr_guardian_system = ovr_guardian_system
-		perform_runtime_config = false
+		call_deferred("ovrconfig")
+		#perform_runtime_config = false
 		ovr_init_config.set_render_target_size_multiplier(1)
 		if Tglobal.arvrinterface.initialize():
 			get_viewport().arvr = true
@@ -207,6 +213,10 @@ func _ready():
 	$GuiSystem/GUIPanel3D.updateplayerlist()
 	get_node("/root").msaa = Viewport.MSAA_4X
 		
+	$BatFlutter/BatCentre/batflap/AnimationPlayer.playback_speed = 2.0
+	$BatFlutter/BatCentre/batflap/AnimationPlayer.get_animation("ArmatureAction").loop = true
+	$BatFlutter/BatCentre/batflap/AnimationPlayer.play("ArmatureAction")
+
 
 func nextplayernetworkidinringskippingdoppelganger(deletedid):
 	for _i in range($Players.get_child_count()):
@@ -314,10 +324,13 @@ func _connected_to_server():
 
 func _process(_delta):
 	if !perform_runtime_config:
-		ovr_performance.set_clock_levels(1, 1)
-		ovr_performance.set_extra_latency_mode(1)
+		#ovr_performance.set_clock_levels(1, 1)
+		#ovr_performance.set_extra_latency_mode(1)
 		perform_runtime_config = true
-		set_process(false)
+	#	set_process(false)
+		$BatFlutter/BatCentre/batflap/AnimationPlayer.get_animation("ArmatureAction").loop = true
+		$BatFlutter/BatCentre/batflap/AnimationPlayer.play("ArmatureAction")
+	$BatFlutter.rotation_degrees.y += _delta*60
 				
 func clearallprocessactivityforreload():
 	$VerletRopeSystem.clearallverletactivity()

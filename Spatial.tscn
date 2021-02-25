@@ -1,4 +1,4 @@
-[gd_scene load_steps=265 format=2]
+[gd_scene load_steps=266 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/default_env.tres" type="Environment" id=2]
@@ -57,6 +57,7 @@
 [ext_resource path="res://lightweighttextures/croppedscallop.jpg" type="Texture" id=55]
 [ext_resource path="res://sounds/click04.wav" type="AudioStream" id=56]
 [ext_resource path="res://lightweighttextures/waternoise.jpg" type="Texture" id=57]
+[ext_resource path="res://assets/miscobjects/batflap.glb" type="PackedScene" id=58]
 
 [sub_resource type="CubeMesh" id=1]
 size = Vector3( 0.35, 0.01, 0.01 )
@@ -1361,7 +1362,6 @@ albedo_color = Color( 0.168627, 0.972549, 0.027451, 1 )
 
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
-enablevr = false
 
 [node name="Players" type="Spatial" parent="."]
 
@@ -3381,11 +3381,12 @@ use_in_baked_light = true
 mesh = SubResource( 205 )
 material/0 = SubResource( 207 )
 
-[node name="picturepalace" type="StaticBody" parent="."]
-transform = Transform( 1, 0, 0, 0, -1.62921e-07, 1, 0, -1, -1.62921e-07, 0, -10.4624, -54.4313 )
-visible = false
-collision_layer = 32
-collision_mask = 0
+[node name="BatFlutter" type="Spatial" parent="."]
+transform = Transform( 0.866025, 0, 0.5, 0, 1, 0, -0.5, 0, 0.866025, 0, 9.65659, 0 )
 
-[node name="CollisionShape" type="CollisionShape" parent="picturepalace"]
+[node name="BatCentre" type="Spatial" parent="BatFlutter"]
+transform = Transform( 0.927973, 0.372648, 0, -0.372648, 0.927973, 0, 0, 0, 1, -17.7989, 0, 0 )
+
+[node name="batflap" parent="BatFlutter/BatCentre" instance=ExtResource( 58 )]
+transform = Transform( 0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 0, 0 )
 [connection signal="timeout" from="MQTTExperiment/mqttnode/Timer" to="MQTTExperiment/mqttnode" method="_on_Timer_timeout"]
