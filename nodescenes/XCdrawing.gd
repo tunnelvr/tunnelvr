@@ -357,10 +357,11 @@ func mergexcrpcdata(xcdata):
 					var materialsystem = get_node("/root/Spatial/MaterialSystem")
 					xcn.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("normalknot"))
 					if nA[0] == "k":
-						xcn.scale.y = knotyscale
+						xcn.scale = Vector3(closewidthsca, closewidthsca*knotyscale, closewidthsca)
+					else:
+						xcn.scale = Vector3(closewidthsca, closewidthsca, closewidthsca)
 					xcn.set_name(nA)
 					maxnodepointnumber = max(maxnodepointnumber, int(nA))
-					xcn.scale = Vector3(closewidthsca, closewidthsca, closewidthsca)
 					$XCnodes.add_child(xcn)
 					xcn.translation = nodepointsAdd[nA]
 					xcn.get_node("CollisionShape/MeshInstance").layers = CollisionLayer.VL_xcdrawingnodes
