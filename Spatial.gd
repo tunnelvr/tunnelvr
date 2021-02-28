@@ -194,10 +194,10 @@ func _ready():
 	if false:  # loadcentreline
 		#var centrelinefile = "res://surveyscans/dukest1resurvey2009json.res"
 		#var centrelinefile = "res://surveyscans/Ireby/Ireby2/Ireby2.json"
-		#var centrelinefile = "res://surveyscans/LambTrap1.json"
-		var centrelinefile = "res://surveyscans/cusseypot/Cussey_Pot_Master.json"
-		
+		#var centrelinefile = "res://surveyscans/cusseypot/Cussey_Pot_Master.json"
+		var centrelinefile = "res://surveyscans/LoneOak/LoneOak.json"
 		var xcdatalist = Centrelinedata.xcdatalistfromcentreline(centrelinefile)
+		xcdatalist[0]["sketchname"] = centrelinefile.split("/")[-1].split(".")[0]
 		Tglobal.printxcdrawingfromdatamessages = false
 		$SketchSystem.actsketchchange(xcdatalist)
 		Tglobal.printxcdrawingfromdatamessages = true

@@ -7,6 +7,5 @@ extends EditorScript
 var regex = RegEx.new()
 
 func _run():
-	for i in range(3, 5):
-		print(i)
-	
+	var fname = "server/savegame3.res"
+	print(fname.split("/")[-1].split(".")[0])

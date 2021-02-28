@@ -5,6 +5,7 @@ const XCtube = preload("res://nodescenes/XCtube.tscn")
 const RopeHang = preload("res://nodescenes/RopeHang.tscn")
 
 const linewidth = 0.05
+var sketchname = "unnamedsketch"
 
 var actsketchchangeundostack = [ ]
 
@@ -66,7 +67,8 @@ func sketchsystemtodict(stripruntimedataforsaving):
 	var xctubesData = [ ]
 	for xctube in $XCtubes.get_children():
 		xctubesData.append(xctube.exportxctrpcdata())
-	var sketchdatadict = { "xcdrawings":xcdrawingsData,
+	var sketchdatadict = { "sketchname":sketchname,
+						   "xcdrawings":xcdrawingsData,
 						   "xctubes":xctubesData
 						 }
 	var playerMe = get_node("/root/Spatial").playerMe
@@ -221,7 +223,11 @@ remote func actsketchchangeL(xcdatalist):
 			while len(actsketchchangeundostack) >= 10:
 				actsketchchangeundostack.pop_front()
 			actsketchchangeundostack.push_back(xcdatalist)
-			
+
+	if "sketchname" in xcdatalist[0]:
+		sketchname = xcdatalist[0]["sketchname"]
+		get_node("/root/Spatial/GuiSystem/GUIPanel3D/Viewport/GUI/Panel/SketchName").text = sketchname
+	
 	var xcdrawingstoupdate = { }
 	var xctubestoupdate = { }
 	var xcdrawingsrejected = [ ]
@@ -236,6 +242,7 @@ remote func actsketchchangeL(xcdatalist):
 				xcdata["tubename"] = "XCtube_"+xcdata["xcname0"]+"_"+xcdata["xcname1"]
 			var xctube = xctubefromdata(xcdata)  # inline this in order to implement xcchangesequence logic
 			if len(xctube.xcdrawinglink) == 0 and len(xctube.xcsectormaterials) == 0:
+				print("*** removing empty tube problem")
 				removeXCtube(xctube)
 				xctube.queue_free() 
 			else:
@@ -340,13 +347,19 @@ remote func actsketchchangeL(xcdatalist):
 		else:
 			xcdrawing.updatexcpaths()
 
-
+	var badtubeswithnoconnections = [ ]
 	for xctube in xctubestoupdate.values():
 		if $XCdrawings.get_node(xctube.xcname0).drawingtype == DRAWING_TYPE.DT_CENTRELINE:
 			xctube.updatetubepositionlinks(self)
 		else:
-			xctube.updatetubelinkpaths(self)
+			if not xctube.updatetubelinkpaths(self):
+				badtubeswithnoconnections.push_back(xctube)
 		xctube.setxctubepathlinevisibility(self)
+	for xctube in badtubeswithnoconnections:
+		print("*** removing unexplained bad tube found with no connecting lines ", xctube.xcname0, "-", xctube.xcname1)
+		xctubestoupdate.erase(xctube.get_name())
+		removeXCtube(xctube)
+		xctube.queue_free() 
 
 	if caveworldchunkI != -1:
 		for xcdrawing in xcdrawingstoupdate.values():
@@ -459,7 +472,7 @@ func subdictarray(d, a):
 	return r
 
 func sketchdicttochunks(sketchdatadict):
-	var xcdatachunkL = [ { "caveworldchunk":0 } ]
+	var xcdatachunkL = [ { "caveworldchunk":0, "sketchname":sketchdatadict.get("sketchname", "unnamedsketch") } ]
 	playeroriginXCSorter = Vector3(0, 0, 0)
 	if "playerMe" in sketchdatadict:
 		xcdatachunkL[0]["playerMe"] = sketchdatadict["playerMe"]
@@ -554,7 +567,7 @@ remote func loadsketchsystemL(fname):
 	var sketchdatafile = File.new()
 	var sketchdatadict = null
 	if fname == "cleargame":
-		sketchdatadict = { "xcdrawings":[], "xctubes":[] }
+		sketchdatadict = { "sketchname":"unnamedsketch", "xcdrawings":[], "xctubes":[] }
 		if $XCdrawings.get_child_count() != 1:
 			for xcdrawing in $XCdrawings.get_children():
 				if xcdrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
@@ -565,6 +578,8 @@ remote func loadsketchsystemL(fname):
 		sketchdatafile.open(fname, File.READ)
 		sketchdatadict = sketchdatafile.get_var()
 		sketchdatafile.close()
+		if sketchdatadict.get("sketchname", "unnamedsketch") == "unnamedsketch":
+			sketchdatadict["sketchname"] = fname.split("/")[-1].split(".")[0]
 	else:
 		return
 		

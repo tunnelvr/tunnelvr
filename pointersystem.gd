@@ -10,6 +10,7 @@ onready var headcam = playerMe.get_node('HeadCam')
 onready var handright = playerMe.get_node("HandRight")
 onready var handrightcontroller = playerMe.get_node("HandRightController")
 onready var guipanel3d = get_node("/root/Spatial/GuiSystem/GUIPanel3D")
+onready var keyboardpanel = get_node("/root/Spatial/GuiSystem/KeyboardPanel")
 
 onready var LaserOrient = get_node("/root/Spatial/BodyObjects/LaserOrient") 
 onready var LaserSelectLine = get_node("/root/Spatial/BodyObjects/LaserSelectLine") 
@@ -241,7 +242,9 @@ func targetwall(target, targettype):
 			
 func clearpointertarget():
 	if pointertarget == guipanel3d:
-		guipanel3d.guipanelreleasemouse()
+		panelsendreleasemousemotiontopointertarget()
+	elif pointertarget == keyboardpanel:
+		panelsendreleasemousemotiontopointertarget()
 	clearpointertargetmaterial()
 	pointertarget = null
 	pointertargettype = "none"
@@ -254,6 +257,55 @@ func set_handflickmotiongestureposition(lhandflickmotiongestureposition):
 	elif Tglobal.handflickmotiongestureposition == 1:
 		activelaserroot.get_node("LaserSpot").set_surface_material(0, materialsystem.lasermaterialN((1 if activetargetnode != null else 0) + 2))
 
+func panelsendmousemotiontopointertarget():
+	var guipanel = pointertarget
+	var controller_trigger = (handrightcontroller.is_button_pressed(BUTTONS.HT_PINCH_INDEX_FINGER) if Tglobal.questhandtrackingactive else handrightcontroller.is_button_pressed(BUTTONS.VR_TRIGGER)) or Input.is_mouse_button_pressed(BUTTON_LEFT)
+	var controller_global_transform = LaserOrient.global_transform
+	var collision_point = pointertargetpoint
+	guipanel.collision_point = collision_point
+	var collider_transform = guipanel.global_transform
+	var viewport = guipanel.get_node("Viewport")
+	viewport.render_target_update_mode = Viewport.UPDATE_WHEN_VISIBLE
+	if collider_transform.xform_inv(controller_global_transform.origin).z < 0:
+		return
+	var shape_size = guipanel.get_node("CollisionShape").shape.extents * 2
+	var collider_scale = collider_transform.basis.get_scale()
+	var local_point = collider_transform.xform_inv(collision_point)
+
+	local_point /= (collider_scale * collider_scale)  # this rescaling because of no xform_affine_inv.  https://github.com/godotengine/godot/issues/39433
+	local_point /= shape_size
+	local_point += Vector3(0.5, -0.5, 0) # X is about 0 to 1, Y is about 0 to -1.
+	guipanel.viewport_point = Vector2(local_point.x, -local_point.y) * viewport.size
+	
+	var event = InputEventMouseMotion.new()
+	event.position = guipanel.viewport_point
+	viewport.input(event)
+	
+	var distance = controller_global_transform.origin.distance_to(collision_point)/ARVRServer.world_scale
+	var viewport_mousedown = distance < 0.1 or controller_trigger
+	if viewport_mousedown != guipanel.current_viewport_mousedown:
+		event = InputEventMouseButton.new()
+		event.pressed = viewport_mousedown
+		event.button_index = BUTTON_LEFT
+		event.position = guipanel.viewport_point
+		print("vvvv viewport_point ", guipanel.viewport_point)
+		viewport.input(event)
+		guipanel.current_viewport_mousedown = viewport_mousedown
+
+func panelsendreleasemousemotiontopointertarget():
+	var guipanel = pointertarget
+	var viewport = guipanel.get_node("Viewport")
+	if guipanel.current_viewport_mousedown:
+		var event = InputEventMouseButton.new()
+		event.button_index = 1
+		event.position = guipanel.viewport_point
+		viewport.input(event)
+		guipanel.current_viewport_mousedown = false
+	var mevent = InputEventMouseMotion.new()
+	mevent.position = Vector2(0, 0)
+	viewport.input(mevent)
+	viewport.render_target_update_mode = Viewport.UPDATE_ONCE
+	
 func setpointertarget(laserroot, raycast, pointertargetshortdistance):
 	var newpointertarget = raycast.get_collider() if raycast != null else null
 	if newpointertarget != null:
@@ -278,7 +330,9 @@ func setpointertarget(laserroot, raycast, pointertargetshortdistance):
 
 	if newpointertarget != pointertarget:
 		if pointertarget == guipanel3d:
-			guipanel3d.guipanelreleasemouse()
+			panelsendreleasemousemotiontopointertarget()
+		elif pointertarget == keyboardpanel:
+			panelsendreleasemousemotiontopointertarget()
 		clearpointertargetmaterial()
 		pointertarget = newpointertarget
 		pointertargettype = targettype(pointertarget)
@@ -324,7 +378,9 @@ func setpointertarget(laserroot, raycast, pointertargetshortdistance):
 		
 	pointertargetpoint = newpointertargetpoint
 	if is_instance_valid(pointertarget) and pointertarget == guipanel3d:
-		guipanel3d.guipanelsendmousemotion(pointertargetpoint, LaserOrient.global_transform, (handrightcontroller.is_button_pressed(BUTTONS.HT_PINCH_INDEX_FINGER) if Tglobal.questhandtrackingactive else handrightcontroller.is_button_pressed(BUTTONS.VR_TRIGGER)) or Input.is_mouse_button_pressed(BUTTON_LEFT))
+		panelsendmousemotiontopointertarget()
+	if is_instance_valid(pointertarget) and pointertarget == keyboardpanel:
+		panelsendmousemotiontopointertarget()
 
 	if pointertargetpoint != null:
 		laserroot.get_node("LaserSpot").global_transform.origin = pointertargetpoint

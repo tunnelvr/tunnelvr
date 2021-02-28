@@ -223,6 +223,7 @@ func updatetubelinkpaths(sketchsystem):
 	var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(xcname0)
 	var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(xcname1)
 	assert ((len(xcdrawinglink)%2) == 0)
+	var nlinksfound = 0
 	for j in range(0, len(xcdrawinglink), 2):
 		var lp0 = xcdrawing0.nodepoints.get(xcdrawinglink[j])
 		var lp1 = xcdrawing1.nodepoints.get(xcdrawinglink[j+1])
@@ -232,6 +233,7 @@ func updatetubelinkpaths(sketchsystem):
 		if lp1 == null:
 			print(" *** Error: tube ", get_name(), " link node ", xcdrawinglink[j+1], " missing from ", xcname1)
 			continue
+		nlinksfound += 1
 		var p0 = xcdrawing0.transform * xcdrawing0.nodepoints[xcdrawinglink[j]]
 		var p1 = xcdrawing1.transform * xcdrawing1.nodepoints[xcdrawinglink[j+1]]
 		var vec = p1 - p0
@@ -301,10 +303,13 @@ func updatetubelinkpaths(sketchsystem):
 		$PathLines.get_node(imnodename).queue_free()
 		im += 1
 
+	if nlinksfound == 0:
+		return false
 	surfaceTool.generate_normals()
 	$PathLines.mesh = surfaceTool.commit()
+	assert($PathLines.get_surface_material_count() != 0)
 	$PathLines.set_surface_material(0, get_node("/root/Spatial/MaterialSystem").pathlinematerial("normal"))
-
+	return true
 
 func pickpolysindex(polys, xcdrawinglink, js):
 	var pickpolyindex = -1

@@ -2,7 +2,7 @@ class_name Centrelinedata
 
 
 # "C:\Program Files (x86)\Survex\aven.exe" Ireby\Ireby2\Ireby2.svx
-# python surveyscans\convertdmptojson.py (after editing it for the input and output files)
+# python surveyscans\convertdmptojson.py Ireby\Ireby2\Ireby2.3d
 static func xcdatalistfromcentreline(centrelinefile):
 	print("Opening centreline file ", centrelinefile)
 	var centrelinedatafile = File.new()

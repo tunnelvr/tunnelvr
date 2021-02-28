@@ -2,8 +2,9 @@ extends StaticBody
 
 
 var collision_point := Vector3(0, 0, 0)
-var viewport_point := Vector2(0, 0)
-var viewport_mousedown := false
+var current_viewport_mousedown = false
+var viewport_point = Vector2(0, 0)
+
 onready var sketchsystem = get_node("/root/Spatial/SketchSystem")
 onready var playerMe = get_node("/root/Spatial/Players/PlayerMe")
 onready var selfSpatial = get_node("/root/Spatial")
@@ -481,57 +482,6 @@ func toggleguipanelvisibility(controller_global_transform):
 		selfSpatial.playerMe.doppelganger.puppetenableguipanel(transform if visible else null)
 
 	
-func guipanelsendmousemotion(lcollision_point, controller_global_transform, controller_trigger):
-	$Viewport.render_target_update_mode = Viewport.UPDATE_WHEN_VISIBLE
-	
-	collision_point = lcollision_point
-	var collider_transform = global_transform
-	if collider_transform.xform_inv(controller_global_transform.origin).z < 0:
-		return # Don't allow pressing if we're behind the GUI.
-	
-	# Convert the collision to a relative position. 
-	var shape_size = $CollisionShape.shape.extents * 2
-	var collider_scale = collider_transform.basis.get_scale()
-	var local_point = collider_transform.xform_inv(collision_point)
-	# this rescaling because of no xform_affine_inv.  https://github.com/godotengine/godot/issues/39433
-	local_point /= (collider_scale * collider_scale)
-	local_point /= shape_size
-	local_point += Vector3(0.5, -0.5, 0) # X is about 0 to 1, Y is about 0 to -1.
-	
-	# Find the viewport position by scaling the relative position by the viewport size. Discard Z.
-	viewport_point = Vector2(local_point.x, -local_point.y) * $Viewport.size
-	
-	# Send mouse motion to the GUI.
-	var event = InputEventMouseMotion.new()
-	event.position = viewport_point
-	$Viewport.input(event)
-	
-	# Figure out whether or not we should trigger a click.
-	var new_viewport_mousedown := false
-	var distance = controller_global_transform.origin.distance_to(collision_point)/ARVRServer.world_scale
-	if distance < 0.1:
-		new_viewport_mousedown = true # Allow poking the GUI with finger
-	else:
-		new_viewport_mousedown = controller_trigger
-	
-	# Send a left click to the GUI depending on the above.
-	if new_viewport_mousedown != viewport_mousedown:
-		event = InputEventMouseButton.new()
-		event.pressed = new_viewport_mousedown
-		event.button_index = BUTTON_LEFT
-		event.position = viewport_point
-		#print("vvvv viewport_point ", viewport_point)
-		$Viewport.input(event)
-		viewport_mousedown = new_viewport_mousedown
-
-func guipanelreleasemouse():
-	if viewport_mousedown:
-		var event = InputEventMouseButton.new()
-		event.button_index = 1
-		event.position = viewport_point
-		$Viewport.input(event)
-		viewport_mousedown = false
-	$Viewport.render_target_update_mode = Viewport.UPDATE_ONCE
 		
 func _input(event):
 	if event is InputEventKey and event.pressed:
