@@ -301,6 +301,12 @@ func _player_disconnected(id):
 	$GuiSystem/GUIPanel3D/Viewport/GUI/Panel/Label.text = "player "+String(id)+" disconnected"
 	mqttsystem.mqttpublish("playercount/remove", "%d %d" % [$Players.get_child_count(), id])
 		
+
+func setconnectiontoserveractive(b):
+	Tglobal.connectiontoserveractive = b
+	var handmaterials = get_node("/root/Spatial/MaterialSystem/handmaterials")
+	playerMe.get_node("HandRight/HandFlickFaceY").set_surface_material(0, handmaterials.get_node("serverconnected" if Tglobal.connectiontoserveractive else "serverdisconnected").get_surface_material(0))
+
 func _connected_to_server():
 	print("_connected_to_server")
 	var newnetworkID = get_tree().get_network_unique_id()
@@ -311,7 +317,7 @@ func _connected_to_server():
 	mqttsystem.mqttpublish("connectedtoserver", String(newnetworkID))
 
 	print("SETTING connectiontoserveractive true now")
-	Tglobal.connectiontoserveractive = true
+	setconnectiontoserveractive(true)
 	assert(playerMe.networkID != 0)
 	playerMe.rpc("initplayerappearance", playerMe.playerplatform, playerMe.get_node("HeadCam/csgheadmesh/skullcomponent").material.albedo_color)
 	playerMe.rpc("initplayerappearanceJ", playerMe.playerappearancedict())

@@ -531,7 +531,7 @@ func _on_networkstate_selected(index):
 		if networkedmultiplayerenet != null:
 			networkedmultiplayerenet.close_connection()
 			networkedmultiplayerenet = null
-		Tglobal.connectiontoserveractive = false
+		selfSpatial.setconnectiontoserveractive(false)
 		get_tree().set_network_peer(null)
 		
 	if nssel.begins_with("As Server"):
@@ -549,7 +549,7 @@ func _on_networkstate_selected(index):
 		
 		get_tree().connect("network_peer_connected", selfSpatial, "_player_connected")
 		get_tree().connect("network_peer_disconnected", selfSpatial, "_player_disconnected")
-		Tglobal.connectiontoserveractive = false
+		selfSpatial.setconnectiontoserveractive(false)
 		get_tree().connect("connected_to_server", selfSpatial, "_connected_to_server")
 		get_tree().connect("connection_failed", self, "_connection_failed")
 		get_tree().connect("server_disconnected", self, "_server_disconnected")
@@ -588,13 +588,13 @@ func networkstartasserver(fromgui):
 		var e = websocketserver.listen(selfSpatial.hostportnumber, PoolStringArray(), true)
 		print("Websocketserverclient listen: ", e)
 		get_tree().set_network_peer(websocketserver)
-		Tglobal.connectiontoserveractive = true
+		selfSpatial.setconnectiontoserveractive(true)
 	else:
 		networkedmultiplayerenet = NetworkedMultiplayerENet.new()
 		var e = networkedmultiplayerenet.create_server(selfSpatial.hostportnumber, 32)
 		if e == 0:
 			get_tree().set_network_peer(networkedmultiplayerenet)
-			Tglobal.connectiontoserveractive = true
+			selfSpatial.setconnectiontoserveractive(true)
 		else:
 			print("networkedmultiplayerenet createserver Error: ", {ERR_CANT_CREATE:"ERR_CANT_CREATE"}.get(e, e))
 			print("*** is there a server running on this port already? ", selfSpatial.hostportnumber)
@@ -620,7 +620,7 @@ func _server_disconnected():
 	print("\n\n***_server_disconnected ", websocketclient, "\n\n")
 	websocketclient = null
 	networkedmultiplayerenet = null
-	Tglobal.connectiontoserveractive = false
+	selfSpatial.setconnectiontoserveractive(false)
 	selfSpatial.mqttsystem.mqttpublish("serverdisconnected", String(playerMe.networkID))
 	selfSpatial.deferred_player_connected_list.clear()
 	$Viewport/GUI/Panel/Label.text = "server_disconnected"

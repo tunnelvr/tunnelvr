@@ -1,4 +1,4 @@
-[gd_scene load_steps=271 format=2]
+[gd_scene load_steps=274 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/default_env.tres" type="Environment" id=2]
@@ -97,8 +97,8 @@ roughness = 0.28
 [sub_resource type="CubeMesh" id=8]
 size = Vector3( 0.05, 0.01, 0.05 )
 
-[sub_resource type="SpatialMaterial" id=9]
-albedo_color = Color( 0.984314, 0.92549, 0.0313726, 1 )
+[sub_resource type="SpatialMaterial" id=215]
+albedo_color = Color( 0.0588235, 0.113725, 0.952941, 1 )
 
 [sub_resource type="PrismMesh" id=10]
 left_to_right = 0.1
@@ -1238,6 +1238,15 @@ albedo_color = Color( 0.482353, 0.976471, 0.52549, 1 )
 metallic = 0.32
 roughness = 0.62
 
+[sub_resource type="CubeMesh" id=212]
+size = Vector3( 0.2, 0.2, 0.1 )
+
+[sub_resource type="SpatialMaterial" id=213]
+albedo_color = Color( 0.952941, 0.937255, 0.0470588, 1 )
+
+[sub_resource type="CubeMesh" id=214]
+size = Vector3( 0.2, 0.2, 0.1 )
+
 [sub_resource type="PlaneMesh" id=184]
 size = Vector2( 1, 0.5 )
 
@@ -1465,7 +1474,7 @@ material/0 = SubResource( 7 )
 transform = Transform( 1, 0, 0, 0, 0.965926, 0.258819, 0, -0.258819, 0.965926, 0, 0, 0 )
 layers = 2147483649
 mesh = SubResource( 8 )
-material/0 = SubResource( 9 )
+material/0 = SubResource( 215 )
 
 [node name="pointersystem" type="Node" parent="Players/PlayerMe"]
 script = ExtResource( 5 )
@@ -3261,6 +3270,14 @@ material/0 = SubResource( 182 )
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0500312, 0, 0.121136 )
 mesh = SubResource( 181 )
 material/0 = SubResource( 183 )
+
+[node name="serverconnected" type="MeshInstance" parent="MaterialSystem/handmaterials"]
+mesh = SubResource( 212 )
+material/0 = SubResource( 213 )
+
+[node name="serverdisconnected" type="MeshInstance" parent="MaterialSystem/handmaterials"]
+mesh = SubResource( 214 )
+material/0 = SubResource( 215 )
 
 [node name="buttonmaterials" type="Spatial" parent="MaterialSystem"]
 
