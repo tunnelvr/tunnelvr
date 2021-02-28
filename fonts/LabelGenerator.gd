@@ -34,14 +34,18 @@ func _ready():
 			
 var commonroot = null
 func addnodestolabeltask(centrelinedrawing):
+	commonroot = null
 	for xcname in centrelinedrawing.nodepoints:
 		if Tglobal.splaystationnoderegex == null or not Tglobal.splaystationnoderegex.search(xcname):
 			remainingxcnodenames.append([centrelinedrawing.get_name(), xcname, centrelinedrawing.transform*centrelinedrawing.nodepoints[xcname]])
 			if commonroot == null:
 				commonroot = xcname.to_lower()
 			else:
+				var prevcommonroot = commonroot
 				while commonroot != "" and not xcname.to_lower().begins_with(commonroot):
 					commonroot = commonroot.left(len(commonroot)-1)
+				if commonroot == "" and prevcommonroot != "":
+					print("common root lost at ", xcname.to_lower(), " when was ", prevcommonroot)
 	commonroot = commonroot.left(commonroot.find_last(",")+1)
 	if commonroot == "":
 		commonroot = "ireby2,"

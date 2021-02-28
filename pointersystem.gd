@@ -256,7 +256,8 @@ func set_handflickmotiongestureposition(lhandflickmotiongestureposition):
 		activelaserroot.get_node("LaserSpot").visible = false
 	elif Tglobal.handflickmotiongestureposition == 1:
 		activelaserroot.get_node("LaserSpot").set_surface_material(0, materialsystem.lasermaterialN((1 if activetargetnode != null else 0) + 2))
-
+		activelaserroot.get_node("LaserSpot").visible = true
+		
 func panelsendmousemotiontopointertarget():
 	var guipanel = pointertarget
 	var controller_trigger = (handrightcontroller.is_button_pressed(BUTTONS.HT_PINCH_INDEX_FINGER) if Tglobal.questhandtrackingactive else handrightcontroller.is_button_pressed(BUTTONS.VR_TRIGGER)) or Input.is_mouse_button_pressed(BUTTON_LEFT)
@@ -1248,6 +1249,14 @@ func buttonreleased_vrgrip():
 			planviewsystem.activetargetfloor != null and pointertargetwall == planviewsystem.activetargetfloor and pointertargetwall == gripmenu.gripmenupointertargetwall:
 		sketchsystem.actsketchchange([planviewsystem.getactivetargetfloorViz("")])
 		
+	elif pointertargettype == "XCnode" and gripmenu.gripmenupointertargettype == "XCnode" and (pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING or pointertargetwall.drawingtype == DRAWING_TYPE.DT_ROPEHANG):
+		var ds = DRAWING_TYPE.VIZ_XCD_HIDE  if (pointertargetwall.drawingtype == DRAWING_TYPE.DT_ROPEHANG or pointertargetwall.xcconnectstoshell()) else DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE
+		var updatexcshells = [ pointertargetwall.get_name() ]
+		var updatetubeshells = pointertargetwall.updatetubeshellsconn()
+		sketchsystem.actsketchchange([{ "xcvizstates":{ pointertargetwall.get_name():ds }, "updatetubeshells":updatetubeshells, "updatexcshells":updatexcshells }])
+		if pointertargetwall == activetargetwall:
+			setactivetargetwall(null)
+
 	elif activetargetwall != null and activetargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		var updatexcshells = [ activetargetwall.get_name() ]
 		var updatetubeshells = activetargetwall.updatetubeshellsconn()
@@ -1259,7 +1268,7 @@ func buttonreleased_vrgrip():
 
 	elif intermediatepointplanetubename != "":
 		clearintermediatepointplaneview()
-
+	
 	gripmenu.disableallgripmenus()
 
 func findconstructtubeshellholes(xctubes):
