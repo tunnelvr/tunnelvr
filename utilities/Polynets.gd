@@ -97,6 +97,7 @@ static func makexcdpolys(nodepoints, onepathpairs):
 		return linearpaths
 	return [ ]
 
+
 static func makeropenodesequences(nodepoints, onepathpairs, oddropeverts=null):
 	var Lpathvectorseq = { } 
 	for ii in nodepoints.keys():
@@ -173,3 +174,42 @@ static func triangulatepolygon(poly):
 		surfaceTool.add_vertex(poly[u])
 	surfaceTool.generate_normals()
 	return surfaceTool.commit()
+
+static func stalfromropenodesequences(nodepoints, ropeseqs):
+	if len(ropeseqs) == 1:
+		var ropeseq = ropeseqs.pop_back()
+		var ylo = min(nodepoints[ropeseq[0]].y, nodepoints[ropeseq[-1]].y)
+		var yhi = max(nodepoints[ropeseq[0]].y, nodepoints[ropeseq[-1]].y)
+		var iext = -1
+		for i in range(1, len(ropeseq)-1):
+			if nodepoints[ropeseq[i]].y < ylo:
+				ylo = nodepoints[ropeseq[i]].y
+				iext = i
+			if nodepoints[ropeseq[iext]].y > yhi:
+				yhi = nodepoints[ropeseq[i]].y
+				iext = i
+		if iext != 1 and iext != len(ropeseq) - 2:
+			return null
+		ropeseqs.push_back(ropeseq.slice(0, iext))
+		ropeseqs.push_back(ropeseq.slice(iext, len(ropeseq)-1))
+	elif len(ropeseqs) != 2:
+		return null
+	if len(ropeseqs[1]) != 2:
+		ropeseqs.invert()
+	if len(ropeseqs[1]) != 2:
+		return null
+	if ropeseqs[0][-1][0] == "a":
+		ropeseqs[0].invert()
+	if ropeseqs[1][-1][0] == "a":
+		ropeseqs[1].invert()
+	
+	var stalseq = [ ]
+	for r in ropeseqs[0]:
+		stalseq.push_back(nodepoints[r])
+	var ax0 = nodepoints[ropeseqs[1][0]]
+	var ax1 = nodepoints[ropeseqs[1][1]]
+	var vec = ax0 - ax1
+	if vec.dot(stalseq[-1] - stalseq[0]) > 0:
+		vec = -vec
+	return [stalseq, ax1, vec]
+	

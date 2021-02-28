@@ -99,6 +99,55 @@ func xcconnectstoshell():
 			return true
 	return false
 
+func makestalshellmesh(revseq, p0, vec):
+	var Nsides = 20
+	var arraymesh = ArrayMesh.new()
+	var surfaceTool = SurfaceTool.new()
+	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var prevrevring = null
+	var v = 0
+	for rp in revseq:
+		var lam = vec.dot(rp - p0)/vec.dot(vec)
+		var a = p0 + vec*lam
+		var rv = rp - a
+		var rvperp = rv.cross(vec.normalized())
+		var revring = [ ]
+		var u = 0
+		for i in range(Nsides):
+			var theta = deg2rad(i*360.0/Nsides)
+			var pt = a + cos(theta)*rv + sin(theta)*rvperp
+			if i != 0:
+				u += (revring[-2] - pt).length()
+			revring.push_back(pt)
+			revring.push_back(Vector2(u, v))
+		if prevrevring != null:
+			for i in range(Nsides):
+				var i1 = (i+1)%Nsides
+				surfaceTool.add_uv(prevrevring[i*2+1])
+				surfaceTool.add_uv2(prevrevring[i*2+1])
+				surfaceTool.add_vertex(prevrevring[i*2])
+				surfaceTool.add_uv(revring[i*2+1])
+				surfaceTool.add_uv2(revring[i*2+1])
+				surfaceTool.add_vertex(revring[i*2])
+				surfaceTool.add_uv(revring[i1*2+1])
+				surfaceTool.add_uv2(revring[i1*2+1])
+				surfaceTool.add_vertex(revring[i1*2])
+
+				surfaceTool.add_uv(prevrevring[i*2+1])
+				surfaceTool.add_uv2(prevrevring[i*2+1])
+				surfaceTool.add_vertex(prevrevring[i*2])
+				surfaceTool.add_uv(revring[i1*2+1])
+				surfaceTool.add_uv2(revring[i1*2+1])
+				surfaceTool.add_vertex(revring[i1*2])
+				surfaceTool.add_uv(prevrevring[i1*2+1])
+				surfaceTool.add_uv2(prevrevring[i1*2+1])
+				surfaceTool.add_vertex(prevrevring[i1*2])
+		prevrevring = revring
+		v += vec.length()
+	surfaceTool.generate_normals()
+	surfaceTool.commit(arraymesh)
+	return arraymesh
+
 
 func setdrawingvisiblecode(ldrawingvisiblecode):
 	var drawingvisiblecode_old = drawingvisiblecode
@@ -115,20 +164,38 @@ func setdrawingvisiblecode(ldrawingvisiblecode):
 	elif drawingtype == DRAWING_TYPE.DT_ROPEHANG:
 		var hidenodeshang = ((drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE) == 0)
 		if hidenodeshang and len(onepathpairs) != 0:
-			var middlenodes = $RopeHang.updatehangingropepathsArrayMesh_Verlet(nodepoints, onepathpairs)
-			for xcn in $XCnodes.get_children():
-				xcn.visible = ((xcn.get_name()[0] == "a") or (middlenodes.find(xcn.get_name()) == -1))
-				xcn.get_node("CollisionShape").disabled = not xcn.visible
-				if xcn.has_node("RopeLabel"):
-					xcn.get_node("RopeLabel").visible = false
-			$RopeHang.visible = true
-			$PathLines.visible = false
-			get_node("/root/Spatial/VerletRopeSystem").addropehang($RopeHang)
+			var ropeseqs = Polynets.makeropenodesequences(nodepoints, onepathpairs, null)
+			var stalseqax = Polynets.stalfromropenodesequences(nodepoints, ropeseqs)
+			if stalseqax != null:
+				print("stalseqs  ", stalseqax)
+				var stalshellmesh = makestalshellmesh(stalseqax[0], stalseqax[1], stalseqax[2])
+				updatexcshellmesh(stalshellmesh)
+				$RopeHang.visible = false
+				$PathLines.visible = false
+				for xcn in $XCnodes.get_children():
+					xcn.visible = (xcn.get_name()[0] == "a")
+					xcn.get_node("CollisionShape").disabled = not xcn.visible
+
+			else:
+				var middlenodes = $RopeHang.updatehangingropepathsArrayMesh_Verlet(nodepoints, onepathpairs)
+				for xcn in $XCnodes.get_children():
+					xcn.visible = ((xcn.get_name()[0] == "a") or (middlenodes.find(xcn.get_name()) == -1))
+					xcn.get_node("CollisionShape").disabled = not xcn.visible
+					if xcn.has_node("RopeLabel"):
+						xcn.get_node("RopeLabel").visible = false
+				$RopeHang.visible = true
+				$PathLines.visible = false
+				get_node("/root/Spatial/VerletRopeSystem").addropehang($RopeHang)
 
 		else:
 			for xcn in $XCnodes.get_children():
 				xcn.transform.origin = nodepoints[xcn.get_name()]
 			updatelinearropepaths()
+			var xcflatshell = get_node_or_null("XCflatshell")
+			if xcflatshell != null:
+				xcflatshell.visible = false
+				xcflatshell.get_node("CollisionShape").disabled = true
+				
 			for xcn in $XCnodes.get_children():
 				xcn.visible = true
 				xcn.get_node("CollisionShape").disabled = not xcn.visible
@@ -686,8 +753,7 @@ func makexctubeshell(xcdrawings):
 	surfaceTool.commit(arraymesh)
 	return arraymesh
 	
-func updatexctubeshell(xcdrawings):
-	var xctubeshellmesh = makexctubeshell(xcdrawings)
+func updatexcshellmesh(xctubeshellmesh):
 	if xctubeshellmesh != null:
 		if not has_node("XCflatshell"):
 			var xcflatshell = preload("res://nodescenes/XCtubeshell.tscn").instance()
@@ -700,7 +766,7 @@ func updatexctubeshell(xcdrawings):
 	else:
 		if has_node("XCflatshell"):
 			$XCflatshell.queue_free()
-		
+
 func notubeconnections_so_delxcable():
 	for xctube in xctubesconn:
 		if len(xctube.xcdrawinglink) != 0:
