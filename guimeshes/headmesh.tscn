@@ -1,9 +1,9 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=6 format=2]
 
 [sub_resource type="CubeMesh" id=1]
 size = Vector3( 0.2, 0.1, 0.1 )
 
-[sub_resource type="SpatialMaterial" id=4]
+[sub_resource type="SpatialMaterial" id=2]
 resource_local_to_scene = true
 albedo_color = Color( 0.105882, 0.188235, 0.509804, 1 )
 
@@ -13,15 +13,40 @@ height = 0.3
 radial_segments = 24
 rings = 24
 
-[sub_resource type="SpatialMaterial" id=5]
+[sub_resource type="SpatialMaterial" id=4]
 resource_local_to_scene = true
 albedo_color = Color( 0.74, 0.62345, 0.5846, 1 )
 
+[sub_resource type="SpatialMaterial" id=5]
+resource_local_to_scene = true
+albedo_color = Color( 0.984314, 0.87451, 0.152941, 1 )
+metallic = 0.35
+roughness = 0.54
+
 [node name="csgheadmesh" type="CSGMesh"]
+transform = Transform( 0.7, 0, 0, 0, 0.7, 0, 0, 0, 0.7, -0.000207186, 0, -0.000614047 )
 mesh = SubResource( 1 )
-material = SubResource( 4 )
+material = SubResource( 2 )
 
 [node name="skullcomponent" type="CSGMesh" parent="."]
 transform = Transform( 0.9, 0, 0, 0, 1, 0, 0, 0, 0.98, 0, -0.051, 0.085 )
 mesh = SubResource( 3 )
+material = SubResource( 4 )
+
+[node name="righteye" type="CSGCylinder" parent="."]
+transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, 0.05, 0, -0.05 )
+visible = false
+operation = 2
+radius = 0.015
+height = 0.03
+sides = 12
+material = SubResource( 5 )
+
+[node name="lefteye" type="CSGCylinder" parent="."]
+transform = Transform( 1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, -0.05, 0, -0.05 )
+visible = false
+operation = 2
+radius = 0.015
+height = 0.03
+sides = 12
 material = SubResource( 5 )

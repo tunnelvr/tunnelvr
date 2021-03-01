@@ -52,6 +52,7 @@ func setatheadtrans(headtrans, lforceontogroundtimedown):
 
 func initcontrollersignalconnections():
 	HandLeftController.connect("button_pressed", self, "_on_button_pressed")
+	HandLeftController.connect("button_release", self, "_on_button_release")
 
 func initquesthandcontrollersignalconnections():
 	pass
@@ -118,6 +119,12 @@ func _on_button_pressed(p_button):
 		if abs(joypos.y) < 0.5 and abs(joypos.x) > 0.1:
 			nextphysicsrotatestep += (1 if joypos.x > 0 else -1)*(22.5 if abs(joypos.x) > 0.8 else 90.0)
 			joyposxrotsnaphysteresis = 2
+	elif p_button == BUTTONS.VR_BUTTON_BY:
+		playerMe.seteyestate(true)
+		
+func _on_button_release(p_button):
+	if p_button == BUTTONS.VR_BUTTON_BY:
+		playerMe.seteyestate(false)
 
 var laserangleadjustmode = false
 var laserangleoriginal = 0

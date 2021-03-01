@@ -181,6 +181,11 @@ remote func puppetenableguipanel(guitransform):
 remote func puppetsetheadtorchlight(torchon):
 	$HeadCam/headtorchcone/headtorchon.visible = torchon
 	$HeadCam/headtorchcone/headtorchon/SpotLight.visible = (Tglobal.arvrinterfacename != "OVRMobile")
+
+remote func puppeteyestate(eyesopen):
+	print("puppet eye state ", get_name(), " ", eyesopen)
+	$HeadCam/csgheadmesh/righteye.visible = eyesopen
+	$HeadCam/csgheadmesh/lefteye.visible = eyesopen
 	
 func _process(delta):
 	process_puppetpositionstack(delta)

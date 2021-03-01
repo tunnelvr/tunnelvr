@@ -39,7 +39,6 @@ func initplayerappearance_me():
 		get_node("GuardianPoly/floorareamesh").set_surface_material(0, get_node("/root/Spatial/MaterialSystem").xcdrawingmaterial("guardianpoly"))
 		get_node("GuardianPoly/floorareamesh").visible = true
 	
-
 func setheadtorchlight(torchon):
 	if torchon:
 		$HeadCam/HeadtorchLight.visible = true
@@ -62,6 +61,14 @@ func setheadtorchlight(torchon):
 		rpc("puppetsetheadtorchlight", torchon)
 	if is_instance_valid(doppelganger):
 		doppelganger.puppetsetheadtorchlight(torchon)
+
+func seteyestate(eyesopen):
+	if Tglobal.connectiontoserveractive:
+		rpc("puppeteyestate", eyesopen)
+	if is_instance_valid(doppelganger):
+		doppelganger.puppeteyestate(eyesopen)
+	$HeadCam/csgheadmesh/righteye.visible = eyesopen
+	$HeadCam/csgheadmesh/lefteye.visible = eyesopen
 
 func setdoppelganger(doppelgangeron):
 	if doppelgangeron:
@@ -150,11 +157,12 @@ remote func puppetenableguipanel(guitransform):
 remote func puppetsetheadtorchlight(torchon):
 	print("puppetsetheadtorchlight nope not master ", torchon)
 
+remote func puppeteyestate(eyesopen):
+	print("puppeteyestate nope not master ", eyesopen)
+
 
 puppet func bouncedoppelgangerposition(bouncebackID, positiondict):
 	rpc_unreliable_id(bouncebackID, "setdoppelgangerposition", positiondict)
-
-
 
 func swapcontrollers():
 	var cidl = $HandLeftController.controller_id
