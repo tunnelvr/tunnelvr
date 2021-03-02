@@ -73,7 +73,8 @@ func setropematerialcolour(n):
 	ropematerialcolor.albedo_color = col
 	ropematerialsolidcolor.albedo_color = col
 	
-func derivenverts(nodepoints, onepathpairs):
+func derivenverts(nodepoints, ropesequences):
+
 	nodenamesArr = [ ]
 	nodenamesAnchorN = 0
 	nverts = [ ]
@@ -94,9 +95,7 @@ func derivenverts(nodepoints, onepathpairs):
 	nropeseqs = [ ]
 	nropeseqLengs = [ ]
 	nropeseqseglens = [ ]
-	oddropeverts = [ ]
 	totalropeleng = 0.0
-	var ropesequences = Polynets.makeropenodesequences(nodepoints, onepathpairs, oddropeverts)
 	for r in range(len(ropesequences)):
 		var ropeseq = ropesequences[r]
 		var nropeseq = [ nnodenames[ropeseq[0]] ]
@@ -126,9 +125,8 @@ func derivenverts(nodepoints, onepathpairs):
 	totalstretchropeleng = totalropeleng
 	return middlenodes
 	
-func updatehangingropepathsArrayMesh_Verlet(nodepoints, onepathpairs):
-	assert (len(onepathpairs) != 0)
-	var middlenodes = derivenverts(nodepoints, onepathpairs)
+func updatehangingropepathsArrayMesh_Verlet(nodepoints, ropesequences):
+	var middlenodes = derivenverts(nodepoints, ropesequences)
 	#print("nropeseqLengs ", nropeseqLengs)
 	
 	var verts = [] 

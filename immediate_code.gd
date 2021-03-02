@@ -8,4 +8,8 @@ var regex = RegEx.new()
 
 func _run():
 	var x = [2,3,4,5,6,76,7]
-	print(x.slice(0, 3), (x.slice(3, len(x)-1)))
+	print(x.slice(4,1,-1))
+	var y = PoolVector2Array()
+	y.resize(10)
+	y[1] = Vector2(1,2)
+	print(y)

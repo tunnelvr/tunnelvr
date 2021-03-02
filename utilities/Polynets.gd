@@ -98,7 +98,7 @@ static func makexcdpolys(nodepoints, onepathpairs):
 	return [ ]
 
 
-static func makeropenodesequences(nodepoints, onepathpairs, oddropeverts=null):
+static func makeropenodesequences(nodepoints, onepathpairs, oddropeverts):
 	var Lpathvectorseq = { } 
 	for ii in nodepoints.keys():
 		Lpathvectorseq[ii] = [ ]
@@ -112,6 +112,7 @@ static func makeropenodesequences(nodepoints, onepathpairs, oddropeverts=null):
 		opvisits.append(0)
 
 	if oddropeverts != null:
+		oddropeverts.clear()
 		for ii in nodepoints.keys():
 			if (len(Lpathvectorseq[ii])%2) == 1:
 				oddropeverts.push_back(ii)
@@ -211,5 +212,95 @@ static func stalfromropenodesequences(nodepoints, ropeseqs):
 	var vec = ax0 - ax1
 	if vec.dot(stalseq[-1] - stalseq[0]) > 0:
 		vec = -vec
-	return [stalseq, ax1, vec]
+	var nohideaxisnodes = [ ropeseqs[1][0] ]
+	if ropeseqs[1][1][0] == "a":
+		nohideaxisnodes.push_back(ropeseqs[1][1])
+	return [stalseq, ax1, vec, nohideaxisnodes]
 	
+	
+	
+static func oppositenode(nodename, ropeseq):
+	return ropeseq[-1 if (ropeseq[0] == nodename) else 0]
+static func swaparrindexes(arr, i, j):
+	var b = arr[i]
+	arr[i] = arr[j]
+	arr[j] = b
+static func cuboidfacseq(nodename, ropeseqs, ropeseqqs):
+	var cseq = [ ]
+	for re in ropeseqqs:
+		var ropeseq = ropeseqs[re]
+		if ropeseq[0] == nodename:
+			cseq += ropeseq.slice(0, len(ropeseq)-2)
+			nodename = ropeseq[-1]
+		else:
+			assert (ropeseq[-1] == nodename)
+			cseq += ropeseq.slice(len(ropeseq)-1, 1, -1)
+			nodename = ropeseq[0]
+	return cseq
+
+static func cuboidfromropenodesequences(nodepoints, ropeseqs):
+	if len(ropeseqs) != 12:
+		return null
+	var ropeseqends = { } 
+	for j in range(len(ropeseqs)):
+		var e0 = ropeseqs[j][0]
+		var e1 = ropeseqs[j][-1]
+		if ropeseqends.has(e0):
+			ropeseqends[e0].push_back(j)
+		else:
+			ropeseqends[e0] = [ j ]
+		if ropeseqends.has(e1):
+			ropeseqends[e1].push_back(j)
+		else:
+			ropeseqends[e1] = [ j ]
+	if len(ropeseqends) != 8:
+		return null
+		
+	var topnode = null
+	for nodename in ropeseqends.keys():
+		if len(ropeseqends[nodename]) != 3:
+			return null
+		if topnode == null or (nodepoints[nodename].y > nodepoints[topnode].y):
+			topnode = nodename
+
+	var secondseqq = [ ]
+	for j in ropeseqends[topnode]:
+		var secondseqqj = [ j ]
+		var jo = oppositenode(topnode, ropeseqs[j])
+		secondseqqj.push_back(jo)
+		for je in ropeseqends[jo]:
+			var jeo = oppositenode(jo, ropeseqs[je])
+			if jeo != topnode:
+				secondseqqj.push_back(je)
+				secondseqqj.push_back(jeo)
+		assert (len(secondseqqj) == 6)
+		secondseqq.push_back(secondseqqj)
+		
+	if secondseqq[1][5] == secondseqq[0][3] or secondseqq[1][5] == secondseqq[0][5]:
+		swaparrindexes(secondseqq[1], 2, 4)
+		swaparrindexes(secondseqq[1], 3, 5)
+	if secondseqq[0][3] == secondseqq[1][3]:
+		swaparrindexes(secondseqq[0], 2, 4)
+		swaparrindexes(secondseqq[0], 3, 5)
+	if secondseqq[1][5] == secondseqq[2][5]:
+		swaparrindexes(secondseqq[2], 2, 4)
+		swaparrindexes(secondseqq[2], 3, 5)
+	for k in range(3):
+		var sn = secondseqq[k][5]
+		if sn != secondseqq[(k+1)%3][3]:
+			return null
+		var sne = secondseqq[k][4]
+		var sne1 = secondseqq[(k+1)%3][2]
+		for je in range(3):
+			if ropeseqends[sn][je] != sne and ropeseqends[sn][je] != sne1:
+				secondseqq[k].push_back(ropeseqends[sn][je])
+				secondseqq[k].push_back(oppositenode(sn, ropeseqs[ropeseqends[sn][je]]))
+		assert (len(secondseqq[k]) == 8)
+		assert (k == 0 or secondseqq[k][-1] == secondseqq[k-1][-1])
+
+	var cuboidfacs = [ ]
+	for k in range(3):
+		cuboidfacs.push_back(cuboidfacseq(topnode, ropeseqs, [secondseqq[k][0], secondseqq[k][4], secondseqq[(k+1)%3][2], secondseqq[(k+1)%3][0]]))
+		cuboidfacs.push_back(cuboidfacseq(secondseqq[k][1], ropeseqs, [secondseqq[k][2], secondseqq[(k+2)%3][6], secondseqq[k][6], secondseqq[k][4]]))
+	return cuboidfacs
+		
