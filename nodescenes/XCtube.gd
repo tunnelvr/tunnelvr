@@ -4,10 +4,11 @@ extends Spatial
 var xcname0 : String 
 var xcname1 : String
 
-# this should be a list of dicts so we can run more info into them
 var xcdrawinglink = [ ]      # [ 0nodenamefrom, 0nodenameto, 1nodenamefrom, 1nodenameto, ... ]
 var xcsectormaterials = [ ]  # [ 0material, 1material, ... ]
 var xclinkintermediatenodes = null 		 # [ 0[Vector3(u,v,lambda), Vector3, Vector3], 1[ ], 2[ ] ] parallel to the drawinglinks, if it is set
+
+var xctchangesequence = -1
 
 # derived data
 var pickedpolyindex0 = -1
@@ -20,8 +21,8 @@ var planealongvecwhenparallel = null
 
 const linewidth = 0.02
 
-func exportxctrpcdata():   # read by xctubefromdata()
-	var res = { "name":get_name(),  # tubename
+func exportxctrpcdata(stripruntimedataforsaving):   # read by xctubefromdata()
+	var res = { "tubename":get_name(),
 				"xcname0":xcname0, 
 				"xcname1":xcname1, 
 				"xcdrawinglink":xcdrawinglink, 
@@ -31,6 +32,8 @@ func exportxctrpcdata():   # read by xctubefromdata()
 			  }
 	if xclinkintermediatenodes != null:
 		res["xclinkintermediatenodes"] = xclinkintermediatenodes
+	if not stripruntimedataforsaving:
+		res["xctchangesequence"] = xctchangesequence
 	return res 
 
 
@@ -222,6 +225,7 @@ func updatetubelinkpaths(sketchsystem):
 	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(xcname0)
 	var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(xcname1)
+	makeplaneintersectionaxisvec(xcdrawing0, xcdrawing1)
 	assert ((len(xcdrawinglink)%2) == 0)
 	var nlinksfound = 0
 	for j in range(0, len(xcdrawinglink), 2):
@@ -1080,11 +1084,6 @@ func CopyHoleGapShape(li, sketchsystem):
 				  }
 
 	return xctdata
-
-
-
-
-
 
 
 	

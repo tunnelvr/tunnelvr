@@ -37,22 +37,6 @@ func findxctube(xcname0, xcname1):
 				return xctube
 	return null
 	
-func xctubefromdata(xctdata):
-	var xctube = findxctube(xctdata["xcname0"], xctdata["xcname1"])
-	if xctube == null:
-		var xcdrawing0 = get_node("XCdrawings").get_node(xctdata["xcname0"])
-		var xcdrawing1 = get_node("XCdrawings").get_node(xctdata["xcname1"])
-		xctdata["m0"] = 1 if xcdrawing1.drawingtype == DRAWING_TYPE.DT_CENTRELINE else 0
-		if xctdata["m0"] == 0:
-			xctube = newXCtube(xcdrawing0, xcdrawing1)
-		else:
-			xctube = newXCtube(xcdrawing1, xcdrawing0)
-		if xcdrawing0.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
-			xctube.makeplaneintersectionaxisvec(xcdrawing0, xcdrawing1)
-	else:
-		xctdata["m0"] = 1 if xctube.xcname0 == xctdata["xcname1"] else 0
-	xctube.mergexctrpcdata(xctdata)
-	return xctube
 
 	
 func sketchsystemtodict(stripruntimedataforsaving):
@@ -66,7 +50,7 @@ func sketchsystemtodict(stripruntimedataforsaving):
 			xcdrawingsData.append(xcdrawing.exportxcrpcdata(stripruntimedataforsaving))
 	var xctubesData = [ ]
 	for xctube in $XCtubes.get_children():
-		xctubesData.append(xctube.exportxctrpcdata())
+		xctubesData.append(xctube.exportxctrpcdata(stripruntimedataforsaving))
 	var sketchdatadict = { "sketchname":sketchname,
 						   "xcdrawings":xcdrawingsData,
 						   "xctubes":xctubesData
@@ -207,7 +191,7 @@ remote func actsketchchangeL(xcdatalist):
 		if fromremotecall:
 			var playerOther = get_node("/root/Spatial/Players").get_node_or_null("NetworkedPlayer"+String(xcdatalist[0]["networkIDsource"]))
 			if playerOther != null:
-				if "overridingxcdrawing" in xcdatalist[0]:
+				if "overridingxcdrawing" in xcdatalist[0] or "overridingxctube" in xcdatalist[0]:
 					playerOther.get_node("AnimationPlayer_actsketchchange_fixbad").play("actsketchchange_flash")
 				else:
 					playerOther.get_node("AnimationPlayer_actsketchchange").play("actsketchchange_flash")
@@ -231,6 +215,7 @@ remote func actsketchchangeL(xcdatalist):
 	var xcdrawingstoupdate = { }
 	var xctubestoupdate = { }
 	var xcdrawingsrejected = [ ]
+	var xctubesrejected = [ ]
 	for i in range(len(xcdatalist)):
 		var xcdata = xcdatalist[i]
 		if "caveworldchunk" in xcdata:
@@ -240,18 +225,49 @@ remote func actsketchchangeL(xcdatalist):
 				print("update tube ", xcdata["tubename"])
 			if xcdata["tubename"] == "**notset":
 				xcdata["tubename"] = "XCtube_"+xcdata["xcname0"]+"_"+xcdata["xcname1"]
-			var xctube = xctubefromdata(xcdata)  # inline this in order to implement xcchangesequence logic
-			if len(xctube.xcdrawinglink) == 0 and len(xctube.xcsectormaterials) == 0:
-				print("*** removing empty tube problem")
-				removeXCtube(xctube)
-				xctube.queue_free() 
+			var xctube = findxctube(xcdata["xcname0"], xcdata["xcname1"])
+			if xctube == null:
+				var xcdrawing0 = get_node("XCdrawings").get_node(xcdata["xcname0"])
+				var xcdrawing1 = get_node("XCdrawings").get_node(xcdata["xcname1"])
+				xcdata["m0"] = 1 if xcdrawing1.drawingtype == DRAWING_TYPE.DT_CENTRELINE else 0
+				if xcdata["m0"] == 0:
+					xctube = newXCtube(xcdrawing0, xcdrawing1)
+				else:
+					xctube = newXCtube(xcdrawing1, xcdrawing0)
+				if xcdrawing0.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
+					xctube.makeplaneintersectionaxisvec(xcdrawing0, xcdrawing1)
 			else:
-				xctubestoupdate[xctube.get_name()] = xctube
-				if "materialsectorschanged" in xcdata:
-					for j in xcdata["materialsectorschanged"]:
-						if j < len(xctube.xcsectormaterials) and j < xctube.get_node("XCtubesectors").get_child_count():
-							get_node("/root/Spatial/MaterialSystem").updatetubesectormaterial(xctube.get_node("XCtubesectors").get_child(j), xctube.xcsectormaterials[j], false)
-			
+				xcdata["m0"] = 1 if xctube.xcname0 == xcdata["xcname1"] else 0
+
+			if "overridingxctube" in xcdata:
+				assert(fromremotecall)
+				print("overridingxctube ", xcdata.get("tubename"), " hereseq:", xctube.xctchangesequence, " remoteseq:", xcdata["overridingxctube"])
+				xctube.xctchangesequence = -1
+			xctube.xctchangesequence += 1
+			if not fromremotecall:
+				xcdata["xctchangesequence"] = xctube.xctchangesequence
+			elif "xctchangesequence" in xcdata and xcdata["xctchangesequence"] != xctube.xctchangesequence:
+				if xctube.xctchangesequence == 0:
+					xctube.xctchangesequence = xcdata["xctchangesequence"]
+				else:
+					print("Mismatch change sequence in xctube ", xcdata["tubename"], " remote ", xcdata["xctchangesequence"], " here ", xctube.xctchangesequence)
+					xctube = null
+			if xctube != null:
+				xctube.mergexctrpcdata(xcdata)
+				if len(xctube.xcdrawinglink) == 0 and len(xctube.xcsectormaterials) == 0:
+					print("*** removing empty tube problem")
+					removeXCtube(xctube)
+					xctube.queue_free() 
+				else:
+					xctubestoupdate[xctube.get_name()] = xctube
+					if "materialsectorschanged" in xcdata:
+						for j in xcdata["materialsectorschanged"]:
+							if j < len(xctube.xcsectormaterials) and j < xctube.get_node("XCtubesectors").get_child_count():
+								get_node("/root/Spatial/MaterialSystem").updatetubesectormaterial(xctube.get_node("XCtubesectors").get_child(j), xctube.xcsectormaterials[j], false)
+			else:
+				xctubesrejected.append({"tubename":xcdata["tubename"], "xcname0":xcdata["xcname0"], "xcname1":xcdata["xcname1"]})
+				print("rejecting XC tube from data", xcdata)
+							
 		elif "planview" in xcdata:
 			var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
 			planviewsystem.actplanviewdict(xcdata["planview"])
@@ -398,7 +414,13 @@ remote func actsketchchangeL(xcdatalist):
 			sendoverridingxcdrawingsdata(xcdrawingsrejected, xcdatalist[0]["networkIDsource"])
 		else:
 			rpc_id(1, "sendoverridingxcdrawingsdata", xcdrawingsrejected, playerMe.networkID)
-			
+	if len(xctubesrejected) != 0:
+		print("The following tubes have bad change sequences and need to be requested from the server", xctubesrejected)
+		if playerMe.networkID == 1:
+			sendoverridingxctubesdata(xctubesrejected, xcdatalist[0]["networkIDsource"])
+		else:
+			rpc_id(1, "sendoverridingxctubesdata", xctubesrejected, playerMe.networkID)
+	
 	return null
 		
 remote func sendoverridingxcdrawingsdata(xcdrawingsrejected, playeridtoupdate):
@@ -415,6 +437,24 @@ remote func sendoverridingxcdrawingsdata(xcdrawingsrejected, playeridtoupdate):
 			xcdatalist.push_back(xcdata)
 	rpc_id(playeridtoupdate, "actsketchchangeL", xcdatalist)
 		
+remote func sendoverridingxctubesdata(xctubesrejected, playeridtoupdate):
+	var playerMe = get_node("/root/Spatial").playerMe
+	assert (playerMe.networkID == 1)
+	var xcdatalist = [ ]
+	var updatetubeshells = [ ]
+	for xct in xctubesrejected:
+		print(" sendoverridingxctubesdata ", xct["tubename"], " to ", playeridtoupdate)
+		var xctube = findxctube(xct["xcname0"], xct["xcname1"])
+		if xctube != null:
+			var xcdata = xctube.exportxctrpcdata(false)
+			xcdata["overridingxctube"] = 1
+			#xcdata["xctchangesequence"] = xctube.xctchangesequence
+			xcdata["networkIDsource"] = playerMe.networkID
+			xcdatalist.push_back(xcdata)
+			updatetubeshells.push_back({"tubename":xcdata.get("tubename"), "xcname0":xct["xcname0"], "xcname1":xct["xcname1"] })
+	xcdatalist.push_back({ "xcvizstates":{ }, "updatetubeshells":updatetubeshells } )
+	rpc_id(playeridtoupdate, "actsketchchangeL", xcdatalist)
+
 	
 func xcdrawingfromdata(xcdata, fromremotecall):
 	var xcdrawing = $XCdrawings.get_node_or_null(xcdata["name"])

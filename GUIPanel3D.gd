@@ -644,7 +644,7 @@ remote func sendbacknetworkmetrics(lnetworkmetrics, networkIDsource):
 	var playerOther = get_node("/root/Spatial/Players").get_node_or_null(playerOthername)
 	if playerOther != null and len(playerOther.puppetpositionstack) != 0:
 		lnetworkmetrics["stackduration"] = playerOther.puppetpositionstack[-1]["Ltimestamp"] - OS.get_ticks_msec()*0.001
-		print(playerOthername, " stackduration is ", lnetworkmetrics["stackduration"])
+		#print(playerOthername, " stackduration is ", lnetworkmetrics["stackduration"])
 	elif playerOther == null:
 		print("Did not find ", playerOthername)
 		lnetworkmetrics["stackduration"] = -1.0

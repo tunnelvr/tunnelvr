@@ -9,7 +9,6 @@ extends Spatial
 # ../Godot_v3.2.3-stable_linux_server.64  --main-pack tunnelvr_v0.5.0.pck
 
 # xcdfullsetvisibilitycollision to use CollisionLayers technology instead
-# scalebar on planview
 # Treeview to show which are downloaded
 # record zooming trimming position on each and a programmable scalebar
 
@@ -44,8 +43,6 @@ extends Spatial
 # * VR leads@skydeas1  and @brainonsilicon in Leeds (can do a trip there)
 
 # * Bring in XCdrawings that are hooked to the centreline that will highlight when they get it
-
-# * clear up the laser pointer logic and materials
 
 # * Need to ask to improve the documentation on https://docs.godotengine.org/en/latest/classes/class_meshinstance.html#class-meshinstance-method-set-surface-material
 # *   See also https://godotengine.org/qa/3488/how-to-generate-a-mesh-with-multiple-materials
@@ -178,7 +175,7 @@ func _ready():
 			$BodyObjects/PlayerDirections.initquesthandcontrollersignalconnections()
 		else:
 			playerMe.initnormalvrtrackingnow()
-			$BodyObjects/PlayerDirections.initcontrollersignalconnections()
+		$BodyObjects/PlayerDirections.initcontrollersignalconnections()
 			
 	else:
 		playerMe.initkeyboardcontroltrackingnow()
