@@ -60,6 +60,6 @@ func _process(delta):
 		senddata_outgoing("beat".to_utf8())
 		heartbeattimeout = 1.0
 
-func _input(event):
-	if event is InputEventKey and event.pressed and event.scancode == KEY_P:
-		connectws()
+#func _input(event):
+#	if event is InputEventKey and event.pressed and event.scancode == KEY_P:
+#		connectws()

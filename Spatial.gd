@@ -253,8 +253,6 @@ func _player_connected(id):
 	playerMe.rpc_id(id, "initplayerappearanceJ", playerMe.playerappearancedict())
 	players_connected_list.push_back(id)
 	$GuiSystem/GUIPanel3D/Viewport/GUI/Panel/Label.text = "player "+String(id)+" connected"
-	if not Tglobal.controlslocked:
-		$GuiSystem/GUIPanel3D.toggleguipanelvisibility(null)
 
 	mqttsystem.mqttpublish("playercount/add", "%d %d" % [$Players.get_child_count(), id])
 	if playerMe.networkID == 1:
@@ -346,5 +344,4 @@ func clearallprocessactivityforreload():
 		#pointersystem.clearpointertargetmaterial()
 		pointersystem.clearpointertarget()
 		pointersystem.setactivetargetwall(null)
-
 

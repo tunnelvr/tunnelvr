@@ -178,7 +178,13 @@ static func triangulatepolygon(poly):
 
 static func stalfromropenodesequences(nodepoints, ropeseqs):
 	if len(ropeseqs) == 1:
-		var ropeseq = ropeseqs.pop_back()
+		var ropeseq = ropeseqs[0]
+		if ropeseq[0] == ropeseq[-1]:
+			return null
+		if ropeseq[0][0] != "a" or ropeseq[-1][0] != "a":
+			return null
+		if len(ropeseq) <= 3:
+			return null
 		var ylo = min(nodepoints[ropeseq[0]].y, nodepoints[ropeseq[-1]].y)
 		var yhi = max(nodepoints[ropeseq[0]].y, nodepoints[ropeseq[-1]].y)
 		var iext = -1
@@ -186,15 +192,17 @@ static func stalfromropenodesequences(nodepoints, ropeseqs):
 			if nodepoints[ropeseq[i]].y < ylo:
 				ylo = nodepoints[ropeseq[i]].y
 				iext = i
-			if nodepoints[ropeseq[iext]].y > yhi:
+			if nodepoints[ropeseq[i]].y > yhi:
 				yhi = nodepoints[ropeseq[i]].y
 				iext = i
 		if iext != 1 and iext != len(ropeseq) - 2:
 			return null
+		ropeseqs.pop_back()
 		ropeseqs.push_back(ropeseq.slice(0, iext))
 		ropeseqs.push_back(ropeseq.slice(iext, len(ropeseq)-1))
 	elif len(ropeseqs) != 2:
 		return null
+		
 	if len(ropeseqs[1]) != 2:
 		ropeseqs.invert()
 	if len(ropeseqs[1]) != 2:

@@ -289,7 +289,7 @@ func panelsendmousemotiontopointertarget():
 		event.pressed = viewport_mousedown
 		event.button_index = BUTTON_LEFT
 		event.position = guipanel.viewport_point
-		print("vvvv viewport_point ", guipanel.viewport_point)
+		#print("vvvv viewport_point ", guipanel.viewport_point)
 		viewport.input(event)
 		guipanel.current_viewport_mousedown = viewport_mousedown
 
@@ -305,7 +305,8 @@ func panelsendreleasemousemotiontopointertarget():
 	var mevent = InputEventMouseMotion.new()
 	mevent.position = Vector2(0, 0)
 	viewport.input(mevent)
-	viewport.render_target_update_mode = Viewport.UPDATE_ONCE
+	if not keyboardpanel.visible:
+		viewport.render_target_update_mode = Viewport.UPDATE_ONCE
 	
 func setpointertarget(laserroot, raycast, pointertargetshortdistance):
 	var newpointertarget = raycast.get_collider() if raycast != null else null
@@ -502,22 +503,17 @@ func buttonreleased_vrby():
 		playerMe.ovr_guardian_system.request_boundary_visible(false)
 
 func buttonpressed_vrby(gripbuttonheld):
-	#if playerMe.ovr_guardian_system != null:
-	#	print(" ovr_guardian_system.get_boundary_geometry() == " + str(playerMe.ovr_guardian_system.get_boundary_geometry()));
-	#	print(" ovr_guardian_system.get_boundary_visible() == " + str(playerMe.ovr_guardian_system.get_boundary_visible()));
-	#	playerMe.ovr_guardian_system.request_boundary_visible(true)
-	#	print(" ovr_guardian_system.get_boundary_oriented_bounding_box() == " + str(playerMe.ovr_guardian_system.get_boundary_oriented_bounding_box()));
-
-
 	if Tglobal.controlslocked:
 		if not guipanel3d.visible:
-			guipanel3d.toggleguipanelvisibility(LaserOrient.global_transform)
+			guipanel3d.setguipanelvisible(LaserOrient.global_transform)
 		else:
 			print("controls locked")
 	elif planviewsystem.visible and (pointerplanviewtarget != null or pointertargettype == "PlanView"):
 		sketchsystem.actsketchchange([{"planview": { "visible":true, "planviewactive":not planviewsystem.planviewactive }} ])
+	elif guipanel3d.visible:
+		guipanel3d.setguipanelhide()
 	else:
-		guipanel3d.toggleguipanelvisibility(LaserOrient.global_transform)
+		guipanel3d.setguipanelvisible(LaserOrient.global_transform)
 
 func buttonpressed_vrgrip():
 	gripbuttonpressused = false
@@ -1230,8 +1226,7 @@ func buttonreleased_vrgrip():
 
 		
 	elif pointertargettype == "GUIPanel3D":
-		if guipanel3d.visible:
-			guipanel3d.toggleguipanelvisibility(null)
+		guipanel3d.setguipanelhide()
 
 	elif pointertargettype == "XCdrawing" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING and len(pointertargetwall.nodepoints) != 0:
 		clearpointertargetmaterial()

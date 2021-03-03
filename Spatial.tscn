@@ -301,10 +301,10 @@ uv1_offset = Vector3( -0.2, 0.9, 0 )
 bg_color = Color( 0.0980392, 0.443137, 0.882353, 1 )
 
 [sub_resource type="BoxShape" id=37]
-extents = Vector3( 0.8, 0.4, 0.01 )
+extents = Vector3( 0.4, 0.2, 0.01 )
 
 [sub_resource type="QuadMesh" id=38]
-size = Vector2( 1.6, 0.8 )
+size = Vector2( 0.8, 0.4 )
 
 [sub_resource type="SpatialMaterial" id=39]
 flags_unshaded = true
@@ -1384,7 +1384,6 @@ albedo_color = Color( 0.168627, 0.972549, 0.027451, 1 )
 
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
-enablevr = false
 
 [node name="Players" type="Spatial" parent="."]
 
@@ -1568,10 +1567,10 @@ __meta__ = {
 }
 
 [node name="Networkstate" type="OptionButton" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 145.665
-margin_top = 79.9548
-margin_right = 324.665
-margin_bottom = 106.955
+margin_left = 22.665
+margin_top = 76.9548
+margin_right = 201.665
+margin_bottom = 103.955
 hint_tooltip = "Network state"
 text = "Network Off"
 items = [ "Network Off", null, false, 0, null, "Check IPnum", null, false, 1, null, "As Server", null, false, 2, null ]
@@ -1592,18 +1591,6 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ButtonChoke" type="Button" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 111.73
-margin_top = 184.887
-margin_right = 170.73
-margin_bottom = 212.887
-rect_pivot_offset = Vector2( 111.073, 28.0005 )
-toggle_mode = true
-text = "Choke"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
 [node name="ButtonHeadtorch" type="CheckBox" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
 margin_left = 17.0
 margin_top = 127.0
@@ -1618,25 +1605,13 @@ __meta__ = {
 }
 
 [node name="ButtonDoppelganger" type="CheckBox" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 171.407
-margin_top = 190.59
-margin_right = 297.407
-margin_bottom = 218.59
+margin_left = 18.407
+margin_top = 156.59
+margin_right = 144.407
+margin_bottom = 184.59
 rect_pivot_offset = Vector2( 138.61, -8.13628 )
 hint_tooltip = "test tooltip"
 text = "Doppelganger"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="ButtonLockControls" type="CheckBox" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 19.3636
-margin_top = 158.41
-margin_right = 143.364
-margin_bottom = 186.41
-rect_pivot_offset = Vector2( 138.61, -8.13628 )
-hint_tooltip = "test tooltip"
-text = "Lock Controls"
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -1653,45 +1628,33 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ButtonSwapControllers" type="Button" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 22.336
-margin_top = 79.8284
-margin_right = 140.336
-margin_bottom = 107.828
-rect_pivot_offset = Vector2( 138.61, -8.13628 )
-hint_tooltip = "test tooltip"
-text = "Swap Controllers"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
 [node name="SwitchTest" type="OptionButton" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 171.0
-margin_top = 136.0
-margin_right = 265.0
-margin_bottom = 163.0
+margin_left = 22.0
+margin_top = 235.0
+margin_right = 116.0
+margin_bottom = 262.0
 text = "normal"
-items = [ "normal", null, false, 0, null, "hide floors", null, false, 1, null, "all grey", null, false, 2, null, "hide xc", null, false, 3, null, "toggle guardian", null, false, 4, null, "export OBJ", null, false, 7, null ]
+items = [ "normal", null, false, 0, null, "hide floors", null, false, 1, null, "all grey", null, false, 2, null, "hide xc", null, false, 3, null, "toggle guardian", null, false, 4, null, "export OBJ", null, false, 7, null, "choke", null, false, 6, null, "swap controllers", null, false, 7, null, "lock controls", null, false, 8, null ]
 selected = 0
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="WorldScaleLabel" type="Label" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 150.0
-margin_top = 167.0
-margin_right = 237.0
-margin_bottom = 189.0
+margin_left = 207.0
+margin_top = 82.0
+margin_right = 294.0
+margin_bottom = 104.0
 text = "World scale:"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="WorldScale" type="OptionButton" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 245.0
-margin_top = 166.0
-margin_right = 294.0
-margin_bottom = 193.0
+margin_left = 296.0
+margin_top = 81.0
+margin_right = 345.0
+margin_bottom = 108.0
 text = "1x"
 items = [ "1x", null, false, 0, null, "0.25x", null, false, 1, null, "10x", null, false, 2, null ]
 selected = 0
@@ -1700,9 +1663,9 @@ __meta__ = {
 }
 
 [node name="PlayerList" type="OptionButton" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 26.0
+margin_left = 66.0
 margin_top = 208.0
-margin_right = 103.0
+margin_right = 143.0
 margin_bottom = 231.0
 text = "server"
 items = [ "server", null, false, 0, null ]
@@ -1712,10 +1675,10 @@ __meta__ = {
 }
 
 [node name="ButtonGoto" type="Button" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 31.0
-margin_top = 233.0
-margin_right = 74.0
-margin_bottom = 261.0
+margin_left = 21.0
+margin_top = 204.0
+margin_right = 64.0
+margin_bottom = 232.0
 rect_pivot_offset = Vector2( 111.073, 28.0005 )
 disabled = true
 text = "Goto"
@@ -1724,10 +1687,10 @@ __meta__ = {
 }
 
 [node name="PlayerInfo" type="Label" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 116.227
-margin_top = 225.796
-margin_right = 345.227
-margin_bottom = 265.796
+margin_left = 145.227
+margin_top = 230.796
+margin_right = 374.227
+margin_bottom = 270.796
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -1743,14 +1706,52 @@ __meta__ = {
 }
 
 [node name="SketchName" type="Label" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 202.325
+margin_left = 203.325
 margin_top = 112.296
-margin_right = 292.325
+margin_right = 293.325
 margin_bottom = 134.296
 text = "none"
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="LineEdit" type="LineEdit" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
+margin_left = 261.0
+margin_top = 7.0
+margin_right = 365.0
+margin_bottom = 36.0
+
+[node name="EditColorRect" type="ColorRect" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
+margin_left = 154.0
+margin_top = 130.0
+margin_right = 376.0
+margin_bottom = 185.0
+color = Color( 0.133333, 0.6, 0.784314, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="TextEdit" type="TextEdit" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel/EditColorRect"]
+margin_left = 3.0
+margin_top = 3.0
+margin_right = 219.0
+margin_bottom = 50.0
+highlight_current_line = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="TextRelatedActions" type="Panel" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
+visible = false
+margin_left = 154.0
+margin_top = 194.0
+margin_right = 373.0
+margin_bottom = 263.0
+
+[node name="CheckBox" type="Button" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel/TextRelatedActions"]
+margin_right = 88.0
+margin_bottom = 24.0
+text = "newcontrol"
 
 [node name="ViewportReal" type="Viewport" parent="GuiSystem/GUIPanel3D"]
 size = Vector2( 380, 280 )

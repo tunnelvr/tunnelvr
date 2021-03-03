@@ -5,7 +5,7 @@ onready var _refrence_button = $Viewport/VirtualKeyboard/ReferenceButton;
 onready var _container_letters = $Viewport/VirtualKeyboard/Container_Letters
 onready var _container_symbols = $Viewport/VirtualKeyboard/Container_Symbols
 
-export var allow_newline = false;
+export var allow_newline = true;
 const B_SIZE = 48;
 
 const NUMBER_LAYOUT = ["1","2","3","4","5","6","7","8","9","0"];
@@ -26,6 +26,7 @@ const BUTTON_LAYOUT_SYMBOLS = [
 var current_viewport_mousedown = false
 var collision_point = Vector3(0, 0, 0)
 var viewport_point = Vector2(0, 0)
+onready var viewportforvirtualkeyboard = get_node("/root/Spatial/GuiSystem/GUIPanel3D/Viewport")
 
 signal enter_pressed;
 signal cancel_pressed;
@@ -47,6 +48,7 @@ func _toggle_symbols(show_symbols):
 	else:
 		_container_letters.visible = true;
 		_container_symbols.visible = false;
+
 
 func _create_input_event(b, pressed):
 	var scancode = 0;
@@ -98,16 +100,14 @@ func _on_button_down(b):
 	
 	var ev = _create_input_event(b, true);
 	if (!ev): return;
-	get_tree().input_event(ev);
+	viewportforvirtualkeyboard.input(ev)
 
 
 func _on_button_up(b):
 	_last_button_down_hack = null;
 	var ev = _create_input_event(b, false);
 	if ev:
-		print("keypress ", b)
-		#get_tree().input_event(ev);
-
+		viewportforvirtualkeyboard.input(ev)
 
 func _create_button(_parent, text, x, y, w = 1, h = 1):
 	var b = _refrence_button.duplicate();
@@ -160,7 +160,6 @@ func _create_keyboard_buttons():
 		_create_button(_virtual_keyboard, k, x, y);
 		x += 1;
 		
-	
 
 	x = 1;
 	y = 1;

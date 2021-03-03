@@ -74,7 +74,6 @@ func setropematerialcolour(n):
 	ropematerialsolidcolor.albedo_color = col
 	
 func derivenverts(nodepoints, ropesequences):
-
 	nodenamesArr = [ ]
 	nodenamesAnchorN = 0
 	nverts = [ ]

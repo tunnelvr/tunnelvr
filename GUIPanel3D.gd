@@ -8,6 +8,7 @@ var viewport_point = Vector2(0, 0)
 onready var sketchsystem = get_node("/root/Spatial/SketchSystem")
 onready var playerMe = get_node("/root/Spatial/Players/PlayerMe")
 onready var selfSpatial = get_node("/root/Spatial")
+onready var virtualkeyboard = get_node("/root/Spatial/GuiSystem/KeyboardPanel")
 	
 func _on_buttonload_pressed():
 	var savegamefileid = $Viewport/GUI/Panel/Savegamefilename.get_selected_id()
@@ -30,8 +31,8 @@ func _on_buttonload_pressed():
 		else:
 			$Viewport/GUI/Panel/Label.text = "*" + savegamefilename + " does not exist"
 					
-	if not $Viewport/GUI/Panel/Label.text.begins_with("*") and not Tglobal.controlslocked:
-		toggleguipanelvisibility(null)
+	if not $Viewport/GUI/Panel/Label.text.begins_with("*"):
+		setguipanelhide()
 	Tglobal.soundsystem.quicksound("MenuClick", collision_point)
 	
 func _on_buttonsave_pressed():
@@ -60,8 +61,8 @@ func _on_buttonplanview_pressed():
 		pvchange["planviewactive"] = true
 		var guidpaneltransform = global_transform
 		var guidpanelsize = $Quad.mesh.size
+		setguipanelhide()
 		if not Tglobal.controlslocked:
-			toggleguipanelvisibility(null)
 			guidpaneltransform = null
 		pvchange["transformpos"] = planviewsystem.planviewtransformpos(guidpaneltransform, guidpanelsize)
 		sketchsystem.actsketchchange([{"planview":pvchange}])
@@ -71,33 +72,22 @@ func _on_buttonplanview_pressed():
 		$Viewport/GUI/Panel/Label.text = "Planview off"
 
 	Tglobal.soundsystem.quicksound("MenuClick", collision_point)
-	if not Tglobal.controlslocked:
-		toggleguipanelvisibility(null)
+	setguipanelhide()
 	
 func _on_buttonheadtorch_toggled(button_pressed):
 	playerMe.setheadtorchlight(button_pressed)
 	$Viewport/GUI/Panel/Label.text = "Headtorch on" if button_pressed else "Headtorch off"
-	if not Tglobal.controlslocked:
-		toggleguipanelvisibility(null)
+	setguipanelhide()
 
 func _on_buttondoppelganger_toggled(button_pressed):
 	playerMe.setdoppelganger(button_pressed)
 	$Viewport/GUI/Panel/Label.text = "Doppelganger on" if button_pressed else "Doppelganger off"
-	if not Tglobal.controlslocked:
-		toggleguipanelvisibility(null)
-
-func _on_buttonlockcontrols_toggled(button_pressed):
-	Tglobal.controlslocked = button_pressed
-	$Viewport/GUI/Panel/Label.text = "Controls locked" if button_pressed else "Controls unlocked"
-	if not Tglobal.controlslocked:
-		toggleguipanelvisibility(null)
-	Tglobal.soundsystem.quicksound("MenuClick", collision_point)
+	setguipanelhide()
 
 func _on_buttonflywalkreversed_toggled(button_pressed):
 	get_node("/root/Spatial/BodyObjects/PlayerDirections").flywalkreversed = button_pressed
 	$Viewport/GUI/Panel/Label.text = "Fly/Walk reversed" if button_pressed else "Fly/Walk normal"
-	if not Tglobal.controlslocked:
-		toggleguipanelvisibility(null)
+	setguipanelhide()
 
 
 func _on_playerscale_selected(index):
@@ -137,7 +127,7 @@ func _on_playerscale_selected(index):
 		else:
 			playerMe.playerflyscale = playerMe.playerscale*0.75
 		playerMe.playerwalkscale = 1.0
-	toggleguipanelvisibility(null)
+	setguipanelhide()
 	selfSpatial.mqttsystem.mqttpublish("playerscale", String(newplayerscale))
 
 
@@ -193,7 +183,6 @@ func exportOBJ():
 			
 	fout.close()
 	print("exported to C:/Users/ViveOne/AppData/Roaming/Godot/app_userdata/tunnelvr/objexport")
-	$Viewport/GUI/Panel/Label.text = "Cave exported"
 
 	var fmtl = File.new()
 	fmtl.open(fmtlname, File.WRITE)
@@ -253,47 +242,71 @@ func exportSTL():
 	print("saved ", fname, " in C:/Users/ViveOne/AppData/Roaming/Godot/app_userdata/tunnelvr")
 	$Viewport/GUI/Panel/Label.text = "Cave exported"
 
-
+var prevnssel = "normal"
 func _on_switchtest(index):
-	var nssel = $Viewport/GUI/Panel/SwitchTest.get_item_text(index)
+	var SwitchTest = $Viewport/GUI/Panel/SwitchTest
+	var nssel = SwitchTest.get_item_text(index)
 	print(" _on_switchtest ", nssel, " ", index)
+
+	if prevnssel == "choke":
+		makechoke(false)
+	elif prevnssel == "lock controls":
+		Tglobal.controlslocked = false
+		Tglobal.soundsystem.quicksound("MenuClick", collision_point)
+		
 	if nssel == "export STL":
 		exportSTL()
-		return
-	if nssel == "export OBJ":
-		exportOBJ()
-		return
+		$Viewport/GUI/Panel/Label.text = "STL exported"
+		SwitchTest.selected = 0
 
-	if nssel == "toggle guardian":
+	elif nssel == "export OBJ":
+		exportOBJ()
+		$Viewport/GUI/Panel/Label.text = "OBJ exported"
+		SwitchTest.selected = 0
+
+	elif nssel == "toggle guardian":
 		var guardianpolyvisible = not playerMe.get_node("GuardianPoly").visible
 		for player in get_node("/root/Spatial/Players").get_children():
 			player.get_node("GuardianPoly").visible = guardianpolyvisible
-		return
+		SwitchTest.selected = 0
 		
+	elif nssel == "choke":
+		$Viewport/GUI/Panel/Label.text = "Boulder choke!"
+		makechoke(true)
+		setguipanelhide()
 
-	var n = 0
-	for xcdrawing in sketchsystem.get_node("XCdrawings").get_children():
-		if xcdrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
-			if true or (xcdrawing.drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_GHOSTLY_B) != 0:
-				xcdrawing.get_node("XCdrawingplane").visible = (index == 0)
-				n += 1
-	print(("hiding " if index == 1 else "showing "), n, " ghostly drawings")
-	if nssel == "all grey":
-		var materialsystem = get_node("/root/Spatial/MaterialSystem")
-		for xctube in sketchsystem.get_node("XCtubes").get_children():
-			for xctubesector in xctube.get_node("XCtubesectors").get_children():
-				materialsystem.updatetubesectormaterial(xctubesector, "flatgrey", false)
-	if nssel == "hide xc":
-		sketchsystem.get_node("XCdrawings").visible = false
-	elif nssel == "normal":
-		sketchsystem.get_node("XCdrawings").visible = true
+	elif nssel == "swap controllers":
+		playerMe.swapcontrollers()
+		$Viewport/GUI/Panel/Label.text = "Controllers swapped"
+		Tglobal.soundsystem.quicksound("MenuClick", collision_point)
+		setguipanelhide()
+		SwitchTest.selected = 0
+		
+	elif nssel == "lock controls":
+		Tglobal.controlslocked = true
+		Tglobal.soundsystem.quicksound("MenuClick", collision_point)		
+		
+	elif prevnssel == "hide floors" or prevnssel == "all grey" or prevnssel == "hide xc":
+		var n = 0
+		var showall = (nssel == "normal")
+		for xcdrawing in sketchsystem.get_node("XCdrawings").get_children():
+			if xcdrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
+				if true or (xcdrawing.drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_GHOSTLY_B) != 0:
+					xcdrawing.get_node("XCdrawingplane").visible = showall
+					n += 1
+		if nssel == "all grey":
+			var materialsystem = get_node("/root/Spatial/MaterialSystem")
+			for xctube in sketchsystem.get_node("XCtubes").get_children():
+				for xctubesector in xctube.get_node("XCtubesectors").get_children():
+					materialsystem.updatetubesectormaterial(xctubesector, "flatgrey", false)
+		if nssel == "hide xc":
+			sketchsystem.get_node("XCdrawings").visible = false
+		elif nssel == "normal":
+			sketchsystem.get_node("XCdrawings").visible = true
+	
+	prevnssel = nssel
 	
 
-		
-func _on_buttonswapcontrollers_pressed():
-	playerMe.swapcontrollers()
-	$Viewport/GUI/Panel/Label.text = "Controllers swapped"
-	Tglobal.soundsystem.quicksound("MenuClick", collision_point)
 
 func _on_buttonrecord_down():
 	$Viewport/GUI/Panel/Label.text = "Recording ***"
@@ -307,9 +320,7 @@ func _on_buttonplay_pressed():
 	Tglobal.soundsystem.playmyvoicerecording()
 	$Viewport/GUI/Panel/Label.text = "Play voice"
 	
-func _on_buttonload_choke(pressed):
-	$Viewport/GUI/Panel/Label.text = "Boulder choke!"
-	toggleguipanelvisibility(null)
+func makechoke(pressed):
 	var Nboulders = 50
 	var boulderclutter = get_node("/root/Spatial/BoulderClutter")
 	if pressed:
@@ -332,8 +343,22 @@ func _on_buttonload_choke(pressed):
 		for markernode in boulderclutter.get_children():
 			markernode.queue_free()
 
+func _on_textedit_focus_entered():
+	print("text edit focus entered")
+	virtualkeyboard.visible = true
+	Tglobal.virtualkeyboardactive = true
+	virtualkeyboard.get_node("CollisionShape").disabled = not virtualkeyboard.visible
+	#$Viewport.render_target_update_mode = Viewport.UPDATE_ALWAYS
 
-	
+func _on_textedit_focus_exited():
+	print("text edit focus exited")
+	virtualkeyboard.visible = false
+	Tglobal.virtualkeyboardactive = false
+	virtualkeyboard.get_node("CollisionShape").disabled = not virtualkeyboard.visible
+	virtualkeyboard._toggle_symbols(false)
+	virtualkeyboard._toggle_case(false)
+	#print("uu ", $Viewport.render_target_update_mode, "  ", Viewport.UPDATE_ALWAYS)
+	#$Viewport.render_target_update_mode = Viewport.UPDATE_WHEN_VISIBLE if visible else Viewport.UPDATE_DISABLED
 
 const clientips = [ "144.76.167.54 Alex",  # alex server
 					"192.168.8.104 Quest2",  # home wifi
@@ -357,13 +382,16 @@ func _ready():
 	$Viewport/GUI/Panel/ButtonPlanView.connect("pressed", self, "_on_buttonplanview_pressed")
 	$Viewport/GUI/Panel/ButtonHeadtorch.connect("toggled", self, "_on_buttonheadtorch_toggled")
 	$Viewport/GUI/Panel/ButtonDoppelganger.connect("toggled", self, "_on_buttondoppelganger_toggled")
-	$Viewport/GUI/Panel/ButtonSwapControllers.connect("pressed", self, "_on_buttonswapcontrollers_pressed")
-	$Viewport/GUI/Panel/ButtonLockControls.connect("toggled", self, "_on_buttonlockcontrols_toggled")
+	#$Viewport/GUI/Panel/ButtonSwapControllers.connect("pressed", self, "_on_buttonswapcontrollers_pressed")
+	#$Viewport/GUI/Panel/ButtonLockControls.connect("toggled", self, "_on_buttonlockcontrols_toggled")
 	$Viewport/GUI/Panel/FlyWalkReversed.connect("toggled", self, "_on_buttonflywalkreversed_toggled")
 	#$Viewport/GUI/Panel/ButtonRecord.connect("button_down", self, "_on_buttonrecord_down")
 	#$Viewport/GUI/Panel/ButtonRecord.connect("button_up", self, "_on_buttonrecord_up")
 	#$Viewport/GUI/Panel/ButtonPlay.connect("pressed", self, "_on_buttonplay_pressed")
-	$Viewport/GUI/Panel/ButtonChoke.connect("toggled", self, "_on_buttonload_choke")
+	#$Viewport/GUI/Panel/ButtonChoke.connect("toggled", self, "_on_buttonload_choke")
+	$Viewport/GUI/Panel/EditColorRect/TextEdit.connect("focus_entered", self, "_on_textedit_focus_entered")
+	$Viewport/GUI/Panel/EditColorRect/TextEdit.connect("focus_exited", self, "_on_textedit_focus_exited")
+
 	
 	$Viewport/GUI/Panel/SwitchTest.connect("item_selected", self, "_on_switchtest")
 	$Viewport/GUI/Panel/PlayerList.connect("item_selected", self, "_on_playerlist_selected")
@@ -392,7 +420,7 @@ func _on_buttongoto_pressed():
 			rpc_id(1, "playerjumpgoto", playerMe.networkID, 0.5)
 	elif selectedplayernetworkid != -1:
 		playerjumpgoto(selectedplayernetworkid, 0.5)
-	toggleguipanelvisibility(null)
+	setguipanelhide()
 
 var selectedplayernetworkid = 0
 var selectedplayerplatform = ""
@@ -435,65 +463,80 @@ func updateplayerlist():
 	$Viewport/GUI/Panel/PlayerList.select(selectedplayerindex)
 	
 
-func toggleguipanelvisibility(controller_global_transform):
-	if not visible and controller_global_transform != null:
-		var paneltrans = Transform()
-		var controllertrans = controller_global_transform
-		var paneldistance = 0.6 if Tglobal.VRoperating else 0.2
-		paneltrans.origin = controllertrans.origin - paneldistance*ARVRServer.world_scale*(controllertrans.basis.z)
-		var lookatpos = controllertrans.origin - 1.6*ARVRServer.world_scale*(controllertrans.basis.z)
-		paneltrans = paneltrans.looking_at(lookatpos, Vector3(0, 1, 0))
-		paneltrans = Transform(paneltrans.basis.scaled(Vector3(ARVRServer.world_scale, ARVRServer.world_scale, ARVRServer.world_scale)), paneltrans.origin)		
-		global_transform = paneltrans
-		
-		$Viewport/GUI/Panel/Label.text = ""
-		var MQTTExperiment = get_node_or_null("/root/Spatial/MQTTExperiment")
-		if MQTTExperiment != null and MQTTExperiment.msg != "":
-			$Viewport/GUI/Panel/Label.text = MQTTExperiment.msg
-		elif Tglobal.connectiontoserveractive:
-			Tglobal.connectiontoserveractive
+func setguipanelvisible(controller_global_transform):
+	var paneltrans = Transform()
+	var controllertrans = controller_global_transform
+	var paneldistance = 0.6 if Tglobal.VRoperating else 0.2
+	paneltrans.origin = controllertrans.origin - paneldistance*ARVRServer.world_scale*(controllertrans.basis.z)
+	var lookatpos = controllertrans.origin - 1.6*ARVRServer.world_scale*(controllertrans.basis.z)
+	paneltrans = paneltrans.looking_at(lookatpos, Vector3(0, 1, 0))
+	paneltrans = Transform(paneltrans.basis.scaled(Vector3(ARVRServer.world_scale, ARVRServer.world_scale, ARVRServer.world_scale)), paneltrans.origin)
+	global_transform = paneltrans
 
-		visible = true
-		$CollisionShape.disabled = false
-		Tglobal.soundsystem.quicksound("ShowGui", global_transform.origin)
-		$Viewport.render_target_update_mode = Viewport.UPDATE_WHEN_VISIBLE
-		
-	else:
-		visible = false	
-		$Viewport.render_target_update_mode = Viewport.UPDATE_DISABLED
-		$CollisionShape.disabled = true
-		var MQTTExperiment = get_node_or_null("/root/Spatial/MQTTExperiment")
-		if MQTTExperiment != null and MQTTExperiment.msg != "":
-			$Viewport/GUI/Panel/Label.text = MQTTExperiment.msg
+	var kpaneltrans = paneltrans
+	kpaneltrans.origin = paneltrans.origin - paneltrans.basis.y*($Quad.mesh.size.y/2) - Vector3(0, virtualkeyboard.get_node("Quad").mesh.size.y/2, 0)
+	var klookatpos = 2*kpaneltrans.origin - controllertrans.origin + 0*ARVRServer.world_scale*(controllertrans.basis.z)
+	print(klookatpos)
+	klookatpos += -1.1*ARVRServer.world_scale*(controllertrans.basis.z)
+	print(klookatpos)
+	kpaneltrans = kpaneltrans.looking_at(klookatpos, Vector3(0, 1, 0))
+	kpaneltrans = Transform(kpaneltrans.basis.scaled(Vector3(ARVRServer.world_scale, ARVRServer.world_scale, ARVRServer.world_scale)), kpaneltrans.origin)
+	virtualkeyboard.global_transform = kpaneltrans
+	
+	$Viewport/GUI/Panel/Label.text = ""
+	var MQTTExperiment = get_node_or_null("/root/Spatial/MQTTExperiment")
+	if MQTTExperiment != null and MQTTExperiment.msg != "":
+		$Viewport/GUI/Panel/Label.text = MQTTExperiment.msg
+	elif Tglobal.connectiontoserveractive:
+		Tglobal.connectiontoserveractive
+
+	visible = true
+	$CollisionShape.disabled = not visible
+	Tglobal.soundsystem.quicksound("ShowGui", global_transform.origin)
 
 	if Tglobal.connectiontoserveractive:
-		print("nnnnn ", get_tree().get_network_unique_id())
-		assert(selfSpatial.playerMe.networkID != 0)
-		selfSpatial.playerMe.rpc("puppetenableguipanel", transform if visible else null)
-
-		if visible and $Viewport/GUI/Panel/Label.text == "":
-			var msg = "NetIDs "+str(selfSpatial.playerMe.networkID)+":"
-			for id in selfSpatial.players_connected_list:
-				msg += " "+str(id)
-			print(msg)
-			$Viewport/GUI/Panel/Label.text = msg
-			
+		selfSpatial.playerMe.rpc("puppetenableguipanel", transform)
 	if is_instance_valid(selfSpatial.playerMe.doppelganger):
-		selfSpatial.playerMe.doppelganger.puppetenableguipanel(transform if visible else null)
-
-	
+		selfSpatial.playerMe.doppelganger.puppetenableguipanel(transform)
 		
+func setguipanelhide():
+	if not Tglobal.controlslocked:
+		visible = false
+		$Viewport.render_target_update_mode = Viewport.UPDATE_DISABLED
+		$CollisionShape.disabled = not visible
+		if $Viewport/GUI/Panel/EditColorRect/TextEdit.has_focus():
+			$Viewport/GUI/Panel/EditColorRect/TextEdit.release_focus()
+
+		if Tglobal.connectiontoserveractive:
+			selfSpatial.playerMe.rpc("puppetenableguipanel", null)
+		if is_instance_valid(selfSpatial.playerMe.doppelganger):
+			selfSpatial.playerMe.doppelganger.puppetenableguipanel(null)
+
+		
+
+#func _unhandled_key_input(event):
 func _input(event):
-	if event is InputEventKey and event.pressed:
+	if not (event is InputEventKey):
+		return
+	if event.scancode == KEY_ESCAPE:
+		return
+
+	if virtualkeyboard.visible:
+		$Viewport.input(event)
+		get_tree().set_input_as_handled()
+
+	elif event.pressed:
 		if event.scancode == KEY_L:
 			_on_buttonload_pressed()
 		elif event.scancode == KEY_G:
 			$Viewport/GUI/Panel/ButtonDoppelganger.pressed = not $Viewport/GUI/Panel/ButtonDoppelganger.pressed
 			_on_buttondoppelganger_toggled($Viewport/GUI/Panel/ButtonDoppelganger.pressed)	
 		elif event.scancode == KEY_O:
-			_on_buttonswapcontrollers_pressed()
+			playerMe.swapcontrollers()
+			Tglobal.soundsystem.quicksound("MenuClick", collision_point)
 		elif event.scancode == KEY_B:
 			call_deferred("_on_networkstate_selected", 3)
+
 
 #-------------networking system
 var websocketserver = null

@@ -80,7 +80,7 @@ func _physics_process(delta):
 	playerdirectedwalkingvelocity = Vector3(0,0,0)
 
 	var joypos = HandLeft.joypos
-	if not Input.is_action_pressed("lh_shift"):
+	if not Input.is_action_pressed("lh_shift") and not Tglobal.virtualkeyboardactive:
 		if Input.is_action_pressed("lh_forward"):   joypos.y += 1
 		if Input.is_action_pressed("lh_backward"):  joypos.y += -1
 		if Input.is_action_pressed("lh_left"):      joypos.x += -1

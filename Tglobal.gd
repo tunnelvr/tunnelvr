@@ -11,6 +11,7 @@ var arvrinterface = null
 var VRoperating = false
 
 var controlslocked = false
+var virtualkeyboardactive = false
 var questhandtracking = false
 var questhandtrackingactive = false
 

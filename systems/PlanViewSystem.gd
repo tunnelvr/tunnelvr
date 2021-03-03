@@ -300,20 +300,18 @@ func actplanviewdict(pvchange):
 				xctube.setxctubepathlinevisibility(sketchsystem)
 
 func planviewtransformpos(guidpaneltransform, guidpanelsize):
+	var paneltrans = $PlanView.global_transform
 	if guidpaneltransform != null:
-		var paneltrans = $PlanView.global_transform
 		paneltrans.origin = guidpaneltransform.origin + guidpaneltransform.basis.y*(guidpanelsize.y/2) + Vector3(0,$PlanView/ProjectionScreen/ImageFrame.mesh.size.y/2,0)
 		var eyepos = get_node("/root/Spatial").playerMe.get_node("HeadCam").global_transform.origin
 		paneltrans = paneltrans.looking_at(eyepos + 2*(paneltrans.origin-eyepos), Vector3(0, 1, 0))
-		return paneltrans
 	else:
-		var paneltrans = $PlanView.global_transform
 		var controllertrans = get_node("/root/Spatial/BodyObjects/LaserOrient").global_transform
 		var paneldistance = 1.2 if Tglobal.VRoperating else 0.6
 		paneltrans.origin = controllertrans.origin - paneldistance*ARVRServer.world_scale*(controllertrans.basis.z)
 		var lookatpos = controllertrans.origin - 1.6*ARVRServer.world_scale*(controllertrans.basis.z)
 		paneltrans = paneltrans.looking_at(lookatpos, Vector3(0, 1, 0))
-		return paneltrans
+	return paneltrans
 
 
 var updateplanviewentitysizes_working = false
