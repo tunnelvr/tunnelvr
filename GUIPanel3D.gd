@@ -9,46 +9,70 @@ onready var sketchsystem = get_node("/root/Spatial/SketchSystem")
 onready var playerMe = get_node("/root/Spatial/Players/PlayerMe")
 onready var selfSpatial = get_node("/root/Spatial")
 onready var virtualkeyboard = get_node("/root/Spatial/GuiSystem/KeyboardPanel")
-	
+
+var regexacceptableprojectname = RegEx.new()
+
+var cavefilesdir = "user://cavefiles/"
+
 func _on_buttonload_pressed():
 	var savegamefileid = $Viewport/GUI/Panel/Savegamefilename.get_selected_id()
 	var savegamefilename = $Viewport/GUI/Panel/Savegamefilename.get_item_text(savegamefileid)
-	if savegamefilename == "cleargame":
-		sketchsystem.loadsketchsystemL("cleargame")
-		$Viewport/GUI/Panel/Label.text = "Clearing game"
-	elif savegamefilename.begins_with("server/"):
-		savegamefilename = savegamefilename.replace("server/", "")
-		if Tglobal.connectiontoserveractive and playerMe.networkID != 1:
-			sketchsystem.rpc_id(1, "loadsketchsystemL", "user://"+savegamefilename)
-			$Viewport/GUI/Panel/Label.text = "Loading server sketch"
+	if savegamefilename == "--clearcave":
+		sketchsystem.loadsketchsystemL("clearcave")
+		$Viewport/GUI/Panel/Label.text = "Clearing cave"
+
+	elif not savegamefilename.ends_with(".res"):
+		if savegamefilename[0] == "*":
+			savegamefilename = savegamefilename.lstrip("*")
+		var savegamefilenameU = cavefilesdir+savegamefilename+".res"
+		if $Viewport/GUI/Panel/ButtonServerside.pressed:
+			if Tglobal.connectiontoserveractive and playerMe.networkID != 1:
+				sketchsystem.rpc_id(1, "loadsketchsystemL", savegamefilenameU)
+				$Viewport/GUI/Panel/Label.text = "Loading server sketch"
+			else:
+				$Viewport/GUI/Panel/Label.text = "*server not connected"
 		else:
-			$Viewport/GUI/Panel/Label.text = "*server not connected"
-	else:
-		var savegamefilenameU = "user://"+savegamefilename
-		if File.new().file_exists(savegamefilenameU):
-			sketchsystem.loadsketchsystemL(savegamefilenameU)
-			$Viewport/GUI/Panel/Label.text = "Sketch Loaded"
-		else:
-			$Viewport/GUI/Panel/Label.text = "*" + savegamefilename + " does not exist"
-					
+			if File.new().file_exists(savegamefilenameU):
+				sketchsystem.loadsketchsystemL(savegamefilenameU)
+				$Viewport/GUI/Panel/Label.text = "Sketch Loaded"
+			else:
+				$Viewport/GUI/Panel/Label.text = "*" + savegamefilename + " does not exist"
+
 	if not $Viewport/GUI/Panel/Label.text.begins_with("*"):
 		setguipanelhide()
 	Tglobal.soundsystem.quicksound("MenuClick", collision_point)
 	
+remote func setsavegamefilename(cfile):
+	var snames = $Viewport/GUI/Panel/Savegamefilename
+	for i in range(snames.get_item_count()):
+		if cfile == snames.get_item_text(i).lstrip("*"):
+			snames.select(i)
+			return
+	snames.add_item(cfile)
+	snames.select(snames.get_item_count() - 1)	
+	
 func _on_buttonsave_pressed():
-	var savegamefileid = $Viewport/GUI/Panel/Savegamefilename.get_selected_id()
-	var savegamefilename = $Viewport/GUI/Panel/Savegamefilename.get_item_text(savegamefileid)
-	if savegamefilename == "cleargame":
-		$Viewport/GUI/Panel/Label.text = "Cannot oversave cleargame"
-	elif savegamefilename.begins_with("server/"):
-		savegamefilename = savegamefilename.replace("server/", "")
-		if Tglobal.connectiontoserveractive and playerMe.networkID != 1:
-			sketchsystem.rpc_id(1, "savesketchsystem", "user://"+savegamefilename)
-			$Viewport/GUI/Panel/Label.text = "Saving server sketch"
-	else:
-		var savegamefilenameU = "user://"+savegamefilename
-		sketchsystem.savesketchsystem(savegamefilenameU)
-		$Viewport/GUI/Panel/Label.text = "Sketch Saved"
+	var snames = $Viewport/GUI/Panel/Savegamefilename
+	var savegamefileid = snames.get_selected_id()
+	var savegamefilename = snames.get_item_text(savegamefileid)
+	if savegamefilename == "--clearcave":
+		$Viewport/GUI/Panel/Label.text = "Cannot oversave clearcave"
+
+	elif not savegamefilename.ends_with(".res"):
+		if savegamefilename[0] == "*":
+			savegamefilename = savegamefilename.lstrip("*")
+		var savegamefilenameU = cavefilesdir+savegamefilename+".res"
+		sketchsystem.rset("sketchname", savegamefilename)
+		rpc("setsavegamefilename", savegamefilename)
+		if $Viewport/GUI/Panel/ButtonServerside.pressed:
+			if Tglobal.connectiontoserveractive and playerMe.networkID != 1:
+				sketchsystem.rpc_id(1, "savesketchsystem", savegamefilenameU)
+				$Viewport/GUI/Panel/Label.text = "Saving server sketch"
+			else:
+				$Viewport/GUI/Panel/Label.text = "File not saved"
+		else:
+			sketchsystem.savesketchsystem(savegamefilenameU)
+			$Viewport/GUI/Panel/Label.text = "Sketch Saved"
 	Tglobal.soundsystem.quicksound("MenuClick", collision_point)
 	
 
@@ -349,6 +373,7 @@ func _on_textedit_focus_entered():
 	Tglobal.virtualkeyboardactive = true
 	virtualkeyboard.get_node("CollisionShape").disabled = not virtualkeyboard.visible
 	#$Viewport.render_target_update_mode = Viewport.UPDATE_ALWAYS
+	$Viewport/GUI/Panel/TextRelatedActions.visible = true
 
 func _on_textedit_focus_exited():
 	print("text edit focus exited")
@@ -357,14 +382,15 @@ func _on_textedit_focus_exited():
 	virtualkeyboard.get_node("CollisionShape").disabled = not virtualkeyboard.visible
 	virtualkeyboard._toggle_symbols(false)
 	virtualkeyboard._toggle_case(false)
-	#print("uu ", $Viewport.render_target_update_mode, "  ", Viewport.UPDATE_ALWAYS)
-	#$Viewport.render_target_update_mode = Viewport.UPDATE_WHEN_VISIBLE if visible else Viewport.UPDATE_DISABLED
+	yield(get_tree().create_timer(0.1), "timeout")
+	$Viewport/GUI/Panel/TextRelatedActions.visible = false
 
-const clientips = [ "144.76.167.54 Alex",  # alex server
+const clientips = [ "tunnelvr.goatchurch.org.uk",  # alex server
 					"192.168.8.104 Quest2",  # home wifi
 					"192.168.8.101 JGT",     # home wifi
 					"192.168.43.186 Quest2S9" ]
 func _ready():
+	regexacceptableprojectname.compile('(?i)^([a-z0-9.\\-_]+)\\s*$')
 	if has_node("ViewportReal"):
 		var fgui = $Viewport/GUI
 		$Viewport.remove_child(fgui)
@@ -375,7 +401,7 @@ func _ready():
 		
 	$Viewport.render_target_update_mode = Viewport.UPDATE_DISABLED
 	for clientip in clientips:
-		$Viewport/GUI/Panel/Networkstate.add_item("Client->"+clientip)
+		$Viewport/GUI/Panel/Networkstate.add_item(clientip)
 	
 	$Viewport/GUI/Panel/ButtonLoad.connect("pressed", self, "_on_buttonload_pressed")
 	$Viewport/GUI/Panel/ButtonSave.connect("pressed", self, "_on_buttonsave_pressed")
@@ -399,9 +425,52 @@ func _ready():
 	$Viewport/GUI/Panel/WorldScale.connect("item_selected", self, "_on_playerscale_selected")
 	$Viewport/GUI/Panel/Networkstate.connect("item_selected", self, "_on_networkstate_selected")
 
+	$Viewport/GUI/Panel/TextRelatedActions/ButtonMessage.connect("pressed", self, "_on_buttonmessage_pressed")
+	$Viewport/GUI/Panel/TextRelatedActions/ButtonNewfile.connect("pressed", self, "_on_buttonnewfile_pressed")
+	$Viewport/GUI/Panel/TextRelatedActions/ButtonRemovefile.connect("pressed", self, "_on_buttonremovefile_pressed")
+
+
 	if $Viewport/GUI/Panel/Networkstate.selected != 0:  # could record saved settings on disk
 		call_deferred("_on_networkstate_selected", $Viewport/GUI/Panel/Networkstate.selected)
 
+	$Viewport/GUI/Panel/Savegamefilename.clear()
+	$Viewport/GUI/Panel/Savegamefilename.add_item("--clearcave")
+	for cfile in cavesfilelist():
+		$Viewport/GUI/Panel/Savegamefilename.add_item(cfile)
+
+func cavesfilelist():
+	var cfiles = [ ]
+	var dir = Directory.new()
+	if not dir.dir_exists(cavefilesdir):
+		var err = Directory.new().make_dir(cavefilesdir)
+		print("Making directory ", cavefilesdir, " err code: ", err)
+	var e = dir.open(cavefilesdir)
+	if e != OK:
+		print("list dir error ", e)
+		return
+	var fnames = [ ]
+	dir.list_dir_begin()
+	var file_name = dir.get_next()
+	while file_name != "":
+		if file_name != "." and file_name != "..":
+			assert (not dir.current_is_dir())
+			if file_name.ends_with(".res"):
+				var cname = file_name.substr(0, len(file_name)-4)
+				cfiles.push_back(cname)
+		file_name = dir.get_next()
+	return cfiles
+
+remote func servercavesfilelist(scfiles):
+	var snames = $Viewport/GUI/Panel/Savegamefilename
+	var snamelist = [ ]
+	for i in range(snames.get_item_count()):
+		snamelist.push_back(snames.get_item_text(i).lstrip("*"))
+	for cfile in scfiles:
+		if not snamelist.has(cfile):
+			snames.add_item(cfile)
+		else:
+			print(" file ", cfile, " already listed")
+		
 func clickbuttonheadtorch():
 	$Viewport/GUI/Panel/ButtonHeadtorch.pressed = not $Viewport/GUI/Panel/ButtonHeadtorch.pressed
 	_on_buttonheadtorch_toggled($Viewport/GUI/Panel/ButtonHeadtorch.pressed)
@@ -421,6 +490,31 @@ func _on_buttongoto_pressed():
 	elif selectedplayernetworkid != -1:
 		playerjumpgoto(selectedplayernetworkid, 0.5)
 	setguipanelhide()
+
+remote func copyacrosstextedit(text):
+	$Viewport/GUI/Panel/EditColorRect/TextEdit.text = text
+
+func _on_buttonmessage_pressed():
+	if Tglobal.connectiontoserveractive:
+		rpc("copyacrosstextedit", $Viewport/GUI/Panel/EditColorRect/TextEdit.text)
+	
+func _on_buttonnewfile_pressed():
+	var snames = $Viewport/GUI/Panel/Savegamefilename
+	var mtext = $Viewport/GUI/Panel/EditColorRect/TextEdit.text
+	var mmtext = regexacceptableprojectname.search(mtext)
+	if mmtext == null:
+		return
+	var ftext = mmtext.get_string(0)
+	for i in range(snames.get_item_count()):
+		if ftext == snames.get_item_text(i):
+			return
+	snames.add_item("*"+ftext)
+	var fi = snames.get_item_count()-1
+	snames.select(fi)
+	
+func _on_buttonremovefile_pressed():
+	pass
+
 
 var selectedplayernetworkid = 0
 var selectedplayerplatform = ""
@@ -562,7 +656,7 @@ func _on_networkstate_selected(index):
 				$Viewport/GUI/Panel/Label.text = kf
 		websocketclient = null
 		
-	if nssel.begins_with("Network Off"):
+	elif nssel.begins_with("Network Off"):
 		if websocketserver != null:
 			websocketserver.close()
 			# Note: To achieve a clean close, you will need to keep polling until either WebSocketClient.connection_closed or WebSocketServer.client_disconnected is received.
@@ -577,18 +671,18 @@ func _on_networkstate_selected(index):
 		selfSpatial.setconnectiontoserveractive(false)
 		get_tree().set_network_peer(null)
 		
-	if nssel.begins_with("As Server"):
+	elif nssel.begins_with("As Server"):
 		networkstartasserver(true)
 		if selfSpatial.playerMe.networkID == 0:
 			$Viewport/GUI/Panel/Label.text = "server failed to start"
 		else:
 			$Viewport/GUI/Panel/Label.text = "networkID: "+str(selfSpatial.playerMe.networkID)
 				
-	if nssel.begins_with("Client->"):
+	else:
 		selfSpatial.hostipnumber = nssel.replace("Client->", "")
-		if selfSpatial.hostipnumber.find(" "):
+		if selfSpatial.hostipnumber.find(" ") != -1:
 			selfSpatial.hostipnumber = selfSpatial.hostipnumber.left(selfSpatial.hostipnumber.find(" "))
-		print(selfSpatial.hostipnumber.is_valid_ip_address())
+		print(nssel, "    ", selfSpatial.hostipnumber, "  ", selfSpatial.hostipnumber.is_valid_ip_address())
 		
 		get_tree().connect("network_peer_connected", selfSpatial, "_player_connected")
 		get_tree().connect("network_peer_disconnected", selfSpatial, "_player_disconnected")
@@ -609,7 +703,7 @@ func _on_networkstate_selected(index):
 			var inbandwidth = 0
 			var outbandwidth = 0
 			var e = networkedmultiplayerenet.create_client(selfSpatial.hostipnumber, selfSpatial.hostportnumber, inbandwidth, outbandwidth)
-			print("networkedmultiplayerenet createclient: ", e)
+			print("networkedmultiplayerenet createclient: ", e, " ", selfSpatial.hostipnumber)
 			get_tree().set_network_peer(networkedmultiplayerenet)
 		$Viewport/GUI/Panel/Label.text = "connecting "+("websocket" if selfSpatial.usewebsockets else "ENET")
 

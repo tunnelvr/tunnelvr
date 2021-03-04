@@ -256,6 +256,7 @@ func _player_connected(id):
 
 	mqttsystem.mqttpublish("playercount/add", "%d %d" % [$Players.get_child_count(), id])
 	if playerMe.networkID == 1:
+		$GuiSystem/GUIPanel3D.rpc_id(id, "servercavesfilelist", $GuiSystem/GUIPanel3D.cavesfilelist())
 		print("Converting sketchsystemtodict")
 		var sketchdatadict = $SketchSystem.sketchsystemtodict(false)
 		assert(playerMe.networkID != 0)

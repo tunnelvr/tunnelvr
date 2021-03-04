@@ -210,8 +210,8 @@ remote func actsketchchangeL(xcdatalist):
 
 	if "sketchname" in xcdatalist[0]:
 		sketchname = xcdatalist[0]["sketchname"]
-		get_node("/root/Spatial/GuiSystem/GUIPanel3D/Viewport/GUI/Panel/SketchName").text = sketchname
-	
+		get_node("/root/Spatial/GuiSystem/GUIPanel3D").setsavegamefilename(sketchname)
+		
 	var xcdrawingstoupdate = { }
 	var xctubestoupdate = { }
 	var xcdrawingsrejected = [ ]
@@ -606,7 +606,7 @@ func sketchdicttochunks(sketchdatadict):
 remote func loadsketchsystemL(fname):
 	var sketchdatafile = File.new()
 	var sketchdatadict = null
-	if fname == "cleargame":
+	if fname == "clearcave":
 		sketchdatadict = { "sketchname":"unnamedsketch", "xcdrawings":[], "xctubes":[] }
 		if $XCdrawings.get_child_count() != 1:
 			for xcdrawing in $XCdrawings.get_children():
@@ -618,8 +618,10 @@ remote func loadsketchsystemL(fname):
 		sketchdatafile.open(fname, File.READ)
 		sketchdatadict = sketchdatafile.get_var()
 		sketchdatafile.close()
-		if sketchdatadict.get("sketchname", "unnamedsketch") == "unnamedsketch":
-			sketchdatadict["sketchname"] = fname.split("/")[-1].split(".")[0]
+		var fsketchname = fname.split("/")[-1].split(".")[0]
+		if sketchdatadict.get("sketchname", "unnamedsketch") != fsketchname:
+			print("resetting sketchname from ", sketchdatadict.get("sketchname", "unnamedsketch"), " to ", fsketchname, " on load")
+			sketchdatadict["sketchname"] = fsketchname
 	else:
 		return
 		

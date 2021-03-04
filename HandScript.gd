@@ -251,6 +251,9 @@ func initnormalvrtracking(lhandcontroller):
 func process_ovrhandtracking(delta):
 	handpositionstack.clear()
 	handconfidence = ovr_hand_tracking.get_hand_pose(controller_id, hand_boneorientations)
+	for i in range(len(hand_boneorientations)):
+		hand_boneorientations[i] = hand_boneorientations[i].normalized()  # really?
+		
 	handvalid = handconfidence != null and handconfidence == 1
 	if handvalid:
 		transform = handcontroller.transform 

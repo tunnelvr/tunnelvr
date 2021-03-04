@@ -5,11 +5,21 @@ extends EditorScript
 # Control-Shift X to run this code in the editor
 # *******
 var regex = RegEx.new()
-
 func _run():
-	var x = [2,3,4,5,6,76,7]
-	print(x.slice(4,1,-1))
-	var y = PoolVector2Array()
-	y.resize(10)
-	y[1] = Vector2(1,2)
-	print(y)
+	regex.compile('(?i)^([a-z0-9.\\-_]+)\\s*$')
+	var x = "k-0_kl \n "
+	print([x])
+	x = regex.search(x)
+	print(x == null)
+	print(x.get_string(1))
+	print("s*sdfsdf".lstrip("*"))
+
+	var some_string = "One,Two,Three,Four"
+	var some_array = some_string.rsplit(",", true, 1)
+	print(some_array.size()) # Prints 2
+	print(some_array[0]) # Prints "Four"
+	print(some_array[1]) # Prints "Three,Two,One"
+	
+	var g = "sdfsdf1.res"
+	print(g, "  ", g.substr(0, len(g)-4))
+

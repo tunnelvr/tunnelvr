@@ -165,12 +165,13 @@ puppet func bouncedoppelgangerposition(bouncebackID, positiondict):
 	rpc_unreliable_id(bouncebackID, "setdoppelgangerposition", positiondict)
 
 func swapcontrollers():
-	var cidl = $HandLeftController.controller_id
-	var cidr = $HandRightController.controller_id
-	$HandLeftController.controller_id = cidr
-	$HandRightController.controller_id = cidl
-	$HandLeft.controller_id = cidr
-	$HandRight.controller_id = cidl
+	if not Tglobal.questhandtracking:
+		var cidl = $HandLeftController.controller_id
+		var cidr = $HandRightController.controller_id
+		$HandLeftController.controller_id = cidr
+		$HandRightController.controller_id = cidl
+		$HandLeft.controller_id = cidr
+		$HandRight.controller_id = cidl
 
 remotesync func playvoicerecording(wavrecording):
 	print("playing recording ", wavrecording.size()) 
@@ -214,7 +215,8 @@ func playerappearancedict():
 	return { "playerplatform":playerplatform, 
 			 "playerheadcolour":get_node("HeadCam/csgheadmesh/skullcomponent").material.albedo_color, 
 			 "torchon":get_node("HeadCam/HeadtorchLight").visible, 
-			 "guardianpoly":guardianpoly
+			 "guardianpoly":guardianpoly, 
+			 "cavesfilelist":guipanel3d.cavesfilelist()
 			}
 
 
@@ -289,4 +291,5 @@ func initquesthandtrackingnow(lovr_hand_tracking):
 	ovr_hand_tracking = lovr_hand_tracking
 	$HandLeft.initovrhandtracking(ovr_hand_tracking, $HandLeftController)
 	$HandRight.initovrhandtracking(ovr_hand_tracking, $HandRightController)
-	get_node("/root/Spatial/GuiSystem/GUIPanel3D/Viewport/GUI/Panel/ButtonSwapControllers").disabled = true
+	#get_node("/root/Spatial/GuiSystem/GUIPanel3D/Viewport/GUI/Panel/ButtonSwapControllers").disabled = true
+
