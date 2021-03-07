@@ -155,6 +155,26 @@ func _on_playerscale_selected(index):
 	selfSpatial.mqttsystem.mqttpublish("playerscale", String(newplayerscale))
 
 
+
+func objsinglesurface(joff, fout, sname, mesh, transform, materialsystem, materialdict, xcmaterialname):
+	if not materialdict.has(xcmaterialname):
+		 materialdict[xcmaterialname] = materialsystem.tubematerial(xcmaterialname, false)
+	var uvscale = materialdict[xcmaterialname].uv1_scale
+	fout.store_line(sname)
+	var sarrays = mesh.surface_get_arrays(0)
+	for p in sarrays[0]:
+		var tp = transform.xform(p)
+		fout.store_line("v %f %f %f"%[tp.x, tp.y, tp.z])
+	for n in sarrays[4]:
+		fout.store_line("vt %f %f"%[n.x*uvscale.x, n.y*uvscale.y])
+	fout.store_line("usemtl %s"%xcmaterialname)
+	fout.store_line("s off")
+	for j in range(0, len(sarrays[0]), 3):
+		fout.store_line("f %d/%d %d/%d %d/%d"%[j+joff,j+joff,  j+joff+1,j+joff+1,  j+joff+2,j+joff+2])
+	joff += len(sarrays[0])
+	return joff
+
+
 func exportOBJ():
 	if not Directory.new().dir_exists("user://objexport"):
 		Directory.new().make_dir("user://objexport")
@@ -170,27 +190,20 @@ func exportOBJ():
 		for i in range(xctube.get_node("XCtubesectors").get_child_count()):
 			var xctubesector = xctube.get_node("XCtubesectors").get_child(i)
 			var xcmaterialname = xctube.xcsectormaterials[i]
-			if xcmaterialname == "hole":
-				continue
-			if not materialdict.has(xcmaterialname):
-				 materialdict[xcmaterialname] = materialsystem.tubematerial(xcmaterialname, false)
-			var uvscale = materialdict[xcmaterialname].uv1_scale
-			fout.store_line("o %s_%d"%[xctube.get_name(), i])
 			var mesh = xctubesector.get_node("MeshInstance").mesh
-			var sarrays = mesh.surface_get_arrays(0)
-			for p in sarrays[0]:
-				fout.store_line("v %f %f %f"%[p.x, p.y, p.z])
-			for n in sarrays[4]:
-				fout.store_line("vt %f %f"%[n.x*uvscale.x, n.y*uvscale.y])
-			fout.store_line("usemtl %s"%xcmaterialname)
-			fout.store_line("s off")
-			for j in range(0, len(sarrays[0]), 3):
-				fout.store_line("f %d/%d %d/%d %d/%d"%[j+joff,j+joff,  j+joff+1,j+joff+1,  j+joff+2,j+joff+2])
-			joff += len(sarrays[0])
+			var sname = "o %s_%d"%[xctube.get_name(), i]
+			if xcmaterialname != "hole":
+				joff = objsinglesurface(joff, fout, sname, mesh, Transform(), materialsystem, materialdict, xcmaterialname)
 
 	materialdict["rope"] = materialsystem.pathlinematerial("rope")
 	for xcdrawing in sketchsystem.get_node("XCdrawings").get_children():
-		if xcdrawing.drawingtype == DRAWING_TYPE.DT_ROPEHANG:
+		if xcdrawing.has_node("XCflatshell") and (xcdrawing.drawingtype == DRAWING_TYPE.DT_ROPEHANG or xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING):
+			var mesh = xcdrawing.get_node("XCflatshell/MeshInstance").mesh
+			var sname = "o %s"%[xcdrawing.get_name()]
+			if xcdrawing.xcflatshellmaterial != "hole":
+				joff = objsinglesurface(joff, fout, sname, mesh, xcdrawing.transform, materialsystem, materialdict, xcdrawing.xcflatshellmaterial)
+
+		elif xcdrawing.drawingtype == DRAWING_TYPE.DT_ROPEHANG:
 			var uvscale = materialdict["rope"].uv1_scale
 			fout.store_line("o %s"%[xcdrawing.get_name()])
 			var mesh = xcdrawing.get_node("RopeHang/RopeMesh").mesh
@@ -204,6 +217,8 @@ func exportOBJ():
 				for j in range(0, len(sarrays[8]), 3):
 					fout.store_line("f %d/%d %d/%d %d/%d"%[sarrays[8][j]+joff,sarrays[8][j]+joff,  sarrays[8][j+1]+joff,sarrays[8][j+1]+joff,  sarrays[8][j+2]+joff,sarrays[8][j+2]+joff])
 				joff += len(sarrays[0])
+				
+
 			
 	fout.close()
 	print("exported to C:/Users/ViveOne/AppData/Roaming/Godot/app_userdata/tunnelvr/objexport")

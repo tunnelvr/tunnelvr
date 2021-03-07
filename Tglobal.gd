@@ -1,6 +1,6 @@
 extends Node
 
-const version = "v0.5.6"
+const version = "v0.5.7"
 
 var connectiontoserveractive = false
 var morethanoneplayer = false

@@ -12,6 +12,8 @@ var actsketchchangeundostack = [ ]
 #const defaultfloordrawing = "http://cave-registry.org.uk/svn/NorthernEngland/ThreeCountiesArea/rawscans/Ireby/DukeStResurvey-drawnup-p3.jpg"
 const defaultfloordrawing = "http://cave-registry.org.uk/svn/NorthernEngland/rawscans/LambTrap/LambTrap-drawnup-1.png"
 
+var pointersystem = null
+
 func _ready():
 	var floordrawingimg = defaultfloordrawing
 	#floordrawingimg = "res://surveyscans/greenland/ushapedcave.png"
@@ -92,7 +94,10 @@ func actsketchchange(xcdatalist):
 				xcdatalist[0]["rpcoptional"] = 0
 				prevcombinabletransformposchangetimestamp = xcdatalist[0].get("timestamp", 0)
 
-	actsketchchangeL(xcdatalist)  # <--- the main function you want to step into
+	################## # VVV--- the main function you want to step into
+	actsketchchangeL(xcdatalist)  
+	################## #
+	
 	if Tglobal.connectiontoserveractive and not (xcdatalist[0].get("rpcoptional", 0) == 1):
 		assert(playerMe.networkID != 0)
 		#print("Delaying transmission by 20 seconds to simulate bad connections")
@@ -484,6 +489,9 @@ func xcdrawingfromdata(xcdata, fromremotecall):
 			print("Mismatch change sequence in drawing ", xcdata["name"], " remote ", xcdata["xcchangesequence"], " here ", xcdrawing.xcchangesequence)
 			return null
 		  
+	if "prevnodepoints" in xcdata:
+		pointersystem.cleardeletedtargets(xcdata.get("prevnodepoints"), xcdata.get("nextnodepoints"))
+		
 	var t0 = OS.get_ticks_msec()
 	xcdrawing.mergexcrpcdata(xcdata)
 	var dt = OS.get_ticks_msec() - t0

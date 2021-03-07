@@ -1550,7 +1550,6 @@ margin_top = 43.0
 margin_right = 195.0
 margin_bottom = 70.0
 text = "savegame.res"
-selected = 0
 __meta__ = {
 "_edit_use_anchors_": false
 }

@@ -165,6 +165,7 @@ func _ready():
 	
 	$PlanViewSystem.transferintorealviewport((not enablevr) and planviewonly)
 	playerMe.initplayerappearance_me()
+	$SketchSystem.pointersystem = playerMe.get_node("pointersystem")
 	
 	Tglobal.VRoperating = (Tglobal.arvrinterfacename != "none")
 	if Tglobal.VRoperating:

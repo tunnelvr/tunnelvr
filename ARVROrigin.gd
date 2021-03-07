@@ -216,6 +216,7 @@ func playerappearancedict():
 			 "playerheadcolour":get_node("HeadCam/csgheadmesh/skullcomponent").material.albedo_color, 
 			 "torchon":get_node("HeadCam/HeadtorchLight").visible, 
 			 "guardianpoly":guardianpoly, 
+			 "version":Tglobal.version,
 			 "cavesfilelist":guipanel3d.cavesfilelist()
 			}
 

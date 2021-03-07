@@ -144,6 +144,14 @@ func clearactivetargetnode():
 	activetargetnodetriggerpulling = false
 	activelaserroot.get_node("LaserSpot").set_surface_material(0, materialsystem.lasermaterialN((1 if activetargetnode != null else 0) + (2 if pointertarget == null else 0)))
 
+func cleardeletedtargets(prevnodepoints, nextnodepoints):
+	for xcnodename in prevnodepoints:
+		if nextnodepoints == null or not nextnodepoints.has(xcnodename):
+			if activetargetnode != null and activetargetnode.get_name() == xcnodename:
+				clearactivetargetnode()
+			if pointertargettype == "XCnode" and pointertarget != null and pointertarget.get_name() == xcnodename:
+				clearpointertarget()
+
 	
 func setactivetargetnode(newactivetargetnode):
 	clearactivetargetnode()
@@ -633,10 +641,18 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 							  }
 				xcdatalist.push_back(xctdata)
 
-		clearactivetargetnode()
-		clearpointertarget()
-		activelaserroot.get_node("LaserSpot").visible = false
+		#clearactivetargetnode()
+		#clearpointertarget()
 		sketchsystem.actsketchchange(xcdatalist)
+		if Tglobal.handflickmotiongestureposition == 1:
+			activelaserroot.get_node("LaserSpot").visible = true
+		
+	#elif Tglobal.handflickmotiongestureposition == 1:
+	#	activelaserroot.get_node("LaserSpot").set_surface_material(0, materialsystem.lasermaterialN((1 if activetargetnode != null else 0) + 2))
+	#	activelaserroot.get_node("LaserSpot").visible = true
+
+
+
 		#Tglobal.soundsystem.quicksound("BlipSound", pointertargetpoint)
 
 	elif activetargetnode != null and pointertarget == activetargetnode:
@@ -1174,7 +1190,8 @@ func buttonreleased_vrgrip():
 												"prevnodepoints":prevnodepoints,
 												"nextnodepoints":nextnodepoints
 											}])
-
+				clearactivetargetnode()
+				
 			elif pointertarget.get_name() == "HoleXC":
 				var xcsectormaterial = gripmenu.gripmenupointertargetwall.xcsectormaterials[gripmenu.gripmenuactivetargettubesectorindex]
 				if xcsectormaterial == "hole":
