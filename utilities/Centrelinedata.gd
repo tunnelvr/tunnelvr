@@ -106,6 +106,62 @@ static func xcdatalistfromcentreline(centrelinefile):
 			prevsname = sname
 
 	xcdrawinglist.push_back({ "xcvizstates":xcvizstates, "updatetubeshells":updatetubeshells })
-
 	return xcdrawinglist
 	
+
+static func xcdatalistfromwinddata(wingdeffile):
+	var f = File.new()
+	f.open(wingdeffile, File.READ)
+	var k = [ ]
+	for j in range(70):
+		k.append(f.get_csv_line())
+	var sections = [ ]
+	var zvals = [ ]
+	for i in range(1, 60, 3):
+		var pts = [ ]
+		var z = float(k[2][i+1])
+		for j in range(2, 70):
+			assert (z == float(k[j][i+1]))
+			pts.append(Vector3(float(k[j][i]), float(k[j][i+2]), 0))
+		zvals.append(z)
+		sections.append(pts)
+	
+	var nodepairs = [ ]
+	for i in range(67):
+		nodepairs.append("p%d"%i)
+		nodepairs.append("p%d"%(i+1))
+	var xcdrawinglist = [ ]
+	var xcvizstates = { }
+	var prevsname = null
+	var updatetubeshells = [ ]
+	var enddrawinglinks = ["p0", "p0", "graphpaper", null,  "p67", "p67", "graphpaper", null]
+	for j in range(len(sections)):
+		var pts = sections[j]
+		var nodepoints = { }
+		for i in range(68):
+			nodepoints["p%d" % i] = pts[i]
+		var sname = "ws%d"%j
+		var xcdata = { "name":sname, 
+					   "drawingtype":DRAWING_TYPE.DT_XCDRAWING, 
+					   "transformpos":Transform(Basis(), Vector3(0, 1.2, zvals[j])), 
+					   "prevnodepoints":{ },
+					   "nextnodepoints":nodepoints,
+					   "prevonepathpairs":[ ],
+					   "newonepathpairs":nodepairs.duplicate(),
+					 }
+		xcdrawinglist.push_back(xcdata)
+		xcvizstates[sname] = DRAWING_TYPE.VIZ_XCD_HIDE
+		if j != 0:
+			var xctdata = { "tubename":"**notset", 
+							"xcname0":prevsname, 
+							"xcname1":sname,
+							"prevdrawinglinks":[ ],
+							"newdrawinglinks":enddrawinglinks.duplicate()
+						  }
+			xcdrawinglist.push_back(xctdata)
+			updatetubeshells.push_back({ "tubename":xctdata["tubename"], "xcname0":xctdata["xcname0"], "xcname1":xctdata["xcname1"] })
+		prevsname = sname
+	xcdrawinglist.push_back({ "xcvizstates":xcvizstates, "updatetubeshells":updatetubeshells })
+	return xcdrawinglist
+	
+

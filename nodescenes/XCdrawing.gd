@@ -24,9 +24,9 @@ var nodepointmean = Vector3(0,0,0)
 var nodepointylo = 0.0
 var nodepointyhi = 0.0
 var imgheightwidthratio = 0  # known from the xcresource image (though could be cached)
+
 var shortestpathseglength = 0.0
 var closewidthsca = 1.0
-
 var linewidth = 0.05
 
 func DeHoleTubeShell(xcname):
@@ -468,11 +468,14 @@ func mergexcrpcdata(xcdata):
 				elif drawingtype == DRAWING_TYPE.DT_ROPEHANG:
 					xcn = XCnode_knot.instance()
 					var materialsystem = get_node("/root/Spatial/MaterialSystem")
-					xcn.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("normalknot"))
+					var mat = null
 					if nA[0] == "k":
 						xcn.scale = Vector3(closewidthsca, closewidthsca*knotyscale, closewidthsca)
+						mat = materialsystem.nodematerial("normalknot")
 					else:
 						xcn.scale = Vector3(closewidthsca, closewidthsca, closewidthsca)
+						mat = materialsystem.nodematerial("normalknotwall")
+					xcn.get_node("CollisionShape/MeshInstance").set_surface_material(0, mat)
 					xcn.set_name(nA)
 					maxnodepointnumber = max(maxnodepointnumber, int(nA))
 					$XCnodes.add_child(xcn)
@@ -589,6 +592,24 @@ func updatelinearropepaths():
 	if len(onepathpairs) == 0:
 		$PathLines.mesh = null
 		return middlenodes
+
+	var lclosewidthsca = 1.0
+	var countanchors = 0
+	for nname in nodepoints:
+		if nname[0] == "a":
+			countanchors += 1
+	if countanchors >= 5:
+		lclosewidthsca = 0.25
+	if shortestpathseglength != 0.0 and shortestpathseglength < linewidth*5*lclosewidthsca:
+		lclosewidthsca *= 0.5
+		if shortestpathseglength < linewidth*5*lclosewidthsca:
+			lclosewidthsca *= 0.5
+	if closewidthsca != lclosewidthsca:
+		closewidthsca = lclosewidthsca
+		for xcn in $XCnodes.get_children():
+			var kscale = 0.5 if xcn.get_name()[0] == "a" else 1.0
+			xcn.scale = Vector3(closewidthsca, closewidthsca*kscale, closewidthsca)
+
 	var ropesequences = Polynets.makeropenodesequences(nodepoints, onepathpairs, null)
 	var surfaceTool = SurfaceTool.new()
 	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
@@ -642,10 +663,10 @@ func updatelinearropepaths():
 
 func updatexcpaths():
 	var lclosewidthsca = 1.0
-	if shortestpathseglength != 0.0 and shortestpathseglength < linewidth*5:
-		lclosewidthsca = 0.5
-		if shortestpathseglength < linewidth*5*closewidthsca:
-			lclosewidthsca = 0.25
+	if shortestpathseglength != 0.0 and shortestpathseglength < linewidth*5*lclosewidthsca:
+		lclosewidthsca *= 0.5
+		if shortestpathseglength < linewidth*5*lclosewidthsca:
+			lclosewidthsca *= 0.5
 	if closewidthsca != lclosewidthsca:
 		closewidthsca = lclosewidthsca
 		for xcn in $XCnodes.get_children():

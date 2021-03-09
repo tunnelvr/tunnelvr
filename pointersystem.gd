@@ -124,8 +124,10 @@ func clearednodematerialtype(xcn, bwallactive, walldrawingtype):
 		return "normalfloorpos"
 	elif ch == "r":
 		return "normalhole"
-	elif ch == "a" or ch == "k":
+	elif ch == "k":
 		return "normalknot"
+	elif ch == "a":
+		return "normalknotwall"
 	else:
 		return "normal"
 
@@ -577,10 +579,7 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 			xcdata["prevonepathpairs"] = [ ]
 			xcdata["newonepathpairs"] = [ activetargetnode.get_name(), newnodename]
 			sketchsystem.actsketchchange([xcdata])
-			if newnodename[0] == "k":
-				setactivetargetnode(activetargetnodewall.get_node("XCnodes").get_node(newnodename))
-			else:
-				clearactivetargetnode()
+			setactivetargetnode(activetargetnodewall.get_node("XCnodes").get_node(newnodename))
 	elif not is_instance_valid(pointertarget):
 		pass
 		
@@ -666,7 +665,7 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 						   "transformpos":Transform(),
 						   "prevnodepoints":{ },
 						   "nextnodepoints":{"a0":pointertargetpoint} }
-			sketchsystem.actsketchchange([xcdata])
+			sketchsystem.actsketchchange([xcdata, { "xcvizstates":{ xcdata["name"]:DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE }}])
 			var xcrope = sketchsystem.get_node("XCdrawings").get_node(xcdata["name"])
 			setactivetargetnode(xcrope.get_node("XCnodes").get_node("a0"))
 

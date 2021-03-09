@@ -203,6 +203,17 @@ func _ready():
 		$BodyObjects/PlayerDirections.floorprojectdistance = 20
 		$BodyObjects/PlayerDirections.forceontogroundtimedown = 2.25
 		
+	elif true:  # load wing file
+		var xcdatalist = Centrelinedata.xcdatalistfromwinddata("res://surveyscans/wingform/Wing XYZ geometry.csv")
+		xcdatalist[0]["sketchname"] = "wingfile"
+		Tglobal.printxcdrawingfromdatamessages = false
+		$SketchSystem.actsketchchange(xcdatalist)
+		Tglobal.printxcdrawingfromdatamessages = true
+		playerMe.transform.origin.y += 10
+		$BodyObjects/PlayerDirections.floorprojectdistance = 20
+		$BodyObjects/PlayerDirections.forceontogroundtimedown = 2.25
+
+		
 	elif true:
 		$SketchSystem.loadsketchsystemL("res://surveyscans/smallirebysave.res")
 	else:
