@@ -203,7 +203,7 @@ func _ready():
 		$BodyObjects/PlayerDirections.floorprojectdistance = 20
 		$BodyObjects/PlayerDirections.forceontogroundtimedown = 2.25
 		
-	elif true:  # load wing file
+	elif false:  # load wing file
 		var xcdatalist = Centrelinedata.xcdatalistfromwinddata("res://surveyscans/wingform/Wing XYZ geometry.csv")
 		xcdatalist[0]["sketchname"] = "wingfile"
 		Tglobal.printxcdrawingfromdatamessages = false
