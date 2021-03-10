@@ -189,35 +189,9 @@ func _ready():
 	var perm = OS.get_granted_permissions()
 	print("Granted permissions: ", perm)
 
-	if false:  # loadcentreline
-		#var centrelinefile = "res://surveyscans/dukest1resurvey2009json.res"
-		#var centrelinefile = "res://surveyscans/Ireby/Ireby2/Ireby2.json"
-		#var centrelinefile = "res://surveyscans/cusseypot/Cussey_Pot_Master.json"
-		var centrelinefile = "res://surveyscans/LoneOak/LoneOak.json"
-		var xcdatalist = Centrelinedata.xcdatalistfromcentreline(centrelinefile)
-		xcdatalist[0]["sketchname"] = centrelinefile.split("/")[-1].split(".")[0]
-		Tglobal.printxcdrawingfromdatamessages = false
-		$SketchSystem.actsketchchange(xcdatalist)
-		Tglobal.printxcdrawingfromdatamessages = true
-		playerMe.transform.origin.y += 10
-		$BodyObjects/PlayerDirections.floorprojectdistance = 20
-		$BodyObjects/PlayerDirections.forceontogroundtimedown = 2.25
-		
-	elif false:  # load wing file
-		var xcdatalist = Centrelinedata.xcdatalistfromwinddata("res://surveyscans/wingform/Wing XYZ geometry.csv")
-		xcdatalist[0]["sketchname"] = "wingfile"
-		Tglobal.printxcdrawingfromdatamessages = false
-		$SketchSystem.actsketchchange(xcdatalist)
-		Tglobal.printxcdrawingfromdatamessages = true
-		playerMe.transform.origin.y += 10
-		$BodyObjects/PlayerDirections.floorprojectdistance = 20
-		$BodyObjects/PlayerDirections.forceontogroundtimedown = 2.25
+	#if true:
+	$SketchSystem.loadsketchsystemL("res://surveyscans/smallirebysave.res")
 
-		
-	elif true:
-		$SketchSystem.loadsketchsystemL("res://surveyscans/smallirebysave.res")
-	else:
-		pass
 	playerMe.global_transform.origin.y += 5
 	$GuiSystem/GUIPanel3D.updateplayerlist()
 	get_node("/root").msaa = Viewport.MSAA_4X

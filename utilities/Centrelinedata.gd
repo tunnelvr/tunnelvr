@@ -109,7 +109,7 @@ static func xcdatalistfromcentreline(centrelinefile):
 	return xcdrawinglist
 	
 
-static func xcdatalistfromwinddata(wingdeffile):
+static func xcdatalistfromwingdata(wingdeffile):
 	var f = File.new()
 	f.open(wingdeffile, File.READ)
 	var k = [ ]
@@ -130,11 +130,17 @@ static func xcdatalistfromwinddata(wingdeffile):
 	for i in range(67):
 		nodepairs.append("p%d"%i)
 		nodepairs.append("p%d"%(i+1))
+	#var enddrawinglinks = ["p0", "p0", "graphpaper", null,  "p67", "p67", "graphpaper", null]
+	var enddrawinglinks = [ ]
+	for i in range(68):
+		enddrawinglinks.append("p%d"%i)
+		enddrawinglinks.append("p%d"%i)
+		enddrawinglinks.append("graphpaper")
+		enddrawinglinks.append(null)
 	var xcdrawinglist = [ ]
 	var xcvizstates = { }
 	var prevsname = null
 	var updatetubeshells = [ ]
-	var enddrawinglinks = ["p0", "p0", "graphpaper", null,  "p67", "p67", "graphpaper", null]
 	for j in range(len(sections)):
 		var pts = sections[j]
 		var nodepoints = { }

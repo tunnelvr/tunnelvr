@@ -553,6 +553,32 @@ func buttonpressed_vrgrip():
 
 	gripmenu.gripmenuon(LaserOrient.global_transform, pointertargetpoint, pointertargetwall, pointertargettype, activetargettube, activetargettubesectorindex, activetargetwall, activetargetnode)
 	
+	
+func ropepointtargetUV():
+	var pointertargettube = pointertargetwall
+	var ipbasis = pointertargettube.intermedpointplanebasis(pointertargetpoint)
+	var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(pointertargettube.xcname0)
+	var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(pointertargettube.xcname1)
+	var xcdrawing0nodes = xcdrawing0.get_node("XCnodes")
+	var xcdrawing1nodes = xcdrawing1.get_node("XCnodes")
+	var aroundsegment = pointertarget.get_index()
+	var jA = aroundsegment*2
+	if jA < len(pointertargettube.xcdrawinglink):
+		var p0 = xcdrawing0nodes.get_node(pointertargettube.xcdrawinglink[jA]).global_transform.origin
+		var p1 = xcdrawing1nodes.get_node(pointertargettube.xcdrawinglink[jA+1]).global_transform.origin
+		var ropepointlamda = inverse_lerp(ipbasis.z.dot(p0), ipbasis.z.dot(p1), ipbasis.z.dot(pointertargetpoint))
+		var pc = lerp(p0, p1, ropepointlamda)
+		
+		var jB = (jA + 2) % len(pointertargettube.xcdrawinglink)
+		var p0B = xcdrawing0nodes.get_node(pointertargettube.xcdrawinglink[jB]).global_transform.origin
+		var p1B = xcdrawing1nodes.get_node(pointertargettube.xcdrawinglink[jB+1]).global_transform.origin
+		var ropepointlamdaB = inverse_lerp(ipbasis.z.dot(p0B), ipbasis.z.dot(p1B), ipbasis.z.dot(pointertargetpoint))
+		var pcB = lerp(p0B, p1B, ropepointlamdaB)
+		var pcvec = pcB - pc
+		var pcveclen = pcvec.length_squared()
+		var lambdaCalong = pcvec.dot(pointertargetpoint - pc)/(pcveclen if pcveclen != 0 else 1.0)
+		print("ropepointUV ", pointertargettube.get_name(), [ropepointlamda, ropepointlamdaB], [aroundsegment, lambdaCalong])
+	
 var initialsequencenodename = null
 var initialsequencenodenameP = null
 func buttonpressed_vrtrigger(gripbuttonheld):
@@ -562,6 +588,8 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 	if Tglobal.handflickmotiongestureposition == 1 and activetargetnodewall != null and activetargetnodewall.drawingtype == DRAWING_TYPE.DT_ROPEHANG and \
 			(pointertargettype == "none" or pointertargettype == "XCtubesector" or pointertargettype == "XCflatshell"):
 		var newnodepoint = activetargetnodewall.global_transform.xform_inv(pointertargetpoint)
+		if pointertargettype == "XCtubesector" or pointertargettype == "XCflatshell":
+			var ropepointuv = ropepointtargetUV()
 		if gripbuttonheld:
 			if activetargetnode.get_name()[0] == ("k" if pointertargettype == "none" else "a"):
 				sketchsystem.actsketchchange([{
@@ -572,6 +600,7 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 				clearactivetargetnode()
 		else:
 			var newnodename = activetargetnodewall.newuniquexcnodename("k" if pointertargettype == "none" else "a")
+			
 			var xcdata = { "name":activetargetnodewall.get_name(), 
 						   "prevnodepoints":{ }, 
 						   "nextnodepoints":{ newnodename:newnodepoint } 
@@ -660,6 +689,7 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 	elif activetargetnode == null and activetargetnodewall == null and pointertargettype == "XCtubesector":
 		var pointertargettube = pointertargetwall
 		if Tglobal.handflickmotiongestureposition == 1:
+			var ropepointuv = ropepointtargetUV()
 			var xcdata = { "name":sketchsystem.uniqueXCname("r"), 
 						   "drawingtype":DRAWING_TYPE.DT_ROPEHANG,
 						   "transformpos":Transform(),
