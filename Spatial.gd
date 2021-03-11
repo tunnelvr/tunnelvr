@@ -286,8 +286,8 @@ func _player_disconnected(id):
 
 func setconnectiontoserveractive(b):
 	Tglobal.connectiontoserveractive = b
-	var handmaterials = get_node("/root/Spatial/MaterialSystem/handmaterials")
-	playerMe.get_node("HandRight/HandFlickFaceY").set_surface_material(0, handmaterials.get_node("serverconnected" if Tglobal.connectiontoserveractive else "serverdisconnected").get_surface_material(0))
+	playerMe.get_node("HandRight/HandFlickFaceY").set_surface_material(0, $MaterialSystem/handmaterials.get_node("serverconnected" if Tglobal.connectiontoserveractive else "serverdisconnected").get_surface_material(0))
+	$GuiSystem/GUIPanel3D/Viewport/GUI/Panel/ButtonServerside.disabled = (not b) or (playerMe.networkID == 1)
 
 func _connected_to_server():
 	print("_connected_to_server")

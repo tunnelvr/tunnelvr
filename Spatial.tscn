@@ -1628,6 +1628,7 @@ margin_right = 316.0
 margin_bottom = 72.0
 rect_pivot_offset = Vector2( 138.61, -8.13628 )
 hint_tooltip = "test tooltip"
+disabled = true
 text = "Serverside"
 __meta__ = {
 "_edit_use_anchors_": false
