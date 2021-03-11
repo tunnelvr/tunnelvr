@@ -563,22 +563,22 @@ func ropepointtargetUV():
 	var xcdrawing1nodes = xcdrawing1.get_node("XCnodes")
 	var aroundsegment = pointertarget.get_index()
 	var jA = aroundsegment*2
-	if jA < len(pointertargettube.xcdrawinglink):
-		var p0 = xcdrawing0nodes.get_node(pointertargettube.xcdrawinglink[jA]).global_transform.origin
-		var p1 = xcdrawing1nodes.get_node(pointertargettube.xcdrawinglink[jA+1]).global_transform.origin
-		var ropepointlamda = inverse_lerp(ipbasis.z.dot(p0), ipbasis.z.dot(p1), ipbasis.z.dot(pointertargetpoint))
-		var pc = lerp(p0, p1, ropepointlamda)
-		
-		var jB = (jA + 2) % len(pointertargettube.xcdrawinglink)
-		var p0B = xcdrawing0nodes.get_node(pointertargettube.xcdrawinglink[jB]).global_transform.origin
-		var p1B = xcdrawing1nodes.get_node(pointertargettube.xcdrawinglink[jB+1]).global_transform.origin
-		var ropepointlamdaB = inverse_lerp(ipbasis.z.dot(p0B), ipbasis.z.dot(p1B), ipbasis.z.dot(pointertargetpoint))
-		var pcB = lerp(p0B, p1B, ropepointlamdaB)
-		var pcvec = pcB - pc
-		var pcveclen = pcvec.length_squared()
-		var lambdaCalong = pcvec.dot(pointertargetpoint - pc)/(pcveclen if pcveclen != 0 else 1.0)
-		print("ropepointUV ", pointertargettube.get_name(), [ropepointlamda, ropepointlamdaB], [aroundsegment, lambdaCalong])
+	var p0 = xcdrawing0nodes.get_node(pointertargettube.xcdrawinglink[jA]).global_transform.origin
+	var p1 = xcdrawing1nodes.get_node(pointertargettube.xcdrawinglink[jA+1]).global_transform.origin
+	var ropepointlamda = inverse_lerp(ipbasis.z.dot(p0), ipbasis.z.dot(p1), ipbasis.z.dot(pointertargetpoint))
+	var pc = lerp(p0, p1, ropepointlamda)
 	
+	var jB = (jA + 2) % len(pointertargettube.xcdrawinglink)
+	var p0B = xcdrawing0nodes.get_node(pointertargettube.xcdrawinglink[jB]).global_transform.origin
+	var p1B = xcdrawing1nodes.get_node(pointertargettube.xcdrawinglink[jB+1]).global_transform.origin
+	var ropepointlamdaB = inverse_lerp(ipbasis.z.dot(p0B), ipbasis.z.dot(p1B), ipbasis.z.dot(pointertargetpoint))
+	var pcB = lerp(p0B, p1B, ropepointlamdaB)
+	var pcvec = pcB - pc
+	var pcveclen = pcvec.length_squared()
+	var lambdaCalong = pcvec.dot(pointertargetpoint - pc)/(pcveclen if pcveclen != 0 else 1.0)
+	print("ropepointUV ", pointertargettube.get_name(), [ropepointlamda, ropepointlamdaB], [aroundsegment, lambdaCalong])
+	return Vector3((int(pointertargettube.get_name().split("_")[1]) + ropepointlamda)/20.0, (aroundsegment + lambdaCalong)/68.0, 0.0)
+		
 var initialsequencenodename = null
 var initialsequencenodenameP = null
 func buttonpressed_vrtrigger(gripbuttonheld):
@@ -588,27 +588,49 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 	if Tglobal.handflickmotiongestureposition == 1 and activetargetnodewall != null and activetargetnodewall.drawingtype == DRAWING_TYPE.DT_ROPEHANG and \
 			(pointertargettype == "none" or pointertargettype == "XCtubesector" or pointertargettype == "XCflatshell"):
 		var newnodepoint = activetargetnodewall.global_transform.xform_inv(pointertargetpoint)
-		if pointertargettype == "XCtubesector" or pointertargettype == "XCflatshell":
-			var ropepointuv = ropepointtargetUV()
+		var xcdata = null
+		var ropepointuv = null
+		var prevactivetargetnodewall = null
+		if Tglobal.wingmeshtrimmingmode and (pointertargettype == "XCtubesector" or pointertargettype == "XCflatshell"):
+			ropepointuv = ropepointtargetUV()
+			prevactivetargetnodewall = activetargetnodewall
 		if gripbuttonheld:
 			if activetargetnode.get_name()[0] == ("k" if pointertargettype == "none" else "a"):
-				sketchsystem.actsketchchange([{
-					"name":activetargetnodewall.get_name(), 
-					"prevnodepoints":{ activetargetnode.get_name():activetargetnode.translation }, 
-					"nextnodepoints":{ activetargetnode.get_name():newnodepoint } 
-				}])
+				xcdata = { "name":activetargetnodewall.get_name(), 
+						   "prevnodepoints":{ activetargetnode.get_name():activetargetnode.translation }, 
+						   "nextnodepoints":{ activetargetnode.get_name():newnodepoint } 
+						 }
+				sketchsystem.actsketchchange([xcdata])
 				clearactivetargetnode()
 		else:
 			var newnodename = activetargetnodewall.newuniquexcnodename("k" if pointertargettype == "none" else "a")
-			
-			var xcdata = { "name":activetargetnodewall.get_name(), 
-						   "prevnodepoints":{ }, 
-						   "nextnodepoints":{ newnodename:newnodepoint } 
-						 }
+			xcdata = { "name":activetargetnodewall.get_name(), 
+					   "prevnodepoints":{ }, 
+					   "nextnodepoints":{ newnodename:newnodepoint } 
+					 }
 			xcdata["prevonepathpairs"] = [ ]
 			xcdata["newonepathpairs"] = [ activetargetnode.get_name(), newnodename]
 			sketchsystem.actsketchchange([xcdata])
 			setactivetargetnode(activetargetnodewall.get_node("XCnodes").get_node(newnodename))
+		
+		if Tglobal.wingmeshtrimmingmode and ropepointuv != null and xcdata != null and len(prevactivetargetnodewall.xctubesconn) == 1:
+			var xctube = prevactivetargetnodewall.xctubesconn[0]
+			var xcdrawingflatname = (xctube.xcname1 if xctube.xcname0 == prevactivetargetnodewall.get_name() else xctube.xcname0)
+			var xcdrawingf = sketchsystem.get_node("XCdrawings").get_node(xcdrawingflatname)
+			var newnodepointf = xcdrawingf.global_transform.xform_inv(pointertargetpoint)
+			var fnodename = (xcdata["nextnodepoints"].keys()[0] if len(xcdata["nextnodepoints"]) == 1 else null)
+			var xcdataf = { "name":xcdrawingflatname, 
+							"prevnodepoints":{ }, 
+							"nextnodepoints":{ fnodename:ropepointuv*4 } 
+						  }
+			if xcdata["prevnodepoints"].has(fnodename) and xcdrawingf.nodepoints.has(fnodename):
+				xcdataf["prevnodepoints"][fnodename] = xcdrawingf.nodepoints[fnodename]
+			if xcdata.has("newonepathpairs") and xcdrawingf.nodepoints.has(xcdata["newonepathpairs"][0]):
+				xcdataf["prevonepathpairs"] = [ ]
+				xcdataf["newonepathpairs"] = xcdata["newonepathpairs"].duplicate()
+			sketchsystem.actsketchchange([xcdataf])
+
+		
 	elif not is_instance_valid(pointertarget):
 		pass
 		
@@ -650,6 +672,20 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 			xcdata["prevonepathpairs"] = prevonepathpairs
 			xcdata["newonepathpairs"] = [ ]
 		var xcdatalist = [ xcdata ]
+
+		if Tglobal.wingmeshtrimmingmode and pointertargetwall.drawingtype == DRAWING_TYPE.DT_ROPEHANG and len(activetargetnodewall.xctubesconn) == 1:
+			var xctube = activetargetnodewall.xctubesconn[0]
+			var xcdrawingflatname = (xctube.xcname1 if xctube.xcname0 == activetargetnodewall.get_name() else xctube.xcname0)
+			var xcdrawingf = sketchsystem.get_node("XCdrawings").get_node(xcdrawingflatname)
+			var xcdataf = { "name":xcdrawingflatname, 
+							"prevnodepoints":xcdata["prevnodepoints"].duplicate(), 
+							"nextnodepoints":xcdata["nextnodepoints"].duplicate()
+						  }
+			if xcdata.has("prevonepathpairs"):
+				xcdataf["prevonepathpairs"] = xcdata["prevonepathpairs"].duplicate()
+				xcdataf["newonepathpairs"] = xcdata["newonepathpairs"].duplicate()
+			xcdatalist.push_back(xcdataf)
+
 		
 		for xctube in activetargetnodewall.xctubesconn:
 			var prevdrawinglinks = [ ]
@@ -668,6 +704,7 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 								"newdrawinglinks":[ ] 
 							  }
 				xcdatalist.push_back(xctdata)
+
 
 		#clearactivetargetnode()
 		#clearpointertarget()
@@ -927,34 +964,47 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 				xcdatalist.push_back({"xcvizstates":{ pointertargetwall.get_name():DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE } })
 			sketchsystem.actsketchchange(xcdatalist)
 
-		elif activetargetnodewall != pointertargetwall and activetargetnodewall.drawingtype == DRAWING_TYPE.DT_ROPEHANG and pointertargetwall.drawingtype == DRAWING_TYPE.DT_ROPEHANG:
-			print("tube or merge two ropehang things here")
+			if Tglobal.wingmeshtrimmingmode and pointertargetwall.drawingtype == DRAWING_TYPE.DT_ROPEHANG and len(activetargetnodewall.xctubesconn) == 1:
+				var xctube = activetargetnodewall.xctubesconn[0]
+				var xcdrawingflatname = (xctube.xcname1 if xctube.xcname0 == activetargetnodewall.get_name() else xctube.xcname0)
+				var xcdrawingf = sketchsystem.get_node("XCdrawings").get_node(xcdrawingflatname)
+				var xcdataf = { "name":xcdrawingflatname, 
+								"prevonepathpairs":xcdata["prevonepathpairs"].duplicate(), 
+								"newonepathpairs":xcdata["newonepathpairs"].duplicate()
+							  }
+				sketchsystem.actsketchchange([xcdataf])
 
-		elif activetargetnodewall != pointertargetwall and activetargetnodewall.drawingtype == DRAWING_TYPE.DT_XCDRAWING and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
-			var xcname0 = activetargetnodewall.get_name()
-			var nodename0 = activetargetnode.get_name()
-			var xcname1 = pointertargetwall.get_name()
-			var nodename1 = pointertarget.get_name()
-			var xctube = sketchsystem.findxctube(xcname0, xcname1)
-			var xctdata = { "xcname0": xcname0, "xcname1":xcname1 }
-			if xctube == null:
-				xctdata["tubename"] = "**notset"
-				xctdata["prevdrawinglinks"] = [ ]
-				xctdata["newdrawinglinks"] = [ nodename0, nodename1, "simpledirt", null ]
-			else:
-				xctdata["tubename"] = xctube.get_name()
-				var j = xctube.linkspresentindex(nodename0, nodename1) if xctube.xcname0 == xcname0 else xctube.linkspresentindex(nodename1, nodename0)
-				if j == -1:
+		elif activetargetnodewall != pointertargetwall:
+			var maketube = activetargetnodewall.drawingtype == DRAWING_TYPE.DT_XCDRAWING and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING
+			if Tglobal.wingmeshtrimmingmode and activetargetnodewall.drawingtype == DRAWING_TYPE.DT_ROPEHANG and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
+				maketube = true
+			if maketube:
+				var xcname0 = activetargetnodewall.get_name()
+				var nodename0 = activetargetnode.get_name()
+				var xcname1 = pointertargetwall.get_name()
+				var nodename1 = pointertarget.get_name()
+				var xctube = sketchsystem.findxctube(xcname0, xcname1)
+				var xctdata = { "xcname0": xcname0, "xcname1":xcname1 }
+				if xctube == null:
+					xctdata["tubename"] = "**notset"
 					xctdata["prevdrawinglinks"] = [ ]
 					xctdata["newdrawinglinks"] = [ nodename0, nodename1, "simpledirt", null ]
 				else:
-					xctdata["prevdrawinglinks"] = [ nodename0, nodename1, xctube.xcsectormaterials[j], (xctube.xclinkintermediatenodes[j] if xctube.xclinkintermediatenodes != null else null) ]
-					xctdata["newdrawinglinks"] = [ ]
-					
-			var xctdatalist = [xctdata]
-			#if pointertargetwall.drawingvisiblecode != DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE and activetargetnodewall.drawingvisiblecode != DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE:
-			xctdatalist.push_back({ "xcvizstates":{ }, "updatetubeshells":[{"tubename":xctube.get_name() if xctube != null else "**notset", "xcname0": xcname0, "xcname1":xcname1 }] })
-			sketchsystem.actsketchchange(xctdatalist)
+					xctdata["tubename"] = xctube.get_name()
+					var j = xctube.linkspresentindex(nodename0, nodename1) if xctube.xcname0 == xcname0 else xctube.linkspresentindex(nodename1, nodename0)
+					if j == -1:
+						xctdata["prevdrawinglinks"] = [ ]
+						xctdata["newdrawinglinks"] = [ nodename0, nodename1, "simpledirt", null ]
+					else:
+						xctdata["prevdrawinglinks"] = [ nodename0, nodename1, xctube.xcsectormaterials[j], (xctube.xclinkintermediatenodes[j] if xctube.xclinkintermediatenodes != null else null) ]
+						xctdata["newdrawinglinks"] = [ ]
+						
+				var xctdatalist = [xctdata]
+				#if pointertargetwall.drawingvisiblecode != DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE and activetargetnodewall.drawingvisiblecode != DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE:
+				xctdatalist.push_back({ "xcvizstates":{ }, "updatetubeshells":[{"tubename":xctube.get_name() if xctube != null else "**notset", "xcname0": xcname0, "xcname1":xcname1 }] })
+				sketchsystem.actsketchchange(xctdatalist)
+			else:
+				print("Cannot make tube to ropehangs")
 		clearactivetargetnode()
 											
 	elif activetargetnode == null and pointertargettype == "XCnode":

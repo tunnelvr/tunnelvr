@@ -218,6 +218,7 @@ remote func actsketchchangeL(xcdatalist):
 		get_node("/root/Spatial/GuiSystem/GUIPanel3D").setsavegamefilename(sketchname)
 		
 	var xcdrawingstoupdate = { }
+	var xcdrawingstoupdatevisiblecodes = { }
 	var xctubestoupdate = { }
 	var xcdrawingsrejected = [ ]
 	var xctubesrejected = [ ]
@@ -358,7 +359,9 @@ remote func actsketchchangeL(xcdatalist):
 						tpos = xcn.translation
 				if tpos != null:
 					Tglobal.soundsystem.quicksound(sname, xcdrawing.global_transform*tpos)
-
+			elif xcdata.has("drawingvisiblecode"):
+				xcdrawingstoupdatevisiblecodes[xcdrawing.get_name()] = xcdata["drawingvisiblecode"]
+				
 	for xcdrawing in xcdrawingstoupdate.values():
 		if xcdrawing.drawingtype == DRAWING_TYPE.DT_ROPEHANG:
 			if xcdrawing.drawingvisiblecode != DRAWING_TYPE.VIZ_XCD_HIDE:
@@ -385,9 +388,12 @@ remote func actsketchchangeL(xcdatalist):
 	if caveworldchunkI != -1:
 		for xcdrawing in xcdrawingstoupdate.values():
 			if xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
-				xcdrawing.setdrawingvisiblecode(DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE if len(xcdrawing.xctubesconn) == 0 else DRAWING_TYPE.VIZ_XCD_HIDE)
-			#elif xcdrawing.drawingtype == DRAWING_TYPE.DT_ROPEHANG:
-			#	xcdrawing.setdrawingvisiblecode(DRAWING_TYPE.VIZ_XCD_HIDE)
+				if xcdrawingstoupdatevisiblecodes.has(xcdrawing.get_name()):
+					xcdrawing.setdrawingvisiblecode(xcdrawingstoupdatevisiblecodes[xcdrawing.get_name()])
+				else:
+					xcdrawing.setdrawingvisiblecode(xcdrawingstoupdatevisiblecodes.get(xcdrawing.get_name(), DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE if len(xcdrawing.xctubesconn) == 0 else DRAWING_TYPE.VIZ_XCD_HIDE))
+			elif xcdrawing.drawingtype == DRAWING_TYPE.DT_ROPEHANG:
+				xcdrawing.setdrawingvisiblecode(DRAWING_TYPE.VIZ_XCD_HIDE)
 		for xctube in xctubestoupdate.values():
 			if $XCdrawings.get_node(xctube.xcname0).drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 				xctube.updatetubeshell($XCdrawings)
@@ -727,7 +733,8 @@ func newXCuniquedrawingPaperN(xcresource, sname, drawingtype):
 func newXCtube(xcdrawing0, xcdrawing1):
 	assert ((xcdrawing0.drawingtype == DRAWING_TYPE.DT_XCDRAWING and xcdrawing1.drawingtype == DRAWING_TYPE.DT_XCDRAWING) or
 			(xcdrawing0.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE and xcdrawing1.drawingtype == DRAWING_TYPE.DT_XCDRAWING) or
-			(xcdrawing0.drawingtype == DRAWING_TYPE.DT_CENTRELINE and xcdrawing1.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE))
+			(xcdrawing0.drawingtype == DRAWING_TYPE.DT_CENTRELINE and xcdrawing1.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE) or 
+			(Tglobal.wingmeshtrimmingmode and xcdrawing0.drawingtype == DRAWING_TYPE.DT_ROPEHANG and xcdrawing1.drawingtype == DRAWING_TYPE.DT_XCDRAWING))
 		
 	var xctube = XCtube.instance()
 	xctube.xcname0 = xcdrawing0.get_name()

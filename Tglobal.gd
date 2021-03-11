@@ -20,6 +20,8 @@ var soundsystem = null
 
 var hidecavewallstoseefloors = false
 
+var wingmeshtrimmingmode = true
+
 var splaystationnoderegex = null
 func _ready():
 	splaystationnoderegex = RegEx.new()
