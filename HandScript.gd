@@ -1,7 +1,7 @@
 extends Spatial
 
-const handmodelfile1 = "res://addons/godot_ovrmobile/example_scenes/left_hand_model.glb"
-const handmodelfile2 = "res://addons/godot_ovrmobile/example_scenes/right_hand_model.glb"
+const handmodelfile1 = "res://assets/ovrmodels/left_hand_model.glb"
+const handmodelfile2 = "res://assets/ovrmodels/right_hand_model.glb"
 
 const hand_bone_mappings = [0, 23,  1, 2, 3, 4,  6, 7, 8,  10, 11, 12,  14, 15, 16, 18, 19, 20, 21];
 var ovr_hand_tracking = null

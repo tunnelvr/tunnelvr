@@ -8,15 +8,15 @@
 resource_local_to_scene = true
 albedo_color = Color( 0.105882, 0.188235, 0.509804, 1 )
 
-[sub_resource type="SpatialMaterial" id=6]
+[sub_resource type="SpatialMaterial" id=2]
 albedo_color = Color( 0.342484, 0.296732, 0.0535948, 1 )
 
-[sub_resource type="CylinderMesh" id=7]
+[sub_resource type="CylinderMesh" id=3]
 top_radius = 0.025
 bottom_radius = 0.025
 height = 0.004
 
-[sub_resource type="SpatialMaterial" id=8]
+[sub_resource type="SpatialMaterial" id=4]
 albedo_color = Color( 0.027451, 0.027451, 0.027451, 1 )
 emission_enabled = true
 emission = Color( 0.0509804, 0.14902, 0.960784, 1 )
@@ -24,75 +24,75 @@ emission_energy = 1.0
 emission_operator = 0
 emission_on_uv2 = false
 
-[sub_resource type="CylinderMesh" id=9]
+[sub_resource type="CylinderMesh" id=5]
 top_radius = 0.04
 bottom_radius = 0.04
 height = 0.01
 
-[sub_resource type="SpatialMaterial" id=10]
+[sub_resource type="SpatialMaterial" id=6]
 emission_enabled = true
 emission = Color( 0.956863, 0.878431, 0.027451, 1 )
 emission_energy = 0.87
 emission_operator = 0
 emission_on_uv2 = false
 
-[sub_resource type="PrismMesh" id=11]
+[sub_resource type="PrismMesh" id=7]
 size = Vector3( 0.01, 0.01, 0.2 )
 
-[sub_resource type="SpatialMaterial" id=12]
+[sub_resource type="SpatialMaterial" id=8]
 resource_local_to_scene = true
 albedo_color = Color( 1, 0.0156863, 0.0156863, 1 )
 
-[sub_resource type="CubeMesh" id=13]
+[sub_resource type="CubeMesh" id=9]
 resource_local_to_scene = true
 size = Vector3( 0.1, 50, 0.1 )
 
-[sub_resource type="SpatialMaterial" id=14]
+[sub_resource type="SpatialMaterial" id=10]
 flags_unshaded = true
 flags_do_not_receive_shadows = true
 albedo_color = Color( 0.956863, 0.835294, 0.0509804, 1 )
 
-[sub_resource type="CubeMesh" id=15]
+[sub_resource type="CubeMesh" id=11]
 size = Vector3( 0.002, 0.002, 1 )
 
-[sub_resource type="SpatialMaterial" id=16]
+[sub_resource type="SpatialMaterial" id=12]
 flags_unshaded = true
 flags_do_not_receive_shadows = true
 albedo_color = Color( 0.976471, 0.552941, 0.0117647, 1 )
 
-[sub_resource type="SpatialMaterial" id=17]
+[sub_resource type="SpatialMaterial" id=13]
 flags_unshaded = true
 flags_no_depth_test = true
 albedo_color = Color( 0.937255, 0.901961, 0.0431373, 0.67451 )
 
-[sub_resource type="CubeMesh" id=18]
-material = SubResource( 17 )
+[sub_resource type="CubeMesh" id=14]
+material = SubResource( 13 )
 size = Vector3( 0.01, 0.01, 1 )
 
-[sub_resource type="CubeMesh" id=19]
-material = SubResource( 16 )
+[sub_resource type="CubeMesh" id=15]
+material = SubResource( 12 )
 size = Vector3( 0.02, 0.02, 1 )
 
-[sub_resource type="QuadMesh" id=20]
+[sub_resource type="QuadMesh" id=16]
 size = Vector2( 0.6, 0.4 )
 
-[sub_resource type="SpatialMaterial" id=21]
+[sub_resource type="SpatialMaterial" id=17]
 params_cull_mode = 2
 albedo_color = Color( 0.0705882, 0.0862745, 0.0980392, 1 )
 metallic = 0.43
 roughness = 0.66
 
-[sub_resource type="PrismMesh" id=22]
+[sub_resource type="PrismMesh" id=18]
 left_to_right = 0.1
 size = Vector3( 0.1, 0.2, 0.1 )
 
-[sub_resource type="SpatialMaterial" id=23]
+[sub_resource type="SpatialMaterial" id=19]
 flags_do_not_receive_shadows = true
 albedo_color = Color( 0.341176, 0.411765, 0.976471, 1 )
 metallic = 0.41
 roughness = 0.45
 
-[sub_resource type="Animation" id=24]
+[sub_resource type="Animation" id=20]
 length = 0.3
 tracks/0/type = "value"
 tracks/0/path = NodePath("HeadCam/headtorchcone/Inset:material/0:emission")
@@ -107,7 +107,7 @@ tracks/0/keys = {
 "values": [ Color( 0.0509804, 0.14902, 0.960784, 1 ), Color( 0.945098, 0.898039, 0.203922, 1 ) ]
 }
 
-[sub_resource type="Animation" id=25]
+[sub_resource type="Animation" id=21]
 length = 0.3
 tracks/0/type = "value"
 tracks/0/path = NodePath("HeadCam/headtorchcone:material:albedo_color")
@@ -134,7 +134,7 @@ tracks/1/keys = {
 "values": [ Vector3( 2, 1, 2 ), Vector3( 1, 1, 1 ) ]
 }
 
-[sub_resource type="Animation" id=26]
+[sub_resource type="Animation" id=22]
 length = 0.8
 tracks/0/type = "value"
 tracks/0/path = NodePath("HeadCam/headtorchcone:material:albedo_color")
@@ -178,19 +178,19 @@ radius = 0.03
 height = 0.051
 sides = 16
 cone = true
-material = SubResource( 6 )
+material = SubResource( 2 )
 
 [node name="Inset" type="MeshInstance" parent="HeadCam/headtorchcone"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.029, 0 )
 cast_shadow = 0
-mesh = SubResource( 7 )
-material/0 = SubResource( 8 )
+mesh = SubResource( 3 )
+material/0 = SubResource( 4 )
 
 [node name="headtorchon" type="MeshInstance" parent="HeadCam/headtorchcone"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.01, 0 )
 visible = false
-mesh = SubResource( 9 )
-material/0 = SubResource( 10 )
+mesh = SubResource( 5 )
+material/0 = SubResource( 6 )
 
 [node name="SpotLight" type="SpotLight" parent="HeadCam/headtorchcone/headtorchon"]
 transform = Transform( 1, 0, 0, 0, -1.62921e-07, 1, 0, -1, -1.62921e-07, 0, -0.05, 0 )
@@ -208,16 +208,16 @@ __meta__ = {
 
 [node name="visorline" type="MeshInstance" parent="HeadCam"]
 transform = Transform( 2.65432e-14, -1.62921e-07, 1, -1, -1.62921e-07, 0, 1.62921e-07, -1, -1.62921e-07, 1.4521e-08, 0.0545774, -0.0445647 )
-mesh = SubResource( 11 )
-material/0 = SubResource( 12 )
+mesh = SubResource( 7 )
+material/0 = SubResource( 8 )
 
 [node name="headlocator" type="Spatial" parent="."]
 
 [node name="locatorline" type="MeshInstance" parent="headlocator"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 30, 0 )
 cast_shadow = 0
-mesh = SubResource( 13 )
-material/0 = SubResource( 14 )
+mesh = SubResource( 9 )
+material/0 = SubResource( 10 )
 
 [node name="HandLeft" type="Spatial" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.149729, 0.251003, 0 )
@@ -237,8 +237,8 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.411951, 0.678362, 0 )
 
 [node name="MeshInstance" type="MeshInstance" parent="LaserOrient/Length"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.5 )
-mesh = SubResource( 15 )
-material/0 = SubResource( 16 )
+mesh = SubResource( 11 )
+material/0 = SubResource( 12 )
 
 [node name="LaserSelectLine" type="Spatial" parent="."]
 transform = Transform( 0.387934, 0, 0.921687, 0, 1, 0, -0.921687, 0, 0.387934, -0.338186, 0, 0 )
@@ -248,7 +248,7 @@ visible = false
 
 [node name="Mesh" type="MeshInstance" parent="LaserSelectLine/Scale"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.5 )
-mesh = SubResource( 18 )
+mesh = SubResource( 14 )
 material/0 = null
 __meta__ = {
 "_editor_description_": ""
@@ -262,7 +262,7 @@ visible = false
 
 [node name="LaserVertical" type="MeshInstance" parent="PlanViewLaser/Length"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.5 )
-mesh = SubResource( 19 )
+mesh = SubResource( 15 )
 material/0 = null
 __meta__ = {
 "_editor_description_": ""
@@ -280,8 +280,8 @@ transform = Transform( 1, 1.54407e-07, 3.89076e-08, -1.54407e-07, 0.880593, 0.47
 visible = false
 
 [node name="Quad" type="MeshInstance" parent="FakeGuiSystem/GUIPanel3D"]
-mesh = SubResource( 20 )
-material/0 = SubResource( 21 )
+mesh = SubResource( 16 )
+material/0 = SubResource( 17 )
 
 [node name="GuardianPoly" type="Spatial" parent="."]
 visible = false
@@ -293,14 +293,14 @@ cast_shadow = 0
 [node name="floororigin" type="MeshInstance" parent="GuardianPoly"]
 transform = Transform( -1.62921e-07, 0, 1, 0, 1, 0, -1, 0, -1.62921e-07, 0, 0.3, 0 )
 cast_shadow = 0
-mesh = SubResource( 22 )
-material/0 = SubResource( 23 )
+mesh = SubResource( 18 )
+material/0 = SubResource( 19 )
 
 [node name="AnimationPlayer_setavatarposition_flash" type="AnimationPlayer" parent="."]
-anims/setavatarposition_flash = SubResource( 24 )
+anims/setavatarposition_flash = SubResource( 20 )
 
 [node name="AnimationPlayer_actsketchchange" type="AnimationPlayer" parent="."]
-anims/actsketchchange_flash = SubResource( 25 )
+anims/actsketchchange_flash = SubResource( 21 )
 
 [node name="AnimationPlayer_actsketchchange_fixbad" type="AnimationPlayer" parent="."]
-anims/actsketchchange_flash = SubResource( 26 )
+anims/actsketchchange_flash = SubResource( 22 )
