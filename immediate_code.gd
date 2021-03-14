@@ -6,4 +6,4 @@ extends EditorScript
 # *******
 var regex = RegEx.new()
 func _run():
-	print(frac(9.8))
+	print(4%3.1)

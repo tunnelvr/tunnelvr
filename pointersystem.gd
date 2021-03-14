@@ -1233,19 +1233,12 @@ func buttonreleased_vrgrip():
 					var pointinpoly = Geometry.is_point_in_polygon(Vector2(psel.x, psel.y), PoolVector2Array(lpolypoints))
 					print("  pointinpoly ", pointinpoly)
 					if pointinpoly:
-						polypoints = lpolypoints
-				if polypoints != null:
-					var arraymesh = ArrayMesh.new()
-					var surfaceTool = SurfaceTool.new()
-					surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
-					var pi = Geometry.triangulate_polygon(polypoints)
-					for j in range(len(pi)):
-						var u = pi[j]
-						surfaceTool.add_uv(polypoints[u])
-						surfaceTool.add_uv2(polypoints[u])
-						surfaceTool.add_vertex(Vector3(polypoints[u].x, polypoints[u].y, floor(j/3)*0.01))
-					surfaceTool.generate_normals()
-					surfaceTool.commit(arraymesh)
+						polypoints = PoolVector2Array(lpolypoints)
+
+				var arraymesh = null
+				if polypoints != null and len(polypoints) != 0:
+					arraymesh = Polynets.finemeshpolygon(polypoints, 0.25)
+				if arraymesh != null:
 					xcdrawing.updatexcshellmesh(arraymesh)
 				else:
 					xcdrawing.updatexcshellmesh(null)
