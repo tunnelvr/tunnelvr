@@ -1,5 +1,6 @@
 extends Node
 
+onready var selfSpatial = get_node("/root/Spatial")
 onready var playerMe = get_node("/root/Spatial/Players/PlayerMe")
 onready var HeadCam = playerMe.get_node("HeadCam")
 onready var HandLeft = playerMe.get_node("HandLeft")
@@ -114,7 +115,11 @@ func _physics_process(delta):
 			playerdirectedwalkingvelocity = dir.normalized()*(-joypos.y*walkspeed*playerMe.playerwalkscale)
 			
 func _on_button_pressed(p_button):
-	if p_button == BUTTONS.VR_PAD:
+	print("DDD p_button ", p_button)
+	if p_button == BUTTONS.VR_MENU and Tglobal.arvrinterfacename == "OVRMobile" and selfSpatial.pointersystem != null:
+		selfSpatial.pointersystem.buttonpressed_vrby()
+
+	elif p_button == BUTTONS.VR_PAD:
 		var joypos = HandLeft.joypos
 		if abs(joypos.y) < 0.5 and abs(joypos.x) > 0.1:
 			nextphysicsrotatestep += (1 if joypos.x > 0 else -1)*(22.5 if abs(joypos.x) > 0.8 else 90.0)

@@ -6,5 +6,4 @@ extends EditorScript
 # *******
 var regex = RegEx.new()
 func _run():
-	var x = "sdf_33_66"
-	print(int(x.split("_")[1]))
+	print(frac(9.8))

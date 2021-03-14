@@ -325,8 +325,9 @@ func _on_switchtest(index):
 
 	elif nssel == "toggle guardian":
 		var guardianpolyvisible = not playerMe.get_node("GuardianPoly").visible
-		for player in get_node("/root/Spatial/Players").get_children():
-			player.get_node("GuardianPoly").visible = guardianpolyvisible
+		setguardianstate(guardianpolyvisible)
+		if Tglobal.connectiontoserveractive:
+			rpc("setguardianstate", guardianpolyvisible)
 		SwitchTest.selected = 0
 		
 	elif nssel == "choke":
@@ -505,7 +506,11 @@ remote func servercavesfilelist(scfiles):
 			snames.add_item(cfile)
 		else:
 			print(" file ", cfile, " already listed")
-		
+
+remote func setguardianstate(guardianpolyvisible):
+	for player in get_node("/root/Spatial/Players").get_children():
+		player.get_node("GuardianPoly").visible = guardianpolyvisible
+
 func clickbuttonheadtorch():
 	$Viewport/GUI/Panel/ButtonHeadtorch.pressed = not $Viewport/GUI/Panel/ButtonHeadtorch.pressed
 	_on_buttonheadtorch_toggled($Viewport/GUI/Panel/ButtonHeadtorch.pressed)

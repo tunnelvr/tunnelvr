@@ -462,15 +462,15 @@ func setpointertarget(laserroot, raycast, pointertargetshortdistance):
 
 func _on_button_pressed(p_button):
 	var gripbuttonheld = handright.gripbuttonheld
-	#print("pppp ", pointertargetpoint, " ", [activetargetnode, pointertargettype, " pbutton", p_button])
+	print("pppp ", pointertargetpoint, " ", [activetargetnode, pointertargettype, " pbutton", p_button])
 	if Tglobal.questhandtrackingactive:
 		gripbuttonheld = handrightcontroller.is_button_pressed(BUTTONS.HT_PINCH_MIDDLE_FINGER)
 		if p_button == BUTTONS.HT_PINCH_RING_FINGER:
 			if handrightcontroller.is_button_pressed(BUTTONS.HT_PINCH_PINKY):
-				buttonpressed_vrby(false)
+				buttonpressed_vrby()
 		elif p_button == BUTTONS.HT_PINCH_PINKY:
 			if handrightcontroller.is_button_pressed(BUTTONS.HT_PINCH_RING_FINGER):
-				buttonpressed_vrby(false)
+				buttonpressed_vrby()
 		elif Tglobal.controlslocked:
 			print("Controls locked")	
 		elif p_button == BUTTONS.HT_PINCH_INDEX_FINGER:
@@ -479,7 +479,7 @@ func _on_button_pressed(p_button):
 			buttonpressed_vrgrip()
 	else:
 		if p_button == BUTTONS.VR_BUTTON_BY:
-			buttonpressed_vrby(gripbuttonheld)
+			buttonpressed_vrby()
 		elif Tglobal.controlslocked:
 			print("Controls locked")	
 		elif p_button == BUTTONS.VR_GRIP:
@@ -512,7 +512,7 @@ func buttonreleased_vrby():
 	if playerMe.ovr_guardian_system != null:
 		playerMe.ovr_guardian_system.request_boundary_visible(false)
 
-func buttonpressed_vrby(gripbuttonheld):
+func buttonpressed_vrby():
 	if Tglobal.controlslocked:
 		if not guipanel3d.visible:
 			guipanel3d.setguipanelvisible(LaserOrient.global_transform)
@@ -553,7 +553,6 @@ func buttonpressed_vrgrip():
 
 	gripmenu.gripmenuon(LaserOrient.global_transform, pointertargetpoint, pointertargetwall, pointertargettype, activetargettube, activetargettubesectorindex, activetargetwall, activetargetnode)
 	
-	
 func ropepointtargetUV():
 	var pointertargettube = pointertargetwall
 	var ipbasis = pointertargettube.intermedpointplanebasis(pointertargetpoint)
@@ -577,7 +576,8 @@ func ropepointtargetUV():
 	var pcveclen = pcvec.length_squared()
 	var lambdaCalong = pcvec.dot(pointertargetpoint - pc)/(pcveclen if pcveclen != 0 else 1.0)
 	print("ropepointUV ", pointertargettube.get_name(), [ropepointlamda, ropepointlamdaB], [aroundsegment, lambdaCalong])
-	return Vector3((int(pointertargettube.get_name().split("_")[1]) + ropepointlamda)/20.0, (aroundsegment + lambdaCalong)/68.0, 0.0)
+	var usec = int(pointertargettube.get_name().split("_")[1])
+	return Vector3((usec + ropepointlamda)/20.0, (aroundsegment + lambdaCalong)/68.0, 0)
 		
 var initialsequencenodename = null
 var initialsequencenodenameP = null
@@ -594,13 +594,13 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 		if Tglobal.wingmeshtrimmingmode and (pointertargettype == "XCtubesector" or pointertargettype == "XCflatshell"):
 			ropepointuv = ropepointtargetUV()
 			prevactivetargetnodewall = activetargetnodewall
+		var newactivetargetnodeinfo = null
 		if gripbuttonheld:
 			if activetargetnode.get_name()[0] == ("k" if pointertargettype == "none" else "a"):
 				xcdata = { "name":activetargetnodewall.get_name(), 
 						   "prevnodepoints":{ activetargetnode.get_name():activetargetnode.translation }, 
 						   "nextnodepoints":{ activetargetnode.get_name():newnodepoint } 
 						 }
-				sketchsystem.actsketchchange([xcdata])
 				clearactivetargetnode()
 		else:
 			var newnodename = activetargetnodewall.newuniquexcnodename("k" if pointertargettype == "none" else "a")
@@ -610,26 +610,31 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 					 }
 			xcdata["prevonepathpairs"] = [ ]
 			xcdata["newonepathpairs"] = [ activetargetnode.get_name(), newnodename]
-			sketchsystem.actsketchchange([xcdata])
-			setactivetargetnode(activetargetnodewall.get_node("XCnodes").get_node(newnodename))
-		
+			newactivetargetnodeinfo = [activetargetnodewall, newnodename]
+
+		var xcdatalist = [ xcdata ]
 		if Tglobal.wingmeshtrimmingmode and ropepointuv != null and xcdata != null and len(prevactivetargetnodewall.xctubesconn) == 1:
 			var xctube = prevactivetargetnodewall.xctubesconn[0]
 			var xcdrawingflatname = (xctube.xcname1 if xctube.xcname0 == prevactivetargetnodewall.get_name() else xctube.xcname0)
 			var xcdrawingf = sketchsystem.get_node("XCdrawings").get_node(xcdrawingflatname)
+			var Dpointertargetpoint = xcdrawingf.ropepointreprojectXYZ(ropepointuv, sketchsystem)
+			print("ropepointreprojectXYZ to ", Dpointertargetpoint, " should be ", pointertargetpoint)
 			var newnodepointf = xcdrawingf.global_transform.xform_inv(pointertargetpoint)
 			var fnodename = (xcdata["nextnodepoints"].keys()[0] if len(xcdata["nextnodepoints"]) == 1 else null)
 			var xcdataf = { "name":xcdrawingflatname, 
 							"prevnodepoints":{ }, 
-							"nextnodepoints":{ fnodename:ropepointuv*4 } 
+							"nextnodepoints":{ fnodename:ropepointuv*Tglobal.wingmeshuvexpansionfac } 
 						  }
 			if xcdata["prevnodepoints"].has(fnodename) and xcdrawingf.nodepoints.has(fnodename):
 				xcdataf["prevnodepoints"][fnodename] = xcdrawingf.nodepoints[fnodename]
 			if xcdata.has("newonepathpairs") and xcdrawingf.nodepoints.has(xcdata["newonepathpairs"][0]):
 				xcdataf["prevonepathpairs"] = [ ]
 				xcdataf["newonepathpairs"] = xcdata["newonepathpairs"].duplicate()
-			sketchsystem.actsketchchange([xcdataf])
+			xcdatalist.push_front(xcdataf)
 
+		sketchsystem.actsketchchange(xcdatalist)
+		if newactivetargetnodeinfo != null:
+			setactivetargetnode(newactivetargetnodeinfo[0].get_node("XCnodes").get_node(newactivetargetnodeinfo[1]))
 		
 	elif not is_instance_valid(pointertarget):
 		pass
@@ -715,8 +720,6 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 	#elif Tglobal.handflickmotiongestureposition == 1:
 	#	activelaserroot.get_node("LaserSpot").set_surface_material(0, materialsystem.lasermaterialN((1 if activetargetnode != null else 0) + 2))
 	#	activelaserroot.get_node("LaserSpot").visible = true
-
-
 
 		#Tglobal.soundsystem.quicksound("BlipSound", pointertargetpoint)
 
@@ -1546,7 +1549,7 @@ func _input(event):
 			if not Tglobal.VRoperating:
 				handright.vrbybuttonheld = event.pressed
 			if event.pressed:
-				buttonpressed_vrby(false)	
+				buttonpressed_vrby()	
 		if event.pressed and event.scancode == KEY_H:
 			set_handflickmotiongestureposition(handflickmotiongestureposition_shortpos if Tglobal.handflickmotiongestureposition == handflickmotiongestureposition_normal else handflickmotiongestureposition_normal)
 

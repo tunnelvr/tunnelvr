@@ -584,9 +584,138 @@ func newuniquexcnodename(ch):
 		if not $XCnodes.has_node(newnodename):
 			return newnodename
 
+
 const uvfacx = 0.2
 const uvfacy = 0.4
 
+func ropepathseqribbons(surfaceTool):
+	var middlenodes = [ ]
+	var ropesequences = Polynets.makeropenodesequences(nodepoints, onepathpairs, null)
+	for ropeseq in ropesequences:
+		var p0 = nodepoints[ropeseq[0]]
+		var p1 = nodepoints[ropeseq[1]]
+		var perp0 = Vector3(-(p1.y - p0.y), p1.x - p0.x, 0).normalized()
+		var fperp0 = linewidth*perp0
+		var p0left = p0 - fperp0
+		var p0right = p0 + fperp0
+		var p0u = 0.0
+		var perp1 = perp0
+		for i in range(1, len(ropeseq)):
+			var p1u = p0u + (p1-p0).length()
+			var p2 = null
+			var perp2 = null
+			if i+1 < len(ropeseq):
+				middlenodes.push_back(ropeseq[i])
+				p2 = nodepoints[ropeseq[i+1]]
+				perp2 = Vector3(-(p2.y - p1.y), p2.x - p1.x, 0).normalized()
+				perp1 = (perp0+perp2).normalized()
+			var fperp1 = linewidth*perp1
+			var p1left = p1 - fperp1
+			var p1right = p1 + fperp1
+			surfaceTool.add_uv(Vector2(p0u*uvfacx, 0.0))
+			surfaceTool.add_vertex(p0left)
+			surfaceTool.add_uv(Vector2(p1u*uvfacx, 0.0))
+			surfaceTool.add_vertex(p1left)
+			surfaceTool.add_uv(Vector2(p0u*uvfacx, uvfacy))
+			surfaceTool.add_vertex(p0right)
+			surfaceTool.add_uv(Vector2(p0u*uvfacx, uvfacy))
+			surfaceTool.add_vertex(p0right)
+			surfaceTool.add_uv(Vector2(p1u*uvfacx, 0.0))
+			surfaceTool.add_vertex(p1left)
+			surfaceTool.add_uv(Vector2(p1u*uvfacx, uvfacy))
+			surfaceTool.add_vertex(p1right)
+			
+			p0 = p1
+			p1 = p2
+			p0left = p1left
+			p0right = p1right
+			perp1 = perp2
+			p0u = p1u
+	return middlenodes
+	
+func ropepointreprojectXYZ(uv, sketchsystem):
+	var usecl = uv.x*20
+	var usec = int(clamp(floor(usecl), 0, 19))
+	var ropepointlamda = usecl - usec
+	var aroundsegmentl = uv.y*68.0
+	var aroundsegment = int(clamp(floor(aroundsegmentl), 0, 67))
+	var lambdaCalong = aroundsegmentl - aroundsegment
+	var xctube = sketchsystem.get_node("XCtubes").get_node_or_null("XCtube_ws%d_ws%d" % [usec, usec+1])
+	if xctube == null:
+		return null
+	var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(xctube.xcname0)
+	var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(xctube.xcname1)
+	var xcdrawing0nodes = xcdrawing0.get_node("XCnodes")
+	var xcdrawing1nodes = xcdrawing1.get_node("XCnodes")
+
+	var jA = aroundsegment*2
+	var p0 = xcdrawing0nodes.get_node(xctube.xcdrawinglink[jA]).global_transform.origin
+	var p1 = xcdrawing1nodes.get_node(xctube.xcdrawinglink[jA+1]).global_transform.origin
+	var pc = lerp(p0, p1, ropepointlamda)
+	
+	var jB = (jA + 2) % len(xctube.xcdrawinglink)
+	var p0B = xcdrawing0nodes.get_node(xctube.xcdrawinglink[jB]).global_transform.origin
+	var p1B = xcdrawing1nodes.get_node(xctube.xcdrawinglink[jB+1]).global_transform.origin
+	var pcB = lerp(p0B, p1B, ropepointlamda)
+
+	return lerp(pc, pcB, lambdaCalong)
+
+var parametricstepleng = 0.05
+func parametricropelines(surfaceTool):
+	assert (Tglobal.wingmeshtrimmingmode)
+	var sketchsystem = get_node("/root/Spatial/SketchSystem")
+	var xctube = xctubesconn[0]
+	var xcdrawingflatname = (xctube.xcname1 if xctube.xcname0 == get_name() else xctube.xcname0)
+	var xcdrawingf = sketchsystem.get_node("XCdrawings").get_node(xcdrawingflatname)
+
+	for j in range(0, len(onepathpairs), 2):
+		var p0 = nodepoints[onepathpairs[j]]
+		var p1 = nodepoints[onepathpairs[j+1]]
+		var vec = p1 - p0
+		var veclen = vec.length()
+		if veclen == 0.0:
+			continue
+		var veca = Vector3(0,1,0) if abs(vec.y) < 5*min(abs(vec.x), abs(vec.z)) else Vector3(1,0,0) 
+		var vp1 = vec.cross(veca).normalized()*linewidth*closewidthsca
+		var vp2 = vec.cross(vp1).normalized()*linewidth*closewidthsca
+
+		var pseq = [ p0 ]
+		var uv0 = xcdrawingf.nodepoints.get(onepathpairs[j])
+		var uv1 = xcdrawingf.nodepoints.get(onepathpairs[j+1])
+		if uv0 != null and uv1 != null:
+			uv0 /= Tglobal.wingmeshuvexpansionfac
+			uv1 /= Tglobal.wingmeshuvexpansionfac
+			var parasegs = ceil(uv0.distance_to(uv1)/parametricstepleng)
+			for k in range(1, parasegs):
+				var uv = lerp(uv0, uv1, k*1.0/parasegs)
+				var p = ropepointreprojectXYZ(uv, sketchsystem)
+				if p != null:
+					pseq.append(p)
+		pseq.append(p1)
+		if len(pseq) != 2:
+			print(" pseq ", pseq)
+		
+		for l in range(len(pseq)-1):
+			var p0l = pseq[l]
+			var p1l = pseq[l+1]
+			var p0a = [p0l-vp1-vp2, p0l+vp1-vp2, p0l+vp1+vp2, p0l-vp1+vp2]
+			var p1a = [p1l-vp1-vp2, p1l+vp1-vp2, p1l+vp1+vp2, p1l-vp1+vp2]
+			for i in range(4):
+				var i1 = (i+1)%4
+				surfaceTool.add_uv(Vector2(i*uvfacx, 0))
+				surfaceTool.add_vertex(p0a[i])
+				surfaceTool.add_uv(Vector2(i*uvfacx, veclen*uvfacy))
+				surfaceTool.add_vertex(p1a[i])
+				surfaceTool.add_uv(Vector2((i+1)*uvfacx, veclen*uvfacy))
+				surfaceTool.add_vertex(p1a[i1])
+
+				surfaceTool.add_uv(Vector2(i*uvfacx, 0))
+				surfaceTool.add_vertex(p0a[i])
+				surfaceTool.add_uv(Vector2((i+1)*uvfacx, veclen*uvfacy))
+				surfaceTool.add_vertex(p1a[i1])
+				surfaceTool.add_uv(Vector2((i+1)*uvfacx, 0))
+				surfaceTool.add_vertex(p0a[i1])
+	
 func updatelinearropepaths():
 	var middlenodes = [ ]
 	if len(onepathpairs) == 0:
@@ -596,79 +725,13 @@ func updatelinearropepaths():
 	for nname in nodepoints:
 		if nname[0] == "a":
 			countanchors += 1
-	resetclosewidthsca(1.0 if countanchors < 5 else 0.25)
+	resetclosewidthsca(1.0 if countanchors < 5 else 0.5)
 	var surfaceTool = SurfaceTool.new()
 	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
-	if countanchors < 5:
-		var ropesequences = Polynets.makeropenodesequences(nodepoints, onepathpairs, null)
-		for ropeseq in ropesequences:
-			var p0 = nodepoints[ropeseq[0]]
-			var p1 = nodepoints[ropeseq[1]]
-			var perp0 = Vector3(-(p1.y - p0.y), p1.x - p0.x, 0).normalized()
-			var fperp0 = linewidth*perp0
-			var p0left = p0 - fperp0
-			var p0right = p0 + fperp0
-			var p0u = 0.0
-			var perp1 = perp0
-			for i in range(1, len(ropeseq)):
-				var p1u = p0u + (p1-p0).length()
-				var p2 = null
-				var perp2 = null
-				if i+1 < len(ropeseq):
-					middlenodes.push_back(ropeseq[i])
-					p2 = nodepoints[ropeseq[i+1]]
-					perp2 = Vector3(-(p2.y - p1.y), p2.x - p1.x, 0).normalized()
-					perp1 = (perp0+perp2).normalized()
-				var fperp1 = linewidth*perp1
-				var p1left = p1 - fperp1
-				var p1right = p1 + fperp1
-				surfaceTool.add_uv(Vector2(p0u*uvfacx, 0.0))
-				surfaceTool.add_vertex(p0left)
-				surfaceTool.add_uv(Vector2(p1u*uvfacx, 0.0))
-				surfaceTool.add_vertex(p1left)
-				surfaceTool.add_uv(Vector2(p0u*uvfacx, uvfacy))
-				surfaceTool.add_vertex(p0right)
-				surfaceTool.add_uv(Vector2(p0u*uvfacx, uvfacy))
-				surfaceTool.add_vertex(p0right)
-				surfaceTool.add_uv(Vector2(p1u*uvfacx, 0.0))
-				surfaceTool.add_vertex(p1left)
-				surfaceTool.add_uv(Vector2(p1u*uvfacx, uvfacy))
-				surfaceTool.add_vertex(p1right)
-				
-				p0 = p1
-				p1 = p2
-				p0left = p1left
-				p0right = p1right
-				perp1 = perp2
-				p0u = p1u
-
+	if Tglobal.wingmeshtrimmingmode and countanchors >= 5 and len(xctubesconn) == 1:
+		parametricropelines(surfaceTool)
 	else:
-		for j in range(0, len(onepathpairs), 2):
-			var p0 = nodepoints[onepathpairs[j]]
-			var p1 = nodepoints[onepathpairs[j+1]]
-			var vec = p1 - p0
-			var veclen = vec.length()
-			if veclen != 0.0:
-				var veca = Vector3(0,1,0) if abs(vec.y) < 5*min(abs(vec.x), abs(vec.z)) else Vector3(1,0,0) 
-				var vp1 = vec.cross(veca).normalized()*linewidth*closewidthsca
-				var vp2 = vec.cross(vp1).normalized()*linewidth*closewidthsca
-				var p0a = [p0-vp1-vp2, p0+vp1-vp2, p0+vp1+vp2, p0-vp1+vp2]
-				var p1a = [p1-vp1-vp2, p1+vp1-vp2, p1+vp1+vp2, p1-vp1+vp2]
-				for i in range(4):
-					var i1 = (i+1)%4
-					surfaceTool.add_uv(Vector2(i*uvfacx, 0))
-					surfaceTool.add_vertex(p0a[i])
-					surfaceTool.add_uv(Vector2(i*uvfacx, veclen*uvfacy))
-					surfaceTool.add_vertex(p1a[i])
-					surfaceTool.add_uv(Vector2((i+1)*uvfacx, veclen*uvfacy))
-					surfaceTool.add_vertex(p1a[i1])
-
-					surfaceTool.add_uv(Vector2(i*uvfacx, 0))
-					surfaceTool.add_vertex(p0a[i])
-					surfaceTool.add_uv(Vector2((i+1)*uvfacx, veclen*uvfacy))
-					surfaceTool.add_vertex(p1a[i1])
-					surfaceTool.add_uv(Vector2((i+1)*uvfacx, 0))
-					surfaceTool.add_vertex(p0a[i1])
+		middlenodes = ropepathseqribbons(surfaceTool)
 
 	surfaceTool.generate_normals()
 	var newmesh = surfaceTool.commit()
@@ -677,9 +740,9 @@ func updatelinearropepaths():
 	return middlenodes
 
 func resetclosewidthsca(lclosewidthsca):
-	if shortestpathseglength != 0.0 and shortestpathseglength < linewidth*5*lclosewidthsca:
+	if shortestpathseglength != 0.0 and shortestpathseglength < linewidth*3*lclosewidthsca:
 		lclosewidthsca *= 0.5
-		if shortestpathseglength < linewidth*5*lclosewidthsca:
+		if shortestpathseglength < linewidth*3*lclosewidthsca:
 			lclosewidthsca *= 0.5
 	if closewidthsca != lclosewidthsca:
 		closewidthsca = lclosewidthsca

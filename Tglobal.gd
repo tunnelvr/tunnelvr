@@ -21,6 +21,7 @@ var soundsystem = null
 var hidecavewallstoseefloors = false
 
 var wingmeshtrimmingmode = true
+var wingmeshuvexpansionfac = 4.0
 
 var splaystationnoderegex = null
 func _ready():
