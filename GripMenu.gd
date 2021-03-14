@@ -93,6 +93,8 @@ func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointert
 	elif gripmenupointertargettype == "XCdrawing" and gripmenupointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		var draggable = (gripmenuactivetargetnode != null) and (activetargetwall == pointertargetwall)
 		gmlist = ["DragXC" if draggable else "", "DelXC" if pointertargetwall.notubeconnections_so_delxcable() else ""]
+		if Tglobal.wingmeshtrimmingmode:
+			gmlist.push_back("S_Triang")
 
 	elif gripmenupointertargettype == "Papersheet":
 		gmlist = [ ]

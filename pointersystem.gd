@@ -341,6 +341,8 @@ func setpointertarget(laserroot, raycast, pointertargetshortdistance):
 		newpointertargetpoint = raycast.global_transform.origin + (-raycast.global_transform.basis.z)*pointertargetshortdistance
 
 	if newpointertarget != pointertarget:
+		if newpointertarget != null and Tglobal.wingmeshtrimmingmode:
+			print("PT: ", newpointertarget.get_name())
 		if pointertarget == guipanel3d:
 			panelsendreleasemousemotiontopointertarget()
 		elif pointertarget == keyboardpanel:
@@ -1216,6 +1218,38 @@ func buttonreleased_vrgrip():
 					if xcdrawing1 == activetargetwall:
 						setactivetargetwall(null)
 
+			elif pointertarget.get_name() == "S_Triang":
+				assert (Tglobal.wingmeshtrimmingmode)
+				var xcdrawing = gripmenu.gripmenupointertargetwall
+				var psel = xcdrawing.global_transform.xform_inv(gripmenu.gripmenupointertargetpoint)
+				var ipolys = Polynets.makexcdpolys(xcdrawing.nodepoints, xcdrawing.onepathpairs)
+				var polypoints = null
+				for ipoly in ipolys:
+					if len(ipoly) == 0:
+						continue
+					var lpolypoints = [ ]
+					for i in ipoly:
+						lpolypoints.push_back(Vector2(xcdrawing.nodepoints[i].x, xcdrawing.nodepoints[i].y))
+					var pointinpoly = Geometry.is_point_in_polygon(Vector2(psel.x, psel.y), PoolVector2Array(lpolypoints))
+					print("  pointinpoly ", pointinpoly)
+					if pointinpoly:
+						polypoints = lpolypoints
+				if polypoints != null:
+					var arraymesh = ArrayMesh.new()
+					var surfaceTool = SurfaceTool.new()
+					surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
+					var pi = Geometry.triangulate_polygon(polypoints)
+					for j in range(len(pi)):
+						var u = pi[j]
+						surfaceTool.add_uv(polypoints[u])
+						surfaceTool.add_uv2(polypoints[u])
+						surfaceTool.add_vertex(Vector3(polypoints[u].x, polypoints[u].y, floor(j/3)*0.01))
+					surfaceTool.generate_normals()
+					surfaceTool.commit(arraymesh)
+					xcdrawing.updatexcshellmesh(arraymesh)
+				else:
+					xcdrawing.updatexcshellmesh(null)
+	
 			elif pointertarget.get_name() == "ShowFloor":
 				var xcdrawing = gripmenu.gripmenupointertargetwall
 				sketchsystem.actsketchchange([{ "xcvizstates":{xcdrawing.get_name():DRAWING_TYPE.VIZ_XCD_FLOOR_NORMAL}} ])

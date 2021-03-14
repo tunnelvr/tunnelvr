@@ -692,8 +692,6 @@ func parametricropelines(surfaceTool):
 				if p != null:
 					pseq.append(p)
 		pseq.append(p1)
-		if len(pseq) != 2:
-			print(" pseq ", pseq)
 		
 		for l in range(len(pseq)-1):
 			var p0l = pseq[l]
@@ -750,6 +748,8 @@ func resetclosewidthsca(lclosewidthsca):
 			var kscale = 0.5 if xcn.get_name()[0] == "a" else 1.0
 			xcn.scale = Vector3(closewidthsca, closewidthsca*kscale, closewidthsca)
 
+#func demotriangulation(psel):
+	
 
 func updatexcpaths():
 	var pathlines = $PathLines
