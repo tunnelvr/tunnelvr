@@ -1237,7 +1237,9 @@ func buttonreleased_vrgrip():
 
 				var arraymesh = null
 				if polypoints != null and len(polypoints) != 0:
-					arraymesh = Polynets.finemeshpolygon(polypoints, 0.25)
+					var sketchdatafile = File.new()
+					#arraymesh = Polynets.finemeshpolygon(polypoints, 0.25)
+					arraymesh = get_node("/root/Spatial/ExecutingFeatures").finemeshpolygon(polypoints, 0.25)
 				if arraymesh != null:
 					xcdrawing.updatexcshellmesh(arraymesh)
 				else:
