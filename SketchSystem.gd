@@ -69,7 +69,7 @@ remote func savesketchsystem(fname):
 	sketchdatafile.store_var(sketchdatadict)
 	sketchdatafile.close()
 	Directory.new().rename(fnamewriting, fname)
-	print("saved ", fname, " in C:/Users/ViveOne/AppData/Roaming/Godot/app_userdata/tunnelvr")
+	print("saved ", fname, " in ", OS.get_user_data_dir())
 
 
 func combinabletransformposchange(xcdatalist):
