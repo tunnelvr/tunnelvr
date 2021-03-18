@@ -1237,13 +1237,12 @@ func buttonreleased_vrgrip():
 
 				var arraymesh = null
 				if polypoints != null and len(polypoints) != 0:
-					var sketchdatafile = File.new()
-					#arraymesh = Polynets.finemeshpolygon(polypoints, 0.25)
-					arraymesh = get_node("/root/Spatial/ExecutingFeatures").finemeshpolygon(polypoints, 0.25)
-				if arraymesh != null:
-					xcdrawing.updatexcshellmesh(arraymesh)
+					arraymesh = get_node("/root/Spatial/ExecutingFeatures").call_deferred("finemeshpolygon", polypoints, 0.25, xcdrawing)
 				else:
-					xcdrawing.updatexcshellmesh(null)
+					if arraymesh != null:
+						xcdrawing.updatexcshellmesh(arraymesh)
+					else:
+						xcdrawing.updatexcshellmesh(null)
 	
 			elif pointertarget.get_name() == "ShowFloor":
 				var xcdrawing = gripmenu.gripmenupointertargetwall
