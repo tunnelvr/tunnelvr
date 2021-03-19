@@ -49,24 +49,13 @@ func finemeshpolygon(polypoints, leng, xcdrawing):
 	fout.open(fmeshname, File.READ)
 	var x = parse_json(fout.get_line())
 	fout.close()
-	print("triangulation received with %d points and %d faces" % [len(x[0]), len(x[1])])
-
-	#PoolVector3Array()
-	
-	var arraymesh = ArrayMesh.new()
-	var surfaceTool = SurfaceTool.new()
-	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
-	var v = x[0]
-	for i in len(x[1]):
-		var t = x[1][i]
-		for j in range(3):
-			var p = Vector2(v[t[j]][0], v[t[j]][1])
-			surfaceTool.add_uv(p)
-			surfaceTool.add_uv2(p)
-			surfaceTool.add_vertex(Vector3(p.x, p.y, (int(i)%50)*0.005+0.005))
-	surfaceTool.generate_normals()
-	surfaceTool.commit(arraymesh)
-	xcdrawing.updatexcshellmesh(arraymesh)
-	
+	print("triangulation received with %d points and %d faces" % [len(x[0]), len(x[1])/3])
+	var nvertices = [ ]
+	for v in x[0]:
+		nvertices.push_back(Vector3(v[0], v[1], 0.0))
+	var sketchsystem = get_node("/root/Spatial/SketchSystem")
+	sketchsystem.actsketchchange([{"name":xcdrawing.get_name(), "wingmesh":{"vertices":nvertices, "triangles":x[1]}}])
 	return null
+
+
 

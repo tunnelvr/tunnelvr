@@ -339,7 +339,22 @@ remote func actsketchchangeL(xcdatalist):
 			elif "transformpos" in xcdata and len(xcdrawing.xctubesconn) != 0:
 				for xctube in xcdrawing.xctubesconn:
 					xctubestoupdate[xctube.get_name()] = xctube
-					
+
+			if Tglobal.wingmeshtrimmingmode and "wingmesh" in xcdata:
+				var arraymesh = ArrayMesh.new()
+				var surfaceTool = SurfaceTool.new()
+				surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
+				var vertices = xcdata["wingmesh"]["vertices"]
+				var triangles = xcdata["wingmesh"]["triangles"]
+				for j in range(len(triangles)):
+					var p = vertices[triangles[j]]
+					surfaceTool.add_uv(Vector2(p.x, p.y))
+					surfaceTool.add_uv2(Vector2(p.x, p.y))
+					surfaceTool.add_vertex(p)
+				surfaceTool.generate_normals()
+				surfaceTool.commit(arraymesh)
+				xcdrawing.updatexcshellmesh(arraymesh)
+			
 			if caveworldchunkI == -1 and xcdrawing != null:
 				var tpos = null
 				var xcname = null
