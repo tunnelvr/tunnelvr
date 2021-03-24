@@ -6,6 +6,7 @@ var networkID = 0
 var playerplatform = ""
 onready var playerversion = Tglobal.version
 var guardianpoly = null
+var executingfeaturesavailable = [ ]
 var playerscale = 1.0
 var playerflyscale = 1.0
 var playerwalkscale = 1.0
@@ -38,6 +39,7 @@ func initplayerappearance_me():
 		get_node("GuardianPoly/floorareamesh").mesh = Polynets.triangulatepolygon(guardianpoly)
 		get_node("GuardianPoly/floorareamesh").set_surface_material(0, get_node("/root/Spatial/MaterialSystem").xcdrawingmaterial("guardianpoly"))
 		get_node("GuardianPoly/floorareamesh").visible = true
+	executingfeaturesavailable = get_node("/root/Spatial/ExecutingFeatures").executingfeaturesavailable()
 	
 func setheadtorchlight(torchon):
 	if torchon:
@@ -77,7 +79,6 @@ func setdoppelganger(doppelgangeron):
 			doppelganger.set_name("Doppelganger")
 			doppelganger.get_node("HeadCam/csgheadmesh/skullcomponent").material.albedo_color = get_node("HeadCam/csgheadmesh/skullcomponent").material.albedo_color
 			get_parent().add_child(doppelganger)
-			doppelganger.initplayerappearance(playerplatform, get_node("HeadCam/csgheadmesh/skullcomponent").material.albedo_color)
 			doppelganger.initplayerappearanceJ(playerappearancedict())
 			doppelganger.networkID = -10
 			
@@ -216,6 +217,7 @@ func playerappearancedict():
 			 "playerheadcolour":get_node("HeadCam/csgheadmesh/skullcomponent").material.albedo_color, 
 			 "torchon":get_node("HeadCam/HeadtorchLight").visible, 
 			 "guardianpoly":guardianpoly, 
+			 "executingfeaturesavailable":executingfeaturesavailable,
 			 "version":Tglobal.version,
 			 "cavesfilelist":guipanel3d.cavesfilelist()
 			}

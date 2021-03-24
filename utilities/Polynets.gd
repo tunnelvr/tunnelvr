@@ -176,58 +176,6 @@ static func triangulatepolygon(poly):
 	surfaceTool.generate_normals()
 	return surfaceTool.commit()
 
-static func finemeshpolygon(polypoints, parametricstepleng):
-	var arr = Geometry.offset_polygon_2d(polypoints, -parametricstepleng)
-	if len(arr) != 1:
-		return null
-
-	var dpoints = [ ]
-	var ipolypoints = arr[0]
-	var xlo = ipolypoints[0].x
-	var xhi = ipolypoints[0].x
-	var ylo = ipolypoints[0].y
-	var yhi = ipolypoints[0].y
-	for dp in ipolypoints:
-		xlo = min(xlo, dp.x)
-		xhi = max(xhi, dp.x)
-		ylo = min(ylo, dp.y)
-		yhi = max(yhi, dp.y)
-	var nx = min(100, max(2, ceil((xhi - xlo)/parametricstepleng)))
-	var ny = min(100, max(2, ceil((yhi - ylo)/parametricstepleng)))
-	for ix in range(1, nx):
-		for iy in range(1, ny):
-			var mp = Vector2(lerp(xlo, xhi, (ix+(0.5 if (iy%2)==1 else 0.0))/nx), lerp(ylo, yhi, iy/ny))
-			if Geometry.is_point_in_polygon(mp, ipolypoints):
-				dpoints.push_back(mp)
-
-	for i in range(len(polypoints)):
-		var i1 = (i+1)%len(polypoints)
-		var p0 = polypoints[i]
-		var p1 = polypoints[i1]
-		var np = max(1, ceil(p0.distance_to(p1)/parametricstepleng))
-		dpoints.push_back(p0)
-		for j in range(1, np):
-			var mp = lerp(p0, p1, j*1.0/np)
-			dpoints.push_back(mp)
-		
-	print(" finemeshpolygon triangulating with ", len(dpoints), " points")
-	var arraymesh = ArrayMesh.new()
-	var surfaceTool = SurfaceTool.new()
-	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
-	var pi = Geometry.triangulate_delaunay_2d(PoolVector2Array(dpoints))
-
-	for j in range(0, len(pi), 3):
-		var cp = (dpoints[pi[j]] + dpoints[pi[j+1]] + dpoints[pi[j+2]])/3
-		if Geometry.is_point_in_polygon(cp, polypoints):
-			for k in range(3):
-				var u = pi[j+k]
-				surfaceTool.add_uv(dpoints[u])
-				surfaceTool.add_uv2(dpoints[u])
-				surfaceTool.add_vertex(Vector3(dpoints[u].x, dpoints[u].y, (int(floor(j/3))%50)*0.005+0.005))
-	surfaceTool.generate_normals()
-	surfaceTool.commit(arraymesh)
-	return arraymesh
-
 
 
 static func stalfromropenodesequences(nodepoints, ropeseqs):

@@ -235,7 +235,6 @@ func _player_connected(id):
 	Tglobal.morethanoneplayer = $Players.get_child_count() >= 2
 	print(" playerMe networkID ", playerMe.networkID, " ", get_tree().get_network_unique_id())
 	assert(playerMe.networkID != 0)
-	playerMe.rpc_id(id, "initplayerappearance", playerMe.playerplatform, playerMe.get_node("HeadCam/csgheadmesh/skullcomponent").material.albedo_color)
 	playerMe.rpc_id(id, "initplayerappearanceJ", playerMe.playerappearancedict())
 	players_connected_list.push_back(id)
 	$GuiSystem/GUIPanel3D/Viewport/GUI/Panel/Label.text = "player "+String(id)+" connected"

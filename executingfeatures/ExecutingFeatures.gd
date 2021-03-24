@@ -1,7 +1,24 @@
 extends Node
 
+func finemeshpolygon_networked(polypoints, leng, xcdrawing):
+	var playerwithexecutefeatures = null
+	for player in get_node("/root/Spatial/Players").get_children():
+		if player.executingfeaturesavailable.has("finemeshpolygon"):
+			playerwithexecutefeatures = player
+			break
+	if playerwithexecutefeatures == null:
+		print("no player able to execute finemeshpolygon")
+		return
+	elif playerwithexecutefeatures.networkID == get_node("/root/Spatial").playerMe.networkID:
+		call_deferred("finemeshpolygon_execute", polypoints, 0.25, xcdrawing.get_name())
+	else:
+		rpc_id(playerwithexecutefeatures.networkID, "finemeshpolygon_execute", polypoints, 0.25, xcdrawing.get_name())
+		print("rpc on finemeshpolygon_execute")
+		
+
 var pymeshpid = -1
-func finemeshpolygon(polypoints, leng, xcdrawing):
+remote func finemeshpolygon_execute(polypoints, leng, xcdrawingname):
+	print("entering finemeshpolygon_execute")
 	if pymeshpid != -1:
 		print("already busy")
 		return null
@@ -53,9 +70,24 @@ func finemeshpolygon(polypoints, leng, xcdrawing):
 	var nvertices = [ ]
 	for v in x[0]:
 		nvertices.push_back(Vector3(v[0], v[1], 0.0))
+
+	#			var p = ropepointreprojectXYZ(uv, sketchsystem)
+
 	var sketchsystem = get_node("/root/Spatial/SketchSystem")
-	sketchsystem.actsketchchange([{"name":xcdrawing.get_name(), "wingmesh":{"vertices":nvertices, "triangles":x[1]}}])
+	sketchsystem.actsketchchange([{"name":xcdrawingname, "wingmesh":{"vertices":nvertices, "triangles":x[1]}}])
 	return null
 
+const flattenerexecutingplatforms = {
+	"julianlinuxlaptop":"6e6e2e697912445d86bb1b5b93996cfe",
+	"nixosserver":"unknown"
+}
+
+func executingfeaturesavailable():
+	var res = [ ]
+	var osuniqueid = OS.get_unique_id()
+	if flattenerexecutingplatforms.values().has(osuniqueid):
+		 res.append("finemeshpolygon")
+		 res.append("meshflattener")
+	return res
 
 

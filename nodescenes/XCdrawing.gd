@@ -539,8 +539,8 @@ func mergexcrpcdata(xcdata):
 			var p0 = nodepoints.get(onepathpairs[j])
 			var p1 = nodepoints.get(onepathpairs[j+1])
 			if p0 == null or p1 == null:
-				print("Deleting unknown point from onepathpairs ", (onepathpairs[j] if p0 == null else ""), "  ", (onepathpairs[j+1] if p1 == null else ""))
-				assert (false)  # assert (fromremotecall)
+				print("***  Deleting unknown point from onepathpairs ", (onepathpairs[j] if p0 == null else ""), "  ", (onepathpairs[j+1] if p1 == null else ""))
+				#assert (false)  # assert (fromremotecall)
 				onepathpairs[j] = onepathpairs[-2]
 				onepathpairs[j+1] = onepathpairs[-1]
 			else:

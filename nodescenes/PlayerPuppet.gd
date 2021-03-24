@@ -3,30 +3,17 @@ extends Spatial
 var networkID = 0
 var playerplatform = ""
 var playerversion = ""
+var executingfeaturesavailable = [ ]
 
 var puppetpositionstack = [ ]         # [ { "timestamp", "Ltimestamp", "playertransform", "headcamtransform" } ] 
 var puppetpointerpositionstack = [ ]  # [ { "timestamp", "Ltimestamp", "orient", "length", "spotvisible" } ] 
 
-# to abolish
-remote func initplayerappearance(lplayerplatform, headcolour):  # obsolete in later versions
-	playerplatform = lplayerplatform
-	get_node("HeadCam/csgheadmesh/skullcomponent").material.albedo_color = headcolour
-	get_node("headlocator/locatorline").get_surface_material(0).albedo_color = headcolour
-	#if playerplatform == "PC":
-	#	get_node("HeadCam/csgheadmesh").mesh.size.x = 0.15
-	if playerplatform == "Quest":
-		get_node("HeadCam/visorline").visible = true
-		get_node("HeadCam/visorline").get_surface_material(0).albedo_color = headcolour
-	elif playerplatform == "Vive":
-		get_node("HeadCam/visorline").visible = true
-		get_node("HeadCam/visorline").get_surface_material(0).albedo_color = Color(0, 0, 0.3)
-	else:
-		get_node("HeadCam/visorline").visible = false
 
 remote func initplayerappearanceJ(playerappearance):
 	playerplatform = playerappearance.get("playerplatform", "unknown")
 	var headcolour = playerappearance.get("playerheadcolour", Color.white)
 	var playerversion = playerappearance.get("playerversion", "unknown")
+	var executingfeaturesavailable = playerappearance.get("executingfeaturesavailable", [ ])
 	puppetsetheadtorchlight(playerappearance.get("torchon", false))
 	var guardianpoly = playerappearance.get("guardianpoly", null)
 	if guardianpoly != null:
