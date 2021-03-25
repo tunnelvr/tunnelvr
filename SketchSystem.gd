@@ -577,7 +577,7 @@ func sketchdicttochunks(sketchdatadict):
 	var xctubesDmaphalfstaged = { }
 	for j in range(len(xcdrawingsD)):
 		var xcdrawingD = xcdrawingsD[j]
-		if (len(xcdatachunkL) > 50  and j < len(xcdrawingsD) - 10) or nnodesL > 300:
+		if (len(xcdatachunkL) > 50  and j < len(xcdrawingsD) - 10) or nnodesL > 180:
 			xcdatachunkL = [ { "caveworldchunk":len(xcdatachunks) } ]
 			xcdatachunks.push_back(xcdatachunkL)
 			nnodesL = 0
@@ -661,6 +661,7 @@ remote func loadsketchsystemL(fname):
 	var xcdatachunks = sketchdicttochunks(sketchdatadict)
 	print("Generated ", len(xcdatachunks), " chunks")
 	for xcdatachunk in xcdatachunks:
+		print("sending caveworldchunk ", xcdatachunk[0].caveworldchunk, " size ", len(var2bytes(xcdatachunk)))
 		actsketchchange(xcdatachunk)
 		yield(get_tree().create_timer(0.2), "timeout")
 	var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
