@@ -346,13 +346,16 @@ remote func actsketchchangeL(xcdatalist):
 				surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
 				var vertices = xcdata["wingmesh"]["vertices"]
 				var triangles = xcdata["wingmesh"]["triangles"]
+				var flattenedvertices = xcdata["wingmesh"].get("flattenedvertices", vertices)
 				for j in range(len(triangles)):
 					var p = vertices[triangles[j]]
-					surfaceTool.add_uv(Vector2(p.x, p.y))
-					surfaceTool.add_uv2(Vector2(p.x, p.y))
+					var fp = flattenedvertices[triangles[j]]
+					surfaceTool.add_uv(Vector2(fp.x, fp.y))
+					surfaceTool.add_uv2(Vector2(fp.x, fp.y))
 					surfaceTool.add_vertex(p)
 				surfaceTool.generate_normals()
 				surfaceTool.commit(arraymesh)
+				print("committing ", len(triangles), " to ", xcdrawing.get_name())
 				xcdrawing.updatexcshellmesh(arraymesh)
 			
 			if caveworldchunkI == -1 and xcdrawing != null:

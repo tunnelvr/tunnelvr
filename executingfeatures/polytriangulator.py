@@ -10,11 +10,14 @@ import sys, numpy, json, os, shutil
 import pymesh
 print(sys.argv)
 
-x = json.loads(open(sys.argv[1]).readline())
+polyfile = sys.argv[1]
+tol = float(sys.argv[2])
+meshfile = sys.argv[3]
+
+x = json.loads(open(polyfile).readline())
 vertices = numpy.array(x[0])
 faces = numpy.array(x[1])
 mesh = pymesh.form_mesh(vertices, faces)
-tol = float(sys.argv[2])
 mesh, info = pymesh.split_long_edges(mesh, tol)
 #print(info)
 
@@ -22,7 +25,7 @@ fout = open("temp.txt", "w")
 print("writing %d verts and %d faces" % (len(mesh.vertices), len(mesh.faces)))
 fout.write(json.dumps([mesh.vertices.tolist(), mesh.faces.flatten().tolist()]))
 fout.close()
-shutil.move("temp.txt", sys.argv[3])
+shutil.move("temp.txt", meshfile)
 
 
 # then for the flattener 

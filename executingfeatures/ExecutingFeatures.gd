@@ -21,7 +21,17 @@ remote func finemeshpolygon_execute(polypoints, leng, xcdrawingname):
 	print("entering finemeshpolygon_execute")
 	if pymeshpid != -1:
 		print("already busy")
-		return null
+		return
+
+	var sketchsystem = get_node("/root/Spatial/SketchSystem")
+	var xcdrawingf = sketchsystem.get_node("XCdrawings").get_node(xcdrawingname)
+	var xcropedrawingwing = null
+	if len(xcdrawingf.xctubesconn) == 1:
+		var xctube = xcdrawingf.xctubesconn[0]
+		var xcropedrawingwingname = (xctube.xcname1 if xctube.xcname0 == xcdrawingname else xctube.xcname0)
+		xcropedrawingwing = sketchsystem.get_node("XCdrawings").get_node(xcropedrawingwingname)
+		assert (xcropedrawingwing.drawingtype == DRAWING_TYPE.DT_ROPEHANG)
+
 	
 	var pi = Geometry.triangulate_polygon(polypoints)
 	var vertices = [ ]
@@ -36,6 +46,7 @@ remote func finemeshpolygon_execute(polypoints, leng, xcdrawingname):
 		dir.make_dir("user://executingfeatures")
 	var fpolyname = "user://executingfeatures/polygon.txt"
 	var fmeshname = "user://executingfeatures/mesh.txt"
+
 	var fout = File.new()
 	if fout.file_exists(fmeshname):
 		dir.remove(fmeshname)
@@ -50,7 +61,7 @@ remote func finemeshpolygon_execute(polypoints, leng, xcdrawingname):
 	print(pymeshpid)
 	if pymeshpid == -1:
 		print("fail")
-		return null
+		return
 	
 	for i in range(20):
 		yield(get_tree().create_timer(1.0), "timeout")
@@ -61,7 +72,7 @@ remote func finemeshpolygon_execute(polypoints, leng, xcdrawingname):
 		print("no file after 20 seconds, kill")
 		OS.kill(pymeshpid)
 		pymeshpid = -1
-		return null
+		return
 	
 	fout.open(fmeshname, File.READ)
 	var x = parse_json(fout.get_line())
@@ -70,12 +81,71 @@ remote func finemeshpolygon_execute(polypoints, leng, xcdrawingname):
 	var nvertices = [ ]
 	for v in x[0]:
 		nvertices.push_back(Vector3(v[0], v[1], 0.0))
-
-	#			var p = ropepointreprojectXYZ(uv, sketchsystem)
-
-	var sketchsystem = get_node("/root/Spatial/SketchSystem")
 	sketchsystem.actsketchchange([{"name":xcdrawingname, "wingmesh":{"vertices":nvertices, "triangles":x[1]}}])
-	return null
+
+	if xcropedrawingwing == null:
+		print("no ropexcsurface for wing")
+		pymeshpid = -1
+		return
+		
+	var surfacedisplacement = Vector3(-2,0,0)
+	var nsurfacevertices = [ ]
+	var triangles = x[1]
+	for v in x[0]:
+		var sprojpoint = xcropedrawingwing.ropepointreprojectXYZ(Vector2(v[0], v[1]), sketchsystem)
+		nsurfacevertices.push_back(surfacedisplacement + sprojpoint)
+	#sketchsystem.actsketchchange([{"name":xcropedrawingwing.get_name(), "wingmesh":{"vertices":nsurfacevertices, "triangles":x[1]}}])
+
+	var fsurfacemeshname = "user://executingfeatures/surfacemesh.txt"
+	var fflattenedmeshname = "user://executingfeatures/flattenedmesh.txt"
+	if fout.file_exists(fflattenedmeshname):
+		dir.remove(fflattenedmeshname)
+	
+	var svertices = [ ]
+	for p in nsurfacevertices:
+		svertices.push_back([p.x, p.y, p.z])
+	fout.open(fsurfacemeshname, File.WRITE)
+	fout.store_line(to_json([svertices, triangles]))
+	fout.close()
+
+	var freecadappimage = "/home/julian/executables/FreeCAD_0.19-24267-Linux-Conda_glibc2.12-x86_64.AppImage"
+	var fmeshflattenerpy = "res://executingfeatures/meshflattener.py"
+
+	var arguments = PoolStringArray([
+			ProjectSettings.globalize_path(fmeshflattenerpy), 
+			ProjectSettings.globalize_path(freecadappimage), 
+			ProjectSettings.globalize_path(fsurfacemeshname), 
+			ProjectSettings.globalize_path(fflattenedmeshname)])
+	pymeshpid = OS.execute("python", arguments, false)
+	print(pymeshpid, arguments)
+	if pymeshpid == -1:
+		print("fail")
+		return
+	
+	for i in range(10):
+		yield(get_tree().create_timer(1.0), "timeout")
+		if fout.file_exists(fflattenedmeshname):
+			break
+		print("waiting on mesh flattener ", i)
+	if not fout.file_exists(fflattenedmeshname):
+		print("no file after 10 seconds, kill")
+		OS.kill(pymeshpid)
+		pymeshpid = -1
+		return
+
+	fout.open(fflattenedmeshname, File.READ)
+	var px = parse_json(fout.get_line())
+	fout.close()
+	print("flattened points %d received" % [len(px)])
+	var flattenedvertices = [ ]
+	for v in x[0]:
+		flattenedvertices.push_back(Vector2(v[0], v[1]))
+	sketchsystem.actsketchchange([{"name":xcropedrawingwing.get_name(), "wingmesh":{"vertices":nsurfacevertices, "triangles":x[1], "flattenedvertices":flattenedvertices}}])
+
+	pymeshpid = -1
+
+
+
 
 const flattenerexecutingplatforms = {
 	"julianlinuxlaptop":"6e6e2e697912445d86bb1b5b93996cfe",
