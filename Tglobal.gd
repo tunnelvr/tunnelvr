@@ -22,6 +22,9 @@ var hidecavewallstoseefloors = false
 
 var wingmeshtrimmingmode = true
 var wingmeshuvexpansionfac = 4.0
+var wingmeshuvudivisions = 19
+var wingmeshuvvdivisions = 68
+
 
 var splaystationnoderegex = null
 func _ready():

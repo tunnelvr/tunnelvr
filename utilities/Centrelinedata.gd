@@ -125,14 +125,15 @@ static func xcdatalistfromwingdata(wingdeffile):
 			pts.append(Vector3(float(k[j][i]), float(k[j][i+2]), 0))
 		zvals.append(z)
 		sections.append(pts)
+	assert(len(sections) == Tglobal.wingmeshuvudivisions)
 	
 	var nodepairs = [ ]
-	for i in range(67):
+	for i in range(Tglobal.wingmeshuvvdivisions-1):
 		nodepairs.append("p%d"%i)
 		nodepairs.append("p%d"%(i+1))
 	#var enddrawinglinks = ["p0", "p0", "graphpaper", null,  "p67", "p67", "graphpaper", null]
 	var enddrawinglinks = [ ]
-	for i in range(68):
+	for i in range(Tglobal.wingmeshuvvdivisions):
 		enddrawinglinks.append("p%d"%i)
 		enddrawinglinks.append("p%d"%i)
 		enddrawinglinks.append("graphpaper")
@@ -144,7 +145,7 @@ static func xcdatalistfromwingdata(wingdeffile):
 	for j in range(len(sections)):
 		var pts = sections[j]
 		var nodepoints = { }
-		for i in range(68):
+		for i in range(Tglobal.wingmeshuvvdivisions):
 			nodepoints["p%d" % i] = pts[i]
 		var sname = "ws%d"%j
 		var xcdata = { "name":sname, 

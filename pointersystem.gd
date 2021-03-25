@@ -341,8 +341,8 @@ func setpointertarget(laserroot, raycast, pointertargetshortdistance):
 		newpointertargetpoint = raycast.global_transform.origin + (-raycast.global_transform.basis.z)*pointertargetshortdistance
 
 	if newpointertarget != pointertarget:
-		if newpointertarget != null and Tglobal.wingmeshtrimmingmode:
-			print("PT: ", newpointertarget.get_name())
+		#if newpointertarget != null and Tglobal.wingmeshtrimmingmode:
+		#	print("PT: ", newpointertarget.get_name())
 		if pointertarget == guipanel3d:
 			panelsendreleasemousemotiontopointertarget()
 		elif pointertarget == keyboardpanel:
@@ -579,7 +579,8 @@ func ropepointtargetUV():
 	var lambdaCalong = pcvec.dot(pointertargetpoint - pc)/(pcveclen if pcveclen != 0 else 1.0)
 	print("ropepointUV ", pointertargettube.get_name(), [ropepointlamda, ropepointlamdaB], [aroundsegment, lambdaCalong])
 	var usec = int(pointertargettube.get_name().split("_")[1])
-	return Vector3((usec + ropepointlamda)/20.0, (aroundsegment + lambdaCalong)/68.0, 0)
+	return Vector3((usec + ropepointlamda)/Tglobal.wingmeshuvudivisions, (aroundsegment + lambdaCalong)/Tglobal.wingmeshuvvdivisions, 0)
+
 		
 var initialsequencenodename = null
 var initialsequencenodenameP = null

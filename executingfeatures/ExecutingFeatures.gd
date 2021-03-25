@@ -79,8 +79,10 @@ remote func finemeshpolygon_execute(polypoints, leng, xcdrawingname):
 	fout.close()
 	print("triangulation received with %d points and %d faces" % [len(x[0]), len(x[1])/3])
 	var nvertices = [ ]
-	for v in x[0]:
-		nvertices.push_back(Vector3(v[0], v[1], 0.0))
+	for i in range(len(x[0])):
+		var v = x[0][i]
+		var z = (0.01 if (int(i/3)%2) == 0 else -0.01)
+		nvertices.push_back(Vector3(v[0], v[1], z))
 	sketchsystem.actsketchchange([{"name":xcdrawingname, "wingmesh":{"vertices":nvertices, "triangles":x[1]}}])
 
 	if xcropedrawingwing == null:
@@ -92,7 +94,9 @@ remote func finemeshpolygon_execute(polypoints, leng, xcdrawingname):
 	var nsurfacevertices = [ ]
 	var triangles = x[1]
 	for v in x[0]:
-		var sprojpoint = xcropedrawingwing.ropepointreprojectXYZ(Vector2(v[0], v[1]), sketchsystem)
+		var uv = Vector2(clamp(v[0]/Tglobal.wingmeshuvexpansionfac, 0, 1), 
+						 clamp(v[1]/Tglobal.wingmeshuvexpansionfac, 0, 1))
+		var sprojpoint = xcropedrawingwing.ropepointreprojectXYZ(uv, sketchsystem)
 		nsurfacevertices.push_back(surfacedisplacement + sprojpoint)
 	#sketchsystem.actsketchchange([{"name":xcropedrawingwing.get_name(), "wingmesh":{"vertices":nsurfacevertices, "triangles":x[1]}}])
 

@@ -633,12 +633,12 @@ func ropepathseqribbons(surfaceTool):
 			p0u = p1u
 	return middlenodes
 	
-func ropepointreprojectXYZ(uv, sketchsystem):
-	var usecl = uv.x*20
-	var usec = int(clamp(floor(usecl), 0, 19))
+func ropepointreprojectXYZ(uv, sketchsystem):  #  opposite of ropepointtargetUV
+	var usecl = uv.x*Tglobal.wingmeshuvudivisions
+	var usec = int(clamp(floor(usecl), 0, Tglobal.wingmeshuvudivisions-1))
 	var ropepointlamda = usecl - usec
-	var aroundsegmentl = uv.y*68.0
-	var aroundsegment = int(clamp(floor(aroundsegmentl), 0, 67))
+	var aroundsegmentl = uv.y*Tglobal.wingmeshuvvdivisions
+	var aroundsegment = int(clamp(floor(aroundsegmentl), 0, Tglobal.wingmeshuvvdivisions-1))
 	var lambdaCalong = aroundsegmentl - aroundsegment
 	var xctube = sketchsystem.get_node("XCtubes").get_node_or_null("XCtube_ws%d_ws%d" % [usec, usec+1])
 	if xctube == null:
