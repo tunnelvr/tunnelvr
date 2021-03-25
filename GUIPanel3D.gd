@@ -423,7 +423,7 @@ func _on_textedit_focus_exited():
 
 const clientips = [ "tunnelvr.goatchurch.org.uk",  # alex server
 					"192.168.8.104 Quest2",  # home wifi
-					"192.168.8.101 JGT",     # home wifi
+					"192.168.43.172 JGTS9",     # home wifi
 					"192.168.43.186 Quest2S9" ]
 func _ready():
 	regexacceptableprojectname.compile('(?i)^([a-z0-9.\\-_]+)\\s*$')

@@ -13,7 +13,7 @@ remote func initplayerappearanceJ(playerappearance):
 	playerplatform = playerappearance.get("playerplatform", "unknown")
 	var headcolour = playerappearance.get("playerheadcolour", Color.white)
 	var playerversion = playerappearance.get("playerversion", "unknown")
-	var executingfeaturesavailable = playerappearance.get("executingfeaturesavailable", [ ])
+	executingfeaturesavailable = playerappearance.get("executingfeaturesavailable", [ ])
 	puppetsetheadtorchlight(playerappearance.get("torchon", false))
 	var guardianpoly = playerappearance.get("guardianpoly", null)
 	if guardianpoly != null:
