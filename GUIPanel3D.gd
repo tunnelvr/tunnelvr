@@ -422,10 +422,13 @@ func _on_textedit_focus_exited():
 	$Viewport/GUI/Panel/TextRelatedActions.visible = false
 
 const clientips = [ "tunnelvr.goatchurch.org.uk",  # alex server
+					"Local-network",
 					"192.168.8.104 Quest2",  # home wifi
 					"192.168.43.172 JGTS9",     # home wifi
 					"192.168.43.186 Quest2S9" ]
+var uniqueinstancestring = ""
 func _ready():
+	uniqueinstancestring = OS.get_unique_id().replace("{", "").split("-")[0].to_upper()+"_"+str(randi())
 	regexacceptableprojectname.compile('(?i)^([a-z0-9.\\-_]+)\\s*$')
 	if has_node("ViewportReal"):
 		var fgui = $Viewport/GUI
@@ -675,11 +678,18 @@ func _input(event):
 #-------------networking system
 var websocketserver = null
 var websocketclient = null
-var networkedmultiplayerenet = null
+var networkedmultiplayerenetserver = null
+var networkedmultiplayerenetclient = null
+var udpdiscoveryreceivingserver = null
 
 func _on_networkstate_selected(index):
+	if $Viewport/GUI/Panel/Networkstate.selected != index:
+		$Viewport/GUI/Panel/Networkstate.selected = index
 	var nssel = $Viewport/GUI/Panel/Networkstate.get_item_text(index)
 	print("Select networkstate: ", nssel)
+	if not nssel.begins_with("Local-network") and udpdiscoveryreceivingserver != null:
+		udpdiscoveryreceivingserver.stop()
+		udpdiscoveryreceivingserver = null
 	if nssel == "Check IPnum":
 		print("IP local interfaces: ")
 		$Viewport/GUI/Panel/Label.text = ""
@@ -705,9 +715,12 @@ func _on_networkstate_selected(index):
 		if websocketclient != null:
 			websocketclient.disconnect_from_host()
 			#websocketclient = null
-		if networkedmultiplayerenet != null:
-			networkedmultiplayerenet.close_connection()
-			networkedmultiplayerenet = null
+		if networkedmultiplayerenetclient != null:
+			networkedmultiplayerenetclient.close_connection()
+			networkedmultiplayerenetclient = null
+		if networkedmultiplayerenetserver != null:
+			networkedmultiplayerenetserver.close_connection()
+			networkedmultiplayerenetserver = null
 		selfSpatial.setconnectiontoserveractive(false)
 		get_tree().set_network_peer(null)
 		
@@ -718,6 +731,10 @@ func _on_networkstate_selected(index):
 		else:
 			$Viewport/GUI/Panel/Label.text = "networkID: "+str(selfSpatial.playerMe.networkID)
 				
+	elif nssel.begins_with("Local-network"):
+		udpdiscoveryreceivingserver = UDPServer.new()
+		udpdiscoveryreceivingserver.listen(selfSpatial.udpserverdiscoveryport)
+
 	else:
 		selfSpatial.hostipnumber = nssel.replace("Client->", "")
 		if selfSpatial.hostipnumber.find(" ") != -1:
@@ -739,12 +756,12 @@ func _on_networkstate_selected(index):
 			get_tree().set_network_peer(websocketclient)
 			
 		else:
-			networkedmultiplayerenet = NetworkedMultiplayerENet.new()
+			networkedmultiplayerenetclient = NetworkedMultiplayerENet.new()
 			var inbandwidth = 0
 			var outbandwidth = 0
-			var e = networkedmultiplayerenet.create_client(selfSpatial.hostipnumber, selfSpatial.hostportnumber, inbandwidth, outbandwidth)
+			var e = networkedmultiplayerenetclient.create_client(selfSpatial.hostipnumber, selfSpatial.hostportnumber, inbandwidth, outbandwidth)
 			print("networkedmultiplayerenet createclient: ", e, " ", selfSpatial.hostipnumber)
-			get_tree().set_network_peer(networkedmultiplayerenet)
+			get_tree().set_network_peer(networkedmultiplayerenetclient)
 		$Viewport/GUI/Panel/Label.text = "connecting "+("websocket" if selfSpatial.usewebsockets else "ENET")
 
 func networkstartasserver(fromgui):
@@ -767,10 +784,10 @@ func networkstartasserver(fromgui):
 		get_tree().set_network_peer(websocketserver)
 		selfSpatial.setconnectiontoserveractive(true)
 	else:
-		networkedmultiplayerenet = NetworkedMultiplayerENet.new()
-		var e = networkedmultiplayerenet.create_server(selfSpatial.hostportnumber, 32)
+		networkedmultiplayerenetserver = NetworkedMultiplayerENet.new()
+		var e = networkedmultiplayerenetserver.create_server(selfSpatial.hostportnumber, 32)
 		if e == 0:
-			get_tree().set_network_peer(networkedmultiplayerenet)
+			get_tree().set_network_peer(networkedmultiplayerenetserver)
 			selfSpatial.setconnectiontoserveractive(true)
 		else:
 			print("networkedmultiplayerenet createserver Error: ", {ERR_CANT_CREATE:"ERR_CANT_CREATE"}.get(e, e))
@@ -796,7 +813,7 @@ func _connection_failed():
 func _server_disconnected():
 	print("\n\n***_server_disconnected ", websocketclient, "\n\n")
 	websocketclient = null
-	networkedmultiplayerenet = null
+	networkedmultiplayerenetclient = null
 	selfSpatial.setconnectiontoserveractive(false)
 	selfSpatial.mqttsystem.mqttpublish("serverdisconnected", String(playerMe.networkID))
 	selfSpatial.deferred_player_connected_list.clear()
@@ -840,6 +857,10 @@ var netlinkstatstimer = 0.0
 var maxdelta = 0.0
 var sumdelta = 0.0
 var countframes = 0
+var multicastudpipnum = "255.255.255.255"
+const udpdiscoverybroadcasterperiod = 2.0
+var udpdiscoverybroadcasterperiodtimer = udpdiscoverybroadcasterperiod
+
 func _process(delta):
 	if websocketserver != null:
 		if websocketserver.is_listening():
@@ -872,3 +893,29 @@ func _process(delta):
 			elif selectedplayernetworkid == -10:
 				call_deferred("sendbacknetworkmetrics", { "ticksout":OS.get_ticks_msec() }, -11)
 			netlinkstatstimer = 0.0
+
+	if networkedmultiplayerenetserver != null and not OS.has_feature("Server") and selfSpatial.udpserverdiscoveryport != 0:
+		udpdiscoverybroadcasterperiodtimer -= delta
+		if udpdiscoverybroadcasterperiodtimer < 0:
+			udpdiscoverybroadcasterperiodtimer = udpdiscoverybroadcasterperiod
+			var udpdiscoverybroadcaster = PacketPeerUDP.new()
+			udpdiscoverybroadcaster.connect_to_host(multicastudpipnum, selfSpatial.udpserverdiscoveryport)
+			udpdiscoverybroadcaster.put_packet(("TunnelVRserver-here! "+uniqueinstancestring).to_utf8())
+			print("put UDP onto ", multicastudpipnum)
+			udpdiscoverybroadcaster.close()
+
+	if udpdiscoveryreceivingserver != null and playerMe.networkID == 0:
+		udpdiscoveryreceivingserver.poll()
+		if udpdiscoveryreceivingserver.is_connection_available():
+			var peer = udpdiscoveryreceivingserver.take_connection()
+			var pkt = peer.get_packet()
+			var spkt = pkt.get_string_from_utf8().split(" ")
+			print("Received: ", spkt, " from ", peer.get_packet_ip())
+			if spkt[0] == "TunnelVRserver-here!":
+				var serverIPnumber = peer.get_packet_ip()
+				$Viewport/GUI/Panel/Networkstate.add_item(serverIPnumber)
+				udpdiscoveryreceivingserver.stop()
+				udpdiscoveryreceivingserver = null
+				_on_networkstate_selected($Viewport/GUI/Panel/Networkstate.get_item_count()-1)
+
+

@@ -661,7 +661,7 @@ remote func loadsketchsystemL(fname):
 	var xcdatachunks = sketchdicttochunks(sketchdatadict)
 	print("Generated ", len(xcdatachunks), " chunks")
 	for xcdatachunk in xcdatachunks:
-		print("sending caveworldchunk ", xcdatachunk[0].caveworldchunk, " size ", len(var2bytes(xcdatachunk)))
+		#print("sending caveworldchunk ", xcdatachunk[0].caveworldchunk, " size ", len(var2bytes(xcdatachunk)))
 		actsketchchange(xcdatachunk)
 		yield(get_tree().create_timer(0.2), "timeout")
 	var planviewsystem = get_node("/root/Spatial/PlanViewSystem")

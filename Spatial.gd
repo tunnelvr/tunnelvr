@@ -53,6 +53,7 @@ extends Spatial
 	
 var hostipnumber: String = ""
 export var hostportnumber: int = 4546
+export var udpserverdiscoveryport: int = 4547
 export var enablevr: = true
 export var usewebsockets: = false
 export var planviewonly: = false
