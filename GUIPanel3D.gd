@@ -770,7 +770,8 @@ func _on_networkstate_selected(index):
 			print("networkedmultiplayerenet createclient: ", e, " ", selfSpatial.hostipnumber)
 			get_tree().set_network_peer(networkedmultiplayerenetclient)
 		$Viewport/GUI/Panel/Label.text = "connecting "+("websocket" if selfSpatial.usewebsockets else "ENET")
-
+		setguipanelhide()
+	
 func networkstartasserver(fromgui):
 	if not fromgui:
 		yield(get_tree().create_timer(2.0), "timeout")		

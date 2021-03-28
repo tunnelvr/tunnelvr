@@ -102,6 +102,8 @@ func actsketchchange(xcdatalist):
 		assert(playerMe.networkID != 0)
 		#print("Delaying transmission by 20 seconds to simulate bad connections")
 		#yield(get_tree().create_timer(20), "timeout")
+		if Tglobal.wingmeshtrimmingmode and "wingmesh" in xcdatalist[0]:
+			print("sending wingmesh data size ", len(var2bytes(xcdatalist)))
 		rpc("actsketchchangeL", xcdatalist)
 
 func clearentirecaveworld():

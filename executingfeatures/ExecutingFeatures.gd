@@ -137,14 +137,17 @@ remote func finemeshpolygon_execute(polypoints, leng, xcdrawingname):
 		return
 
 	fout.open(fflattenedmeshname, File.READ)
-	var px = parse_json(fout.get_line())
+	var jtxt = fout.get_line()
 	fout.close()
-	print("flattened points %d received" % [len(px)])
-	var flattenedvertices = [ ]
-	for v in x[0]:
-		flattenedvertices.push_back(Vector2(v[0], v[1]))
-	sketchsystem.actsketchchange([{"name":xcropedrawingwing.get_name(), "wingmesh":{"vertices":nsurfacevertices, "triangles":x[1], "flattenedvertices":flattenedvertices}}])
-
+	var px = parse_json(jtxt)
+	if px != null:
+		print("flattened points %d received" % [len(px)])
+		var flattenedvertices = [ ]
+		for v in x[0]:
+			flattenedvertices.push_back(Vector2(v[0], v[1]))
+		sketchsystem.actsketchchange([{"name":xcropedrawingwing.get_name(), "wingmesh":{"vertices":nsurfacevertices, "triangles":x[1], "flattenedvertices":flattenedvertices}}])
+	else:
+		print("dud flattening output ", jtxt.substr(0, 15))
 	pymeshpid = -1
 
 
