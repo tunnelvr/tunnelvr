@@ -792,6 +792,7 @@ func networkstartasserver(fromgui):
 		else:
 			print("networkedmultiplayerenet createserver Error: ", {ERR_CANT_CREATE:"ERR_CANT_CREATE"}.get(e, e))
 			print("*** is there a server running on this port already? ", selfSpatial.hostportnumber)
+			networkedmultiplayerenetserver = null
 			$Viewport/GUI/Panel/Networkstate.selected = 0
 
 	var lnetworkID = get_tree().get_network_unique_id()
@@ -901,7 +902,7 @@ func _process(delta):
 			var udpdiscoverybroadcaster = PacketPeerUDP.new()
 			udpdiscoverybroadcaster.connect_to_host(multicastudpipnum, selfSpatial.udpserverdiscoveryport)
 			udpdiscoverybroadcaster.put_packet(("TunnelVRserver-here! "+uniqueinstancestring).to_utf8())
-			print("put UDP onto ", multicastudpipnum)
+			print("put UDP onto ", multicastudpipnum, ":", selfSpatial.udpserverdiscoveryport)
 			udpdiscoverybroadcaster.close()
 
 	if udpdiscoveryreceivingserver != null and playerMe.networkID == 0:
