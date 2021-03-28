@@ -116,8 +116,8 @@ func _physics_process(delta):
 			
 func _on_button_pressed(p_button):
 	print("DDD p_button ", p_button)
-	if p_button == BUTTONS.VR_MENU and Tglobal.arvrinterfacename == "OVRMobile" and selfSpatial.pointersystem != null:
-		selfSpatial.pointersystem.buttonpressed_vrby()
+	if p_button == BUTTONS.VR_MENU and Tglobal.arvrinterfacename == "OVRMobile":
+		playerMe.get_node("pointersystem").buttonpressed_vrby()
 
 	elif p_button == BUTTONS.VR_PAD:
 		var joypos = HandLeft.joypos
