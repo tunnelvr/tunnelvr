@@ -315,7 +315,7 @@ func _process(_delta):
 		#ovr_performance.set_clock_levels(1, 1)
 		#ovr_performance.set_extra_latency_mode(1)
 		perform_runtime_config = true
-	#	set_process(false)
+		#set_process(false)
 		$BatFlutter/BatCentre/batflap/AnimationPlayer.get_animation("ArmatureAction").loop = true
 		$BatFlutter/BatCentre/batflap/AnimationPlayer.play("ArmatureAction")
 	$BatFlutter.rotation_degrees.y += _delta*60

@@ -346,13 +346,35 @@ remote func actsketchchangeL(xcdatalist):
 				surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
 				var vertices = xcdata["wingmesh"]["vertices"]
 				var triangles = xcdata["wingmesh"]["triangles"]
-				var flattenedvertices = xcdata["wingmesh"].get("flattenedvertices", vertices)
+				var flattenedvertices = xcdata["wingmesh"].get("flattenedvertices", null)
+
+				var triangleflatdistortion = [ ]
+				if flattenedvertices != null:
+					for j in range(0, len(triangles), 3):
+						var tfduv = Polynets.triangledistortionmeasure(
+							vertices[triangles[j]], vertices[triangles[j+1]], vertices[triangles[j+2]], 
+							flattenedvertices[triangles[j]], flattenedvertices[triangles[j+1]], flattenedvertices[triangles[j+2]])
+						triangleflatdistortion.push_back(tfduv)
+					
+				var surfacedisplacement = Vector3(-2,0,0) if flattenedvertices != null else Vector3(0,0,0)
 				for j in range(len(triangles)):
 					var p = vertices[triangles[j]]
-					var fp = flattenedvertices[triangles[j]]
+					var fp = flattenedvertices[triangles[j]] if flattenedvertices != null else p
+					var tfduv = triangleflatdistortion[int(j/3)] if flattenedvertices != null else Vector2(0.5, 0.0)
 					surfaceTool.add_uv(Vector2(fp.x, fp.y))
-					surfaceTool.add_uv2(Vector2(fp.x, fp.y))
-					surfaceTool.add_vertex(p)
+					surfaceTool.add_uv2(tfduv)
+					surfaceTool.add_vertex(surfacedisplacement + p)
+
+				if flattenedvertices != null:
+					var flattenedsurfacedisplacement = vertices[0] + Vector3(-3,0,0)
+					for j in range(len(triangles)):
+						#var p = vertices[triangles[j]]
+						var fp = flattenedvertices[triangles[j]]
+						var tfduv = triangleflatdistortion[int(j/3)]
+						surfaceTool.add_uv(Vector2(fp.x, fp.y))
+						surfaceTool.add_uv2(tfduv)
+						surfaceTool.add_vertex(flattenedsurfacedisplacement + Vector3(fp.x, 0.0, fp.y))
+
 				surfaceTool.generate_normals()
 				surfaceTool.commit(arraymesh)
 				print("committing ", len(triangles), " to ", xcdrawing.get_name())

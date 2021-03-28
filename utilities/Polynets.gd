@@ -313,4 +313,10 @@ static func cuboidfromropenodesequences(nodepoints, ropeseqs):
 		cuboidfacs.push_back(cuboidfacseq(topnode, ropeseqs, [secondseqq[k][0], secondseqq[k][4], secondseqq[(k+1)%3][2], secondseqq[(k+1)%3][0]]))
 		cuboidfacs.push_back(cuboidfacseq(secondseqq[k][1], ropeseqs, [secondseqq[k][2], secondseqq[(k+2)%3][6], secondseqq[k][6], secondseqq[k][4]]))
 	return cuboidfacs
-		
+	
+static func triangledistortionmeasure(p0, p1, p2, f0, f1, f2):
+	var parea = 0.5*(p1 - p0).cross(p2 - p0).length()
+	var farea = 0.5*(f1 - f0).cross(f2 - f0)
+	var areachange = farea/parea
+	var u = clamp((areachange - 0.5), 0.0, 0.9999)
+	return Vector2(u, 1.0)

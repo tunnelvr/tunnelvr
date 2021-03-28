@@ -10,7 +10,7 @@ func finemeshpolygon_networked(polypoints, leng, xcdrawing):
 		print("no player able to execute finemeshpolygon")
 		return
 	elif playerwithexecutefeatures.networkID == get_node("/root/Spatial").playerMe.networkID:
-		call_deferred("finemeshpolygon_execute", polypoints, 0.25, xcdrawing.get_name())
+		call_deferred("finemeshpolygon_execute", polypoints, 0.125, xcdrawing.get_name())
 	else:
 		rpc_id(playerwithexecutefeatures.networkID, "finemeshpolygon_execute", polypoints, 0.25, xcdrawing.get_name())
 		print("rpc on finemeshpolygon_execute")
@@ -90,14 +90,13 @@ remote func finemeshpolygon_execute(polypoints, leng, xcdrawingname):
 		pymeshpid = -1
 		return
 		
-	var surfacedisplacement = Vector3(-2,0,0)
 	var nsurfacevertices = [ ]
 	var triangles = x[1]
 	for v in x[0]:
 		var uv = Vector2(clamp(v[0]/Tglobal.wingmeshuvexpansionfac, 0, 1), 
 						 clamp(v[1]/Tglobal.wingmeshuvexpansionfac, 0, 1))
 		var sprojpoint = xcropedrawingwing.ropepointreprojectXYZ(uv, sketchsystem)
-		nsurfacevertices.push_back(surfacedisplacement + sprojpoint)
+		nsurfacevertices.push_back(sprojpoint)
 	#sketchsystem.actsketchchange([{"name":xcropedrawingwing.get_name(), "wingmesh":{"vertices":nsurfacevertices, "triangles":x[1]}}])
 
 	var fsurfacemeshname = "user://executingfeatures/surfacemesh.txt"

@@ -1,4 +1,4 @@
-[gd_scene load_steps=293 format=2]
+[gd_scene load_steps=294 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/default_env.tres" type="Environment" id=2]
@@ -62,6 +62,7 @@
 [ext_resource path="res://lightweighttextures/calcite.jpg" type="Texture" id=60]
 [ext_resource path="res://lightweighttextures/graph.png" type="Texture" id=61]
 [ext_resource path="res://executingfeatures/ExecutingFeatures.gd" type="Script" id=62]
+[ext_resource path="res://lightweighttextures/distortiongradient.png" type="Texture" id=63]
 
 [sub_resource type="CubeMesh" id=1]
 size = Vector3( 0.35, 0.01, 0.01 )
@@ -610,6 +611,12 @@ uv1_offset = Vector3( 0, 0.35, 0 )
 params_specular_mode = 2
 params_cull_mode = 2
 albedo_texture = ExtResource( 61 )
+emission_enabled = true
+emission = Color( 0, 0, 0, 1 )
+emission_energy = 1.0
+emission_operator = 0
+emission_on_uv2 = true
+emission_texture = ExtResource( 63 )
 uv1_scale = Vector3( 10, 10, 10 )
 
 [sub_resource type="PlaneMesh" id=101]
