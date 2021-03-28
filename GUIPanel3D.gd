@@ -690,6 +690,7 @@ func _on_networkstate_selected(index):
 	if not nssel.begins_with("Local-network") and udpdiscoveryreceivingserver != null:
 		udpdiscoveryreceivingserver.stop()
 		udpdiscoveryreceivingserver = null
+
 	if nssel == "Check IPnum":
 		print("IP local interfaces: ")
 		$Viewport/GUI/Panel/Label.text = ""
@@ -706,7 +707,7 @@ func _on_networkstate_selected(index):
 				$Viewport/GUI/Panel/Label.text = kf
 		websocketclient = null
 		
-	elif nssel.begins_with("Network Off"):
+	else:   # put the network completely off
 		if websocketserver != null:
 			websocketserver.close()
 			# Note: To achieve a clean close, you will need to keep polling until either WebSocketClient.connection_closed or WebSocketServer.client_disconnected is received.
@@ -721,9 +722,15 @@ func _on_networkstate_selected(index):
 		if networkedmultiplayerenetserver != null:
 			networkedmultiplayerenetserver.close_connection()
 			networkedmultiplayerenetserver = null
+		if udpdiscoveryreceivingserver != null:
+			udpdiscoveryreceivingserver.stop()
+			udpdiscoveryreceivingserver = null
+
 		selfSpatial.setconnectiontoserveractive(false)
 		get_tree().set_network_peer(null)
 		
+	if nssel == "Check IPnum" or nssel == "Check IPnum":
+		pass
 	elif nssel.begins_with("As Server"):
 		networkstartasserver(true)
 		if selfSpatial.playerMe.networkID == 0:
