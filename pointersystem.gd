@@ -1230,6 +1230,7 @@ func buttonreleased_vrgrip():
 						continue
 					var lpolypoints = [ ]
 					for i in ipoly:
+
 						lpolypoints.push_back(Vector2(xcdrawing.nodepoints[i].x, xcdrawing.nodepoints[i].y))
 					var pointinpoly = Geometry.is_point_in_polygon(Vector2(psel.x, psel.y), PoolVector2Array(lpolypoints))
 					print("  pointinpoly ", pointinpoly)

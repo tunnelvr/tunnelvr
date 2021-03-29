@@ -28,7 +28,7 @@ x = json.loads(open(surfacemeshfile).readline())
 vertices = numpy.array(x[0])*1000
 faces = numpy.array(x[1]).reshape((-1, 3))
 flattener = flatmesh.FaceUnwrapper(vertices, faces)
-flattener.findFlatNodes(5, 0.95)
+flattener.findFlatNodes(10, 0.95)
 fnodes = flattener.ze_nodes*0.001
 
 fout = open(tempfile, "w")

@@ -10,14 +10,15 @@ func finemeshpolygon_networked(polypoints, leng, xcdrawing):
 		print("no player able to execute finemeshpolygon")
 		return
 	elif playerwithexecutefeatures.networkID == get_node("/root/Spatial").playerMe.networkID:
-		call_deferred("finemeshpolygon_execute", polypoints, 0.125, xcdrawing.get_name())
+		var trilineleng = 0.125
+		call_deferred("finemeshpolygon_execute", polypoints, trilineleng, xcdrawing.get_name())
 	else:
 		rpc_id(playerwithexecutefeatures.networkID, "finemeshpolygon_execute", polypoints, 0.25, xcdrawing.get_name())
 		print("rpc on finemeshpolygon_execute")
 		
 
 var pymeshpid = -1
-remote func finemeshpolygon_execute(polypoints, leng, xcdrawingname):
+remote func finemeshpolygon_execute(polypoints, trilineleng, xcdrawingname):
 	print("entering finemeshpolygon_execute")
 	if pymeshpid != -1:
 		print("already busy")
@@ -32,6 +33,9 @@ remote func finemeshpolygon_execute(polypoints, leng, xcdrawingname):
 		xcropedrawingwing = sketchsystem.get_node("XCdrawings").get_node(xcropedrawingwingname)
 		assert (xcropedrawingwing.drawingtype == DRAWING_TYPE.DT_ROPEHANG)
 
+	for i in range(len(polypoints)):
+		polypoints[i].x = clamp(polypoints[i].x, 0, Tglobal.wingmeshuvexpansionfac)
+		polypoints[i].y = clamp(polypoints[i].y, 0, Tglobal.wingmeshuvexpansionfac)
 	
 	var pi = Geometry.triangulate_polygon(polypoints)
 	var vertices = [ ]
@@ -55,7 +59,7 @@ remote func finemeshpolygon_execute(polypoints, leng, xcdrawingname):
 	fout.store_line(to_json([vertices, faces]))
 	fout.close()
 	var dc = "run -it --rm -v %s:/data -v %s:/code pymesh/pymesh /code/polytriangulator.py /data/polygon.txt %f /data/mesh.txt" % \
-		[ ProjectSettings.globalize_path("user://executingfeatures"), ProjectSettings.globalize_path("res://executingfeatures"), leng ]
+		[ ProjectSettings.globalize_path("user://executingfeatures"), ProjectSettings.globalize_path("res://executingfeatures"), trilineleng ]
 	print(dc)
 	pymeshpid = OS.execute("docker", PoolStringArray(dc.split(" ")), false)
 	print(pymeshpid)
@@ -143,7 +147,7 @@ remote func finemeshpolygon_execute(polypoints, leng, xcdrawingname):
 	if px != null:
 		print("flattened points %d received" % [len(px)])
 		var flattenedvertices = [ ]
-		for v in x[0]:
+		for v in px:
 			flattenedvertices.push_back(Vector2(v[0], v[1]))
 		sketchsystem.actsketchchange([{"name":xcropedrawingwing.get_name(), "wingmesh":{"vertices":nsurfacevertices, "triangles":x[1], "flattenedvertices":flattenedvertices}}])
 	else:

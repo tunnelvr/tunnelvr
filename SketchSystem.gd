@@ -368,7 +368,7 @@ remote func actsketchchangeL(xcdatalist):
 					surfaceTool.add_vertex(surfacedisplacement + p)
 
 				if flattenedvertices != null:
-					var flattenedsurfacedisplacement = vertices[0] + Vector3(-3,0,0)
+					var flattenedsurfacedisplacement = vertices[0] + Vector3(-4,0,0)
 					for j in range(len(triangles)):
 						#var p = vertices[triangles[j]]
 						var fp = flattenedvertices[triangles[j]]
