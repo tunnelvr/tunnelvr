@@ -11,14 +11,22 @@ import pymesh
 print(sys.argv)
 
 polyfile = sys.argv[1]
-tol = float(sys.argv[2])
-meshfile = sys.argv[3]
+meshfile = sys.argv[2]
+trilineleng = float(sys.argv[3])
+trilineshortleng = float(sys.argv[4])
 
 x = json.loads(open(polyfile).readline())
 vertices = numpy.array(x[0])
 faces = numpy.array(x[1])
 mesh = pymesh.form_mesh(vertices, faces)
-mesh, info = pymesh.split_long_edges(mesh, tol)
+
+#mesh, info = pymesh.remove_degenerated_triangles(mesh, 100)
+preserve_feature = False  # see https://github.com/PyMesh/PyMesh/issues/289
+mesh, info = pymesh.split_long_edges(mesh, trilineleng)
+mesh, info = pymesh.collapse_short_edges(mesh, trilineshortleng, preserve_feature=preserve_feature)
+mesh, info = pymesh.split_long_edges(mesh, trilineleng)
+mesh, info = pymesh.collapse_short_edges(mesh, trilineshortleng, preserve_feature=preserve_feature)
+
 #print(info)
 
 fout = open("temp.txt", "w")

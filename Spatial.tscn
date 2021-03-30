@@ -610,7 +610,7 @@ uv1_offset = Vector3( 0, 0.35, 0 )
 [sub_resource type="SpatialMaterial" id=100]
 params_specular_mode = 2
 params_cull_mode = 2
-albedo_color = Color( 0.27, 0.27, 0.27, 1 )
+albedo_color = Color( 0.45, 0.45, 0.45, 1 )
 albedo_texture = ExtResource( 61 )
 emission_enabled = true
 emission = Color( 0, 0, 0, 1 )

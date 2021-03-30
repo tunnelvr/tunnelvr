@@ -10,7 +10,8 @@ func finemeshpolygon_networked(polypoints, leng, xcdrawing):
 		print("no player able to execute finemeshpolygon")
 		return
 	elif playerwithexecutefeatures.networkID == get_node("/root/Spatial").playerMe.networkID:
-		var trilineleng = 0.125
+		var trilineleng = 0.100
+		
 		call_deferred("finemeshpolygon_execute", polypoints, trilineleng, xcdrawing.get_name())
 	else:
 		rpc_id(playerwithexecutefeatures.networkID, "finemeshpolygon_execute", polypoints, 0.25, xcdrawing.get_name())
@@ -19,6 +20,7 @@ func finemeshpolygon_networked(polypoints, leng, xcdrawing):
 
 var pymeshpid = -1
 remote func finemeshpolygon_execute(polypoints, trilineleng, xcdrawingname):
+	var trilineshortleng = trilineleng/4
 	print("entering finemeshpolygon_execute")
 	if pymeshpid != -1:
 		print("already busy")
@@ -58,8 +60,8 @@ remote func finemeshpolygon_execute(polypoints, trilineleng, xcdrawingname):
 	fout.open(fpolyname, File.WRITE)
 	fout.store_line(to_json([vertices, faces]))
 	fout.close()
-	var dc = "run -it --rm -v %s:/data -v %s:/code pymesh/pymesh /code/polytriangulator.py /data/polygon.txt %f /data/mesh.txt" % \
-		[ ProjectSettings.globalize_path("user://executingfeatures"), ProjectSettings.globalize_path("res://executingfeatures"), trilineleng ]
+	var dc = "run -it --rm -v %s:/data -v %s:/code pymesh/pymesh /code/polytriangulator.py /data/polygon.txt /data/mesh.txt %f %f" % \
+		[ ProjectSettings.globalize_path("user://executingfeatures"), ProjectSettings.globalize_path("res://executingfeatures"), trilineleng, trilineshortleng ]
 	print(dc)
 	pymeshpid = OS.execute("docker", PoolStringArray(dc.split(" ")), false)
 	print(pymeshpid)
