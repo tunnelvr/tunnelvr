@@ -14,4 +14,4 @@ func _run():
 		udpsender.connect_to_host(ipnum, 4547)
 		udpsender.put_packet(PoolByteArray(msg))
 		udpsender.close()
-		OS.delay_msec(2000)
+		yield(Engine.get_main_loop().create_timer(2.0), "timeout")

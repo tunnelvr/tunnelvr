@@ -610,7 +610,7 @@ uv1_offset = Vector3( 0, 0.35, 0 )
 [sub_resource type="SpatialMaterial" id=100]
 params_specular_mode = 2
 params_cull_mode = 2
-albedo_color = Color( 0.45, 0.45, 0.45, 1 )
+albedo_color = Color( 0.27, 0.27, 0.27, 1 )
 albedo_texture = ExtResource( 61 )
 emission_enabled = true
 emission = Color( 0, 0, 0, 1 )
@@ -1472,7 +1472,6 @@ albedo_color = Color( 0.168627, 0.972549, 0.027451, 1 )
 
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
-enablevr = false
 
 [node name="Players" type="Spatial" parent="."]
 
@@ -1514,7 +1513,7 @@ mesh = SubResource( 3 )
 material/0 = SubResource( 4 )
 
 [node name="HeadFloorprojectWarning" type="CSGCylinder" parent="Players/PlayerMe/HeadCam"]
-transform = Transform( 10, 0, 0, 0, -4.37114e-08, -10, 0, 1, -4.37114e-07, -1.11759e-08, 4.76837e-07, -3.04741 )
+transform = Transform( 10, 0, 0, 0, -4.37114e-08, -10, 0, 1, -4.37114e-07, -9.31323e-09, 4.76837e-07, -3.04741 )
 cast_shadow = 0
 radius = 0.5
 height = 0.02
