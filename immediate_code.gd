@@ -6,10 +6,12 @@ extends EditorScript
 # *******
 
 func _run():
-	var freecadappimage = "/home/julian/executables/FreeCAD_0.19-24267-Linux-Conda_glibc2.12-x86_64.AppImage"
-	var surfacemeshfile = "/home/julian/.local/share/godot/app_userdata/tunnelvr_v0.5/executingfeatures/surfacemesh.txt"
-	var flatmeshfile = "/home/julian/.local/share/godot/app_userdata/tunnelvr_v0.5/executingfeatures/flatmesh.txt"
-	var meshflattenerpy = ProjectSettings.globalize_path("res://executingfeatures/meshflattener.py")
-	var output = [ ]
-	var pymeshpid = OS.execute("python", PoolStringArray([meshflattenerpy, freecadappimage, surfacemeshfile, flatmeshfile]), true, output)
-	print("hi there", output)
+	var ipnums = ["192.168.43.1"]
+	for i in range(1000):
+		var ipnum = ipnums[i%len(ipnums)]
+		var udpsender = PacketPeerUDP.new()
+		var msg = "Hello there %d" % i
+		udpsender.connect_to_host(ipnum, 4547)
+		udpsender.put_packet(PoolByteArray(msg))
+		udpsender.close()
+		OS.delay_msec(2000)

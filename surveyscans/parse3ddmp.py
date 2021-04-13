@@ -5,7 +5,10 @@
 import re, datetime, time, math, os, sys, json, tempfile
 from collections import namedtuple
 
+
 dump3dexe = '"C:\\Program Files (x86)\\Survex\\dump3d.exe"'
+if sys.platform == "linux":
+    dump3dexe = "dump3d"
 
 class P3(namedtuple('P3', ['x', 'y', 'z'])):
     __slots__ = ()

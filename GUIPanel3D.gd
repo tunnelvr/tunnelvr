@@ -304,7 +304,8 @@ func _on_switchtest(index):
 		SwitchTest.selected = 0
 
 	elif nssel == "load Centreline":
-		var centrelinefile = "res://surveyscans/LoneOak/LoneOak.json"
+		#var centrelinefile = "res://surveyscans/LoneOak/LoneOak.json"
+		var centrelinefile = "res://surveyscans/skirwith/skirwith_jgtslapdash.json"
 		var xcdatalist = Centrelinedata.xcdatalistfromcentreline(centrelinefile)
 		xcdatalist[0]["sketchname"] = centrelinefile.split("/")[-1].split(".")[0]
 		Tglobal.printxcdrawingfromdatamessages = false
@@ -867,6 +868,8 @@ var maxdelta = 0.0
 var sumdelta = 0.0
 var countframes = 0
 var multicastudpipnum = "255.255.255.255"
+#var multicastudpipnum = "192.168.43.172"
+
 const udpdiscoverybroadcasterperiod = 2.0
 var udpdiscoverybroadcasterperiodtimer = udpdiscoverybroadcasterperiod
 

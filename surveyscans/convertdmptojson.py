@@ -3,7 +3,9 @@ import os, sys
 
 
 dump3dexe = '"C:\\Program Files (x86)\\Survex\\dump3d.exe"'
-#dump3dexe = 'dump3d'
+if sys.platform == "linux":
+    dump3dexe = 'dump3d'
+    
 #fname = "Ireby/Ireby2/Ireby2.3d"
 #outputfile = "Ireby/Ireby2/Ireby2.json"
 #fname = "LoneOak.3d"

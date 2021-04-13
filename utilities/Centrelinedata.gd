@@ -28,6 +28,13 @@ static func xcdatalistfromcentreline(centrelinefile):
 	var stationnodepoints = { }
 	for i in range(len(stationpointsnamesorg)):
 		var stationpointname = stationpointsnamesorg[i].replace(".", ",")   # dots not allowed in node name, but commas are
+		
+		# see splaystatoonnoderegex for ourcoding from cusseypot
+		# but other times splays come in as blank
+		# we should have labelled splay explicitly on load
+		if stationpointname == "":
+			stationpointname = "%ds" % i
+		
 		stationpointsnames.push_back(stationpointname)
 		#nodepoints[k] = Vector3(stationpointscoords[i*3], 8.1+stationpointscoords[i*3+2], -stationpointscoords[i*3+1])
 		var stationpoint = Vector3(stationpointscoords[i*3] - bbcenvec.x, 
