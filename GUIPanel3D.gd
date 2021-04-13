@@ -867,8 +867,8 @@ var netlinkstatstimer = 0.0
 var maxdelta = 0.0
 var sumdelta = 0.0
 var countframes = 0
-var multicastudpipnum = "255.255.255.255"
-#var multicastudpipnum = "192.168.43.172"
+var broadcastudpipnum = "255.255.255.255"
+
 
 const udpdiscoverybroadcasterperiod = 2.0
 var udpdiscoverybroadcasterperiodtimer = udpdiscoverybroadcasterperiod
@@ -911,9 +911,12 @@ func _process(delta):
 		if udpdiscoverybroadcasterperiodtimer < 0:
 			udpdiscoverybroadcasterperiodtimer = udpdiscoverybroadcasterperiod
 			var udpdiscoverybroadcaster = PacketPeerUDP.new()
-			udpdiscoverybroadcaster.connect_to_host(multicastudpipnum, selfSpatial.udpserverdiscoveryport)
-			udpdiscoverybroadcaster.put_packet(("TunnelVRserver-here! "+uniqueinstancestring).to_utf8())
-			print("put UDP onto ", multicastudpipnum, ":", selfSpatial.udpserverdiscoveryport)
+			udpdiscoverybroadcaster.set_broadcast_enabled(true)
+			var err0 = udpdiscoverybroadcaster.set_dest_address(broadcastudpipnum, selfSpatial.udpserverdiscoveryport)
+			var err1 = udpdiscoverybroadcaster.put_packet(("TunnelVRserver-here! "+uniqueinstancestring).to_utf8())
+			print("put UDP onto ", broadcastudpipnum, ":", selfSpatial.udpserverdiscoveryport, " errs:", err0, " ", err1)
+			if err0 != 0:
+				print("udpdiscoverybroadcaster")
 			udpdiscoverybroadcaster.close()
 
 	if udpdiscoveryreceivingserver != null and playerMe.networkID == 0:

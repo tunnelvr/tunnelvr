@@ -3664,5 +3664,4 @@ transform = Transform( 0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 0, 0 )
 
 [node name="ExecutingFeatures" type="Node" parent="."]
 script = ExtResource( 62 )
-
 [connection signal="timeout" from="MQTTExperiment/mqttnode/Timer" to="MQTTExperiment/mqttnode" method="_on_Timer_timeout"]
