@@ -20,7 +20,7 @@ var soundsystem = null
 
 var hidecavewallstoseefloors = false
 
-var wingmeshtrimmingmode = true
+var wingmeshtrimmingmode = false
 var wingmeshuvexpansionfac = 4.0
 var wingmeshuvudivisions = 19
 var wingmeshuvvdivisions = 68

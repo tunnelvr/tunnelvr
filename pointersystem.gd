@@ -1209,7 +1209,6 @@ func buttonreleased_vrgrip():
 					if gripmenu.gripmenupointertargetwall == activetargetwall:
 						setactivetargetwall(null)
 				elif gripmenu.gripmenupointertargettype == "XCtubesector":
-					print(gripmenu.gripmenupointertargettype)
 					sketchsystem.actsketchchange([{ "xcvizstates":{gripmenu.gripmenupointertargetwall.xcname0:DRAWING_TYPE.VIZ_XCD_HIDE, 
 																   gripmenu.gripmenupointertargetwall.xcname1:DRAWING_TYPE.VIZ_XCD_HIDE}} ])
 					var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(gripmenu.gripmenupointertargetwall.xcname0)
@@ -1218,6 +1217,12 @@ func buttonreleased_vrgrip():
 						setactivetargetwall(null)
 					if xcdrawing1 == activetargetwall:
 						setactivetargetwall(null)
+				elif gripmenu.gripmenupointertargettype == "XCdrawing" and gripmenu.gripmenupointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
+					var xcdrawing = gripmenu.gripmenupointertargetwall
+					sketchsystem.actsketchchange([{ "xcvizstates":{ gripmenu.gripmenupointertargetwall.get_name():DRAWING_TYPE.VIZ_XCD_HIDE}} ])
+					if xcdrawing == activetargetwall:
+						setactivetargetwall(null)
+
 
 			elif pointertarget.get_name() == "S_Triang":
 				assert (Tglobal.wingmeshtrimmingmode)
