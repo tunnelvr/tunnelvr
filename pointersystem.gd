@@ -44,6 +44,7 @@ var activetargetnodetriggerpulledz = 0.0
 
 var activetargetwallgrabbed = null
 var activetargetwallgrabbedtransform = null
+var activetargetwallgrabbedmotion = DRAWING_TYPE.GRABMOTION_ROTATION_ADDITIVE
 var activetargetwallgrabbedorgtransform = null
 var activetargetwallgrabbeddispvector = null
 var activetargetwallgrabbedpoint = null
@@ -855,7 +856,7 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 		else:
 			activetargetwallgrabbedtransform = alaserspot.global_transform.affine_inverse() * activetargetwallgrabbed.global_transform
 			activetargetwallgrabbedpoint = null
-
+		activetargetwallgrabbedmotion = DRAWING_TYPE.GRABMOTION_ROTATION_ADDITIVE
 			
 	elif pointertargettype == "XCdrawing" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		if pointertargetwall != activetargetwall:
@@ -875,6 +876,7 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 				activetargetwallgrabbedpoint = alaserspot.global_transform.origin
 				activetargetwallgrabbedlocalpoint = activetargetwallgrabbed.global_transform.affine_inverse() * alaserspot.global_transform.origin
 				activetargetwallgrabbedpointoffset = alaserspot.global_transform.origin - activetargetwallgrabbed.global_transform.origin
+				activetargetwallgrabbedmotion = DRAWING_TYPE.GRABMOTION_PRIMARILY_LOCKED_VERTICAL if (len(activetargetwallgrabbed.nodepoints) == 0) else DRAWING_TYPE.GRABMOTION_PRIMARILY_LOCKED_VERTICAL_ROTATION_ONLY
 
 		elif (activetargetnode != null and activetargetnodewall == pointertargetwall) or len(pointertargetwall.nodepoints) == 0:
 			if len(pointertargetwall.nodepoints) == 0:
@@ -950,6 +952,24 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 		else:
 			sketchsystem.actsketchchange([planviewsystem.getactivetargetfloorViz(pointertargetwall.get_name())])
 
+	elif pointertargettype == "XCdrawing" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE and \
+					(pointertargetwall.drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE_B) != 0: 
+		if gripbuttonheld:
+			clearactivetargetnode()
+			var alaserspot = activelaserroot.get_node("LaserSpot")
+			alaserspot.global_transform.origin = pointertargetpoint
+			activetargetwallgrabbed = pointertargetwall
+			activetargetwallgrabbedlaserroottrans = activelaserroot.global_transform
+			activetargetwallgrabbedtransform = alaserspot.global_transform.affine_inverse() * activetargetwallgrabbed.global_transform
+			activetargetwallgrabbedorgtransform = activetargetwallgrabbed.global_transform
+			activetargetwallgrabbeddispvector = alaserspot.global_transform.origin - activelaserroot.global_transform.origin
+			activetargetwallgrabbedpoint = alaserspot.global_transform.origin
+			activetargetwallgrabbedlocalpoint = activetargetwallgrabbed.global_transform.affine_inverse() * alaserspot.global_transform.origin
+			activetargetwallgrabbedpointoffset = alaserspot.global_transform.origin - activetargetwallgrabbed.global_transform.origin
+			#activetargetwallgrabbedmotion = DRAWING_TYPE.GRABMOTION_ROTATION_ADDITIVE
+			activetargetwallgrabbedmotion = DRAWING_TYPE.GRABMOTION_DIRECTIONAL_DRAGGING
+			if Input.is_key_pressed(KEY_CONTROL) or handrightcontroller.is_button_pressed(BUTTONS.VR_BUTTON_AX):
+				activetargetwallgrabbedmotion = DRAWING_TYPE.GRABMOTION_PRIMARILY_LOCKED_VERTICAL_SPIN_TO_SCALE
 
 	elif activetargetnode != null and pointertargettype == "XCnode" and (pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING or pointertargetwall.drawingtype == DRAWING_TYPE.DT_ROPEHANG):
 		if activetargetnodewall == pointertargetwall and (activetargetnodewall.drawingtype == DRAWING_TYPE.DT_XCDRAWING or activetargetnodewall.drawingtype == DRAWING_TYPE.DT_ROPEHANG):
@@ -1416,10 +1436,13 @@ func findconstructtubeshellholes(xctubes):
 
 var targetwallvertplane = true
 var prevactivetargetwallgrabbedorgtransform = null
+
 func targetwalltransformpos(optionalrevertcode):
-	if activetargetwallgrabbed.get_name() == "PlanView" or activetargetwallgrabbed.drawingtype != DRAWING_TYPE.DT_XCDRAWING:
+	if activetargetwallgrabbedmotion == DRAWING_TYPE.GRABMOTION_ROTATION_ADDITIVE or activetargetwallgrabbedmotion == DRAWING_TYPE.GRABMOTION_DIRECTIONAL_DRAGGING:
 		var newtrans = null
-		if activetargetwallgrabbedpoint != null:
+		if activetargetwallgrabbedmotion == DRAWING_TYPE.GRABMOTION_DIRECTIONAL_DRAGGING:
+			newtrans = activelaserroot.get_node("LaserSpot").global_transform * activetargetwallgrabbedtransform
+		elif activetargetwallgrabbedpoint != null:
 			newtrans = activelaserroot.get_node("LaserSpot").global_transform * activetargetwallgrabbedtransform
 			newtrans.origin += activetargetwallgrabbedpoint - newtrans * activetargetwallgrabbedlocalpoint
 		else:
@@ -1439,8 +1462,17 @@ func targetwalltransformpos(optionalrevertcode):
 							"transformpos":newtrans }
 			return txcdata
 	
-	assert (activetargetwallgrabbed.drawingtype == DRAWING_TYPE.DT_XCDRAWING)	
-	var rotateonly = (len(activetargetwallgrabbed.nodepoints) != 0)
+	#assert (activetargetwallgrabbed.drawingtype == DRAWING_TYPE.DT_XCDRAWING)	
+	var rotateonly = (activetargetwallgrabbedmotion == DRAWING_TYPE.GRABMOTION_PRIMARILY_LOCKED_VERTICAL_ROTATION_ONLY)
+	var spinscale = 1.0
+	if activetargetwallgrabbedmotion == DRAWING_TYPE.GRABMOTION_PRIMARILY_LOCKED_VERTICAL_SPIN_TO_SCALE:
+		var zbasisdotalignment = activetargetwallgrabbedlaserroottrans.basis.z.dot(activelaserroot.global_transform.basis.z)
+		if zbasisdotalignment > 0.92:
+			var xbasisproj = Vector2(activetargetwallgrabbedlaserroottrans.basis.x.dot(activelaserroot.global_transform.basis.x), activetargetwallgrabbedlaserroottrans.basis.y.dot(activelaserroot.global_transform.basis.x))
+			var xbasisangchange = xbasisproj.angle()
+			spinscale = clamp(1.0 - xbasisangchange, 0.5, 2)
+			#print("x  ", xbasisangchange, "  ", spinscale)
+			
 	var txcdata = { "name":activetargetwallgrabbed.get_name(), 
 					"rpcoptional":(0 if optionalrevertcode else 1),
 					"timestamp":OS.get_ticks_msec()*0.001,
@@ -1463,7 +1495,7 @@ func targetwalltransformpos(optionalrevertcode):
 	elif targetwallvertplane:
 		var angy = -Vector2(laserrelvec.z, laserrelvec.x).angle()
 		if abs(activetargetwallgrabbedorgtransform.basis.z.y) < 0.3:  # should be 0 or 1 for vertical or horiz
-			txcdata["transformpos"] = activetargetwallgrabbedorgtransform.rotated(Vector3(0,1,0), angy)
+			txcdata["transformpos"] = activetargetwallgrabbedorgtransform.rotated(Vector3(0,1,0), angy).scaled(Vector3(spinscale, spinscale, spinscale))
 			var angpush = 0 if rotateonly else -(activetargetwallgrabbedlaserroottrans.origin.y - activelaserroot.global_transform.origin.y)
 			var activetargetwallgrabbedpointmoved = activetargetwallgrabbedpoint + 20*angpush*activetargetwallgrabbeddispvector.normalized()
 			txcdata["transformpos"].origin += activetargetwallgrabbedpointmoved - txcdata["transformpos"]*activetargetwallgrabbedlocalpoint

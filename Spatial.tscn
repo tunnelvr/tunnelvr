@@ -2404,8 +2404,8 @@ __meta__ = {
 }
 
 [node name="PlanGUI" type="Control" parent="PlanViewSystem/PlanView/Viewport"]
-margin_left = 3.56763
-margin_right = 803.568
+margin_left = 4.27478
+margin_right = 804.275
 margin_bottom = 800.0
 theme = ExtResource( 47 )
 __meta__ = {
@@ -2832,7 +2832,7 @@ margin_right = 294.973
 margin_bottom = 18.881
 disabled = true
 text = "normal"
-items = [ "normal", null, false, 0, null, "unshaded", null, false, 1, null, "ghostly", null, false, 2, null, "hide", null, false, 3, null, "delete", null, false, 4, null ]
+items = [ "normal", null, false, 0, null, "photo", null, false, 1, null, "ghostly", null, false, 2, null, "hide", null, false, 3, null, "delete", null, false, 4, null, "unshaded", null, false, 5, null ]
 selected = 0
 
 [node name="LabelPaper" type="Label" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorMove"]

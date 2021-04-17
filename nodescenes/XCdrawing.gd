@@ -282,15 +282,21 @@ func setdrawingvisiblecode(ldrawingvisiblecode):
 			var matname
 			if (drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_ACTIVE_B) != 0:
 				planviewsystem.activetargetfloor = self
-				var floorstyleid = 0
+				var floorstyleid = DRAWING_TYPE.FS_NORMAL
 				if ((drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_GHOSTLY_B) != 0):
-					floorstyleid = 2
+					if ((drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE_B) != 0):
+						floorstyleid = DRAWING_TYPE.FS_PHOTO
+					else:
+						floorstyleid = DRAWING_TYPE.FS_GHOSTLY
 				elif ((drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE_B) != 0):
-					floorstyleid = 1
+					floorstyleid = DRAWING_TYPE.FS_UNSHADED
+					
 				planviewsystem.planviewcontrols.get_node("FloorMove/FloorStyle").selected = floorstyleid
 				planviewsystem.planviewcontrols.get_node("ColorRect/LabelXCresource").text = xcresource.replace("%20", " ")
 				planviewsystem.planviewcontrols.get_node("ColorRect").visible = true
-				if (drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_GHOSTLY_B) != 0:
+				if (drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE_B) != 0:
+					matname = "xcdrawingmaterials/floorborderedactive"
+				elif (drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_GHOSTLY_B) != 0:
 					matname = "xcdrawingmaterials/floorborderedghostlyactive"
 				else:
 					matname = "xcdrawingmaterials/floorborderedactive"
@@ -299,10 +305,10 @@ func setdrawingvisiblecode(ldrawingvisiblecode):
 					planviewsystem.activetargetfloor = null
 					planviewsystem.planviewcontrols.get_node("ColorRect").visible = false
 					planviewsystem.planviewcontrols.get_node("ColorRect/LabelXCresource").text = ""
-				if (drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_GHOSTLY_B) != 0:
-					matname = "xcdrawingmaterials/floorborderedghostly"
-				elif (drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE_B) != 0:
+				if (drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE_B) != 0:
 					matname = "xcdrawingmaterials/floorborderedunshaded"
+				elif (drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_GHOSTLY_B) != 0:
+					matname = "xcdrawingmaterials/floorborderedghostly"
 				else:
 					matname = "xcdrawingmaterials/floorbordered"
 			var matc = get_node("/root/Spatial/MaterialSystem").get_node(matname).get_surface_material(0)
@@ -329,6 +335,7 @@ func updateformetresquaresscaletexture():
 	mat.uv1_offset = -$XCdrawingplane.get_scale()/2
 
 func expandxcdrawingscale(nodepointglobal):
+	assert (drawingtype == DRAWING_TYPE.DT_XCDRAWING)
 	var nodepointlocal = global_transform.xform_inv(nodepointglobal)
 	var ascax = abs(nodepointlocal.x) + 2
 	var ascay = abs(nodepointlocal.y) + 2

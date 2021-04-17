@@ -9,8 +9,6 @@ var imgdir = "user://northernimages/"
 var nonimagedir = "user://nonimagewebpages/"
 var urldir = "http://cave-registry.org.uk/svn/NorthernEngland/ThreeCountiesArea/rawscans/Ireby/"
 
-var paperwidth = 0.4
-
 var paperdrawinglist = [ ]
 var nonimagepageslist = [ ]
 
@@ -74,8 +72,7 @@ func clearallimageloadingactivity():
 	paperdrawinglist.clear()
 
 func _http_request_completed(result, response_code, headers, body, httprequestdataobject):
-	if httprequestdataobject["httprequest"] != httprequest:
-		print("_http_request_completed ")
+	print("_http_request_completed ", len(body), " bytes")
 	httprequestdataobject["httprequest"].queue_free()
 	if response_code == 200:
 		if "paperdrawing" in httprequestdataobject:

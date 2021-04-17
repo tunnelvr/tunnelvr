@@ -38,13 +38,15 @@ func floorstyle_itemselected(floorstyleid):
 		var newdrawingcode = DRAWING_TYPE.VIZ_XCD_FLOOR_NORMAL
 		if (activetargetfloor.drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_ACTIVE_B) != 0:
 			newdrawingcode |= DRAWING_TYPE.VIZ_XCD_FLOOR_ACTIVE_B
-		if floorstyleid == 2:
+		if floorstyleid == DRAWING_TYPE.FS_GHOSTLY:
 			newdrawingcode |= DRAWING_TYPE.VIZ_XCD_FLOOR_GHOSTLY_B
-		elif floorstyleid == 1:
+		elif floorstyleid == DRAWING_TYPE.FS_UNSHADED:
 			newdrawingcode |= DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE_B
-		elif floorstyleid == 3:
+		elif floorstyleid == DRAWING_TYPE.FS_PHOTO:
+			newdrawingcode |= (DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE_B | DRAWING_TYPE.VIZ_XCD_FLOOR_GHOSTLY_B)
+		elif floorstyleid == DRAWING_TYPE.FS_HIDE:
 			newdrawingcode = DRAWING_TYPE.VIZ_XCD_FLOOR_HIDDEN
-		elif floorstyleid == 4:
+		elif floorstyleid == DRAWING_TYPE.FS_DELETE:
 			newdrawingcode = DRAWING_TYPE.VIZ_XCD_FLOOR_DELETED
 			
 		var floorviz = { "prevxcvizstates":{ activetargetfloor.get_name():activetargetfloor.drawingvisiblecode  }, 
@@ -52,9 +54,9 @@ func floorstyle_itemselected(floorstyleid):
 		sketchsystem.actsketchchange([floorviz])
 
 func defaultimgtrim():
-	return { "imgwidth":20, 
-			 "imgtrimleftdown":Vector2(-10, -10),
-			 "imgtrimrightup":Vector2(10, 10) }
+	return { "imgwidth":10, 
+			 "imgtrimleftdown":Vector2(-5, -5),
+			 "imgtrimrightup":Vector2(5, 5) }
 
 func fetchbuttonpressed(item, column, idx):
 	if item == null:
