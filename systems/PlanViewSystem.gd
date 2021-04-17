@@ -9,6 +9,7 @@ var activetargetfloortransformpos = null
 var activetargetfloorimgtrim = null
 
 var buttonidxtoitem = { }
+var buttonidxloaded = [ ]
 onready var fileviewtree = $PlanView/Viewport/PlanGUI/PlanViewControls/FileviewTree
 onready var planviewcontrols = $PlanView/Viewport/PlanGUI/PlanViewControls
 var imgregex = RegEx.new()
@@ -56,16 +57,19 @@ func defaultimgtrim():
 			 "imgtrimrightup":Vector2(10, 10) }
 
 func fetchbuttonpressed(item, column, idx):
-	print("iii ", item, " ", column, "  ", idx)
 	if item == null:
-		print("fetchbuttonpressed item is null problem")
 		item = buttonidxtoitem.get(idx)
+		print("fetchbuttonpressed item is null problem")
+	print("iii ", idx, " ", item, " ", item.get_text(0), " ", column, "  ")
 	var url = item.get_tooltip(0)
 	if url == "**clear-cache**":
 		print("Clearing image and webpage caches")
 		ImageSystem.clearcachedir(ImageSystem.imgdir)
 		ImageSystem.clearcachedir(ImageSystem.nonimagedir)
+		clearsetupfileviewtree(false)
+		planviewcontrols.get_node("CheckBoxFileTree").pressed = false
 		return
+		
 	var fname = item.get_text(0)
 	print("url to fetch: ", url)
 	if imgregex.search(fname):
@@ -86,12 +90,20 @@ func fetchbuttonpressed(item, column, idx):
 		var floorviz = getactivetargetfloorViz(sname)
 		sketchsystem.actsketchchange([activetargetfloorimgtrim, floorviz])
 		
-	else:
+	elif not buttonidxloaded.has(idx):
 		item.set_button_disabled(column, idx, true)
+		item.erase_button(column, idx)
+		buttonidxloaded.push_back(idx) 
 		#item.erase_button(column, idx)
 		#buttonidxtoitem.erase(idx)
 		item.set_custom_bg_color(0, Color("#ff0099"))
 		ImageSystem.fetchunrolltree(fileviewtree, item, item.get_tooltip(0))
+	else:
+		print("Suppressing button ", fname, " which should be disabled")
+
+func itemdoubleclicked():
+	print("  ", fileviewtree.get_selected(), " ", fileviewtree.get_scroll())
+
 
 func addsubitem(upperitem, fname, url):
 	var item = fileviewtree.create_item(upperitem)
@@ -168,11 +180,17 @@ func _ready():
 	planviewcontrols.get_node("CheckBoxCentrelinesVisible").connect("pressed", self, "checkcentrelinesvisible_pressed")
 	planviewcontrols.get_node("FloorMove/FloorStyle").connect("item_selected", self, "floorstyle_itemselected")
 	planviewcontrols.get_node("CheckBoxFileTree").connect("toggled", self, "checkboxfiletree_toggled")
-	call_deferred("readydeferred")
+	call_deferred("clearsetupfileviewtree", true)
 	set_process(visible)
 		
-func readydeferred():
-	fileviewtree.connect("button_pressed", self, "fetchbuttonpressed")
+func clearsetupfileviewtree(binit):
+	if binit:
+		fileviewtree.connect("button_pressed", self, "fetchbuttonpressed")
+		fileviewtree.connect("item_selected", self, "itemdoubleclicked")
+	fileviewtree.clear()
+	buttonidxtoitem.clear()
+	buttonidxloaded.clear() 
+		
 	var root = fileviewtree.create_item()
 	root.set_text(0, "Root of tree")
 	root.set_tooltip(0, "**clear-cache**")
@@ -502,9 +520,9 @@ func processplanviewpointing(raycastcollisionpoint, controller_trigger):
 			event.button_index = BUTTON_LEFT
 			event.position = viewport_point
 			$PlanView/Viewport.input(event)
+			print("pg mouse down ", event.pressed)
 	else:
-		if viewport_mousedown:
-			planviewguipanelreleasemouse()
+		planviewguipanelreleasemouse()
 		var laspt = plancamera.project_position(viewport_point, 0)
 		planviewsystem.get_node("RealPlanCamera/LaserScope").global_transform.origin = laspt
 		planviewsystem.get_node("RealPlanCamera/LaserScope").visible = true
@@ -512,11 +530,16 @@ func processplanviewpointing(raycastcollisionpoint, controller_trigger):
 	return inguipanel
 	
 func planviewguipanelreleasemouse():
-	assert (viewport_mousedown)
-	var event = InputEventMouseButton.new()
-	event.button_index = 1
-	event.position = viewport_point
+	if viewport_mousedown:
+		var event = InputEventMouseButton.new()
+		event.button_index = BUTTON_LEFT
+		event.position = viewport_point
+		event.pressed = false
+		$PlanView/Viewport.input(event)
+		viewport_mousedown = false
+	var event = InputEventMouseMotion.new()
+	event.position = Vector2(0,0)
 	$PlanView/Viewport.input(event)
-	viewport_mousedown = false
+
 
 

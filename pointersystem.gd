@@ -1560,8 +1560,7 @@ func _physics_process(delta):
 
 	if pointerplanviewtarget == null or not planviewsystem.planviewactive:
 		planviewsystem.get_node("RealPlanCamera/LaserScope").visible = false
-		if planviewsystem.viewport_mousedown:
-			planviewsystem.planviewguipanelreleasemouse()
+		planviewsystem.planviewguipanelreleasemouse()
 	
 	if activetargetwallgrabbedtransform != null:
 		sketchsystem.actsketchchange([ targetwalltransformpos(0) ])
