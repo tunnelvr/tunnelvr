@@ -1,6 +1,8 @@
 #!/usr/bin/python
 
 # This is your main conversion from 3d files to javascript code with passage tubes
+# The main bit does the output for the ground window, as c# but it lear from the svxscale
+# but it should be generalized to handle convertdmptotunnelvrjson instead
 
 import re, datetime, time, math, os, sys, json, tempfile
 from collections import namedtuple
