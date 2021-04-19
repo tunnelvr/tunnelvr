@@ -749,10 +749,12 @@ func uniqueXCdrawingPapername(xcresource):
 			break
 	return sname
 
+
 func newXCuniquedrawingPaperN(xcresource, sname, drawingtype):
 	var xcdrawing = XCdrawing.instance()
 	xcdrawing.drawingtype = drawingtype
 	xcdrawing.drawingvisiblecode = DRAWING_TYPE.VIZ_XCD_FLOOR_NORMAL
+
 	xcdrawing.xcresource = xcresource
 	xcdrawing.set_name(sname)
 	$XCdrawings.add_child(xcdrawing)

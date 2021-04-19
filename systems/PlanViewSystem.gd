@@ -32,7 +32,6 @@ func getactivetargetfloorViz(newactivetargetfloorname: String):
 														  
 	return xcviz
 
-
 func floorstyle_itemselected(floorstyleid):
 	if activetargetfloor != null:
 		var newdrawingcode = DRAWING_TYPE.VIZ_XCD_FLOOR_NORMAL
@@ -58,6 +57,8 @@ func defaultimgtrim():
 			 "imgtrimleftdown":Vector2(-5, -5),
 			 "imgtrimrightup":Vector2(5, 5) }
 
+var bdefaultnewpapertophotomode = true
+var photolayerimport = 0
 func fetchbuttonpressed(item, column, idx):
 	if item == null:
 		item = buttonidxtoitem.get(idx)
@@ -81,15 +82,24 @@ func fetchbuttonpressed(item, column, idx):
 				var floory = xcdrawing.global_transform.origin.y
 				if pt0.y <= floory:
 					pt0.y = floory + 0.1
-					
+		if bdefaultnewpapertophotomode:
+			pt0.z += photolayerimport*0.1
+			photolayerimport += 1
+		
 		var sname = sketchsystem.uniqueXCdrawingPapername(url)
+		var transformpos = Transform(Vector3(1,0,0), Vector3(0,0,-1), Vector3(0,1,0), pt0)
+		if bdefaultnewpapertophotomode:
+			transformpos = Transform(Vector3(1,0,0), Vector3(0,1,0), Vector3(0,0,1), pt0)
+			
 		activetargetfloorimgtrim = { "name":sname, 
 									 "drawingtype":DRAWING_TYPE.DT_FLOORTEXTURE,
 									 "xcresource":url,
 									 "imgtrim":defaultimgtrim(),
-									 "transformpos":Transform(Vector3(1,0,0), Vector3(0,0,-1), Vector3(0,1,0), pt0)
+									 "transformpos":transformpos
 								   }
 		var floorviz = getactivetargetfloorViz(sname)
+		if bdefaultnewpapertophotomode:
+			floorviz["xcvizstates"][sname] = (DRAWING_TYPE.VIZ_XCD_FLOOR_NORMAL | DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE_B | DRAWING_TYPE.VIZ_XCD_FLOOR_GHOSTLY_B)
 		sketchsystem.actsketchchange([activetargetfloorimgtrim, floorviz])
 		
 	elif not buttonidxloaded.has(idx):

@@ -91,7 +91,7 @@ func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointert
 		gmlist = ["NewXC"]
 			
 	elif gripmenupointertargettype == "XCdrawing" and gripmenupointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
-		gmlist = ["HideXC"]
+		gmlist = ["HideXC" if len(pointertargetwall.nodepoints) != 0  else "" ]
 		if (gripmenuactivetargetnode != null) and (activetargetwall == pointertargetwall):
 			gmlist.push_back("DragXC")
 		else:

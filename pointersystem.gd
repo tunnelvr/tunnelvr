@@ -25,6 +25,7 @@ var pointertargetwall = null
 var pointertargetpoint = Vector3(0, 0, 0)
 var gripbuttonpressused = false
 var laserselectlinelogicallyvisible = false
+var joyposcumulative = Vector2(0, 0)
 
 var activetargetnode = null
 var activetargetnodewall = null
@@ -48,6 +49,8 @@ var activetargetwallgrabbedmotion = DRAWING_TYPE.GRABMOTION_ROTATION_ADDITIVE
 var activetargetwallgrabbedorgtransform = null
 var activetargetwallgrabbeddispvector = null
 var activetargetwallgrabbedpoint = null
+var activetargetwallgrabbedlength = 0
+var activetargetwalljoyposcumulative = Vector2(0, 0)
 var activetargetwallgrabbedpointoffset = null
 var activetargetwallgrabbedlocalpoint = null
 var activetargetwallgrabbedlaserroottrans = null
@@ -851,11 +854,14 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 		if gripbuttonheld:
 			activetargetwallgrabbedtransform = alaserspot.global_transform.affine_inverse() * activetargetwallgrabbed.global_transform
 			activetargetwallgrabbedpoint = alaserspot.global_transform.origin
+			activetargetwallgrabbedlength = alaserspot.transform.origin.z
+			activetargetwalljoyposcumulative = joyposcumulative
 			activetargetwallgrabbedlocalpoint = activetargetwallgrabbed.global_transform.affine_inverse() * alaserspot.global_transform.origin
 			activetargetwallgrabbedpointoffset = alaserspot.global_transform.origin - activetargetwallgrabbed.global_transform.origin
 		else:
 			activetargetwallgrabbedtransform = alaserspot.global_transform.affine_inverse() * activetargetwallgrabbed.global_transform
 			activetargetwallgrabbedpoint = null
+			activetargetwallgrabbedlength = 0
 		activetargetwallgrabbedmotion = DRAWING_TYPE.GRABMOTION_ROTATION_ADDITIVE
 			
 	elif pointertargettype == "XCdrawing" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
@@ -874,6 +880,8 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 				activetargetwallgrabbedorgtransform = activetargetwallgrabbed.global_transform
 				activetargetwallgrabbeddispvector = alaserspot.global_transform.origin - activelaserroot.global_transform.origin
 				activetargetwallgrabbedpoint = alaserspot.global_transform.origin
+				activetargetwallgrabbedlength = alaserspot.transform.origin.z
+				activetargetwalljoyposcumulative = joyposcumulative
 				activetargetwallgrabbedlocalpoint = activetargetwallgrabbed.global_transform.affine_inverse() * alaserspot.global_transform.origin
 				activetargetwallgrabbedpointoffset = alaserspot.global_transform.origin - activetargetwallgrabbed.global_transform.origin
 				activetargetwallgrabbedmotion = DRAWING_TYPE.GRABMOTION_PRIMARILY_LOCKED_VERTICAL if (len(activetargetwallgrabbed.nodepoints) == 0) else DRAWING_TYPE.GRABMOTION_PRIMARILY_LOCKED_VERTICAL_ROTATION_ONLY
@@ -964,8 +972,11 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 			activetargetwallgrabbedorgtransform = activetargetwallgrabbed.global_transform
 			activetargetwallgrabbeddispvector = alaserspot.global_transform.origin - activelaserroot.global_transform.origin
 			activetargetwallgrabbedpoint = alaserspot.global_transform.origin
+			activetargetwallgrabbedlength = alaserspot.transform.origin.z
+			activetargetwalljoyposcumulative = joyposcumulative
 			activetargetwallgrabbedlocalpoint = activetargetwallgrabbed.global_transform.affine_inverse() * alaserspot.global_transform.origin
 			activetargetwallgrabbedpointoffset = alaserspot.global_transform.origin - activetargetwallgrabbed.global_transform.origin
+			
 			#activetargetwallgrabbedmotion = DRAWING_TYPE.GRABMOTION_ROTATION_ADDITIVE
 			activetargetwallgrabbedmotion = DRAWING_TYPE.GRABMOTION_DIRECTIONAL_DRAGGING
 			if Input.is_key_pressed(KEY_CONTROL) or handrightcontroller.is_button_pressed(BUTTONS.VR_BUTTON_AX):
@@ -1237,7 +1248,7 @@ func buttonreleased_vrgrip():
 						setactivetargetwall(null)
 					if xcdrawing1 == activetargetwall:
 						setactivetargetwall(null)
-				elif gripmenu.gripmenupointertargettype == "XCdrawing" and gripmenu.gripmenupointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
+				elif gripmenu.gripmenupointertargettype == "XCdrawing" and gripmenu.gripmenupointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING and len(gripmenu.gripmenupointertargetwall.nodepoints) != 0:
 					var xcdrawing = gripmenu.gripmenupointertargetwall
 					sketchsystem.actsketchchange([{ "xcvizstates":{ gripmenu.gripmenupointertargetwall.get_name():DRAWING_TYPE.VIZ_XCD_HIDE}} ])
 					if xcdrawing == activetargetwall:
@@ -1440,13 +1451,19 @@ var prevactivetargetwallgrabbedorgtransform = null
 func targetwalltransformpos(optionalrevertcode):
 	if activetargetwallgrabbedmotion == DRAWING_TYPE.GRABMOTION_ROTATION_ADDITIVE or activetargetwallgrabbedmotion == DRAWING_TYPE.GRABMOTION_DIRECTIONAL_DRAGGING:
 		var newtrans = null
+		var laserspottransform = activelaserroot.get_node("LaserSpot").global_transform
+		if activetargetwallgrabbedlength != 0:
+			var reljoyposcumulative = joyposcumulative - activetargetwalljoyposcumulative
+			var reticulelength = min(-0.1, activetargetwallgrabbedlength - 5*reljoyposcumulative.y)
+			laserspottransform.origin = activelaserroot.global_transform.origin + reticulelength*activelaserroot.global_transform.basis.z
+
 		if activetargetwallgrabbedmotion == DRAWING_TYPE.GRABMOTION_DIRECTIONAL_DRAGGING:
-			newtrans = activelaserroot.get_node("LaserSpot").global_transform * activetargetwallgrabbedtransform
+			newtrans = laserspottransform * activetargetwallgrabbedtransform
 		elif activetargetwallgrabbedpoint != null:
-			newtrans = activelaserroot.get_node("LaserSpot").global_transform * activetargetwallgrabbedtransform
+			newtrans = laserspottransform * activetargetwallgrabbedtransform
 			newtrans.origin += activetargetwallgrabbedpoint - newtrans * activetargetwallgrabbedlocalpoint
 		else:
-			newtrans = activelaserroot.get_node("LaserSpot").global_transform * activetargetwallgrabbedtransform
+			newtrans = laserspottransform * activetargetwallgrabbedtransform
 			
 		if activetargetwallgrabbed.get_name() == "PlanView":
 			var txcdata = { "planview":{ "transformpos":newtrans },
@@ -1542,6 +1559,7 @@ func buttonreleased_vrtrigger():
 		LaserSelectLine.get_node("Scale").scale = Vector3(1, 1, 1)
 
 func _physics_process(delta):
+	joyposcumulative += handright.joypos*delta
 	if playerMe.handflickmotiongesture != 0:
 		if playerMe.handflickmotiongesture == 1:
 			set_handflickmotiongestureposition(min(Tglobal.handflickmotiongestureposition+1, handflickmotiongestureposition_gone))
