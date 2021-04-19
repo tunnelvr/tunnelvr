@@ -3,6 +3,9 @@ class_name Centrelinedata
 
 # "C:\Program Files (x86)\Survex\aven.exe" Ireby\Ireby2\Ireby2.svx
 # python surveyscans\convertdmptojson.py Ireby\Ireby2\Ireby2.3d
+# python convertdmptotunnelvrjson.py -3 skirwith/skirwith-cave.3d -a skirwith/Dskirwith_jgtslapdash.json
+# [remember to copy the 3d file from the source directory]
+# ssh godot@proxmox.dynamicdevices.co.uk -p 23
 static func xcdatalistfromcentreline(centrelinefile):
 	print("Opening centreline file ", centrelinefile)
 	var centrelinedatafile = File.new()
@@ -22,6 +25,9 @@ static func xcdatalistfromcentreline(centrelinefile):
 			bb[j+3] = max(bb[j+3], stationpointscoords[i*3+j])
 	print("svx bounding box", bb)
 	var bbcenvec = Vector3((bb[0]+bb[3])/2, (bb[2] - 1), (bb[1]+bb[4])/2)
+	print("\n\nbbcenvec ", bbcenvec)
+	bbcenvec = Vector3(0, -11.23, 0)
+	print("resetting to ", bbcenvec)
 
 	var stationpointsnames = [ ]
 	var stationpoints = [ ]
@@ -50,7 +56,7 @@ static func xcdatalistfromcentreline(centrelinefile):
 			centrelinelegs.push_back(stationpointsnames[legsconnections[i*2]])
 			centrelinelegs.push_back(stationpointsnames[legsconnections[i*2+1]])
 
-	var xcdrawingcentreline = { "name":"centreline", 
+	var xcdrawingcentreline = { "name":"centreline2", 
 								"xcresource":"centrelinedata", 
 								"drawingtype":DRAWING_TYPE.DT_CENTRELINE, 
 								"transformpos":Transform(), 
@@ -68,6 +74,8 @@ static func xcdatalistfromcentreline(centrelinefile):
 	var hexonepathpairs = [ "hl","hu", "hu","hv", "hv","hr", "hr","he", "he","hd", "hd","hl"]
 	var hextubepairs = ["hl", "hl", "mediumrock", null,  "hr", "hr", "partialrock", null]
 	for j in range(len(xsectgps)):
+		print("*** Skipping the xcsections ")
+		break
 		var xsectgp = xsectgps[j]
 		var xsectindexes = xsectgp.xsectindexes
 		var xsectrightvecs = xsectgp.xsectrightvecs
