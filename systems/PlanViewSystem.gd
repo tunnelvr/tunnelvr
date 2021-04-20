@@ -39,8 +39,8 @@ func floorstyle_itemselected(floorstyleid):
 			newdrawingcode |= DRAWING_TYPE.VIZ_XCD_FLOOR_ACTIVE_B
 		if floorstyleid == DRAWING_TYPE.FS_GHOSTLY:
 			newdrawingcode |= DRAWING_TYPE.VIZ_XCD_FLOOR_GHOSTLY_B
-		elif floorstyleid == DRAWING_TYPE.FS_UNSHADED:
-			newdrawingcode |= DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE_B
+		#elif floorstyleid == DRAWING_TYPE.FS_UNSHADED:
+		#	newdrawingcode |= DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE_B
 		elif floorstyleid == DRAWING_TYPE.FS_PHOTO:
 			newdrawingcode |= (DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE_B | DRAWING_TYPE.VIZ_XCD_FLOOR_GHOSTLY_B)
 		elif floorstyleid == DRAWING_TYPE.FS_HIDE:
@@ -57,7 +57,6 @@ func defaultimgtrim():
 			 "imgtrimleftdown":Vector2(-5, -5),
 			 "imgtrimrightup":Vector2(5, 5) }
 
-var bdefaultnewpapertophotomode = true
 var photolayerimport = 0
 func fetchbuttonpressed(item, column, idx):
 	if item == null:
@@ -82,13 +81,13 @@ func fetchbuttonpressed(item, column, idx):
 				var floory = xcdrawing.global_transform.origin.y
 				if pt0.y <= floory:
 					pt0.y = floory + 0.1
-		if bdefaultnewpapertophotomode:
+		if planviewcontrols.get_node("ImportPhotoMode").pressed:
 			pt0.z += photolayerimport*0.1
 			photolayerimport += 1
 		
 		var sname = sketchsystem.uniqueXCdrawingPapername(url)
 		var transformpos = Transform(Vector3(1,0,0), Vector3(0,0,-1), Vector3(0,1,0), pt0)
-		if bdefaultnewpapertophotomode:
+		if planviewcontrols.get_node("ImportPhotoMode").pressed:
 			transformpos = Transform(Vector3(1,0,0), Vector3(0,1,0), Vector3(0,0,1), pt0)
 			
 		activetargetfloorimgtrim = { "name":sname, 
@@ -98,7 +97,7 @@ func fetchbuttonpressed(item, column, idx):
 									 "transformpos":transformpos
 								   }
 		var floorviz = getactivetargetfloorViz(sname)
-		if bdefaultnewpapertophotomode:
+		if planviewcontrols.get_node("ImportPhotoMode").pressed:
 			floorviz["xcvizstates"][sname] = (DRAWING_TYPE.VIZ_XCD_FLOOR_NORMAL | DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE_B | DRAWING_TYPE.VIZ_XCD_FLOOR_GHOSTLY_B)
 		sketchsystem.actsketchchange([activetargetfloorimgtrim, floorviz])
 		

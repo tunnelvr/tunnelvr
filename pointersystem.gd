@@ -980,7 +980,7 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 			#activetargetwallgrabbedmotion = DRAWING_TYPE.GRABMOTION_ROTATION_ADDITIVE
 			activetargetwallgrabbedmotion = DRAWING_TYPE.GRABMOTION_DIRECTIONAL_DRAGGING
 			if Input.is_key_pressed(KEY_CONTROL) or handrightcontroller.is_button_pressed(BUTTONS.VR_BUTTON_AX):
-				activetargetwallgrabbedmotion = DRAWING_TYPE.GRABMOTION_PRIMARILY_LOCKED_VERTICAL_SPIN_TO_SCALE
+				activetargetwallgrabbedmotion = DRAWING_TYPE.GRABMOTION_ROTATION_ADDITIVE
 
 	elif activetargetnode != null and pointertargettype == "XCnode" and (pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING or pointertargetwall.drawingtype == DRAWING_TYPE.DT_ROPEHANG):
 		if activetargetnodewall == pointertargetwall and (activetargetnodewall.drawingtype == DRAWING_TYPE.DT_XCDRAWING or activetargetnodewall.drawingtype == DRAWING_TYPE.DT_ROPEHANG):
@@ -1450,10 +1450,14 @@ var prevactivetargetwallgrabbedorgtransform = null
 
 func targetwalltransformpos(optionalrevertcode):
 	if activetargetwallgrabbedmotion == DRAWING_TYPE.GRABMOTION_ROTATION_ADDITIVE or activetargetwallgrabbedmotion == DRAWING_TYPE.GRABMOTION_DIRECTIONAL_DRAGGING:
+		var targetisplanview = (activetargetwallgrabbed.get_name() == "PlanView")
 		var newtrans = null
 		var laserspottransform = activelaserroot.get_node("LaserSpot").global_transform
+		var reljoyposcumulative = joyposcumulative - activetargetwalljoyposcumulative
 		if activetargetwallgrabbedlength != 0:
-			var reljoyposcumulative = joyposcumulative - activetargetwalljoyposcumulative
+			if activetargetwallgrabbedmotion == DRAWING_TYPE.GRABMOTION_DIRECTIONAL_DRAGGING and not targetisplanview and activetargetwallgrabbedlength != 0:
+				var relscale = clamp(3*reljoyposcumulative.x + 1, 0.2, 5)
+				laserspottransform = laserspottransform.scaled(Vector3(relscale, relscale, relscale))
 			var reticulelength = min(-0.1, activetargetwallgrabbedlength - 5*reljoyposcumulative.y)
 			laserspottransform.origin = activelaserroot.global_transform.origin + reticulelength*activelaserroot.global_transform.basis.z
 
@@ -1464,8 +1468,9 @@ func targetwalltransformpos(optionalrevertcode):
 			newtrans.origin += activetargetwallgrabbedpoint - newtrans * activetargetwallgrabbedlocalpoint
 		else:
 			newtrans = laserspottransform * activetargetwallgrabbedtransform
+
 			
-		if activetargetwallgrabbed.get_name() == "PlanView":
+		if targetisplanview:
 			var txcdata = { "planview":{ "transformpos":newtrans },
 							"rpcoptional":(0 if optionalrevertcode else 1),
 							"timestamp":OS.get_ticks_msec()*0.001,
@@ -1481,14 +1486,6 @@ func targetwalltransformpos(optionalrevertcode):
 	
 	#assert (activetargetwallgrabbed.drawingtype == DRAWING_TYPE.DT_XCDRAWING)	
 	var rotateonly = (activetargetwallgrabbedmotion == DRAWING_TYPE.GRABMOTION_PRIMARILY_LOCKED_VERTICAL_ROTATION_ONLY)
-	var spinscale = 1.0
-	if activetargetwallgrabbedmotion == DRAWING_TYPE.GRABMOTION_PRIMARILY_LOCKED_VERTICAL_SPIN_TO_SCALE:
-		var zbasisdotalignment = activetargetwallgrabbedlaserroottrans.basis.z.dot(activelaserroot.global_transform.basis.z)
-		if zbasisdotalignment > 0.92:
-			var xbasisproj = Vector2(activetargetwallgrabbedlaserroottrans.basis.x.dot(activelaserroot.global_transform.basis.x), activetargetwallgrabbedlaserroottrans.basis.y.dot(activelaserroot.global_transform.basis.x))
-			var xbasisangchange = xbasisproj.angle()
-			spinscale = clamp(1.0 - xbasisangchange, 0.5, 2)
-			#print("x  ", xbasisangchange, "  ", spinscale)
 			
 	var txcdata = { "name":activetargetwallgrabbed.get_name(), 
 					"rpcoptional":(0 if optionalrevertcode else 1),
@@ -1512,7 +1509,7 @@ func targetwalltransformpos(optionalrevertcode):
 	elif targetwallvertplane:
 		var angy = -Vector2(laserrelvec.z, laserrelvec.x).angle()
 		if abs(activetargetwallgrabbedorgtransform.basis.z.y) < 0.3:  # should be 0 or 1 for vertical or horiz
-			txcdata["transformpos"] = activetargetwallgrabbedorgtransform.rotated(Vector3(0,1,0), angy).scaled(Vector3(spinscale, spinscale, spinscale))
+			txcdata["transformpos"] = activetargetwallgrabbedorgtransform.rotated(Vector3(0,1,0), angy)
 			var angpush = 0 if rotateonly else -(activetargetwallgrabbedlaserroottrans.origin.y - activelaserroot.global_transform.origin.y)
 			var activetargetwallgrabbedpointmoved = activetargetwallgrabbedpoint + 20*angpush*activetargetwallgrabbeddispvector.normalized()
 			txcdata["transformpos"].origin += activetargetwallgrabbedpointmoved - txcdata["transformpos"]*activetargetwallgrabbedlocalpoint

@@ -2832,7 +2832,7 @@ margin_right = 294.973
 margin_bottom = 18.881
 disabled = true
 text = "normal"
-items = [ "normal", null, false, 0, null, "photo", null, false, 1, null, "ghostly", null, false, 2, null, "hide", null, false, 3, null, "delete", null, false, 4, null, "unshaded", null, false, 5, null ]
+items = [ "normal", null, false, 0, null, "photo", null, false, 1, null, "ghostly", null, false, 2, null, "hide", null, false, 3, null, "delete", null, false, 4, null ]
 selected = 0
 
 [node name="LabelPaper" type="Label" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorMove"]
@@ -2902,10 +2902,10 @@ __meta__ = {
 [node name="CheckBoxRealTubesVisible" type="CheckBox" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
 anchor_right = 0.015
 anchor_bottom = 0.24
-margin_left = 580.155
-margin_top = 46.3216
-margin_right = 660.155
-margin_bottom = 46.3216
+margin_left = 573.981
+margin_top = 46.8828
+margin_right = 653.981
+margin_bottom = 46.8828
 rect_pivot_offset = Vector2( 100.162, 19.0063 )
 pressed = true
 text = "real tubes"
@@ -2920,7 +2920,21 @@ margin_left = 470.796
 margin_top = 27.8946
 margin_right = 558.796
 margin_bottom = 27.8946
+pressed = true
 text = "centrelines"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ImportPhotoMode" type="CheckBox" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
+anchor_right = 0.015
+anchor_bottom = 0.24
+margin_left = 471.918
+margin_top = 68.8644
+margin_right = 559.918
+margin_bottom = 68.8644
+pressed = true
+text = "import photo mode"
 __meta__ = {
 "_edit_use_anchors_": false
 }

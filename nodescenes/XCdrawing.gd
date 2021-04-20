@@ -289,7 +289,8 @@ func setdrawingvisiblecode(ldrawingvisiblecode):
 					else:
 						floorstyleid = DRAWING_TYPE.FS_GHOSTLY
 				elif ((drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE_B) != 0):
-					floorstyleid = DRAWING_TYPE.FS_UNSHADED
+					#floorstyleid = DRAWING_TYPE.FS_UNSHADED
+					floorstyleid = DRAWING_TYPE.FS_GHOSTLY
 					
 				planviewsystem.planviewcontrols.get_node("FloorMove/FloorStyle").selected = floorstyleid
 				planviewsystem.planviewcontrols.get_node("ColorRect/LabelXCresource").text = xcresource.replace("%20", " ")
