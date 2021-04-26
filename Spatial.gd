@@ -59,10 +59,16 @@ export var usewebsockets: = false
 export var planviewonly: = false
 
 var perform_runtime_config = true
-var ovr_init_config = null
-var ovr_performance = null
-var ovr_hand_tracking = null
-var ovr_guardian_system = null
+
+var ovr_base_api = null
+var ovr_utilities_api = null
+var ovr_init_api = null
+var orv_vrapi_proxy = null
+var ovr_guardian_system = null # not found the function in ovr_base_api yet
+
+var ovr_hand_tracking = null  # use base
+
+
 
 onready var playerMe = $Players/PlayerMe
 onready var mqttsystem = $MQTTExperiment
@@ -85,8 +91,8 @@ func setnetworkidnamecolour(player, networkID):
 	player.set_name("NetworkedPlayer"+String(networkID))
 	
 func ovrconfig():
-	ovr_performance.set_clock_levels(1, 1)
-	ovr_performance.set_extra_latency_mode(1)
+	ovr_base_api.set_clock_levels(1, 1)
+	ovr_base_api.set_extra_latency_mode(1)
 	
 	
 func _ready():
@@ -103,14 +109,17 @@ func _ready():
 		
 	elif checkloadinterface("OVRMobile"):  # ignores enablevr flag on quest platform
 		print("found quest, initializing")
-		ovr_init_config = load("res://addons/godot_ovrmobile/OvrInitConfig.gdns").new()
-		ovr_performance = load("res://addons/godot_ovrmobile/OvrPerformance.gdns").new()
-		ovr_hand_tracking = load("res://addons/godot_ovrmobile/OvrHandTracking.gdns").new();
-		ovr_guardian_system = load("res://addons/godot_ovrmobile/OvrGuardianSystem.gdns").new();
+		ovr_base_api = load("res://addons/godot_ovrmobile/OvrBaseAPI.gdns").new()
+		ovr_utilities_api = load("res://addons/godot_ovrmobile/OvrUtilities.gdns").new()
+		ovr_init_api = load("res://addons/godot_ovrmobile/OvrInitAPI.gdns").new();
+		orv_vrapi_proxy = load("res://addons/godot_ovrmobile/OvrVrApiProxy.gdns").new();
+
+		ovr_hand_tracking = ovr_base_api
+		
 		playerMe.ovr_guardian_system = ovr_guardian_system
 		call_deferred("ovrconfig")
 		#perform_runtime_config = false
-		ovr_init_config.set_render_target_size_multiplier(1)
+		#ovr_init_config.set_render_target_size_multiplier(1)
 		if Tglobal.arvrinterface.initialize():
 			get_viewport().arvr = true
 			Engine.target_fps = 72

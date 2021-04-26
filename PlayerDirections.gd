@@ -123,7 +123,9 @@ func _on_button_pressed(p_button):
 		var joypos = HandLeft.joypos
 		if abs(joypos.y) < 0.5 and abs(joypos.x) > 0.1:
 			nextphysicsrotatestep += (1 if joypos.x > 0 else -1)*(22.5 if abs(joypos.x) > 0.8 else 90.0)
-			joyposxrotsnaphysteresis = 2
+			if Tglobal.arvrinterfacename != "OVRMobile" and Tglobal.arvrinterfacename != "Oculus":
+				print("clicked turn (touchpad type), disabling non-click snap rotate")
+				joyposxrotsnaphysteresis = 2
 	elif p_button == BUTTONS.VR_BUTTON_BY:
 		playerMe.seteyestate(true)
 		
