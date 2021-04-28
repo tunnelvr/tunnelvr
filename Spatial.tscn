@@ -1472,7 +1472,6 @@ albedo_color = Color( 0.168627, 0.972549, 0.027451, 1 )
 
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
-enablevr = false
 
 [node name="Players" type="Spatial" parent="."]
 
@@ -1756,7 +1755,7 @@ margin_top = 81.0
 margin_right = 345.0
 margin_bottom = 108.0
 text = "1x"
-items = [ "1x", null, false, 0, null, "0.25x", null, false, 1, null, "10x", null, false, 2, null ]
+items = [ "1x", null, false, 0, null, "0.25x", null, false, 1, null, "10x", null, false, 2, null, "2x", null, false, 3, null ]
 selected = 0
 __meta__ = {
 "_edit_use_anchors_": false
