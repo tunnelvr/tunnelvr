@@ -112,8 +112,61 @@ func fetchbuttonpressed(item, column, idx):
 	else:
 		print("Suppressing button ", fname, " which should be disabled")
 
-func itemdoubleclicked():
+func itemselected():
+	var itemclicked = fileviewtree.get_selected()
 	print("  ", fileviewtree.get_selected(), " ", fileviewtree.get_scroll())
+
+func scrolltree(bdown):
+	var itemselected = fileviewtree.get_selected()
+	if itemselected == null:
+		itemselected = fileviewtree.get_root()
+	var nextitem = null
+	if bdown:
+		if not itemselected.collapsed:
+			var item0 = itemselected.get_children()
+			if item0 != null:
+				nextitem = item0
+		if nextitem == null:
+			nextitem = itemselected.get_next()
+		if nextitem == null:
+			var itemt = itemselected
+			while true:
+				itemt = itemt.get_parent()
+				if itemt == null:
+					break
+				var itempn = itemt.get_next()
+				if itempn != null:
+					nextitem = itempn
+					break 
+	else:
+		nextitem = itemselected.get_prev()
+		if nextitem != null:
+			while not nextitem.collapsed:
+				var item0 = nextitem.get_children()
+				if item0 != null:
+					while true:
+						var item1 = item0.get_next()
+						if item1 == null:
+							break
+						item0 = item1
+					nextitem = item0
+				else:
+					break
+		else:
+			nextitem = itemselected.get_parent()
+	if nextitem != null:
+		nextitem.select(0)
+		fileviewtree.scroll_to_item(nextitem)
+	
+func _input(event):
+	if fileviewtree.visible:
+		if event is InputEventKey and event.pressed:
+			if event.scancode == KEY_J:
+				scrolltree(true)
+			if event.scancode == KEY_U:
+				scrolltree(false)
+				
+
 
 
 func addsubitem(upperitem, fname, url):
@@ -197,7 +250,7 @@ func _ready():
 func clearsetupfileviewtree(binit):
 	if binit:
 		fileviewtree.connect("button_pressed", self, "fetchbuttonpressed")
-		fileviewtree.connect("item_selected", self, "itemdoubleclicked")
+		fileviewtree.connect("item_selected", self, "itemselected")
 	fileviewtree.clear()
 	buttonidxtoitem.clear()
 	buttonidxloaded.clear() 

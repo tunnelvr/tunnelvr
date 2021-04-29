@@ -1560,6 +1560,8 @@ func buttonreleased_vrtrigger():
 		activetargetnodetriggerpulling = false
 		LaserSelectLine.get_node("Scale").scale = Vector3(1, 1, 1)
 
+
+var joyposyscrollcountdown = 0 
 func _physics_process(delta):
 	joyposcumulative += handright.joypos*delta
 	if playerMe.handflickmotiongesture != 0:
@@ -1569,8 +1571,8 @@ func _physics_process(delta):
 			set_handflickmotiongestureposition(0)
 		playerMe.get_node("HandRight/PalmLight").visible = (Tglobal.handflickmotiongestureposition == handflickmotiongestureposition_gone)
 		playerMe.handflickmotiongesture = 0
-		
-	if playerMe.get_node("HandRight").pointervalid:
+
+	if handright.pointervalid:
 		var firstlasertarget = LaserOrient.get_node("RayCast").get_collider()
 		if firstlasertarget != null and firstlasertarget.is_queued_for_deletion():
 			firstlasertarget = null
@@ -1601,6 +1603,14 @@ func _physics_process(delta):
 				activelaserroot.get_node("LaserSpot").global_transform.basis = LaserOrient.global_transform.basis
 				if inguipanelsection:
 					setpointertarget(activelaserroot, null, -1.0)
+					if planviewsystem.fileviewtree.visible:
+						if abs(handright.joypos.y) < 0.4:
+							joyposyscrollcountdown = 0
+						if abs(handright.joypos.y) > 0.9:
+							joyposyscrollcountdown -= delta
+							if joyposyscrollcountdown <= 0:
+								planviewsystem.scrolltree(handright.joypos.y < 0)
+								joyposyscrollcountdown = 0.3333
 				else:
 					activelaserroot.get_node("RayCast").force_raycast_update()
 					setpointertarget(activelaserroot, activelaserroot.get_node("RayCast"), -1.0)
