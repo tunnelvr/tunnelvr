@@ -1259,6 +1259,12 @@ func buttonreleased_vrgrip():
 				assert (Tglobal.wingmeshtrimmingmode)
 				var xcdrawing = gripmenu.gripmenupointertargetwall
 				var psel = xcdrawing.global_transform.xform_inv(gripmenu.gripmenupointertargetpoint)
+				var fpolyname = "user://segmentedwing.txt"
+				var fout = File.new()
+				fout.open(fpolyname, File.WRITE)
+				fout.store_line(to_json([xcdrawing.nodepoints, xcdrawing.onepathpairs]))
+				fout.close()
+
 				var ipolys = Polynets.makexcdpolys(xcdrawing.nodepoints, xcdrawing.onepathpairs)
 				var polypoints = null
 				for ipoly in ipolys:
@@ -1266,7 +1272,6 @@ func buttonreleased_vrgrip():
 						continue
 					var lpolypoints = [ ]
 					for i in ipoly:
-
 						lpolypoints.push_back(Vector2(xcdrawing.nodepoints[i].x, xcdrawing.nodepoints[i].y))
 					var pointinpoly = Geometry.is_point_in_polygon(Vector2(psel.x, psel.y), PoolVector2Array(lpolypoints))
 					print("  pointinpoly ", pointinpoly)
