@@ -425,9 +425,8 @@ func _on_textedit_focus_exited():
 
 const clientips = [ "tunnelvr.goatchurch.org.uk",  # alex server
 					"Local-network",
-					"192.168.8.104 Quest2",  # home wifi
-					"192.168.43.172 JGTS9",     # home wifi
-					"192.168.43.186 Quest2S9" ]
+					"godot.doesliverpool.xyz",
+					"192.168.1.171 Matt" ]
 var uniqueinstancestring = ""
 func _ready():
 	uniqueinstancestring = OS.get_unique_id().replace("{", "").split("-")[0].to_upper()+"_"+str(randi())
