@@ -1,27 +1,52 @@
-{ stdenv, lib, godot-headless }:
+{ stdenv, lib, fetchFromGitHub, godot-headless, fetchurl, runCommandNoCC, unzip }:
 
+let
+  my-godot-headless = godot-headless.overrideAttrs (oldAttrs: rec {
+    src = fetchFromGitHub {
+      owner  = "godotengine";
+      repo   = "godot";
+      rev    = "3.3-stable";
+      sha256 = "sha256:0lclrx0y7w1dah40053sjlppb6c5p32icq7x5pvdfgyd3i63mnbb";
+    };
+  });
+in
 stdenv.mkDerivation rec {
+
   pname = "tunnelvr-headless";
   version = "6bbd23bf9f719dc7cdfd9de08addb62adbd52a62";
 
   src = fetchGit {
     url = "https://github.com/goatchurchprime/tunnelvr.git";
-    rev = "6bbd23bf9f719dc7cdfd9de08addb62adbd52a62";
-#    ref = "refs/tags/v0.6.0";
-    ref = "refs/heads/master";
-#    sha256 = lib.fakeSha256;
+    rev = "c91524c8820ce47b1e0948f6c037afb11ad479ff";
+    ref = "refs/heads/nix";
   };
+
+  templates = let drv = fetchurl {
+    url = "https://downloads.tuxfamily.org/godotengine/3.2.3/Godot_v3.2.3-stable_export_templates.tpz";
+    sha256 = "sha256-ng7UxVyMvt/F8HPnGqQazGeI+QWt3wJbKICUe/poCgE=";
+  };
+  in runCommandNoCC "Godot" {buildInputs = [unzip];} ''
+    unzip ${drv} -d $out
+    '';
 
   nativeBuildInputs = [ godot-headless ];
 
   outputs = [ "out" ];
 
   buildPhase = ''
-    godot-headless --export "Linux/X11" $out/bin/${pname}
+    mkdir -p $TMP/.config
+    mkdir -p $TMP/.local/share/godot/templates
+    mkdir -p $TMP/.config/godot/projects/
+    export HOME=$TMP
+    export XDG_CONFIG_HOME="$TMP/.config"
+    export XDG_DATA_HOME="$TMP/.local/share"
+    mkdir -p $TMP/.local/share/godot/
+    ln -s $templates/templates $TMP/.local/share/godot/templates/3.2.3.stable
+
+    godot-headless --export "Linux/X11" $out
   '';
 
-#    mkdir -p "$out/bin"
-#  doCheck = true;
+  dontInstall = true;
 
   meta = with stdenv.lib; {
     description = "A program that produces a familiar, friendly greeting";
@@ -36,3 +61,4 @@ stdenv.mkDerivation rec {
     platforms = platforms.all;
   };
 }
+
