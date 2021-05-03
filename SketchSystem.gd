@@ -6,6 +6,8 @@ const RopeHang = preload("res://nodescenes/RopeHang.tscn")
 
 const linewidth = 0.05
 var sketchname = "unnamedsketch"
+const fileheading = "__tunnelvr__ "
+const savesketchasjsonlines = true
 
 var actsketchchangeundostack = [ ]
 
@@ -58,7 +60,11 @@ func sketchsystemtodict(stripruntimedataforsaving):
 						   "xctubes":xctubesData
 						 }
 	var playerMe = get_node("/root/Spatial").playerMe
-	sketchdatadict["playerMe"] = { "transformpos":playerMe.global_transform, "headtrans":playerMe.get_node("HeadCam").global_transform }
+	sketchdatadict["playerMe"] = { "playerplatform":playerMe.playerplatform,
+								   "tunnelvrversion":Tglobal.tunnelvrversion, 
+								   "datetime":OS.get_datetime(),
+								   "transformpos":playerMe.global_transform, 
+								   "headtrans":playerMe.get_node("HeadCam").global_transform }
 	return sketchdatadict
 	
 remote func savesketchsystem(fname):
@@ -66,7 +72,45 @@ remote func savesketchsystem(fname):
 	var sketchdatafile = File.new()
 	var fnamewriting = fname + "_WRITING"
 	sketchdatafile.open(fnamewriting, File.WRITE)
-	sketchdatafile.store_var(sketchdatadict)
+	if savesketchasjsonlines:
+		sketchdatafile.store_line("%s%s" % [fileheading, sketchdatadict["sketchname"]])
+		var pm = sketchdatadict["playerMe"]
+		pm["stransformpos"] = var2str(pm["transformpos"])
+		pm.erase("transformpos")
+		pm["sheadtrans"] = var2str(pm["headtrans"])
+		pm.erase("headtrans")
+		pm["Nxcdrawings"] = len(sketchdatadict["xcdrawings"])
+		pm["Nxctubes"] = len(sketchdatadict["xctubes"])
+		sketchdatafile.store_line(to_json(pm))
+
+		for xcdrawingDat in sketchdatadict["xcdrawings"]:
+			xcdrawingDat["stransformpos"] = var2str(xcdrawingDat["transformpos"])
+			xcdrawingDat.erase("transformpos")
+			xcdrawingDat["snodepoints"] = { }
+			for node in xcdrawingDat["nodepoints"]:
+				var p = xcdrawingDat["nodepoints"][node]
+				xcdrawingDat["snodepoints"][node] = [p.x, p.y, p.z]
+			xcdrawingDat.erase("nodepoints")
+			if "imgtrim" in xcdrawingDat:
+				xcdrawingDat["imgtrim"]["simgtrimleftdown"] = var2str(xcdrawingDat["imgtrim"]["imgtrimleftdown"])
+				xcdrawingDat["imgtrim"].erase("imgtrimleftdown")
+				xcdrawingDat["imgtrim"]["simgtrimrightup"] = var2str(xcdrawingDat["imgtrim"]["imgtrimrightup"])
+				xcdrawingDat["imgtrim"].erase("imgtrimrightup")
+			sketchdatafile.store_line(to_json(xcdrawingDat))
+
+		for xctubeDat in sketchdatadict["xctubes"]:
+			if "xclinkintermediatenodes" in xctubeDat:
+				xctubeDat["sxclinkintermediatenodes"] = [ ]
+				for xci in xctubeDat["xclinkintermediatenodes"]:
+					var sxci = [ ]
+					for p in xci:
+						sxci.push_back([p.x, p.y, p.z])
+					xctubeDat["sxclinkintermediatenodes"].push_back(sxci)
+				xctubeDat.erase("xclinkintermediatenodes")
+			sketchdatafile.store_line(to_json(xctubeDat))
+	else:
+		sketchdatafile.store_var(sketchdatadict)
+
 	sketchdatafile.close()
 	Directory.new().rename(fnamewriting, fname)
 	print("saved ", fname, " in ", OS.get_user_data_dir())
@@ -672,8 +716,59 @@ remote func loadsketchsystemL(fname):
 	elif sketchdatafile.file_exists(fname):
 		print("Loading sketchsystemtodict from ", fname)
 		sketchdatafile.open(fname, File.READ)
-		sketchdatadict = sketchdatafile.get_var()
+		var firstline = sketchdatafile.get_buffer(20).get_string_from_ascii()
+		sketchdatafile.seek(0)
+		if firstline.begins_with(fileheading):
+			firstline = sketchdatafile.get_line()
+			var headerdata = firstline.split(" ")
+			sketchdatadict = { "sketchname":headerdata[1].percent_decode(), "xcdrawings": [ ], "xctubes": [ ] }
+			while true:
+				var jline = sketchdatafile.get_line()
+				if jline == null or jline == "":
+					break
+				var jdat = parse_json(jline)
+				if jdat != null:
+					if "playerplatform" in jdat:
+						jdat["transformpos"] = str2var(jdat["stransformpos"])
+						jdat.erase("stransformpos")
+						jdat["headtrans"] = str2var(jdat["sheadtrans"])
+						jdat.erase("sheadtrans")
+						sketchdatadict["playerMe"] = jdat
+					elif "drawingtype" in jdat:
+						jdat["transformpos"] = str2var(jdat["stransformpos"])
+						jdat.erase("stransformpos")
+						jdat["nodepoints"] = { }
+						for node in jdat["snodepoints"]:
+							var p = jdat["snodepoints"][node]
+							jdat["nodepoints"][node] = Vector3(p[0], p[1], p[2])
+						jdat.erase("snodepoints")
+						if "imgtrim" in jdat:
+							jdat["imgtrim"]["imgtrimleftdown"] = str2var(jdat["imgtrim"]["simgtrimleftdown"])
+							jdat["imgtrim"].erase("simgtrimleftdown")
+							jdat["imgtrim"]["imgtrimrightup"] = str2var(jdat["imgtrim"]["simgtrimrightup"])
+							jdat["imgtrim"].erase("simgtrimrightup")
+						jdat["drawingtype"] = int(jdat["drawingtype"])
+						jdat["drawingvisiblecode"] = int(jdat["drawingvisiblecode"])
+						sketchdatadict["xcdrawings"].push_back(jdat)
+						
+					elif "tubename" in jdat:
+						if "sxclinkintermediatenodes" in jdat:
+							jdat["xclinkintermediatenodes"] = [ ]
+							for sxci in jdat["sxclinkintermediatenodes"]:
+								var xci = [ ]
+								for p in sxci:
+									xci.push_back(Vector3(p[0], p[1], p[2]))
+								jdat["xclinkintermediatenodes"].push_back(xci)
+							jdat.erase("sxclinkintermediatenodes")
+						sketchdatadict["xctubes"].push_back(jdat)
+					else:
+						print("Unrecognized jline: ", jdat)
+				else:
+					print("Bad jline: ", jline.substr(0, 30))
+		else:
+			sketchdatadict = sketchdatafile.get_var()
 		sketchdatafile.close()
+		print("items loaded: ", len(sketchdatadict["xcdrawings"]), " drawings,  ", len(sketchdatadict["xctubes"]), " tubes.")
 		var fsketchname = fname.split("/")[-1].split(".")[0]
 		if sketchdatadict.get("sketchname", "unnamedsketch") != fsketchname:
 			print("resetting sketchname from ", sketchdatadict.get("sketchname", "unnamedsketch"), " to ", fsketchname, " on load")

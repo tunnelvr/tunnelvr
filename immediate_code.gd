@@ -6,12 +6,7 @@ extends EditorScript
 # *******
 
 func _run():
-	var ipnums = ["192.168.43.1"]
-	for i in range(1000):
-		var ipnum = ipnums[i%len(ipnums)]
-		var udpsender = PacketPeerUDP.new()
-		var msg = "Hello there %d" % i
-		udpsender.connect_to_host(ipnum, 4547)
-		udpsender.put_packet(PoolByteArray(msg))
-		udpsender.close()
-		yield(Engine.get_main_loop().create_timer(2.0), "timeout")
+	var x = Transform()
+	x = {"aaa":true}
+	print(to_json([(x)]))
+	

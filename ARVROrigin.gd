@@ -4,7 +4,7 @@ var doppelganger = null
 
 var networkID = 0
 var playerplatform = ""
-onready var playerversion = Tglobal.version
+onready var playertunnelvrversion = Tglobal.tunnelvrversion
 var guardianpoly = null
 var executingfeaturesavailable = [ ]
 var playerscale = 1.0
@@ -218,7 +218,7 @@ func playerappearancedict():
 			 "torchon":get_node("HeadCam/HeadtorchLight").visible, 
 			 "guardianpoly":guardianpoly, 
 			 "executingfeaturesavailable":executingfeaturesavailable,
-			 "version":Tglobal.version,
+			 "tunnelvrversion":Tglobal.tunnelvrversion,
 			 "cavesfilelist":guipanel3d.cavesfilelist()
 			}
 

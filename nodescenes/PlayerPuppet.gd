@@ -2,7 +2,7 @@ extends Spatial
 
 var networkID = 0
 var playerplatform = ""
-var playerversion = ""
+var playertunnelvrversion = ""
 var executingfeaturesavailable = [ ]
 
 var puppetpositionstack = [ ]         # [ { "timestamp", "Ltimestamp", "playertransform", "headcamtransform" } ] 
@@ -12,7 +12,7 @@ var puppetpointerpositionstack = [ ]  # [ { "timestamp", "Ltimestamp", "orient",
 remote func initplayerappearanceJ(playerappearance):
 	playerplatform = playerappearance.get("playerplatform", "unknown")
 	var headcolour = playerappearance.get("playerheadcolour", Color.white)
-	var playerversion = playerappearance.get("playerversion", "unknown")
+	playertunnelvrversion = playerappearance.get("tunnelvrversion", "unknown")
 	executingfeaturesavailable = playerappearance.get("executingfeaturesavailable", [ ])
 	puppetsetheadtorchlight(playerappearance.get("torchon", false))
 	var guardianpoly = playerappearance.get("guardianpoly", null)
