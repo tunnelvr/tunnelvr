@@ -62,6 +62,11 @@ func fetchbuttonpressed(item, column, idx):
 	if item == null:
 		item = buttonidxtoitem.get(idx)
 		print("fetchbuttonpressed item is null problem")
+	elif idx == -1:
+		for lidx in buttonidxtoitem:
+			if buttonidxtoitem[lidx] == item:
+				idx = lidx
+				break
 	print("iii ", idx, " ", item, " ", item.get_text(0), " ", column, "  ")
 	var url = item.get_tooltip(0)
 	if url == "**clear-cache**":

@@ -1089,6 +1089,13 @@ func buttonpressed_vrpad(gripbuttonheld, joypos):
 		if pointertargetwall.drawingtype == DRAWING_TYPE.DT_ROPEHANG and pointertargetwall.drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_HIDE: 
 			pointertargetwall.get_node("RopeHang").iteratehangingrope_Verlet()
 			
+	elif pointertargettype == "PlanView" or pointerplanviewtarget != null:
+		if planviewsystem.planviewactive:
+			if planviewsystem.fileviewtree.visible:
+				var itemselected = planviewsystem.fileviewtree.get_selected()
+				if itemselected != null:
+					planviewsystem.fetchbuttonpressed(itemselected, 0, -1)
+			
 func exchdictptrs(xcdata, e0, e1):
 	if e0 in xcdata:
 		var e0d = xcdata[e0]
@@ -1644,6 +1651,10 @@ func _input(event):
 				buttonpressed_vrby()	
 		if event.pressed and event.scancode == KEY_H:
 			set_handflickmotiongestureposition(handflickmotiongestureposition_shortpos if Tglobal.handflickmotiongestureposition == handflickmotiongestureposition_normal else handflickmotiongestureposition_normal)
+
+		if event.scancode == KEY_COMMA:
+			if event.pressed:
+				buttonpressed_vrpad(false, handright.joypos)
 
 	elif Input.get_mouse_mode() != Input.MOUSE_MODE_CAPTURED:
 		pass
