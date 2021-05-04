@@ -689,10 +689,11 @@ var networkedmultiplayerenetclient = null
 var udpdiscoveryreceivingserver = null
 
 func _on_networkstate_selected(index):
+	print("_on_networkstate_selected: ", index, " ", OS.get_ticks_msec())
 	if $Viewport/GUI/Panel/Networkstate.selected != index:
 		$Viewport/GUI/Panel/Networkstate.selected = index
 	var nssel = $Viewport/GUI/Panel/Networkstate.get_item_text(index)
-	print("Select networkstate: ", nssel)
+	print("Select networkstate: ", nssel, " ", OS.get_ticks_msec())
 	if not nssel.begins_with("Local-network") and udpdiscoveryreceivingserver != null:
 		udpdiscoveryreceivingserver.stop()
 		udpdiscoveryreceivingserver = null
@@ -714,6 +715,7 @@ func _on_networkstate_selected(index):
 		websocketclient = null
 		
 	else:   # put the network completely off
+		print("Network off")
 		if websocketserver != null:
 			websocketserver.close()
 			# Note: To achieve a clean close, you will need to keep polling until either WebSocketClient.connection_closed or WebSocketServer.client_disconnected is received.
@@ -732,10 +734,13 @@ func _on_networkstate_selected(index):
 			udpdiscoveryreceivingserver.stop()
 			udpdiscoveryreceivingserver = null
 
+		removeallplayersdisconnection()
 		selfSpatial.setconnectiontoserveractive(false)
 		get_tree().set_network_peer(null)
+
+
 		
-	if nssel == "Check IPnum" or nssel == "Check IPnum":
+	if nssel == "Check IPnum" or nssel == "Network Off":
 		pass
 	elif nssel.begins_with("As Server"):
 		networkstartasserver(true)
@@ -824,18 +829,21 @@ func _connection_failed():
 		assert (len(selfSpatial.deferred_player_connected_list) == 0)
 		assert (len(selfSpatial.players_connected_list) == 0)
 	$Viewport/GUI/Panel/Label.text = "connection_failed"
+
+func removeallplayersdisconnection():
+	selfSpatial.mqttsystem.mqttpublish("serverdisconnected", String(playerMe.networkID))
+	selfSpatial.deferred_player_connected_list.clear()
+	$Viewport/GUI/Panel/Label.text = "server_disconnected"
+	for id in selfSpatial.players_connected_list.duplicate():
+		print("server_disconnected, calling _player_disconnected on ", id)
+		selfSpatial.call_deferred("_player_disconnected", id)
 	
 func _server_disconnected():
 	print("\n\n***_server_disconnected ", websocketclient, "\n\n")
 	websocketclient = null
 	networkedmultiplayerenetclient = null
 	selfSpatial.setconnectiontoserveractive(false)
-	selfSpatial.mqttsystem.mqttpublish("serverdisconnected", String(playerMe.networkID))
-	selfSpatial.deferred_player_connected_list.clear()
-	$Viewport/GUI/Panel/Label.text = "server_disconnected"
-	for id in selfSpatial.players_connected_list:
-		print("server_disconnected, calling _player_disconnected on ", id)
-		selfSpatial.call_deferred("_player_disconnected", id)
+	removeallplayersdisconnection()
 	if $Viewport/GUI/Panel/Networkstate.selected != 0:
 		$Viewport/GUI/Panel/Networkstate.selected = 0
 	
