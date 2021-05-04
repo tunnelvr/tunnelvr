@@ -4,11 +4,11 @@ const monospacefontcharwidth = 10
 const monospacefontcharheight = 21
 const maxlabelstorenderperimage = 20
 
-var remainingxcnodenames = [ ]  # [ (centrelinedrawingname, name, position) ]
+var remainingxcnodenames = [ ]  # [ (centrelinedrawingname, nodename, label, position) ]
 var remainingropelabels = [ ]   # [ (ropexcname, ropenodename, ropelabel) ]
 
 var workingxccentrelinedrawingname = null
-var workingxcnodenamelist = [ ]
+var workingxcnodenamelist = [ ] # [ (nodename, label) ]
 var numcharsofeachline = [ ]
 var workingropexcdrawingname = null
 var workingropexcnodename = null
@@ -24,7 +24,7 @@ var currentplannodesca = 1.0
 
 var sortdfunctorigin = Vector3(0,0,0)
 func sortdfunc(a, b):
-	return sortdfunctorigin.distance_squared_to(a[2]) > sortdfunctorigin.distance_squared_to(b[2])
+	return sortdfunctorigin.distance_squared_to(a[3]) > sortdfunctorigin.distance_squared_to(b[3])
 
 var stationnodematerial = null
 func _ready():
@@ -32,24 +32,17 @@ func _ready():
 	stationnodematerial = materialsystem.nodematerial("station")
 	set_process(false)
 			
-var commonroot = null
 func addnodestolabeltask(centrelinedrawing):
-	commonroot = null
+	var commonroot = ""
+	if centrelinedrawing.additionalproperties != null:
+		commonroot = centrelinedrawing.additionalproperties.get("stationnamecommonroot", "")
 	for xcname in centrelinedrawing.nodepoints:
 		if Tglobal.splaystationnoderegex == null or not Tglobal.splaystationnoderegex.search(xcname):
-			remainingxcnodenames.append([centrelinedrawing.get_name(), xcname, centrelinedrawing.transform*centrelinedrawing.nodepoints[xcname]])
-			if commonroot == null:
-				commonroot = xcname.to_lower()
-			else:
-				var prevcommonroot = commonroot
-				while commonroot != "" and not xcname.to_lower().begins_with(commonroot):
-					commonroot = commonroot.left(len(commonroot)-1)
-				if commonroot == "" and prevcommonroot != "":
-					print("common root lost at ", xcname.to_lower(), " when was ", prevcommonroot)
-	commonroot = commonroot.left(commonroot.find_last(",")+1)
-	if commonroot == "":
-		commonroot = "ireby2,"
-	print("stationlabels common root: ", commonroot)
+			var lnodelabel = xcname
+			if commonroot != "" and lnodelabel.to_lower().begins_with(commonroot):
+				lnodelabel = lnodelabel.right(len(commonroot))
+			lnodelabel = lnodelabel.replace(",", ".")
+			remainingxcnodenames.push_back([centrelinedrawing.get_name(), xcname, lnodelabel, centrelinedrawing.transform*centrelinedrawing.nodepoints[xcname]])
 	sortdfunctorigin = get_node("/root/Spatial").playerMe.get_node("HeadCam").global_transform.origin
 
 	
@@ -93,15 +86,13 @@ func _process(delta):
 		else:
 			workingxccentrelinedrawingname = remainingxcnodenames.back()[0]
 			while len(workingxcnodenamelist) < maxlabelstorenderperimage and len(remainingxcnodenames) != 0 and workingxccentrelinedrawingname == remainingxcnodenames.back()[0]:
-				workingxcnodenamelist.push_back(remainingxcnodenames.back()[1])
+				workingxcnodenamelist.push_back(remainingxcnodenames.back())
 				remainingxcnodenames.pop_back()
 
 			var labeltextlines = [ ]
 			maxnumchars = 0
-			for lnodelabel in workingxcnodenamelist:
-				if commonroot != "" and lnodelabel.to_lower().begins_with(commonroot):
-					lnodelabel = lnodelabel.right(len(commonroot))
-				lnodelabel = lnodelabel.replace(",", ".")
+			for i in range(len(workingxcnodenamelist)):
+				var lnodelabel = workingxcnodenamelist[i][2]
 				labeltextlines.push_back(lnodelabel)
 				numcharsofeachline.push_back(len(lnodelabel))
 				maxnumchars = max(maxnumchars, len(lnodelabel))
@@ -144,7 +135,8 @@ func _process(delta):
 		var workingxccentrelinedrawing = get_node("/root/Spatial/SketchSystem/XCdrawings").get_node_or_null(workingxccentrelinedrawingname)
 		if workingxccentrelinedrawing != null:
 			for i in range(len(workingxcnodenamelist)):
-				var workingxcnodename = workingxcnodenamelist[i]
+				var workingxcnodename = workingxcnodenamelist[i][1]
+				var workingxcnodelabel = workingxcnodenamelist[i][2]
 				var lineimgwidth = numcharsofeachline[i]*monospacefontcharwidth
 				var workingxcnode = workingxccentrelinedrawing.get_node("XCnodes").get_node_or_null(workingxcnodename)
 				if workingxcnode == null:

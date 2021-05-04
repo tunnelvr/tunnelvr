@@ -55,7 +55,8 @@ static func xcdatalistfromcentreline(centrelinefile):
 		if stationpointsnames[legsconnections[i*2]] != "" and stationpointsnames[legsconnections[i*2+1]] != "":
 			centrelinelegs.push_back(stationpointsnames[legsconnections[i*2]])
 			centrelinelegs.push_back(stationpointsnames[legsconnections[i*2+1]])
-
+			
+	var additionalproperties = { "stationnamecommonroot":findcommonroot(stationnodepoints) }
 	var xcdrawingcentreline = { "name":"centreline2", 
 								"xcresource":"centrelinedata", 
 								"drawingtype":DRAWING_TYPE.DT_CENTRELINE, 
@@ -64,6 +65,7 @@ static func xcdatalistfromcentreline(centrelinefile):
 								"nextnodepoints":stationnodepoints,
 								"prevonepathpairs":[ ],
 								"newonepathpairs":centrelinelegs, 
+								"additionalproperties":additionalproperties
 							  }
 	var xcdrawinglist = [ xcdrawingcentreline ]
 	#var xcvizstates = { xcdrawingcentreline["name"]:DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE }
@@ -169,7 +171,7 @@ static func xcdatalistfromwingdata(wingdeffile):
 					   "prevnodepoints":{ },
 					   "nextnodepoints":nodepoints,
 					   "prevonepathpairs":[ ],
-					   "newonepathpairs":nodepairs.duplicate(),
+					   "newonepathpairs":nodepairs.duplicate()
 					 }
 		xcdrawinglist.push_back(xcdata)
 		xcvizstates[sname] = DRAWING_TYPE.VIZ_XCD_HIDE
@@ -185,5 +187,23 @@ static func xcdatalistfromwingdata(wingdeffile):
 		prevsname = sname
 	xcdrawinglist.push_back({ "xcvizstates":xcvizstates, "updatetubeshells":updatetubeshells })
 	return xcdrawinglist
-	
 
+static func findcommonroot(nodepoints):
+	var commonroot = null
+	for xcname in nodepoints:
+		if Tglobal.splaystationnoderegex == null or not Tglobal.splaystationnoderegex.search(xcname):
+			if commonroot == null:
+				commonroot = xcname.to_lower()
+			else:
+				var prevcommonroot = commonroot
+				while commonroot != "" and not xcname.to_lower().begins_with(commonroot):
+					commonroot = commonroot.left(len(commonroot)-1)
+				if commonroot == "" and prevcommonroot != "":
+					print("common root lost at ", xcname.to_lower(), " when was ", prevcommonroot)
+	commonroot = commonroot.left(commonroot.find_last(",")+1)
+	if commonroot == "":
+		commonroot = "ireby2,"
+	elif commonroot == null:
+		commonroot = ""
+	print("stationlabels common root: ", commonroot)
+	return commonroot

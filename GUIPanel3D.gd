@@ -324,7 +324,12 @@ func _on_switchtest(index):
 		$Viewport/GUI/Panel/Label.text = "Wing loaded"
 		SwitchTest.selected = 0
 
-
+	elif nssel == "CL_common_root":
+		for xcdrawingcentreline in get_tree().get_nodes_in_group("gpcentrelinegeo"):
+			if xcdrawingcentreline.additionalproperties == null:
+				xcdrawingcentreline.additionalproperties = { "stationnamecommonroot":Centrelinedata.findcommonroot(xcdrawingcentreline.nodepoints) }
+		SwitchTest.selected = 0
+		
 	elif nssel == "toggle guardian":
 		var guardianpolyvisible = not playerMe.get_node("GuardianPoly").visible
 		setguardianstate(guardianpolyvisible)

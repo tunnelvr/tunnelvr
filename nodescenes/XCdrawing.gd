@@ -15,7 +15,7 @@ var xcflatshellmaterial = "simpledirt"
 var imgwidth = 0
 var imgtrimleftdown = Vector2(0,0)
 var imgtrimrightup = Vector2(0,0)
-
+var additionalproperties = null
 
 # derived data
 var xctubesconn = [ ]   # references to xctubes that connect to here (could use their names instead)
@@ -365,37 +365,37 @@ func exportxcrpcdata(stripruntimedataforsaving):
 	var d
 	if drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
 		d = { "name":get_name(), 
-				 "xcresource":xcresource,
-				 "drawingtype":drawingtype,
-				 "transformpos":transform,
-				 "nodepoints": nodepoints, 
-				 "imgtrim":{ "imgwidth":imgwidth, "imgtrimleftdown":imgtrimleftdown, "imgtrimrightup":imgtrimrightup, "imgheightwidthratio":imgheightwidthratio },
-				 "visible":true, # to abolish 
-				 "drawingvisiblecode":drawingvisiblecode
-			   }
+			  "xcresource":xcresource,
+			  "drawingtype":drawingtype,
+			  "transformpos":transform,
+			  "nodepoints": nodepoints, 
+			  "imgtrim":{ "imgwidth":imgwidth, "imgtrimleftdown":imgtrimleftdown, "imgtrimrightup":imgtrimrightup, "imgheightwidthratio":imgheightwidthratio },
+			  "drawingvisiblecode":drawingvisiblecode
+			}
 		
 	else:
 		d = { "name":get_name(), 
-			 "xcresource":xcresource,
-			 "drawingtype":drawingtype,
-			 #"prevtransformpos":
-			 "transformpos":transform,
-			 #"imgtrim":{imgwidth,imgtrimleftdown,imgtrimrightup,(heightwidthratio of xcresource)}
-			 #"previmgtrim":{imgwidth,imgtrimleftdown,imgtrimrightup}
-			 "nodepoints": nodepoints, 
-			 # "prevnodepoints":
-			 # "nextnodepoints":
-			 "onepathpairs":onepathpairs,
-			 # "prevonepathpairs":
-			 # "newonepathpairs"
-			 #"xcflatshellmaterial"
-			 # "prevxcflatshellmaterial"
-			 # "nextxcflatshellmaterial"
-			 "visible":$XCdrawingplane.visible, # to abolish
-			 "drawingvisiblecode":drawingvisiblecode
-		   }
+			  "xcresource":xcresource,
+			  "drawingtype":drawingtype,
+			  #"prevtransformpos":
+			  "transformpos":transform,
+			  #"imgtrim":{imgwidth,imgtrimleftdown,imgtrimrightup,(heightwidthratio of xcresource)}
+			  #"previmgtrim":{imgwidth,imgtrimleftdown,imgtrimrightup}
+			  "nodepoints": nodepoints, 
+			  # "prevnodepoints":
+			  # "nextnodepoints":
+			  "onepathpairs":onepathpairs,
+			  # "prevonepathpairs":
+			  # "newonepathpairs"
+			  #"xcflatshellmaterial"
+			  # "prevxcflatshellmaterial"
+			  # "nextxcflatshellmaterial"
+			  "drawingvisiblecode":drawingvisiblecode
+			}
 		if xcflatshellmaterial != "simpledirt":
 			d["xcflatshellmaterial"] = xcflatshellmaterial
+		if additionalproperties != null:
+			d["additionalproperties"] = additionalproperties
 			
 	if not stripruntimedataforsaving:
 		d["xcchangesequence"] = xcchangesequence
@@ -557,19 +557,17 @@ func mergexcrpcdata(xcdata):
 					shortestpathseglengthsq = vlensq
 		shortestpathseglength = sqrt(max(0, shortestpathseglengthsq))
 
-	if "drawingvisiblecode" in xcdata or "visible" in xcdata:
-		if not ("drawingvisiblecode" in xcdata):
-			if drawingtype == DRAWING_TYPE.DT_XCDRAWING:
-				xcdata["drawingvisiblecode"] = DRAWING_TYPE.VIZ_XCD_PLANE_VISIBLE if xcdata["visible"] else DRAWING_TYPE.VIZ_XCD_HIDE
-			elif drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
-				xcdata["drawingvisiblecode"] = DRAWING_TYPE.VIZ_XCD_FLOOR_NORMAL if xcdata["visible"] else DRAWING_TYPE.VIZ_XCD_FLOOR_HIDDEN
-			elif drawingtype == DRAWING_TYPE.DT_CENTRELINE:
-				xcdata["drawingvisiblecode"] = DRAWING_TYPE.VIZ_XCD_HIDE
+	if "drawingvisiblecode" in xcdata:
 		setdrawingvisiblecode(xcdata["drawingvisiblecode"])
+	if "additionalproperties" in xcdata:
+		additionalproperties = xcdata["additionalproperties"]
+		
 	if drawingtype == DRAWING_TYPE.DT_CENTRELINE:
 		updatexcpaths_centreline($PathLines, linewidth)
 	elif drawingtype != DRAWING_TYPE.DT_ROPEHANG:
 		updatexcpaths()
+
+
 	
 func setxcnpoint(xcn, pt, planar):
 	xcn.global_transform.origin = pt
