@@ -6,12 +6,18 @@ extends EditorScript
 # *******
 
 func _run():
-	var ipnums = ["192.168.43.1"]
-	for i in range(1000):
-		var ipnum = ipnums[i%len(ipnums)]
-		var udpsender = PacketPeerUDP.new()
-		var msg = "Hello there %d" % i
-		udpsender.connect_to_host(ipnum, 4547)
-		udpsender.put_packet(PoolByteArray(msg))
-		udpsender.close()
-		yield(Engine.get_main_loop().create_timer(2.0), "timeout")
+	var plyname = "res://surveyscans/pointscans/WSC 10cm WGS1984 - Cloud.ply"
+	var fout = File.new()
+	if fout.file_exists(plyname):
+		fout.open(plyname, File.READ)
+		while fout.get_line() != "end_header":
+			print(fout.get_line())
+		print("-----------------points")
+		for i in range(2000000):
+			var v = fout.get_line().trim_suffix(" ").split(" ")
+			if len(v) != 8:
+				print("vvvv ", v, i)
+				break
+				
+		fout.close()
+		

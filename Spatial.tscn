@@ -1,4 +1,4 @@
-[gd_scene load_steps=294 format=2]
+[gd_scene load_steps=298 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/default_env.tres" type="Environment" id=2]
@@ -63,6 +63,8 @@
 [ext_resource path="res://lightweighttextures/graph.png" type="Texture" id=61]
 [ext_resource path="res://executingfeatures/ExecutingFeatures.gd" type="Script" id=62]
 [ext_resource path="res://lightweighttextures/distortiongradient.png" type="Texture" id=63]
+[ext_resource path="res://surveyscans/pointscans/PointMeshExperiment.gd" type="Script" id=64]
+[ext_resource path="res://surveyscans/pointscans/pointcloud.shader" type="Shader" id=65]
 
 [sub_resource type="CubeMesh" id=1]
 size = Vector3( 0.35, 0.01, 0.01 )
@@ -1469,6 +1471,14 @@ height = 1.1
 
 [sub_resource type="SpatialMaterial" id=230]
 albedo_color = Color( 0.168627, 0.972549, 0.027451, 1 )
+
+[sub_resource type="ShaderMaterial" id=231]
+shader = ExtResource( 65 )
+shader_param/albedo = Color( 1, 1, 1, 1 )
+shader_param/point_scale = 12.0
+
+[sub_resource type="PointMesh" id=232]
+material = SubResource( 231 )
 
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
@@ -3677,5 +3687,11 @@ transform = Transform( 0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 0, 0 )
 
 [node name="ExecutingFeatures" type="Node" parent="."]
 script = ExtResource( 62 )
+
+[node name="PointMeshExperiment" type="MeshInstance" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 28.1548, -3.31971, -60.4508 )
+mesh = SubResource( 232 )
+material/0 = null
+script = ExtResource( 64 )
 
 [connection signal="timeout" from="MQTTExperiment/mqttnode/Timer" to="MQTTExperiment/mqttnode" method="_on_Timer_timeout"]
