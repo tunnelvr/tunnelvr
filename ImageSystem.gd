@@ -228,12 +228,16 @@ func _process(delta):
 
 	elif fetchednonimagedataobject != null:
 		print("FFFN ", fetchednonimagedataobject)
+		if fetchednonimagedataobject.get("parsedumpcentreline") == "yes":
+			get_node("/root/Spatial/ExecutingFeatures").parse3ddmpcentreline_execute(fetchednonimagedataobject["fetchednonimagedataobjectfile"], fetchednonimagedataobject["url"])
+			
 		if "tree" in fetchednonimagedataobject:
 			var htmltextfile = File.new()
 			htmltextfile.open(fetchednonimagedataobject["fetchednonimagedataobjectfile"], File.READ)
 			var htmltext = htmltextfile.get_as_text()
 			htmltextfile.close()
 			get_node("/root/Spatial/PlanViewSystem").openlinklistpage(fetchednonimagedataobject["item"], htmltext)
+		
 		fetchednonimagedataobject = null
 
 	elif httprequest != null:

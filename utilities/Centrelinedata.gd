@@ -1,6 +1,5 @@
 class_name Centrelinedata
 
-
 # "C:\Program Files (x86)\Survex\aven.exe" Ireby\Ireby2\Ireby2.svx
 # python surveyscans\convertdmptojson.py Ireby\Ireby2\Ireby2.3d
 # python convertdmptotunnelvrjson.py -3 skirwith/skirwith-cave.3d -a skirwith/Dskirwith_jgtslapdash.json
@@ -23,11 +22,9 @@ static func xcdatalistfromcentreline(centrelinefile):
 		for j in range(3):
 			bb[j] = min(bb[j], stationpointscoords[i*3+j])
 			bb[j+3] = max(bb[j+3], stationpointscoords[i*3+j])
-	print("svx bounding box", bb)
+	print("svx bounding box xyzlo ", [bb[0], bb[1], bb[2]], " hi ", [bb[3], bb[4], bb[5]])
 	var bbcenvec = Vector3((bb[0]+bb[3])/2, (bb[2] - 1), (bb[1]+bb[4])/2)
 	print("\n\nbbcenvec ", bbcenvec)
-	bbcenvec = Vector3(0, -11.23, 0)
-	print("resetting to ", bbcenvec)
 
 	var stationpointsnames = [ ]
 	var stationpoints = [ ]

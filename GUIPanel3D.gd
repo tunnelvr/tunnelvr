@@ -306,7 +306,8 @@ func _on_switchtest(index):
 	elif nssel == "load Centreline":
 		#var centrelinefile = "res://surveyscans/LoneOak/LoneOak.json"
 		#var centrelinefile = "res://surveyscans/skirwith/skirwith_jgtslapdash.json"
-		var centrelinefile = "res://surveyscans/skirwith/skirwith-cave.json"
+		#var centrelinefile = "res://surveyscans/skirwith/skirwith-cave.json"
+		var centrelinefile = "res://surveyscans/test.json"
 		var xcdatalist = Centrelinedata.xcdatalistfromcentreline(centrelinefile)
 		xcdatalist[0]["sketchname"] = centrelinefile.split("/")[-1].split(".")[0]
 		Tglobal.printxcdrawingfromdatamessages = false

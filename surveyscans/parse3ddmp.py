@@ -443,6 +443,94 @@ def GetWGSGeoidcorrection(lng, lat):
 	return 0
 
 
+
+def exportfortunnelvr(fout, dmp3d):
+    entrancenodes = [node  for node in dmp3d.nodes  if "ENTRANCE" in node[2]]
+    svxp0 = max((node[0]  for node in entrancenodes or dmp3d.nodes), key=(lambda X: (X[2], X[0], X[1])))
+    svxp0 = P3(svxp0[0], svxp0[1], 0.0)
+    csrec = { "svxp0":svxp0, "title":dmp3d.title, "headdate":dmp3d.headdate.isoformat() }
+    if dmp3d.cs:
+        print("We have a coordinate system (cs) ", dmp3d.cs)
+        import pyproj
+        proj = pyproj.Proj(dmp3d.cs)
+        lngp0, latp0 = proj(svxp0[0], svxp0[1], inverse=True)
+        lngp0, latp0
+        ddeg = 0.01
+        pxn, pyn = proj(lngp0, latp0+ddeg)
+        nyfac, nxfac = (pyn-svxp0[1])/ddeg, (pxn-svxp0[0])/ddeg 
+        pxe, pye = proj(lngp0+ddeg, latp0)
+        eyfac, exfac = (pye-svxp0[1])/ddeg, (pxe-svxp0[0])/ddeg 
+        csrec["svxp0"] = P3(lngp0, latp0, svxp0[2])
+        csrec.update({ "cs":dmp3d.cs, "nyfac":nyfac, "nxfac":nxfac, "eyfac":eyfac, "exfac":exfac })
+
+    leglines = [line  for line in dmp3d.lines  if line[0] != line[1] and "SURFACE" not in line[4]]
+    xsects = [xsect  for xsect in dmp3d.xsects  if len(xsect) >= 2]
+
+    # points as triples
+    stationpoints = set()
+    stationpoints.update(line[0]  for line in leglines)
+    stationpoints.update(line[1]  for line in leglines)
+    stationpoints = list(stationpoints)
+    stationpoints.sort(key=lambda X: (X[2], X[0], X[1]))
+
+    stationpointsdict = dict((p, i)  for i, p in enumerate(stationpoints))
+
+    def convp(p):
+        if "cs" in csrec:
+            px, py = proj(p[0], p[1], inverse=True)
+            p = P3(px, py, p[2])
+            r = p - csrec["svxp0"]
+            r = P3(csrec["nxfac"]*r[1] + csrec["exfac"]*r[0], csrec["nyfac"]*r[1] + csrec["eyfac"]*r[0], r[2])
+        else:
+            r = p - csrec["svxp0"]
+        return r
+
+    stationpointscoords = sum((tuple(convp(stationpoint))  for stationpoint in stationpoints), ())
+    stationpointsnames = [ dmp3d.nodepmap[stationpoint][0][0]  for stationpoint in stationpoints ]
+    legsconnections = sum(((stationpointsdict[legline[0]], stationpointsdict[legline[1]])  for legline in leglines), ())
+    legsconnections = sum(((stationpointsdict[legline[0]], stationpointsdict[legline[1]])  for legline in leglines), ())
+    legsstyles = [ legline[3]  for legline in leglines ]
+
+    xsectgps = [ ]
+    for xsectseq in xsects:
+        xsectpoints = [dmp3d.nmapnodes[xs[0]]  for xs in xsectseq]
+        xsectindexes = [ stationpointsdict[xsectpoint]  for xsectpoint in xsectpoints ]
+        xsectrightvecs = [ ]
+        for i in range(len(xsectpoints)):
+            pback = convp(xsectpoints[max(0, i-1)])
+            p = convp(xsectpoints[i])
+            pfore = convp(xsectpoints[min(len(xsectpoints)-1, i+1)])
+            vback = P3.ZNorm(P3(p.x - pback.x, p.y - pback.y, 0.0))
+            vfore = P3.ZNorm(P3(pfore.x - p.x, pfore.y - p.y, 0.0))
+            xsectplanevec = P3.ZNorm(vback + vfore)
+            xsectrightvecs.append(xsectplanevec[1])
+            xsectrightvecs.append(-xsectplanevec[0])
+        xsectrightvecs
+        xsectlruds = sum((xs[1]  for xs in xsectseq), ())
+        xsectlruds
+        xsectgps.append({ "xsectindexes":xsectindexes, "xsectrightvecs":xsectrightvecs, "xsectlruds":xsectlruds })
+    xsectgps
+
+    jrec = { "stationpointscoords": stationpointscoords,
+             "stationpointsnames":  stationpointsnames, 
+             "legsconnections":     legsconnections,
+             "legsstyles":          legsstyles, 
+             "xsectgps":            xsectgps
+           }
+    jrec.update(csrec)
+    print(" ".join("%s:%d"%(k, len(v))  for k, v in jrec.items()  if type(v) in [tuple, list]))
+
+    def round_floats(o):
+        if isinstance(o, float):
+            return round(o, 5)
+        if isinstance(o, dict):
+            return {k: round_floats(v) for k, v in o.items()}
+        if isinstance(o, (list, tuple)):
+            return [round_floats(x) for x in o]
+        return o
+    fout.write(json.dumps(round_floats(jrec)))
+
+
 # main case with further libraries loaded and some command line help stuff
 if __name__ == "__main__":
     from optparse import OptionParser
@@ -454,6 +542,7 @@ if __name__ == "__main__":
     parser.add_option("-s", "--streamdump", dest="streamdmp",  default=False,action="store_true", help="Stream dmp from stdin")
     parser.add_option("-j", "--js",         dest="js",         metavar="FILE",                    help="Output js version 3d file")
     parser.add_option("-c", "--streamjs",   dest="streamjs",   default=False,action="store_true", help="Stream js to stdout")
+    parser.add_option("-t", "--tunnelvr",   dest="tunnelvr",    default=False,action="store_true", help="TunnelVR format")
     parser.description = "Analyses or processes survex 3D file to do things with the passages\n(station beginning with 'fbmap_' should be mountaintops)"
     parser.epilog = "Best way to execute: dump3d yourcave.3d | ./parse3ddmp.py -s -r \n"
 
@@ -498,6 +587,7 @@ if __name__ == "__main__":
             exit(0)
             
     # json output from here onwards
+    
     if options.streamjs:
         fout = sys.stdout
     elif options.js:
@@ -505,6 +595,10 @@ if __name__ == "__main__":
     else:
         parser.print_help()
         exit(1)
+        
+    if options.tunnelvr:
+        exportfortunnelvr(fout, dmp3d)
+        exit(0)
         
     leglines = [line  for line in dmp3d.lines  if line[0] != line[1] and "SURFACE" not in line[4]]
     xsects = [xsect  for xsect in dmp3d.xsects  if len(xsect) >= 2]

@@ -18,6 +18,7 @@ func finemeshpolygon_networked(polypoints, leng, xcdrawing):
 		print("rpc on finemeshpolygon_execute")
 		
 
+
 var pymeshpid = -1
 remote func finemeshpolygon_execute(polypoints, trilineleng, xcdrawingname):
 	var trilineshortleng = trilineleng/4
@@ -170,6 +171,105 @@ func executingfeaturesavailable():
 	if flattenerexecutingplatforms.values().has(osuniqueid):
 		 res.append("finemeshpolygon")
 		 res.append("meshflattener")
+		 res.append("parse3ddmp_centreline")
 	return res
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+func _input(event):
+	if event is InputEventKey and event.pressed:
+		if event.scancode == KEY_8:
+			parse3ddmpcentreline_networked("http://cave-registry.org.uk/svn/NorthernEngland/Ingleborough/survexdata/JeanPot/JeanPot.3d")
+
+func parse3ddmpcentreline_networked(f3durl):
+	var playerwithexecutefeatures = null
+	for player in get_node("/root/Spatial/Players").get_children():
+		if player.executingfeaturesavailable.has("parse3ddmp_centreline"):
+			playerwithexecutefeatures = player
+			break
+	if playerwithexecutefeatures == null:
+		print("no player able to execute parse3ddmp_centreline")
+		return
+	elif playerwithexecutefeatures.networkID == get_node("/root/Spatial").playerMe.networkID:
+		call_deferred("fetch3dcentreline_execute", f3durl)
+	else:
+		rpc_id(playerwithexecutefeatures.networkID, "fetch3dcentreline_execute", f3durl)
+		print("rpc on parse3ddmpcentreline_execute")
+		
+remote func fetch3dcentreline_execute(f3durl):
+	var ImageSystem = get_node("/root/Spatial/ImageSystem")
+	var nonimagedataobject = { "url":f3durl, "parsedumpcentreline":"yes" }
+	ImageSystem.nonimagepageslist.append(nonimagedataobject)
+	ImageSystem.set_process(true)
+
+var parse3ddmpcentrelinepid = -1
+func parse3ddmpcentreline_execute(f3dfile, f3durl):
+	print("entering parse3ddmpcentreline_execute")
+	if parse3ddmpcentrelinepid != -1:
+		print("already busy")
+		return
+	parse3ddmpcentrelinepid = 0
+	
+	var dir = Directory.new()
+	if not dir.dir_exists("user://executingfeatures"):
+		dir.make_dir("user://executingfeatures")
+	var jcentreline = "user://executingfeatures/fcentreline.json"
+
+	var fout = File.new()
+	if fout.file_exists(jcentreline):
+		dir.remove(jcentreline)
+	
+	var fparse3ddmppy = "res://surveyscans/parse3ddmp.py"
+	var arguments = PoolStringArray([
+			ProjectSettings.globalize_path(fparse3ddmppy), 
+			"--3d="+ProjectSettings.globalize_path(f3dfile), 
+			"--js="+ProjectSettings.globalize_path(jcentreline), 
+			"--tunnelvr"])
+	print("python ", arguments)
+	parse3ddmpcentrelinepid = OS.execute("python", arguments, false)
+	print(parse3ddmpcentrelinepid, arguments)
+	if parse3ddmpcentrelinepid == -1:
+		print("fail")
+		return
+	
+	for i in range(10):
+		yield(get_tree().create_timer(0.8), "timeout")
+		if fout.file_exists(jcentreline):
+			break
+		print("parse3d ", i)
+	if not fout.file_exists(jcentreline):
+		print("no file after 10 seconds, kill")
+		OS.kill(parse3ddmpcentrelinepid)
+		parse3ddmpcentrelinepid = -1
+		return
+	parse3ddmpcentrelinepid = -1
+
+	var xcdatalist = Centrelinedata.xcdatalistfromcentreline(jcentreline)
+	#xcdatalist[0]["sketchname"] = f3durl.split("/")[-1].split(".")[0]
+	xcdatalist[0]["xcresource"] = f3durl
+
+	Tglobal.printxcdrawingfromdatamessages = false
+	var sketchsystem = get_node("/root/Spatial/SketchSystem")
+	sketchsystem.actsketchchange(xcdatalist)
+	Tglobal.printxcdrawingfromdatamessages = true
 
 

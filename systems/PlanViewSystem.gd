@@ -14,10 +14,12 @@ onready var fileviewtree = $PlanView/Viewport/PlanGUI/PlanViewControls/FileviewT
 onready var planviewcontrols = $PlanView/Viewport/PlanGUI/PlanViewControls
 var imgregex = RegEx.new()
 var listregex = RegEx.new()
+var f3dregex = RegEx.new()
 
 var installbuttontex = null
 var fetchbuttontex = null
 var clearcachebuttontex = null
+var f3dbuttontex = null
 
 func getactivetargetfloorViz(newactivetargetfloorname: String):
 	var xcviz = { "prevxcvizstates":{ }, "xcvizstates":{ } }
@@ -106,6 +108,10 @@ func fetchbuttonpressed(item, column, idx):
 			floorviz["xcvizstates"][sname] = (DRAWING_TYPE.VIZ_XCD_FLOOR_NORMAL | DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE_B | DRAWING_TYPE.VIZ_XCD_FLOOR_GHOSTLY_B)
 		sketchsystem.actsketchchange([activetargetfloorimgtrim, floorviz])
 		
+	if f3dregex.search(fname):
+		print("\n\n\n\n***\n\n 3dfile to load ", url)
+		get_node("/root/Spatial/ExecutingFeatures").parse3ddmpcentreline_networked(url)
+		
 	elif not buttonidxloaded.has(idx):
 		item.set_button_disabled(column, idx, true)
 		item.erase_button(column, idx)
@@ -181,6 +187,8 @@ func addsubitem(upperitem, fname, url):
 	var tex = null
 	if imgregex.search(fname):
 		tex = installbuttontex.duplicate()
+	if f3dregex.search(fname):
+		tex = f3dbuttontex.duplicate()
 	elif url.ends_with("/"):
 		tex = fetchbuttontex.duplicate()
 	else:
@@ -237,9 +245,11 @@ func checkcentrelinesvisible_pressed():
 func _ready():
 	listregex.compile('<li><a href="([^"]*)">')
 	imgregex.compile('(?i)\\.(png|jpg|jpeg)$')
+	f3dregex.compile('(?i)\\.(3d)$')
 	installbuttontex = get_node("/root/Spatial/MaterialSystem/buttonmaterials/InstallButton").get_surface_material(0).albedo_texture
 	fetchbuttontex = get_node("/root/Spatial/MaterialSystem/buttonmaterials/FetchButton").get_surface_material(0).albedo_texture
 	clearcachebuttontex = get_node("/root/Spatial/MaterialSystem/buttonmaterials/ClearCacheButton").get_surface_material(0).albedo_texture
+	f3dbuttontex = get_node("/root/Spatial/MaterialSystem/buttonmaterials/f3dButton").get_surface_material(0).albedo_texture
 
 	$RealPlanCamera.set_as_toplevel(true)
 	planviewcontrols.get_node("ZoomView/ButtonCentre").connect("pressed", self, "buttoncentre_pressed")
