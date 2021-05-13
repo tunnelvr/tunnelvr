@@ -329,7 +329,17 @@ func _on_switchtest(index):
 			if xcdrawingcentreline.additionalproperties == null:
 				xcdrawingcentreline.additionalproperties = { "stationnamecommonroot":Centrelinedata.findcommonroot(xcdrawingcentreline.nodepoints) }
 		SwitchTest.selected = 0
-		
+
+	elif nssel == "LoadPointMesh":
+		var pointmeshexperiment = get_node("/root/Spatial/PointMeshExperiment")
+		if pointmeshexperiment.visible:
+			pointmeshexperiment.visible = false
+		else:
+			pointmeshexperiment.visible = true
+			pointmeshexperiment.LoadPointMesh()
+		SwitchTest.selected = 0
+		setguipanelhide()
+				
 	elif nssel == "toggle guardian":
 		var guardianpolyvisible = not playerMe.get_node("GuardianPoly").visible
 		setguardianstate(guardianpolyvisible)

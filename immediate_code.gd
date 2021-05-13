@@ -5,19 +5,21 @@ extends EditorScript
 # Control-Shift X to run this code in the editor
 # *******
 
+func D_run():
+	var a = PoolStringArray()
+	a.push_back("d")
+	if a:
+		print("hji there")
+
 func _run():
-	var plyname = "res://surveyscans/pointscans/WSC 10cm WGS1984 - Cloud.ply"
-	var fout = File.new()
-	if fout.file_exists(plyname):
-		fout.open(plyname, File.READ)
-		while fout.get_line() != "end_header":
-			print(fout.get_line())
-		print("-----------------points")
-		for i in range(2000000):
-			var v = fout.get_line().trim_suffix(" ").split(" ")
-			if len(v) != 8:
-				print("vvvv ", v, i)
-				break
-				
-		fout.close()
-		
+	
+	var csvname = "res://surveyscans/pointscans/smallcloud.csv"
+	print("Loading pointmesh ", csvname)
+	var fin = File.new()
+	fin.open(csvname, File.READ)
+	var v = fin.get_csv_line()
+	while len(v) == 3:
+		var a = Vector3(float(v[0]), float(v[2]), float(v[1]))
+		v = fin.get_csv_line()
+	fin.close()
+	
