@@ -879,6 +879,7 @@ func updatetubeshell(xcdrawings):
 		else:
 			triangulatetuberails(surfaceTool, tuberail0, tuberail1)
 		surfaceTool.generate_normals()
+		surfaceTool.generate_tangents()
 		var tubesectormesh = surfaceTool.commit()
 		var xctubesector = preload("res://nodescenes/XCtubeshell.tscn").instance()
 		xctubesector.set_name("XCtubesector_"+String(i))

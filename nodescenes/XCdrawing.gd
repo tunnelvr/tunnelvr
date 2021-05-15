@@ -178,6 +178,7 @@ func makestalshellmesh(revseq, p0, vec):
 		prevringrad = ringrad
 		v += vec.length()
 	surfaceTool.generate_normals()
+	surfaceTool.generate_tangents()
 	surfaceTool.commit(arraymesh)
 	return arraymesh
 
