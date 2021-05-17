@@ -75,8 +75,9 @@ func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointert
 	gripmenupointertargettype = pointertargettype
 	gripmenuactivetargettubesectorindex = activetargettubesectorindex
 	gripmenuactivetargetnode = activetargetnode
-	get_node("/root/Spatial/BodyObjects/GripLaserSpot").translation = gripmenupointertargetpoint
-	get_node("/root/Spatial/BodyObjects/GripLaserSpot").visible = get_node("/root/Spatial/BodyObjects/LaserOrient/LaserSpot").visible
+	if Tglobal.handflickmotiongestureposition == 0:
+		get_node("/root/Spatial/BodyObjects/GripLaserSpot").translation = gripmenupointertargetpoint
+		get_node("/root/Spatial/BodyObjects/GripLaserSpot").visible = get_node("/root/Spatial/BodyObjects/LaserOrient/LaserSpot").visible
 	
 	var paneltrans = global_transform
 	paneltrans.origin = controllertrans.origin - 0.8*ARVRServer.world_scale*(controllertrans.basis.z)

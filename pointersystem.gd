@@ -392,6 +392,10 @@ func setpointertarget(laserroot, raycast, pointertargetshortdistance):
 			laserselectlinelogicallyvisible = true
 		elif activetargetnodewall != null and activetargetnodewall.drawingtype == DRAWING_TYPE.DT_ROPEHANG:
 			laserselectlinelogicallyvisible = (pointertargettype == "none" and Tglobal.handflickmotiongestureposition == 1)
+		elif activetargetnodewall != null and activetargetnodewall.drawingtype == DRAWING_TYPE.DT_CENTRELINE:
+			laserselectlinelogicallyvisible = (len(activetargetnodewall.xctubesconn) == 0 and pointertargettype == "none" and Tglobal.handflickmotiongestureposition == 1)
+		else:
+			laserselectlinelogicallyvisible = false
 		LaserSelectLine.visible = laserselectlinelogicallyvisible
 		
 	pointertargetpoint = newpointertargetpoint
