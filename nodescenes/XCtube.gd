@@ -198,9 +198,7 @@ func updatetubepositionlinks(sketchsystem):
 		var p0m = p0
 		var p0mleft = p0m - linewidth*perp
 		var p0mright = p0m + linewidth*perp
-		var jb = j/2
 		var p1m = p1
-		var p1mtrans = null
 		var p1mleft = p1m - linewidth*perp
 		var p1mright = p1m + linewidth*perp
 		surfaceTool.add_vertex(p0mleft)
@@ -315,26 +313,6 @@ func updatetubelinkpaths(sketchsystem):
 	$PathLines.set_surface_material(0, get_node("/root/Spatial/MaterialSystem").pathlinematerial("normal"))
 	return true
 
-func pickpolysindex(polys, xcdrawinglink, js):
-	var pickpolyindex = -1
-	for i in range(len(polys)):
-		var meetsallnodes = true
-		var j = js
-		while j < len(xcdrawinglink):
-			var meetnodename = xcdrawinglink[j]
-			if not polys[i].has(meetnodename):
-				meetsallnodes = false
-				break
-			j += 2
-		if meetsallnodes:
-			pickpolyindex = i
-			break
-	if len(polys) == 1 and pickpolyindex == 0:
-		var meetnodenames = xcdrawinglink.slice(js, len(xcdrawinglink), 2)
-		if (not meetnodenames.has(polys[0][0])) or (not meetnodenames.has(polys[0][-1])):
-			pickpolyindex = -1
-			
-	return pickpolyindex
 
 func fa(a, b):
 	return a[0] < b[0] or (a[0] == b[0] and a[1] < b[1])
@@ -363,8 +341,8 @@ func maketubepolyassociation_andreorder(xcdrawing0, xcdrawing1):
 	
 	#assert ((len(polys0) != 1) or (len(polys0[0]) == 0))
 	#assert ((len(polys1) != 1) or (len(polys1[0]) == 0))
-	pickedpolyindex0 = pickpolysindex(polys0, xcdrawinglink, 0)
-	pickedpolyindex1 = pickpolysindex(polys1, xcdrawinglink, 1)
+	pickedpolyindex0 = Polynets.pickpolysindex(polys0, xcdrawinglink, 0)
+	pickedpolyindex1 = Polynets.pickpolysindex(polys1, xcdrawinglink, 1)
 	
 	if pickedpolyindex0 == -1 or pickedpolyindex1 == -1 or len(xcdrawinglink) == 0:
 		if pickedpolyindex0 == -1:
@@ -669,7 +647,6 @@ func gettubeshellholes(sketchsystem):
 func advanceuvFar(uvFixed, ptFixed, uvFar, ptFar, ptFarNew, bclockwise):
 	var uvvec = uvFar - uvFixed
 	var uvperpvec = Vector2(uvvec.y, -uvvec.x) if bclockwise else Vector2(-uvvec.y, uvvec.x)
-	var uvvecleng = uvvec.length()
 	var vecFar = ptFar - ptFixed
 	var vecFarNew = ptFarNew - ptFixed
 	var vecFarFarNewprod = vecFar.length()*vecFarNew.length()
@@ -842,8 +819,6 @@ func updatetubeshell(xcdrawings):
 	var poly1 = mtpa[1]
 	var ilaM = mtpa[2]
 
-	var xcnodes0 = xcdrawing0.get_node("XCnodes")
-	var xcnodes1 = xcdrawing1.get_node("XCnodes")
 	for li in range(len(ilaM)):
 		if ilaM[li].get("opensector", false):
 			continue
@@ -909,10 +884,10 @@ func shellcontourxcside(xcdrawing, poly, ila, ilaN, pref):
 		scc.push_back([pref%nodename, xcdrawing.transform * xcdrawing.nodepoints[nodename]])
 	return scc
 	
-func shellcontourintermed(p0, p1, xclinkintermediatenodes, pref):
+func shellcontourintermed(p0, p1, xclinkintermediatenodeds, pref):
 	var scc = [ ]
-	for j in range(len(xclinkintermediatenodes)):
-		var dp = xclinkintermediatenodes[j]
+	for j in range(len(xclinkintermediatenodeds)):
+		var dp = xclinkintermediatenodeds[j]
 		var sp = lerp(p0, p1, dp.z)
 		var spbasis = intermedpointplanebasis(sp)
 		scc.push_back([pref%j, sp + spbasis.x*dp.x + spbasis.y*dp.y])
@@ -1033,8 +1008,6 @@ func remaptransitivechaintointermediates(transchain):
 	var intermediatepoints = [ ]
 	var p0 = transchain[0]
 	var p1 = transchain[-1]
-	var pvec = p1 - p0
-	var pveclensq = pvec.length_squared()
 	for i in range(1, len(transchain)-1):
 		var p = transchain[i]
 		var ipbasis = intermedpointplanebasis(p)
@@ -1059,8 +1032,6 @@ func CopyHoleGapShape(li, sketchsystem):
 	var xcdrawing0 = xcdrawings.get_node(xcname0)
 	var xcdrawing1 = xcdrawings.get_node(xcname1)
 	var mtpa = maketubepolyassociation_andreorder(xcdrawing0, xcdrawing1)
-	var poly0 = mtpa[0]
-	var poly1 = mtpa[1]
 	var ilaM = mtpa[2]
 
 	var i = ilaM[li]["i"]

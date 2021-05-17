@@ -110,6 +110,9 @@ func fetchbuttonpressed(item, column, idx):
 		
 	if f3dregex.search(fname):
 		print("\n\n\n\n***\n\n 3dfile to load ", url)
+		if not planviewcontrols.get_node("CheckBoxCentrelinesVisible").pressed:
+			planviewcontrols.get_node("CheckBoxCentrelinesVisible").pressed = true
+			checkcentrelinesvisible_pressed()
 		get_node("/root/Spatial/ExecutingFeatures").parse3ddmpcentreline_networked(url)
 		
 	elif not buttonidxloaded.has(idx):
@@ -125,7 +128,7 @@ func fetchbuttonpressed(item, column, idx):
 
 func itemselected():
 	var itemclicked = fileviewtree.get_selected()
-	print("  ", fileviewtree.get_selected(), " ", fileviewtree.get_scroll())
+	print("  ", itemclicked, " ", fileviewtree.get_scroll())
 
 func scrolltree(bdown):
 	var itemselected = fileviewtree.get_selected()
@@ -177,7 +180,6 @@ func _input(event):
 			if event.scancode == KEY_U:
 				scrolltree(false)
 				
-
 
 
 func addsubitem(upperitem, fname, url):
@@ -409,7 +411,6 @@ func planviewtransformpos(guidpaneltransform, guidpanelsize):
 		var lookatpos = controllertrans.origin - 1.6*ARVRServer.world_scale*(controllertrans.basis.z)
 		paneltrans = paneltrans.looking_at(lookatpos, Vector3(0, 1, 0))
 	return paneltrans
-
 
 var updateplanviewentitysizes_working = false
 func updateplanviewentitysizes():

@@ -112,9 +112,6 @@ func _physics_process(delta):
 			prevfootsteptimestamp = physicsprocessTimeStamp
 			prevfootstepposition = footstepposition
 
-	var Dgo = playerMe.global_transform.origin
-	var Dplayerbodycentre = HeadCentre.global_transform.origin - Vector3(0, playerheadcentreabovebodycentreheight, 0) + Ddebugvisualoffset
-
 	var capsuleshaftheight = playerbodyverticalheight - 2*playerheadbodyradius
 	$PlayerKinematicBody/PlayerBodyCapsule.shape.height = capsuleshaftheight
 

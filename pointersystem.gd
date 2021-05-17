@@ -630,7 +630,6 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 			var xcdrawingf = sketchsystem.get_node("XCdrawings").get_node(xcdrawingflatname)
 			var Dpointertargetpoint = xcdrawingf.ropepointreprojectXYZ(ropepointuv, sketchsystem)
 			print("ropepointreprojectXYZ to ", Dpointertargetpoint, " should be ", pointertargetpoint)
-			var newnodepointf = xcdrawingf.global_transform.xform_inv(pointertargetpoint)
 			var fnodename = (xcdata["nextnodepoints"].keys()[0] if len(xcdata["nextnodepoints"]) == 1 else null)
 			var xcdataf = { "name":xcdrawingflatname, 
 							"prevnodepoints":{ }, 
@@ -703,7 +702,6 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 		if Tglobal.wingmeshtrimmingmode and pointertargetwall.drawingtype == DRAWING_TYPE.DT_ROPEHANG and len(activetargetnodewall.xctubesconn) == 1:
 			var xctube = activetargetnodewall.xctubesconn[0]
 			var xcdrawingflatname = (xctube.xcname1 if xctube.xcname0 == activetargetnodewall.get_name() else xctube.xcname0)
-			var xcdrawingf = sketchsystem.get_node("XCdrawings").get_node(xcdrawingflatname)
 			var xcdataf = { "name":xcdrawingflatname, 
 							"prevnodepoints":xcdata["prevnodepoints"].duplicate(), 
 							"nextnodepoints":xcdata["nextnodepoints"].duplicate()
@@ -751,7 +749,6 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 	elif activetargetnode == null and activetargetnodewall == null and pointertargettype == "XCtubesector":
 		var pointertargettube = pointertargetwall
 		if Tglobal.handflickmotiongestureposition == 1:
-			var ropepointuv = ropepointtargetUV()
 			var xcdata = { "name":sketchsystem.uniqueXCname("r"), 
 						   "drawingtype":DRAWING_TYPE.DT_ROPEHANG,
 						   "transformpos":Transform(),
@@ -1019,7 +1016,6 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 			if Tglobal.wingmeshtrimmingmode and pointertargetwall.drawingtype == DRAWING_TYPE.DT_ROPEHANG and len(activetargetnodewall.xctubesconn) == 1:
 				var xctube = activetargetnodewall.xctubesconn[0]
 				var xcdrawingflatname = (xctube.xcname1 if xctube.xcname0 == activetargetnodewall.get_name() else xctube.xcname0)
-				var xcdrawingf = sketchsystem.get_node("XCdrawings").get_node(xcdrawingflatname)
 				var xcdataf = { "name":xcdrawingflatname, 
 								"prevonepathpairs":xcdata["prevonepathpairs"].duplicate(), 
 								"newonepathpairs":xcdata["newonepathpairs"].duplicate()

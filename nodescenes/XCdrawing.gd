@@ -99,35 +99,6 @@ func xcconnectstoshell():
 			return true
 	return false
 
-func makecuboidshellmesh(nodepoints, cuboidfacs):
-	var arraymesh = ArrayMesh.new()
-	var surfaceTool = SurfaceTool.new()
-	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
-	for cuboidfac in cuboidfacs:
-		var ppoly = [ ]
-		for c in cuboidfac:
-			ppoly.push_back(nodepoints[c])
-		var polynormsum = Vector3(0, 0, 0)
-		for i in range(len(ppoly)):
-			polynormsum += (ppoly[i] - ppoly[i-1]).cross(ppoly[(i+1)%len(ppoly)] - ppoly[i])
-		var polynorm = polynormsum.normalized()
-		var polyax0 = polynormsum.cross(ppoly[1] - ppoly[0]).normalized()
-		var polyax1 = polynorm.cross(polyax0)
-		
-		var pv = PoolVector2Array()
-		pv.resize(len(ppoly))
-		for i in range(len(ppoly)):
-			var p = ppoly[i] - ppoly[0]
-			pv[i] = Vector2(p.dot(polyax0), p.dot(polyax1))
-		var pi = Geometry.triangulate_polygon(pv)
-		for u in pi:
-			surfaceTool.add_uv(pv[u])
-			surfaceTool.add_uv2(pv[u])
-			surfaceTool.add_vertex(ppoly[u])
-			
-	surfaceTool.generate_normals()
-	surfaceTool.commit(arraymesh)
-	return arraymesh
 
 
 func makestalshellmesh(revseq, p0, vec):
@@ -203,7 +174,7 @@ func setdrawingvisiblecode(ldrawingvisiblecode):
 			var stalseqax = Polynets.stalfromropenodesequences(nodepoints, ropeseqs) if cuboidfacs == null else null
 			if cuboidfacs != null:
 				print("cuboidfacs ", cuboidfacs)
-				var cuboidshellmesh = makecuboidshellmesh(nodepoints, cuboidfacs)
+				var cuboidshellmesh = Polynets.makecuboidshellmesh(nodepoints, cuboidfacs)
 				updatexcshellmesh(cuboidshellmesh)
 				$RopeHang.visible = false
 				$PathLines.visible = false

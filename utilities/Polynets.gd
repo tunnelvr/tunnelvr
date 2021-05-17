@@ -321,3 +321,54 @@ static func triangledistortionmeasure(p0, p1, p2, f0, f1, f2):
 	var u = clamp((areachange - 0.5), 0.001, 0.999)
 	#print(u, " ", parea, " ", farea)
 	return Vector2(u, 0.001)
+
+static func makecuboidshellmesh(nodepoints, cuboidfacs):
+	var arraymesh = ArrayMesh.new()
+	var surfaceTool = SurfaceTool.new()
+	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for cuboidfac in cuboidfacs:
+		var ppoly = [ ]
+		for c in cuboidfac:
+			ppoly.push_back(nodepoints[c])
+		var polynormsum = Vector3(0, 0, 0)
+		for i in range(len(ppoly)):
+			polynormsum += (ppoly[i] - ppoly[i-1]).cross(ppoly[(i+1)%len(ppoly)] - ppoly[i])
+		var polynorm = polynormsum.normalized()
+		var polyax0 = polynormsum.cross(ppoly[1] - ppoly[0]).normalized()
+		var polyax1 = polynorm.cross(polyax0)
+		
+		var pv = PoolVector2Array()
+		pv.resize(len(ppoly))
+		for i in range(len(ppoly)):
+			var p = ppoly[i] - ppoly[0]
+			pv[i] = Vector2(p.dot(polyax0), p.dot(polyax1))
+		var pi = Geometry.triangulate_polygon(pv)
+		for u in pi:
+			surfaceTool.add_uv(pv[u])
+			surfaceTool.add_uv2(pv[u])
+			surfaceTool.add_vertex(ppoly[u])
+			
+	surfaceTool.generate_normals()
+	surfaceTool.commit(arraymesh)
+	return arraymesh
+
+static func pickpolysindex(polys, xcdrawinglink, js):
+	var pickpolyindex = -1
+	for i in range(len(polys)):
+		var meetsallnodes = true
+		var j = js
+		while j < len(xcdrawinglink):
+			var meetnodename = xcdrawinglink[j]
+			if not polys[i].has(meetnodename):
+				meetsallnodes = false
+				break
+			j += 2
+		if meetsallnodes:
+			pickpolyindex = i
+			break
+	if len(polys) == 1 and pickpolyindex == 0:
+		var meetnodenames = xcdrawinglink.slice(js, len(xcdrawinglink), 2)
+		if (not meetnodenames.has(polys[0][0])) or (not meetnodenames.has(polys[0][-1])):
+			pickpolyindex = -1
+			
+	return pickpolyindex

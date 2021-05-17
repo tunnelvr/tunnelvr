@@ -504,7 +504,6 @@ func cavesfilelist():
 	if e != OK:
 		print("list dir error ", e)
 		return
-	var fnames = [ ]
 	dir.list_dir_begin()
 	var file_name = dir.get_next()
 	while file_name != "":
@@ -641,8 +640,6 @@ func setguipanelvisible(controller_global_transform):
 	var MQTTExperiment = get_node_or_null("/root/Spatial/MQTTExperiment")
 	if MQTTExperiment != null and MQTTExperiment.msg != "":
 		$Viewport/GUI/Panel/Label.text = MQTTExperiment.msg
-	elif Tglobal.connectiontoserveractive:
-		Tglobal.connectiontoserveractive
 
 	visible = true
 	$CollisionShape.disabled = not visible
