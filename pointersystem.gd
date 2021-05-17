@@ -642,7 +642,18 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 		sketchsystem.actsketchchange(xcdatalist)
 		if newactivetargetnodeinfo != null:
 			setactivetargetnode(newactivetargetnodeinfo[0].get_node("XCnodes").get_node(newactivetargetnodeinfo[1]))
-		
+
+	elif Tglobal.handflickmotiongestureposition == 1 and activetargetnodewall != null and activetargetnodewall.drawingtype == DRAWING_TYPE.DT_CENTRELINE and \
+			len(activetargetnodewall.xctubesconn) == 0 and gripbuttonheld:
+		var tvec = pointertargetpoint - activetargetnode.global_transform.origin
+		var transformpos = activetargetnodewall.transform
+		transformpos.origin += tvec
+		var txcdata = { "name":activetargetnodewall.get_name(), 
+						"prevtransformpos":activetargetnodewall.transform,
+						"transformpos":transformpos }
+		sketchsystem.actsketchchange([txcdata])
+		clearactivetargetnode()
+				
 	elif not is_instance_valid(pointertarget):
 		pass
 		

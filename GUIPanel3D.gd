@@ -655,6 +655,8 @@ func setguipanelvisible(controller_global_transform):
 		
 func setguipanelhide():
 	if not Tglobal.controlslocked:
+		#if virtualkeyboard.visible:
+		#	_on_textedit_focus_exited()
 		visible = false
 		$Viewport.render_target_update_mode = Viewport.UPDATE_DISABLED
 		$CollisionShape.disabled = not visible

@@ -264,6 +264,8 @@ func parse3ddmpcentreline_execute(f3dfile, f3durl):
 	parse3ddmpcentrelinepid = -1
 
 	var xcdatalist = Centrelinedata.xcdatalistfromcentreline(jcentreline)
+	if xcdatalist == null:
+		return
 	#xcdatalist[0]["sketchname"] = f3durl.split("/")[-1].split(".")[0]
 	xcdatalist[0]["xcresource"] = f3durl
 

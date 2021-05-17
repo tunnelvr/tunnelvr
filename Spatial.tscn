@@ -1821,6 +1821,9 @@ margin_left = 154.0
 margin_top = 194.0
 margin_right = 373.0
 margin_bottom = 263.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="ButtonNewfile" type="Button" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel/TextRelatedActions"]
 margin_left = 73.0

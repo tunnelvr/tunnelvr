@@ -429,22 +429,21 @@ def findallocateentrects(blocknames, legnodesdict, nodes):
 # ./geographiclib-get-geoids.sh minimal  (might have to move the files to /usr/local/share/GeographicLib
 # https://geographiclib.sourceforge.io/html/geoid.html
 def GetWGSGeoidcorrection(lng, lat):
-	f = os.popen('GeoidEval --input-string "%f %f"' % (lat, lng))
-	res = f.read().strip()
-	print("Geoid made at", res)
-	if res:
-		return float(res)
-	print("GeoidEval not installed or not working")
-	if 49 <= lat <= 59 and -6 <= lng <= 2:
-		return 48 # for yorkshire
-	if 46 <= lat <= 48 and 9 <= lng <= 17:
-		return 47 # for salzburg
-	print("Geoideval can't be guessed outside of Austria or UK")
-	return 0
+    f = os.popen('GeoidEval --input-string "%f %f"' % (lat, lng))
+    res = f.read().strip()
+    print("Geoid made at", res)
+    if res:
+        return float(res)
+    print("GeoidEval not installed or not working")
+    if 49 <= lat <= 59 and -6 <= lng <= 2:
+        return 48 # for yorkshire
+    if 46 <= lat <= 48 and 9 <= lng <= 17:
+        return 47 # for salzburg
+    print("Geoideval can't be guessed outside of Austria or UK")
+    return 0
 
 
-
-def exportfortunnelvr(fout, dmp3d):
+def exportfortunnelvr(jsfile, dmp3d):
     entrancenodes = [node  for node in dmp3d.nodes  if "ENTRANCE" in node[2]]
     svxp0 = max((node[0]  for node in entrancenodes or dmp3d.nodes), key=(lambda X: (X[2], X[0], X[1])))
     svxp0 = P3(svxp0[0], svxp0[1], 0.0)
@@ -486,7 +485,8 @@ def exportfortunnelvr(fout, dmp3d):
         return r
 
     stationpointscoords = sum((tuple(convp(stationpoint))  for stationpoint in stationpoints), ())
-    stationpointsnames = [ dmp3d.nodepmap[stationpoint][0][0]  for stationpoint in stationpoints ]
+    stationpointsnames = [ dmp3d.nodepmap[stationpoint][0][0] if stationpoint in dmp3d.nodepmap else ".%dy"%i \
+                           for i, stationpoint in enumerate(stationpoints) ]
     legsconnections = sum(((stationpointsdict[legline[0]], stationpointsdict[legline[1]])  for legline in leglines), ())
     legsconnections = sum(((stationpointsdict[legline[0]], stationpointsdict[legline[1]])  for legline in leglines), ())
     legsstyles = [ legline[3]  for legline in leglines ]
@@ -528,8 +528,11 @@ def exportfortunnelvr(fout, dmp3d):
         if isinstance(o, (list, tuple)):
             return [round_floats(x) for x in o]
         return o
-    fout.write(json.dumps(round_floats(jrec)))
 
+    fout = open(jsfile, "w")
+    json.dump(round_floats(jrec), fout)
+    fout.close()
+    
 
 # main case with further libraries loaded and some command line help stuff
 if __name__ == "__main__":
@@ -588,6 +591,10 @@ if __name__ == "__main__":
             
     # json output from here onwards
     
+    if options.tunnelvr:
+        exportfortunnelvr(options.js, dmp3d)
+        exit(0)
+
     if options.streamjs:
         fout = sys.stdout
     elif options.js:
@@ -595,10 +602,6 @@ if __name__ == "__main__":
     else:
         parser.print_help()
         exit(1)
-        
-    if options.tunnelvr:
-        exportfortunnelvr(fout, dmp3d)
-        exit(0)
         
     leglines = [line  for line in dmp3d.lines  if line[0] != line[1] and "SURFACE" not in line[4]]
     xsects = [xsect  for xsect in dmp3d.xsects  if len(xsect) >= 2]

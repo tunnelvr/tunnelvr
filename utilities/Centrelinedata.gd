@@ -10,6 +10,8 @@ static func xcdatalistfromcentreline(centrelinefile):
 	var centrelinedatafile = File.new()
 	centrelinedatafile.open(centrelinefile, File.READ)
 	var centrelinedata = parse_json(centrelinedatafile.get_line())
+	if centrelinedata == null:
+		return null
 
 	var stationpointscoords = centrelinedata.stationpointscoords
 	var stationpointsnamesorg = centrelinedata.stationpointsnames
@@ -189,7 +191,9 @@ static func findcommonroot(nodepoints):
 	var commonroot = null
 	for xcname in nodepoints:
 		if Tglobal.splaystationnoderegex == null or not Tglobal.splaystationnoderegex.search(xcname):
-			if commonroot == null:
+			if xcname.begins_with(","):
+				pass
+			elif commonroot == null:
 				commonroot = xcname.to_lower()
 			else:
 				var prevcommonroot = commonroot
@@ -197,10 +201,9 @@ static func findcommonroot(nodepoints):
 					commonroot = commonroot.left(len(commonroot)-1)
 				if commonroot == "" and prevcommonroot != "":
 					print("common root lost at ", xcname.to_lower(), " when was ", prevcommonroot)
-	commonroot = commonroot.left(commonroot.find_last(",")+1)
-	if commonroot == "":
-		commonroot = "ireby2,"
-	elif commonroot == null:
+	if commonroot != null:
+		commonroot = commonroot.left(commonroot.find_last(",")+1)
+	else:
 		commonroot = ""
 	print("stationlabels common root: ", commonroot)
 	return commonroot
