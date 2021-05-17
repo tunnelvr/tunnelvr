@@ -189,7 +189,7 @@ func addsubitem(upperitem, fname, url):
 	var tex = null
 	if imgregex.search(fname):
 		tex = installbuttontex.duplicate()
-	if f3dregex.search(fname):
+	elif f3dregex.search(fname):
 		tex = f3dbuttontex.duplicate()
 	elif url.ends_with("/"):
 		tex = fetchbuttontex.duplicate()
