@@ -21,6 +21,7 @@ var playerstepdownbump = 0.05
 var freefallsurfaceslidedragfactor = 1.1
 var freefallairdragfactor = 0.8
 var flyingkinematicenlargement = 0.03
+onready var floor_lowest_height = get_node("/root/Spatial/underfloor").transform.origin.y
 
 onready var psqparams = PhysicsShapeQueryParameters.new()
 onready var psqparamshead = PhysicsShapeQueryParameters.new()
