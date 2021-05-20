@@ -244,6 +244,8 @@ func setdrawingvisiblecode(ldrawingvisiblecode):
 			setxcdrawingvisiblehideL(true)
 			if planviewsystem.activetargetfloor == self:
 				planviewsystem.activetargetfloor = null
+				planviewsystem.planviewcontrols.get_node("ColorRect").visible = false
+				planviewsystem.planviewcontrols.get_node("ColorRect/LabelXCresource").text = ""
 			$XCdrawingplane.visible = false
 			$XCdrawingplane/CollisionShape.disabled = true
 

@@ -108,7 +108,7 @@ func fetchbuttonpressed(item, column, idx):
 			floorviz["xcvizstates"][sname] = (DRAWING_TYPE.VIZ_XCD_FLOOR_NORMAL | DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE_B | DRAWING_TYPE.VIZ_XCD_FLOOR_GHOSTLY_B)
 		sketchsystem.actsketchchange([activetargetfloorimgtrim, floorviz])
 		
-	if f3dregex.search(fname):
+	elif f3dregex.search(fname):
 		print("\n\n\n\n***\n\n 3dfile to load ", url)
 		if not planviewcontrols.get_node("CheckBoxCentrelinesVisible").pressed:
 			planviewcontrols.get_node("CheckBoxCentrelinesVisible").pressed = true
@@ -179,6 +179,11 @@ func _input(event):
 				scrolltree(true)
 			if event.scancode == KEY_U:
 				scrolltree(false)
+			if event.scancode == KEY_7:
+				var itemselected = fileviewtree.get_selected()
+				if itemselected != null:
+					fetchbuttonpressed(itemselected, 0, -1)
+				
 				
 
 
@@ -495,7 +500,7 @@ func _process(delta):
 		var floormove = planviewcontrols.get_node("FloorMove")
 		var joyposmove = Vector3((-1 if floormove.get_node("ButtonMoveLeft").is_pressed() else 0) + (1 if floormove.get_node("ButtonMoveRight").is_pressed() else 0), 
 								 0.5*(-1 if floormove.get_node("ButtonMoveFall").is_pressed() else 0) + (1 if floormove.get_node("ButtonMoveRise").is_pressed() else 0),
-								 (-1 if floormove.get_node("ButtonMoveDown").is_pressed() else 0) + (1 if floormove.get_node("ButtonMoveUp").is_pressed() else 0))
+								 (1 if floormove.get_node("ButtonMoveDown").is_pressed() else 0) + (-1 if floormove.get_node("ButtonMoveUp").is_pressed() else 0))
 		var joygrow = (-1 if floormove.get_node("ButtonShrink").is_pressed() else 0) + (1 if floormove.get_node("ButtonGrow").is_pressed() else 0)
 		var joyrot = Vector2((-1 if floormove.get_node("ButtonRotR").is_pressed() else 0) + (1 if floormove.get_node("ButtonRotL").is_pressed() else 0), 
 							 (-1 if floormove.get_node("ButtonTiltFore").is_pressed() else 0) + (1 if floormove.get_node("ButtonTiltBack").is_pressed() else 0))

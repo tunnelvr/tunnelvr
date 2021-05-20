@@ -2430,50 +2430,50 @@ __meta__ = {
 }
 
 [node name="LabelViewSlide" type="Label" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ViewSlide"]
-margin_left = 4.4823
-margin_top = 49.9065
-margin_right = 73.4823
-margin_bottom = 71.9065
+margin_left = -4.9671
+margin_top = 59.3559
+margin_right = 64.0329
+margin_bottom = 81.3559
 text = "ViewSlide"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="ButtonSlideDown" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ViewSlide"]
-margin_left = 38.899
-margin_top = 25.7379
-margin_right = 61.899
-margin_bottom = 51.7379
+margin_left = 39.5289
+margin_top = 32.0375
+margin_right = 62.5289
+margin_bottom = 58.0375
 text = "V"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="ButtonSlideLeft" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ViewSlide"]
-margin_left = 6.7621
-margin_top = 27.713
-margin_right = 36.7621
-margin_bottom = 53.713
+margin_left = 6.13216
+margin_top = 32.7526
+margin_right = 36.1322
+margin_bottom = 58.7526
 text = "<<"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="ButtonSlideRight" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ViewSlide"]
-margin_left = 64.9428
-margin_top = 28.3356
-margin_right = 94.9428
-margin_bottom = 54.3356
+margin_left = 64.3129
+margin_top = 30.8554
+margin_right = 94.3129
+margin_bottom = 56.8554
 text = ">>"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="ButtonSlideUp" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ViewSlide"]
-margin_left = 39.5396
-margin_top = -1.66661
-margin_right = 62.5396
-margin_bottom = 24.3334
+margin_left = 42.0594
+margin_top = 2.11311
+margin_right = 65.0594
+margin_bottom = 28.1131
 text = "^"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -2861,8 +2861,8 @@ __meta__ = {
 }
 
 [node name="ButtonClosePlanView" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
-margin_right = 20.0
-margin_bottom = 22.0
+margin_right = 40.0
+margin_bottom = 35.0
 hint_tooltip = "Close Plan View
 "
 text = "X"
@@ -2955,10 +2955,10 @@ __meta__ = {
 }
 
 [node name="CheckBoxFileTree" type="CheckBox" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
-margin_left = 8.40472
-margin_top = 69.5596
-margin_right = 99.4047
-margin_bottom = 99.5596
+margin_left = 18.0794
+margin_top = 77.7401
+margin_right = 109.079
+margin_bottom = 101.74
 text = "Filetree"
 __meta__ = {
 "_edit_use_anchors_": false
