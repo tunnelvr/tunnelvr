@@ -667,6 +667,8 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 		pointertarget.jump_up()
 
 	# grip click moves node on xcwall
+
+
 	elif gripbuttonheld and activetargetnode != null and pointertargettype == "XCdrawing" and pointertargetwall == activetargetnodewall:
 		var movetopoint = activetargetnodewall.global_transform.xform_inv(pointertargetpoint)
 		movetopoint.z = 0.0
@@ -675,8 +677,23 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 					"prevnodepoints":{ activetargetnode.get_name():activetargetnode.translation }, 
 					"nextnodepoints":{ activetargetnode.get_name():movetopoint } 
 				}])
+
 		if activetargetnodewall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 			activetargetnodewall.expandxcdrawingscale(pointertargetpoint)
+
+		if activetargetnodewall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
+			var xctubec = null
+			var xcdrawingc = null
+			for xctube in activetargetnodewall.xctubesconn:
+				var xcdrawingcname = (xctube.xcname1 if xctube.xcname0 == activetargetnodewall.get_name() else xctube.xcname0)
+				xcdrawingc = sketchsystem.get_node("XCdrawings").get_node(xcdrawingcname)
+				if xcdrawingc.drawingtype == DRAWING_TYPE.DT_CENTRELINE:
+					xctubec = xctube
+			if xctubec != null:
+				var floormovedata = xctubec.centrelineconnectionfloortransformpos(sketchsystem)
+				if floormovedata != null:
+					sketchsystem.actsketchchange(floormovedata)
+
 		clearactivetargetnode()
 		
 	# reselection when selected on grip deletes the node		
