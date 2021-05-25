@@ -1551,6 +1551,7 @@ material/0 = SubResource( 7 )
 
 [node name="HandFlickFaceY" type="MeshInstance" parent="Players/PlayerMe/HandRight"]
 transform = Transform( 1, 0, 0, 0, 0.965926, 0.258819, 0, -0.258819, 0.965926, 0, 0, 0 )
+visible = false
 layers = 2147483649
 mesh = SubResource( 8 )
 material/0 = SubResource( 9 )

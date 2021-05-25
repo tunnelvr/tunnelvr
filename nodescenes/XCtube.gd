@@ -237,7 +237,8 @@ func updatetubelinkpaths(sketchsystem):
 			continue
 		nlinksfound += 1
 		var p0 = xcdrawing0.transform * xcdrawing0.nodepoints[xcdrawinglink[j]]
-		var p1 = xcdrawing1.transform * xcdrawing1.nodepoints[xcdrawinglink[j+1]]
+		var p1u = xcdrawing1.nodepoints[xcdrawinglink[j+1]]
+		var p1 = xcdrawing1.transform * p1u
 		var vec = p1 - p0
 		var veclen = max(0.01, vec.length())
 		var perp = Vector3(1, 0, 0)
@@ -245,6 +246,8 @@ func updatetubelinkpaths(sketchsystem):
 			perp = vec.cross(xcdrawing1.global_transform.basis.y).normalized()
 			if perp == Vector3(0, 0, 0):
 				perp = xcdrawing1.global_transform.basis.x
+		var vsmallrotright = ((p1u.x > xcdrawing1.nodepointmean.x) == (p1u.y > xcdrawing1.nodepointmean.y))
+		perp = perp.rotated(xcdrawing1.global_transform.basis.z, deg2rad(5 if vsmallrotright else -5))
 		var arrowlen = min(0.4, veclen*0.5)
 
 		var p0m = p0
