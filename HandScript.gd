@@ -68,7 +68,7 @@ var handpositionstack = [ ]  # [ { "Ltimestamp", "valid", "transform", "boneorie
 
 func _ready():
 	islefthand = (get_name() == "HandLeft")
-	var controllermodel = get_node("OculusQuestTouchController_Left_Reactive" if islefthand else "OculusQuestTouchController_Right_Reactive")
+	controllermodel = get_node("OculusQuestTouchController_Left_Reactive" if islefthand else "OculusQuestTouchController_Right_Reactive")
 	handmodel = get_node("left_hand_model" if islefthand else "right_hand_model")
 	setcontrollerhandtransform(1.0)
 	transform = controllerhandtransform
@@ -104,7 +104,6 @@ func _ready():
 		internalhandray = $RayCast
 		boneattachmentmiddletip = addboneattachment("middle_null")
 	
-
 func addfingerpinchbutton(bname):
 	var boneattachment = addboneattachment(bname)
 	var fingerpinchbutton = load("res://nodescenes/FingerPinchButton.tscn").instance()
@@ -146,8 +145,7 @@ func update_handpose(delta):
 
 func update_fademode(delta, valid, translucentvalidity, model, material):
 	if valid:
-		if translucentvalidity == 0:
-			model.visible = true
+		model.visible = true
 		if translucentvalidity < 1:
 			translucentvalidity += delta*fadetimevalidity
 			if translucentvalidity < 1:
@@ -193,10 +191,10 @@ func process_handpositionstack(delta):
 		return
 	var hp = handpositionstack[0]
 	if len(handpositionstack) == 1:
-		if hp.has("valid"):
-			handstate = HS_HAND if hp["valid"] else HS_INVALID
 		if hp.has("handstate"):
 			handstate = hp["handstate"]
+		elif hp.has("valid"):
+			handstate = HS_HAND if hp["valid"] else HS_INVALID
 		if hp.has("transform"):
 			transform = hp["transform"]
 		if hp.has("boneorientations"):
@@ -206,10 +204,10 @@ func process_handpositionstack(delta):
 	else:
 		var hp1 = handpositionstack[1]
 		var lam = inverse_lerp(hp["Ltimestamp"], hp1["Ltimestamp"], t)
-		if hp.has("valid") and hp1.has("valid"):
-			handstate = HS_HAND if (hp["valid"] if lam < 0.5 else hp1["valid"]) else HS_INVALID
 		if hp.has("handstate") and hp1.has("handstate"):
 			handstate = hp["handstate"] if lam < 0.5 else hp1["handstate"]
+		elif hp.has("valid") and hp1.has("valid"):
+			handstate = HS_HAND if (hp["valid"] if lam < 0.5 else hp1["valid"]) else HS_INVALID
 
 		if hp.has("transform") and hp1.has("transform"):
 			transform = Transform(hp["transform"].basis.slerp(hp1["transform"].basis, lam), lerp(hp["transform"].origin, hp1["transform"].origin, lam))
@@ -239,8 +237,14 @@ func handpositiondict(t0):
 func handposeimmediate(boneorientations, dt):
 	handpositionstack.clear()
 	var t0 = OS.get_ticks_msec()*0.001
-	handpositionstack.push_back({"Ltimestamp":t0, "valid":true, "boneorientations":hand_boneorientations.duplicate() })
-	handpositionstack.push_back({"Ltimestamp":t0+dt, "valid":true, "boneorientations":boneorientations })
+	handpositionstack.push_back({"Ltimestamp":t0, 
+								 "valid":true, 
+								 "handstate":handstate,
+								 "boneorientations":hand_boneorientations.duplicate() })
+	handpositionstack.push_back({"Ltimestamp":t0+dt, 
+								 "valid":true, 
+								 "handstate":handstate,
+								 "boneorientations":boneorientations })
 
 func initkeyboardtracking():
 	handcontroller = null
@@ -286,7 +290,10 @@ func process_keyboardcontroltracking(headcam, dmousecontrollermotioncumulative, 
 	ht.origin += -0.5*playerscale*ht.basis.z
 	pointervalid = true
 	ht = ht*Transform().rotated(Vector3(1,0,0), deg2rad(45))*Transform().rotated(Vector3(0,1,0), deg2rad(30))
-	transform = ht * controllerhandtransform
+	if handstate == HS_TOUCHCONTROLLER:
+		transform = ht
+	else:
+		transform = ht * controllerhandtransform
 	pointerposearvrorigin = ht*controllerpointerposetransform
 	indexfingerpinchbutton.get_node("MeshInstance").get_surface_material(0).emission_energy = 1 if triggerbuttonheld else 0
 	middlefingerpinchbutton.get_node("MeshInstance").get_surface_material(0).emission_energy = 1 if gripbuttonheld else 0
@@ -302,7 +309,12 @@ func process_handgesturefromcontrol():
 func _process(delta):
 	if handpositionstack != null and len(handpositionstack) != 0:
 		process_handpositionstack(delta)
-	handtranslucentvalidity = update_fademode(delta, (handstate != HS_INVALID), handtranslucentvalidity, handmodel, handmaterial)
+	if handstate == HS_TOUCHCONTROLLER:
+		handmodel.visible = false
+		controllermodel.visible = true
+	else:
+		controllermodel.visible = false
+		handtranslucentvalidity = update_fademode(delta, (handstate != HS_INVALID), handtranslucentvalidity, handmodel, handmaterial)
 	if pointervalid:
 		pointermodel.transform = transform.inverse()*pointerposearvrorigin
 	pointertranslucentvalidity = update_fademode(delta, pointervalid, pointertranslucentvalidity, pointermodel, pointermaterial)

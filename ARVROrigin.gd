@@ -225,6 +225,7 @@ func playerappearancedict():
 
 var Dleftquesthandcontrollername = "unknown"
 var Drightquesthandcontrollername = "unknown"
+var key_9toggle = false
 func _process(delta):
 	if Tglobal.questhandtracking:
 		var rightquesthandcontrollername = $HandRightController.get_controller_name()
@@ -273,12 +274,11 @@ func _process(delta):
 			if Input.is_action_pressed("lh_rise"):  duckrise += 1
 			$HeadCam.translation.y = clamp($HeadCam.translation.y + duckrise*delta*1.1, 0.4, 1.8)
 
-		#if Input.is_action_just_pressed("KEY_9"):
-			
-			
+		if Input.is_action_just_pressed("ui_key_9"):
+			$HandRight.handstate = 2 if ($HandRight.handstate == 1) else 1
+		if $HandRight.handstate == 0:
+			$HandRight.handstate = 1
 		$HandRight.process_keyboardcontroltracking($HeadCam, Vector2(hx*0.033, 0), playerscale)
-
-
 
 	if $HandRight.pointervalid:
 		LaserOrient.transform = global_transform*$HandRight.pointerposearvrorigin
