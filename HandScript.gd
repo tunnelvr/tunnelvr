@@ -1,14 +1,12 @@
 extends Spatial
 
-const handmodelfile1 = "res://assets/ovrmodels/left_hand_model.glb"
-const handmodelfile2 = "res://assets/ovrmodels/right_hand_model.glb"
-
 const hand_bone_mappings = [0, 23,  1, 2, 3, 4,  6, 7, 8,  10, 11, 12,  14, 15, 16, 18, 19, 20, 21];
 var ovr_hand_tracking = null
 var islefthand = false
 var handcontroller = null
 var controller_id = 0
 var handmodel = null
+var controllermodel = null
 var handarmature = null
 var handskeleton = null
 var meshnode = null
@@ -39,7 +37,8 @@ var middleringbutton = null
 
 var ovrhandscale = 1.0
 var handconfidence = 0
-var handvalid = false
+enum { HS_INVALID=0, HS_HAND=1, HS_TOUCHCONTROLLER=2 }
+var handstate = HS_INVALID
 var hand_boneorientations = [ Quat( 0, 0, 0, 1 ), Quat( 0, 0, 0, 1 ), Quat( 0.467562, 0.371268, 0.0784822, 0.798365 ), Quat( 0.253112, 0.141304, 0.155991, 0.944264 ), Quat( -0.0820883, -0.0530134, 0.190872, 0.976739 ), Quat( 0.0813293, 0.0570069, 0.0396865, 0.994264 ), Quat( 0.0443113, 0.0529943, 0.211373, 0.974961 ), Quat( -0.0262251, 0.000635884, 0.291161, 0.956315 ), Quat( -0.0167604, -0.0247861, 0.0716335, 0.996982 ), Quat( -0.0144094, -0.0484558, 0.17288, 0.983645 ), Quat( -0.0127633, -0.000258344, 0.341284, 0.939874 ), Quat( -0.0484786, 0.00163537, 0.0500899, 0.997566 ), Quat( -0.0682813, -0.113321, 0.185936, 0.973614 ), Quat( -0.0401938, 0.00888745, 0.348554, 0.936384 ), Quat( -0.0114638, 0.0296684, 0.146252, 0.988736 ), Quat( -0.207036, -0.140343, 0.0183118, 0.968042 ), Quat( 0.0544313, -0.108607, 0.254061, 0.959528 ), Quat( -0.0522058, -0.0357106, 0.158563, 0.985321 ), Quat( 0.00130541, 0.0483228, 0.170572, 0.984159 ), Quat( 0, 0, 0, 1 ), Quat( 0, 0, 0, 1 ), Quat( 0, 0, 0, 1 ), Quat( 0, 0, 0, 1 ), Quat( 0, 0, 0, 1 ) ]
 
 const gestureboneorientations = { 
@@ -69,13 +68,8 @@ var handpositionstack = [ ]  # [ { "Ltimestamp", "valid", "transform", "boneorie
 
 func _ready():
 	islefthand = (get_name() == "HandLeft")
-	var handmodelfile = handmodelfile1 if islefthand else handmodelfile2
-	var handmodelres = load(handmodelfile)
-	if handmodelres == null:
-		print("Please download the Godot Oculus Mobile Plugin: https://github.com/GodotVR/godot-oculus-mobile-asset")
-	handmodel = handmodelres.instance()
-	add_child(handmodel)
-	handmodel.visible = false
+	var controllermodel = get_node("OculusQuestTouchController_Left_Reactive" if islefthand else "OculusQuestTouchController_Right_Reactive")
+	handmodel = get_node("left_hand_model" if islefthand else "right_hand_model")
 	setcontrollerhandtransform(1.0)
 	transform = controllerhandtransform
 	handarmature = handmodel.get_child(0)
@@ -137,7 +131,7 @@ func initovrhandtracking(lovr_hand_tracking, lhandcontroller):
 	handmaterial.flags_transparent = true
 
 func update_handpose(delta):
-	if handvalid:
+	if handstate == HS_HAND:
 		for i in range(hand_bone_mappings.size()):
 			handskeleton.set_bone_pose(hand_bone_mappings[i], Transform(hand_boneorientations[i]))
 		if internalhandray != null:
@@ -200,7 +194,9 @@ func process_handpositionstack(delta):
 	var hp = handpositionstack[0]
 	if len(handpositionstack) == 1:
 		if hp.has("valid"):
-			handvalid = hp["valid"]
+			handstate = HS_HAND if hp["valid"] else HS_INVALID
+		if hp.has("handstate"):
+			handstate = hp["handstate"]
 		if hp.has("transform"):
 			transform = hp["transform"]
 		if hp.has("boneorientations"):
@@ -211,7 +207,10 @@ func process_handpositionstack(delta):
 		var hp1 = handpositionstack[1]
 		var lam = inverse_lerp(hp["Ltimestamp"], hp1["Ltimestamp"], t)
 		if hp.has("valid") and hp1.has("valid"):
-			handvalid = hp["valid"] if lam < 0.5 else hp1["valid"]
+			handstate = HS_HAND if (hp["valid"] if lam < 0.5 else hp1["valid"]) else HS_INVALID
+		if hp.has("handstate") and hp1.has("handstate"):
+			handstate = hp["handstate"] if lam < 0.5 else hp1["handstate"]
+
 		if hp.has("transform") and hp1.has("transform"):
 			transform = Transform(hp["transform"].basis.slerp(hp1["transform"].basis, lam), lerp(hp["transform"].origin, hp1["transform"].origin, lam))
 		if hp.has("boneorientations") and hp1.has("boneorientations"):
@@ -226,7 +225,8 @@ func process_handpositionstack(delta):
 
 func handpositiondict(t0):
 	var handposdict = { "timestamp":t0, 
-						"valid":handvalid, 
+						"valid":(handstate != HS_INVALID), # to delete
+						"handstate":handstate,
 						"transform":transform, 
 						"gripbuttonheld":int(gripbuttonheld), 
 						"triggerbuttonheld":int(triggerbuttonheld),
@@ -254,15 +254,15 @@ func process_ovrhandtracking(delta):
 	for i in range(len(hand_boneorientations)):
 		hand_boneorientations[i] = hand_boneorientations[i].normalized()  # really?
 		
-	handvalid = handconfidence != null and handconfidence == 1
-	if handvalid:
+	handstate = HS_HAND if (handconfidence != null and handconfidence == 1) else HS_INVALID
+	if handstate == HS_HAND:
 		transform = handcontroller.transform 
 		gripbuttonheld = handcontroller.is_button_pressed(BUTTONS.HT_PINCH_MIDDLE_FINGER)
 		triggerbuttonheld = handcontroller.is_button_pressed(BUTTONS.HT_PINCH_INDEX_FINGER)
 	indexfingerpinchbutton.get_node("MeshInstance").get_surface_material(0).emission_energy = 1 if triggerbuttonheld else (handcontroller.get_joystick_axis(0)+1)/3
 	middlefingerpinchbutton.get_node("MeshInstance").get_surface_material(0).emission_energy = 1 if gripbuttonheld else (handcontroller.get_joystick_axis(1)+1)/3
 	update_handpose(delta)
-	pointervalid = handvalid and ovr_hand_tracking.is_pointer_pose_valid(controller_id)
+	pointervalid = (handstate == HS_HAND) and ovr_hand_tracking.is_pointer_pose_valid(controller_id)
 	if pointervalid:
 		pointerposearvrorigin = ovr_hand_tracking.get_pointer_pose(controller_id)
 		
@@ -302,7 +302,7 @@ func process_handgesturefromcontrol():
 func _process(delta):
 	if handpositionstack != null and len(handpositionstack) != 0:
 		process_handpositionstack(delta)
-	handtranslucentvalidity = update_fademode(delta, handvalid, handtranslucentvalidity, handmodel, handmaterial)
+	handtranslucentvalidity = update_fademode(delta, (handstate != HS_INVALID), handtranslucentvalidity, handmodel, handmaterial)
 	if pointervalid:
 		pointermodel.transform = transform.inverse()*pointerposearvrorigin
 	pointertranslucentvalidity = update_fademode(delta, pointervalid, pointertranslucentvalidity, pointermodel, pointermaterial)

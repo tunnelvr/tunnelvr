@@ -109,7 +109,7 @@ func _physics_process(delta):
 	$HandRight.middleringbutton.get_node("MeshInstance").get_surface_material(0).emission_energy = 1 if $HandRight/RayCast.is_colliding() else 0
 
 	var handflickface = 0.0
-	if $HandRight.handvalid:
+	if $HandRight.handstate:
 		var handprojectionpoint = $HandRight.global_transform.origin + $HandRight.global_transform.basis.x*(-0.2)
 		var handflickpos = handprojectionpoint - $HeadCam.global_transform.origin
 		if len(handflickdistancestack) >= handflickdistancestack_sizemax:
@@ -242,6 +242,7 @@ func _process(delta):
 		else:
 			$HandRight.process_normalvrtracking(delta)
 			Tglobal.questhandtrackingactive = false
+			
 		if leftquesthandcontrollername == "Oculus Tracked Left Hand":
 			$HandLeft.process_ovrhandtracking(delta)
 		else:
@@ -250,6 +251,7 @@ func _process(delta):
 	elif Tglobal.VRoperating:
 		$HandLeft.process_normalvrtracking(delta)
 		$HandRight.process_normalvrtracking(delta)
+		
 	else:
 		var hx = 0
 		if Input.is_action_pressed("lh_shift"):
@@ -271,7 +273,13 @@ func _process(delta):
 			if Input.is_action_pressed("lh_rise"):  duckrise += 1
 			$HeadCam.translation.y = clamp($HeadCam.translation.y + duckrise*delta*1.1, 0.4, 1.8)
 
+		#if Input.is_action_just_pressed("KEY_9"):
+			
+			
 		$HandRight.process_keyboardcontroltracking($HeadCam, Vector2(hx*0.033, 0), playerscale)
+
+
+
 	if $HandRight.pointervalid:
 		LaserOrient.transform = global_transform*$HandRight.pointerposearvrorigin
 	else:

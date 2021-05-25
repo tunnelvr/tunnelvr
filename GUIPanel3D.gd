@@ -12,6 +12,7 @@ onready var virtualkeyboard = get_node("/root/Spatial/GuiSystem/KeyboardPanel")
 
 var regexacceptableprojectname = RegEx.new()
 
+# ln -s /home/julian/data/NorthernEngland/PeakDistrict/tunnelvrdata/cavefiles /home/julian/.local/share/godot/app_userdata/tunnelvr_v0.6/cavefiles
 var cavefilesdir = "user://cavefiles/"
 
 func _on_buttonload_pressed():

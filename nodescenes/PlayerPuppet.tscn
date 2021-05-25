@@ -1,8 +1,12 @@
-[gd_scene load_steps=26 format=2]
+[gd_scene load_steps=30 format=2]
 
 [ext_resource path="res://nodescenes/PlayerPuppet.gd" type="Script" id=1]
 [ext_resource path="res://HandScript.gd" type="Script" id=2]
 [ext_resource path="res://guimeshes/headmesh.tscn" type="PackedScene" id=3]
+[ext_resource path="res://assets/ovrmodels/OculusQuestTouchController_Left_Reactive.gltf" type="PackedScene" id=4]
+[ext_resource path="res://assets/ovrmodels/left_hand_model.glb" type="PackedScene" id=5]
+[ext_resource path="res://assets/ovrmodels/OculusQuestTouchController_Right_Reactive.gltf" type="PackedScene" id=6]
+[ext_resource path="res://assets/ovrmodels/right_hand_model.glb" type="PackedScene" id=7]
 
 [sub_resource type="SpatialMaterial" id=1]
 resource_local_to_scene = true
@@ -223,12 +227,24 @@ material/0 = SubResource( 10 )
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.149729, 0.251003, 0 )
 script = ExtResource( 2 )
 
+[node name="left_hand_model" parent="HandLeft" instance=ExtResource( 5 )]
+visible = false
+
+[node name="OculusQuestTouchController_Left_Reactive" parent="HandLeft" instance=ExtResource( 4 )]
+visible = false
+
 [node name="HandRight" type="Spatial" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.187223, 0, 0 )
 script = ExtResource( 2 )
 
 [node name="AudioStreamPlayer3D" type="AudioStreamPlayer3D" parent="HandRight"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.336952, 0.251003, 0 )
+
+[node name="right_hand_model" parent="HandRight" instance=ExtResource( 7 )]
+visible = false
+
+[node name="OculusQuestTouchController_Right_Reactive" parent="HandRight" instance=ExtResource( 6 )]
+visible = false
 
 [node name="LaserOrient" type="Spatial" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.411951, 0.678362, 0 )
