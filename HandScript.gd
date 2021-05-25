@@ -5,14 +5,20 @@ var ovr_hand_tracking = null
 var islefthand = false
 var handcontroller = null
 var controller_id = 0
-var handmodel = null
+
 var controllermodel = null
+var controllermodel_trigger = null
+var controllermodel_grip = null
+var controllermodel_by = null
+
+var handmodel = null
 var handarmature = null
 var handskeleton = null
 var meshnode = null
 var handmaterial = null
 var handmaterial_orgtransparency = false
 var handmaterial_orgtranslucency = 1
+
 var joypos = Vector2(0, 0)
 
 var controllerhandtransform = null
@@ -69,6 +75,10 @@ var handpositionstack = [ ]  # [ { "Ltimestamp", "valid", "transform", "boneorie
 func _ready():
 	islefthand = (get_name() == "HandLeft")
 	controllermodel = get_node("OculusQuestTouchController_Left_Reactive" if islefthand else "OculusQuestTouchController_Right_Reactive")
+	controllermodel_trigger = controllermodel.get_node("l_controller_Trigger") if islefthand else controllermodel.get_node("r_controller_Trigger")
+	controllermodel_grip = controllermodel.get_node("l_controller_Grip") if islefthand else controllermodel.get_node("r_controller_Grip")
+	controllermodel_by = controllermodel.get_node("l_controller_Y") if islefthand else controllermodel.get_node("r_controller_B")
+
 	handmodel = get_node("left_hand_model" if islefthand else "right_hand_model")
 	setcontrollerhandtransform(1.0)
 	transform = controllerhandtransform
@@ -200,6 +210,11 @@ func process_handpositionstack(delta):
 		if hp.has("boneorientations"):
 			for i in range(hand_bone_mappings.size()):
 				hand_boneorientations[i] = hp["boneorientations"][i]
+		if hp.has("controllerbuttons"):
+			controllermodel_trigger.rotation_degrees.x = hp["controllerbuttons"]["trigger"]
+			controllermodel_grip.transform.origin.x = hp["controllerbuttons"]["grip"]
+			controllermodel_by.transform.origin.y = hp["controllerbuttons"]["by"]
+
 		handpositionstack.pop_front()
 	else:
 		var hp1 = handpositionstack[1]
@@ -211,10 +226,16 @@ func process_handpositionstack(delta):
 
 		if hp.has("transform") and hp1.has("transform"):
 			transform = Transform(hp["transform"].basis.slerp(hp1["transform"].basis, lam), lerp(hp["transform"].origin, hp1["transform"].origin, lam))
+		if hp.has("controllerbuttons"):
+			controllermodel_trigger.rotation_degrees.x = lerp(hp["controllerbuttons"]["trigger"], hp1["controllerbuttons"]["trigger"], lam)
+			controllermodel_grip.transform.origin.x = lerp(hp["controllerbuttons"]["grip"], hp1["controllerbuttons"]["grip"], lam)
+			controllermodel_by.transform.origin.y = lerp(hp["controllerbuttons"]["by"], hp1["controllerbuttons"]["by"], lam)
 		if hp.has("boneorientations") and hp1.has("boneorientations"):
 			for i in range(hand_bone_mappings.size()):
 				hand_boneorientations[i] = hp["boneorientations"][i].slerp(hp1["boneorientations"][i], lam)
 			hp = hp1
+
+
 	if hp.has("triggerbuttonheld"): 
 		indexfingerpinchbutton.get_node("MeshInstance").get_surface_material(0).emission_energy = 1 if hp["triggerbuttonheld"] else 0
 	if hp.has("gripbuttonheld"): 
@@ -228,7 +249,10 @@ func handpositiondict(t0):
 						"transform":transform, 
 						"gripbuttonheld":int(gripbuttonheld), 
 						"triggerbuttonheld":int(triggerbuttonheld),
-						"vrbybuttonheld":int(vrbybuttonheld)
+						"vrbybuttonheld":int(vrbybuttonheld),
+						"controllerbuttons":{"trigger":controllermodel_trigger.rotation_degrees.x, 
+											 "grip":controllermodel_grip.transform.origin.x,
+											 "by":controllermodel_by.transform.origin.y}
 					  }
 	if true or Tglobal.questhandtracking:
 		handposdict["boneorientations"] = hand_boneorientations
@@ -240,11 +264,19 @@ func handposeimmediate(boneorientations, dt):
 	handpositionstack.push_back({"Ltimestamp":t0, 
 								 "valid":true, 
 								 "handstate":handstate,
-								 "boneorientations":hand_boneorientations.duplicate() })
+								 "boneorientations":hand_boneorientations.duplicate(), 
+								 "controllerbuttons":{"trigger":controllermodel_trigger.rotation_degrees.x, 
+													  "grip":controllermodel_grip.transform.origin.x,
+													  "by":controllermodel_by.transform.origin.y}
+							   })
 	handpositionstack.push_back({"Ltimestamp":t0+dt, 
 								 "valid":true, 
 								 "handstate":handstate,
-								 "boneorientations":boneorientations })
+								 "boneorientations":boneorientations,
+								 "controllerbuttons":{"trigger":(25.0 if islefthand else -25.0) if triggerbuttonheld else 0.0, 
+													  "grip":(-0.0035 if islefthand else 0.0035) if gripbuttonheld else 0.0,
+													  "by":(-0.002 if islefthand else 0.002) if vrbybuttonheld else 0.0}
+							   })
 
 func initkeyboardtracking():
 	handcontroller = null
