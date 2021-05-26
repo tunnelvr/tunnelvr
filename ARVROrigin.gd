@@ -238,15 +238,21 @@ func _process(delta):
 			Dleftquesthandcontrollername = leftquesthandcontrollername
 
 		if rightquesthandcontrollername == "Oculus Tracked Right Hand":
+			if $HandRight.handstate == 2:
+				$HandRight.handstate = 0
 			$HandRight.process_ovrhandtracking(delta)
 			Tglobal.questhandtrackingactive = true
 		else:
+			$HandRight.handstate = 2
 			$HandRight.process_normalvrtracking(delta)
 			Tglobal.questhandtrackingactive = false
 			
 		if leftquesthandcontrollername == "Oculus Tracked Left Hand":
+			if $HandLeft.handstate == 2:
+				$HandLeft.handstate = 0
 			$HandLeft.process_ovrhandtracking(delta)
 		else:
+			$HandLeft.handstate = 2
 			$HandLeft.process_normalvrtracking(delta)
 
 	elif Tglobal.VRoperating:

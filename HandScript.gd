@@ -78,7 +78,9 @@ func _ready():
 	controllermodel_trigger = controllermodel.get_node("l_controller_Trigger") if islefthand else controllermodel.get_node("r_controller_Trigger")
 	controllermodel_grip = controllermodel.get_node("l_controller_Grip") if islefthand else controllermodel.get_node("r_controller_Grip")
 	controllermodel_by = controllermodel.get_node("l_controller_Y") if islefthand else controllermodel.get_node("r_controller_B")
-
+	#var controllermaterial = controllermodel_trigger.mesh.surface_get_material(0)  # no idea how this is already getting set
+	#controllermaterial.set albedo texture OculusQuestTouchControllerTexture_Color_inverted.png
+	
 	handmodel = get_node("left_hand_model" if islefthand else "right_hand_model")
 	setcontrollerhandtransform(1.0)
 	transform = controllerhandtransform
@@ -265,17 +267,17 @@ func handposeimmediate(boneorientations, dt):
 								 "valid":true, 
 								 "handstate":handstate,
 								 "boneorientations":hand_boneorientations.duplicate(), 
-								 "controllerbuttons":{"trigger":controllermodel_trigger.rotation_degrees.x, 
-													  "grip":controllermodel_grip.transform.origin.x,
-													  "by":controllermodel_by.transform.origin.y}
+								 "controllerbuttons":{ "trigger":controllermodel_trigger.rotation_degrees.x, 
+													   "grip":controllermodel_grip.transform.origin.x,
+													   "by":controllermodel_by.transform.origin.y }
 							   })
 	handpositionstack.push_back({"Ltimestamp":t0+dt, 
 								 "valid":true, 
 								 "handstate":handstate,
 								 "boneorientations":boneorientations,
-								 "controllerbuttons":{"trigger":(25.0 if islefthand else -25.0) if triggerbuttonheld else 0.0, 
-													  "grip":(-0.0035 if islefthand else 0.0035) if gripbuttonheld else 0.0,
-													  "by":(-0.002 if islefthand else 0.002) if vrbybuttonheld else 0.0}
+								 "controllerbuttons":{ "trigger":(25.0 if islefthand else -25.0) if triggerbuttonheld else 0.0, 
+													   "grip":(-0.0035 if islefthand else 0.0035) if gripbuttonheld else 0.0,
+													   "by":-0.002 if vrbybuttonheld else 0.0 }
 							   })
 
 func initkeyboardtracking():
@@ -307,7 +309,10 @@ func process_normalvrtracking(delta):
 	gripbuttonheld = handcontroller.is_button_pressed(BUTTONS.VR_GRIP)
 	triggerbuttonheld = handcontroller.is_button_pressed(BUTTONS.VR_TRIGGER)
 	vrbybuttonheld = handcontroller.is_button_pressed(BUTTONS.VR_BUTTON_BY)
-	transform = handcontroller.transform * controllerhandtransform
+	if handstate == HS_TOUCHCONTROLLER:
+		transform = handcontroller.transform
+	else:
+		transform = handcontroller.transform * controllerhandtransform
 	pointervalid = true
 	pointerposearvrorigin = handcontroller.transform * controllerpointerposetransform
 	indexfingerpinchbutton.get_node("MeshInstance").get_surface_material(0).emission_energy = 1 if triggerbuttonheld else 0
@@ -336,7 +341,7 @@ func process_handgesturefromcontrol():
 							"handthumbfings" + ("1" if triggerbuttonheld else "0") + ("1" if gripbuttonheld else "0") + "00"
 	if newcurrentgesture != currentgesture:
 		currentgesture = newcurrentgesture
-		handposeimmediate(gestureboneorientations[currentgesture], 0.2)
+		handposeimmediate(gestureboneorientations[currentgesture], 0.1 if handstate == HS_TOUCHCONTROLLER else 0.2)
 	
 func _process(delta):
 	if handpositionstack != null and len(handpositionstack) != 0:
