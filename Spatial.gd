@@ -2,7 +2,6 @@ extends Spatial
 
 # Stuff to do:
 
-# rationalize the ResourceLoader.load(fetcheddrawingfile)  # imported as an Image, could be something else
 
 # To release, export to the Linux, Windows and Quest2/Android platforms, zip the appropriate dlls and sos together and 
 # Upload to Alex's machine.  To run, go into Ubuntu export Linux/X11 runable, go into /mnt/c/Users/henry/godot/tunnelvr_releases and run:
@@ -10,25 +9,9 @@ extends Spatial
 
 # xcdfullsetvisibilitycollision to use CollisionLayers technology instead
 # Treeview to show which are downloaded
-# record zooming trimming position on each and a programmable scalebar
-
-# * check size/100x scale with gitter problem on vive
-# * check mass culling of everything not really close to see what framerate does
-# * centreline nodes drawn or not tickbox
-
-# * xcchangesequence technology applied to tubes (check using the 20 second delay)
-
-# * How is it going to work from planview?
-#   -- this can be done from the plan view too, 
-#   -- plot with front-culling so as to see inside the shapes, and plot with image textures on
 
 # * highlight nodes under pointer system so it's global and simplifies colouring code (active node to be an overlay)
 # * RTC version to work (and would use webXR)
-
-# * XCdrawing shell pickable and changable material
-# * Finish debugging planview and centreline nodes (which should often be visible)
-# * centreline nodes to have label highlighted only when pointed at
-
 
 # * godot docs.  assert returns null from the function it's in when you ignore it
 # * check out HDR example https://godotengine.org/asset-library/asset/110
@@ -41,8 +24,6 @@ extends Spatial
 # https://www.youtube.com/watch?v=gpQePH-Ffbw
 
 # * VR leads@skydeas1  and @brainonsilicon in Leeds (can do a trip there)
-
-# * Bring in XCdrawings that are hooked to the centreline that will highlight when they get it
 
 # * Need to ask to improve the documentation on https://docs.godotengine.org/en/latest/classes/class_meshinstance.html#class-meshinstance-method-set-surface-material
 # *   See also https://godotengine.org/qa/3488/how-to-generate-a-mesh-with-multiple-materials

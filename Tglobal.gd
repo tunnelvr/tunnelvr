@@ -1,6 +1,6 @@
 extends Node
 
-const tunnelvrversion = "v0.6.1"
+const tunnelvrversion = "v0.6.2"
 
 var connectiontoserveractive = false
 var morethanoneplayer = false

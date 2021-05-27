@@ -328,6 +328,14 @@ func _on_switchtest(index):
 			pointmeshexperiment.LoadPointMesh()
 		SwitchTest.selected = 0
 		setguipanelhide()
+
+	elif nssel == "BackfaceCull":
+		var materialsystem = get_node("/root/Spatial/MaterialSystem")
+		materialsystem.togglebackfacecull()
+		if Tglobal.connectiontoserveractive:
+			rpc("togglebackfacecull")
+		SwitchTest.selected = 0
+		setguipanelhide()
 				
 	elif nssel == "toggle guardian":
 		var guardianpolyvisible = not playerMe.get_node("GuardianPoly").visible

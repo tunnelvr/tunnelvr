@@ -30,6 +30,7 @@ func setcontrollerhandtransform(playerscale):
 		controllerhandtransform = Transform(Basis(Vector3(0,0,1), deg2rad(-45*0)), Vector3(0,0,0)) * \
 								  Transform(Vector3(0,0,1), Vector3(0,1,0), Vector3(-1,0,0), Vector3(0,0,0.1*playerscale))
 	handmodel.scale = Vector3(1,1,1)*playerscale*ovrhandscale
+	controllermodel.scale = Vector3(1,1,1)*playerscale
 	if has_node("HandFlickFaceY"):
 		$HandFlickFaceY.scale = Vector3(1,1,1)*playerscale
 	

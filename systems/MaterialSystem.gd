@@ -44,5 +44,12 @@ func adjustmaterialtotorchlight(torchon):
 	$xcdrawingmaterials/highlight.get_surface_material(0).albedo_color.a = 0.33 if torchon else 0.43
 	$tubematerials/hole.get_surface_material(0).albedo_color.a = 0.11 if torchon else 0.18
 
-	
+remote func togglebackfacecull():
+	for tmesh in get_node("tubematerials").get_children():
+		var tmat = tmesh.get_surface_material(0)
+		if tmat.params_cull_mode == SpatialMaterial.CULL_DISABLED:
+			tmat.params_cull_mode = SpatialMaterial.CULL_BACK
+		elif tmat.params_cull_mode == SpatialMaterial.CULL_BACK:
+			tmat.params_cull_mode = SpatialMaterial.CULL_DISABLED
+
 	

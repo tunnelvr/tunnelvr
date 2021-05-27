@@ -1522,10 +1522,15 @@ cast_to = Vector3( 0, 0, 0.001 )
 collision_mask = 40
 
 [node name="left_hand_model" parent="Players/PlayerMe/HandLeft" instance=ExtResource( 72 )]
-visible = false
 
 [node name="OculusQuestTouchController_Left_Reactive" parent="Players/PlayerMe/HandLeft" instance=ExtResource( 73 )]
 visible = false
+
+[node name="PalmLight" type="MeshInstance" parent="Players/PlayerMe/HandLeft"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.09, -0.02, 0 )
+visible = false
+mesh = SubResource( 6 )
+material/0 = SubResource( 7 )
 
 [node name="HandRightController" type="ARVRController" parent="Players/PlayerMe"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.2, 1.5, -0.5 )
@@ -1547,8 +1552,6 @@ visible = false
 mesh = SubResource( 6 )
 material/0 = SubResource( 7 )
 
-[node name="Spatial" type="Spatial" parent="Players/PlayerMe/HandRight"]
-
 [node name="HandFlickFaceY" type="MeshInstance" parent="Players/PlayerMe/HandRight"]
 transform = Transform( 1, 0, 0, 0, 0.965926, 0.258819, 0, -0.258819, 0.965926, 0, 0, 0 )
 visible = false
@@ -1557,9 +1560,9 @@ mesh = SubResource( 8 )
 material/0 = SubResource( 9 )
 
 [node name="right_hand_model" parent="Players/PlayerMe/HandRight" instance=ExtResource( 71 )]
-visible = false
 
 [node name="OculusQuestTouchController_Right_Reactive" parent="Players/PlayerMe/HandRight" instance=ExtResource( 70 )]
+visible = false
 
 [node name="pointersystem" type="Node" parent="Players/PlayerMe"]
 script = ExtResource( 5 )
@@ -1731,7 +1734,7 @@ margin_top = 235.0
 margin_right = 116.0
 margin_bottom = 262.0
 text = "normal"
-items = [ "normal", null, false, 0, null, "hide floors", null, false, 1, null, "all grey", null, false, 2, null, "hide xc", null, false, 3, null, "toggle guardian", null, false, 4, null, "export OBJ", null, false, 7, null, "choke", null, false, 6, null, "swap controllers", null, false, 7, null, "lock controls", null, false, 8, null, "LoadPointMesh", null, false, 10, null, "CL_common_root", null, false, 11, null ]
+items = [ "normal", null, false, 0, null, "hide floors", null, false, 1, null, "all grey", null, false, 2, null, "hide xc", null, false, 3, null, "toggle guardian", null, false, 4, null, "export OBJ", null, false, 7, null, "choke", null, false, 6, null, "swap controllers", null, false, 7, null, "lock controls", null, false, 8, null, "LoadPointMesh", null, false, 10, null, "BackfaceCull", null, false, 11, null ]
 selected = 0
 __meta__ = {
 "_edit_use_anchors_": false
