@@ -5,42 +5,47 @@ program for drawing up cave surveys.  It's based on the excellent
 [Godot Game Engine](https://godotengine.org/) that's used for designing 
 Virtual Reality games on an almost plug and play basis.
 
+Being like a game, the intention is to make drawing up cave surveys fun and collaborative.  
+You can make improvements to the map with your friends in VR.  It is easier and more intuitive 
+because it is in 3D from the perspective of how you see it in the real life, rather than 
+as a technical 2D drawing with overlapping layers.
 
-## Install instructions
+## How to run
 
-Download and run Godot.
+### As a binary executable
+
+Go to the [releases](https://github.com/goatchurchprime/tunnelvr/releases) page and download, unzip and run 
+the binary executable for your operating system.  Linux, Windows and Oculus Quest Android are available, and 
+iOS is sometimes available when someone makes a build on a Mac.
+
+### From sources
+
+This is super easy owing to the power of Godot.  
 
 Clone this repo
 
-Download the assets
+Download and run the [Standard release of Godot](https://godotengine.org/download) for your operating system.
 
-For the HTC Vive (which is the platform it is being developed on), 
-simply hit run and it should put you there.  The Vive works with OpenVR.
+Scan project directory for tunnelvr and then open it.  
 
-For other platforms you may need to edit "Spatial.gd" to get the right initializer.  
+Download the godot_ovrmobile asset if you are deploying to the Oculus Quest
 
-
-## Objective
-
-This should work like an OpenStreetmap for caves, where cave explorers can conveniently 
-edit and share common 3D models of the caves direcly on the web with the least effort.
-
-Note that laser point scan to 1mm accuracy is not a map, any more than a satellite photograph is a map.  
-A map is a representation of the landscape that shows the details that are important for what it is used for.
-
-The cave map is intended to be used for:
- (a) route finding and discovery,
- (b) illustrating what is there to someone who has not been there (same purpose as an expensive photograph),
- (c) showing where the ropes and rigging go because it's dimensionally accurate,
- (d) fun collaborative artwork (it's easier to collaborate on a representation of something real, than 
-a landscape that is purely made up.
-
-TunnelVR is multiplayer so that two or people can interact, either as a tourist and guide, 
-a teacher and student of the editing tools, or collaborators improving the representation of 
-a particular area of the cave.
-
+Hit the "Play" button on the top right
 
 ## Controls
+
+### The non-VR pancake flatscreen interface
+
+If you do not have a VR system, you can use TunnelVR in the following way:
+
+* Cursor keys or WASD keys will move forwards, backwards and rotate your camera view left and right.
+* Shift-Up/Down or W/S keys rotates your view up and down (nodding your head)
+* Esc-key or '1' toggles mouse capture.  The mouse controls the hand-laser-cursor used for drawing
+* Right mouse (when captured) brings up a context sensitive menu.  For example, if cursor was on a wall, the Right mouse allows for changing the material.
+* Ctrl-Up/Down turns off gravity and flies forwards or backwards in the direction of view.  Try looking down first (Shift-S) then flying backwards (Ctrl-S) to get a view of the scene from above.
+* 'M'-key toggles control panel menu.  Use this to join the network (select Network Off -> tunnelvr.goatchurch.org.uk) will connect you to the main server where you can meet with other players and be shown around
+ 
+### In-VR controls
 
 Controllers and hand tracking works.  Controller buttons animates the hands to the appropriate gesture: 
 * thumb and forefinger pinch is same as trigger button, 
@@ -48,9 +53,10 @@ Controllers and hand tracking works.  Controller buttons animates the hands to t
 * thumb and pinky and ring finger at same time is menu button
 
 ### *Left hand* is for movement.
-* Thumb touchpad -- slides forward or backward in direction of view
-* Thumb touchpad click left or right -- rotates view 45 degrees left or right
-* Grip -- turns off gravity
+* Thumb-stick forwards and backwards -- slides in direction of view
+* Trigger -- slides in direction of the short orange laser emerging from the controller or hand
+* Thumb-stick left or right -- rotates view 45 degrees left or right
+* Grip -- turns off gravity and allows flying or hovering
 * Grip+Trigger -- Flies in direction of controller axis
 * Grip+Touchpad+Trigger -- Flies in direction of controller at 5x speed.
 
@@ -93,17 +99,21 @@ CAT scan with 1mm thick layers all perpendicular to the X-axis.  However, capabi
 change the orientation of the slices makes the modelling more symetrical.
 
 ## Input data
+
 Cave data is sourced from [Cave-Registry](http://cave-registry.org.uk/) [NorthernEngland](http://cave-registry.org.uk/svn/NorthernEngland/)
-First execute:
-* "C:\Program Files (x86)\Survex\aven.exe" Ireby\Ireby2\Ireby2.svx
-to process the data into a .3d file Then process this file (after first editing the input and output file names)
-* python surveyscans\convertdmptojson.py
-Now edit the call to `xcdatalistfromcentreline` in the tunnelvr source code and enabled it to load the centreline and tubes on load.  
-Save and use as normal
+in processed [survex 3d format](https://survex.com/docs.html).  It requires one of the computers on the network to be able to 
+execute `python` and `dump3d` from a command line to convert this into the geometry format that TunnelVR needs.
 
 ![Screenshot](screenshot.png)
 
-
 # Running on a server
 
+Any running copy of TunnelVR can act as a server by selecting Network Off -> As Server.  If another instance is running on the same
+local area network, then doing Network Off -> Local-network will find and connect to the designated server.
+
+Download the [headless server version](https://godotengine.org/download/server), unpack the linux zip file, then execute:
+
+> ./Godot_v3.3.1-stable_linux_server.64  --main-pack tunnelvr_v0.5.0.pck
+
+Execute this in a [screen](https://linuxize.com/post/how-to-use-linux-screen/) terminal window to allow it to persist.  
 
