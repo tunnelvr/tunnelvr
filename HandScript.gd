@@ -81,6 +81,16 @@ func _ready():
 	controllermodel_by = controllermodel.get_node("l_controller_Y") if islefthand else controllermodel.get_node("r_controller_B")
 	#var controllermaterial = controllermodel_trigger.mesh.surface_get_material(0)  # no idea how this is already getting set
 	#controllermaterial.set albedo texture OculusQuestTouchControllerTexture_Color_inverted.png
+	var controllertriggermaterial = controllermodel_trigger.mesh.surface_get_material(0)
+	controllertriggermaterial = controllertriggermaterial.duplicate()
+	controllertriggermaterial.albedo_color = Color(1.0, 0.5, 0.0)
+	controllermodel_trigger.mesh.surface_set_material(0, controllertriggermaterial)
+
+	var controllergripmaterial = controllermodel_grip.mesh.surface_get_material(0)
+	controllergripmaterial = controllergripmaterial.duplicate()
+	controllergripmaterial.albedo_color = Color(0.5, 1.0, 0.5)
+	controllermodel_grip.mesh.surface_set_material(0, controllergripmaterial)
+	
 	
 	handmodel = get_node("left_hand_model" if islefthand else "right_hand_model")
 	setcontrollerhandtransform(1.0)
