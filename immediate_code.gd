@@ -13,5 +13,6 @@ func D_run():
 
 
 func _run():
-	var x = false	
-	print(x == 1)
+	var x = {1:3, "a":2}
+	for l in x:
+		print(l)

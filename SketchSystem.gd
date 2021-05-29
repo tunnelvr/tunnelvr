@@ -382,6 +382,12 @@ remote func actsketchchangeL(xcdatalist):
 				if len(xcdata.get("prevnodepoints", [])) != 0:
 					for xctube in xcdrawing.xctubesconn:
 						xctubestoupdate[xctube.get_name()] = xctube
+				if len(xcdata.get("nextnodepoints", [])) == 1:
+					for xcnname in xcdata["nextnodepoints"]:
+						var xcn = xcdrawing.get_node("XCnodes").get_node_or_null(xcnname)
+						if xcn != null:
+							xcdrawing.expandxcdrawingscale(xcn.global_transform.origin)
+								
 			elif "transformpos" in xcdata and len(xcdrawing.xctubesconn) != 0:
 				for xctube in xcdrawing.xctubesconn:
 					xctubestoupdate[xctube.get_name()] = xctube

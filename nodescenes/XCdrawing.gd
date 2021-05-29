@@ -306,8 +306,9 @@ func setdrawingvisiblecode(ldrawingvisiblecode):
 			
 func updateformetresquaresscaletexture():
 	var mat = $XCdrawingplane/CollisionShape/MeshInstance.get_surface_material(0)
-	mat.uv1_scale = $XCdrawingplane.get_scale()
-	mat.uv1_offset = -$XCdrawingplane.get_scale()/2
+	if mat != null:
+		mat.uv1_scale = $XCdrawingplane.get_scale()
+		mat.uv1_offset = -$XCdrawingplane.get_scale()/2
 
 func expandxcdrawingscale(nodepointglobal):
 	assert (drawingtype == DRAWING_TYPE.DT_XCDRAWING)

@@ -345,6 +345,7 @@ func setpointertarget(laserroot, raycast, pointertargetshortdistance):
 		newpointertargetpoint = raycast.global_transform.origin + (-raycast.global_transform.basis.z)*pointertargetshortdistance
 
 	if newpointertarget != pointertarget:
+		#print("NN ", newpointertarget, " ", raycast.get_collision_point())
 		#if newpointertarget != null and Tglobal.wingmeshtrimmingmode:
 		#	print("PT: ", newpointertarget.get_name())
 		if pointertarget == guipanel3d:
