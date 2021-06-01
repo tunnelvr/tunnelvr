@@ -226,6 +226,7 @@ func playerappearancedict():
 var Dleftquesthandcontrollername = "unknown"
 var Drightquesthandcontrollername = "unknown"
 var key_9toggle = false
+enum { HS_INVALID=0, HS_HAND=1, HS_TOUCHCONTROLLER=2 }
 func _process(delta):
 	if Tglobal.questhandtracking:
 		var rightquesthandcontrollername = $HandRightController.get_controller_name()
@@ -238,24 +239,28 @@ func _process(delta):
 			Dleftquesthandcontrollername = leftquesthandcontrollername
 
 		if rightquesthandcontrollername == "Oculus Tracked Right Hand":
-			if $HandRight.handstate == 2:
-				$HandRight.handstate = 0
+			if $HandRight.handstate == HS_TOUCHCONTROLLER:
+				$HandRight.handstate = HS_INVALID
 			$HandRight.process_ovrhandtracking(delta)
 			Tglobal.questhandtrackingactive = true
 		else:
-			$HandRight.handstate = 2
+			$HandRight.handstate = HS_TOUCHCONTROLLER
 			$HandRight.process_normalvrtracking(delta)
 			Tglobal.questhandtrackingactive = false
 			
 		if leftquesthandcontrollername == "Oculus Tracked Left Hand":
-			if $HandLeft.handstate == 2:
-				$HandLeft.handstate = 0
+			if $HandLeft.handstate == HS_TOUCHCONTROLLER:
+				$HandLeft.handstate = HS_INVALID
 			$HandLeft.process_ovrhandtracking(delta)
 		else:
-			$HandLeft.handstate = 2
+			$HandLeft.handstate = HS_TOUCHCONTROLLER
 			$HandLeft.process_normalvrtracking(delta)
 
 	elif Tglobal.VRoperating:
+		if $HandRight.handstate == HS_INVALID:
+			$HandRight.handstate = HS_HAND
+		if $HandLeft.handstate == HS_INVALID:
+			$HandLeft.handstate = HS_HAND
 		$HandLeft.process_normalvrtracking(delta)
 		$HandRight.process_normalvrtracking(delta)
 		
@@ -280,10 +285,10 @@ func _process(delta):
 			if Input.is_action_pressed("lh_rise"):  duckrise += 1
 			$HeadCam.translation.y = clamp($HeadCam.translation.y + duckrise*delta*1.1, 0.4, 1.8)
 
+		if $HandRight.handstate == HS_INVALID:
+			$HandRight.handstate = HS_HAND
 		if Input.is_action_just_pressed("ui_key_9"):
-			$HandRight.handstate = 2 if ($HandRight.handstate == 1) else 1
-		if $HandRight.handstate == 0:
-			$HandRight.handstate = 1
+			$HandRight.handstate = HS_TOUCHCONTROLLER if ($HandRight.handstate == HS_HAND) else HS_HAND
 		$HandRight.process_keyboardcontroltracking($HeadCam, Vector2(hx*0.033, 0), playerscale)
 
 	if $HandRight.pointervalid:
