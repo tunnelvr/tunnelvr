@@ -437,8 +437,7 @@ func _on_textedit_focus_exited():
 
 const clientips = [ "tunnelvr.goatchurch.org.uk",  # alex server
 					"Local-network",
-					"godot.doesliverpool.xyz",
-					"192.168.1.171 Matt" ]
+					"godot.doesliverpool.xyz" ]
 var uniqueinstancestring = ""
 func _ready():
 	uniqueinstancestring = OS.get_unique_id().replace("{", "").split("-")[0].to_upper()+"_"+str(randi())
@@ -761,7 +760,8 @@ func _on_networkstate_selected(index):
 				
 	elif nssel.begins_with("Local-network"):
 		udpdiscoveryreceivingserver = UDPServer.new()
-		udpdiscoveryreceivingserver.listen(selfSpatial.udpserverdiscoveryport)
+		var udperr = udpdiscoveryreceivingserver.listen(selfSpatial.udpserverdiscoveryport)
+		print("UDP err ", udperr)
 
 	else:
 		selfSpatial.hostipnumber = nssel.replace("Client->", "")
@@ -825,7 +825,7 @@ func networkstartasserver(fromgui):
 			$Viewport/GUI/Panel/Networkstate.selected = 0
 
 	var lnetworkID = get_tree().get_network_unique_id()
-	selfSpatial.setnetworkidnamecolour(selfSpatial.playerMe, lnetworkID)
+	selfSpatial.setnetworkidname(selfSpatial.playerMe, lnetworkID)
 	print("server networkID: ", selfSpatial.playerMe.networkID)
 	selfSpatial.mqttsystem.mqttpublish("startasserver", String(selfSpatial.playerMe.networkID))
 		
@@ -856,6 +856,7 @@ func _server_disconnected():
 	removeallplayersdisconnection()
 	if $Viewport/GUI/Panel/Networkstate.selected != 0:
 		$Viewport/GUI/Panel/Networkstate.selected = 0
+
 	
 var networkmetricsreceived = null
 remote func recordnetworkmetrics(lnetworkmetricsreceived):
@@ -951,7 +952,9 @@ func _process(delta):
 			print("Received: ", spkt, " from ", peer.get_packet_ip())
 			if spkt[0] == "TunnelVRserver-here!":
 				var serverIPnumber = peer.get_packet_ip()
-				$Viewport/GUI/Panel/Networkstate.add_item(serverIPnumber)
+				var lastitem = $Viewport/GUI/Panel/Networkstate.get_item_text($Viewport/GUI/Panel/Networkstate.get_item_count()-1)
+				if lastitem != serverIPnumber:
+					$Viewport/GUI/Panel/Networkstate.add_item(serverIPnumber)
 				udpdiscoveryreceivingserver.stop()
 				udpdiscoveryreceivingserver = null
 				_on_networkstate_selected($Viewport/GUI/Panel/Networkstate.get_item_count()-1)
