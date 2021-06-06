@@ -5,6 +5,10 @@ class_name Centrelinedata
 # python convertdmptotunnelvrjson.py -3 skirwith/skirwith-cave.3d -a skirwith/Dskirwith_jgtslapdash.json
 # [remember to copy the 3d file from the source directory]
 # ssh godot@proxmox.dynamicdevices.co.uk -p 23
+
+const makecentrelrudsplays = true
+const makecentrelinehextubes = true
+
 static func xcdatalistfromcentreline(centrelinefile):
 	print("Opening centreline file ", centrelinefile)
 	var centrelinedatafile = File.new()
@@ -46,14 +50,64 @@ static func xcdatalistfromcentreline(centrelinefile):
 								   stationpointscoords[i*3+2] - bbcenvec.y, 
 								   -(stationpointscoords[i*3+1] - bbcenvec.z))
 		stationpoints.push_back(stationpoint)
-		if stationpointname != "":
-			stationnodepoints[stationpointname] = stationpoint
+		stationnodepoints[stationpointname] = stationpoint
 
 	var centrelinelegs = [ ]
 	for i in range(len(legsstyles)):
 		if stationpointsnames[legsconnections[i*2]] != "" and stationpointsnames[legsconnections[i*2+1]] != "":
 			centrelinelegs.push_back(stationpointsnames[legsconnections[i*2]])
 			centrelinelegs.push_back(stationpointsnames[legsconnections[i*2+1]])
+
+	if makecentrelrudsplays:
+		var ilrud = 1
+		var xsectgps = centrelinedata.xsectgps
+		for j in range(len(xsectgps)):
+			var xsectgp = xsectgps[j]
+			var xsectindexes = xsectgp.xsectindexes
+			var xsectrightvecs = xsectgp.xsectrightvecs
+			var xsectlruds = xsectgp.xsectlruds
+
+			for i in range(len(xsectindexes)):
+				var xl = max(0.1, xsectlruds[i*4+0])
+				var xr = max(0.1, xsectlruds[i*4+1])
+				var xu = max(0.1, xsectlruds[i*4+2])
+				var xd = max(0.1, xsectlruds[i*4+3])
+
+				var spnleft = "%dls" % ilrud
+				var spnright = "%drs" % ilrud
+				var spnup = "%dus" % ilrud
+				var spndown = "%dds" % ilrud
+
+				var p = stationpoints[xsectindexes[i]]
+				var spn = stationpointsnames[xsectindexes[i]]
+				var vh = Vector3(xsectrightvecs[i*2], 0, -xsectrightvecs[i*2+1])
+				var pl = p - vh*xl
+				var pr = p + vh*xr
+				var pu = p + Vector3(0, xu, 0)
+				var pd = p - Vector3(0, xd, 0)
+
+				stationpointsnames.push_back(spnleft)
+				stationpoints.push_back(pl)
+				stationnodepoints[spnleft] = pl
+				stationpointsnames.push_back(spnright)
+				stationpoints.push_back(pr)
+				stationnodepoints[spnright] = pr
+				stationpointsnames.push_back(spnup)
+				stationpoints.push_back(pu)
+				stationnodepoints[spnup] = pu
+				stationpointsnames.push_back(spndown)
+				stationpoints.push_back(pd)
+				stationnodepoints[spndown] = pd
+				centrelinelegs.push_back(spn)
+				centrelinelegs.push_back(spnleft)
+				centrelinelegs.push_back(spn)
+				centrelinelegs.push_back(spnright)
+				centrelinelegs.push_back(spn)
+				centrelinelegs.push_back(spnup)
+				centrelinelegs.push_back(spn)
+				centrelinelegs.push_back(spndown)
+				ilrud += 1
+
 			
 	var additionalproperties = { "stationnamecommonroot":findcommonroot(stationnodepoints) }
 	var xcdrawingcentreline = { "name":"centreline2", 
@@ -71,55 +125,55 @@ static func xcdatalistfromcentreline(centrelinefile):
 	var xcvizstates = { xcdrawingcentreline["name"]:DRAWING_TYPE.VIZ_XCD_HIDE }
 	var updatetubeshells = [ ]
 
-	var xsectgps = centrelinedata.xsectgps
-	var hexonepathpairs = [ "hl","hu", "hu","hv", "hv","hr", "hr","he", "he","hd", "hd","hl"]
-	var hextubepairs = ["hl", "hl", "mediumrock", null,  "hr", "hr", "partialrock", null]
-	for j in range(len(xsectgps)):
-		print("*** Skipping the xcsections ")
-		break
-		var xsectgp = xsectgps[j]
-		var xsectindexes = xsectgp.xsectindexes
-		var xsectrightvecs = xsectgp.xsectrightvecs
-		var xsectlruds = xsectgp.xsectlruds
+				
+	if makecentrelinehextubes:
+		var xsectgps = centrelinedata.xsectgps
+		var hexonepathpairs = [ "hl","hu", "hu","hv", "hv","hr", "hr","he", "he","hd", "hd","hl"]
+		var hextubepairs = ["hl", "hl", "mediumrock", null,  "hr", "hr", "partialrock", null]
+		for j in range(len(xsectgps)):
+			var xsectgp = xsectgps[j]
+			var xsectindexes = xsectgp.xsectindexes
+			var xsectrightvecs = xsectgp.xsectrightvecs
+			var xsectlruds = xsectgp.xsectlruds
 
-		var prevsname = null
-		for i in range(len(xsectindexes)):
-			var sname = stationpointsnames[xsectindexes[i]]+"s"+String(j)
-			var hexnodepoints = { }
-			var xl = max(0.1, xsectlruds[i*4+0])
-			var xr = max(0.1, xsectlruds[i*4+1])
-			var xu = max(0.1, xsectlruds[i*4+2])
-			var xd = max(0.1, xsectlruds[i*4+3])
-			hexnodepoints["hl"] = Vector3(-xl, 0, 0)
-			hexnodepoints["hr"] = Vector3(xr, 0, 0)
-			hexnodepoints["hu"] = Vector3(-xl/2, xu, 0)
-			hexnodepoints["hv"] = Vector3(+xr/2, xu, 0)
-			hexnodepoints["hd"] = Vector3(-xl/2, -xd, 0)
-			hexnodepoints["he"] = Vector3(+xr/2, -xd, 0)
-			var p = stationpoints[xsectindexes[i]]
-			var ang = Vector2(xsectrightvecs[i*2], -xsectrightvecs[i*2+1]).angle()
-			var xcdata = { "name":sname, 
-						   "xcresource":"station_"+sname, 
-						   "drawingtype":DRAWING_TYPE.DT_XCDRAWING, 
-						   "transformpos":Transform(Basis().rotated(Vector3(0,-1,0), ang), p), 
-						   "prevnodepoints":{ },
-						   "nextnodepoints":hexnodepoints,
-						   "prevonepathpairs":[ ],
-						   "newonepathpairs":hexonepathpairs.duplicate(),
-						 }
-			xcdrawinglist.push_back(xcdata)
-			xcvizstates[sname] = DRAWING_TYPE.VIZ_XCD_HIDE
+			var prevsname = null
+			for i in range(len(xsectindexes)):
+				var sname = stationpointsnames[xsectindexes[i]]+"s"+String(j)
+				var hexnodepoints = { }
+				var xl = max(0.1, xsectlruds[i*4+0])
+				var xr = max(0.1, xsectlruds[i*4+1])
+				var xu = max(0.1, xsectlruds[i*4+2])
+				var xd = max(0.1, xsectlruds[i*4+3])
+				hexnodepoints["hl"] = Vector3(-xl, 0, 0)
+				hexnodepoints["hr"] = Vector3(xr, 0, 0)
+				hexnodepoints["hu"] = Vector3(-xl/2, xu, 0)
+				hexnodepoints["hv"] = Vector3(+xr/2, xu, 0)
+				hexnodepoints["hd"] = Vector3(-xl/2, -xd, 0)
+				hexnodepoints["he"] = Vector3(+xr/2, -xd, 0)
+				var p = stationpoints[xsectindexes[i]]
+				var ang = Vector2(xsectrightvecs[i*2], -xsectrightvecs[i*2+1]).angle()
+				var xcdata = { "name":sname, 
+							   "xcresource":"station_"+sname, 
+							   "drawingtype":DRAWING_TYPE.DT_XCDRAWING, 
+							   "transformpos":Transform(Basis().rotated(Vector3(0,-1,0), ang), p), 
+							   "prevnodepoints":{ },
+							   "nextnodepoints":hexnodepoints,
+							   "prevonepathpairs":[ ],
+							   "newonepathpairs":hexonepathpairs.duplicate(),
+							 }
+				xcdrawinglist.push_back(xcdata)
+				xcvizstates[sname] = DRAWING_TYPE.VIZ_XCD_HIDE
 
-			if prevsname != null:
-				var xctdata = { "tubename":"**notset", 
-								"xcname0":prevsname, 
-								"xcname1":sname,
-								"prevdrawinglinks":[ ],
-								"newdrawinglinks":hextubepairs.duplicate()
-							  }
-				xcdrawinglist.push_back(xctdata)
-				updatetubeshells.push_back({ "tubename":xctdata["tubename"], "xcname0":xctdata["xcname0"], "xcname1":xctdata["xcname1"] })
-			prevsname = sname
+				if prevsname != null:
+					var xctdata = { "tubename":"**notset", 
+									"xcname0":prevsname, 
+									"xcname1":sname,
+									"prevdrawinglinks":[ ],
+									"newdrawinglinks":hextubepairs.duplicate()
+								  }
+					xcdrawinglist.push_back(xctdata)
+					updatetubeshells.push_back({ "tubename":xctdata["tubename"], "xcname0":xctdata["xcname0"], "xcname1":xctdata["xcname1"] })
+				prevsname = sname
 
 	xcdrawinglist.push_back({ "xcvizstates":xcvizstates, "updatetubeshells":updatetubeshells })
 	return xcdrawinglist

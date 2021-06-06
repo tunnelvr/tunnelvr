@@ -493,8 +493,13 @@ def exportfortunnelvr(jsfile, dmp3d):
 
     xsectgps = [ ]
     for xsectseq in xsects:
-        xsectpoints = [dmp3d.nmapnodes[xs[0]]  for xs in xsectseq]
-        xsectindexes = [ stationpointsdict[xsectpoint]  for xsectpoint in xsectpoints ]
+        xsectpoints, xsectindexes = [ ], [ ]
+        for xs in xsectseq:
+            xsp = dmp3d.nmapnodes[xs[0]]
+            if xsp in stationpointsdict:  # avoid using a tube on a surface leg
+                xsi = stationpointsdict[xsp]
+                xsectpoints.append(xsp)
+                xsectindexes.append(xsi)
         xsectrightvecs = [ ]
         for i in range(len(xsectpoints)):
             pback = convp(xsectpoints[max(0, i-1)])
