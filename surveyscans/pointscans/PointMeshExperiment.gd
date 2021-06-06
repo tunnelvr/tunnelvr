@@ -30,6 +30,24 @@ func pointmeshfromcsvfile(st, csvname):
 		st.add_vertex(Vector3(float(v[0]), float(v[2]), float(v[1])))
 		v = fin.get_csv_line()
 	fin.close()
+
+func colouredpointmeshfromcsvfile(st, csvname):
+	print("Loading pointmesh ", csvname)
+	var fin = File.new()
+	fin.open(csvname, File.READ)
+	var v = fin.get_csv_line()
+	var n = 0
+	while len(v) == 6:
+		n += 1
+		if (n%500) == 0:
+			print("pause at ", n)
+			#yield(get_tree().create_timer(0.05), "timeout")
+			yield(get_tree(), "idle_frame")
+		st.add_color(Color(float(v[3])/255.0, float(v[4])/255.0, float(v[5])/255.0))
+		st.add_vertex(Vector3(float(v[0]), float(v[2]), float(v[1])))
+		v = fin.get_csv_line()
+	fin.close()
+
 	
 #func _ready():
 func LoadPointMesh():
@@ -39,9 +57,15 @@ func LoadPointMesh():
 	var fcheck = File.new()
 	var plyname = "res://surveyscans/pointscans/WSC 10cm WGS1984 - Cloud.ply"
 	var csvname = "res://surveyscans/pointscans/smallcloud.csvn"
+	var colcsvname = "res://surveyscans/pointscans/alexroom.csvn"
 	if false and fcheck.file_exists(plyname):
 		pointmeshfromplyfile(st, plyname, 200000)
+	elif fcheck.file_exists(colcsvname):
+		#transform.origin = Vector3(0, 0, -6)
+		yield(colouredpointmeshfromcsvfile(st, colcsvname), "completed")
 	elif fcheck.file_exists(csvname):
+		transform.origin = Vector3(-205, 8, -6)
+		print("Setting mesh position to ", transform.origin)
 		yield(pointmeshfromcsvfile(st, csvname), "completed")
 	else:
 		print("point cloud files not found")

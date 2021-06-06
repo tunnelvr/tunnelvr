@@ -184,7 +184,7 @@ func setactivetargetwall(newactivetargetwall):
 	
 	activetargetwall = newactivetargetwall
 	activetargetwallgrabbedtransform = null
-	if (activetargetwall == get_node("/root/Spatial/PlanViewSystem")):
+	if activetargetwall == planviewsystem:
 		print("Waaat")
 
 	if activetargetwall != null and activetargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:

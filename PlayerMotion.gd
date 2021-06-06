@@ -37,6 +37,7 @@ var playerdirectedflight_prev = false
 var playerbodycentre_prev = Vector3(0,0,0)
 var playercentrevelocitystack = [ Vector3(0,0,0), Vector3(0,0,0), Vector3(0,0,0), Vector3(0,0,0) ]
 var playercentrevelocitystack_index = -2
+var playernofallbelowY = -20.0
 
 func getplayerrecentvelocity():
 	if playercentrevelocitystack_index >= 0:
@@ -260,6 +261,8 @@ func process_freefall(delta):
 	var Dplayerbodycentre = playerbodycentre
 	playerfreefallbodyvelocity.y -= gravityacceleration*delta
 	playerfreefallbodyvelocity *= 1.0 - freefallairdragfactor*delta
+	if playerfreefallbodyvelocity.y < 0.0 and playerbodycentre.y < playernofallbelowY:
+		playerfreefallbodyvelocity = Vector3(0,0,0)
 	playerfreefallbodyvelocity = $PlayerKinematicBody.move_and_slide(playerfreefallbodyvelocity, Vector3(0, 1, 0))
 	playerbodycentre = $PlayerKinematicBody.global_transform.origin
 	playerMe.global_transform.origin = -Ddebugvisualoffset + playerbodycentre + Vector3(0, playerheadcentreabovebodycentreheight, 0) - headcentrefromvroriginvector

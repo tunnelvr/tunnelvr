@@ -403,6 +403,7 @@ func actplanviewdict(pvchange):
 					xctubesector.visible = true
 				xctube.setxctubepathlinevisibility(sketchsystem)
 
+
 func planviewtransformpos(guidpaneltransform, guidpanelsize):
 	var paneltrans = $PlanView.global_transform
 	if guidpaneltransform != null:
@@ -419,6 +420,7 @@ func planviewtransformpos(guidpaneltransform, guidpanelsize):
 
 var updateplanviewentitysizes_working = false
 func updateplanviewentitysizes():
+	var Dt0 = OS.get_ticks_msec()
 	var nodesca = $PlanView/Viewport/PlanGUI/Camera.size/70.0*3.0
 	var labelsca = nodesca*2.0
 	get_node("/root/Spatial/LabelGenerator").currentplannodesca = nodesca
@@ -452,6 +454,7 @@ func updateplanviewentitysizes():
 				rectrecttestt0 = OS.get_ticks_msec()
 	print("rectrecttests final ", rectrecttests, " ms:", OS.get_ticks_msec() - rectrecttestt0)
 	updateplanviewentitysizes_working = false
+	print("updateplanviewent ", OS.get_ticks_msec() - Dt0)
 
 var slowviewportframeratecountdown = 1
 var slowviewupdatecentrelinesizeupdaterate = 1.5

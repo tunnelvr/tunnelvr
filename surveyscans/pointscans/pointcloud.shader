@@ -11,6 +11,8 @@ void vertex() {
 	//NORMAL = VERTEX - WORLD_MATRIX[3].xyz;
 	POINT_SIZE = point_scale/dist;
 	NORMAL = CAMERA_MATRIX[2].xyz;
+	
+	// uncomment to work from distance
 	COLOR.rgb = mix(vec3(1,0,0), vec3(0,0,1), dist/20.0);
 }
 

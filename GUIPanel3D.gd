@@ -78,7 +78,7 @@ func _on_buttonsave_pressed():
 	
 
 func _on_buttonplanview_pressed():
-	var button_pressed = $Viewport/GUI/Panel/ButtonPlanView.pressed  # using toggled signal causes updates when programatically set
+	var button_pressed = $Viewport/GUI/Panel/ButtonPlanView.pressed
 	var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
 	if button_pressed:
 		var pvchange = planviewsystem.planviewtodict()
@@ -403,7 +403,7 @@ func makechoke(pressed):
 			yield(get_tree().create_timer(0.1), "timeout")
 			if HandRight.pointervalid:
 				var markernode = null
-				if ((i%5) == 1):
+				if ((i%5) == 10):
 					markernode = preload("res://assets/objectscenes/log.tscn").instance()
 				else:
 					markernode = preload("res://assets/objectscenes/boulder.tscn").instance()
@@ -685,6 +685,10 @@ func _input(event):
 			Tglobal.soundsystem.quicksound("MenuClick", collision_point)
 		elif event.scancode == KEY_B:
 			call_deferred("_on_networkstate_selected", 3)
+		elif event.scancode == KEY_P:
+			$Viewport/GUI/Panel/ButtonPlanView.pressed = not $Viewport/GUI/Panel/ButtonPlanView.pressed
+			_on_buttonplanview_pressed()
+
 
 
 #-------------networking system
