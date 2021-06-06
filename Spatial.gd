@@ -59,7 +59,7 @@ func checkloadinterface(larvrinterfacename):
 	return false
 
 
-func setnetworkidnamecolour(player, networkID):
+func setnetworkidname(player, networkID):
 	player.networkID = networkID
 	player.set_network_master(networkID)
 	player.set_name("NetworkedPlayer"+String(networkID))
@@ -204,7 +204,7 @@ func _player_connected(id):
 	var playerothername = "NetworkedPlayer"+String(id)
 	if not $Players.has_node(playerothername):
 		var playerOther = load("res://nodescenes/PlayerPuppet.tscn").instance()
-		setnetworkidnamecolour(playerOther, id)
+		setnetworkidname(playerOther, id)
 		playerOther.visible = false
 		$Players.add_child(playerOther)
 		print("Added ", playerothername, " to $Players")
@@ -266,13 +266,15 @@ func setconnectiontoserveractive(b):
 	Tglobal.connectiontoserveractive = b
 	playerMe.get_node("HandRight/HandFlickFaceY").set_surface_material(0, $MaterialSystem/handmaterials.get_node("serverconnected" if Tglobal.connectiontoserveractive else "serverdisconnected").get_surface_material(0))
 	$GuiSystem/GUIPanel3D/Viewport/GUI/Panel/ButtonServerside.disabled = (not b) or (playerMe.networkID == 1)
-
+	if not Tglobal.connectiontoserveractive:
+		setnetworkidname(playerMe, 0)
+	
 func _connected_to_server():
 	print("_connected_to_server")
 	var newnetworkID = get_tree().get_network_unique_id()
 	if playerMe.networkID != newnetworkID:
 		print("setting the newnetworkID: ", newnetworkID)
-		setnetworkidnamecolour(playerMe, newnetworkID)
+		setnetworkidname(playerMe, newnetworkID)
 	$GuiSystem/GUIPanel3D/Viewport/GUI/Panel/Label.text = "connected as "+String(playerMe.networkID)
 	mqttsystem.mqttpublish("connectedtoserver", String(newnetworkID))
 
