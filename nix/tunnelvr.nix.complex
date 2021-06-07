@@ -28,7 +28,7 @@ stdenv.mkDerivation rec {
 
   src = fetchGit {
     url = "https://github.com/goatchurchprime/tunnelvr.git";
-    rev = "efa2d11adf90990beae5933b578a9687221edb69";
+    rev = "6bbd23bf9f719dc7cdfd9de08addb62adbd52a62";
     ref = "refs/heads/master";
   };
 
@@ -82,20 +82,22 @@ stdenv.mkDerivation rec {
   '';
 
   dontInstall = true;
+  dontFixup = true;
+  dontStrip = true;
 
-  installPhase = ''
-    runHook preInstall
-    mkdir -p $out/bin
-    mv $out/share/tunnelvr/tunnelvr $out/bin
-    # Patch binaries.
-    interpreter=$(cat $NIX_CC/nix-support/dynamic-linker)
-    patchelf \
-      --set-interpreter $interpreter \
-      --set-rpath ${lib.makeLibraryPath buildInputs} \
-      $out/share/tunnelvr/tunnelvr
-    mkdir -p $out/share/pixmaps
-    runHook postInstall
-  '';
+#  installPhase = ''
+#    runHook preInstall
+#    mkdir -p $out/bin
+#    mv $out/share/tunnelvr/tunnelvr $out/bin
+#    # Patch binaries.
+#    interpreter=$(cat $NIX_CC/nix-support/dynamic-linker)
+#    patchelf \
+#      --set-interpreter $interpreter \
+#      --set-rpath ${lib.makeLibraryPath buildInputs} \
+#      $out/share/tunnelvr/tunnelvr
+#    mkdir -p $out/share/pixmaps
+#    runHook postInstall
+#  '';
 
   meta = with lib; {
     homepage = "https://ohmygit.org/";

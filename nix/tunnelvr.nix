@@ -8,6 +8,7 @@ let
       rev    = "3.3-stable";
       sha256 = "sha256:0lclrx0y7w1dah40053sjlppb6c5p32icq7x5pvdfgyd3i63mnbb";
     };
+    patches = [];
   });
 in
 stdenv.mkDerivation rec {
@@ -22,31 +23,36 @@ stdenv.mkDerivation rec {
   };
 
   templates = let drv = fetchurl {
-    url = "https://downloads.tuxfamily.org/godotengine/3.2.3/Godot_v3.2.3-stable_export_templates.tpz";
-    sha256 = "sha256-ng7UxVyMvt/F8HPnGqQazGeI+QWt3wJbKICUe/poCgE=";
+    url = "https://downloads.tuxfamily.org/godotengine/3.3/Godot_v3.3-stable_export_templates.tpz";
+    sha256 = "sha256-hWJcL5CMdEb84ToNP4YYhhLG9dwyNBapeTsUmPw/awQ=";
   };
   in runCommandNoCC "Godot" {buildInputs = [unzip];} ''
     unzip ${drv} -d $out
     '';
 
-  nativeBuildInputs = [ godot-headless ];
+  nativeBuildInputs = [ my-godot-headless ];
 
-  outputs = [ "out" ];
-
-  buildPhase = ''
-    mkdir -p $TMP/.config
-    mkdir -p $TMP/.local/share/godot/templates
-    mkdir -p $TMP/.config/godot/projects/
-    export HOME=$TMP
-    export XDG_CONFIG_HOME="$TMP/.config"
-    export XDG_DATA_HOME="$TMP/.local/share"
-    mkdir -p $TMP/.local/share/godot/
-    ln -s $templates/templates $TMP/.local/share/godot/templates/3.2.3.stable
-
+  runCommand "tunnelvr" { buildInputs = [ my-godot-headless ]; } ''
+    mkdir $out
     godot-headless --export "Linux/X11" $out
   '';
 
-  dontInstall = true;
+  outputs = [ "out" ];
+
+#  buildPhase = ''
+#    mkdir -p $TMP/.config
+#    mkdir -p $TMP/.local/share/godot/templates
+#    mkdir -p $TMP/.config/godot/projects/
+#    export HOME=$TMP
+#    export XDG_CONFIG_HOME="$TMP/.config"
+#    export XDG_DATA_HOME="$TMP/.local/share"
+#    mkdir -p $TMP/.local/share/godot/
+#    ln -s $templates/templates $TMP/.local/share/godot/templates/3.3.stable
+#
+#    godot-headless --export "Linux/X11" $out
+#  '';
+
+#  dontInstall = true;
 
   meta = with stdenv.lib; {
     description = "A program that produces a familiar, friendly greeting";
