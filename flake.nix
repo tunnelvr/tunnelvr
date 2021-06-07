@@ -5,7 +5,7 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
     godot = {
-      url = "github:godotengine/godot/3.3";
+      url = "github:godotengine/godot/3.3.2-stable";
       flake = false;
     };
     tunnelvr = {

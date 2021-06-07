@@ -3,16 +3,16 @@
     "godot": {
       "flake": false,
       "locked": {
-        "lastModified": 1622716965,
-        "narHash": "sha256-8t2WzZ6+/5lQ/uZQu2taEDeuGMaKVre6272maooGZ4E=",
+        "lastModified": 1621856353,
+        "narHash": "sha256-oHxdVKICJX9mQvTB2zGa9TfMTnsKK6TMsXp/vpY21WU=",
         "owner": "godotengine",
         "repo": "godot",
-        "rev": "05b72c2e9b4f5d2390c5e68026a09da6e6fd706d",
+        "rev": "7610409b8a14b8499763efa76578795c755a846d",
         "type": "github"
       },
       "original": {
         "owner": "godotengine",
-        "ref": "3.3",
+        "ref": "3.3.2-stable",
         "repo": "godot",
         "type": "github"
       }
@@ -36,7 +36,25 @@
     "root": {
       "inputs": {
         "godot": "godot",
-        "nixpkgs": "nixpkgs"
+        "nixpkgs": "nixpkgs",
+        "tunnelvr": "tunnelvr"
+      }
+    },
+    "tunnelvr": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1623055339,
+        "narHash": "sha256-Z59d79lLjxQZyKsr3nOfxhX7Ab1Rx34IOcL7VxSa8KU=",
+        "owner": "goatchurchprime",
+        "repo": "tunnelvr",
+        "rev": "1dd1ea79792e9d9dd48257669808845625393063",
+        "type": "github"
+      },
+      "original": {
+        "owner": "goatchurchprime",
+        "ref": "master",
+        "repo": "tunnelvr",
+        "type": "github"
       }
     }
   },
