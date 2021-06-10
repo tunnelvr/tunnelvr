@@ -20,6 +20,7 @@ in
   config = mkIf cfg.enable {
     systemd.services.tunnelvr = {
       description = "TunnelVR Service";
+      path = [ pkgs.python3Minimal pkgs.survex ];
       wantedBy = [ "multi-user.target" ];
       after = [ "networking.target" ];
       serviceConfig = {
