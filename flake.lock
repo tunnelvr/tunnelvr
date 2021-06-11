@@ -37,17 +37,34 @@
       "inputs": {
         "godot": "godot",
         "nixpkgs": "nixpkgs",
+        "survex": "survex",
         "tunnelvr": "tunnelvr"
+      }
+    },
+    "survex": {
+      "locked": {
+        "lastModified": 1623256563,
+        "narHash": "sha256-XQd6VULbUsBksOF9hOZGBZzvzborDv1TvtmFmEsPrwc=",
+        "owner": "matthewcroughan",
+        "repo": "nixpkgs",
+        "rev": "9007ca34b8c4a02ba145eea102cb2c343de97aae",
+        "type": "github"
+      },
+      "original": {
+        "owner": "matthewcroughan",
+        "ref": "add-survex",
+        "repo": "nixpkgs",
+        "type": "github"
       }
     },
     "tunnelvr": {
       "flake": false,
       "locked": {
-        "lastModified": 1623055339,
-        "narHash": "sha256-Z59d79lLjxQZyKsr3nOfxhX7Ab1Rx34IOcL7VxSa8KU=",
+        "lastModified": 1623075182,
+        "narHash": "sha256-u7uUU/co7YmWUeJkzrxs6UXkkr9THbx6EU3Mq1TcLLE=",
         "owner": "goatchurchprime",
         "repo": "tunnelvr",
-        "rev": "1dd1ea79792e9d9dd48257669808845625393063",
+        "rev": "445fc835f45055c531b7b0980c1bd31de1932d9c",
         "type": "github"
       },
       "original": {

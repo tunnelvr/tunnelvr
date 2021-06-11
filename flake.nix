@@ -4,6 +4,7 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
+    survex.url = "github:matthewcroughan/nixpkgs/add-survex";
     godot = {
       url = "github:godotengine/godot/3.3.2-stable";
       flake = false;
@@ -14,7 +15,7 @@
     };
   };
 
-  outputs = { self, nixpkgs, godot, tunnelvr }: {
+  outputs = { self, nixpkgs, godot, tunnelvr, survex }: {
 
 #    packages.x86_64-linux = let pkgs = import nixpkgs { system = "x86_64-linux"; }; in {
 #      tunnelvr = pkgs.callPackage ./nix/runcommand-tunnelvr.nix {};
@@ -37,6 +38,8 @@
         src = godot;
         patches = [];
       });
+
+      survex = survex.legacyPackages.x86_64-linux.survex;
 
       tunnelvr = 
       runCommandNoCC "tunnelvr" {
