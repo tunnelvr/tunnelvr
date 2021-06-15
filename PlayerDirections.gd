@@ -24,8 +24,8 @@ const playerspawnoffsetheight = 3.0
 
 var joyposxrotsnaphysteresis = 0
 var forebackmovementjoystick = DRAWING_TYPE.JOYPOS_LEFTCONTROLLER
-var strafemovementjoystick = DRAWING_TYPE.JOYPOS_DISABLED
-var snapturnemovementjoystick = DRAWING_TYPE.JOYPOS_LEFTCONTROLLER
+var strafemovementjoystick = DRAWING_TYPE.JOYPOS_LEFTCONTROLLER
+var snapturnemovementjoystick = DRAWING_TYPE.JOYPOS_RIGHTCONTROLLER
 
 func setasaudienceofpuppet(playerpuppet, puppetheadtrans, lforceontogroundtimedown):
 	var puppetheadpos = puppetheadtrans.origin

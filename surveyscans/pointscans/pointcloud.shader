@@ -1,7 +1,7 @@
 shader_type spatial;
 render_mode world_vertex_coords;
 uniform vec4 albedo : hint_color = vec4(1.0);
-uniform float point_scale = 32.0;
+uniform float point_scale = 64.0;
 
 void vertex() {
 	// Point size adjustment using camera position
