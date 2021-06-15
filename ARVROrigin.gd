@@ -15,6 +15,8 @@ var bouncetestnetworkID = 0
 onready var LaserOrient = get_node("/root/Spatial/BodyObjects/LaserOrient")
 onready var LaserSelectLine = get_node("/root/Spatial/BodyObjects/LaserSelectLine")
 onready var PlanViewSystem = get_node("/root/Spatial/PlanViewSystem")
+onready var PlayerDirections = get_node("/root/Spatial/BodyObjects/PlayerDirections")
+
 var ovr_hand_tracking = null
 var ovr_guardian_system = null
 onready var guipanel3d = get_node("/root/Spatial/GuiSystem/GUIPanel3D")
@@ -265,20 +267,16 @@ func _process(delta):
 		$HandRight.process_normalvrtracking(delta)
 		
 	else:
-		var hx = 0
+		var viewupdownjoy = 0.0
+		var handleftrightjoy = 0.0
 		if Input.is_action_pressed("lh_shift"):
 			var lhkeyvec = Vector2(0, 0)
-			if Input.is_action_pressed("lh_forward"):   lhkeyvec.y += 1
-			if Input.is_action_pressed("lh_backward"):  lhkeyvec.y += -1
-			if Input.is_action_pressed("lh_left"):      lhkeyvec.x += -1
-			if Input.is_action_pressed("lh_right"):     lhkeyvec.x += 1
-			hx = lhkeyvec.x
-			lhkeyvec.x = 0
-			#var vtarget = -$HeadCam.global_transform.basis.z*20 + $HeadCam.global_transform.basis.x*lhkeyvec.x*15*delta + Vector3(0, lhkeyvec.y, 0)*15*delta
-			#$HeadCam.look_at($HeadCam.global_transform.origin + vtarget, Vector3(0,1,0))
-			#rotation_degrees.y += $HeadCam.rotation_degrees.y
-			#$HeadCam.rotation_degrees.y = 0
-			$HeadCam.rotation_degrees.x = clamp($HeadCam.rotation_degrees.x + 90*delta*lhkeyvec.y, -89, 89)
+			if Input.is_action_pressed("lh_forward"):   viewupdownjoy += 1
+			if Input.is_action_pressed("lh_backward"):  viewupdownjoy += -1
+			if PlayerDirections.snapturnemovementjoystick == DRAWING_TYPE.JOYPOS_DISABLED:
+				if Input.is_action_pressed("lh_left"):      handleftrightjoy += -1
+				if Input.is_action_pressed("lh_right"):     handleftrightjoy += 1
+			$HeadCam.rotation_degrees.x = clamp($HeadCam.rotation_degrees.x + 90*delta*viewupdownjoy, -89, 89)
 
 			var duckrise = 0
 			if Input.is_action_pressed("lh_duck"):  duckrise += -1
@@ -289,7 +287,7 @@ func _process(delta):
 			$HandRight.handstate = HS_HAND
 		if Input.is_action_just_pressed("ui_key_9"):
 			$HandRight.handstate = HS_TOUCHCONTROLLER if ($HandRight.handstate == HS_HAND) else HS_HAND
-		$HandRight.process_keyboardcontroltracking($HeadCam, Vector2(hx*0.033, 0), playerscale)
+		$HandRight.process_keyboardcontroltracking($HeadCam, Vector2(handleftrightjoy*0.033, 0), playerscale)
 
 	if $HandRight.pointervalid:
 		LaserOrient.transform = global_transform*$HandRight.pointerposearvrorigin

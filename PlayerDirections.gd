@@ -4,6 +4,7 @@ onready var selfSpatial = get_node("/root/Spatial")
 onready var playerMe = get_node("/root/Spatial/Players/PlayerMe")
 onready var HeadCam = playerMe.get_node("HeadCam")
 onready var HandLeft = playerMe.get_node("HandLeft")
+onready var HandRight = playerMe.get_node("HandRight")
 onready var HandLeftController = playerMe.get_node("HandLeftController")
 
 var flyspeed = 5.0
@@ -20,6 +21,11 @@ var floorprojectdistance = 10
 const playeraudiencedistance = 5.0
 const playeraudiencesidedisplacement = 4.0
 const playerspawnoffsetheight = 3.0
+
+var joyposxrotsnaphysteresis = 0
+var forebackmovementjoystick = DRAWING_TYPE.JOYPOS_LEFTCONTROLLER
+var strafemovementjoystick = DRAWING_TYPE.JOYPOS_DISABLED
+var snapturnemovementjoystick = DRAWING_TYPE.JOYPOS_LEFTCONTROLLER
 
 func setasaudienceofpuppet(playerpuppet, puppetheadtrans, lforceontogroundtimedown):
 	var puppetheadpos = puppetheadtrans.origin
@@ -72,33 +78,45 @@ func _process(delta):
 		print("WIP step_high_just_detected")
 
 
-
-var joyposxrotsnaphysteresis = 0 
 func _physics_process(delta):
 	playerdirectedflight = ((HandLeft.gripbuttonheld or Input.is_action_pressed("lh_ctrl")) != flywalkreversed) or \
 							(playerMe.playerscale > 1.0)
 	playerdirectedflightvelocity = Vector3(0,0,0)
 	playerdirectedwalkingvelocity = Vector3(0,0,0)
 
-	var joypos = HandLeft.joypos
-	if not Input.is_action_pressed("lh_shift") and not Tglobal.virtualkeyboardactive:
-		if Input.is_action_pressed("lh_forward"):   joypos.y += 1
-		if Input.is_action_pressed("lh_backward"):  joypos.y += -1
-		if Input.is_action_pressed("lh_left"):      joypos.x += -1
-		if Input.is_action_pressed("lh_right"):     joypos.x += 1
+	var joyposforeback = 0.0
+	var joyposstrafe = 0.0
+	var joypossnapturn = 0.0
+	if forebackmovementjoystick != DRAWING_TYPE.JOYPOS_DISABLED:
+		joyposforeback = HandLeft.joypos.y if forebackmovementjoystick == DRAWING_TYPE.JOYPOS_LEFTCONTROLLER else HandRight.joypos.y
+	if strafemovementjoystick != DRAWING_TYPE.JOYPOS_DISABLED:
+		joyposstrafe = HandLeft.joypos.x if forebackmovementjoystick == DRAWING_TYPE.JOYPOS_LEFTCONTROLLER else HandRight.joypos.x
+	if snapturnemovementjoystick != DRAWING_TYPE.JOYPOS_DISABLED:
+		joypossnapturn = HandLeft.joypos.x if snapturnemovementjoystick == DRAWING_TYPE.JOYPOS_LEFTCONTROLLER else HandRight.joypos.x
+
+	if not Tglobal.virtualkeyboardactive:
+		if not Input.is_action_pressed("lh_shift"):
+			if Input.is_action_pressed("lh_forward"):   joyposforeback += 1
+			if Input.is_action_pressed("lh_backward"):  joyposforeback += -1
+			if Input.is_action_pressed("lh_left"):      joyposstrafe += -1
+			if Input.is_action_pressed("lh_right"):     joyposstrafe += 1
+		elif snapturnemovementjoystick != DRAWING_TYPE.JOYPOS_DISABLED:
+			if Input.is_action_pressed("lh_left"):      joypossnapturn += -1
+			if Input.is_action_pressed("lh_right"):     joypossnapturn += 1
+
 
 	if not Tglobal.questhandtrackingactive and not Tglobal.controlslocked:
-		if abs(joypos.x) < 0.4 and joyposxrotsnaphysteresis != 2:
+		if abs(joypossnapturn) < 0.4 and joyposxrotsnaphysteresis != 2:
 			joyposxrotsnaphysteresis = 0
 		elif joyposxrotsnaphysteresis == 0:
-			if abs(joypos.x) > 0.9:
-				joyposxrotsnaphysteresis = (1 if joypos.x > 0 else -1)
+			if abs(joypossnapturn) > 0.9:
+				joyposxrotsnaphysteresis = (1 if joypossnapturn > 0 else -1)
 				nextphysicsrotatestep += joyposxrotsnaphysteresis*22.5
 
 	if HandLeft.triggerbuttonheld and HandLeft.pointervalid and not Tglobal.controlslocked:
 		var vec = -(playerMe.global_transform*HandLeft.pointerposearvrorigin).basis.z
 		if playerdirectedflight:
-			var flyacceleration = lerp(1.0, 5.0, (joypos.y-0.7)/0.3) if joypos.y>0.8 else 1.0
+			var flyacceleration = lerp(1.0, 5.0, (joyposforeback-0.7)/0.3) if joyposforeback>0.8 else 1.0
 			playerdirectedflightvelocity = vec.normalized()*flyspeed*flyacceleration*playerMe.playerflyscale
 		else:
 			playerdirectedwalkingvelocity = Vector3(vec.x, 0, vec.z).normalized()*walkspeed*playerMe.playerwalkscale
@@ -107,12 +125,13 @@ func _physics_process(delta):
 				#playerdirectedwalkingvelocity = -playerdirectedwalkingvelocity
 				playerdirectedwalkingvelocity = Vector3(HeadCam.global_transform.basis.z.x, 0, HeadCam.global_transform.basis.z.z).normalized()*walkspeed*playerMe.playerwalkscale
 
-	elif not Tglobal.questhandtrackingactive and not Tglobal.controlslocked and abs(joypos.y) > 0.2:
+	elif not Tglobal.questhandtrackingactive and not Tglobal.controlslocked and (abs(joyposforeback) > 0.2 or abs(joyposstrafe) > 0.2):
 		if playerdirectedflight: 
-			playerdirectedflightvelocity = HeadCam.global_transform.basis.z*(-joypos.y*flyspeed)*playerMe.playerscale
+			playerdirectedflightvelocity = (-HeadCam.global_transform.basis.z*joyposforeback + HeadCam.global_transform.basis.x*joyposstrafe)*flyspeed*playerMe.playerscale
 		else:
-			var dir = Vector3(HeadCam.global_transform.basis.z.x, 0, HeadCam.global_transform.basis.z.z)
-			playerdirectedwalkingvelocity = dir.normalized()*(-joypos.y*walkspeed*playerMe.playerwalkscale)
+			var dir = Vector3(HeadCam.global_transform.basis.z.x, 0, HeadCam.global_transform.basis.z.z).normalized()
+			var perpdir = Vector3(dir.z, 0, -dir.x)
+			playerdirectedwalkingvelocity = (-dir*joyposforeback + perpdir*joyposstrafe)*walkspeed*playerMe.playerwalkscale
 			
 func _on_button_pressed(p_button):
 	print("DDD p_button ", p_button)
