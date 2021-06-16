@@ -4,6 +4,7 @@ var doppelganger = null
 
 var networkID = 0
 var playerplatform = ""
+var playeroperatingsystem = ""
 onready var playertunnelvrversion = Tglobal.tunnelvrversion
 var guardianpoly = null
 var executingfeaturesavailable = [ ]
@@ -41,7 +42,8 @@ func initplayerappearance_me():
 		get_node("GuardianPoly/floorareamesh").mesh = Polynets.triangulatepolygon(guardianpoly)
 		get_node("GuardianPoly/floorareamesh").set_surface_material(0, get_node("/root/Spatial/MaterialSystem").xcdrawingmaterial("guardianpoly"))
 		get_node("GuardianPoly/floorareamesh").visible = true
-	executingfeaturesavailable = get_node("/root/Spatial/ExecutingFeatures").executingfeaturesavailable()
+	executingfeaturesavailable = get_node("/root/Spatial/ExecutingFeatures").find_executingfeaturesavailable()
+	print("executingfeaturesavailable: ", executingfeaturesavailable)
 	
 func setheadtorchlight(torchon):
 	if torchon:
@@ -216,6 +218,7 @@ func playerpositiondict():
 
 func playerappearancedict():
 	return { "playerplatform":playerplatform, 
+			 "playeroperatingsystem":playeroperatingsystem,
 			 "playerheadcolour":get_node("HeadCam/csgheadmesh/skullcomponent").material.albedo_color, 
 			 "torchon":get_node("HeadCam/HeadtorchLight").visible, 
 			 "guardianpoly":guardianpoly, 

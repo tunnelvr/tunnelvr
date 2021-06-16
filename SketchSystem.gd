@@ -207,7 +207,10 @@ remote func actsketchchangeL(xcdatalist):
 		if xcdatalist[0]["caveworldchunk"] == 0:
 			var PlayerDirections = get_node("/root/Spatial/BodyObjects/PlayerDirections")
 			Tglobal.printxcdrawingfromdatamessages = false
-			clearentirecaveworld()
+			if xcdatalist[0]["sketchname"] != "importing_the_centreline__do_not_clear":
+				clearentirecaveworld()
+			else:
+				PlayerDirections.forceontogroundtimedown = 0.75
 			if "playerMe" in xcdatalist[0]:
 				spawnplayerme(xcdatalist[0]["playerMe"])
 				var playerserver = get_node_or_null("/root/Spatial/Players/NetworkedPlayer1")
@@ -281,6 +284,9 @@ remote func actsketchchangeL(xcdatalist):
 			if xctube == null:
 				var xcdrawing0 = get_node("XCdrawings").get_node(xcdata["xcname0"])
 				var xcdrawing1 = get_node("XCdrawings").get_node(xcdata["xcname1"])
+				if xcdrawing0 == null or xcdrawing1 == null:
+					print("bad tube ")
+					continue
 				xcdata["m0"] = 1 if xcdrawing1.drawingtype == DRAWING_TYPE.DT_CENTRELINE else 0
 				if xcdata["m0"] == 0:
 					xctube = newXCtube(xcdrawing0, xcdrawing1)
@@ -676,6 +682,7 @@ func sketchdicttochunks(sketchdatadict):
 				xcdatachunkL = [ { "caveworldchunk":len(xcdatachunks) } ]
 				xcdatachunks.push_back(xcdatachunkL)
 				remainingnodepoints = remainingnodepoints.slice(len(SxcdrawingD["nextnodepoints"]), len(remainingnodepoints))
+
 			SxcdrawingD = { "name":xcdrawingD["name"], 
 							"prevnodepoints":[], 
 							"nextnodepoints":subdictarray(xcdrawingD["nodepoints"], remainingnodepoints), 
@@ -684,10 +691,21 @@ func sketchdicttochunks(sketchdatadict):
 			xcdatachunkL.push_back(SxcdrawingD)
 			Dnodepointstotal -= len(SxcdrawingD["nextnodepoints"])
 			assert (Dnodepointstotal == 0)
+			while len(SxcdrawingD["newonepathpairs"]) > 2000:
+				var keepnewonwpathpairs = SxcdrawingD["newonepathpairs"].slice(0, 1799)
+				var remainingnewonepathpairs = SxcdrawingD["newonepathpairs"].slice(len(keepnewonwpathpairs), len(SxcdrawingD["newonepathpairs"]))
+				SxcdrawingD["newonepathpairs"] = keepnewonwpathpairs
+				xcdatachunkL = [ { "caveworldchunk":len(xcdatachunks) } ]
+				SxcdrawingD = { "name":xcdrawingD["name"], 
+								"prevonepathpairs":[],
+								"newonepathpairs":remainingnewonepathpairs }
+				xcdatachunks.push_back(xcdatachunkL)
 			nnodesL = 400
+				
 		else:
 			xcdatachunkL.push_back(xcdrawingD)
 			nnodesL += len(xcdrawingD["nodepoints"])
+			
 		for i in xcdrawingnamemapItubes.get(xcdrawingD["name"], []):
 			var xctubeD = xctubesDmaphalfstaged.get(i)
 			if xctubeD != null:

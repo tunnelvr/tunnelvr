@@ -13,6 +13,11 @@ func D_run():
 
 
 func _run():
-	var x = {1:3, "a":2}
-	for l in x:
-		print(l)
+	var ffindexecutingfeaturespy = "res://surveyscans/find_executingfeatures.py"
+	var arguments = PoolStringArray([
+			ProjectSettings.globalize_path(ffindexecutingfeaturespy) ])
+	print("python ", arguments)
+	var output = [ ]
+	var ffindexecutingfeaturespy_status = OS.execute("python", arguments, true, output)
+	print(ffindexecutingfeaturespy_status, output[0].split(" "))
+	print(OS.get_name())

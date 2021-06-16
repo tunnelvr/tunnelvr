@@ -165,15 +165,16 @@ const flattenerexecutingplatforms = {
 	"nixosserver":"unknown"
 }
 
-func executingfeaturesavailable():
-	var res = [ ]
-	var osuniqueid = OS.get_unique_id()
-	if flattenerexecutingplatforms.values().has(osuniqueid):
-		 res.append("finemeshpolygon")
-		 res.append("meshflattener")
-		 res.append("parse3ddmp_centreline")
-	return res
-
+func find_executingfeaturesavailable():
+	var playerplatform = get_node("/root/Spatial").playerMe.playerplatform
+	if playerplatform == "PC" or playerplatform == "Server":
+		var ffindexecutingfeaturespy = "res://surveyscans/find_executingfeatures.py"
+		var arguments = PoolStringArray([ProjectSettings.globalize_path(ffindexecutingfeaturespy) ])
+		var output = [ ]
+		var ffindexecutingfeaturespy_status = OS.execute("python", arguments, true, output)
+		if ffindexecutingfeaturespy_status == 0 and len(output) == 1:
+			return Array(output[0].split(" "))
+	return [ ]
 
 
 
@@ -198,7 +199,8 @@ func executingfeaturesavailable():
 func _input(event):
 	if event is InputEventKey and event.pressed:
 		if event.scancode == KEY_8:
-			parse3ddmpcentreline_networked("http://cave-registry.org.uk/svn/NorthernEngland/Ingleborough/survexdata/JeanPot/JeanPot.3d")
+			parse3ddmpcentreline_networked("http://cave-registry.org.uk/svn/NorthernEngland/PeakDistrict/LoneOak/Skydusky.3d")
+			#parse3ddmpcentreline_networked("http://cave-registry.org.uk/svn/NorthernEngland/Ingleborough/survexdata/JeanPot/JeanPot.3d")
 
 func parse3ddmpcentreline_networked(f3durl):
 	var playerwithexecutefeatures = null
@@ -263,15 +265,20 @@ func parse3ddmpcentreline_execute(f3dfile, f3durl):
 		return
 	parse3ddmpcentrelinepid = -1
 
-	var xcdatalist = Centrelinedata.xcdatalistfromcentreline(jcentreline)
-	if xcdatalist == null:
+	var sketchdatadict = Centrelinedata.sketchdatadictlistfromcentreline(jcentreline)
+	if sketchdatadict == null:
 		return
-	#xcdatalist[0]["sketchname"] = f3durl.split("/")[-1].split(".")[0]
-	xcdatalist[0]["xcresource"] = f3durl
 
-	Tglobal.printxcdrawingfromdatamessages = false
 	var sketchsystem = get_node("/root/Spatial/SketchSystem")
-	sketchsystem.actsketchchange(xcdatalist)
-	Tglobal.printxcdrawingfromdatamessages = true
+	#xcdatalist[0]["sketchname"] = f3durl.split("/")[-1].split(".")[0]
+	sketchdatadict["xcdrawings"][0]["xcresource"] = f3durl
+	sketchdatadict["sketchname"] = "importing_the_centreline__do_not_clear"
+	var xcdatachunks = sketchsystem.sketchdicttochunks(sketchdatadict)
+	print("Centreline split into ", len(xcdatachunks), " chunks")
+	for xcdatachunk in xcdatachunks:
+		yield(get_tree().create_timer(0.2), "timeout")
+		sketchsystem.actsketchchange(xcdatachunk)
+
+	#sketchsystem.rpc_id(id, "actsketchchangeL", [{"planview":$PlanViewSystem.planviewtodict()}]) 
 
 

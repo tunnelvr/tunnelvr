@@ -9,7 +9,7 @@ class_name Centrelinedata
 const makecentrelrudsplays = true
 const makecentrelinehextubes = true
 
-static func xcdatalistfromcentreline(centrelinefile):
+static func sketchdatadictlistfromcentreline(centrelinefile):
 	print("Opening centreline file ", centrelinefile)
 	var centrelinedatafile = File.new()
 	centrelinedatafile.open(centrelinefile, File.READ)
@@ -113,23 +113,23 @@ static func xcdatalistfromcentreline(centrelinefile):
 	var xcdrawingcentreline = { "name":"centreline2", 
 								"xcresource":"centrelinedata", 
 								"drawingtype":DRAWING_TYPE.DT_CENTRELINE, 
+								"drawingvisiblecode":DRAWING_TYPE.VIZ_XCD_HIDE,
 								"transformpos":Transform(), 
-								"prevnodepoints":{ },
-								"nextnodepoints":stationnodepoints,
-								"prevonepathpairs":[ ],
-								"newonepathpairs":centrelinelegs, 
+								"nodepoints":stationnodepoints,
+								"onepathpairs":centrelinelegs, 
 								"additionalproperties":additionalproperties
 							  }
-	var xcdrawinglist = [ xcdrawingcentreline ]
+	var xcdrawings = [ xcdrawingcentreline ]
 	#var xcvizstates = { xcdrawingcentreline["name"]:DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE }
-	var xcvizstates = { xcdrawingcentreline["name"]:DRAWING_TYPE.VIZ_XCD_HIDE }
-	var updatetubeshells = [ ]
+	#var xcvizstates = { xcdrawingcentreline["name"]:DRAWING_TYPE.VIZ_XCD_HIDE }
+	#var updatetubeshells = [ ]
 
-				
+	var xctubes = [ ]
 	if makecentrelinehextubes:
 		var xsectgps = centrelinedata.xsectgps
 		var hexonepathpairs = [ "hl","hu", "hu","hv", "hv","hr", "hr","he", "he","hd", "hd","hl"]
-		var hextubepairs = ["hl", "hl", "mediumrock", null,  "hr", "hr", "partialrock", null]
+		var hextubepairs = ["hl", "hl",  "hr", "hr" ]
+		var xcsectormaterials = [ "mediumrock", "partialrock" ]
 		for j in range(len(xsectgps)):
 			var xsectgp = xsectgps[j]
 			var xsectindexes = xsectgp.xsectindexes
@@ -155,28 +155,27 @@ static func xcdatalistfromcentreline(centrelinefile):
 				var xcdata = { "name":sname, 
 							   "xcresource":"station_"+sname, 
 							   "drawingtype":DRAWING_TYPE.DT_XCDRAWING, 
+							   "drawingvisiblecode":DRAWING_TYPE.VIZ_XCD_HIDE,
 							   "transformpos":Transform(Basis().rotated(Vector3(0,-1,0), ang), p), 
-							   "prevnodepoints":{ },
-							   "nextnodepoints":hexnodepoints,
-							   "prevonepathpairs":[ ],
-							   "newonepathpairs":hexonepathpairs.duplicate(),
+							   "nodepoints":hexnodepoints,
+							   "onepathpairs":hexonepathpairs.duplicate()
 							 }
-				xcdrawinglist.push_back(xcdata)
-				xcvizstates[sname] = DRAWING_TYPE.VIZ_XCD_HIDE
+				xcdrawings.push_back(xcdata)
+				#xcvizstates[sname] = DRAWING_TYPE.VIZ_XCD_HIDE
 
 				if prevsname != null:
 					var xctdata = { "tubename":"**notset", 
 									"xcname0":prevsname, 
 									"xcname1":sname,
-									"prevdrawinglinks":[ ],
-									"newdrawinglinks":hextubepairs.duplicate()
+									"xcdrawinglink":hextubepairs.duplicate(),
+									"xcsectormaterials":xcsectormaterials.duplicate()
 								  }
-					xcdrawinglist.push_back(xctdata)
-					updatetubeshells.push_back({ "tubename":xctdata["tubename"], "xcname0":xctdata["xcname0"], "xcname1":xctdata["xcname1"] })
+					xctubes.push_back(xctdata)
+					#updatetubeshells.push_back({ "tubename":xctdata["tubename"], "xcname0":xctdata["xcname0"], "xcname1":xctdata["xcname1"] })
 				prevsname = sname
 
-	xcdrawinglist.push_back({ "xcvizstates":xcvizstates, "updatetubeshells":updatetubeshells })
-	return xcdrawinglist
+	#xcdrawinglist.push_back({ "xcvizstates":xcvizstates, "updatetubeshells":updatetubeshells })
+	return { "xcdrawings":xcdrawings, "xctubes":xctubes }
 	
 
 static func xcdatalistfromwingdata(wingdeffile):

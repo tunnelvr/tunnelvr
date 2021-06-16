@@ -72,6 +72,7 @@ func ovrconfig():
 func _ready():
 	print("  Available Interfaces are %s: " % str(ARVRServer.get_interfaces()));
 	print("Initializing VR" if enablevr else "VR disabled");
+	playerMe.playeroperatingsystem = OS.get_name()
 
 	if OS.has_feature("Server"):
 		print("On server mode, autostart server connection")

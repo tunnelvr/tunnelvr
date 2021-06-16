@@ -3,6 +3,7 @@ extends Spatial
 var networkID = 0
 var playerplatform = ""
 var playertunnelvrversion = ""
+var playeroperatingsystem = ""
 var executingfeaturesavailable = [ ]
 
 var puppetpositionstack = [ ]         # [ { "timestamp", "Ltimestamp", "playertransform", "headcamtransform" } ] 
@@ -14,6 +15,14 @@ remote func initplayerappearanceJ(playerappearance):
 	var headcolour = playerappearance.get("playerheadcolour", Color.white)
 	playertunnelvrversion = playerappearance.get("tunnelvrversion", "unknown")
 	executingfeaturesavailable = playerappearance.get("executingfeaturesavailable", [ ])
+	playeroperatingsystem = playerappearance.get("playeroperatingsystem", "unknown")
+	if playerplatform == "Server":
+		if playeroperatingsystem == "unknown" and len(executingfeaturesavailable) == 0:
+			executingfeaturesavailable.append("parse3ddmp_centreline")
+			print("Appending parse3ddmp_centreline to server executingfeatures")
+		else:
+			print("** no longer need to append parse3ddmp_centreline to server executingfeatures")
+
 	puppetsetheadtorchlight(playerappearance.get("torchon", false))
 	var guardianpoly = playerappearance.get("guardianpoly", null)
 	if guardianpoly != null:
