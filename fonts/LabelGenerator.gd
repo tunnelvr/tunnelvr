@@ -2,7 +2,8 @@ extends Spatial
 
 const monospacefontcharwidth = 10
 const monospacefontcharheight = 21
-const maxlabelstorenderperimage = 20
+const maxlabelstorenderperimage = 40
+const insanelylargelabelslimit = 2000
 
 var remainingxcnodenames = [ ]  # [ (centrelinedrawingname, nodename, label, position) ]
 var remainingropelabels = [ ]   # [ (ropexcname, ropenodename, ropelabel) ]
@@ -36,6 +37,7 @@ func addnodestolabeltask(centrelinedrawing):
 	var commonroot = ""
 	if centrelinedrawing.additionalproperties != null:
 		commonroot = centrelinedrawing.additionalproperties.get("stationnamecommonroot", "")
+	
 	for xcname in centrelinedrawing.nodepoints:
 		if Tglobal.splaystationnoderegex == null or not Tglobal.splaystationnoderegex.search(xcname):
 			var lnodelabel = xcname
@@ -43,6 +45,9 @@ func addnodestolabeltask(centrelinedrawing):
 				lnodelabel = lnodelabel.right(len(commonroot))
 			lnodelabel = lnodelabel.replace(",", ".")
 			remainingxcnodenames.push_back([centrelinedrawing.get_name(), xcname, lnodelabel, centrelinedrawing.transform*centrelinedrawing.nodepoints[xcname]])
+			if len(remainingxcnodenames) > insanelylargelabelslimit:
+				print("Insanely many centreline node labels, quitting adding with ", len(centrelinedrawing.nodepoints), " remaining.")
+				break
 	sortdfunctorigin = get_node("/root/Spatial").playerMe.get_node("HeadCam").global_transform.origin
 
 	

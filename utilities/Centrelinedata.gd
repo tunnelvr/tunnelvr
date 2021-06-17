@@ -138,7 +138,7 @@ static func sketchdatadictlistfromcentreline(centrelinefile):
 
 			var prevsname = null
 			for i in range(len(xsectindexes)):
-				var sname = stationpointsnames[xsectindexes[i]]+"s"+String(j)
+				var sname = stationpointsnames[xsectindexes[i]]+"t"+String(i)+"s"+String(j)
 				var hexnodepoints = { }
 				var xl = max(0.1, xsectlruds[i*4+0])
 				var xr = max(0.1, xsectlruds[i*4+1])

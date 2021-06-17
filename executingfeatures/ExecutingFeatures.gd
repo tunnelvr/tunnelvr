@@ -203,6 +203,11 @@ func _input(event):
 			#parse3ddmpcentreline_networked("http://cave-registry.org.uk/svn/NorthernEngland/Ingleborough/survexdata/JeanPot/JeanPot.3d")
 
 func parse3ddmpcentreline_networked(f3durl):
+	var sketchsystem = get_node("/root/Spatial/SketchSystem")
+	if sketchsystem.caveworldchunkI != -1 or parse3ddmpcentrelinepid != -1:
+		print("Cannot start centreline processing when already caveworld chunking")
+		return
+
 	var playerwithexecutefeatures = null
 	for player in get_node("/root/Spatial/Players").get_children():
 		if player.executingfeaturesavailable.has("parse3ddmp_centreline"):

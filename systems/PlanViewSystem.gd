@@ -376,6 +376,7 @@ func actplanviewdict(pvchange):
 		get_node("RealPlanCamera/LaserScope/LaserOrient/RayCast").collision_mask = plancameraraycollisionmask
 			
 	if "realtubesvisible" in pvchange and Tglobal.hidecavewallstoseefloors != (not pvchange["realtubesvisible"]):
+		planviewcontrols.get_node("CheckBoxRealTubesVisible").pressed = pvchange["realtubesvisible"]
 		Tglobal.hidecavewallstoseefloors = (not pvchange["realtubesvisible"])
 		if Tglobal.hidecavewallstoseefloors:
 			for xcdrawing in sketchsystem.get_node("XCdrawings").get_children():

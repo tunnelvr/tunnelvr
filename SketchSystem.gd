@@ -285,7 +285,7 @@ remote func actsketchchangeL(xcdatalist):
 				var xcdrawing0 = get_node("XCdrawings").get_node(xcdata["xcname0"])
 				var xcdrawing1 = get_node("XCdrawings").get_node(xcdata["xcname1"])
 				if xcdrawing0 == null or xcdrawing1 == null:
-					print("bad tube ")
+					print("bad tube  ", (xcdata["xcname0"] if xcdrawing0 == null else ""), " ", (xcdata["xcname1"] if xcdrawing1 == null else ""))
 					continue
 				xcdata["m0"] = 1 if xcdrawing1.drawingtype == DRAWING_TYPE.DT_CENTRELINE else 0
 				if xcdata["m0"] == 0:
@@ -631,6 +631,7 @@ func sketchdicttochunks(sketchdatadict):
 		playeroriginXCSorter = sketchdatadict["playerMe"]["headtrans"].origin
 	var xcdrawingsD = sketchdatadict["xcdrawings"]
 	xcdrawingsD.sort_custom(self, "xcsorterfunc")
+
 	var xctubesarrayD = sketchdatadict["xctubes"]
 	var xcdrawingnamemapItubes = { }
 	for i in range(len(xctubesarrayD)):
@@ -644,13 +645,14 @@ func sketchdicttochunks(sketchdatadict):
 			if not ("xcsectormaterials" in xctubeD):
 				print("Bad tube in array at ", i, " of ", len(xctubesarrayD))
 				continue
-			
+
 		if not (xctubeD.xcname0 in xcdrawingnamemapItubes):
 			xcdrawingnamemapItubes[xctubeD.xcname0] = [ ]
 		xcdrawingnamemapItubes[xctubeD.xcname0].push_back(i)
 		if not (xctubeD.xcname1 in xcdrawingnamemapItubes):
 			xcdrawingnamemapItubes[xctubeD.xcname1] = [ ]
 		xcdrawingnamemapItubes[xctubeD.xcname1].push_back(i)
+
 
 	var xcdatachunks = [ xcdatachunkL ]
 	var nnodesL = 0
@@ -699,6 +701,7 @@ func sketchdicttochunks(sketchdatadict):
 				SxcdrawingD = { "name":xcdrawingD["name"], 
 								"prevonepathpairs":[],
 								"newonepathpairs":remainingnewonepathpairs }
+				xcdatachunkL.push_back(SxcdrawingD)
 				xcdatachunks.push_back(xcdatachunkL)
 			nnodesL = 400
 				
@@ -712,6 +715,7 @@ func sketchdicttochunks(sketchdatadict):
 				if "name" in xctubeD:
 					xctubeD["tubename"] = xctubeD["name"]
 					xctubeD.erase("name")
+
 				xcdatachunkL.push_back(xctubeD)
 				xctubesDmaphalfstaged.erase(i)
 			if xctubesarrayD[i] != null:
