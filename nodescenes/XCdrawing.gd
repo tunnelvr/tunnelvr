@@ -244,8 +244,8 @@ func setdrawingvisiblecode(ldrawingvisiblecode):
 			setxcdrawingvisiblehideL(true)
 			if planviewsystem.activetargetfloor == self:
 				planviewsystem.activetargetfloor = null
-				planviewsystem.planviewcontrols.get_node("ColorRect").visible = false
-				planviewsystem.planviewcontrols.get_node("ColorRect/LabelXCresource").text = ""
+				planviewsystem.planviewcontrols.get_node("ColorRectURL").visible = false
+				planviewsystem.planviewcontrols.get_node("ColorRectURL/LabelXCresource").text = ""
 			$XCdrawingplane.visible = false
 			$XCdrawingplane/CollisionShape.disabled = true
 
@@ -267,8 +267,8 @@ func setdrawingvisiblecode(ldrawingvisiblecode):
 					floorstyleid = DRAWING_TYPE.FS_GHOSTLY
 					
 				planviewsystem.planviewcontrols.get_node("FloorMove/FloorStyle").selected = floorstyleid
-				planviewsystem.planviewcontrols.get_node("ColorRect/LabelXCresource").text = xcresource.replace("%20", " ")
-				planviewsystem.planviewcontrols.get_node("ColorRect").visible = true
+				planviewsystem.planviewcontrols.get_node("ColorRectURL/LabelXCresource").text = xcresource.replace("%20", " ")
+				planviewsystem.planviewcontrols.get_node("ColorRectURL").visible = true
 				if (drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE_B) != 0:
 					matname = "xcdrawingmaterials/floorborderedactive"
 				elif (drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_GHOSTLY_B) != 0:
@@ -278,8 +278,8 @@ func setdrawingvisiblecode(ldrawingvisiblecode):
 			else:
 				if planviewsystem.activetargetfloor == self:
 					planviewsystem.activetargetfloor = null
-					planviewsystem.planviewcontrols.get_node("ColorRect").visible = false
-					planviewsystem.planviewcontrols.get_node("ColorRect/LabelXCresource").text = ""
+					planviewsystem.planviewcontrols.get_node("ColorRectURL").visible = false
+					planviewsystem.planviewcontrols.get_node("ColorRectURL/LabelXCresource").text = ""
 				if (drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE_B) != 0:
 					matname = "xcdrawingmaterials/floorborderedunshaded"
 				elif (drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_GHOSTLY_B) != 0:

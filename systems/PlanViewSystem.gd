@@ -330,7 +330,8 @@ func actplanviewdict(pvchange):
 			get_node("/root/Spatial/LabelGenerator").restartlabelmakingprocess(playerMe.get_node("HeadCam").global_transform.origin)
 			get_node("/root/Spatial/WorldEnvironment/DirectionalLight").visible = true
 		else:
-			get_node("PlanView/CollisionShape").disabled = true
+			$PlanView/CollisionShape.disabled = true
+			$PlanView/Viewport/PlanGUI/PlanViewControls/ColorRectURL.visible = false
 			get_node("/root/Spatial/WorldEnvironment/DirectionalLight").visible = not get_node("/root/Spatial/GuiSystem/GUIPanel3D/Viewport/GUI/Panel/ButtonHeadtorch").pressed
 	var guipanel3d = get_node("/root/Spatial/GuiSystem/GUIPanel3D")
 	guipanel3d.get_node("Viewport/GUI/Panel/ButtonPlanView").pressed = visible
@@ -506,14 +507,11 @@ func _process(delta):
 								 0.5*(-1 if floormove.get_node("ButtonMoveFall").is_pressed() else 0) + (1 if floormove.get_node("ButtonMoveRise").is_pressed() else 0),
 								 (1 if floormove.get_node("ButtonMoveDown").is_pressed() else 0) + (-1 if floormove.get_node("ButtonMoveUp").is_pressed() else 0))
 		var joygrow = (-1 if floormove.get_node("ButtonShrink").is_pressed() else 0) + (1 if floormove.get_node("ButtonGrow").is_pressed() else 0)
-		var joyrot = Vector2((-1 if floormove.get_node("ButtonRotR").is_pressed() else 0) + (1 if floormove.get_node("ButtonRotL").is_pressed() else 0), 
-							 (-1 if floormove.get_node("ButtonTiltFore").is_pressed() else 0) + (1 if floormove.get_node("ButtonTiltBack").is_pressed() else 0))
 		if len(activetargetfloor.nodepoints) != 0:
 			joyposmove.x = 0
 			joyposmove.z = 0
 			joygrow = 0
-			joyrot = Vector2(0, 0)
-		if joypostrimld != Vector2(0,0) or joypostrimru != Vector2(0,0) or joyposmove != Vector3(0,0,0) or joygrow != 0 or joyrot != Vector2(0, 0):
+		if joypostrimld != Vector2(0,0) or joypostrimru != Vector2(0,0) or joyposmove != Vector3(0,0,0) or joygrow != 0:
 			if "name" in lastoptionaltxcdata and lastoptionaltxcdata["name"] != activetargetfloor.get_name():
 				sketchsystem.actsketchchange([lastoptionaltxcdata])
 				lastoptionaltxcdata.clear()
@@ -526,12 +524,9 @@ func _process(delta):
 			var d = activetargetfloor
 			var drawingplane = d.get_node("XCdrawingplane")
 			var sfac = delta*8
-			if joyposmove != Vector3(0,0,0) or joyrot != Vector2(0, 0):
+			if joyposmove != Vector3(0,0,0):
 				txcdata["prevtransformpos"] = d.transform
-				var tb = d.transform.basis
-				if joyrot != Vector2(0, 0):
-					tb = Basis(tb.get_euler() + Vector3(joyrot.y*delta, joyrot.x*delta, 0))
-				txcdata["transformpos"] = Transform(tb, d.transform.origin + Basis()*joyposmove*delta*8)
+				txcdata["transformpos"] = Transform(d.transform.basis, d.transform.origin + Basis()*joyposmove*delta*8)
 				lastoptionaltxcdata["prevtransformpos"] = txcdata["prevtransformpos"]
 				lastoptionaltxcdata["transformpos"] = txcdata["transformpos"]
 

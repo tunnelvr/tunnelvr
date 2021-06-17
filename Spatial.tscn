@@ -2789,46 +2789,6 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ButtonRotR" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorMove"]
-margin_left = 118.258
-margin_top = -3.97028
-margin_right = 164.258
-margin_bottom = 18.0298
-text = "RotR"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="ButtonRotL" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorMove"]
-margin_left = 117.52
-margin_top = 20.8591
-margin_right = 163.52
-margin_bottom = 42.8591
-text = "RotL"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="ButtonTiltFore" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorMove"]
-margin_left = 117.52
-margin_top = 44.7977
-margin_right = 163.52
-margin_bottom = 66.7977
-text = "TiltF"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="ButtonTiltBack" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorMove"]
-margin_left = 118.78
-margin_top = 63.6965
-margin_right = 164.78
-margin_bottom = 85.6965
-text = "TiltB"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
 [node name="FloorStyle" type="OptionButton" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorMove"]
 margin_left = 221.973
 margin_top = -5.11896
@@ -2943,7 +2903,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ColorRect" type="ColorRect" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
+[node name="ColorRectURL" type="ColorRect" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
 visible = false
 margin_left = 473.0
 margin_top = 30.0
@@ -2954,7 +2914,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="LabelXCresource" type="Label" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ColorRect"]
+[node name="LabelXCresource" type="Label" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ColorRectURL"]
 margin_left = -1.0
 margin_top = -1.0
 margin_right = 304.0

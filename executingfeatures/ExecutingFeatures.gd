@@ -199,8 +199,8 @@ func find_executingfeaturesavailable():
 func _input(event):
 	if event is InputEventKey and event.pressed:
 		if event.scancode == KEY_8:
-			parse3ddmpcentreline_networked("http://cave-registry.org.uk/svn/NorthernEngland/PeakDistrict/LoneOak/Skydusky.3d")
-			#parse3ddmpcentreline_networked("http://cave-registry.org.uk/svn/NorthernEngland/Ingleborough/survexdata/JeanPot/JeanPot.3d")
+			#parse3ddmpcentreline_networked("http://cave-registry.org.uk/svn/NorthernEngland/PeakDistrict/LoneOak/Skydusky.3d")
+			parse3ddmpcentreline_networked("http://cave-registry.org.uk/svn/NorthernEngland/Ingleborough/survexdata/JeanPot/JeanPot.3d")
 
 func parse3ddmpcentreline_networked(f3durl):
 	var sketchsystem = get_node("/root/Spatial/SketchSystem")
