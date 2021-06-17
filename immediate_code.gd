@@ -13,11 +13,10 @@ func D_run():
 
 
 func _run():
-	var ffindexecutingfeaturespy = "res://surveyscans/find_executingfeatures.py"
-	var arguments = PoolStringArray([
-			ProjectSettings.globalize_path(ffindexecutingfeaturespy) ])
-	print("python ", arguments)
-	var output = [ ]
-	var ffindexecutingfeaturespy_status = OS.execute("python", arguments, true, output)
-	print(ffindexecutingfeaturespy_status, output[0].split(" "))
-	print(OS.get_name())
+	var g = "res://surveyscans/find_executingfeatures.py"
+	var fg = g.rsplit("/")[-1]
+	var dd = Directory.new()
+	var d = "user://executingfeatures/"+fg
+	print(ProjectSettings.globalize_path(d))
+	var e = dd.copy(g, d)
+	print(e)

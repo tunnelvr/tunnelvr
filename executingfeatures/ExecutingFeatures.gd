@@ -160,9 +160,11 @@ remote func finemeshpolygon_execute(polypoints, trilineleng, xcdrawingname):
 
 func find_executingfeaturesavailable():
 	var playerplatform = get_node("/root/Spatial").playerMe.playerplatform
+	#print("force to not have executing features here")
+	#return [ ]
 	if playerplatform == "PC" or playerplatform == "Server":
-		var ffindexecutingfeaturespy = "res://surveyscans/find_executingfeatures.py"
-		var arguments = PoolStringArray([ProjectSettings.globalize_path(ffindexecutingfeaturespy) ])
+		var ffindexecutingfeaturespy = copytouserfilesystem("res://surveyscans/find_executingfeatures.py")
+		var arguments = PoolStringArray([ffindexecutingfeaturespy])
 		var output = [ ]
 		# this is where parse3ddmp_centreline gets added
 		var ffindexecutingfeaturespy_status = OS.execute("python", arguments, true, output)
@@ -187,7 +189,18 @@ func find_executingfeaturesavailable():
 
 
 
-
+func copytouserfilesystem(f):
+	var dir = Directory.new()
+	if not dir.dir_exists("user://executingfeatures"):
+		dir.make_dir("user://executingfeatures")
+	var fname = f.rsplit("/")[-1]
+	var dest = "user://executingfeatures/"+fname
+	if true or not dir.file_exists(dest):
+		print("Copying out our py file ", fname)
+		var e = dir.copy(f, dest)
+		if e != 0:
+			print("copytousrfilesystem ERROR ", e)
+	return ProjectSettings.globalize_path(dest)
 
 
 func _input(event):
@@ -207,14 +220,16 @@ func parse3ddmpcentreline_networked(f3durl):
 		if player.executingfeaturesavailable.has("parse3ddmp_centreline"):
 			playerwithexecutefeatures = player
 			break
+			
 	if playerwithexecutefeatures == null:
 		print("no player able to execute parse3ddmp_centreline")
 		return
 	elif playerwithexecutefeatures.networkID == get_node("/root/Spatial").playerMe.networkID:
+		print("locally calling parse3ddmpcentreline_execute")
 		call_deferred("fetch3dcentreline_execute", f3durl)
 	else:
+		print("rpc on parse3ddmpcentreline_execute networkdid=", playerwithexecutefeatures.networkID)
 		rpc_id(playerwithexecutefeatures.networkID, "fetch3dcentreline_execute", f3durl)
-		print("rpc on parse3ddmpcentreline_execute")
 		
 remote func fetch3dcentreline_execute(f3durl):
 	var ImageSystem = get_node("/root/Spatial/ImageSystem")
@@ -239,9 +254,9 @@ func parse3ddmpcentreline_execute(f3dfile, f3durl):
 	if fout.file_exists(jcentreline):
 		dir.remove(jcentreline)
 	
-	var fparse3ddmppy = "res://surveyscans/parse3ddmp.py"
+	var fparse3ddmppy = copytouserfilesystem("res://surveyscans/parse3ddmp.py")
 	var arguments = PoolStringArray([
-			ProjectSettings.globalize_path(fparse3ddmppy), 
+			fparse3ddmppy, 
 			"--3d="+ProjectSettings.globalize_path(f3dfile), 
 			"--js="+ProjectSettings.globalize_path(jcentreline), 
 			"--tunnelvr"])
