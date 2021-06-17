@@ -158,19 +158,13 @@ remote func finemeshpolygon_execute(polypoints, trilineleng, xcdrawingname):
 	pymeshpid = -1
 
 
-
-
-const flattenerexecutingplatforms = {
-	"julianlinuxlaptop":"6e6e2e697912445d86bb1b5b93996cfe",
-	"nixosserver":"unknown"
-}
-
 func find_executingfeaturesavailable():
 	var playerplatform = get_node("/root/Spatial").playerMe.playerplatform
 	if playerplatform == "PC" or playerplatform == "Server":
 		var ffindexecutingfeaturespy = "res://surveyscans/find_executingfeatures.py"
 		var arguments = PoolStringArray([ProjectSettings.globalize_path(ffindexecutingfeaturespy) ])
 		var output = [ ]
+		# this is where parse3ddmp_centreline gets added
 		var ffindexecutingfeaturespy_status = OS.execute("python", arguments, true, output)
 		if ffindexecutingfeaturespy_status == 0 and len(output) == 1:
 			return Array(output[0].split(" "))
@@ -287,3 +281,5 @@ func parse3ddmpcentreline_execute(f3dfile, f3durl):
 	#sketchsystem.rpc_id(id, "actsketchchangeL", [{"planview":$PlanViewSystem.planviewtodict()}]) 
 
 
+func _ready():
+	print("The PATH environment is: ", OS.get_environment("PATH"), "\n\n")

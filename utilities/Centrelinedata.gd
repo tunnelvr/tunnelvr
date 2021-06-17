@@ -7,7 +7,7 @@ class_name Centrelinedata
 # ssh godot@proxmox.dynamicdevices.co.uk -p 23
 
 const makecentrelrudsplays = true
-const makecentrelinehextubes = true
+const makecentrelinehextubes = false
 
 static func sketchdatadictlistfromcentreline(centrelinefile):
 	print("Opening centreline file ", centrelinefile)

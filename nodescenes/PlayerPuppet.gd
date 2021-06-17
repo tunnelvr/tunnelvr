@@ -19,7 +19,7 @@ remote func initplayerappearanceJ(playerappearance):
 	if playerplatform == "Server":
 		if playeroperatingsystem == "unknown" and len(executingfeaturesavailable) == 0:
 			executingfeaturesavailable.append("parse3ddmp_centreline")
-			print("Appending parse3ddmp_centreline to server executingfeatures")
+			print("Force appending parse3ddmp_centreline to server executingfeatures")
 		else:
 			print("** no longer need to append parse3ddmp_centreline to server executingfeatures")
 
