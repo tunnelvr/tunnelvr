@@ -605,10 +605,6 @@ func xcdrawingfromdata(xcdata, fromremotecall):
 	if xcdrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
 		if "xcresource" in xcdata and xcdrawing.drawingvisiblecode != DRAWING_TYPE.VIZ_XCD_FLOOR_HIDDEN and xcdrawing.drawingvisiblecode != DRAWING_TYPE.VIZ_XCD_FLOOR_DELETED:
 			get_node("/root/Spatial/ImageSystem").fetchpaperdrawing(xcdrawing)
-	if xcdrawing.drawingtype == DRAWING_TYPE.DT_CENTRELINE:
-		#assert (false)   # shouldn't happen, not to be updated!
-		var LabelGenerator = get_node("/root/Spatial/LabelGenerator")
-		LabelGenerator.addnodestolabeltask(xcdrawing)
 	return xcdrawing
 
 var playeroriginXCSorter = Vector3(0, 0, 0)
@@ -678,7 +674,8 @@ func sketchdicttochunks(sketchdatadict):
 			while len(remainingnodepoints) > 300:
 				SxcdrawingD = { "name":xcdrawingD["name"], 
 								"prevnodepoints":[], 
-								"nextnodepoints":subdictarray(xcdrawingD["nodepoints"], remainingnodepoints.slice(0, 300)) }
+								"nextnodepoints":subdictarray(xcdrawingD["nodepoints"], remainingnodepoints.slice(0, 300)), 
+								"partialxcchunk":"yes" }
 				xcdatachunkL.push_back(SxcdrawingD)
 				Dnodepointstotal -= len(SxcdrawingD["nextnodepoints"])
 				xcdatachunkL = [ { "caveworldchunk":len(xcdatachunks) } ]
@@ -696,7 +693,8 @@ func sketchdicttochunks(sketchdatadict):
 			while len(SxcdrawingD["newonepathpairs"]) > 2000:
 				var keepnewonwpathpairs = SxcdrawingD["newonepathpairs"].slice(0, 1799)
 				var remainingnewonepathpairs = SxcdrawingD["newonepathpairs"].slice(len(keepnewonwpathpairs), len(SxcdrawingD["newonepathpairs"]))
-				SxcdrawingD["newonepathpairs"] = keepnewonwpathpairs
+				SxcdrawingD["newonepathpairs"] = keepnewonwpathpairs  # changing member already in list
+				SxcdrawingD["partialxcchunk"] = "yes"
 				xcdatachunkL = [ { "caveworldchunk":len(xcdatachunks) } ]
 				SxcdrawingD = { "name":xcdrawingD["name"], 
 								"prevonepathpairs":[],

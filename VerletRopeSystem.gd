@@ -67,7 +67,7 @@ func setropenodelabel(ropehang, ropenodename, labelstring):
 	xcn.get_node("RopeLabel").visible = true
 	print(" labelstring ", labelstring)
 	labelgenerator.remainingropelabels.push_back([ropehang.get_parent().get_name(), ropenodename, labelstring])
-	labelgenerator.restartlabelmakingprocess()
+	labelgenerator.restartlabelmakingprocess(null)
 
 func addropehang(ropehang):
 	if len(ropehang.oddropeverts) == 2:

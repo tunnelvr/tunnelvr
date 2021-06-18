@@ -538,8 +538,17 @@ func mergexcrpcdata(xcdata):
 		additionalproperties = xcdata["additionalproperties"]
 		
 	if drawingtype == DRAWING_TYPE.DT_CENTRELINE:
-		updatexcpaths_centreline($PathLines, linewidth)
-	elif drawingtype != DRAWING_TYPE.DT_ROPEHANG:
+		if xcdata.get("partialxcchunk", "no") != "yes":
+			updatexcpaths_centreline($PathLines, linewidth)
+			var labelgenerator = get_node("/root/Spatial/LabelGenerator")
+			labelgenerator.addnodestolabeltask(self)
+			var playermeheadcam = get_node("/root/Spatial").playerMe.get_node("HeadCam")
+			labelgenerator.restartlabelmakingprocess(playermeheadcam.global_transform.origin)
+		
+	elif drawingtype == DRAWING_TYPE.DT_ROPEHANG:
+		if drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_HIDE:
+			updatexcpaths()
+	else:
 		updatexcpaths()
 
 
@@ -729,8 +738,6 @@ func resetclosewidthsca(lclosewidthsca):
 			var kscale = 0.5 if xcn.get_name()[0] == "a" else 1.0
 			xcn.scale = Vector3(closewidthsca, closewidthsca*kscale, closewidthsca)
 
-#func demotriangulation(psel):
-	
 
 func updatexcpaths():
 	var pathlines = $PathLines
