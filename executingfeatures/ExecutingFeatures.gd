@@ -207,7 +207,14 @@ func _input(event):
 	if event is InputEventKey and event.pressed:
 		if event.scancode == KEY_8:
 			#parse3ddmpcentreline_networked("http://cave-registry.org.uk/svn/NorthernEngland/PeakDistrict/LoneOak/Skydusky.3d")
-			parse3ddmpcentreline_networked("http://cave-registry.org.uk/svn/NorthernEngland/Ingleborough/survexdata/JeanPot/JeanPot.3d")
+			parse3ddmpcentreline_networked("http://cave-registry.org.uk/svn/NorthernEngland/Ingleborough/survexdata/SkirwithCave/skirwith-lower-entrance.3d")
+			#parse3ddmpcentreline_networked("http://cave-registry.org.uk/svn/NorthernEngland/Ingleborough/survexdata/JeanPot/JeanPot.3d")
+			var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
+			if not planviewsystem.planviewcontrols.get_node("CheckBoxCentrelinesVisible").pressed:
+				planviewsystem.planviewcontrols.get_node("CheckBoxCentrelinesVisible").pressed = true
+				planviewsystem.checkcentrelinesvisible_pressed()
+		if event.scancode == KEY_9:
+			parse3ddmpcentreline_networked("http://cave-registry.org.uk/svn/NorthernEngland/Ingleborough/survexdata/SkirwithCave/skirwith-lower-entrance_deflected.3d")
 			var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
 			if not planviewsystem.planviewcontrols.get_node("CheckBoxCentrelinesVisible").pressed:
 				planviewsystem.planviewcontrols.get_node("CheckBoxCentrelinesVisible").pressed = true
@@ -285,9 +292,14 @@ func parse3ddmpcentreline_execute(f3dfile, f3durl):
 		return
 	parse3ddmpcentrelinepid = -1
 
+	var maxcentrelinenumber = 0
+	for xcdrawingcentreline in get_tree().get_nodes_in_group("gpcentrelinegeo"):
+		maxcentrelinenumber = max(maxcentrelinenumber, int(xcdrawingcentreline.get_name()))
 	var sketchdatadict = Centrelinedata.sketchdatadictlistfromcentreline(jcentreline)
 	if sketchdatadict == null:
 		return
+	sketchdatadict["xcdrawings"][0]["name"] = "centreline%d" % (maxcentrelinenumber+1)
+	sketchdatadict["xcdrawings"][0]["transformpos"] = Transform(Basis(), Vector3(0, (maxcentrelinenumber+1)*2, 0))
 
 	var sketchsystem = get_node("/root/Spatial/SketchSystem")
 	#xcdatalist[0]["sketchname"] = f3durl.split("/")[-1].split(".")[0]

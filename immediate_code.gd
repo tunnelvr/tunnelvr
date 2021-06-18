@@ -13,10 +13,4 @@ func D_run():
 
 
 func _run():
-	var g = "res://surveyscans/find_executingfeatures.py"
-	var fg = g.rsplit("/")[-1]
-	var dd = Directory.new()
-	var d = "user://executingfeatures/"+fg
-	print(ProjectSettings.globalize_path(d))
-	var e = dd.copy(g, d)
-	print(e)
+	print(int("sdfsd99"))

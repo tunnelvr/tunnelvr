@@ -266,7 +266,8 @@ remote func actsketchchangeL(xcdatalist):
 
 	if "sketchname" in xcdatalist[0]:
 		sketchname = xcdatalist[0]["sketchname"]
-		get_node("/root/Spatial/GuiSystem/GUIPanel3D").setsavegamefilename(sketchname)
+		if sketchname != "importing_the_centreline__do_not_clear":
+			get_node("/root/Spatial/GuiSystem/GUIPanel3D").setsavegamefilename(sketchname)
 		
 	var xcdrawingstoupdate = { }
 	var xcdrawingstoupdatevisiblecodes = { }
