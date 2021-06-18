@@ -167,8 +167,8 @@ func setdrawingvisiblecode(ldrawingvisiblecode):
 		setxcdrawingvisiblehideL(true)
 
 	elif drawingtype == DRAWING_TYPE.DT_ROPEHANG:
-		var hidenodeshang = ((drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE) == 0)
-		if hidenodeshang and len(onepathpairs) != 0:
+		var hidenodeshang = ((drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE) == 0) and (len(onepathpairs) != 0)
+		if hidenodeshang:
 			var ropeseqs = Polynets.makeropenodesequences(nodepoints, onepathpairs, $RopeHang.oddropeverts)
 			var cuboidfacs = Polynets.cuboidfromropenodesequences(nodepoints, ropeseqs)
 			var stalseqax = Polynets.stalfromropenodesequences(nodepoints, ropeseqs) if cuboidfacs == null else null
@@ -203,9 +203,10 @@ func setdrawingvisiblecode(ldrawingvisiblecode):
 				get_node("/root/Spatial/VerletRopeSystem").addropehang($RopeHang)
 
 			else:
-				print("not a rope or stal")
+				print("Not an identified rope shape type, unhiding nodeshang")
+				hidenodeshang = false
 
-		else:
+		if not hidenodeshang:
 			for xcn in $XCnodes.get_children():
 				xcn.transform.origin = nodepoints[xcn.get_name()]
 			updatelinearropepaths()
@@ -545,10 +546,7 @@ func mergexcrpcdata(xcdata):
 			var playermeheadcam = get_node("/root/Spatial").playerMe.get_node("HeadCam")
 			labelgenerator.restartlabelmakingprocess(playermeheadcam.global_transform.origin)
 		
-	elif drawingtype == DRAWING_TYPE.DT_ROPEHANG:
-		if drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_HIDE:
-			updatexcpaths()
-	else:
+	elif drawingtype != DRAWING_TYPE.DT_ROPEHANG:
 		updatexcpaths()
 
 

@@ -50,6 +50,8 @@ func sketchsystemtodict(stripruntimedataforsaving):
 			print("Discarding empty xcdrawing on save ", xcdrawing.get_name())
 		elif xcdrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE and xcdrawing.drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_FLOOR_DELETED:
 			print("Discarding hidden floortexture on save ", xcdrawing.get_name())
+		elif xcdrawing.drawingtype == DRAWING_TYPE.DT_ROPEHANG and len(xcdrawing.nodepoints) == 0 and stripruntimedataforsaving:
+			print("Discarding empty ropehang on save ", xcdrawing.get_name())
 		else:
 			xcdrawingsData.append(xcdrawing.exportxcrpcdata(stripruntimedataforsaving))
 	var xctubesData = [ ]
