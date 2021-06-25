@@ -60,11 +60,11 @@
     "tunnelvr": {
       "flake": false,
       "locked": {
-        "lastModified": 1623075182,
-        "narHash": "sha256-u7uUU/co7YmWUeJkzrxs6UXkkr9THbx6EU3Mq1TcLLE=",
+        "lastModified": 1624032288,
+        "narHash": "sha256-ewJx4rLiG5EZzVusW7eVxtQx2EEpRvE2MQTN1ZIlixk=",
         "owner": "goatchurchprime",
         "repo": "tunnelvr",
-        "rev": "445fc835f45055c531b7b0980c1bd31de1932d9c",
+        "rev": "de5fc822d935ee2b39dd2cf412f6e21e08ef0b9b",
         "type": "github"
       },
       "original": {
