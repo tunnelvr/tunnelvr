@@ -70,6 +70,7 @@ func fetchbuttonpressed(item, column, idx):
 				idx = lidx
 				break
 	print("iii ", idx, " ", item, " ", item.get_text(0), " ", column, "  ")
+	Tglobal.soundsystem.quicksound("MenuClick", raycastcollisionpointC)
 	var url = item.get_tooltip(0)
 	if url == "**clear-cache**":
 		print("Clearing image and webpage caches")
@@ -114,7 +115,8 @@ func fetchbuttonpressed(item, column, idx):
 			planviewcontrols.get_node("CheckBoxCentrelinesVisible").pressed = true
 			checkcentrelinesvisible_pressed()
 		get_node("/root/Spatial/ExecutingFeatures").parse3ddmpcentreline_networked(url)
-		
+
+			
 	elif not buttonidxloaded.has(idx):
 		item.set_button_disabled(column, idx, true)
 		item.erase_button(column, idx)
@@ -580,12 +582,14 @@ func checkboxfiletree_toggled(button_pressed):
 
 var viewport_mousedown = false
 var viewport_point = Vector2(0,0)
+var raycastcollisionpointC = Vector3(0,0,0)
 func processplanviewpointing(raycastcollisionpoint, controller_trigger):
 	var planviewsystem = self
 	var plancamera = planviewsystem.get_node("PlanView/Viewport/PlanGUI/Camera")
 	var collider_transform = planviewsystem.get_node("PlanView").global_transform
 	var shape_size = planviewsystem.get_node("PlanView/CollisionShape").shape.extents * 2
 	var collider_scale = collider_transform.basis.get_scale()
+	raycastcollisionpointC = raycastcollisionpoint
 	var local_point = collider_transform.xform_inv(raycastcollisionpoint)
 	local_point /= (collider_scale * collider_scale)
 	local_point /= shape_size
