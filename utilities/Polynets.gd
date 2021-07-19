@@ -178,7 +178,7 @@ static func triangulatepolygon(poly):
 
 
 
-static func stalfromropenodesequences(nodepoints, ropeseqs):
+static func stalfromropenodesequences(nodepoints, ropeseqs):  # stalactites, stalagmites and columns
 	if len(ropeseqs) == 1:
 		var ropeseq = ropeseqs[0]
 		if ropeseq[0] == ropeseq[-1]:
@@ -213,7 +213,11 @@ static func stalfromropenodesequences(nodepoints, ropeseqs):
 		ropeseqs[0].invert()
 	if ropeseqs[1][-1][0] == "a":
 		ropeseqs[1].invert()
-	
+	if ropeseqs[1][0][0] != "a":
+		return null
+	if ropeseqs[0][0][0] != "a":
+		return null
+		
 	var stalseq = [ ]
 	for r in ropeseqs[0]:
 		stalseq.push_back(nodepoints[r])
@@ -228,6 +232,187 @@ static func stalfromropenodesequences(nodepoints, ropeseqs):
 	return [stalseq, ax1, vec, nohideaxisnodes]
 	
 	
+static func makestalshellmesh(revseq, p0, vec):
+	var Nsides = max(8, int(300/(len(revseq) + 10)))
+	var arraymesh = ArrayMesh.new()
+	var surfaceTool = SurfaceTool.new()
+	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var prevrevring = null
+	var prevringrad = 1
+	var v = 0
+	for j in range(len(revseq)):
+		var rp = revseq[j]
+		var lam = vec.dot(rp - p0)/vec.dot(vec)
+		var a = p0 + vec*lam
+		var rv = rp - a
+		var ringrad = rv.length()
+		var rvperp = rv.cross(vec.normalized())
+		var revring = [ ]
+		for i in range(Nsides):
+			var theta = deg2rad(i*360.0/Nsides)
+			var pt = a + cos(theta)*rv + sin(theta)*rvperp
+			var u = theta*(prevringrad + ringrad)*0.5
+			revring.push_back(pt)
+			revring.push_back(Vector2(u, v))
+		if prevrevring != null:
+			for i in range(Nsides):
+				var i1 = (i+1)%Nsides
+				surfaceTool.add_uv(prevrevring[i*2+1])
+				surfaceTool.add_uv2(prevrevring[i*2+1])
+				surfaceTool.add_vertex(prevrevring[i*2])
+				surfaceTool.add_uv(revring[i*2+1])
+				surfaceTool.add_uv2(revring[i*2+1])
+				surfaceTool.add_vertex(revring[i*2])
+				surfaceTool.add_uv(revring[i1*2+1])
+				surfaceTool.add_uv2(revring[i1*2+1])
+				surfaceTool.add_vertex(revring[i1*2])
+
+				surfaceTool.add_uv(prevrevring[i*2+1])
+				surfaceTool.add_uv2(prevrevring[i*2+1])
+				surfaceTool.add_vertex(prevrevring[i*2])
+				surfaceTool.add_uv(revring[i1*2+1])
+				surfaceTool.add_uv2(revring[i1*2+1])
+				surfaceTool.add_vertex(revring[i1*2])
+				surfaceTool.add_uv(prevrevring[i1*2+1])
+				surfaceTool.add_uv2(prevrevring[i1*2+1])
+				surfaceTool.add_vertex(prevrevring[i1*2])
+		prevrevring = revring
+		prevringrad = ringrad
+		v += vec.length()
+	surfaceTool.generate_normals()
+	surfaceTool.generate_tangents()
+	surfaceTool.commit(arraymesh)
+	return arraymesh
+
+
+static func signpostfromropenodesequences(nodepoints, ropeseqs):
+	if len(ropeseqs) <= 1:
+		return null
+	var signpostseqj = -1
+	for j in range(len(ropeseqs)):
+		var ropeseq = ropeseqs[j]
+		if ropeseq[0][0] == "a" or ropeseq[-1][0] == "a":
+			if len(ropeseq) != 2 or signpostseqj != -1:
+				return null
+			if ropeseq[-1][0] == "a":
+				if ropeseq[0][0] == "a":
+					return null
+				ropeseq.invert()
+			signpostseqj = j
+	if signpostseqj == -1:
+		return null
+
+	var signpostseq = ropeseqs[signpostseqj]
+	var vss = nodepoints[signpostseq[1]] - nodepoints[signpostseq[0]]
+	var vssa = rad2deg(Vector2(vss.y, Vector2(vss.x, vss.z).length()).angle())
+	var signdownwards = (vssa > 90)
+	if (180-vssa if signdownwards else vssa) > 45:
+		return null
+	
+	var ptsignroot = nodepoints[signpostseq[0]]
+	var ptsigntopy = nodepoints[signpostseq[1]].y
+	var flagpolys = [ ]
+	if len(ropeseqs) == 2:
+		var flagseq = ropeseqs[1-signpostseqj]
+		if len(flagseq) < 4:
+			return null
+		if flagseq[0] != flagseq[-1]:
+			return null
+		var vs0 = nodepoints[flagseq[1]] - nodepoints[flagseq[0]]
+		var vs1 = nodepoints[flagseq[-2]] - nodepoints[flagseq[-1]]
+		var vs0a = rad2deg(Vector2(vs0.y, Vector2(vs0.x, vs0.z).length()).angle())
+		var vs1a = rad2deg(Vector2(vs1.y, Vector2(vs1.x, vs1.z).length()).angle())
+		if signdownwards:
+			vs0a = 180-vs0a
+			vs1a = 180-vs1a
+		if vs1a < vs0a:
+			flagseq.invert()
+			vs0a = vs1a
+		if vs0a > 45:
+			return null
+			
+		ptsigntopy = nodepoints[flagseq[1]].y
+		flagpolys.append(flagseq)
+	else:
+		return null
+		
+	var ptsigntop = Vector3(ptsignroot.x, ptsigntopy, ptsignroot.z)
+	var flagsigns = [ ]
+	for j in range(len(flagpolys)):
+		var ppoly = [ ]
+		var flagmsg = "@"
+		for d in flagpolys[j]:
+			ppoly.append(nodepoints[d])
+			if d > flagmsg:
+				flagmsg = d
+		var vecfurthest = ppoly[0] - ptsigntop
+		for i in range(1, len(ppoly)):
+			var veci = ppoly[i] - ptsigntop
+			if veci.length_squared() > vecfurthest.length_squared():
+				vecfurthest = veci
+		var veciang = rad2deg(Vector2(Vector2(vecfurthest.x, vecfurthest.z).length(), vecfurthest.y).angle())
+		if abs(veciang) < 30:
+			vecfurthest.y = 0
+		var vecletters = vecfurthest.normalized()
+		var veclettersup = Vector3(0, 1, 0)
+		if vecletters.y != 0:
+			var vecletters2d = Vector2(vecletters.x, vecletters.z).length()
+			if vecletters2d != 0.0:
+				veclettersup = Vector3(-vecletters.x/vecletters2d*vecletters2d.y, vecletters2d, -vecletters.z/vecletters2d*vecletters2d.y)
+			else:
+				veclettersup = Vector3(1, 0, 0)
+		flagsigns.append([ flagmsg, vecletters, veclettersup ])
+
+	return [ptsignroot, ptsigntopy, flagsigns]
+
+
+static func makesignpostshellmesh(ptsignroot, ptsigntopy, flagsigns):
+	var Nsides = 8
+	var arraymesh = ArrayMesh.new()
+	var surfaceTool = SurfaceTool.new()
+	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var postrad = 0.05
+	var vheight = ptsigntopy - ptsignroot.y
+	var ptpr = ptsignroot + Vector3(postrad, 0, 0)
+	var ptpt = ptsignroot + Vector3(postrad, vheight, 0)
+	var up = 0.0
+	for i in range(Nsides):
+		var theta = deg2rad((i+1)*360.0/Nsides)
+		var vp = Vector3(cos(theta)*postrad, 0, sin(theta)*postrad) if i < Nsides-1 else Vector3(postrad, 0, 0)
+		var ptnr = ptsignroot + vp
+		var ptnt = ptnr + Vector3(0, vheight, 0)
+		var un = theta*postrad
+		
+		surfaceTool.add_uv(Vector2(up, 0))
+		surfaceTool.add_uv2(Vector2(up, 0))
+		surfaceTool.add_vertex(ptpr)
+		surfaceTool.add_uv(Vector2(un, 0))
+		surfaceTool.add_uv2(Vector2(un, 0))
+		surfaceTool.add_vertex(ptnr)
+		surfaceTool.add_uv(Vector2(un, vheight))
+		surfaceTool.add_uv2(Vector2(un, vheight))
+		surfaceTool.add_vertex(ptnt)
+
+		surfaceTool.add_uv(Vector2(up, 0))
+		surfaceTool.add_uv2(Vector2(up, 0))
+		surfaceTool.add_vertex(ptpr)
+		surfaceTool.add_uv(Vector2(un, vheight))
+		surfaceTool.add_uv2(Vector2(un, vheight))
+		surfaceTool.add_vertex(ptnt)
+		surfaceTool.add_uv(Vector2(up, vheight))
+		surfaceTool.add_uv2(Vector2(up, vheight))
+		surfaceTool.add_vertex(ptpt)
+
+		ptpr = ptnr
+		ptpt = ptnt
+		up = un
+
+	surfaceTool.generate_normals()
+	surfaceTool.generate_tangents()
+	surfaceTool.commit(arraymesh)
+	return arraymesh
+
+
 	
 static func oppositenode(nodename, ropeseq):
 	return ropeseq[-1 if (ropeseq[0] == nodename) else 0]
@@ -248,7 +433,7 @@ static func cuboidfacseq(nodename, ropeseqs, ropeseqqs):
 			nodename = ropeseq[0]
 	return cseq
 
-static func cuboidfromropenodesequences(nodepoints, ropeseqs):
+static func cuboidfromropenodesequences(nodepoints, ropeseqs): # cube shape detection
 	if len(ropeseqs) != 12:
 		return null
 	var ropeseqends = { } 

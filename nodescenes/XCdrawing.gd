@@ -101,57 +101,6 @@ func xcconnectstoshell():
 
 
 
-func makestalshellmesh(revseq, p0, vec):
-	var Nsides = max(8, int(300/(len(revseq) + 10)))
-	var arraymesh = ArrayMesh.new()
-	var surfaceTool = SurfaceTool.new()
-	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
-	var prevrevring = null
-	var prevringrad = 1
-	var v = 0
-	for j in range(len(revseq)):
-		var rp = revseq[j]
-		var lam = vec.dot(rp - p0)/vec.dot(vec)
-		var a = p0 + vec*lam
-		var rv = rp - a
-		var ringrad = rv.length()
-		var rvperp = rv.cross(vec.normalized())
-		var revring = [ ]
-		for i in range(Nsides):
-			var theta = deg2rad(i*360.0/Nsides)
-			var pt = a + cos(theta)*rv + sin(theta)*rvperp
-			var u = theta*(prevringrad + ringrad)*0.5
-			revring.push_back(pt)
-			revring.push_back(Vector2(u, v))
-		if prevrevring != null:
-			for i in range(Nsides):
-				var i1 = (i+1)%Nsides
-				surfaceTool.add_uv(prevrevring[i*2+1])
-				surfaceTool.add_uv2(prevrevring[i*2+1])
-				surfaceTool.add_vertex(prevrevring[i*2])
-				surfaceTool.add_uv(revring[i*2+1])
-				surfaceTool.add_uv2(revring[i*2+1])
-				surfaceTool.add_vertex(revring[i*2])
-				surfaceTool.add_uv(revring[i1*2+1])
-				surfaceTool.add_uv2(revring[i1*2+1])
-				surfaceTool.add_vertex(revring[i1*2])
-
-				surfaceTool.add_uv(prevrevring[i*2+1])
-				surfaceTool.add_uv2(prevrevring[i*2+1])
-				surfaceTool.add_vertex(prevrevring[i*2])
-				surfaceTool.add_uv(revring[i1*2+1])
-				surfaceTool.add_uv2(revring[i1*2+1])
-				surfaceTool.add_vertex(revring[i1*2])
-				surfaceTool.add_uv(prevrevring[i1*2+1])
-				surfaceTool.add_uv2(prevrevring[i1*2+1])
-				surfaceTool.add_vertex(prevrevring[i1*2])
-		prevrevring = revring
-		prevringrad = ringrad
-		v += vec.length()
-	surfaceTool.generate_normals()
-	surfaceTool.generate_tangents()
-	surfaceTool.commit(arraymesh)
-	return arraymesh
 
 
 func setdrawingvisiblecode(ldrawingvisiblecode):
@@ -172,6 +121,7 @@ func setdrawingvisiblecode(ldrawingvisiblecode):
 			var ropeseqs = Polynets.makeropenodesequences(nodepoints, onepathpairs, $RopeHang.oddropeverts)
 			var cuboidfacs = Polynets.cuboidfromropenodesequences(nodepoints, ropeseqs)
 			var stalseqax = Polynets.stalfromropenodesequences(nodepoints, ropeseqs) if cuboidfacs == null else null
+			var signseqax = Polynets.signpostfromropenodesequences(nodepoints, ropeseqs) if (cuboidfacs == null and stalseqax == null) else null
 			if cuboidfacs != null:
 				print("cuboidfacs ", cuboidfacs)
 				var cuboidshellmesh = Polynets.makecuboidshellmesh(nodepoints, cuboidfacs)
@@ -183,12 +133,22 @@ func setdrawingvisiblecode(ldrawingvisiblecode):
 					xcn.get_node("CollisionShape").disabled = not xcn.visible
 									#
 			elif stalseqax != null:
-				var stalshellmesh = makestalshellmesh(stalseqax[0], stalseqax[1], stalseqax[2])
+				var stalshellmesh = Polynets.makestalshellmesh(stalseqax[0], stalseqax[1], stalseqax[2])
 				updatexcshellmesh(stalshellmesh)
 				$RopeHang.visible = false
 				$PathLines.visible = false
 				for xcn in $XCnodes.get_children():
 					xcn.visible = (stalseqax[3].find(xcn.get_name()) != -1)
+					xcn.get_node("CollisionShape").disabled = not xcn.visible
+
+			elif signseqax != null:
+				print("signseqax ", signseqax)
+				var signshellmesh = Polynets.makesignpostshellmesh(signseqax[0], signseqax[1], signseqax[2])
+				updatexcshellmesh(signshellmesh)
+				$RopeHang.visible = false
+				$PathLines.visible = false
+				for xcn in $XCnodes.get_children():
+					xcn.visible = (xcn.get_name()[0] == "a")
 					xcn.get_node("CollisionShape").disabled = not xcn.visible
 
 			elif len($RopeHang.oddropeverts) <= 2:
