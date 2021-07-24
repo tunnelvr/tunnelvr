@@ -479,7 +479,7 @@ func _ready():
 	$Viewport/GUI/Panel/TextRelatedActions/ButtonMessage.connect("pressed", self, "_on_buttonmessage_pressed")
 	$Viewport/GUI/Panel/TextRelatedActions/ButtonNewfile.connect("pressed", self, "_on_buttonnewfile_pressed")
 	$Viewport/GUI/Panel/TextRelatedActions/ButtonRemovefile.connect("pressed", self, "_on_buttonremovefile_pressed")
-
+	$Viewport/GUI/Panel/TextRelatedActions/ButtonApplyFlagSign.connect("pressed", self, "_on_buttonflagsign_pressed")
 
 	if $Viewport/GUI/Panel/Networkstate.selected != 0:  # could record saved settings on disk
 		call_deferred("_on_networkstate_selected", $Viewport/GUI/Panel/Networkstate.selected)
@@ -569,6 +569,19 @@ func _on_buttonnewfile_pressed():
 func _on_buttonremovefile_pressed():
 	pass
 
+func _on_buttonflagsign_pressed():
+	print("_on_buttonflagsign_pressed")
+	if sketchsystem.pointersystem.activetargetnode != null and sketchsystem.pointersystem.activetargetnodewall != null and \
+			sketchsystem.pointersystem.activetargetnodewall.drawingtype == DRAWING_TYPE.DT_ROPEHANG:
+		var xcdrawing = sketchsystem.pointersystem.activetargetnodewall
+		if xcdrawing.additionalproperties == null:
+			xcdrawing.additionalproperties = { }
+		if not xcdrawing.additionalproperties.has("flagsignlabels"):
+			xcdrawing.additionalproperties["flagsignlabels"] = { }
+		var nodename = sketchsystem.pointersystem.activetargetnode.get_name()
+		var mtext = $Viewport/GUI/Panel/EditColorRect/TextEdit.text
+		xcdrawing.additionalproperties["flagsignlabels"][nodename] = mtext
+		print("additionalproperties: ", xcdrawing.additionalproperties)
 
 var selectedplayernetworkid = 0
 var selectedplayerplatform = ""

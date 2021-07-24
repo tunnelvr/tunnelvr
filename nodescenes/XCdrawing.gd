@@ -15,7 +15,7 @@ var xcflatshellmaterial = "simpledirt"
 var imgwidth = 0
 var imgtrimleftdown = Vector2(0,0)
 var imgtrimrightup = Vector2(0,0)
-var additionalproperties = null
+var additionalproperties = null  # { stationnamecommonroot:, flagsignlabels: { nodename:label } }
 
 # derived data
 var xctubesconn = [ ]   # references to xctubes that connect to here (could use their names instead)
@@ -121,9 +121,9 @@ func makeflaglabels(ptsignroot, ptsigntopy, postrad, flagsigns):
 			flaglabel.set_surface_material(0, mat)
 			xcn.add_child(flaglabel)
 		flaglabel.visible = true
-		print("fff ", flaglabel.global_transform)
 		var flagbasis = Basis(vecletters, veclettersup, vecletters.cross(veclettersup))
 		flaglabel.global_transform = Transform(flagbasis, ptsigntop + flagbasis.x*(0*flaglabel.mesh.size.x/2))
+		print("fff ", flaglabel.global_transform, flagmsg)
 		labelgenerator.remainingropelabels.push_back([get_name(), xcn.get_name(), flagmsg])
 		labelgenerator.restartlabelmakingprocess(null)
 
@@ -146,7 +146,7 @@ func setdrawingvisiblecode(ldrawingvisiblecode):
 			var ropeseqs = Polynets.makeropenodesequences(nodepoints, onepathpairs, $RopeHang.oddropeverts)
 			var cuboidfacs = Polynets.cuboidfromropenodesequences(nodepoints, ropeseqs)
 			var stalseqax = Polynets.stalfromropenodesequences(nodepoints, ropeseqs) if cuboidfacs == null else null
-			var signseqax = Polynets.signpostfromropenodesequences(nodepoints, ropeseqs) if (cuboidfacs == null and stalseqax == null) else null
+			var signseqax = Polynets.signpostfromropenodesequences(nodepoints, ropeseqs, (additionalproperties if additionalproperties != null else {}).get("flagsignlabels", {})) if (cuboidfacs == null and stalseqax == null) else null
 			if cuboidfacs != null:
 				print("cuboidfacs ", cuboidfacs)
 				var cuboidshellmesh = Polynets.makecuboidshellmesh(nodepoints, cuboidfacs)
@@ -520,10 +520,10 @@ func mergexcrpcdata(xcdata):
 					shortestpathseglengthsq = vlensq
 		shortestpathseglength = sqrt(max(0, shortestpathseglengthsq))
 
-	if "drawingvisiblecode" in xcdata:
-		setdrawingvisiblecode(xcdata["drawingvisiblecode"])
 	if "additionalproperties" in xcdata:
 		additionalproperties = xcdata["additionalproperties"]
+	if "drawingvisiblecode" in xcdata:
+		setdrawingvisiblecode(xcdata["drawingvisiblecode"])
 		
 	if drawingtype == DRAWING_TYPE.DT_CENTRELINE:
 		if xcdata.get("partialxcchunk", "no") != "yes":

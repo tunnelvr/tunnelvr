@@ -285,7 +285,7 @@ static func makestalshellmesh(revseq, p0, vec):
 	return arraymesh
 
 
-static func signpostfromropenodesequences(nodepoints, ropeseqs):
+static func signpostfromropenodesequences(nodepoints, ropeseqs, flagsignlabels):
 	if len(ropeseqs) <= 1:
 		return null
 	var signpostseqj = -1
@@ -341,14 +341,14 @@ static func signpostfromropenodesequences(nodepoints, ropeseqs):
 	var nohideaxisnodes = [ signpostseq[0] ]
 	for j in range(len(flagpolys)):
 		var ppoly = [ ]
-		var flagmsg = "@"
+		var flagmsg = ""
+		var nodelabelled = null
 		for d in flagpolys[j]:
 			ppoly.append(nodepoints[d])
-			if len(d) > len(flagmsg):
-				flagmsg = d
-		var nodelabelled = flagmsg
-		nohideaxisnodes.append(nodelabelled)
-		flagmsg = "long messsage - "+flagmsg
+			var flagsignlabel = flagsignlabels.get(d)
+			if flagsignlabel != null and len(flagsignlabel) > len(flagmsg):
+				flagmsg = flagsignlabel
+				nodelabelled = d
 		var vecfurthest = ppoly[0] - ptsigntop
 		var nodefurthest = flagpolys[j][0]
 		for i in range(1, len(ppoly)):
@@ -356,6 +356,11 @@ static func signpostfromropenodesequences(nodepoints, ropeseqs):
 			if veci.length_squared() > vecfurthest.length_squared():
 				vecfurthest = veci
 				nodefurthest = flagpolys[j][i]
+		if nodelabelled == null:
+			nodelabelled = nodefurthest
+			flagmsg = "node - "+nodelabelled
+		nohideaxisnodes.append(nodelabelled)
+
 		var veciang = rad2deg(Vector2(Vector2(vecfurthest.x, vecfurthest.z).length(), vecfurthest.y).angle())
 		if abs(veciang) < 30:
 			vecfurthest.y = 0

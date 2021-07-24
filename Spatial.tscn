@@ -1928,6 +1928,16 @@ margin_right = 218.0
 margin_bottom = 24.0
 text = "removefile"
 
+[node name="ButtonApplyFlagSign" type="Button" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel/TextRelatedActions"]
+margin_left = 6.32919
+margin_top = 28.5732
+margin_right = 65.3292
+margin_bottom = 52.5732
+text = "FlagSign"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [node name="ViewportReal" type="Viewport" parent="GuiSystem/GUIPanel3D"]
 size = Vector2( 380, 280 )
 hdr = false
@@ -3470,10 +3480,12 @@ mesh = SubResource( 190 )
 material/0 = SubResource( 192 )
 
 [node name="serverconnected" type="MeshInstance" parent="MaterialSystem/handmaterials"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.726604, 0, 0 )
 mesh = SubResource( 193 )
 material/0 = SubResource( 194 )
 
 [node name="serverdisconnected" type="MeshInstance" parent="MaterialSystem/handmaterials"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.391052, 0, 0 )
 mesh = SubResource( 195 )
 material/0 = SubResource( 9 )
 
@@ -3502,7 +3514,7 @@ material/0 = SubResource( 203 )
 [node name="labelmaterials" type="Spatial" parent="MaterialSystem"]
 
 [node name="RopeLabel" type="MeshInstance" parent="MaterialSystem/labelmaterials"]
-transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 1.69899 )
+transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 2.08877 )
 layers = 8192
 cast_shadow = 0
 mesh = SubResource( 229 )
@@ -3512,7 +3524,7 @@ __meta__ = {
 }
 
 [node name="FlagLabel" type="MeshInstance" parent="MaterialSystem/labelmaterials"]
-transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 1.2742 )
+transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 2.5214 )
 layers = 8192
 cast_shadow = 0
 mesh = SubResource( 233 )
@@ -3626,7 +3638,7 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1, 0 )
 shape = SubResource( 210 )
 
 [node name="Mesh" type="MeshInstance" parent="underfloor"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.00067521, 0.0301399, 0.000480108 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.000686559, 0.0279083, 0.000474949 )
 mesh = SubResource( 212 )
 material/0 = null
 
