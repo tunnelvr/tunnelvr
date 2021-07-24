@@ -338,18 +338,24 @@ static func signpostfromropenodesequences(nodepoints, ropeseqs):
 		
 	var ptsigntop = Vector3(ptsignroot.x, ptsigntopy, ptsignroot.z)
 	var flagsigns = [ ]
+	var nohideaxisnodes = [ signpostseq[0] ]
 	for j in range(len(flagpolys)):
 		var ppoly = [ ]
 		var flagmsg = "@"
 		for d in flagpolys[j]:
 			ppoly.append(nodepoints[d])
-			if d > flagmsg:
+			if len(d) > len(flagmsg):
 				flagmsg = d
+		var nodelabelled = flagmsg
+		nohideaxisnodes.append(nodelabelled)
+		flagmsg = "long messsage - "+flagmsg
 		var vecfurthest = ppoly[0] - ptsigntop
+		var nodefurthest = flagpolys[j][0]
 		for i in range(1, len(ppoly)):
 			var veci = ppoly[i] - ptsigntop
 			if veci.length_squared() > vecfurthest.length_squared():
 				vecfurthest = veci
+				nodefurthest = flagpolys[j][i]
 		var veciang = rad2deg(Vector2(Vector2(vecfurthest.x, vecfurthest.z).length(), vecfurthest.y).angle())
 		if abs(veciang) < 30:
 			vecfurthest.y = 0
@@ -361,17 +367,16 @@ static func signpostfromropenodesequences(nodepoints, ropeseqs):
 				veclettersup = Vector3(-vecletters.x/vecletters2d*vecletters2d.y, vecletters2d, -vecletters.z/vecletters2d*vecletters2d.y)
 			else:
 				veclettersup = Vector3(1, 0, 0)
-		flagsigns.append([ flagmsg, vecletters, veclettersup ])
+		flagsigns.append([ flagmsg, nodelabelled, vecletters, veclettersup ])
 
-	return [ptsignroot, ptsigntopy, flagsigns]
+	return [ptsignroot, ptsigntopy, flagsigns, nohideaxisnodes]
 
 
-static func makesignpostshellmesh(ptsignroot, ptsigntopy, flagsigns):
+static func makesignpostshellmesh(xcdrawing, ptsignroot, ptsigntopy, postrad):
 	var Nsides = 8
-	var arraymesh = ArrayMesh.new()
+	var postarraymesh = ArrayMesh.new()
 	var surfaceTool = SurfaceTool.new()
 	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
-	var postrad = 0.05
 	var vheight = ptsigntopy - ptsignroot.y
 	var ptpr = ptsignroot + Vector3(postrad, 0, 0)
 	var ptpt = ptsignroot + Vector3(postrad, vheight, 0)
@@ -409,8 +414,9 @@ static func makesignpostshellmesh(ptsignroot, ptsigntopy, flagsigns):
 
 	surfaceTool.generate_normals()
 	surfaceTool.generate_tangents()
-	surfaceTool.commit(arraymesh)
-	return arraymesh
+	surfaceTool.commit(postarraymesh)
+	
+	return postarraymesh
 
 
 	

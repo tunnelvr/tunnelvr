@@ -99,8 +99,33 @@ func xcconnectstoshell():
 			return true
 	return false
 
-
-
+func makeflaglabels(ptsignroot, ptsigntopy, postrad, flagsigns):
+	var labelgenerator = get_node("/root/Spatial/LabelGenerator")
+	var ptsigntop = Vector3(ptsignroot.x, ptsigntopy, ptsignroot.z)
+	for xcn in get_node("XCnodes").get_children():
+		if xcn.has_node("FlagLabel"):
+			xcn.get_node("FlagLabel").visible = false
+	for i in range(len(flagsigns)):
+		var flagmsg = flagsigns[i][0]
+		var nodefurthest = flagsigns[i][1]
+		var vecletters = flagsigns[i][2]
+		var veclettersup = flagsigns[i][3]
+		var xcn = get_node("XCnodes").get_node(nodefurthest)
+		var flaglabel = xcn.get_node_or_null("FlagLabel")
+		if flaglabel == null:
+			var materialsystem = get_node("/root/Spatial/MaterialSystem")
+			var flaglabelmaterialnode = materialsystem.get_node("labelmaterials/FlagLabel")
+			flaglabel = flaglabelmaterialnode.duplicate()
+			var mat = flaglabel.get_surface_material(0).duplicate()
+			flaglabel.mesh = flaglabel.mesh.duplicate()
+			flaglabel.set_surface_material(0, mat)
+			xcn.add_child(flaglabel)
+		flaglabel.visible = true
+		print("fff ", flaglabel.global_transform)
+		var flagbasis = Basis(vecletters, veclettersup, vecletters.cross(veclettersup))
+		flaglabel.global_transform = Transform(flagbasis, ptsigntop + flagbasis.x*(0*flaglabel.mesh.size.x/2))
+		labelgenerator.remainingropelabels.push_back([get_name(), xcn.get_name(), flagmsg])
+		labelgenerator.restartlabelmakingprocess(null)
 
 
 func setdrawingvisiblecode(ldrawingvisiblecode):
@@ -141,14 +166,16 @@ func setdrawingvisiblecode(ldrawingvisiblecode):
 					xcn.visible = (stalseqax[3].find(xcn.get_name()) != -1)
 					xcn.get_node("CollisionShape").disabled = not xcn.visible
 
+
 			elif signseqax != null:
 				print("signseqax ", signseqax)
-				var signshellmesh = Polynets.makesignpostshellmesh(signseqax[0], signseqax[1], signseqax[2])
+				var signshellmesh = Polynets.makesignpostshellmesh(self, signseqax[0], signseqax[1], 0.041)
 				updatexcshellmesh(signshellmesh)
+				makeflaglabels(signseqax[0], signseqax[1], 0.041, signseqax[2])
 				$RopeHang.visible = false
 				$PathLines.visible = false
 				for xcn in $XCnodes.get_children():
-					xcn.visible = (xcn.get_name()[0] == "a")
+					xcn.visible = (signseqax[3].find(xcn.get_name()) != -1)
 					xcn.get_node("CollisionShape").disabled = not xcn.visible
 
 			elif len($RopeHang.oddropeverts) <= 2:
@@ -392,7 +419,7 @@ func mergexcrpcdata(xcdata):
 						xcn.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("normalhole"))
 					xcn.set_name(nA)
 					maxnodepointnumber = max(maxnodepointnumber, int(nA))
-					xcn.scale = Vector3(closewidthsca, closewidthsca, closewidthsca)
+					xcn.get_node("CollisionShape").scale = Vector3(closewidthsca, closewidthsca, closewidthsca)
 					$XCnodes.add_child(xcn)
 					xcn.translation = nodepointsAdd[nA]
 					xcn.get_node("CollisionShape/MeshInstance").layers = CollisionLayer.VL_xcdrawingnodes
@@ -414,10 +441,10 @@ func mergexcrpcdata(xcdata):
 					var materialsystem = get_node("/root/Spatial/MaterialSystem")
 					var mat = null
 					if nA[0] == "k":
-						xcn.scale = Vector3(closewidthsca, closewidthsca*knotyscale, closewidthsca)
+						xcn.get_node("CollisionShape").scale = Vector3(closewidthsca, closewidthsca*knotyscale, closewidthsca)
 						mat = materialsystem.nodematerial("normalknot")
 					else:
-						xcn.scale = Vector3(closewidthsca, closewidthsca, closewidthsca)
+						xcn.get_node("CollisionShape").scale = Vector3(closewidthsca, closewidthsca, closewidthsca)
 						mat = materialsystem.nodematerial("normalknotwall")
 					xcn.get_node("CollisionShape/MeshInstance").set_surface_material(0, mat)
 					xcn.set_name(nA)
@@ -694,7 +721,7 @@ func resetclosewidthsca(lclosewidthsca):
 		closewidthsca = lclosewidthsca
 		for xcn in $XCnodes.get_children():
 			var kscale = 0.5 if xcn.get_name()[0] == "a" else 1.0
-			xcn.scale = Vector3(closewidthsca, closewidthsca*kscale, closewidthsca)
+			xcn.get_node("CollisionShape").scale = Vector3(closewidthsca, closewidthsca*kscale, closewidthsca)
 
 
 func updatexcpaths():

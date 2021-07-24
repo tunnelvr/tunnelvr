@@ -59,7 +59,9 @@ func setropenodelabel(ropehang, ropenodename, labelstring):
 	var labelgenerator = get_node("/root/Spatial/LabelGenerator")
 	var xcn = ropehang.get_node("../XCnodes").get_node(ropenodename)
 	if not xcn.has_node("RopeLabel"):
-		var noderopelabel = ropehang.get_node("RopeLabel").duplicate()
+		var materialsystem = get_node("/root/Spatial/MaterialSystem")
+		var ropelabelmaterialnode = materialsystem.get_node("labelmaterials/RopeLabel")
+		var noderopelabel = ropelabelmaterialnode.duplicate()
 		var mat = noderopelabel.get_surface_material(0).duplicate()
 		noderopelabel.mesh = noderopelabel.mesh.duplicate()
 		noderopelabel.set_surface_material(0, mat)

@@ -13,4 +13,5 @@ func D_run():
 
 
 func _run():
-	print(int("sdfsd99"))
+	print(Vector3(1,0,0).cross(Vector3(0,1,0)))
+	

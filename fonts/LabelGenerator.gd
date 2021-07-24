@@ -22,12 +22,13 @@ var textlabelcountdowntimer = 0.0
 var currentplanlabelsca = 1.0
 var currentplannodesca = 1.0
 
+var stationnodematerial = null
+
 
 var sortdfunctorigin = Vector3(0,0,0)
 func sortdfunc(a, b):
 	return sortdfunctorigin.distance_squared_to(a[3]) > sortdfunctorigin.distance_squared_to(b[3])
 
-var stationnodematerial = null
 func _ready():
 	var materialsystem = get_node("/root/Spatial/MaterialSystem")
 	stationnodematerial = materialsystem.nodematerial("station")
@@ -123,12 +124,24 @@ func _process(delta):
 		if workingropexcdrawing != null:
 			var workingropexcnode = workingropexcdrawing.get_node("XCnodes").get_node_or_null(workingropexcnodename)
 			if workingropexcnode != null:
-				var ropelabelpanel = workingropexcnode.get_node("RopeLabel")
-				ropelabelpanel.mesh.size.x = tex.get_width()*(ropelabelpanel.mesh.size.y/tex.get_height())
-				var mat = ropelabelpanel.get_surface_material(0)
-				mat.set_shader_param("texture_albedo", tex)
-				mat.set_shader_param("vertex_offset", Vector3(-(ropelabelpanel.mesh.size.x*0.5 + 0.15), ropelabelpanel.mesh.size.y*0.5, 0))
-				mat.set_shader_param("vertex_scale", 1.0)
+				var ropelabelpanel = workingropexcnode.get_node_or_null("RopeLabel")
+				var flaglabelpanel = workingropexcnode.get_node_or_null("FlagLabel")
+				if ropelabelpanel != null:
+					ropelabelpanel.mesh.size.x = tex.get_width()*(ropelabelpanel.mesh.size.y/tex.get_height())
+					var mat = ropelabelpanel.get_surface_material(0)
+					mat.set_shader_param("texture_albedo", tex)
+					mat.set_shader_param("vertex_offset", Vector3(-(ropelabelpanel.mesh.size.x*0.5 + 0.15), ropelabelpanel.mesh.size.y*0.5, 0))
+					mat.set_shader_param("vertex_scale", 1.0)
+				elif flaglabelpanel != null:
+					flaglabelpanel.mesh.size.x = tex.get_width()*(flaglabelpanel.mesh.size.y/tex.get_height())
+					var mat = flaglabelpanel.get_surface_material(0)
+					mat.set_shader_param("texture_albedo", tex)
+					var postrad = 0.041
+					mat.set_shader_param("vertex_offset", Vector3(flaglabelpanel.mesh.size.x*0.5 + postrad, -flaglabelpanel.mesh.size.y*0.5, 0))
+					mat.set_shader_param("vertex_scale", 1.0)
+				else:
+					print("Warning flag/rope label panel missing")
+					
 		workingropexcnodename = null
 
 	else:
