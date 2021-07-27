@@ -26,10 +26,12 @@ const BUTTON_LAYOUT_SYMBOLS = [
 var current_viewport_mousedown = false
 var collision_point = Vector3(0, 0, 0)
 var viewport_point = Vector2(0, 0)
+
 onready var viewportforvirtualkeyboard = get_node("/root/Spatial/GuiSystem/GUIPanel3D/Viewport")
 
+
 signal enter_pressed;
-signal cancel_pressed;
+#signal cancel_pressed;
 
 var _all_letter_buttons = [];
 
@@ -59,14 +61,26 @@ func _create_input_event(b, pressed):
 		_toggle_symbols(b.pressed);
 		return;
 	elif (b == _cancel_button):
-		if (!pressed): emit_signal("cancel_pressed");
-		return;
+		scancode = KEY_TAB  # doesn't seem to get decoded to right place
+		var textedit = viewportforvirtualkeyboard.get_node("GUI").get_focus_owner()
+		if textedit != null:
+			textedit.release_focus()
+		return
 	elif (b == _shift_button):
 		if (pressed): 
 			_toggle_case(!b.pressed); # button event is created before it is actually toggled
 		scancode = KEY_SHIFT;
 	elif (b == _backspace_button):
 		scancode = KEY_BACKSPACE;
+	elif b == _left_button:
+		scancode = KEY_LEFT
+	elif b == _right_button:
+		scancode = KEY_RIGHT
+	elif b == _up_button:
+		scancode = KEY_UP
+	elif b == _down_button:
+		scancode = KEY_DOWN
+
 	elif (b == _enter_button):
 		scancode = KEY_ENTER;
 		if (!pressed): emit_signal("enter_pressed");
@@ -135,24 +149,34 @@ var _backspace_button : Button = null;
 var _enter_button : Button = null;
 var _space_button : Button = null;
 var _cancel_button : Button = null;
+var _left_button : Button = null
+var _right_button : Button = null
+var _up_button : Button = null
+var _down_button : Button = null
 
 func _create_keyboard_buttons():
 	_toggle_symbols_button = _create_button(_virtual_keyboard, "#$%", 0+1, 1, 2, 1);
 	_toggle_symbols_button.set_rotation(deg2rad(90.0));
 	_toggle_symbols_button.toggle_mode = true;
 	
-	_shift_button = _create_button(_virtual_keyboard, "Δ", 0, 3, 1, 2);
+	_shift_button = _create_button(_virtual_keyboard, "&#21E7;".xml_unescape(), 0, 3, 1, 2);
 	_shift_button.toggle_mode = true;
 	
-	_backspace_button = _create_button(_virtual_keyboard, "BckSp.", 11+1, 1, 2, 1);
+	_backspace_button = _create_button(_virtual_keyboard, "Del", 11+1, 1, 2, 1); # "&#232B;".xml_unescape()
 	_backspace_button.set_rotation(deg2rad(90.0));
-	_enter_button = _create_button(_virtual_keyboard, "Enter", 11+1, 3, 2, 1);
-	_enter_button.set_rotation(deg2rad(90.0));
+	_enter_button = _create_button(_virtual_keyboard, "&#23CE;".xml_unescape(), 11, 3, 1, 2);
 	
-	_space_button = _create_button(_virtual_keyboard, "Space", 2, 4, 9, 1);
+	_space_button = _create_button(_virtual_keyboard, "Space", 2, 4, 6, 1);
 
-	_cancel_button = _create_button(_virtual_keyboard, "X", 11, 0, 1, 1);
+	_left_button = _create_button(_virtual_keyboard, "&#2B05;".xml_unescape(), 8, 4, 1, 1);
+	_up_button = _create_button(_virtual_keyboard, "&#2B06;".xml_unescape(), 9, 4, 1, 1);
+	_down_button = _create_button(_virtual_keyboard, "&#2B07;".xml_unescape(), 9, 4, 1, 1);
+	_right_button = _create_button(_virtual_keyboard, "&#27A1;".xml_unescape(), 10, 4, 1, 1);
 	
+	_cancel_button = _create_button(_virtual_keyboard, "&#2327;".xml_unescape(), 11, 0, 1, 1);
+	_up_button.rect_scale = Vector2(1, 0.5)
+	_down_button.rect_scale = Vector2(1, 0.5)
+	_down_button.rect_position.y += B_SIZE/2
 	var x = 1;
 	var y = 0;
 	
@@ -160,7 +184,6 @@ func _create_keyboard_buttons():
 		_create_button(_virtual_keyboard, k, x, y);
 		x += 1;
 		
-
 	x = 1;
 	y = 1;
 	# standard buttons

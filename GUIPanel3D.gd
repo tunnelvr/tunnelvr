@@ -675,31 +675,40 @@ func setguipanelhide():
 
 		
 
-#func _unhandled_key_input(event):
 func _input(event):
-	if not (event is InputEventKey):
-		return
-	if event.scancode == KEY_ESCAPE:
-		return
-
-	if virtualkeyboard.visible:
-		$Viewport.input(event)
-		get_tree().set_input_as_handled()
-
-	elif event.pressed:
-		if event.scancode == KEY_L:
-			_on_buttonload_pressed()
-		elif event.scancode == KEY_G:
-			$Viewport/GUI/Panel/ButtonDoppelganger.pressed = not $Viewport/GUI/Panel/ButtonDoppelganger.pressed
-			_on_buttondoppelganger_toggled($Viewport/GUI/Panel/ButtonDoppelganger.pressed)	
-		elif event.scancode == KEY_O:
-			playerMe.swapcontrollers()
-			Tglobal.soundsystem.quicksound("MenuClick", collision_point)
-		elif event.scancode == KEY_B:
-			call_deferred("_on_networkstate_selected", 3)
-		elif event.scancode == KEY_P:
-			$Viewport/GUI/Panel/ButtonPlanView.pressed = not $Viewport/GUI/Panel/ButtonPlanView.pressed
-			_on_buttonplanview_pressed()
+	if event is InputEventKey:
+		print("ee", event, event.scancode)
+		if event.scancode == KEY_ESCAPE:
+			return
+		elif virtualkeyboard.visible:
+			if event.scancode == KEY_TAB:
+				var textedit = $Viewport/GUI.get_focus_owner()
+				if textedit != null:
+					if event.shift and textedit.focus_previous != "":
+						get_node(textedit.focus_previous).grab_focus()
+					elif textedit.focus_next != "":
+						get_node(textedit.focus_next).grab_focus()
+					else:
+						textedit.release_focus()
+			else:
+				$Viewport.input(event)
+			get_tree().set_input_as_handled()
+		elif event.scancode == KEY_TAB:
+			$Viewport.input(event)
+		elif event.pressed:
+			if event.scancode == KEY_L:
+				_on_buttonload_pressed()
+			elif event.scancode == KEY_G:
+				$Viewport/GUI/Panel/ButtonDoppelganger.pressed = not $Viewport/GUI/Panel/ButtonDoppelganger.pressed
+				_on_buttondoppelganger_toggled($Viewport/GUI/Panel/ButtonDoppelganger.pressed)	
+			elif event.scancode == KEY_O:
+				playerMe.swapcontrollers()
+				Tglobal.soundsystem.quicksound("MenuClick", collision_point)
+			elif event.scancode == KEY_B:
+				call_deferred("_on_networkstate_selected", 3)
+			elif event.scancode == KEY_P:
+				$Viewport/GUI/Panel/ButtonPlanView.pressed = not $Viewport/GUI/Panel/ButtonPlanView.pressed
+				_on_buttonplanview_pressed()
 
 
 
