@@ -348,9 +348,7 @@ func setpointertarget(laserroot, raycast, pointertargetshortdistance):
 		#print("NN ", newpointertarget, " ", raycast.get_collision_point())
 		#if newpointertarget != null and Tglobal.wingmeshtrimmingmode:
 		#	print("PT: ", newpointertarget.get_name())
-		if pointertarget == guipanel3d:
-			panelsendreleasemousemotiontopointertarget()
-		elif pointertarget == keyboardpanel:
+		if pointertarget == guipanel3d or pointertarget == keyboardpanel:
 			panelsendreleasemousemotiontopointertarget()
 		clearpointertargetmaterial()
 		pointertarget = newpointertarget
@@ -1612,7 +1610,7 @@ func _physics_process(delta):
 		var firstlasertarget = LaserOrient.get_node("RayCast").get_collider()
 		if firstlasertarget != null and firstlasertarget.is_queued_for_deletion():
 			firstlasertarget = null
-		if firstlasertarget == guipanel3d:
+		if firstlasertarget == guipanel3d or firstlasertarget == keyboardpanel:
 			LaserOrient.visible = true
 			activelaserroot = LaserOrient
 			setpointertarget(activelaserroot, activelaserroot.get_node("RayCast"), -1.0)

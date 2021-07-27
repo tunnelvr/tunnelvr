@@ -391,7 +391,7 @@ remote func actsketchchangeL(xcdatalist):
 				if len(xcdata.get("prevnodepoints", [])) != 0:
 					for xctube in xcdrawing.xctubesconn:
 						xctubestoupdate[xctube.get_name()] = xctube
-				if len(xcdata.get("nextnodepoints", [])) == 1:
+				if len(xcdata.get("nextnodepoints", [])) == 1 and xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 					for xcnname in xcdata["nextnodepoints"]:
 						var xcn = xcdrawing.get_node("XCnodes").get_node_or_null(xcnname)
 						if xcn != null and xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
