@@ -23,13 +23,14 @@ var currentplanlabelsca = 1.0
 var currentplannodesca = 1.0
 
 var stationnodematerial = null
-
+var regexrichtextcodes = RegEx.new()
 
 var sortdfunctorigin = Vector3(0,0,0)
 func sortdfunc(a, b):
 	return sortdfunctorigin.distance_squared_to(a[3]) > sortdfunctorigin.distance_squared_to(b[3])
 
 func _ready():
+	regexrichtextcodes.compile('\\[[^\\]\n]*\\]')
 	var materialsystem = get_node("/root/Spatial/MaterialSystem")
 	stationnodematerial = materialsystem.nodematerial("station")
 	set_process(false)
@@ -80,15 +81,20 @@ func _process(delta):
 
 	if workingropexcnodename == null and len(workingxcnodenamelist) == 0:
 		var labeltext
+		var clabeltext
 		numcharsofeachline = [ ]
 		var maxnumchars = 0
 		if len(remainingropelabels) != 0:
 			workingropexcdrawingname = remainingropelabels.back()[0]
 			workingropexcnodename = remainingropelabels.back()[1]
-			labeltext = remainingropelabels.back()[2]
+			clabeltext = remainingropelabels.back()[2]
+			labeltext = regexrichtextcodes.sub(clabeltext, "", true)
 			remainingropelabels.pop_back()
 			maxnumchars = len(labeltext)
+			if maxnumchars == 0:
+				maxnumchars = 1
 			numcharsofeachline.push_back(maxnumchars)
+			
 		else:
 			workingxccentrelinedrawingname = remainingxcnodenames.back()[0]
 			while len(workingxcnodenamelist) < maxlabelstorenderperimage and len(remainingxcnodenames) != 0 and workingxccentrelinedrawingname == remainingxcnodenames.back()[0]:
@@ -102,9 +108,10 @@ func _process(delta):
 				labeltextlines.push_back(lnodelabel)
 				numcharsofeachline.push_back(len(lnodelabel))
 				maxnumchars = max(maxnumchars, len(lnodelabel))
-			labeltext = PoolStringArray(labeltextlines).join("\n")
+			clabeltext = PoolStringArray(labeltextlines).join("\n")
+			labeltext = clabeltext
 
-		$Viewport/RichTextLabel.bbcode_text = labeltext
+		$Viewport/RichTextLabel.bbcode_text = clabeltext
 		$Viewport.size.x = maxnumchars*monospacefontcharwidth  # monospace font
 		$Viewport.size.y = monospacefontcharheight*len(numcharsofeachline)
 		$Viewport/RichTextLabel.rect_size.x = $Viewport.size.x
@@ -139,6 +146,10 @@ func _process(delta):
 					var postrad = 0.041
 					mat.set_shader_param("vertex_offset", Vector3(flaglabelpanel.mesh.size.x*0.5 + postrad, -flaglabelpanel.mesh.size.y*0.5, 0))
 					mat.set_shader_param("vertex_scale", 1.0)
+					var uvscale = (Vector3(1,1,1) if flaglabelpanel.scale.y == 1 else Vector3(1,-1,1))
+					mat.set_shader_param("uv1_scale", uvscale)
+					mat.set_shader_param("uv2_scale", uvscale)
+
 				else:
 					print("Warning flag/rope label panel missing")
 					

@@ -13,6 +13,8 @@ func D_run():
 
 
 func _run():
-	var a = [2,3,4]
-	for i in range(1, len(a)):
-		print(i, " ", a[i])
+	var s = "[clol].,..[/as]"
+	var regexrichtextcodes = RegEx.new()
+	regexrichtextcodes.compile('\\[[^\\]\n]*\\]')
+	print(s)
+	print([regexrichtextcodes.sub(s, "", true)])

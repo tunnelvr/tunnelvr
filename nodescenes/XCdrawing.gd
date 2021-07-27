@@ -123,8 +123,10 @@ func makeflaglabels(ptsignroot, ptsigntopy, postrad, flagsigns):
 		flaglabel.visible = true
 		var flagbasis = Basis(vecletters, veclettersup, vecletters.cross(veclettersup))
 		flaglabel.global_transform = Transform(flagbasis, ptsigntop + flagbasis.x*(0*flaglabel.mesh.size.x/2))
+		flaglabel.scale.y = (1 if ptsigntopy > ptsignroot.y else -1)
 		print("fff ", flaglabel.global_transform, flagmsg)
-		labelgenerator.remainingropelabels.push_back([get_name(), xcn.get_name(), flagmsg])
+		var cflagmsg = "[color=#00FFFF]"+flagmsg+"[/color]"
+		labelgenerator.remainingropelabels.push_back([get_name(), xcn.get_name(), cflagmsg])
 		labelgenerator.restartlabelmakingprocess(null)
 
 

@@ -390,14 +390,14 @@ static func signpostfromropenodesequences(nodepoints, ropeseqs, flagsignlabels):
 		nohideaxisnodes.append(nodelabelled)
 
 		var veciang = rad2deg(Vector2(Vector2(vecfurthest.x, vecfurthest.z).length(), vecfurthest.y).angle())
-		if abs(veciang) < 30:
+		if abs(veciang) < 40:
 			vecfurthest.y = 0
 		var vecletters = vecfurthest.normalized()
 		var veclettersup = Vector3(0, 1, 0)
 		if vecletters.y != 0:
 			var vecletters2d = Vector2(vecletters.x, vecletters.z).length()
 			if vecletters2d != 0.0:
-				veclettersup = Vector3(-vecletters.x/vecletters2d*vecletters2d.y, vecletters2d, -vecletters.z/vecletters2d*vecletters2d.y)
+				veclettersup = Vector3(-vecletters.x/vecletters2d*vecletters.y, vecletters2d, -vecletters.z/vecletters2d*vecletters.y)
 			else:
 				veclettersup = Vector3(1, 0, 0)
 		flagsigns.append([ flagmsg, nodelabelled, vecletters, veclettersup ])
