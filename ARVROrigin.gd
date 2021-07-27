@@ -62,7 +62,8 @@ func setheadtorchlight(torchon):
 	#var dl = get_node_or_null("/root/Spatial/WorldEnvironment/DirectionalLight2")
 	#if dl != null:
 	#	dl.shadow_enabled = not torchon
-	get_node("/root/Spatial/SoundSystem").quicksound("ClickSound", $HeadCam.global_transform.origin + $HeadCam.global_transform.basis.y * 0.2)
+	if Tglobal.soundsystem != null:
+		Tglobal.soundsystem.quicksound("ClickSound", $HeadCam.global_transform.origin + $HeadCam.global_transform.basis.y * 0.2)
 	if Tglobal.connectiontoserveractive:
 		rpc("puppetsetheadtorchlight", torchon)
 	if is_instance_valid(doppelganger):

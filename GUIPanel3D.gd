@@ -574,15 +574,33 @@ func _on_buttonflagsign_pressed():
 	if sketchsystem.pointersystem.activetargetnode != null and sketchsystem.pointersystem.activetargetnodewall != null and \
 			sketchsystem.pointersystem.activetargetnodewall.drawingtype == DRAWING_TYPE.DT_ROPEHANG:
 		var xcdrawing = sketchsystem.pointersystem.activetargetnodewall
-		if xcdrawing.additionalproperties == null:
-			xcdrawing.additionalproperties = { }
-		if not xcdrawing.additionalproperties.has("flagsignlabels"):
-			xcdrawing.additionalproperties["flagsignlabels"] = { }
+		var newadditionalproperties = xcdrawing.additionalproperties
+		if newadditionalproperties == null:
+			newadditionalproperties = { }
+		if not newadditionalproperties.has("flagsignlabels"):
+			newadditionalproperties["flagsignlabels"] = { }
 		var nodename = sketchsystem.pointersystem.activetargetnode.get_name()
 		var mtext = $Viewport/GUI/Panel/EditColorRect/TextEdit.text
-		xcdrawing.additionalproperties["flagsignlabels"][nodename] = mtext
+		newadditionalproperties["flagsignlabels"][nodename] = mtext
+		var xcdata = { "name":xcdrawing.get_name(), 
+					   "additionalproperties":newadditionalproperties, 
+					   "drawingvisiblecode":DRAWING_TYPE.VIZ_XCD_HIDE
+					 }
+		sketchsystem.actsketchchange([xcdata])
+		sketchsystem.pointersystem.clearactivetargetnode()
 		print("additionalproperties: ", xcdrawing.additionalproperties)
-
+		setguipanelhide()
+		Tglobal.soundsystem.quicksound("MenuClick", collision_point)
+				
+func getflagsignofnodeselected():
+	if sketchsystem.pointersystem.activetargetnodewall != null and sketchsystem.pointersystem.activetargetnodewall.drawingtype == DRAWING_TYPE.DT_ROPEHANG and sketchsystem.pointersystem.activetargetnode != null:
+		var xcdrawing = sketchsystem.pointersystem.activetargetnodewall
+		var nodename = sketchsystem.pointersystem.activetargetnode.get_name()
+		var additionalproperties = xcdrawing.additionalproperties if xcdrawing.additionalproperties != null else {}
+		print("additionalproperties ", additionalproperties)
+		$Viewport/GUI/Panel/EditColorRect/TextEdit.text = additionalproperties.get("flagsignlabels", {}).get(nodename, "")
+	
+				
 var selectedplayernetworkid = 0
 var selectedplayerplatform = ""
 func _on_playerlist_selected(index):
@@ -657,6 +675,8 @@ func setguipanelvisible(controller_global_transform):
 		selfSpatial.playerMe.rpc("puppetenableguipanel", transform)
 	if is_instance_valid(selfSpatial.playerMe.doppelganger):
 		selfSpatial.playerMe.doppelganger.puppetenableguipanel(transform)
+
+	getflagsignofnodeselected()
 		
 func setguipanelhide():
 	if not Tglobal.controlslocked:
@@ -673,11 +693,8 @@ func setguipanelhide():
 		if is_instance_valid(selfSpatial.playerMe.doppelganger):
 			selfSpatial.playerMe.doppelganger.puppetenableguipanel(null)
 
-		
-
 func _input(event):
 	if event is InputEventKey:
-		print("ee", event, event.scancode)
 		if event.scancode == KEY_ESCAPE:
 			return
 		elif virtualkeyboard.visible:

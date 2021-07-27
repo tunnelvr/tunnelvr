@@ -13,4 +13,4 @@ func D_run():
 
 
 func _run():
-	print("as&#2B05;asd".xml_unescape())
+	print(Vector2(10,20)*Vector2(1,-3))

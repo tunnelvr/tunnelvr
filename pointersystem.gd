@@ -168,6 +168,11 @@ func setactivetargetnode(newactivetargetnode):
 		activetargetnode.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("selected"))
 	activelaserroot.get_node("LaserSpot").set_surface_material(0, materialsystem.lasermaterialN((1 if activetargetnode != null else 0) + (2 if pointertarget == null else 0)))
 	setpointertargetmaterial()
+	if guipanel3d.visible:
+		guipanel3d.getflagsignofnodeselected()
+		var viewport = guipanel3d.get_node("Viewport")
+		viewport.render_target_update_mode = Viewport.UPDATE_WHEN_VISIBLE
+
 
 func raynormalcollisionmask():
 	if planviewsystem.planviewcontrols.get_node("CheckBoxCentrelinesVisible").pressed:

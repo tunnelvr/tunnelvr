@@ -1862,26 +1862,6 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="SketchNameLabel" type="Label" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 113.324
-margin_top = 104.296
-margin_right = 203.324
-margin_bottom = 126.296
-text = "Sketchname:"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="SketchName" type="Label" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 204.955
-margin_top = 104.296
-margin_right = 294.955
-margin_bottom = 126.296
-text = "none"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
 [node name="EditColorRect" type="ColorRect" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
 margin_left = 153.0
 margin_top = 130.0
@@ -1898,8 +1878,6 @@ margin_top = 3.0
 margin_right = 218.63
 margin_bottom = 60.0
 custom_fonts/font = SubResource( 12 )
-text = "ddddfffggfdfg
-ffffgf"
 highlight_current_line = true
 __meta__ = {
 "_edit_use_anchors_": false
