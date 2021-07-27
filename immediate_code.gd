@@ -13,4 +13,6 @@ func D_run():
 
 
 func _run():
-	print(Vector2(10,20)*Vector2(1,-3))
+	var a = [2,3,4]
+	for i in range(1, len(a)):
+		print(i, " ", a[i])

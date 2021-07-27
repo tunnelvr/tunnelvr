@@ -333,8 +333,36 @@ static func signpostfromropenodesequences(nodepoints, ropeseqs, flagsignlabels):
 			
 		ptsigntopy = nodepoints[flagseq[1]].y
 		flagpolys.append(flagseq)
-	else:
-		return null
+		
+	elif len(ropeseqs) >= 4:
+		var signpostseqjtop = -1
+		for j in range(len(ropeseqs)):
+			if j != signpostseqj:
+				var ropeseq = ropeseqs[j]
+				if len(ropeseq) == 2:
+					if signpostseqjtop != -1:
+						return null
+					if ropeseq[-1] == signpostseq[1]:
+						ropeseq.invert()
+					if ropeseq[0] != signpostseq[1]:
+						return null
+					signpostseqjtop = j
+		if signpostseqjtop == -1:
+			return null
+		var signpostseqtop = ropeseqs[signpostseqjtop]
+
+		for j in range(len(ropeseqs)):
+			if j != signpostseqj and j != signpostseqjtop:
+				var ropeseq = ropeseqs[j]
+				if ropeseq[-1] == signpostseqtop[1]:
+					ropeseq.invert()
+				if ropeseq[0] != signpostseqtop[1] or ropeseq[-1] != signpostseqtop[0]:
+					return null
+				var flagseq = signpostseqtop.duplicate()
+				for k in range(1, len(ropeseq)):
+					flagseq.append(ropeseq[k])
+				flagpolys.append(flagseq)
+		ptsigntopy = nodepoints[signpostseqtop[1]].y
 		
 	var ptsigntop = Vector3(ptsignroot.x, ptsigntopy, ptsignroot.z)
 	var flagsigns = [ ]
