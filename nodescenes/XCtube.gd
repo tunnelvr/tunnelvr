@@ -191,27 +191,7 @@ func updatetubepositionlinks(sketchsystem):
 	for j in range(0, len(xcdrawinglink), 2):
 		var p0 = xcdrawing0.transform * xcdrawing0.nodepoints[xcdrawinglink[j]]
 		var p1 = xcdrawing1.transform * xcdrawing1.nodepoints[xcdrawinglink[j+1]]
-		var vec = p1 - p0
-		var veclen = max(0.01, vec.length())
-		var perp = xcdrawing1.global_transform.basis.x
-		var arrowlen = min(0.4, veclen*0.5)
-		var p0m = p0
-		var p0mleft = p0m - linewidth*perp
-		var p0mright = p0m + linewidth*perp
-		var p1m = p1
-		var p1mleft = p1m - linewidth*perp
-		var p1mright = p1m + linewidth*perp
-		surfaceTool.add_vertex(p0mleft)
-		surfaceTool.add_vertex(p1mleft)
-		surfaceTool.add_vertex(p0mright)
-		surfaceTool.add_vertex(p0mright)
-		surfaceTool.add_vertex(p1mleft)
-		surfaceTool.add_vertex(p1mright)
-		var pa = p1m - (p1m - p0m).normalized()*arrowlen
-		var arrowfac = max(2*linewidth, arrowlen/2)
-		surfaceTool.add_vertex(p1m)
-		surfaceTool.add_vertex(pa + arrowfac*perp)
-		surfaceTool.add_vertex(pa - arrowfac*perp)
+		Polynets.addarrowmesh(surfaceTool, p0, p1, xcdrawing1.global_transform.basis.x, [])
 	surfaceTool.generate_normals()
 	$PathLines.mesh = surfaceTool.commit()
 	$PathLines.set_surface_material(0, get_node("/root/Spatial/MaterialSystem").pathlinematerial("normal"))
@@ -248,34 +228,13 @@ func updatetubelinkpaths(sketchsystem):
 				perp = xcdrawing1.global_transform.basis.x
 		var vsmallrotright = ((p1u.x > xcdrawing1.nodepointmean.x) == (p1u.y > xcdrawing1.nodepointmean.y))
 		perp = perp.rotated(xcdrawing1.global_transform.basis.z, deg2rad(5 if vsmallrotright else -5))
-		var arrowlen = min(0.4, veclen*0.5)
-
-		var p0m = p0
-		var p0mleft = p0m - linewidth*perp
-		var p0mright = p0m + linewidth*perp
 		var jb = j/2
 		var nintermediatenodes = (0 if xclinkintermediatenodes == null else len(xclinkintermediatenodes[jb]))
-		for i in range(nintermediatenodes+1):
-			var p1m
-			var p1mtrans
-			if i < nintermediatenodes:
-				p1mtrans = intermedpointposT(p0, p1, xclinkintermediatenodes[jb][i])
-				p1m = p1mtrans.origin
-			else:
-				p1m = p1
-				p1mtrans = null
-			var p1mleft = p1m - linewidth*perp
-			var p1mright = p1m + linewidth*perp
-			surfaceTool.add_vertex(p0mleft)
-			surfaceTool.add_vertex(p1mleft)
-			surfaceTool.add_vertex(p0mright)
-			surfaceTool.add_vertex(p0mright)
-			surfaceTool.add_vertex(p1mleft)
-			surfaceTool.add_vertex(p1mright)
-			if i < nintermediatenodes:
-				p0m = p1m
-				p0mleft = p1mleft
-				p0mright = p1mright
+		var intermediatepts = [ ]
+		if nintermediatenodes != 0:
+			for i in range(nintermediatenodes):
+				var p1mtrans = intermedpointposT(p0, p1, xclinkintermediatenodes[jb][i])
+				intermediatepts.push_back(p1mtrans.origin)
 				var inodename = encodeintermediatenodename(jb, i)
 				var inode = $PathLines.get_node_or_null(inodename)
 				if inode == null:
@@ -283,14 +242,6 @@ func updatetubelinkpaths(sketchsystem):
 					inode.set_name(inodename)
 					$PathLines.add_child(inode)
 				inode.global_transform = p1mtrans
-			else:
-				var pa = p1m - (p1m - p0m).normalized()*arrowlen
-				var arrowfac = max(2*linewidth, arrowlen/2)
-				surfaceTool.add_vertex(p1m)
-				surfaceTool.add_vertex(pa + arrowfac*perp)
-				surfaceTool.add_vertex(pa - arrowfac*perp)
-				
-		
 		var im = nintermediatenodes 
 		while true:
 			var imnodename = encodeintermediatenodename(jb, im)
@@ -298,6 +249,7 @@ func updatetubelinkpaths(sketchsystem):
 				break
 			$PathLines.get_node(imnodename).queue_free()
 			im += 1
+		Polynets.addarrowmesh(surfaceTool, p0, p1, perp, intermediatepts)
 			
 	var jbm = len(xcdrawinglink) 
 	while $PathLines.has_node(encodeintermediatenodename(jbm, 0)):

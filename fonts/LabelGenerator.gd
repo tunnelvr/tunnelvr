@@ -137,6 +137,7 @@ func _process(delta):
 		var img = $Viewport.get_texture().get_data()
 		var tex = ImageTexture.new()
 		tex.create_from_image(img, Texture.FLAG_MIPMAPS|Texture.FLAG_REPEAT)
+		
 		var workingropexcdrawing = get_node("/root/Spatial/SketchSystem/XCdrawings").get_node_or_null(workingropexcdrawingname)
 		if workingropexcdrawing != null:
 			var workingropexcnode = workingropexcdrawing.get_node("XCnodes").get_node_or_null(workingropexcnodename)

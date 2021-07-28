@@ -596,3 +596,47 @@ static func pickpolysindex(polys, xcdrawinglink, js):
 			pickpolyindex = -1
 			
 	return pickpolyindex
+
+const linewidth = 0.02
+static func addarrowmesh(surfaceTool, p0, p1, aperp, intermediatepts):
+	var p0m = p0
+	var p0mleft = p0m - linewidth*aperp
+	var p0mright = p0m + linewidth*aperp
+
+	for i in range(len(intermediatepts)):
+		var ipt = intermediatepts[i]
+		var lp1m = ipt
+		var lp1mleft = lp1m - linewidth*aperp
+		var lp1mright = lp1m + linewidth*aperp
+		surfaceTool.add_vertex(p0mleft)
+		surfaceTool.add_vertex(lp1mleft)
+		surfaceTool.add_vertex(p0mright)
+		surfaceTool.add_vertex(p0mright)
+		surfaceTool.add_vertex(lp1mleft)
+		surfaceTool.add_vertex(lp1mright)
+		p0m = ipt
+		p0mleft = lp1mleft
+		p0mright = lp1mright
+
+	var vec = p1 - p0m
+	var veclen = max(0.01, vec.length())
+	var arrowlen = min(0.4, veclen*0.5)
+
+	var p1m = p1 - vec*(arrowlen/veclen)
+	var p1mleft = p1m - linewidth*aperp
+	var p1mright = p1m + linewidth*aperp
+	
+	surfaceTool.add_vertex(p0mleft)
+	surfaceTool.add_vertex(p1mleft)
+	surfaceTool.add_vertex(p0mright)
+	surfaceTool.add_vertex(p0mright)
+	surfaceTool.add_vertex(p1mleft)
+	surfaceTool.add_vertex(p1mright)
+
+	var pa = p1m
+	var arrowfac = max(2*linewidth, arrowlen/2)
+	surfaceTool.add_vertex(p1)
+	surfaceTool.add_vertex(pa + arrowfac*aperp)
+	surfaceTool.add_vertex(pa - arrowfac*aperp)
+
+
