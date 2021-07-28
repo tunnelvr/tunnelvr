@@ -7,8 +7,10 @@ const XCnode_knot = preload("res://nodescenes/XCnode_knot.tscn")
 var xcresource = ""     # source file
 var nodepoints = { }    # { nodename:Vector3 } in local coordinate system
 var onepathpairs = [ ]  # [ Anodename0, Anodename1, Bnodename0, Bnodename1, ... ]
-var drawingtype = DRAWING_TYPE.DT_XCDRAWING
+var drawingtype = DRAWING_TYPE.DT_XCDRAWING # DT_CENTRELINE, DT_ROPEHANG
 var drawingvisiblecode = DRAWING_TYPE.VIZ_XCD_HIDE
+var ropehangdetectedtype = DRAWING_TYPE.RH_NORMAL
+
 var xcchangesequence = -1
 var xcflatshellmaterial = "simpledirt"
 
@@ -158,6 +160,7 @@ func setdrawingvisiblecode(ldrawingvisiblecode):
 				for xcn in $XCnodes.get_children():
 					xcn.visible = (xcn.get_name()[0] == "a")
 					xcn.get_node("CollisionShape").disabled = not xcn.visible
+				ropehangdetectedtype = DRAWING_TYPE.RH_BOULDER
 									#
 			elif stalseqax != null:
 				var stalshellmesh = Polynets.makestalshellmesh(stalseqax[0], stalseqax[1], stalseqax[2])
@@ -167,7 +170,7 @@ func setdrawingvisiblecode(ldrawingvisiblecode):
 				for xcn in $XCnodes.get_children():
 					xcn.visible = (stalseqax[3].find(xcn.get_name()) != -1)
 					xcn.get_node("CollisionShape").disabled = not xcn.visible
-
+				ropehangdetectedtype = DRAWING_TYPE.RH_STAL
 
 			elif signseqax != null:
 				print("signseqax ", signseqax)
@@ -179,6 +182,7 @@ func setdrawingvisiblecode(ldrawingvisiblecode):
 				for xcn in $XCnodes.get_children():
 					xcn.visible = (signseqax[3].find(xcn.get_name()) != -1)
 					xcn.get_node("CollisionShape").disabled = not xcn.visible
+				ropehangdetectedtype = DRAWING_TYPE.RH_FLAGSIGN
 
 			elif len($RopeHang.oddropeverts) <= 2:
 				var middlenodes = $RopeHang.updatehangingropepathsArrayMesh_Verlet(nodepoints, ropeseqs)
@@ -190,10 +194,12 @@ func setdrawingvisiblecode(ldrawingvisiblecode):
 				$RopeHang.visible = true
 				$PathLines.visible = false
 				get_node("/root/Spatial/VerletRopeSystem").addropehang($RopeHang)
+				ropehangdetectedtype = DRAWING_TYPE.RH_NORMAL
 
 			else:
 				print("Not an identified rope shape type, unhiding nodeshang")
 				hidenodeshang = false
+				ropehangdetectedtype = DRAWING_TYPE.RH_NORMAL
 
 		if not hidenodeshang:
 			for xcn in $XCnodes.get_children():
@@ -501,10 +507,9 @@ func mergexcrpcdata(xcdata):
 		xcflatshellmaterial = xcdata["xcflatshellmaterial"]
 	if "prevxcflatshellmaterial" in xcdata:
 		xcflatshellmaterial = xcdata["nextxcflatshellmaterial"]
-		var xcflatshell = get_node_or_null("XCflatshell")
-		if xcflatshell != null:
+		if has_node("XCflatshell"):
 			var materialsystem = get_node("/root/Spatial/MaterialSystem")
-			materialsystem.updatetubesectormaterial(xcflatshell, xcflatshellmaterial, false)
+			materialsystem.updateflatshellmaterial(self, xcflatshellmaterial, false)
 
 	if "nodepoints" in xcdata or "prevnodepoints" in xcdata or "onepathpairs" in xcdata or "prevonepathpairs" in xcdata:
 		var shortestpathseglengthsq = -1.0
@@ -887,7 +892,7 @@ func updatexcshellmesh(xctubeshellmesh):
 			add_child(xcflatshell)
 		$XCflatshell/MeshInstance.mesh = xctubeshellmesh
 		$XCflatshell/CollisionShape.shape.set_faces(xctubeshellmesh.get_faces())
-		get_node("/root/Spatial/MaterialSystem").updatetubesectormaterial($XCflatshell, xcflatshellmaterial, false)
+		get_node("/root/Spatial/MaterialSystem").updateflatshellmaterial(self, xcflatshellmaterial, false)
 	else:
 		if has_node("XCflatshell"):
 			$XCflatshell.queue_free()

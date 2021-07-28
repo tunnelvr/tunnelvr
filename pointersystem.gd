@@ -563,7 +563,7 @@ func buttonpressed_vrgrip():
 	elif pointertargettype == "XCflatshell":
 		activetargetxcflatshell = pointertargetwall
 		var xcflatshellmaterialname = activetargetxcflatshell.xcflatshellmaterial
-		materialsystem.updatetubesectormaterial(activetargetxcflatshell.get_node("XCflatshell"), xcflatshellmaterialname, true)
+		materialsystem.updateflatshellmaterial(activetargetxcflatshell, xcflatshellmaterialname, true)
 
 	gripmenu.gripmenuon(LaserOrient.global_transform, pointertargetpoint, pointertargetwall, pointertargettype, activetargettube, activetargettubesectorindex, activetargetwall, activetargetnode)
 	
@@ -1173,7 +1173,7 @@ func buttonreleased_vrgrip():
 										 }])
 			gripmenu.disableallgripmenus()
 			return
-		materialsystem.updatetubesectormaterial(activetargetxcflatshell.get_node("XCflatshell"), activetargetxcflatshell.xcflatshellmaterial, false)
+		materialsystem.updateflatshellmaterial(activetargetxcflatshell, activetargetxcflatshell.xcflatshellmaterial, false)
 		activetargetxcflatshell = null
 
 	if activetargetwallgrabbedtransform != null:

@@ -124,12 +124,16 @@ func _on_button_down(b):
 	var raycastcollisionpoint = global_transform.xform(local_point)
 	var sketchsystem = get_node("/root/Spatial/SketchSystem")
 	Tglobal.soundsystem.quicksound("ClickSound", raycastcollisionpoint)
-
+	Tglobal.soundsystem.shortvibrate(false, 0.03, 1.0)
+			
 func _on_button_up(b):
 	_last_button_down_hack = null;
 	var ev = _create_input_event(b, false);
 	if ev:
 		viewportforvirtualkeyboard.input(ev)
+
+func _on_mouse_entered():
+	Tglobal.soundsystem.shortvibrate(false, 0.025, 1.0)
 
 func _create_button(_parent, text, x, y, w = 1, h = 1):
 	var b = _refrence_button.duplicate();
@@ -147,7 +151,8 @@ func _create_button(_parent, text, x, y, w = 1, h = 1):
 	
 	b.connect("button_down", self, "_on_button_down", [b]);
 	b.connect("button_up", self, "_on_button_up", [b]);
-	
+	b.connect("mouse_entered", self, "_on_mouse_entered");
+		
 	_parent.add_child(b);
 	return b;
 

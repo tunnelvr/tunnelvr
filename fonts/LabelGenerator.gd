@@ -33,7 +33,15 @@ func _ready():
 	regexrichtextcodes.compile('\\[[^\\]\n]*\\]')
 	var materialsystem = get_node("/root/Spatial/MaterialSystem")
 	stationnodematerial = materialsystem.nodematerial("station")
+	if has_node("ViewportReal"):
+		var frtl = $Viewport/RichTextLabel
+		$Viewport.remove_child(frtl)
+		$ViewportReal.add_child(frtl)
+		$Viewport.set_name("ViewportFake")
+		$ViewportReal.set_name("Viewport")
+		$ViewportLabelPreview.get_surface_material(0).albedo_texture = $Viewport.get_texture()
 	set_process(false)
+	
 			
 func addnodestolabeltask(centrelinedrawing):
 	var commonroot = ""
@@ -94,6 +102,7 @@ func _process(delta):
 			if maxnumchars == 0:
 				maxnumchars = 1
 			numcharsofeachline.push_back(maxnumchars)
+			$Viewport/RichTextLabel.get("custom_styles/normal").bg_color = Color(0.5, 0.2, 0.2) if clabeltext != labeltext else Color(0.4, 0.4, 0.2)
 			
 		else:
 			workingxccentrelinedrawingname = remainingxcnodenames.back()[0]
@@ -110,6 +119,7 @@ func _process(delta):
 				maxnumchars = max(maxnumchars, len(lnodelabel))
 			clabeltext = PoolStringArray(labeltextlines).join("\n")
 			labeltext = clabeltext
+			$Viewport/RichTextLabel.get("custom_styles/normal").bg_color = Color(0.3, 0.3, 0.3)
 
 		$Viewport/RichTextLabel.bbcode_text = clabeltext
 		$Viewport.size.x = maxnumchars*monospacefontcharwidth  # monospace font
@@ -126,7 +136,7 @@ func _process(delta):
 	elif workingropexcnodename != null:
 		var img = $Viewport.get_texture().get_data()
 		var tex = ImageTexture.new()
-		tex.create_from_image(img)
+		tex.create_from_image(img, Texture.FLAG_MIPMAPS|Texture.FLAG_REPEAT)
 		var workingropexcdrawing = get_node("/root/Spatial/SketchSystem/XCdrawings").get_node_or_null(workingropexcdrawingname)
 		if workingropexcdrawing != null:
 			var workingropexcnode = workingropexcdrawing.get_node("XCnodes").get_node_or_null(workingropexcnodename)

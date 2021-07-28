@@ -22,6 +22,12 @@ enum { VIZ_XCD_HIDE 				= 0
 	   VIZ_XCD_FLOOR_DELETED 		= 0b010001,
 	 }
 
+enum { RH_NORMAL = 0,
+	   RH_STAL = 1,
+	   RH_BOULDER = 2,
+	   RH_FLAGSIGN = 3
+	 }
+
 enum { FS_NORMAL = 0,
 	   FS_PHOTO	= 1
 	   FS_GHOSTLY = 2,

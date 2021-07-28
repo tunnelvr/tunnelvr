@@ -19,6 +19,19 @@ func updatetubesectormaterial(xctubesector, name, highlighted):
 	xctubesector.get_node("MeshInstance").set_surface_material(0, tubematerial(name, highlighted))
 	xctubesector.collision_layer = CollisionLayer.CL_CaveWallTrans if name == "hole" else CollisionLayer.CL_CaveWall
 
+func updateflatshellmaterial(xcdrawing, name, highlighted):
+	var xctubesector = xcdrawing.get_node("XCflatshell")
+	xctubesector.visible = true
+	xctubesector.get_node("CollisionShape").disabled = false
+	xctubesector.get_node("MeshInstance").set_surface_material(0, tubematerial(name, highlighted))
+	if name == "hole":
+		xctubesector.collision_layer = CollisionLayer.CL_CaveWallTrans
+	elif xcdrawing.drawingtype == DRAWING_TYPE.DT_ROPEHANG and xcdrawing.ropehangdetectedtype == DRAWING_TYPE.RH_FLAGSIGN:
+		xctubesector.collision_layer = CollisionLayer.CL_CaveWallTrans
+	else:
+		xctubesector.collision_layer = CollisionLayer.CL_CaveWall
+
+
 func nodematerial(mtype):
 	var mm = $nodematerial.get_node(mtype)
 	return mm.get_surface_material(0)
