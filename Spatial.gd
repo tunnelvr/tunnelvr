@@ -125,6 +125,8 @@ func _ready():
 			OS.vsync_enabled = false;
 			print("  Success initializing OpenVR Interface.");
 			playerMe.playerplatform = "Vive"
+			get_node("/root/Spatial/BodyObjects/PlayerDirections").snapturnemovementjoystick = DRAWING_TYPE.JOYPOS_RIGHTCONTROLLER_PADDOWN
+			
 		else:
 			Tglobal.arvrinterface = null
 			Tglobal.arvrinterfacename = "none"

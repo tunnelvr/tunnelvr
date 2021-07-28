@@ -92,7 +92,10 @@ func _physics_process(delta):
 	if strafemovementjoystick != DRAWING_TYPE.JOYPOS_DISABLED:
 		joyposstrafe = HandLeft.joypos.x if forebackmovementjoystick == DRAWING_TYPE.JOYPOS_LEFTCONTROLLER else HandRight.joypos.x
 	if snapturnemovementjoystick != DRAWING_TYPE.JOYPOS_DISABLED:
-		joypossnapturn = HandLeft.joypos.x if snapturnemovementjoystick == DRAWING_TYPE.JOYPOS_LEFTCONTROLLER else HandRight.joypos.x
+		if snapturnemovementjoystick == DRAWING_TYPE.JOYPOS_RIGHTCONTROLLER_PADDOWN:
+			joypossnapturn = HandRight.joypos.x*(2 if HandRight.vrpadbuttonheld else 0.2)
+		else:
+			joypossnapturn = HandLeft.joypos.x if snapturnemovementjoystick == DRAWING_TYPE.JOYPOS_LEFTCONTROLLER else HandRight.joypos.x
 
 	if not Tglobal.virtualkeyboardactive:
 		if not Input.is_action_pressed("lh_shift"):
@@ -142,9 +145,9 @@ func _on_button_pressed(p_button):
 		var joypos = HandLeft.joypos
 		if abs(joypos.y) < 0.5 and abs(joypos.x) > 0.1:
 			nextphysicsrotatestep += (1 if joypos.x > 0 else -1)*(22.5 if abs(joypos.x) > 0.8 else 90.0)
-			if Tglobal.arvrinterfacename != "OVRMobile" and Tglobal.arvrinterfacename != "Oculus":
-				print("clicked turn (touchpad type), disabling non-click snap rotate")
-				joyposxrotsnaphysteresis = 2
+			#if Tglobal.arvrinterfacename != "OVRMobile" and Tglobal.arvrinterfacename != "Oculus":
+			#	print("clicked turn (touchpad type), disabling non-click snap rotate")
+			#	joyposxrotsnaphysteresis = 2
 	elif p_button == BUTTONS.VR_BUTTON_BY:
 		playerMe.seteyestate(true)
 		

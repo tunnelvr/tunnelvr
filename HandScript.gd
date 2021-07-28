@@ -38,6 +38,7 @@ var mousecontrollermotioncumulative = Vector2(0, 0)
 var gripbuttonheld := false
 var triggerbuttonheld = false
 var vrbybuttonheld = false
+var vrpadbuttonheld = false
 var indexfingerpinchbutton = null
 var middlefingerpinchbutton = null
 var middleringbutton = null
@@ -320,6 +321,7 @@ func process_normalvrtracking(delta):
 	gripbuttonheld = handcontroller.is_button_pressed(BUTTONS.VR_GRIP)
 	triggerbuttonheld = handcontroller.is_button_pressed(BUTTONS.VR_TRIGGER)
 	vrbybuttonheld = handcontroller.is_button_pressed(BUTTONS.VR_BUTTON_BY)
+	vrpadbuttonheld = handcontroller.is_button_pressed(BUTTONS.VR_PAD)
 	if handstate == HS_TOUCHCONTROLLER:
 		transform = handcontroller.transform
 	else:
