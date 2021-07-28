@@ -29,6 +29,8 @@ var imageloadingthreadoperating = false
 var imageloadingthreaddrawingfile = null
 var imageloadingthreadloadedimagetexture = null
 
+onready var imagesystemreportslabel = get_node("/root/Spatial/GuiSystem/GUIPanel3D/Viewport/GUI/Panel/ImageSystemReports")
+
 func imageloadingthread_function(userdata):
 	print("imageloadingthread_function started")
 	while true:
@@ -159,17 +161,21 @@ func _process(delta):
 			httprequest.download_file = nonimagepage["fetchednonimagedataobjectfile"]
 			httprequest.request(nonimagepage["url"])
 			httprequestduration = 0.0
+			imagesystemreportslabel.text = "%d-%s" % [len(nonimagepageslist), "nonimage"]
+
 		else:
 			fetchednonimagedataobject = nonimagepage
 		pt = var2str(nonimagepage)
 		
 	if fetcheddrawing == null and fetchednonimagedataobject == null and httprequest == null and len(paperdrawinglist) > 0:
-		var paperdrawing = paperdrawinglist.pop_front()
+		var paperdrawing = paperdrawinglist.pop_back()
+		var fetchreporttype = ""
 		if paperdrawing.xcresource.begins_with("res://"):
 			fetcheddrawingfile = paperdrawing.xcresource
 			fetcheddrawing = paperdrawing
 			if not File.new().file_exists(fetcheddrawingfile):
 				fetcheddrawingfile = "res://guimaterials/imagefilefailure.png"
+			fetchreporttype = "res"
 		elif paperdrawing.xcresource.begins_with("http"):
 			fetcheddrawingfile = imgdir+getshortimagename(paperdrawing.xcresource, true, 6)
 			if paperdrawing.xcresource == defaultfloordrawing:
@@ -186,12 +192,16 @@ func _process(delta):
 				httprequest.download_file = fetcheddrawingfile
 				httprequest.request(paperdrawing.xcresource)
 				httprequestduration = 0.0
+				fetchreporttype = "request"
 			else:
 				print("using cached image ", fetcheddrawingfile)
 				fetcheddrawing = paperdrawing
+				fetchreporttype = "cache"
 		else:
 			fetcheddrawingfile = "res://guimaterials/imagefilefailure.png"
+			fetchreporttype = "fail"
 		pt = var2str(httprequest)
+		imagesystemreportslabel.text = "%d-%s" % [len(paperdrawinglist), fetchreporttype]
 
 	elif fetcheddrawing != null and not imageloadingthreadoperating:
 		imageloadingthreadmutex.lock()
@@ -259,3 +269,14 @@ func fetchpaperdrawing(paperdrawing):
 	paperdrawinglist.push_back(paperdrawing)
 	set_process(true)
 	
+func shuffleimagetotopoflist(paperdrawing):
+	var fi = -1
+	for i in range(len(paperdrawinglist)):
+		if paperdrawinglist[i] == paperdrawing:
+			fi = i
+	if fi != -1:
+		print("shuffling from ", fi, " in list ", len(paperdrawinglist))
+		paperdrawinglist[fi] = paperdrawinglist[-1]
+		paperdrawinglist[-1] = paperdrawing
+	else:
+		print("image not in paperdrawinglist queue")

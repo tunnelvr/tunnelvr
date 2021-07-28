@@ -1529,6 +1529,7 @@ material = SubResource( 232 )
 
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
+enablevr = false
 
 [node name="Players" type="Spatial" parent="."]
 
@@ -1892,7 +1893,7 @@ __meta__ = {
 margin_left = 154.0
 margin_top = 194.0
 margin_right = 373.0
-margin_bottom = 263.0
+margin_bottom = 247.0
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -1931,6 +1932,13 @@ text = "FlagSign"
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="ImageSystemReports" type="Label" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
+margin_left = 161.0
+margin_top = 251.0
+margin_right = 376.0
+margin_bottom = 273.0
+text = "image system reports"
 
 [node name="ViewportReal" type="Viewport" parent="GuiSystem/GUIPanel3D"]
 size = Vector2( 380, 280 )

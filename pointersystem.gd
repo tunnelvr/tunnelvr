@@ -986,16 +986,14 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 				sketchsystem.actsketchchange(floormovedata)
 		clearactivetargetnode()
 
-	elif pointertargettype == "XCdrawing" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE and \
-					planviewsystem.planviewactive: 
-		if gripbuttonheld and planviewsystem.activetargetfloor == pointertargetwall:
-			sketchsystem.actsketchchange([planviewsystem.getactivetargetfloorViz("")])
-		else:
-			sketchsystem.actsketchchange([planviewsystem.getactivetargetfloorViz(pointertargetwall.get_name())])
+	elif pointertargettype == "XCdrawing" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
+		if planviewsystem.planviewactive:
+			if gripbuttonheld and planviewsystem.activetargetfloor == pointertargetwall:
+				sketchsystem.actsketchchange([planviewsystem.getactivetargetfloorViz("")])
+			else:
+				sketchsystem.actsketchchange([planviewsystem.getactivetargetfloorViz(pointertargetwall.get_name())])
 
-	elif pointertargettype == "XCdrawing" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE and \
-					(pointertargetwall.drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE_B) != 0: 
-		if gripbuttonheld:
+		elif (pointertargetwall.drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE_B) != 0 and gripbuttonheld: 
 			clearactivetargetnode()
 			var alaserspot = activelaserroot.get_node("LaserSpot")
 			alaserspot.global_transform.origin = pointertargetpoint
@@ -1015,6 +1013,10 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 			if Input.is_key_pressed(KEY_CONTROL) or handrightcontroller.is_button_pressed(BUTTONS.VR_BUTTON_AX):
 				activetargetwallgrabbedmotion = DRAWING_TYPE.GRABMOTION_ROTATION_ADDITIVE
 
+		else:
+			var imagesystem = get_node("/root/Spatial/ImageSystem")
+			imagesystem.shuffleimagetotopoflist(pointertargetwall)
+			
 	elif activetargetnode != null and pointertargettype == "XCnode" and (pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING or pointertargetwall.drawingtype == DRAWING_TYPE.DT_ROPEHANG):
 		if activetargetnodewall == pointertargetwall and (activetargetnodewall.drawingtype == DRAWING_TYPE.DT_XCDRAWING or activetargetnodewall.drawingtype == DRAWING_TYPE.DT_ROPEHANG):
 			var xcdata = { "name":pointertargetwall.get_name() }
