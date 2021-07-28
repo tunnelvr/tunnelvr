@@ -66,12 +66,17 @@ func _create_input_event(b, pressed):
 		if textedit != null:
 			textedit.release_focus()
 		return
-	elif (b == _shift_button):
+	elif b == _shift_button:
 		if (pressed): 
 			_toggle_case(!b.pressed); # button event is created before it is actually toggled
 		scancode = KEY_SHIFT;
-	elif (b == _backspace_button):
+	elif b == _delete_button:
 		scancode = KEY_BACKSPACE;
+	elif b == _clear_button:
+		scancode = KEY_CLEAR;
+		var textedit = viewportforvirtualkeyboard.get_node("GUI").get_focus_owner()
+		if textedit != null and textedit.get_class() == "TextEdit":
+			textedit.text = ""
 	elif b == _left_button:
 		scancode = KEY_LEFT
 	elif b == _right_button:
@@ -158,7 +163,8 @@ func _create_button(_parent, text, x, y, w = 1, h = 1):
 
 var _toggle_symbols_button : Button = null;
 var _shift_button : Button = null;
-var _backspace_button : Button = null;
+var _delete_button : Button = null;
+var _clear_button : Button = null;
 var _enter_button : Button = null;
 var _space_button : Button = null;
 var _cancel_button : Button = null;
@@ -175,8 +181,8 @@ func _create_keyboard_buttons():
 	_shift_button = _create_button(_virtual_keyboard, "&#21E7;".xml_unescape(), 0, 3, 1, 2);
 	_shift_button.toggle_mode = true;
 	
-	_backspace_button = _create_button(_virtual_keyboard, "Del", 11+1, 1, 2, 1); # "&#232B;".xml_unescape()
-	_backspace_button.set_rotation(deg2rad(90.0));
+	_delete_button = _create_button(_virtual_keyboard, "&#232B;".xml_unescape(), 11, 1, 1, 1); # "&#232B;".xml_unescape()
+	_clear_button = _create_button(_virtual_keyboard, "&#25A1;".xml_unescape(), 11, 2, 1, 1);
 	_enter_button = _create_button(_virtual_keyboard, "&#23CE;".xml_unescape(), 11, 3, 1, 2);
 	
 	_space_button = _create_button(_virtual_keyboard, "Space", 2, 4, 6, 1);
