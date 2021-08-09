@@ -1519,13 +1519,14 @@ height = 1.1
 [sub_resource type="SpatialMaterial" id=232]
 albedo_color = Color( 0.168627, 0.972549, 0.027451, 1 )
 
+[sub_resource type="PointMesh" id=234]
+
 [sub_resource type="ShaderMaterial" id=233]
 shader = ExtResource( 65 )
 shader_param/albedo = Color( 1, 1, 1, 1 )
-shader_param/point_scale = 8.0
-
-[sub_resource type="PointMesh" id=234]
-material = SubResource( 233 )
+shader_param/point_scale = 16.0
+shader_param/highlightplaneperp = Vector3( 0, 1, 0 )
+shader_param/highlightplanedot = 0.0
 
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
@@ -3758,7 +3759,7 @@ script = ExtResource( 62 )
 transform = Transform( -0.766044, 0, 0.642788, 0, 1, 0, 0.642788, 0, 0.766044, 2, 0.2, -4 )
 visible = false
 mesh = SubResource( 234 )
-material/0 = null
+material/0 = SubResource( 233 )
 script = ExtResource( 64 )
 
 [connection signal="timeout" from="MQTTExperiment/mqttnode/Timer" to="MQTTExperiment/mqttnode" method="_on_Timer_timeout"]

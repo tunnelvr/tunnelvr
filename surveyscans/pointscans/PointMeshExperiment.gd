@@ -48,6 +48,11 @@ func colouredpointmeshfromcsvfile(st, csvname):
 		v = fin.get_csv_line()
 	fin.close()
 
+func sethighlightplane(planetransform):
+	var mat = get_surface_material(0)
+	mat.set_shader_param("highlightplaneperp", planetransform.basis.z)
+	mat.set_shader_param("highlightplanedot", planetransform.basis.z.dot(planetransform.origin))
+	
 	
 #func _ready():
 func LoadPointMesh():

@@ -608,6 +608,12 @@ func xcdrawingfromdata(xcdata, fromremotecall):
 	if xcdrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
 		if "xcresource" in xcdata and xcdrawing.drawingvisiblecode != DRAWING_TYPE.VIZ_XCD_FLOOR_HIDDEN and xcdrawing.drawingvisiblecode != DRAWING_TYPE.VIZ_XCD_FLOOR_DELETED:
 			get_node("/root/Spatial/ImageSystem").fetchpaperdrawing(xcdrawing)
+
+	if xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING and xcdrawing == pointersystem.activetargetwall and "transformpos" in xcdata:
+		var pointmeshexperiment = get_node("/root/Spatial/PointMeshExperiment")
+		if pointmeshexperiment != null and pointmeshexperiment.visible:
+			pointmeshexperiment.sethighlightplane(xcdrawing.transform)
+		
 	return xcdrawing
 
 var playeroriginXCSorter = Vector3(0, 0, 0)

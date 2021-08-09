@@ -194,6 +194,9 @@ func setactivetargetwall(newactivetargetwall):
 
 	if activetargetwall != null and activetargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		print("newactivetargetwall ", activetargetwall, " nodes ", activetargetwall.get_node("XCnodes").get_child_count())
+		var pointmeshexperiment = get_node("/root/Spatial/PointMeshExperiment")
+		if pointmeshexperiment != null and pointmeshexperiment.visible:
+			pointmeshexperiment.sethighlightplane(activetargetwall.transform)
 	else:
 		print("newactivetargetwall notdrawing ", activetargetwall)
 	
