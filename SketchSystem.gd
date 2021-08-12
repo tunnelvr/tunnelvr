@@ -265,8 +265,8 @@ remote func actsketchchangeL(xcdatalist):
 			actsketchchangeundostack.push_back(xcdatalist)
 
 	if "sketchname" in xcdatalist[0]:
-		sketchname = xcdatalist[0]["sketchname"]
 		if sketchname != "importing_the_centreline__do_not_clear":
+			sketchname = xcdatalist[0]["sketchname"]
 			get_node("/root/Spatial/GuiSystem/GUIPanel3D").setsavegamefilename(sketchname)
 		
 	var xcdrawingstoupdate = { }
@@ -460,7 +460,7 @@ remote func actsketchchangeL(xcdatalist):
 						tpos = xcn.translation
 				if tpos != null:
 					Tglobal.soundsystem.quicksound(sname, xcdrawing.global_transform*tpos)
-			elif xcdata.has("drawingvisiblecode"):
+			elif xcdata.has("drawingvisiblecode") and xcdrawing != null:
 				xcdrawingstoupdatevisiblecodes[xcdrawing.get_name()] = xcdata["drawingvisiblecode"]
 				
 	for xcdrawing in xcdrawingstoupdate.values():

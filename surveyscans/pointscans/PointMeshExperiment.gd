@@ -62,6 +62,9 @@ func LoadPointMesh():
 	var fcheck = File.new()
 	var plyname = "res://surveyscans/pointscans/WSC 10cm WGS1984 - Cloud.ply"
 	var csvname = "res://surveyscans/pointscans/smallcloud.csvn"
+	var position = Vector3(-205, 8, -6)
+	csvname = "res://surveyscans/pointscans/jiahedong.csvn"
+	position = Vector3(0, 4, 0)
 	var colcsvname = "res://surveyscans/pointscans/alexroom.csvn"
 	if false and fcheck.file_exists(plyname):
 		pointmeshfromplyfile(st, plyname, 200000)
@@ -69,7 +72,7 @@ func LoadPointMesh():
 		#transform.origin = Vector3(0, 0, -6)
 		yield(colouredpointmeshfromcsvfile(st, colcsvname), "completed")
 	elif fcheck.file_exists(csvname):
-		transform.origin = Vector3(-205, 8, -6)
+		transform.origin = position
 		print("Setting mesh position to ", transform.origin)
 		yield(pointmeshfromcsvfile(st, csvname), "completed")
 	else:
