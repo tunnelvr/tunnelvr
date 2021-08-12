@@ -1,4 +1,4 @@
-## Introduction 
+# Introduction 
 
 **TunnelVR** is a follow-on from [TunnelX](https://github.com/CaveSurveying/tunnelx) -- a long-running 
 program for drawing up cave surveys.  It's based on the excellent 
@@ -10,15 +10,15 @@ You can make improvements to the map with your friends in VR.  It is easier and 
 because it is in 3D from the perspective of how you see it in the real life, rather than 
 as a technical 2D drawing with overlapping layers.
 
-## How to run
+# How to run
 
-### As a binary executable
+## As a binary executable
 
 Go to the [releases](https://github.com/goatchurchprime/tunnelvr/releases) page and download, unzip and run 
 the binary executable for your operating system.  Linux, Windows and Oculus Quest Android are available, and 
 iOS is sometimes available when someone makes a build on a Mac.
 
-### From sources
+## From sources
 
 This is super easy owing to the power of Godot.  
 
@@ -32,11 +32,11 @@ Download the godot_ovrmobile asset if you are deploying to the Oculus Quest
 
 Hit the "Play" button on the top right
 
-## Controls
+# Controls
 
-### The non-VR pancake flatscreen interface
+## The non-VR pancake flatscreen interface
 
-If you do not have a VR system, you can use TunnelVR in the following way:
+If you do not have a VR system, you can still run and control TunnelVR on a normal PC with a mouse:
 
 * Cursor keys or WASD keys will move forwards, backwards and rotate your camera view left and right.
 * Shift-Up/Down or W/S keys rotates your view up and down (nodding your head)
@@ -45,35 +45,47 @@ If you do not have a VR system, you can use TunnelVR in the following way:
 * Ctrl-Up/Down turns off gravity and flies forwards or backwards in the direction of view.  Try looking down first (Shift-S) then flying backwards (Ctrl-S) to get a view of the scene from above.
 * 'M'-key toggles control panel menu.  Use this to join the network (select Network Off -> tunnelvr.goatchurch.org.uk) will connect you to the main server where you can meet with other players and be shown around
  
-### In-VR controls
+## VR controls
 
-Controllers and hand tracking works.  Controller buttons animates the hands to the appropriate gesture: 
-* thumb and forefinger pinch is same as trigger button, 
-* thumb and middle finger pinch is grip button
-* thumb and pinky and ring finger at same time is menu button
+### *LEFT CONTROLLER* (movement)
+* **Thumb-stick** -- forwards and backwards and sideways slides in direction of view
+* **Trigger** -- slides on the ground in direction of the controller axis (short orange laser line)
+* **Grip** -- turns off gravity and allows flying or hovering (hold for as long as you wish to stay off the ground)
+* **Grip+Trigger** -- Flies in direction of controller axis
+* **Grip+Trigger+Thumbstick forward** -- Flies in direction of controller at 5x speed.
+* **Menu button (inset button lower left)** -- Open dialog window with further controls
 
-### *Left hand* is for movement.
-* Thumb-stick forwards and backwards -- slides in direction of view
-* Trigger -- slides in direction of the short orange laser emerging from the controller or hand
-* Thumb-stick left or right -- rotates view 45 degrees left or right
-* Grip -- turns off gravity and allows flying or hovering
-* Grip+Trigger -- Flies in direction of controller axis
-* Grip+Touchpad+Trigger -- Flies in direction of controller at 5x speed.
+### *RIGHT CONTROLLER* (drawing)
 
-### *Right hand* is for drawing.
-Cave walls are done by creating polygons in vertical (sometimes horizontal) XC panes and then joining nodes between these polygons to create tubes that are divided into sectors.
-There is a laser pointer coming out of the palm with a range of 50m.
-* Trigger on unselected node -- selects node and draws or deletes a line if there is a previously selected node.  
-If it is part of an unselected XC pane, then it selects the pane and the pointer will see through walls to reach it.
-* Trigger on selected node -- deselects node
-* Trigger on XC pane with node selected -- continues drawing a sequence
-* Grip+Trigger on XC pane -- Moves selected node
-* Grip+Trigger on selected node -- Deletes node
-* Grip+ungrip on selected XC pane -- deselects XC pane
-* Grip+ungrip otherwise -- deselects selected node
-* Trigger on an active tube, then release on disk then click a point on the disk -- Creates an intermediate node which distorts the wall of the tube
-* Grip on target+select menu option+release -- executes a context sensitive command or changes material
-* Menu button (above touchpad) -- Open dialog window with further controls
+Cave walls are made by creating polygons in vertical (sometimes horizontal) XC panes and then joining nodes between these polygons to create tubes that are divided into sectors.
+
+There is a long laser pointer with a range of 50m that makes contact with surfaces with a red ball.
+
+* **Trigger on unselected node** -- activates XC Plane, and selects the node.  If a node was already selected (it's yellow and there is yellow cursor line joining to it), then it adds or subtracts a line to it.
+* **Trigger on selected node** -- deselects node
+* **Trigger on XC Plane with node selected** -- continues drawing a sequence
+* **Grip+Trigger on XC pane with node selected** -- Moves selected node
+* **Grip+Trigger on selected node** -- Deletes node
+* **Grip+ungrip on selected XC pane** -- deselects XC Plane
+* **Grip+ungrip on node** -- deselects XC Plane and hides nodes 
+* **Trigger on an active tube, then release on disk then click a point on the disk** -- Creates an intermediate node which distorts the wall of the tube
+* **Trigger on an intermediate (purple) node, then release on disk then click a point on the disk** -- Moves the intermediate node.
+* **Trigger on an intermediate (purple) node, then release on disk then grip+click a point on the disk** -- Deletes the intermediate node.
+* **Grip on target+select menu option+release** -- executes a context sensitive command or changes material
+
+* **Thumb-stick left/right** -- snap rotates view 45 degrees left or right (consistent with most other VR games)
+
+* **Right hand facing face and moved rapidly towards face** -- shorten laser pointer to enter rope drawing mode
+* **Right hand facing face and moved rapidly away from face** -- return to normal pointer mode
+
+
+### Hand tracking
+For either hand:
+* **thumb and forefinger pinch** -- same as trigger button 
+* **thumb and middle finger pinch** -- same as grip button
+* **thumb and pinky and ring finger** -- menu button
+(Thumb-stick features are not accessible.)
+
 
 ### Grip menu options
 * SelectXC
@@ -81,22 +93,37 @@ If it is part of an unselected XC pane, then it selects the pane and the pointer
 * DeleteXC
 * DeleteTube
 
-### Gestures
-* Right hand twisted to the right and moved rapidly towards face -- shorten laser pointer to enter rope drawing mode
-* Right hand twisted to the right and moved rapidly away from face -- return to normal pointer mode
-
 ## Geometric principle
 
-The cave is made from a series of cross sections.  Most cross sections have a single contour, 
-but junctions can have two lines cutting the outer contour to separate it into three internal areas.
-Connections between nodes in one cross section to nodes in another cross section defines a tube.
-The tube goes between the internal area that spans the connections or the outer area if none do.
-Multiple connections divide the tube into sectors that can be assigned with different materials.
-Tubes should never self-intersect (where the planes of cross sections cut through the contour) or 
-intersect with other tubes.  It is always possible to change the cross-sections or insert new ones 
-to handle a difficult junction area.  In the extreme case, the cave could be modelled as a sliced 
-CAT scan with 1mm thick layers all perpendicular to the X-axis.  However, capability to 
-change the orientation of the slices makes the modelling more symetrical.
+The cave is made from a series of cross sections connected by one or several lines 
+to define a tube.  When more than one line connects two cross sections, the tube is 
+divided into sectors which can be individually coloured.  
+
+Most cross sections have a single contour.  If there is more than one area 
+defined in the cross section, then the tube connecting to the next cross section 
+is either to a single area, or to the outer contour, depending on which nodes 
+the connecting lines join to.
+
+Tubes can be distorted by the addition of intermediate nodes added to the sector lines.
+Nodes of a cross section can be pulled out of the plane by selecting and holding down the 
+right hand trigger on a node for 1 second, and then releasing at the appropriate position 
+along the perpendicular line.
+
+Side junctions are formed by setting the material of a sector to Hole (transparent), then 
+Right hand grip while pointing at the hole to bring up the context sensitive menu, and selecting 
+'HoleXC' to generate a hole type cross section (with green nodes), that can be used 
+exactly like a normal cross section, except that it is tied to the hole.
+
+## Rope type cross sections
+
+In rope drawing mode you have a short laser with a blue spherical cursor.  If 
+you push this into a wall and pull the trigger it starts a network of rope nodes 
+you can draw into space.  
+
+If the rope network as zero or two odd connected nodes, then it's a rope and 
+simulates dangling down under gravity.
+
+You can also make stalactites, rocks and signposts in rope drawing mode.
 
 ## Input data
 
@@ -113,7 +140,7 @@ local area network, then doing Network Off -> Local-network will find and connec
 
 Download the [headless server version](https://godotengine.org/download/server), unpack the linux zip file, then execute:
 
-> ./Godot_v3.3.1-stable_linux_server.64  --main-pack tunnelvr_v0.5.0.pck
+> ./Godot_v3.3.2-stable_linux_server.64  --main-pack tunnelvr_v0.6.3.pck
 
 Execute this in a [screen](https://linuxize.com/post/how-to-use-linux-screen/) terminal window to allow it to persist.  
 
