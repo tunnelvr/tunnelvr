@@ -1,4 +1,4 @@
-[gd_scene load_steps=308 format=2]
+[gd_scene load_steps=312 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/default_env.tres" type="Environment" id=2]
@@ -73,6 +73,8 @@
 [ext_resource path="res://assets/ovrmodels/right_hand_model.glb" type="PackedScene" id=71]
 [ext_resource path="res://assets/ovrmodels/left_hand_model.glb" type="PackedScene" id=72]
 [ext_resource path="res://assets/ovrmodels/OculusQuestTouchController_Left_Reactive.gltf" type="PackedScene" id=73]
+[ext_resource path="res://potreework/PotreeExperiments.gd" type="Script" id=74]
+[ext_resource path="res://potreework/Onode.gd" type="Script" id=75]
 
 [sub_resource type="CubeMesh" id=1]
 size = Vector3( 0.35, 0.01, 0.01 )
@@ -1527,6 +1529,15 @@ shader_param/albedo = Color( 1, 1, 1, 1 )
 shader_param/point_scale = 16.0
 shader_param/highlightplaneperp = Vector3( 0, 1, 0 )
 shader_param/highlightplanedot = 0.0
+
+[sub_resource type="SpatialMaterial" id=236]
+flags_transparent = true
+flags_do_not_receive_shadows = true
+params_cull_mode = 2
+albedo_color = Color( 0.894118, 0.0941176, 0.901961, 0.290196 )
+
+[sub_resource type="CubeMesh" id=235]
+material = SubResource( 236 )
 
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
@@ -3762,5 +3773,14 @@ visible = false
 mesh = SubResource( 233 )
 material/0 = SubResource( 234 )
 script = ExtResource( 64 )
+
+[node name="PotreeExperiments" type="Spatial" parent="."]
+script = ExtResource( 74 )
+
+[node name="root" type="MeshInstance" parent="PotreeExperiments"]
+cast_shadow = 0
+mesh = SubResource( 235 )
+material/0 = null
+script = ExtResource( 75 )
 
 [connection signal="timeout" from="MQTTExperiment/mqttnode/Timer" to="MQTTExperiment/mqttnode" method="_on_Timer_timeout"]

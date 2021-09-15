@@ -16,12 +16,6 @@ remote func initplayerappearanceJ(playerappearance):
 	playertunnelvrversion = playerappearance.get("tunnelvrversion", "unknown")
 	executingfeaturesavailable = playerappearance.get("executingfeaturesavailable", [ ])
 	playeroperatingsystem = playerappearance.get("playeroperatingsystem", "unknown")
-	if playerplatform == "Server":
-		if false and playeroperatingsystem == "unknown" and len(executingfeaturesavailable) == 0:
-			executingfeaturesavailable.append("parse3ddmp_centreline")
-			print("Force appending parse3ddmp_centreline to server executingfeatures")
-		else:
-			print("** no longer need to append parse3ddmp_centreline to server executingfeatures")
 
 	puppetsetheadtorchlight(playerappearance.get("torchon", false))
 	var guardianpoly = playerappearance.get("guardianpoly", null)

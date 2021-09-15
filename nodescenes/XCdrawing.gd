@@ -499,7 +499,7 @@ func mergexcrpcdata(xcdata):
 				onepathpairs[j+1] = onepathpairs[-1]
 				onepathpairs.resize(len(onepathpairs) - 2)
 		for i in range(0, len(onepathpairsAdd), 2):
-			var j = pairpresentindex(onepathpairsAdd[i], onepathpairsAdd[i+1])
+			var j = pairpresentindex(onepathpairsAdd[i], onepathpairsAdd[i+1]) if drawingtype != DRAWING_TYPE.DT_CENTRELINE else -1
 			if j == -1:
 				onepathpairs.push_back(onepathpairsAdd[i])
 				onepathpairs.push_back(onepathpairsAdd[i+1])
