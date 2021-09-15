@@ -1530,14 +1530,14 @@ shader_param/point_scale = 16.0
 shader_param/highlightplaneperp = Vector3( 0, 1, 0 )
 shader_param/highlightplanedot = 0.0
 
-[sub_resource type="SpatialMaterial" id=236]
+[sub_resource type="SpatialMaterial" id=235]
 flags_transparent = true
 flags_do_not_receive_shadows = true
 params_cull_mode = 2
 albedo_color = Color( 0.894118, 0.0941176, 0.901961, 0.290196 )
 
-[sub_resource type="CubeMesh" id=235]
-material = SubResource( 236 )
+[sub_resource type="CubeMesh" id=236]
+material = SubResource( 235 )
 
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
@@ -3779,7 +3779,7 @@ script = ExtResource( 74 )
 
 [node name="root" type="MeshInstance" parent="PotreeExperiments"]
 cast_shadow = 0
-mesh = SubResource( 235 )
+mesh = SubResource( 236 )
 material/0 = null
 script = ExtResource( 75 )
 

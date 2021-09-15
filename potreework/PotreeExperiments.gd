@@ -1,11 +1,14 @@
 extends Spatial
 
-var d = "/home/julian/data/pointclouds/potreetests/outdir/"
+#var d = "/home/julian/data/pointclouds/potreetests/outdir/"
+# PotreeConverter --source xxx.laz --outdir outdir --attributes position_cartesian --method poisson
+var d = "D:/potreetests/outdir/"
 
 var metadata = null
 var mdscale = Vector3(1,1,1)
 var mdoffset = Vector3(0,0,0)
 var nodestoload = [ ]
+var nodestoread = [ ]
 var fhierarchy = File.new()
 var foctree = File.new()
 
@@ -14,6 +17,7 @@ func loadotree():
 	fmetadata.open(d+"metadata.json", File.READ)
 	metadata = parse_json(fmetadata.get_as_text())
 	mdoffset = Vector3(metadata["offset"][0], metadata["offset"][1], metadata["offset"][2])
+	mdoffset = Vector3(0,0,0)
 	mdscale = Vector3(metadata["scale"][0], metadata["scale"][1], metadata["scale"][2])
 	if not fhierarchy.is_open():
 		fhierarchy.open(d+"hierarchy.bin", File.READ)
@@ -27,19 +31,27 @@ func loadotree():
 	root.mesh.size = mdmax-mdmin
 	root.transform.origin = (mdmax-mdmin)/2-mdoffset
 	root.spacing = metadata["spacing"]
-	var nodes = root.loadtreechunk(fhierarchy)
 	
-	for node in nodes:
-		if not node.isnotloaded:
-			nodestoload.append(node)
+	nodestoload.append(root)
 
 
 func _input(event):
 	if event is InputEventKey and event.scancode == KEY_7 and event.pressed:
 		loadotree()
 	if event is InputEventKey and event.scancode == KEY_6 and event.pressed:
+		if len(nodestoload) != 0:
+			var lnode = nodestoload.pop_front()
+			var nodes = lnode.loadtreechunk(fhierarchy)
+			for node in nodes:
+				if node.isnotloaded:
+					nodestoload.append(node)
+				else:
+					nodestoread.append(node)
+	if event is InputEventKey and event.scancode == KEY_5 and event.pressed:
 		if not foctree.is_open():
 			foctree.open(d+"octree.bin", File.READ)
-		for i in range(20):
-			nodestoload[i].loadpoints(foctree, mdscale, mdoffset)
+		for i in range(0, 20):
+			if len(nodestoread) != 0:
+				var rnode = nodestoread.pop_front()
+				rnode.loadpoints(foctree, mdscale, mdoffset)
 		

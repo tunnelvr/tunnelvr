@@ -15,7 +15,7 @@ func pointmeshfromplyfile(st, plyname, maxNpoints):
 			break
 	fin.close()
 
-func pointmeshfromcsvfile(st, csvname):
+func pointmeshfromcsvfile(st, csvname, chunksize=500):
 	print("Loading pointmesh ", csvname)
 	var fin = File.new()
 	fin.open(csvname, File.READ)
@@ -23,7 +23,7 @@ func pointmeshfromcsvfile(st, csvname):
 	var n = 0
 	while len(v) == 3:
 		n += 1
-		if (n%500) == 0:
+		if (n%chunksize) == 0:
 			print("pause at ", n)
 			#yield(get_tree().create_timer(0.05), "timeout")
 			yield(get_tree(), "idle_frame")
@@ -63,8 +63,11 @@ func LoadPointMesh():
 	var plyname = "res://surveyscans/pointscans/WSC 10cm WGS1984 - Cloud.ply"
 	var csvname = "res://surveyscans/pointscans/smallcloud.csvn"
 	var position = Vector3(-205, 8, -6)
+	var chunksize = 500
 	csvname = "res://surveyscans/pointscans/jiahedong.csvn"
+	csvname = "res://surveyscans/pointscans/jiahedong_big.csvn"
 	position = Vector3(0, 4, 0)
+	chunksize = 25000
 	var colcsvname = "res://surveyscans/pointscans/alexroom.csvn"
 	if false and fcheck.file_exists(plyname):
 		pointmeshfromplyfile(st, plyname, 200000)
@@ -74,7 +77,7 @@ func LoadPointMesh():
 	elif fcheck.file_exists(csvname):
 		transform.origin = position
 		print("Setting mesh position to ", transform.origin)
-		yield(pointmeshfromcsvfile(st, csvname), "completed")
+		yield(pointmeshfromcsvfile(st, csvname, chunksize), "completed")
 	else:
 		print("point cloud files not found")
 		for i in range(400):

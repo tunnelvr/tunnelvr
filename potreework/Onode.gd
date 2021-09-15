@@ -9,7 +9,7 @@ var byteOffset = 0
 var byteSize = 0
 
 func loadpoints(foctree, mdscale, mdoffset):
-	var mat = get_node("/root/Spatial/PointMeshExperiment").mesh.surface_get_material(0)
+	var mat = get_node("/root/Spatial/PointMeshExperiment").get_surface_material(0)
 	var st = SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_POINTS)
 	foctree.seek(byteOffset)
@@ -18,8 +18,8 @@ func loadpoints(foctree, mdscale, mdoffset):
 		st.add_vertex(p-global_transform.origin)
 	var pointsmesh = Mesh.new()
 	st.commit(pointsmesh)
-	pointsmesh.surface_set_material(0, mat)
 	mesh = pointsmesh
+	set_surface_material(0, mat)
 
 	
 func loadtreechunk(fhierarchy):
