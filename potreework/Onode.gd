@@ -7,22 +7,25 @@ var isleaf = false
 var numPoints = 0
 var byteOffset = 0
 var byteSize = 0
+var pointmaterial = null
 
-func loadpoints(foctree, mdscale, mdoffset):
-	var mat = get_node("/root/Spatial/PointMeshExperiment").get_surface_material(0)
+func loadoctcellpoints(foctree, mdscale, mdoffset):
 	var st = SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_POINTS)
 	foctree.seek(byteOffset)
 	for i in range(numPoints):
-		var p = Vector3(foctree.get_32(), foctree.get_32(), foctree.get_32())*mdscale # + mdoffset
+		var v0 = foctree.get_32()
+		var v1 = foctree.get_32()
+		var v2 = foctree.get_32()
+		var p = Vector3(v0*mdscale.x + mdoffset.x, v2*mdscale.y + mdoffset.y, -v1*mdscale.z + mdoffset.z)
 		st.add_vertex(p-global_transform.origin)
 	var pointsmesh = Mesh.new()
 	st.commit(pointsmesh)
 	mesh = pointsmesh
-	set_surface_material(0, mat)
+	set_surface_material(0, pointmaterial)
 
 	
-func loadtreechunk(fhierarchy):
+func loadtreechunk(fhierarchy, duplicatepointmaterial):
 	assert (isnotloaded)
 	fhierarchy.seek(byteOffset)
 	var nodes = [ self ]
@@ -51,9 +54,14 @@ func loadtreechunk(fhierarchy):
 													 cnode.mesh.size.y/2 if childIndex & 0b0010 else -cnode.mesh.size.y/2, 
 													 cnode.mesh.size.z/2 if childIndex & 0b0100 else -cnode.mesh.size.z/2)
 					cnode.spacing = pnode.spacing/2
+					if duplicatepointmaterial:
+						cnode.pointmaterial = pnode.pointmaterial.duplicate()
+						cnode.pointmaterial.set_shader_param("point_scale", pnode.pointmaterial.get_shader_param("point_scale")/2)
+					else:
+						cnode.pointmaterial = pnode.pointmaterial
 					assert (not pnode.has_node(cnode.name))
 					pnode.add_child(cnode)
 					nodes.append(cnode)
-	return nodes.slice(1, len(nodes))
+	return nodes
 
 
