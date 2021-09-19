@@ -1,29 +1,29 @@
 {
   "nodes": {
-    "godot": {
+    "godot-source": {
       "flake": false,
       "locked": {
-        "lastModified": 1621856353,
-        "narHash": "sha256-oHxdVKICJX9mQvTB2zGa9TfMTnsKK6TMsXp/vpY21WU=",
+        "lastModified": 1629358050,
+        "narHash": "sha256-L4NBUlC58H3hCi4yvqbsahpLVgwA077Q7Fw5zSN4di4=",
         "owner": "godotengine",
         "repo": "godot",
-        "rev": "7610409b8a14b8499763efa76578795c755a846d",
+        "rev": "b973f997ff56bd9ad4c0a521e123cc4aee13135d",
         "type": "github"
       },
       "original": {
         "owner": "godotengine",
-        "ref": "3.3.2-stable",
+        "ref": "3.3.3-stable",
         "repo": "godot",
         "type": "github"
       }
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1622972307,
-        "narHash": "sha256-ENOu0FPCf95iLLoq2txhJtnA2ZpOFhIVBqQVbKM8ra0=",
+        "lastModified": 1632025165,
+        "narHash": "sha256-vFHkvmdwbJAFg2d60CQ4fbqpEAUFXR0SO3HRWI4+bXM=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "d8eb97e3801bde96491535f40483d550b57605b9",
+        "rev": "a54d2e72e282f2bc68c49f82c735cf664244ec75",
         "type": "github"
       },
       "original": {
@@ -35,7 +35,7 @@
     },
     "root": {
       "inputs": {
-        "godot": "godot",
+        "godot-source": "godot-source",
         "nixpkgs": "nixpkgs",
         "survex": "survex",
         "tunnelvr": "tunnelvr"

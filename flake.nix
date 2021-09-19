@@ -5,8 +5,8 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
     survex.url = "github:matthewcroughan/nixpkgs/add-survex";
-    godot = {
-      url = "github:godotengine/godot/3.3.2-stable";
+    godot-source = {
+      url = "github:godotengine/godot/3.3.3-stable";
       flake = false;
     };
     tunnelvr = {
@@ -15,7 +15,22 @@
     };
   };
 
-  outputs = { self, nixpkgs, godot, tunnelvr, survex }: {
+  outputs = { self, nixpkgs, godot-source, tunnelvr, survex }:
+    let
+      # Generate a user-friendly version numer.
+      version = builtins.substring 0 8 self.lastModifiedDate;
+
+      # System types to support.
+      supportedSystems = [ "x86_64-linux" "x86_64-darwin" ];
+
+      # Helper function to generate an attrset '{ x86_64-linux = f "x86_64-linux"; ... }'.
+      forAllSystems = f: nixpkgs.lib.genAttrs supportedSystems (system: f system);
+
+      # Nixpkgs instantiated for supported system types.
+      nixpkgsFor = forAllSystems (system: import nixpkgs { inherit system; overlays = [ self.overlay ]; });
+
+    in
+    {
 
 #    packages.x86_64-linux = let pkgs = import nixpkgs { system = "x86_64-linux"; }; in {
 #      tunnelvr = pkgs.callPackage ./nix/runcommand-tunnelvr.nix {};
@@ -28,15 +43,29 @@
         nixpkgs.overlays = [ self.overlay ];
       };
 
+    devShell = forAllSystems (system:
+      let
+        pkgs = nixpkgsFor."${system}";
+      in
+        pkgs.mkShell {
+          buildInputs = [
+            pkgs.my-godot
+          ];
+        }
+    );
+
     overlay = final: prev:
     let 
-      inherit (final) stdenv lib fetchFromGitHub godot-headless godot-export-templates fetchurl runCommandNoCC unzip;
+      inherit (final) stdenv lib fetchFromGitHub godot godot-headless godot-export-templates fetchurl runCommandNoCC unzip;
     in
     {
       my-godot-headless = godot-headless.overrideAttrs (oldAttrs: rec {
-        version = godot.rev;
-        src = godot;
-        patches = [];
+        version = godot-source.rev;
+        src = godot-source;
+      });
+      my-godot = godot.overrideAttrs (oldAttrs: rec {
+        version = godot-source.rev;
+        src = godot-source;
       });
 
       survex = survex.legacyPackages.x86_64-linux.survex;
