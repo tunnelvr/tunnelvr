@@ -51,6 +51,12 @@
           buildInputs = [
             pkgs.my-godot
           ];
+
+          shellHook = ''
+            run-godot(){
+              cd ../ && godot
+            }
+          '';
         }
     );
 
@@ -71,26 +77,26 @@
       survex = survex.legacyPackages.x86_64-linux.survex;
 
       tunnelvr = 
-      runCommandNoCC "tunnelvr" {
+        runCommandNoCC "tunnelvr" {
 
-        buildInputs = [ final.my-godot-headless godot-export-templates ];
+          buildInputs = [ final.my-godot-headless godot-export-templates ];
 
-        src = tunnelvr;
+          src = tunnelvr;
 
-      } ''
-        mkdir -p "$TMP/.config"
-        mkdir -p "$TMP/.local/share/godot/templates"
-        mkdir -p "$TMP/.config/godot/projects/"
-        export HOME=$TMP
-        export XDG_CONFIG_HOME="$TMP/.config"
-        export XDG_DATA_HOME="$TMP/.local/share"
-        ln -s ${godot-export-templates} "$TMP/.local/share"
+        } ''
+          mkdir -p "$TMP/.config"
+          mkdir -p "$TMP/.local/share/godot/templates"
+          mkdir -p "$TMP/.config/godot/projects/"
+          export HOME=$TMP
+          export XDG_CONFIG_HOME="$TMP/.config"
+          export XDG_DATA_HOME="$TMP/.local/share"
+          ln -s ${godot-export-templates} "$TMP/.local/share"
 
-        cp -r $src $TMP/src
-        chmod -R u+w -- "$TMP/src"
-        godot-headless --path "$TMP/src" --export-pack "Linux/X11" tunnelvr.pck
-        mv $TMP/src/tunnelvr.pck $out
-      '';
+          cp -r $src $TMP/src
+          chmod -R u+w -- "$TMP/src"
+          godot-headless --path "$TMP/src" --export-pack "Linux/X11" tunnelvr.pck
+          mv $TMP/src/tunnelvr.pck $out
+        '';
     };
   };
 }
