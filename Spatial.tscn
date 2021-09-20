@@ -3764,7 +3764,6 @@ material/0 = ExtResource( 65 )
 script = ExtResource( 64 )
 
 [node name="PotreeExperiments" type="Spatial" parent="."]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -100, 0, 0 )
 script = ExtResource( 74 )
 
 [node name="root" type="MeshInstance" parent="PotreeExperiments"]
