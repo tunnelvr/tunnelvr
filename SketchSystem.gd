@@ -613,6 +613,9 @@ func xcdrawingfromdata(xcdata, fromremotecall):
 		var pointmeshexperiment = get_node("/root/Spatial/PointMeshExperiment")
 		if pointmeshexperiment != null and pointmeshexperiment.visible:
 			pointmeshexperiment.sethighlightplane(xcdrawing.transform)
+		var potreeexperiments = get_node("/root/Spatial/PotreeExperiments")
+		if potreeexperiments != null and potreeexperiments.visible:
+			potreeexperiments.sethighlightplane(xcdrawing.transform)
 		
 	return xcdrawing
 

@@ -197,6 +197,10 @@ func setactivetargetwall(newactivetargetwall):
 		var pointmeshexperiment = get_node("/root/Spatial/PointMeshExperiment")
 		if pointmeshexperiment != null and pointmeshexperiment.visible:
 			pointmeshexperiment.sethighlightplane(activetargetwall.transform)
+		var potreeexperiments = get_node("/root/Spatial/PotreeExperiments")
+		if potreeexperiments != null and potreeexperiments.visible:
+			potreeexperiments.sethighlightplane(activetargetwall.transform)
+
 	else:
 		print("newactivetargetwall notdrawing ", activetargetwall)
 	

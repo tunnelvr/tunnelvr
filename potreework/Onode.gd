@@ -2,14 +2,15 @@ extends MeshInstance
 
 var childMask = 0
 var spacing = 0
-var isnotloaded = true
+var isdefinitionloaded = false
 var isleaf = false
 var numPoints = 0
 var byteOffset = 0
 var byteSize = 0
 var pointmaterial = null
 
-func loadoctcellpoints(foctree, mdscale, mdoffset):
+
+func loadoctcellpoints(foctree, mdscale, mdoffset, pointsizefactor):
 	var st = SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_POINTS)
 	foctree.seek(byteOffset)
@@ -22,44 +23,59 @@ func loadoctcellpoints(foctree, mdscale, mdoffset):
 	var pointsmesh = Mesh.new()
 	st.commit(pointsmesh)
 	mesh = pointsmesh
+	pointmaterial = load("res://potreework/pointcloudslice.material").duplicate()
+	pointmaterial.set_shader_param("point_scale", pointsizefactor*spacing)	
 	set_surface_material(0, pointmaterial)
 
-	
-func loadtreechunk(fhierarchy, duplicatepointmaterial):
-	assert (isnotloaded)
+func constructnode(parentnode, childIndex):
+	name = str(childIndex)
+	mesh = CubeMesh.new()
+	mesh.surface_set_material(0, load("res://potreework/ocellcube.material"))
+	mesh.size = parentnode.mesh.size/2
+	transform.origin = Vector3(mesh.size.x/2 if childIndex & 0b0001 else -mesh.size.x/2, 
+							   mesh.size.y/2 if childIndex & 0b0010 else -mesh.size.y/2, 
+							   mesh.size.z/2 if childIndex & 0b0100 else -mesh.size.z/2)
+	spacing = parentnode.spacing/2
+	assert (not parentnode.has_node(name))
+
+func loadnodedefinition(fhierarchy):
+	var ntype = fhierarchy.get_8()
+	childMask = fhierarchy.get_8()
+	numPoints = fhierarchy.get_32()
+	byteOffset = fhierarchy.get_64()
+	byteSize = fhierarchy.get_64()
+	isdefinitionloaded = (ntype != 2)
+	isleaf = (ntype == 1)
+	assert (isdefinitionloaded or (byteOffset+byteSize <= fhierarchy.get_len()))
+	assert (not isdefinitionloaded or (isleaf == (childMask == 0)))
+
+func loadrootdefinition(metadata, mdoffset):
+	byteSize = metadata["hierarchy"]["firstChunkSize"]
+	numPoints = int(byteSize/22)
+	var mdmin = Vector3(metadata["boundingBox"]["min"][0], metadata["boundingBox"]["min"][2], -metadata["boundingBox"]["min"][1])
+	var mdmax = Vector3(metadata["boundingBox"]["max"][0], metadata["boundingBox"]["max"][2], -metadata["boundingBox"]["max"][1])
+	mesh = CubeMesh.new()
+	mesh.surface_set_material(0, load("res://potreework/ocellcube.material"))
+	mesh.size = mdmax-mdmin
+	transform.origin = (mdmax-mdmin)/2-mdoffset
+	spacing = metadata["spacing"]
+
+
+func loadhierarchychunk(fhierarchy):
+	assert (!isdefinitionloaded)
 	fhierarchy.seek(byteOffset)
 	var nodes = [ self ]
+	assert (byteSize == 22*numPoints)
 	for i in range(byteSize/22):
 		var pnode = nodes[i]
-		
-		var ntype = fhierarchy.get_8()
-		pnode.isnotloaded = (ntype == 2)
-		pnode.isleaf = (ntype == 1)
-		pnode.childMask = fhierarchy.get_8()
-		pnode.numPoints = fhierarchy.get_32()
-		pnode.byteOffset = fhierarchy.get_64()
-		pnode.byteSize = fhierarchy.get_64()
-		assert (pnode.isnotloaded or (pnode.isleaf == (pnode.childMask == 0)))
-		
-		if not pnode.isnotloaded:
+		pnode.loadnodedefinition(fhierarchy)
+		if pnode.isdefinitionloaded:
 			assert (pnode.get_child_count() == 0)
 			for childIndex in range(8):
-				if ((1 << childIndex) & pnode.childMask):
+				if (pnode.childMask & (1 << childIndex)):
 					var cnode = MeshInstance.new()
-					cnode.name = str(childIndex)
 					cnode.set_script(pnode.get_script())
-					cnode.mesh = pnode.mesh.duplicate()
-					cnode.mesh.size = pnode.mesh.size/2
-					cnode.transform.origin = Vector3(cnode.mesh.size.x/2 if childIndex & 0b0001 else -cnode.mesh.size.x/2, 
-													 cnode.mesh.size.y/2 if childIndex & 0b0010 else -cnode.mesh.size.y/2, 
-													 cnode.mesh.size.z/2 if childIndex & 0b0100 else -cnode.mesh.size.z/2)
-					cnode.spacing = pnode.spacing/2
-					if duplicatepointmaterial:
-						cnode.pointmaterial = pnode.pointmaterial.duplicate()
-						cnode.pointmaterial.set_shader_param("point_scale", pnode.pointmaterial.get_shader_param("point_scale")/2)
-					else:
-						cnode.pointmaterial = pnode.pointmaterial
-					assert (not pnode.has_node(cnode.name))
+					cnode.constructnode(pnode, childIndex)
 					pnode.add_child(cnode)
 					nodes.append(cnode)
 	return nodes

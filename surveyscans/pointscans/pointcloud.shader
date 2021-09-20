@@ -1,5 +1,6 @@
 shader_type spatial;
-render_mode world_vertex_coords;
+render_mode world_vertex_coords,shadows_disabled;
+
 uniform vec4 albedo : hint_color = vec4(1.0);
 uniform float point_scale = 16.0;
 uniform vec3 highlightplaneperp = vec3(0,1,0);
