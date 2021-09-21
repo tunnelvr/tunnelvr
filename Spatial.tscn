@@ -1524,7 +1524,7 @@ albedo_color = Color( 0.168627, 0.972549, 0.027451, 1 )
 
 [sub_resource type="PointMesh" id=233]
 
-[sub_resource type="CubeMesh" id=236]
+[sub_resource type="CubeMesh" id=234]
 material = ExtResource( 76 )
 
 [node name="Spatial" type="Spatial"]
@@ -3768,7 +3768,7 @@ script = ExtResource( 74 )
 
 [node name="root" type="MeshInstance" parent="PotreeExperiments"]
 cast_shadow = 0
-mesh = SubResource( 236 )
+mesh = SubResource( 234 )
 material/0 = null
 script = ExtResource( 75 )
 
