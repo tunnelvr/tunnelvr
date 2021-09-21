@@ -9,10 +9,10 @@ var fhierarchy = File.new()
 var foctree = File.new()
 var highlightplaneperp = Vector3(0,0,0)
 var highlightplanedot = Vector3(0,0,0)
+var pointsizevisibilitycutoff = 10.0
+var primarycameraorigin = Vector3(0,0,0)
 
-func loadotree(d, sname):
-	assert (not fmetadata.is_open())
-	name = "h"+sname
+func loadotree(d):
 	fmetadata.open(d+"metadata.json", File.READ)
 	fhierarchy.open(d+"hierarchy.bin", File.READ)
 	foctree.open(d+"octree.bin", File.READ)
@@ -21,14 +21,14 @@ func loadotree(d, sname):
 	mdoffset = Vector3(metadata["offset"][0], 
 					   metadata["offset"][1], 
 					   metadata["offset"][2])
-	
 	mdscale = Vector3(metadata["scale"][0], 
 					  metadata["scale"][1], 
 					  metadata["scale"][2])
 
 	assert(len(metadata["attributes"]) == 1)
 
-	byteSize = metadata["hierarchy"]["firstChunkSize"]
+	hierarchybyteOffset = 0
+	hierarchybyteSize = metadata["hierarchy"]["firstChunkSize"]
 	var mdmin = Vector3(metadata["boundingBox"]["min"][0], 
 						metadata["boundingBox"]["min"][1], 
 						metadata["boundingBox"]["min"][2])
@@ -56,6 +56,54 @@ func sethighlightplane(lhighlightplaneperp, lhighlightplanedot):
 					nodestack.push_back(cnode)
 				
 
+func successornode(node, skip):
+	if not skip and node.get_child_count() > 1:
+		return node.get_child(1)
+	while true:
+		if node.treedepth == 0:
+			return null
+		var inext = node.get_index() + 1
+		node = node.get_parent()
+		if inext < node.get_child_count():
+			return node.get_child(inext)
+			
+
+var processingnode = null
+func _process(delta):
+	if processingnode == null:
+		set_process(false)
+		var nodestack = [ self ]
+		while len(nodestack) != 0:
+			var node = nodestack.pop_back()
+			if node.pointmaterial != null:
+				node.setocellmask()
+				for cnode in node.get_children():
+					if cnode.visible:
+						nodestack.push_back(cnode)
+		
+		
+	elif not processingnode.visibleincamera:
+		processingnode.visible = false
+		processingnode = successornode(processingnode, true)
+
+	elif processingnode.name[0] == "h":
+		processingnode.loadhierarchychunk(fhierarchy)
+		
+	else:
+		var boxcentre = processingnode.global_transform.origin
+		var boxradius = ((processingnode.boxmax - processingnode.boxmin)/2).length()
+		var cd = boxcentre.distance_to(primarycameraorigin)
+		if cd <= boxradius + 0.1:
+			processingnode.visible = true
+		else:
+			var pointsize = pointsizefactor*processingnode.spacing/(cd-boxradius)
+			processingnode.visible = (pointsize > pointsizevisibilitycutoff)
+		
+		if processingnode.visible and processingnode.pointmaterial == null:
+			processingnode.loadoctcellpoints(foctree, mdscale, mdoffset, pointsizefactor)
+		processingnode = successornode(processingnode, not processingnode.visible)
+
+
 func recalclodvisibility(cameraorigin):
 	var nodestoload = [ ]
 	if name[0] == "h" or pointmaterial == null:
@@ -75,7 +123,7 @@ func recalclodvisibility(cameraorigin):
 						cnode.visible = true
 					else:
 						var pointsize = pointsizefactor*cnode.spacing/(cd-boxradius)
-						cnode.visible = (pointsize > 5)
+						cnode.visible = (pointsize > pointsizevisibilitycutoff)
 					if cnode.visible:
 						if cnode.name[0] == "h":
 							nodestoload.push_back(cnode)
@@ -87,7 +135,6 @@ func recalclodvisibility(cameraorigin):
 				else:
 					cnode.visible = false
 	
-	
 	nodestack = [ self ]
 	while len(nodestack) != 0:
 		var node = nodestack.pop_back()
@@ -96,5 +143,6 @@ func recalclodvisibility(cameraorigin):
 			for cnode in node.get_children():
 				if cnode.visible:
 					nodestack.push_back(cnode)
+					
 	return nodestoload
 	

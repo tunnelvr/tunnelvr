@@ -150,10 +150,12 @@ func _on_button_pressed(p_button):
 			#	joyposxrotsnaphysteresis = 2
 	elif p_button == BUTTONS.VR_BUTTON_BY:
 		playerMe.seteyestate(true)
+		selfSpatial.get_node("PotreeExperiments").potreeactivatebuttonpressed(true)
 		
 func _on_button_release(p_button):
 	if p_button == BUTTONS.VR_BUTTON_BY:
 		playerMe.seteyestate(false)
+		selfSpatial.get_node("PotreeExperiments").potreeactivatebuttonpressed(false)
 
 var laserangleadjustmode = false
 var laserangleoriginal = 0

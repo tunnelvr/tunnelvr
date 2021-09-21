@@ -1,5 +1,8 @@
 extends MeshInstance
 
+var hierarchybyteOffset = 0
+var hierarchybyteSize = 0
+
 var childMask = 0
 var spacing = 0
 var treedepth = 0
@@ -8,12 +11,15 @@ var isleaf = false
 var numPoints = 0
 var byteOffset = 0
 var byteSize = 0
+
+
 var pointmaterial = null
 var visibleincamera = false
 
 var boxmin = Vector3(0,0,0)
 var boxmax = Vector3(0,0,0)
 const boxpointepsilon = 0.6
+const spacingdivider = 1.7
 
 func createChildAABB(pnode, index):
 	boxmin = pnode.boxmin
@@ -90,7 +96,7 @@ func loadoctcellpoints(foctree, mdscale, mdoffset, pointsizefactor):
 	set_surface_material(0, pointmaterial)
 
 func constructnode(parentnode, childIndex):
-	spacing = parentnode.spacing/1.7
+	spacing = parentnode.spacing/spacingdivider
 	treedepth = parentnode.treedepth + 1
 	var meshsize = parentnode.mesh.size/2
 	transform.origin = Vector3(meshsize.x/2 if childIndex & 0b0100 else -meshsize.x/2, 
@@ -119,25 +125,31 @@ func constructcontainingmesh(meshsize):
 	visnote.connect("camera_exited", self, "on_camera_exited")
 
 func loadnodedefinition(fhierarchy):
+	assert (name[0] == "c")
 	var ntype = fhierarchy.get_8()
 	childMask = fhierarchy.get_8()
 	numPoints = fhierarchy.get_32()
-	byteOffset = fhierarchy.get_64()
-	byteSize = fhierarchy.get_64()
-	isdefinitionloaded = (ntype != 2)
-	isleaf = (ntype == 1)
-	assert (name[0] == "c")
-	name[0] = ["n", "l", "h"][ntype]
-	assert (isdefinitionloaded or (byteOffset+byteSize <= fhierarchy.get_len()))
-	assert (not isdefinitionloaded or (isleaf == (childMask == 0)))
+	if ntype == 2:
+		hierarchybyteOffset = fhierarchy.get_64()
+		hierarchybyteSize = fhierarchy.get_64()
+		name[0] = "h"
+		isdefinitionloaded = false
+		assert (hierarchybyteOffset+hierarchybyteSize <= fhierarchy.get_len())
+	else:
+		byteOffset = fhierarchy.get_64()
+		byteSize = fhierarchy.get_64()
+		isdefinitionloaded = true
+		isleaf = (ntype == 1)
+		name[0] = ("n" if ntype == 0 else  "l")
+		assert (isleaf == (childMask == 0))
 
 func loadhierarchychunk(fhierarchy):
 	assert (!isdefinitionloaded)
 	assert (name[0] == "h")
 	name[0] = "c"
-	fhierarchy.seek(byteOffset)
+	fhierarchy.seek(hierarchybyteOffset)
 	var nodes = [ self ]
-	for i in range(byteSize/22):
+	for i in range(hierarchybyteSize/22):
 		var pnode = nodes[i]
 		pnode.loadnodedefinition(fhierarchy)
 		if pnode.isdefinitionloaded:

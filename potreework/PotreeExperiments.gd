@@ -11,6 +11,7 @@ var threadtoexit = false
 var nodestoload = [ ]
 var nodestopointload = [ ]
 var nodespointloaded = [ ]
+var rootnode = null
 
 func potreethread_function(userdata):
 	print("potreethread_function started")
@@ -41,18 +42,35 @@ func sethighlightplane(planetransform):
 	rootnode.sethighlightplane(planetransform.basis.z, 
 							   planetransform.basis.z.dot(planetransform.origin))
 
-var ocellmask = 0
-var rootnode = null
-func _input(event):
+func potreeactivatebuttonpressed(buttondown):
+	if buttondown:
+		var primarycameraorigin = Vector3(0, 0, 0)
+		var primarycamera = instance_from_id(Tglobal.primarycamera_instanceid)
+		if primarycamera != null:
+			primarycameraorigin = primarycamera.get_camera_transform().origin
 
-	if event is InputEventKey and event.scancode == KEY_7 and event.pressed:
-		assert (get_child_count() == 0)
-		var rnode = MeshInstance.new()
-		rnode.set_script(load("res://potreework/Onode_root.gd"))
-		rnode.loadotree(d, "root")
-		add_child(rnode)
-		nodestoload.append(rnode)
-		rootnode = rnode
+		if rootnode == null:
+			rootnode = MeshInstance.new()
+			rootnode.set_script(load("res://potreework/Onode_root.gd"))
+			rootnode.primarycameraorigin = primarycameraorigin
+			rootnode.name = "hroot"
+			add_child(rootnode)
+			rootnode.loadotree(d)
+		else:
+			rootnode.primarycameraorigin = primarycameraorigin
+			rootnode.processingnode = rootnode
+			rootnode.set_process(true)
+			if false:
+				var nodestoload = rootnode.recalclodvisibility(primarycameraorigin)
+				for node in nodestoload:
+					if node.name[0] == "h":
+						node.loadhierarchychunk(rootnode.fhierarchy)
+					elif node.pointmaterial == null:
+						node.loadoctcellpoints(rootnode.foctree, rootnode.mdscale, rootnode.mdoffset, rootnode.pointsizefactor)
+
+func _input(event):
+	if event is InputEventKey and event.scancode == KEY_7:
+		potreeactivatebuttonpressed(event.pressed)
 		
 	if event is InputEventKey and event.scancode == KEY_6 and event.pressed:
 		if len(nodestoload) != 0:
@@ -65,34 +83,17 @@ func _input(event):
 					nodestopointload.append(node)
 					
 	if event is InputEventKey and event.scancode == KEY_5 and event.pressed:
-		for i in range(0, 12):
-			if len(nodestopointload) != 0:
-				var rnode = nodestopointload.pop_front()
-				print("loading ", rnode.get_path())
-				rnode.loadoctcellpoints(rootnode.foctree, rootnode.mdscale, rootnode.mdoffset, rootnode.pointsizefactor)
-				nodespointloaded.push_back(rnode)
-		for rnode in nodespointloaded:
-			rnode.setocellmask()
-
-	if event is InputEventKey and event.scancode == KEY_4 and event.pressed:
-		var primarycameraorigin = Vector3(0, 0, 0)
-		var primarycamera = instance_from_id(Tglobal.primarycamera_instanceid)
-		if primarycamera != null:
-			primarycameraorigin = primarycamera.get_camera_transform().origin
-		var nodestoload = rootnode.recalclodvisibility(primarycameraorigin)
-		for node in nodestoload:
-			if node.name[0] == "h":
-				node.loadhierarchychunk(rootnode.fhierarchy)
-			elif node.pointmaterial == null:
-				node.loadoctcellpoints(rootnode.foctree, rootnode.mdscale, rootnode.mdoffset, rootnode.pointsizefactor)
-		
+		var node = rootnode
+		while node != null:
+			print(node)
+			node = rootnode.successornode(node, false)
 		if false:
-			if ocellmask == 0:
-				ocellmask = 1
-			elif ocellmask < 128:
-				ocellmask = ocellmask*2
-			else:
-				ocellmask = 0
-			print("ocellmask ", ocellmask)
+			for i in range(0, 12):
+				if len(nodestopointload) != 0:
+					var rnode = nodestopointload.pop_front()
+					print("loading ", rnode.get_path())
+					rnode.loadoctcellpoints(rootnode.foctree, rootnode.mdscale, rootnode.mdoffset, rootnode.pointsizefactor)
+					nodespointloaded.push_back(rnode)
 			for rnode in nodespointloaded:
-				rnode.pointmaterial.set_shader_param("ocellmask", ocellmask)
+				rnode.setocellmask()
+
