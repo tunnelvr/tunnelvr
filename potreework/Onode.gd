@@ -9,7 +9,7 @@ var numPoints = 0
 var byteOffset = 0
 var byteSize = 0
 var pointmaterial = null
-const makecubecontainer = true
+const makecubecontainer = false
 
 var boxmin = Vector3(0,0,0)
 var boxmax = Vector3(0,0,0)
@@ -22,15 +22,11 @@ func createChildAABB(pnode, index):
 	if ((index & 0b0100) > 0): boxmin.x += boxsize.x / 2;
 	else:                      boxmax.x -= boxsize.x / 2;
 
-	if ((index & 0b0010) > 0):
-		boxmin.y += boxsize.y / 2;
-	else:
-		boxmax.y -= boxsize.y / 2;
+	if ((index & 0b0010) > 0): boxmin.y += boxsize.y / 2;
+	else:                      boxmax.y -= boxsize.y / 2;
 
-	if ((index & 0b0001) > 0):
-		boxmin.z += boxsize.z / 2;
-	else:
-		boxmax.z -= boxsize.z / 2;
+	if ((index & 0b0001) > 0): boxmin.z += boxsize.z / 2;
+	else:                      boxmax.z -= boxsize.z / 2;
 	
 
 func setocellmask():
@@ -51,6 +47,7 @@ func loadoctcellpoints(foctree, mdscale, mdoffset, pointsizefactor):
 		add_child(cc)
 		
 	var ocellcentre = global_transform.origin
+	var relativeocellcentre = transform.origin
 	var childIndex = int(name)
 	var boxminmax = AABB(boxmin, boxmax-boxmin).grow(boxpointepsilon)
 	if ocellcentre.distance_to((boxmin+boxmax)/2) > 0.9:
@@ -59,12 +56,6 @@ func loadoctcellpoints(foctree, mdscale, mdoffset, pointsizefactor):
 	var st = SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_POINTS)
 	foctree.seek(byteOffset)
-	var xmin = 0
-	var xmax = 0
-	var ymin = 0
-	var ymax = 0
-	var zmin = 0
-	var zmax = 0
 	var npointsnotinbox = 0
 	for i in range(numPoints):
 		var v0 = foctree.get_32()
@@ -74,24 +65,19 @@ func loadoctcellpoints(foctree, mdscale, mdoffset, pointsizefactor):
 						v1*mdscale.y + mdoffset.y, 
 						v2*mdscale.z + mdoffset.z)
 		st.add_vertex(p - ocellcentre)
-		if i == 0 or p.x < xmin:  xmin = p.x
-		if i == 0 or p.x > xmax:  xmax = p.x
-		if i == 0 or p.y < ymin:  ymin = p.y
-		if i == 0 or p.y > ymax:  ymax = p.y
-		if i == 0 or p.z < zmin:  zmin = p.z
-		if i == 0 or p.z > zmax:  zmax = p.z
 		if not boxminmax.has_point(p):
 			npointsnotinbox += 1
 		
 	if len(name) == 1:
-		var arr = get_parent().mesh.surface_get_arrays(0)[Mesh.PRIMITIVE_POINTS]
-		for p in arr:
-			var pocellindex = (1 if p.z > ocellcentre.z else 0) + \
-							  (2 if p.y > ocellcentre.y else 0) + \
-							  (4 if p.x > ocellcentre.x else 0) 
+		var parentpoints = get_parent().mesh.surface_get_arrays(0)[Mesh.PRIMITIVE_POINTS]
+		for p in parentpoints:
+			var pocellindex = (4 if p.x > 0.0 else 0) + \
+							  (2 if p.y > 0.0 else 0) + \
+							  (1 if p.z > 0.0 else 0) 
 			if pocellindex == childIndex:
-				st.add_vertex(p - ocellcentre)
-				if not boxminmax.has_point(p):
+				var rp = p - relativeocellcentre
+				st.add_vertex(rp)
+				if not boxminmax.has_point(rp + ocellcentre):
 					npointsnotinbox += 1
 		
 	var pointsmesh = Mesh.new()
@@ -99,7 +85,6 @@ func loadoctcellpoints(foctree, mdscale, mdoffset, pointsizefactor):
 	mesh = pointsmesh
 	if npointsnotinbox != 0:
 		print("npointsnotinbox ", npointsnotinbox, " of ", numPoints)
-		print(numPoints, " mesh ", name, boxmin, "< ", Vector3(xmin, ymin, zmin), "<", Vector3(xmax, ymax, zmax), " <", boxmax)
 	pointmaterial = load("res://potreework/pointcloudslice.material").duplicate()
 	pointmaterial.set_shader_param("point_scale", pointsizefactor*spacing)
 	pointmaterial.set_shader_param("ocellcentre", ocellcentre)

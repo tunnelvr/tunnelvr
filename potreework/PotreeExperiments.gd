@@ -58,6 +58,7 @@ func _input(event):
 		for i in range(0, 12):
 			if len(nodestopointload) != 0:
 				var rnode = nodestopointload.pop_front()
+				print("loading ", rnode.get_path())
 				rnode.loadoctcellpoints(foctree, mdscale, mdoffset, pointsizefactor)
 				nodespointloaded.push_back(rnode)
 		for rnode in nodespointloaded:
