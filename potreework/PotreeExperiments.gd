@@ -56,7 +56,7 @@ func potreeactivatebuttonpressed(buttondown):
 			rootnode.visibleincamera = true
 			add_child(rootnode)
 			rootnode.loadotree(d)
-
+			
 		rootnode.primarycameraorigin = primarycameraorigin
 		rootnode.commenceocellprocessing()
 

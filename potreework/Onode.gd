@@ -44,8 +44,8 @@ func on_camera_exited(camera):
 	if camera.get_instance_id() == Tglobal.primarycamera_instanceid:
 		visibleincamera = false
 
-func loadoctcellpoints(foctree, mdscale, mdoffset, pointsizefactor):
-	var ocellcentre = global_transform.origin
+func loadoctcellpoints(foctree, mdscale, mdoffset, pointsizefactor, roottransforminverse):
+	var ocellcentre = roottransforminverse*global_transform.origin
 	var relativeocellcentre = transform.origin
 	var childIndex = int(name)
 	if ocellcentre.distance_to((Dboxmin+Dboxmax)/2) > 0.9:
@@ -88,10 +88,11 @@ func loadoctcellpoints(foctree, mdscale, mdoffset, pointsizefactor):
 	pointmaterial = load("res://potreework/pointcloudslice.material").duplicate()
 	pointmaterial.set_shader_param("point_scale", pointsizefactor*spacing)
 	pointmaterial.set_shader_param("ocellcentre", ocellcentre)
-	pointmaterial.set_shader_param("ocellmask", ocellmask)	
+	pointmaterial.set_shader_param("ocellmask", ocellmask)
+	pointmaterial.set_shader_param("roottransforminverse", roottransforminverse)
 	set_surface_material(0, pointmaterial)
 
-func constructnode(parentnode, childIndex):
+func constructnode(parentnode, childIndex, Droottransforminverse):
 	spacing = parentnode.spacing/spacingdivider
 	treedepth = parentnode.treedepth + 1
 	ocellsize = parentnode.ocellsize/2
@@ -101,7 +102,7 @@ func constructnode(parentnode, childIndex):
 
 	createChildAABB(parentnode, childIndex)
 	name = "c%d" % childIndex
-	var kcen = parentnode.global_transform.origin + transform.origin
+	var kcen = Droottransforminverse*parentnode.global_transform.origin + transform.origin
 	if kcen.distance_to((Dboxmin+Dboxmax)/2) > 0.9:
 		print("kkmoved centre ", kcen, ((Dboxmin+Dboxmax)/2))
 	assert (not parentnode.has_node(name))
@@ -137,7 +138,7 @@ func loadnodedefinition(fhierarchy):
 		assert ((ntype == 1) == (childMask == 0))
 
 
-func loadhierarchychunk(fhierarchy):
+func loadhierarchychunk(fhierarchy, Droottransforminverse):
 	assert (name[0] == "h")
 	name[0] = "c"
 	fhierarchy.seek(hierarchybyteOffset)
@@ -150,7 +151,7 @@ func loadhierarchychunk(fhierarchy):
 				if (pnode.childMask & (1 << childIndex)):
 					var cnode = MeshInstance.new()
 					cnode.set_script(load("res://potreework/Onode.gd"))
-					cnode.constructnode(pnode, childIndex)
+					cnode.constructnode(pnode, childIndex, Droottransforminverse)
 					cnode.visible = false
 					pnode.add_child(cnode)
 					nodes.append(cnode)

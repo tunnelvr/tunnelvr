@@ -5,6 +5,7 @@ uniform vec4 albedo : hint_color = vec4(1.0);
 uniform float point_scale = 16.0;
 uniform vec3 highlightplaneperp = vec3(0,1,0);
 uniform float highlightplanedot = 0.0;
+uniform mat4 roottransforminverse = mat4(1.0); 
 uniform vec3 ocellcentre = vec3(0,0,0);
 uniform int ocellmask = 0;
 
@@ -18,9 +19,10 @@ const float sizebumpdist = 0.25;
 void vertex() {
 	float distcamera = length(CAMERA_MATRIX[3].xyz - VERTEX); 
 	POINT_SIZE = point_scale/distcamera;
-	int ocellindex = (VERTEX.x > ocellcentre.x ? 16 : 1) * 
-					 (VERTEX.y > ocellcentre.y ? 4 : 1) * 
-					 (VERTEX.z > ocellcentre.z ? 2 : 1); 
+	vec4 sv = roottransforminverse*vec4(VERTEX, 1.0); 
+	int ocellindex = (sv.x > ocellcentre.x ? 16 : 1) * 
+					 (sv.y > ocellcentre.y ? 4 : 1) * 
+					 (sv.z > ocellcentre.z ? 2 : 1); 
 	if (((ocellmask / ocellindex) % 2) != 0)
 		POINT_SIZE = 0.0;
 

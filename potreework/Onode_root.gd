@@ -17,6 +17,7 @@ var visiblepointcount = 0
 var visiblepointcountLimit = 1000000
 
 func loadotree(d):
+
 	fmetadata.open(d+"metadata.json", File.READ)
 	fhierarchy.open(d+"hierarchy.bin", File.READ)
 	foctree.open(d+"octree.bin", File.READ)
@@ -103,7 +104,7 @@ func _process(delta):
 		processingnode = successornode(processingnode, true)
 
 	elif processingnode.name[0] == "h":
-		processingnode.loadhierarchychunk(fhierarchy)
+		processingnode.loadhierarchychunk(fhierarchy, get_parent().global_transform.inverse())
 		
 	else:
 		var boxcentre = processingnode.global_transform.origin
@@ -118,7 +119,7 @@ func _process(delta):
 		uppernodevisibilitymask(processingnode, lvisible)
 		
 		if processingnode.visible and processingnode.pointmaterial == null:
-			processingnode.loadoctcellpoints(foctree, mdscale, mdoffset, pointsizefactor)
+			processingnode.loadoctcellpoints(foctree, mdscale, mdoffset, pointsizefactor, get_parent().global_transform.inverse())
 		processingnode = successornode(processingnode, not processingnode.visible)
 
 
