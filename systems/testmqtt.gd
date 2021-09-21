@@ -12,7 +12,7 @@ func _ready():
 	$mqttnode.server = "mosquitto.doesliverpool.xyz"
 	$mqttnode.client_id = "u"+uniqstring
 	$mqttnode.connect("received_message", self, "received_message")
-	if true:
+	if false:
 		call_deferred("connectmqtt")
 	else:
 		print("disabling mqtt")

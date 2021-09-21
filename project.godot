@@ -200,4 +200,3 @@ quality/shadow_atlas/size.mobile=512
 quality/shading/force_vertex_shading.mobile=false
 quality/shading/force_lambert_over_burley=true
 quality/shading/force_blinn_over_ggx=true
-environment/default_environment="res://environments/default_env.tres"

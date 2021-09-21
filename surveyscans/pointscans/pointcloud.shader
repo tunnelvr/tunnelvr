@@ -18,9 +18,9 @@ const float sizebumpdist = 0.25;
 void vertex() {
 	float distcamera = length(CAMERA_MATRIX[3].xyz - VERTEX); 
 	POINT_SIZE = point_scale/distcamera;
-	int ocellindex = (VERTEX.x > ocellcentre.z ? 2 : 1) * 
+	int ocellindex = (VERTEX.x > ocellcentre.x ? 16 : 1) * 
 					 (VERTEX.y > ocellcentre.y ? 4 : 1) * 
-					 (VERTEX.z > ocellcentre.x ? 16 : 1); 
+					 (VERTEX.z > ocellcentre.z ? 2 : 1); 
 	if (((ocellmask / ocellindex) % 2) != 0)
 		POINT_SIZE = 0.0;
 

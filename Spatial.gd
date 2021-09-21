@@ -163,6 +163,7 @@ func _ready():
 	else:
 		playerMe.initkeyboardcontroltrackingnow()
 		print("*** VR not operating")
+	Tglobal.primarycamera_instanceid = $Players/PlayerMe/HeadCam.get_instance_id() 
 		
 	print("*-*-*-*  requesting permissions: ", OS.request_permissions())
 	# this relates to Android permissions: 	change_wifi_multicast_state, internet, 
@@ -264,7 +265,6 @@ func _player_disconnected(id):
 	$GuiSystem/GUIPanel3D/Viewport/GUI/Panel/Label.text = "player "+String(id)+" disconnected"
 	mqttsystem.mqttpublish("playercount/remove", "%d %d" % [$Players.get_child_count(), id])
 		
-
 func setconnectiontoserveractive(b):
 	Tglobal.connectiontoserveractive = b
 	playerMe.get_node("HandRight/HandFlickFaceY").set_surface_material(0, $MaterialSystem/handmaterials.get_node("serverconnected" if Tglobal.connectiontoserveractive else "serverdisconnected").get_surface_material(0))

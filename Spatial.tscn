@@ -1,7 +1,7 @@
-[gd_scene load_steps=311 format=2]
+[gd_scene load_steps=308 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
-[ext_resource path="res://environments/default_env.tres" type="Environment" id=2]
+[ext_resource path="res://environments/underground_env.tres" type="Environment" id=2]
 [ext_resource path="res://lightweighttextures/watersurface.material" type="Material" id=3]
 [ext_resource path="res://utilities/Locomotion_WalkInPlace.gd" type="Script" id=4]
 [ext_resource path="res://pointersystem.gd" type="Script" id=5]
@@ -74,8 +74,6 @@
 [ext_resource path="res://assets/ovrmodels/left_hand_model.glb" type="PackedScene" id=72]
 [ext_resource path="res://assets/ovrmodels/OculusQuestTouchController_Left_Reactive.gltf" type="PackedScene" id=73]
 [ext_resource path="res://potreework/PotreeExperiments.gd" type="Script" id=74]
-[ext_resource path="res://potreework/Onode.gd" type="Script" id=75]
-[ext_resource path="res://potreework/ocellcube.material" type="Material" id=76]
 
 [sub_resource type="CubeMesh" id=1]
 size = Vector3( 0.35, 0.01, 0.01 )
@@ -1524,12 +1522,8 @@ albedo_color = Color( 0.168627, 0.972549, 0.027451, 1 )
 
 [sub_resource type="PointMesh" id=233]
 
-[sub_resource type="CubeMesh" id=234]
-material = ExtResource( 76 )
-
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
-enablevr = false
 
 [node name="Players" type="Spatial" parent="."]
 
@@ -3765,11 +3759,5 @@ script = ExtResource( 64 )
 
 [node name="PotreeExperiments" type="Spatial" parent="."]
 script = ExtResource( 74 )
-
-[node name="root" type="MeshInstance" parent="PotreeExperiments"]
-cast_shadow = 0
-mesh = SubResource( 234 )
-material/0 = null
-script = ExtResource( 75 )
 
 [connection signal="timeout" from="MQTTExperiment/mqttnode/Timer" to="MQTTExperiment/mqttnode" method="_on_Timer_timeout"]

@@ -25,6 +25,7 @@ var wingmeshuvexpansionfac = 4.0
 var wingmeshuvudivisions = 19
 var wingmeshuvvdivisions = 68
 
+var primarycamera_instanceid = 0
 
 var splaystationnoderegex = null
 func _ready():
