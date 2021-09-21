@@ -9,8 +9,12 @@ var fhierarchy = File.new()
 var foctree = File.new()
 var highlightplaneperp = Vector3(0,0,0)
 var highlightplanedot = Vector3(0,0,0)
-var pointsizevisibilitycutoff = 10.0
+
 var primarycameraorigin = Vector3(0,0,0)
+var pointsizevisibilitycutoff = 10.0
+var processingnode = null
+var visiblepointcount = 0
+var visiblepointcountLimit = 1000000
 
 func loadotree(d):
 	fmetadata.open(d+"metadata.json", File.READ)
@@ -37,24 +41,22 @@ func loadotree(d):
 						metadata["boundingBox"]["max"][2])
 	transform.origin = (mdmax+mdmin)/2
 	spacing = metadata["spacing"]
-	boxmin = mdmin
-	boxmax = mdmax
-	print("yyy ", boxmin, boxmax)
-	constructcontainingmesh(mdmax-mdmin)
+	ocellsize = mdmax - mdmin
+
+	Dboxmin = mdmin
+	Dboxmax = mdmax
+	print("yyy ", mdmin, mdmax)
+	constructcontainingmesh()
 
 func sethighlightplane(lhighlightplaneperp, lhighlightplanedot):
 	highlightplaneperp = lhighlightplaneperp
 	highlightplanedot = lhighlightplanedot
-	var nodestack = [ self ]
-	while len(nodestack) != 0:
-		var node = nodestack.pop_back()
+	var node = self
+	while node != null:
 		if node.pointmaterial != null:
 			node.pointmaterial.set_shader_param("highlightplaneperp", highlightplaneperp)
 			node.pointmaterial.set_shader_param("highlightplanedot", highlightplanedot)
-			for cnode in node.get_children():
-				if cnode.visible:
-					nodestack.push_back(cnode)
-				
+		node = successornode(node, not node.visible)
 
 func successornode(node, skip):
 	if not skip and node.get_child_count() > 1:
@@ -69,18 +71,29 @@ func successornode(node, skip):
 			
 
 func uppernodevisibilitymask(node, lvisible):
-	node.visible = lvisible
-	if node.treedepth != 0:
-		var pnode = node.get_parent()
-		var nodebit = (1 << int(node.name))
-		pnode.ocellmask |= nodebit
+	if node.visible != lvisible:
+		node.visible = lvisible
 		if not node.visible:
-			pnode.ocellmask ^= nodebit
-		if pnode.pointmaterial != null:
-			pnode.pointmaterial.set_shader_param("ocellmask", pnode.ocellmask)
+			node.timestampsinceinvisible = OS.get_ticks_msec()
+			visiblepointcount -= node.numPoints
+		else:
+			visiblepointcount += node.numPoints
+		
+		if node.treedepth != 0:
+			var pnode = node.get_parent()
+			var nodebit = (1 << int(node.name))
+			pnode.ocellmask |= nodebit
+			if not node.visible:
+				pnode.ocellmask ^= nodebit
+			if pnode.pointmaterial != null:
+				pnode.pointmaterial.set_shader_param("ocellmask", pnode.ocellmask)
+			assert (((pnode.ocellmask & nodebit) != 0) == node.visible)
 
 
-var processingnode = null
+func commenceocellprocessing():
+	processingnode = self
+	set_process(true)
+
 func _process(delta):
 	if processingnode == null:
 		set_process(false)
@@ -94,13 +107,15 @@ func _process(delta):
 		
 	else:
 		var boxcentre = processingnode.global_transform.origin
-		var boxradius = ((processingnode.boxmax - processingnode.boxmin)/2).length()
+		var boxradius = (processingnode.ocellsize/2).length()
 		var cd = boxcentre.distance_to(primarycameraorigin)
-		if cd <= boxradius + 0.1:
-			uppernodevisibilitymask(processingnode, true)
-		else:
+		var lvisible = true
+		if cd > boxradius + 0.1:
 			var pointsize = pointsizefactor*processingnode.spacing/(cd-boxradius)
-			uppernodevisibilitymask(processingnode, (pointsize > pointsizevisibilitycutoff))
+			lvisible = (pointsize > pointsizevisibilitycutoff)
+		if visiblepointcount > visiblepointcountLimit:
+			lvisible = false
+		uppernodevisibilitymask(processingnode, lvisible)
 		
 		if processingnode.visible and processingnode.pointmaterial == null:
 			processingnode.loadoctcellpoints(foctree, mdscale, mdoffset, pointsizefactor)

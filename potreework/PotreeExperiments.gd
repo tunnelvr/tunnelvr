@@ -52,14 +52,13 @@ func potreeactivatebuttonpressed(buttondown):
 		if rootnode == null:
 			rootnode = MeshInstance.new()
 			rootnode.set_script(load("res://potreework/Onode_root.gd"))
-			rootnode.primarycameraorigin = primarycameraorigin
 			rootnode.name = "hroot"
+			rootnode.visibleincamera = true
 			add_child(rootnode)
 			rootnode.loadotree(d)
-		else:
-			rootnode.primarycameraorigin = primarycameraorigin
-			rootnode.processingnode = rootnode
-			rootnode.set_process(true)
+
+		rootnode.primarycameraorigin = primarycameraorigin
+		rootnode.commenceocellprocessing()
 
 func _input(event):
 	if event is InputEventKey and event.scancode == KEY_7:

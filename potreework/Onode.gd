@@ -13,26 +13,28 @@ var byteSize = 0
 var ocellmask = 0
 var pointmaterial = null
 var visibleincamera = false
+var ocellsize = Vector3(0,0,0)
+var timestampsinceinvisible = 0
 
-var boxmin = Vector3(0,0,0)
-var boxmax = Vector3(0,0,0)
-
+var Dboxmin = Vector3(0,0,0)
+var Dboxmax = Vector3(0,0,0)
 
 const boxpointepsilon = 0.6
 const spacingdivider = 1.7
+const constructhcubes = true
 
 func createChildAABB(pnode, index):
-	boxmin = pnode.boxmin
-	boxmax = pnode.boxmax
-	var boxsize = boxmax - boxmin
-	if ((index & 0b0100) > 0): boxmin.x += boxsize.x / 2;
-	else:                      boxmax.x -= boxsize.x / 2;
+	Dboxmin = pnode.Dboxmin
+	Dboxmax = pnode.Dboxmax
+	var boxsize = Dboxmax - Dboxmin
+	if ((index & 0b0100) > 0): Dboxmin.x += boxsize.x / 2;
+	else:                      Dboxmax.x -= boxsize.x / 2;
 
-	if ((index & 0b0010) > 0): boxmin.y += boxsize.y / 2;
-	else:                      boxmax.y -= boxsize.y / 2;
+	if ((index & 0b0010) > 0): Dboxmin.y += boxsize.y / 2;
+	else:                      Dboxmax.y -= boxsize.y / 2;
 
-	if ((index & 0b0001) > 0): boxmin.z += boxsize.z / 2;
-	else:                      boxmax.z -= boxsize.z / 2;
+	if ((index & 0b0001) > 0): Dboxmin.z += boxsize.z / 2;
+	else:                      Dboxmax.z -= boxsize.z / 2;
 	
 
 func on_camera_entered(camera):
@@ -42,21 +44,14 @@ func on_camera_exited(camera):
 	if camera.get_instance_id() == Tglobal.primarycamera_instanceid:
 		visibleincamera = false
 
-func setocellmask():
-	var ocellmask = 0
-	for cnode in get_children():
-		if cnode.name[0] == "n" or cnode.name[0] == "l":
-			if cnode.pointmaterial != null and cnode.visible:
-				ocellmask |= (1 << int(cnode.name))
-	pointmaterial.set_shader_param("ocellmask", ocellmask)
-
 func loadoctcellpoints(foctree, mdscale, mdoffset, pointsizefactor):
 	var ocellcentre = global_transform.origin
 	var relativeocellcentre = transform.origin
 	var childIndex = int(name)
-	var boxminmax = AABB(boxmin, boxmax-boxmin).grow(boxpointepsilon)
-	if ocellcentre.distance_to((boxmin+boxmax)/2) > 0.9:
-		print("moved centre ", ocellcentre, ((boxmin+boxmax)/2))
+	if ocellcentre.distance_to((Dboxmin+Dboxmax)/2) > 0.9:
+		print("moved centre ", ocellcentre, ((Dboxmin+Dboxmax)/2))
+	#var boxminmax = AABB(boxmin, boxmax-boxmin).grow(boxpointepsilon)
+	var Dboxminmax = AABB(ocellcentre - ocellsize/2, ocellsize).grow(boxpointepsilon)
 
 	var st = SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_POINTS)
@@ -70,7 +65,7 @@ func loadoctcellpoints(foctree, mdscale, mdoffset, pointsizefactor):
 						v1*mdscale.y + mdoffset.y, 
 						v2*mdscale.z + mdoffset.z)
 		st.add_vertex(p - ocellcentre)
-		if not boxminmax.has_point(p):
+		if not Dboxminmax.has_point(p):
 			npointsnotinbox += 1
 		
 	if len(name) <= 2:
@@ -82,7 +77,7 @@ func loadoctcellpoints(foctree, mdscale, mdoffset, pointsizefactor):
 			if pocellindex == childIndex:
 				var rp = p - relativeocellcentre
 				st.add_vertex(rp)
-				if not boxminmax.has_point(rp + ocellcentre):
+				if not Dboxminmax.has_point(rp + ocellcentre):
 					npointsnotinbox += 1
 
 	var pointsmesh = Mesh.new()
@@ -99,27 +94,27 @@ func loadoctcellpoints(foctree, mdscale, mdoffset, pointsizefactor):
 func constructnode(parentnode, childIndex):
 	spacing = parentnode.spacing/spacingdivider
 	treedepth = parentnode.treedepth + 1
-	var meshsize = parentnode.mesh.size/2
-	transform.origin = Vector3(meshsize.x/2 if childIndex & 0b0100 else -meshsize.x/2, 
-							   meshsize.y/2 if childIndex & 0b0010 else -meshsize.y/2, 
-							   meshsize.z/2 if childIndex & 0b0001 else -meshsize.z/2)
+	ocellsize = parentnode.ocellsize/2
+	transform.origin = Vector3(ocellsize.x/2 if childIndex & 0b0100 else -ocellsize.x/2, 
+							   ocellsize.y/2 if childIndex & 0b0010 else -ocellsize.y/2, 
+							   ocellsize.z/2 if childIndex & 0b0001 else -ocellsize.z/2)
 
 	createChildAABB(parentnode, childIndex)
 	name = "c%d" % childIndex
 	var kcen = parentnode.global_transform.origin + transform.origin
-	if kcen.distance_to((boxmin+boxmax)/2) > 0.9:
-		print("kkmoved centre ", kcen, ((boxmin+boxmax)/2))
+	if kcen.distance_to((Dboxmin+Dboxmax)/2) > 0.9:
+		print("kkmoved centre ", kcen, ((Dboxmin+Dboxmax)/2))
 	assert (not parentnode.has_node(name))
-	constructcontainingmesh(meshsize)
+	constructcontainingmesh()
 
-
-func constructcontainingmesh(meshsize):
-	mesh = CubeMesh.new()
-	mesh.surface_set_material(0, load("res://potreework/ocellcube.material"))
-	mesh.size = meshsize
+func constructcontainingmesh():
+	if constructhcubes:
+		mesh = CubeMesh.new()
+		mesh.surface_set_material(0, load("res://potreework/ocellcube.material"))
+		mesh.size = ocellsize
 	var visnote = VisibilityNotifier.new()
 	visnote.name = "visnote"
-	visnote.aabb = AABB(-meshsize/2, meshsize)
+	visnote.aabb = AABB(-ocellsize/2, ocellsize)
 	visnote.visible = false
 	add_child(visnote)
 	visnote.connect("camera_entered", self, "on_camera_entered")
@@ -141,6 +136,7 @@ func loadnodedefinition(fhierarchy):
 		name[0] = ("n" if ntype == 0 else  "l")
 		assert ((ntype == 1) == (childMask == 0))
 
+
 func loadhierarchychunk(fhierarchy):
 	assert (name[0] == "h")
 	name[0] = "c"
@@ -155,6 +151,7 @@ func loadhierarchychunk(fhierarchy):
 					var cnode = MeshInstance.new()
 					cnode.set_script(load("res://potreework/Onode.gd"))
 					cnode.constructnode(pnode, childIndex)
+					cnode.visible = false
 					pnode.add_child(cnode)
 					nodes.append(cnode)
 	return nodes
