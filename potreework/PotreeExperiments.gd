@@ -60,40 +60,7 @@ func potreeactivatebuttonpressed(buttondown):
 			rootnode.primarycameraorigin = primarycameraorigin
 			rootnode.processingnode = rootnode
 			rootnode.set_process(true)
-			if false:
-				var nodestoload = rootnode.recalclodvisibility(primarycameraorigin)
-				for node in nodestoload:
-					if node.name[0] == "h":
-						node.loadhierarchychunk(rootnode.fhierarchy)
-					elif node.pointmaterial == null:
-						node.loadoctcellpoints(rootnode.foctree, rootnode.mdscale, rootnode.mdoffset, rootnode.pointsizefactor)
 
 func _input(event):
 	if event is InputEventKey and event.scancode == KEY_7:
 		potreeactivatebuttonpressed(event.pressed)
-		
-	if event is InputEventKey and event.scancode == KEY_6 and event.pressed:
-		if len(nodestoload) != 0:
-			var lnode = nodestoload.pop_front()
-			var nodes = lnode.loadhierarchychunk(rootnode.fhierarchy)
-			for node in nodes:
-				if not node.isdefinitionloaded:
-					nodestoload.append(node)
-				else:
-					nodestopointload.append(node)
-					
-	if event is InputEventKey and event.scancode == KEY_5 and event.pressed:
-		var node = rootnode
-		while node != null:
-			print(node)
-			node = rootnode.successornode(node, false)
-		if false:
-			for i in range(0, 12):
-				if len(nodestopointload) != 0:
-					var rnode = nodestopointload.pop_front()
-					print("loading ", rnode.get_path())
-					rnode.loadoctcellpoints(rootnode.foctree, rootnode.mdscale, rootnode.mdoffset, rootnode.pointsizefactor)
-					nodespointloaded.push_back(rnode)
-			for rnode in nodespointloaded:
-				rnode.setocellmask()
-

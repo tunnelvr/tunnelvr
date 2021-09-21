@@ -6,18 +6,18 @@ var hierarchybyteSize = 0
 var childMask = 0
 var spacing = 0
 var treedepth = 0
-var isdefinitionloaded = false
-var isleaf = false
 var numPoints = 0
 var byteOffset = 0
 var byteSize = 0
 
-
+var ocellmask = 0
 var pointmaterial = null
 var visibleincamera = false
 
 var boxmin = Vector3(0,0,0)
 var boxmax = Vector3(0,0,0)
+
+
 const boxpointepsilon = 0.6
 const spacingdivider = 1.7
 
@@ -93,6 +93,7 @@ func loadoctcellpoints(foctree, mdscale, mdoffset, pointsizefactor):
 	pointmaterial = load("res://potreework/pointcloudslice.material").duplicate()
 	pointmaterial.set_shader_param("point_scale", pointsizefactor*spacing)
 	pointmaterial.set_shader_param("ocellcentre", ocellcentre)
+	pointmaterial.set_shader_param("ocellmask", ocellmask)	
 	set_surface_material(0, pointmaterial)
 
 func constructnode(parentnode, childIndex):
@@ -133,18 +134,14 @@ func loadnodedefinition(fhierarchy):
 		hierarchybyteOffset = fhierarchy.get_64()
 		hierarchybyteSize = fhierarchy.get_64()
 		name[0] = "h"
-		isdefinitionloaded = false
 		assert (hierarchybyteOffset+hierarchybyteSize <= fhierarchy.get_len())
 	else:
 		byteOffset = fhierarchy.get_64()
 		byteSize = fhierarchy.get_64()
-		isdefinitionloaded = true
-		isleaf = (ntype == 1)
 		name[0] = ("n" if ntype == 0 else  "l")
-		assert (isleaf == (childMask == 0))
+		assert ((ntype == 1) == (childMask == 0))
 
 func loadhierarchychunk(fhierarchy):
-	assert (!isdefinitionloaded)
 	assert (name[0] == "h")
 	name[0] = "c"
 	fhierarchy.seek(hierarchybyteOffset)
@@ -152,8 +149,7 @@ func loadhierarchychunk(fhierarchy):
 	for i in range(hierarchybyteSize/22):
 		var pnode = nodes[i]
 		pnode.loadnodedefinition(fhierarchy)
-		if pnode.isdefinitionloaded:
-			#assert (pnode.get_child_count() == 0)
+		if pnode.name[0] != "h":
 			for childIndex in range(8):
 				if (pnode.childMask & (1 << childIndex)):
 					var cnode = MeshInstance.new()

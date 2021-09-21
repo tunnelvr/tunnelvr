@@ -68,22 +68,25 @@ func successornode(node, skip):
 			return node.get_child(inext)
 			
 
+func uppernodevisibilitymask(node, lvisible):
+	node.visible = lvisible
+	if node.treedepth != 0:
+		var pnode = node.get_parent()
+		var nodebit = (1 << int(node.name))
+		pnode.ocellmask |= nodebit
+		if not node.visible:
+			pnode.ocellmask ^= nodebit
+		if pnode.pointmaterial != null:
+			pnode.pointmaterial.set_shader_param("ocellmask", pnode.ocellmask)
+
+
 var processingnode = null
 func _process(delta):
 	if processingnode == null:
 		set_process(false)
-		var nodestack = [ self ]
-		while len(nodestack) != 0:
-			var node = nodestack.pop_back()
-			if node.pointmaterial != null:
-				node.setocellmask()
-				for cnode in node.get_children():
-					if cnode.visible:
-						nodestack.push_back(cnode)
-		
 		
 	elif not processingnode.visibleincamera:
-		processingnode.visible = false
+		uppernodevisibilitymask(processingnode, false)
 		processingnode = successornode(processingnode, true)
 
 	elif processingnode.name[0] == "h":
@@ -94,55 +97,13 @@ func _process(delta):
 		var boxradius = ((processingnode.boxmax - processingnode.boxmin)/2).length()
 		var cd = boxcentre.distance_to(primarycameraorigin)
 		if cd <= boxradius + 0.1:
-			processingnode.visible = true
+			uppernodevisibilitymask(processingnode, true)
 		else:
 			var pointsize = pointsizefactor*processingnode.spacing/(cd-boxradius)
-			processingnode.visible = (pointsize > pointsizevisibilitycutoff)
+			uppernodevisibilitymask(processingnode, (pointsize > pointsizevisibilitycutoff))
 		
 		if processingnode.visible and processingnode.pointmaterial == null:
 			processingnode.loadoctcellpoints(foctree, mdscale, mdoffset, pointsizefactor)
 		processingnode = successornode(processingnode, not processingnode.visible)
 
 
-func recalclodvisibility(cameraorigin):
-	var nodestoload = [ ]
-	if name[0] == "h" or pointmaterial == null:
-		nodestoload.push_back(self)
-	var nodestack = [ self ]
-	while len(nodestack) != 0:
-		var node = nodestack.pop_back()
-		if node.pointmaterial != null:
-			for cnode in node.get_children():
-				if cnode.name == "visnote":
-					continue
-				if cnode.visibleincamera:
-					var boxcentre = cnode.global_transform.origin
-					var boxradius = ((cnode.boxmax - cnode.boxmin)/2).length()
-					var cd = boxcentre.distance_to(cameraorigin)
-					if cd <= boxradius + 0.1:
-						cnode.visible = true
-					else:
-						var pointsize = pointsizefactor*cnode.spacing/(cd-boxradius)
-						cnode.visible = (pointsize > pointsizevisibilitycutoff)
-					if cnode.visible:
-						if cnode.name[0] == "h":
-							nodestoload.push_back(cnode)
-						elif cnode.pointmaterial == null:
-							nodestoload.push_back(cnode)
-							nodestack.push_back(cnode)
-						else:
-							nodestack.push_back(cnode)
-				else:
-					cnode.visible = false
-	
-	nodestack = [ self ]
-	while len(nodestack) != 0:
-		var node = nodestack.pop_back()
-		if node.pointmaterial != null:
-			node.setocellmask()
-			for cnode in node.get_children():
-				if cnode.visible:
-					nodestack.push_back(cnode)
-					
-	return nodestoload
-	
