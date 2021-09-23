@@ -13,7 +13,7 @@ var puppetpointerpositionstack = [ ]  # [ { "timestamp", "Ltimestamp", "orient",
 remote func initplayerappearanceJ(playerappearance):
 	playerplatform = playerappearance.get("playerplatform", "unknown")
 	var headcolour = playerappearance.get("playerheadcolour", Color.white)
-	playertunnelvrversion = playerappearance.get("tunnelvrversion", "unknown")
+	playertunnelvrversion = playerappearance.get("tun nelvrversion", "unknown")
 	executingfeaturesavailable = playerappearance.get("executingfeaturesavailable", [ ])
 	playeroperatingsystem = playerappearance.get("playeroperatingsystem", "unknown")
 

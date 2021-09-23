@@ -13,6 +13,8 @@ var nodestopointload = [ ]
 var nodespointloaded = [ ]
 var rootnode = null
 
+
+
 func potreethread_function(userdata):
 	print("potreethread_function started")
 	while not threadtoexit:
@@ -63,3 +65,6 @@ func potreeactivatebuttonpressed(buttondown):
 func _input(event):
 	if event is InputEventKey and event.scancode == KEY_7:
 		potreeactivatebuttonpressed(event.pressed)
+	if event is InputEventKey and event.scancode == KEY_6:
+		if rootnode != null and rootnode.processingnode == null:
+			rootnode.garbagecollectionsweep()

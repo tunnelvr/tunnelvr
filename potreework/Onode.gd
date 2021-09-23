@@ -7,6 +7,7 @@ var childMask = 0
 var spacing = 0
 var treedepth = 0
 var numPoints = 0
+var numPointsCarriedDown = 0
 var byteOffset = 0
 var byteSize = 0
 
@@ -14,7 +15,7 @@ var ocellmask = 0
 var pointmaterial = null
 var visibleincamera = false
 var ocellsize = Vector3(0,0,0)
-var timestampsinceinvisible = 0
+var timestampatinvisibility = 0
 
 var Dboxmin = Vector3(0,0,0)
 var Dboxmax = Vector3(0,0,0)
@@ -56,7 +57,7 @@ func loadoctcellpoints(foctree, mdscale, mdoffset, pointsizefactor, roottransfor
 	var st = SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_POINTS)
 	foctree.seek(byteOffset)
-	var npointsnotinbox = 0
+	var Dnpointsnotinbox = 0
 	for i in range(numPoints):
 		var v0 = foctree.get_32()
 		var v1 = foctree.get_32()
@@ -66,9 +67,10 @@ func loadoctcellpoints(foctree, mdscale, mdoffset, pointsizefactor, roottransfor
 						v2*mdscale.z + mdoffset.z)
 		st.add_vertex(p - ocellcentre)
 		if not Dboxminmax.has_point(p):
-			npointsnotinbox += 1
+			Dnpointsnotinbox += 1
 		
-	if len(name) <= 2:
+	numPointsCarriedDown = 0
+	if treedepth >= 1:
 		var parentpoints = get_parent().mesh.surface_get_arrays(0)[Mesh.PRIMITIVE_POINTS]
 		for p in parentpoints:
 			var pocellindex = (4 if p.x > 0.0 else 0) + \
@@ -77,20 +79,23 @@ func loadoctcellpoints(foctree, mdscale, mdoffset, pointsizefactor, roottransfor
 			if pocellindex == childIndex:
 				var rp = p - relativeocellcentre
 				st.add_vertex(rp)
+				numPointsCarriedDown += 1
 				if not Dboxminmax.has_point(rp + ocellcentre):
-					npointsnotinbox += 1
+					Dnpointsnotinbox += 1
 
 	var pointsmesh = Mesh.new()
 	st.commit(pointsmesh)
 	mesh = pointsmesh
-	if npointsnotinbox != 0:
-		print("npointsnotinbox ", npointsnotinbox, " of ", numPoints)
+	if Dnpointsnotinbox != 0:
+		print("npointsnotinbox ", Dnpointsnotinbox, " of ", numPoints+numPointsCarriedDown)
 	pointmaterial = load("res://potreework/pointcloudslice.material").duplicate()
 	pointmaterial.set_shader_param("point_scale", pointsizefactor*spacing)
 	pointmaterial.set_shader_param("ocellcentre", ocellcentre)
 	pointmaterial.set_shader_param("ocellmask", ocellmask)
 	pointmaterial.set_shader_param("roottransforminverse", roottransforminverse)
 	set_surface_material(0, pointmaterial)
+
+
 
 func constructnode(parentnode, childIndex, Droottransforminverse):
 	spacing = parentnode.spacing/spacingdivider
@@ -142,6 +147,9 @@ func loadhierarchychunk(fhierarchy, Droottransforminverse):
 	assert (name[0] == "h")
 	name[0] = "c"
 	fhierarchy.seek(hierarchybyteOffset)
+	
+	
+	
 	var nodes = [ self ]
 	for i in range(hierarchybyteSize/22):
 		var pnode = nodes[i]

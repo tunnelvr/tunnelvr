@@ -4,23 +4,35 @@ var metadata = null
 var mdscale = Vector3(1,1,1)
 var mdoffset = Vector3(0,0,0)
 var pointsizefactor = 150.0
+
 var fmetadata = File.new()
 var fhierarchy = File.new()
 var foctree = File.new()
+
+# pip install rangehttpserver
+# python -m RangeHTTPServer
+# headers={"Range":"bytes=1-10"}
+
 var highlightplaneperp = Vector3(0,0,0)
 var highlightplanedot = Vector3(0,0,0)
 
 var primarycameraorigin = Vector3(0,0,0)
-var pointsizevisibilitycutoff = 10.0
-var processingnode = null
+var pointsizevisibilitycutoff = 15.0
+
 var visiblepointcount = 0
-var visiblepointcountLimit = 1000000
+var totalpointcount = 0
+var otreecellscount = 0
+var visiblepointcountLimit = 500000
+
+var processingnode = null
 
 func loadotree(d):
-
 	fmetadata.open(d+"metadata.json", File.READ)
 	fhierarchy.open(d+"hierarchy.bin", File.READ)
 	foctree.open(d+"octree.bin", File.READ)
+
+	fetchrequesturl(url, callbackobject, callbackfunction, byteOffset, byteSize):
+
 
 	metadata = parse_json(fmetadata.get_as_text())
 	mdoffset = Vector3(metadata["offset"][0], 
@@ -74,13 +86,13 @@ func successornode(node, skip):
 func uppernodevisibilitymask(node, lvisible):
 	if node.visible != lvisible:
 		node.visible = lvisible
-		if not node.visible:
-			node.timestampsinceinvisible = OS.get_ticks_msec()
-			visiblepointcount -= node.numPoints
+		if node.visible:
+			visiblepointcount += node.numPoints + node.numPointsCarriedDown
 		else:
-			visiblepointcount += node.numPoints
+			node.timestampatinvisibility = OS.get_ticks_msec()
+			visiblepointcount -= node.numPoints + node.numPointsCarriedDown
 		
-		if node.treedepth != 0:
+		if node.treedepth >= 1:
 			var pnode = node.get_parent()
 			var nodebit = (1 << int(node.name))
 			pnode.ocellmask |= nodebit
@@ -90,13 +102,53 @@ func uppernodevisibilitymask(node, lvisible):
 				pnode.pointmaterial.set_shader_param("ocellmask", pnode.ocellmask)
 			assert (((pnode.ocellmask & nodebit) != 0) == node.visible)
 
+func freeinvisiblenoderesources(topnode):
+	var node = topnode
+	var goingdown = true
+	while true:
+		assert (!node.visible)
+		if goingdown:
+			if node.get_child_count() > 1:
+				node = node.get_child(1)
+			else:
+				goingdown = false
+		else:
+			if node.pointmaterial != null:
+				totalpointcount -= node.numPoints + node.numPointsCarriedDown
+				node.mesh = null
+				node.pointmaterial = null
+			if node == topnode:
+				break
+			var inext = node.get_index() + 1
+			node = node.get_parent()
+			if inext < node.get_child_count():
+				node = node.get_child(inext)
+				goingdown = true
+		
 
+func garbagecollectionsweep():
+	assert (processingnode == null)
+	var node = self
+	var oldestinvisiblenode = null
+	while node != null:
+		if node.treedepth >= 1 and node.name[0] != "h" and not node.visible and node.pointmaterial != null:
+			if oldestinvisiblenode == null or node.timestampatinvisibility < oldestinvisiblenode.timestampatinvisibility:
+				oldestinvisiblenode = node
+		node = successornode(node, false)
+	if oldestinvisiblenode != null:
+		var oldestinvisiblenodeage = (OS.get_ticks_msec() - oldestinvisiblenode.timestampatinvisibility)/1000.0
+		print("oldestinvisiblenodeage ", oldestinvisiblenodeage, " ", oldestinvisiblenode.get_child_count()-1)
+		var prevtotalpointcount = totalpointcount
+		freeinvisiblenoderesources(oldestinvisiblenode)
+		print("totalpointcount was: ", prevtotalpointcount, " now: ", totalpointcount)
+		
 func commenceocellprocessing():
 	processingnode = self
 	set_process(true)
 
 func _process(delta):
 	if processingnode == null:
+		print("pointcount visible: ", visiblepointcount, "  all: ", totalpointcount, " otrees: ", otreecellscount)
 		set_process(false)
 		
 	elif not processingnode.visibleincamera:
@@ -104,7 +156,10 @@ func _process(delta):
 		processingnode = successornode(processingnode, true)
 
 	elif processingnode.name[0] == "h":
-		processingnode.loadhierarchychunk(fhierarchy, get_parent().global_transform.inverse())
+		var nodesh = processingnode.loadhierarchychunk(fhierarchy, get_parent().global_transform.inverse())
+		for node in nodesh:
+			if node.name[0] != "h":
+				otreecellscount += 1
 		
 	else:
 		var boxcentre = processingnode.global_transform.origin
@@ -119,7 +174,9 @@ func _process(delta):
 		uppernodevisibilitymask(processingnode, lvisible)
 		
 		if processingnode.visible and processingnode.pointmaterial == null:
-			processingnode.loadoctcellpoints(foctree, mdscale, mdoffset, pointsizefactor, get_parent().global_transform.inverse())
+			var roottransforminverse = get_parent().global_transform.inverse()
+			processingnode.loadoctcellpoints(foctree, mdscale, mdoffset, pointsizefactor, roottransforminverse)
+			totalpointcount += processingnode.numPoints + processingnode.numPointsCarriedDown
 		processingnode = successornode(processingnode, not processingnode.visible)
 
 

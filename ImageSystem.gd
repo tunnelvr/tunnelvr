@@ -265,6 +265,20 @@ func fetchunrolltree(fileviewtree, item, url):
 	nonimagepageslist.append(nonimagedataobject)
 	set_process(true)
 
+
+func fetchrequesturl(url:String, callbackobject, callbackfunction, byteOffset=-1, byteSize=-1):
+	if url.substr(0,4) == "http":
+		var headers = {"Range":"bytes=%d-%d" % [byteOffset, byteOffset+byteSize-1]} if byteOffset != -1 else { }
+		var nonimagedataobject = { "url":url, "callbackobject":callbackobject, "callbackfunction":callbackfunction, "headers":headers }
+		nonimagepageslist.append(nonimagedataobject)
+		set_process(true)
+	else:
+		var f = File.new()
+		f.open(url)
+		f.seek(byteOffset)
+		callbackobject.call_deferred("callbackfunction", f.read(byteSize))
+		
+		
 func fetchpaperdrawing(paperdrawing):
 	paperdrawinglist.push_back(paperdrawing)
 	set_process(true)
