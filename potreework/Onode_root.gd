@@ -6,8 +6,7 @@ var mdoffset = Vector3(0,0,0)
 var pointsizefactor = 150.0
 
 # pip install rangehttpserver
-# python -m RangeHTTPServer
-# headers={"Range":"bytes=1-10"}
+# python -m RangeHTTPServer (after editing site-packages/RangeHTTPServer/__main__.py line: SimpleHTTPServer.test(HandlerClass=RangeRequestHandler, bind="0.0.0.0")
 
 var highlightplaneperp = Vector3(0,0,0)
 var highlightplanedot = Vector3(0,0,0)
@@ -31,8 +30,8 @@ var urloctree = ""
 onready var ImageSystem = get_node("/root/Spatial/ImageSystem")
 
 func commenceloadotree(urlotreedir):
-	urlotreedir = "http://localhost:8000/"
 	urlotreedir = "http://192.168.8.101:8000/"
+	
 	urlmetadata = urlotreedir+"metadata.json"
 	urlhierarchy = urlotreedir+"hierarchy.bin"
 	urloctree = urlotreedir+"octree.bin"

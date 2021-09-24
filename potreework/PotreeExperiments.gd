@@ -2,7 +2,7 @@ extends Spatial
 
 #var d = "/home/julian/data/pointclouds/potreetests/outdir/"
 # PotreeConverter --source xxx.laz --outdir outdir --attributes position_cartesian --method poisson
-var d = "D:/potreetests/outdir/"
+var localpotreeoutdir = "D:/potreetests/outdir/"
 
 var potreethreadmutex = Mutex.new()
 var potreethreadsemaphore = Semaphore.new()
@@ -58,7 +58,11 @@ func potreeactivatebuttonpressed(buttondown):
 			rootnode.visibleincamera = true
 			rootnode.primarycameraorigin = primarycameraorigin
 			add_child(rootnode)
-			rootnode.commenceloadotree(d)
+			var selfSpatial = get_node("/root/Spatial")
+			if selfSpatial.hostipnumber != "":
+				rootnode.commenceloadotree("http://%s:%d/" % [selfSpatial.hostipnumber, selfSpatial.potreeportnumber])
+			else:
+				rootnode.commenceloadotree(localpotreeoutdir)
 		else:
 			rootnode.primarycameraorigin = primarycameraorigin
 			rootnode.commenceocellprocessing()

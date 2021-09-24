@@ -836,12 +836,17 @@ func networkstartasserver(fromgui):
 	if not fromgui:
 		yield(get_tree().create_timer(2.0), "timeout")		
 	print("Starting as server, ipnumber list:")
+	selfSpatial.hostipnumber = ""
 	for k in IP.get_local_interfaces():
 		var ipnum = ""
 		for l in k["addresses"]:
 			if l.find(".") != -1:
 				ipnum = l
 		print(k["friendly"] + ": " + ipnum)
+		if k["friendly"] == "Wi-Fi" or k["friendly"].begins_with("wlan"):
+			selfSpatial.hostipnumber = ipnum
+		elif selfSpatial.hostipnumber == "":
+			selfSpatial.hostipnumber = ipnum
 	
 	get_tree().connect("network_peer_connected", selfSpatial, "_player_connected")
 	get_tree().connect("network_peer_disconnected", selfSpatial, "_player_disconnected")

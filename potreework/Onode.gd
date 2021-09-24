@@ -156,6 +156,7 @@ func loadhierarchychunk(fhierarchyF, Droottransforminverse):
 					cnode.set_script(load("res://potreework/Onode.gd"))
 					cnode.constructnode(pnode, childIndex, Droottransforminverse)
 					cnode.visible = false
+					cnode.cast_shadow = GeometryInstance.SHADOW_CASTING_SETTING_OFF
 					pnode.add_child(cnode)
 					nodes.append(cnode)
 	return nodes

@@ -3759,7 +3759,7 @@ material/0 = ExtResource( 65 )
 script = ExtResource( 64 )
 
 [node name="PotreeExperiments" type="Spatial" parent="."]
-transform = Transform( 1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0 )
+transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 2, 0 )
 script = ExtResource( 74 )
 
 [connection signal="timeout" from="MQTTExperiment/mqttnode/Timer" to="MQTTExperiment/mqttnode" method="_on_Timer_timeout"]

@@ -1,7 +1,6 @@
 shader_type spatial;
 render_mode world_vertex_coords,shadows_disabled;
 
-uniform vec4 albedo : hint_color = vec4(1.0);
 uniform float point_scale = 16.0;
 uniform vec3 highlightplaneperp = vec3(0,1,0);
 uniform float highlightplanedot = 0.0;
@@ -13,8 +12,13 @@ const vec3 closecol = vec3(1,0,0);
 const vec3 farcol = vec3(0,0,1);
 const float fardist = 20.0;
 const vec3 highlightcol = vec3(1,1,0);
+const vec3 highlightcol2 = vec3(0,1,1);
 const float highlightdist = 0.5;
 const float sizebumpdist = 0.25;
+const vec3 bordercolor = vec3(0.1, 0.1, 0.2);
+const float edgeborder = 0.5 - 0.05; 
+
+varying vec3 emissioncol;
 
 void vertex() {
 	float distcamera = length(CAMERA_MATRIX[3].xyz - VERTEX); 
@@ -27,15 +31,25 @@ void vertex() {
 		POINT_SIZE = 0.0;
 
 	NORMAL = CAMERA_MATRIX[2].xyz;
-	float distplane = abs(dot(VERTEX, highlightplaneperp) - highlightplanedot); 
-	if (distplane < sizebumpdist) {
+	float distplane = dot(VERTEX, highlightplaneperp) - highlightplanedot; 
+	if (abs(distplane) < sizebumpdist) {
 		POINT_SIZE *= 2.0;
 	}
 	COLOR.rgb = mix(closecol, farcol, distcamera/fardist);
-	COLOR.a = clamp(1.0 - distplane/highlightdist, 0.0, 1.0);
+	float emissionfac = clamp(1.0 - abs(distplane)/highlightdist, 0.0, 1.0);
+	emissioncol = (distplane > 0.0 ? highlightcol : highlightcol2)*emissionfac;
 }
 
 void fragment() {
-	ALBEDO = COLOR.rgb * albedo.rgb;
-	EMISSION = highlightcol*COLOR.a; 
+	ALBEDO = COLOR.rgb;
+	EMISSION = emissioncol;
+
+	float squarecentredist = max(abs(POINT_COORD.x-0.5), abs(POINT_COORD.y-0.5)); 
+	if (squarecentredist > edgeborder)
+		ALBEDO *= bordercolor;
+
+	// circular points
+	//float rsq = (POINT_COORD.x-0.5)*(POINT_COORD.x-0.5) + (POINT_COORD.y-0.5)*(POINT_COORD.y-0.5);
+	//if (rsq > 0.25)  discard;
+	
 }
