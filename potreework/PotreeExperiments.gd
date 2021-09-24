@@ -41,8 +41,9 @@ func _exit_tree():
 		threadtoexit = false
 
 func sethighlightplane(planetransform):
-	rootnode.sethighlightplane(planetransform.basis.z, 
-							   planetransform.basis.z.dot(planetransform.origin))
+	if rootnode != null:
+		rootnode.sethighlightplane(planetransform.basis.z, 
+								   planetransform.basis.z.dot(planetransform.origin))
 
 func potreeactivatebuttonpressed(buttondown):
 	if buttondown:
