@@ -45,7 +45,7 @@ func on_camera_exited(camera):
 	if camera.get_instance_id() == Tglobal.primarycamera_instanceid:
 		visibleincamera = false
 
-func loadoctcellpoints(foctree, mdscale, mdoffset, pointsizefactor, roottransforminverse):
+func loadoctcellpoints(foctreeF, mdscale, mdoffset, pointsizefactor, roottransforminverse):
 	var ocellcentre = roottransforminverse*global_transform.origin
 	var relativeocellcentre = transform.origin
 	var childIndex = int(name)
@@ -56,12 +56,11 @@ func loadoctcellpoints(foctree, mdscale, mdoffset, pointsizefactor, roottransfor
 
 	var st = SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_POINTS)
-	foctree.seek(byteOffset)
 	var Dnpointsnotinbox = 0
 	for i in range(numPoints):
-		var v0 = foctree.get_32()
-		var v1 = foctree.get_32()
-		var v2 = foctree.get_32()
+		var v0 = foctreeF.get_32()
+		var v1 = foctreeF.get_32()
+		var v2 = foctreeF.get_32()
 		var p = Vector3(v0*mdscale.x + mdoffset.x, 
 						v1*mdscale.y + mdoffset.y, 
 						v2*mdscale.z + mdoffset.z)
@@ -135,7 +134,6 @@ func loadnodedefinition(fhierarchy):
 		hierarchybyteOffset = fhierarchy.get_64()
 		hierarchybyteSize = fhierarchy.get_64()
 		name[0] = "h"
-		assert (hierarchybyteOffset+hierarchybyteSize <= fhierarchy.get_len())
 	else:
 		byteOffset = fhierarchy.get_64()
 		byteSize = fhierarchy.get_64()
@@ -143,17 +141,14 @@ func loadnodedefinition(fhierarchy):
 		assert ((ntype == 1) == (childMask == 0))
 
 
-func loadhierarchychunk(fhierarchy, Droottransforminverse):
+func loadhierarchychunk(fhierarchyF, Droottransforminverse):
 	assert (name[0] == "h")
 	name[0] = "c"
-	fhierarchy.seek(hierarchybyteOffset)
-	
-	
 	
 	var nodes = [ self ]
 	for i in range(hierarchybyteSize/22):
 		var pnode = nodes[i]
-		pnode.loadnodedefinition(fhierarchy)
+		pnode.loadnodedefinition(fhierarchyF)
 		if pnode.name[0] != "h":
 			for childIndex in range(8):
 				if (pnode.childMask & (1 << childIndex)):

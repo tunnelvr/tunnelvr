@@ -17,6 +17,7 @@ func xx(a):
 	a.x += 20
 	print(a)
 func _run():
-	var a = Vector3(10,20,30)
-	var b = AABB(Vector3(10,10,10), Vector3(20,30,40))
-	print(distAABB(b, Vector3(15,45,555)))
+	var a = d + "meta.json"
+	print(a.rsplit("/", true, 1))
+	var v = {"a":9}
+	print(v.get("nn", 10))

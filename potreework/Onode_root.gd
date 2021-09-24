@@ -5,10 +5,6 @@ var mdscale = Vector3(1,1,1)
 var mdoffset = Vector3(0,0,0)
 var pointsizefactor = 150.0
 
-var fmetadata = File.new()
-var fhierarchy = File.new()
-var foctree = File.new()
-
 # pip install rangehttpserver
 # python -m RangeHTTPServer
 # headers={"Range":"bytes=1-10"}
@@ -25,15 +21,25 @@ var otreecellscount = 0
 var visiblepointcountLimit = 500000
 
 var processingnode = null
+var processingnodeWaitingForFile = false
+var processingnodeReturnedFileHandle = null
 
-func loadotree(d):
-	fmetadata.open(d+"metadata.json", File.READ)
-	fhierarchy.open(d+"hierarchy.bin", File.READ)
-	foctree.open(d+"octree.bin", File.READ)
+var urlmetadata = ""
+var urlhierarchy = ""
+var urloctree = ""
 
-	fetchrequesturl(url, callbackobject, callbackfunction, byteOffset, byteSize):
+onready var ImageSystem = get_node("/root/Spatial/ImageSystem")
 
+func commenceloadotree(urlotreedir):
+	urlotreedir = "http://localhost:8000/"
+	urlotreedir = "http://192.168.8.101:8000/"
+	urlmetadata = urlotreedir+"metadata.json"
+	urlhierarchy = urlotreedir+"hierarchy.bin"
+	urloctree = urlotreedir+"octree.bin"
+		
+	ImageSystem.fetchrequesturl({ "url":urlmetadata, "callbackobject":self, "callbackfunction":"callbackloadotree" })
 
+func callbackloadotree(fmetadata, nonimagedataobject):
 	metadata = parse_json(fmetadata.get_as_text())
 	mdoffset = Vector3(metadata["offset"][0], 
 					   metadata["offset"][1], 
@@ -60,6 +66,7 @@ func loadotree(d):
 	Dboxmax = mdmax
 	print("yyy ", mdmin, mdmax)
 	constructcontainingmesh()
+	commenceocellprocessing()
 
 func sethighlightplane(lhighlightplaneperp, lhighlightplanedot):
 	highlightplaneperp = lhighlightplaneperp
@@ -144,11 +151,36 @@ func garbagecollectionsweep():
 		
 func commenceocellprocessing():
 	processingnode = self
+	processingnodeWaitingForFile = false
+	processingnodeReturnedFileHandle = null
+	#ImageSystem.clearallpotreeactivity(self)
+	print(" *** commenceocellprocessing")
 	set_process(true)
 
+var Dnonimagedataobject = null
+var Dprocessingnode = null
+func processingnodeWaitingEnded(f, nonimagedataobject):
+	Dnonimagedataobject = nonimagedataobject
+	Dprocessingnode = processingnode
+	if processingnode != null:
+		if processingnode.name[0] == "h":
+			if nonimagedataobject["url"] == urlhierarchy and \
+					nonimagedataobject["byteOffset"] == processingnode.hierarchybyteOffset and \
+					nonimagedataobject["byteSize"] == processingnode.hierarchybyteSize:
+				processingnodeReturnedFileHandle = f
+			else:
+				print("** discarding returning fetchrequesturl", nonimagedataobject)
+		else:
+			if nonimagedataobject["url"] == urloctree and \
+					nonimagedataobject["byteOffset"] == processingnode.byteOffset and \
+					nonimagedataobject["byteSize"] == processingnode.byteSize:
+				processingnodeReturnedFileHandle = f
+			else:
+				print("** discarding returning fetchrequesturl", nonimagedataobject)
+	
 func _process(delta):
 	if processingnode == null:
-		print("pointcount visible: ", visiblepointcount, "  all: ", totalpointcount, " otrees: ", otreecellscount)
+		print("  ** pointcount visible: ", visiblepointcount, "  all: ", totalpointcount, " otrees: ", otreecellscount)
 		set_process(false)
 		
 	elif not processingnode.visibleincamera:
@@ -156,27 +188,57 @@ func _process(delta):
 		processingnode = successornode(processingnode, true)
 
 	elif processingnode.name[0] == "h":
-		var nodesh = processingnode.loadhierarchychunk(fhierarchy, get_parent().global_transform.inverse())
-		for node in nodesh:
-			if node.name[0] != "h":
-				otreecellscount += 1
+		if not processingnodeWaitingForFile:
+			processingnodeWaitingForFile = true
+			processingnodeReturnedFileHandle = null
+			var nonimagedataobject = { "url":urlhierarchy, "callbackobject":self, 
+									   "callbackfunction":"processingnodeWaitingEnded", 
+									   "byteOffset":processingnode.hierarchybyteOffset, 
+									   "byteSize":processingnode.hierarchybyteSize }
+			ImageSystem.fetchrequesturl(nonimagedataobject)
+		elif processingnodeReturnedFileHandle != null:
+			processingnodeWaitingForFile = false
+			var fhierarchyF = processingnodeReturnedFileHandle
+			processingnodeReturnedFileHandle = null
+			assert ((urlhierarchy.substr(0, 4) != "http") or (fhierarchyF.get_len() == processingnode.hierarchybyteSize))
+			var nodesh = processingnode.loadhierarchychunk(fhierarchyF, get_parent().global_transform.inverse())
+			for node in nodesh:
+				if node.name[0] != "h":
+					otreecellscount += 1
 		
 	else:
-		var boxcentre = processingnode.global_transform.origin
-		var boxradius = (processingnode.ocellsize/2).length()
-		var cd = boxcentre.distance_to(primarycameraorigin)
-		var lvisible = true
-		if cd > boxradius + 0.1:
-			var pointsize = pointsizefactor*processingnode.spacing/(cd-boxradius)
-			lvisible = (pointsize > pointsizevisibilitycutoff)
-		if visiblepointcount > visiblepointcountLimit:
-			lvisible = false
-		uppernodevisibilitymask(processingnode, lvisible)
+		if not processingnodeWaitingForFile:
+			var boxcentre = processingnode.global_transform.origin
+			var boxradius = (processingnode.ocellsize/2).length()
+			var cd = boxcentre.distance_to(primarycameraorigin)
+			var lvisible = true
+			if cd > boxradius + 0.1:
+				var pointsize = pointsizefactor*processingnode.spacing/(cd-boxradius)
+				lvisible = (pointsize > pointsizevisibilitycutoff)
+			if visiblepointcount > visiblepointcountLimit:
+				lvisible = false
+			uppernodevisibilitymask(processingnode, lvisible)
 		
-		if processingnode.visible and processingnode.pointmaterial == null:
+			if processingnode.visible and processingnode.pointmaterial == null:
+				processingnodeWaitingForFile = true
+				processingnodeReturnedFileHandle = null
+				var nonimagedataobject = { "url":urloctree, "callbackobject":self, 
+										   "callbackfunction":"processingnodeWaitingEnded", 
+										   "byteOffset":processingnode.byteOffset, 
+										   "byteSize":processingnode.byteSize }
+				ImageSystem.fetchrequesturl(nonimagedataobject)
+			else:
+				processingnode = successornode(processingnode, not processingnode.visible)
+
+		elif processingnodeReturnedFileHandle != null:
+			processingnodeWaitingForFile = false
+			var foctreeF = processingnodeReturnedFileHandle
+			processingnodeReturnedFileHandle = null
+			if (urloctree.substr(0, 4) == "http"):
+				if (foctreeF.get_len() != processingnode.byteSize):
+					print("lll ", foctreeF.get_len(), "  ", processingnode.byteSize)
+			assert ((urloctree.substr(0, 4) != "http") or (foctreeF.get_len() == processingnode.byteSize))
 			var roottransforminverse = get_parent().global_transform.inverse()
-			processingnode.loadoctcellpoints(foctree, mdscale, mdoffset, pointsizefactor, roottransforminverse)
+			processingnode.loadoctcellpoints(foctreeF, mdscale, mdoffset, pointsizefactor, roottransforminverse)
 			totalpointcount += processingnode.numPoints + processingnode.numPointsCarriedDown
-		processingnode = successornode(processingnode, not processingnode.visible)
-
-
+			processingnode = successornode(processingnode, not processingnode.visible)

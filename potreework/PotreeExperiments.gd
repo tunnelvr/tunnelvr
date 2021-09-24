@@ -13,7 +13,7 @@ var nodestopointload = [ ]
 var nodespointloaded = [ ]
 var rootnode = null
 
-
+onready var ImageSystem = get_node("/root/Spatial/ImageSystem")
 
 func potreethread_function(userdata):
 	print("potreethread_function started")
@@ -56,11 +56,12 @@ func potreeactivatebuttonpressed(buttondown):
 			rootnode.set_script(load("res://potreework/Onode_root.gd"))
 			rootnode.name = "hroot"
 			rootnode.visibleincamera = true
+			rootnode.primarycameraorigin = primarycameraorigin
 			add_child(rootnode)
-			rootnode.loadotree(d)
-			
-		rootnode.primarycameraorigin = primarycameraorigin
-		rootnode.commenceocellprocessing()
+			rootnode.commenceloadotree(d)
+		else:
+			rootnode.primarycameraorigin = primarycameraorigin
+			rootnode.commenceocellprocessing()
 
 func _input(event):
 	if event is InputEventKey and event.scancode == KEY_7:

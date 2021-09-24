@@ -20,7 +20,6 @@ var fetchednonimagedataobject = null
 var httprequest = null
 var httprequestduration = 0.0
 var fetcheddrawingfile = null
-var fetchednonimagedataobjectfile = null
 
 var imageloadingthreadmutex = Mutex.new()
 var imageloadingthreadsemaphore = Semaphore.new()
@@ -74,9 +73,9 @@ func clearallimageloadingactivity():
 	paperdrawinglist.clear()
 
 func _http_request_completed(result, response_code, headers, body, httprequestdataobject):
-	print("_http_request_completed ", len(body), " bytes")
+	print("_http_request_completed ", len(body), " bytes", headers)
 	httprequestdataobject["httprequest"].queue_free()
-	if response_code == 200:
+	if response_code == 200 or response_code == 206:
 		if "paperdrawing" in httprequestdataobject:
 			fetcheddrawing = httprequestdataobject["paperdrawing"]
 		else:
@@ -122,7 +121,7 @@ func clearcachedir(dname):
 		print("remove dir error ", e2)
 			
 
-func getshortimagename(xcresource, withextension, md5nameleng):
+func getshortimagename(xcresource, withextension, md5nameleng, nonimagepage={}):
 	var fname = xcresource.substr(xcresource.find_last("/")+1)
 	var ext = xcresource.get_extension()
 	if ext != null and ext != "":
@@ -130,10 +129,13 @@ func getshortimagename(xcresource, withextension, md5nameleng):
 	fname = fname.get_basename()
 	fname = fname.replace(".", "").replace("@", "").replace("%", "")
 	var md5name = xcresource.md5_text().substr(0, md5nameleng)
+	var extname = ""
+	if nonimagepage.has("byteOffset"):
+		extname = "_%d_%d" % [nonimagepage["byteOffset"], nonimagepage["byteSize"]]
 	if len(fname) > 8:
-		fname = fname.substr(0,4)+md5name+fname.substr(len(fname)-4)
+		fname = fname.substr(0,4)+md5name+extname+fname.substr(len(fname)-4)
 	else:
-		fname = fname+md5name
+		fname = fname+md5name+extname
 	return fname+ext if withextension else fname
 
 
@@ -149,7 +151,10 @@ func _process(delta):
 	var pt = ""
 	if fetcheddrawing == null and fetchednonimagedataobject == null and httprequest == null and len(nonimagepageslist) > 0:
 		var nonimagepage = nonimagepageslist.pop_front()
-		nonimagepage["fetchednonimagedataobjectfile"] = nonimagedir+getshortimagename(nonimagepage["url"], true, 20)
+		nonimagepage["fetchednonimagedataobjectfile"] = nonimagedir + \
+			getshortimagename(nonimagepage["url"], true, 
+							  (10 if nonimagepage.has("byteOffset") else 20), 
+							  nonimagepage)
 		if not File.new().file_exists(nonimagepage["fetchednonimagedataobjectfile"]):
 			if not Directory.new().dir_exists(nonimagedir):
 				var err = Directory.new().make_dir(nonimagedir)
@@ -159,13 +164,17 @@ func _process(delta):
 			nonimagepage["httprequest"] = httprequest
 			httprequest.connect("request_completed", self, "_http_request_completed", [nonimagepage])
 			httprequest.download_file = nonimagepage["fetchednonimagedataobjectfile"]
-			httprequest.request(nonimagepage["url"])
+			var headers = []
+			if nonimagepage.has("byteOffset"):
+				headers.push_back("Range: bytes=%d-%d" % [nonimagepage["byteOffset"], nonimagepage["byteOffset"]+nonimagepage["byteSize"]-1])
+			print("makinghttprequest ", nonimagepage["fetchednonimagedataobjectfile"], nonimagepage.get("byteOffset"))
+			httprequest.request(nonimagepage["url"], headers)
 			httprequestduration = 0.0
 			imagesystemreportslabel.text = "%d-%s" % [len(nonimagepageslist), "nonimage"]
 
 		else:
 			fetchednonimagedataobject = nonimagepage
-		pt = var2str(nonimagepage)
+		pt = var2str({"url":nonimagepage["url"], "byteOffset":nonimagepage.get("byteOffset")})
 		
 	if fetcheddrawing == null and fetchednonimagedataobject == null and httprequest == null and len(paperdrawinglist) > 0:
 		var paperdrawing = paperdrawinglist.pop_back()
@@ -177,7 +186,7 @@ func _process(delta):
 				fetcheddrawingfile = "res://guimaterials/imagefilefailure.png"
 			fetchreporttype = "res"
 		elif paperdrawing.xcresource.begins_with("http"):
-			fetcheddrawingfile = imgdir+getshortimagename(paperdrawing.xcresource, true, 6)
+			fetcheddrawingfile = imgdir+getshortimagename(paperdrawing.xcresource, true, 12)
 			if paperdrawing.xcresource == defaultfloordrawing:
 				fetcheddrawingfile = defaultfloordrawingres
 				print("fetching default drawing file ", fetcheddrawingfile)
@@ -241,12 +250,18 @@ func _process(delta):
 		if fetchednonimagedataobject.get("parsedumpcentreline") == "yes":
 			get_node("/root/Spatial/ExecutingFeatures").parse3ddmpcentreline_execute(fetchednonimagedataobject["fetchednonimagedataobjectfile"], fetchednonimagedataobject["url"])
 			
-		if "tree" in fetchednonimagedataobject:
+		elif "tree" in fetchednonimagedataobject:
 			var htmltextfile = File.new()
 			htmltextfile.open(fetchednonimagedataobject["fetchednonimagedataobjectfile"], File.READ)
 			var htmltext = htmltextfile.get_as_text()
 			htmltextfile.close()
 			get_node("/root/Spatial/PlanViewSystem").openlinklistpage(fetchednonimagedataobject["item"], htmltext)
+
+		elif "callbackobject" in fetchednonimagedataobject:
+			var f = File.new()
+			f.open(fetchednonimagedataobject["fetchednonimagedataobjectfile"], File.READ)
+			print("fff ", f.get_len())
+			fetchednonimagedataobject["callbackobject"].call_deferred(fetchednonimagedataobject["callbackfunction"], f, fetchednonimagedataobject)
 		
 		fetchednonimagedataobject = null
 
@@ -266,18 +281,18 @@ func fetchunrolltree(fileviewtree, item, url):
 	set_process(true)
 
 
-func fetchrequesturl(url:String, callbackobject, callbackfunction, byteOffset=-1, byteSize=-1):
+func fetchrequesturl(nonimagedataobject):
+	var url = nonimagedataobject["url"]
 	if url.substr(0,4) == "http":
-		var headers = {"Range":"bytes=%d-%d" % [byteOffset, byteOffset+byteSize-1]} if byteOffset != -1 else { }
-		var nonimagedataobject = { "url":url, "callbackobject":callbackobject, "callbackfunction":callbackfunction, "headers":headers }
+		print("fetchrequesturl ", url, nonimagedataobject.get("byteOffset"))
 		nonimagepageslist.append(nonimagedataobject)
 		set_process(true)
 	else:
 		var f = File.new()
-		f.open(url)
-		f.seek(byteOffset)
-		callbackobject.call_deferred("callbackfunction", f.read(byteSize))
-		
+		f.open(url, File.READ)
+		if nonimagedataobject.has("byteOffset"):
+			f.seek(nonimagedataobject["byteOffset"])
+		nonimagedataobject["callbackobject"].call_deferred(nonimagedataobject["callbackfunction"], f, nonimagedataobject)
 		
 func fetchpaperdrawing(paperdrawing):
 	paperdrawinglist.push_back(paperdrawing)

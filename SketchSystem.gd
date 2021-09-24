@@ -875,7 +875,7 @@ func newXCuniquedrawing(drawingtype, sname):
 	
 
 func uniqueXCdrawingPapername(xcresource):
-	var fname = get_node("/root/Spatial/ImageSystem").getshortimagename(xcresource, false, 6)
+	var fname = get_node("/root/Spatial/ImageSystem").getshortimagename(xcresource, false, 12)
 	var sname = fname+","
 	for i in range($XCdrawings.get_child_count()+1):
 		sname = fname+","+String(i)
