@@ -174,7 +174,7 @@ remote func puppetsetheadtorchlight(torchon):
 
 remote func puppeteyestate(eyesopen):
 	print("puppet eye state ", get_name(), " ", eyesopen)
-	$HeadCam/csgheadmesh/righteye.visible = eyesopen
+	$HeadCam/csgheadmesh/righteye.visible = eyesopen  # bad this causes recalc of CSG and is slow
 	$HeadCam/csgheadmesh/lefteye.visible = eyesopen
 	
 func _process(delta):

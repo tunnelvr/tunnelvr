@@ -320,12 +320,7 @@ func _on_switchtest(index):
 		SwitchTest.selected = 0
 
 	elif nssel == "LoadPointMesh":
-		var pointmeshexperiment = get_node("/root/Spatial/PointMeshExperiment")
-		if pointmeshexperiment.visible:
-			pointmeshexperiment.visible = false
-		else:
-			pointmeshexperiment.visible = true
-			pointmeshexperiment.LoadPointMesh()
+		selfSpatial.get_node("PotreeExperiments").potreeactivatebuttonpressed(true)
 		SwitchTest.selected = 0
 		setguipanelhide()
 

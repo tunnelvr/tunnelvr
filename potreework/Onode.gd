@@ -22,7 +22,7 @@ var Dboxmax = Vector3(0,0,0)
 
 const boxpointepsilon = 0.6
 const spacingdivider = 1.7
-const constructhcubes = true
+const constructhcubes = false
 
 func createChildAABB(pnode, index):
 	Dboxmin = pnode.Dboxmin
@@ -45,7 +45,7 @@ func on_camera_exited(camera):
 	if camera.get_instance_id() == Tglobal.primarycamera_instanceid:
 		visibleincamera = false
 
-func loadoctcellpoints(foctreeF, mdscale, mdoffset, pointsizefactor, roottransforminverse):
+func loadoctcellpoints(foctreeF, mdscale, mdoffset, pointsizefactor, roottransforminverse, highlightplaneperp, highlightplanedot):
 	var ocellcentre = roottransforminverse*global_transform.origin
 	var relativeocellcentre = transform.origin
 	var childIndex = int(name)
@@ -92,6 +92,9 @@ func loadoctcellpoints(foctreeF, mdscale, mdoffset, pointsizefactor, roottransfo
 	pointmaterial.set_shader_param("ocellcentre", ocellcentre)
 	pointmaterial.set_shader_param("ocellmask", ocellmask)
 	pointmaterial.set_shader_param("roottransforminverse", roottransforminverse)
+	pointmaterial.set_shader_param("highlightplaneperp", highlightplaneperp)
+	pointmaterial.set_shader_param("highlightplanedot", highlightplanedot)
+
 	set_surface_material(0, pointmaterial)
 
 

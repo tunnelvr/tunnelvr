@@ -47,7 +47,7 @@ void fragment() {
 	float squarecentredist = max(abs(POINT_COORD.x-0.5), abs(POINT_COORD.y-0.5)); 
 	if (squarecentredist > edgeborder)
 		ALBEDO *= bordercolor;
-
+		
 	// circular points
 	//float rsq = (POINT_COORD.x-0.5)*(POINT_COORD.x-0.5) + (POINT_COORD.y-0.5)*(POINT_COORD.y-0.5);
 	//if (rsq > 0.25)  discard;

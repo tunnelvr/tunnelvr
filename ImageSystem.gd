@@ -73,7 +73,7 @@ func clearallimageloadingactivity():
 	paperdrawinglist.clear()
 
 func _http_request_completed(result, response_code, headers, body, httprequestdataobject):
-	print("_http_request_completed ", len(body), " bytes", headers)
+	#print("_http_request_completed ", len(body), " bytes", headers)
 	httprequestdataobject["httprequest"].queue_free()
 	if response_code == 200 or response_code == 206:
 		if "paperdrawing" in httprequestdataobject:
@@ -246,7 +246,7 @@ func _process(delta):
 		pt = "paptex"
 
 	elif fetchednonimagedataobject != null:
-		print("FFFN ", fetchednonimagedataobject)
+		#print("FFFN ", fetchednonimagedataobject)
 		if fetchednonimagedataobject.get("parsedumpcentreline") == "yes":
 			get_node("/root/Spatial/ExecutingFeatures").parse3ddmpcentreline_execute(fetchednonimagedataobject["fetchednonimagedataobjectfile"], fetchednonimagedataobject["url"])
 			
@@ -260,7 +260,6 @@ func _process(delta):
 		elif "callbackobject" in fetchednonimagedataobject:
 			var f = File.new()
 			f.open(fetchednonimagedataobject["fetchednonimagedataobjectfile"], File.READ)
-			print("fff ", f.get_len())
 			fetchednonimagedataobject["callbackobject"].call_deferred(fetchednonimagedataobject["callbackfunction"], f, fetchednonimagedataobject)
 		
 		fetchednonimagedataobject = null
@@ -284,7 +283,7 @@ func fetchunrolltree(fileviewtree, item, url):
 func fetchrequesturl(nonimagedataobject):
 	var url = nonimagedataobject["url"]
 	if url.substr(0,4) == "http":
-		print("fetchrequesturl ", url, nonimagedataobject.get("byteOffset"))
+		print("fetchrequesturl ", url, " ", nonimagedataobject.get("byteOffset"), " ", nonimagedataobject.get("byteSize"))
 		nonimagepageslist.append(nonimagedataobject)
 		set_process(true)
 	else:

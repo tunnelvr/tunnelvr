@@ -8,16 +8,17 @@ var pointsizefactor = 150.0
 # pip install rangehttpserver
 # python -m RangeHTTPServer (after editing site-packages/RangeHTTPServer/__main__.py line: SimpleHTTPServer.test(HandlerClass=RangeRequestHandler, bind="0.0.0.0")
 
-var highlightplaneperp = Vector3(0,0,0)
-var highlightplanedot = Vector3(0,0,0)
+var highlightplaneperp = Vector3(1,0,0)
+var highlightplanedot = 0.0
 
 var primarycameraorigin = Vector3(0,0,0)
 var pointsizevisibilitycutoff = 15.0
 
 var visiblepointcount = 0
+var sweptvisiblepointcount = 0
 var totalpointcount = 0
 var otreecellscount = 0
-var visiblepointcountLimit = 500000
+var visiblepointcountLimit = 300000
 
 var processingnode = null
 var processingnodeWaitingForFile = false
@@ -30,8 +31,6 @@ var urloctree = ""
 onready var ImageSystem = get_node("/root/Spatial/ImageSystem")
 
 func commenceloadotree(urlotreedir):
-	urlotreedir = "http://192.168.8.101:8000/"
-	
 	urlmetadata = urlotreedir+"metadata.json"
 	urlhierarchy = urlotreedir+"hierarchy.bin"
 	urloctree = urlotreedir+"octree.bin"
@@ -89,15 +88,16 @@ func successornode(node, skip):
 			return node.get_child(inext)
 			
 
-func uppernodevisibilitymask(node, lvisible):
-	if node.visible != lvisible:
-		node.visible = lvisible
+func uppernodevisibilitymask(node, nodetobevisible):
+	if node.visible != nodetobevisible:
+		node.visible = nodetobevisible
 		if node.visible:
-			visiblepointcount += node.numPoints + node.numPointsCarriedDown
+			visiblepointcount += node.numPoints
 		else:
 			node.timestampatinvisibility = OS.get_ticks_msec()
-			visiblepointcount -= node.numPoints + node.numPointsCarriedDown
-		
+			visiblepointcount -= node.numPoints
+			updatenodeinvisibilitybelow(node)
+			
 		if node.treedepth >= 1:
 			var pnode = node.get_parent()
 			var nodebit = (1 << int(node.name))
@@ -107,6 +107,42 @@ func uppernodevisibilitymask(node, lvisible):
 			if pnode.pointmaterial != null:
 				pnode.pointmaterial.set_shader_param("ocellmask", pnode.ocellmask)
 			assert (((pnode.ocellmask & nodebit) != 0) == node.visible)
+
+func updatenodeinvisibilitybelow(topnode):
+	assert (not topnode.visible)
+	if topnode.get_child_count() <= 1:
+		return
+	var node = topnode.get_child(1)
+	var goingdown = true
+	while true:
+		if goingdown:
+			if node.visible:
+				node.visible = false
+				var pnode = node.get_parent()
+				var nodebit = (1 << int(node.name))
+				pnode.ocellmask |= nodebit
+				pnode.ocellmask ^= nodebit
+				node.timestampatinvisibility = OS.get_ticks_msec()
+				visiblepointcount -= node.numPoints
+				if node.get_child_count() > 1:
+					node = node.get_child(1)
+				else:
+					goingdown = false
+			else:
+				goingdown = false
+		else:
+			if node == topnode:
+				break
+			var inext = node.get_index() + 1
+			var pnode = node.get_parent()
+			if inext < pnode.get_child_count():
+				node = pnode.get_child(inext)
+				goingdown = true
+			else:
+				assert (node.ocellmask == 0)
+				node = pnode
+
+
 
 func freeinvisiblenoderesources(topnode):
 	var node = topnode
@@ -152,6 +188,7 @@ func commenceocellprocessing():
 	processingnode = self
 	processingnodeWaitingForFile = false
 	processingnodeReturnedFileHandle = null
+	sweptvisiblepointcount = 0
 	#ImageSystem.clearallpotreeactivity(self)
 	print(" *** commenceocellprocessing")
 	set_process(true)
@@ -161,7 +198,7 @@ var Dprocessingnode = null
 func processingnodeWaitingEnded(f, nonimagedataobject):
 	Dnonimagedataobject = nonimagedataobject
 	Dprocessingnode = processingnode
-	if processingnode != null:
+	if processingnode != null and processingnodeWaitingForFile:
 		if processingnode.name[0] == "h":
 			if nonimagedataobject["url"] == urlhierarchy and \
 					nonimagedataobject["byteOffset"] == processingnode.hierarchybyteOffset and \
@@ -179,11 +216,12 @@ func processingnodeWaitingEnded(f, nonimagedataobject):
 	
 func _process(delta):
 	if processingnode == null:
-		print("  ** pointcount visible: ", visiblepointcount, "  all: ", totalpointcount, " otrees: ", otreecellscount)
+		print("  ** pointcount visible: ", visiblepointcount, " sweepviz: ", sweptvisiblepointcount, "  all: ", totalpointcount, " otrees: ", otreecellscount)
 		set_process(false)
 		
 	elif not processingnode.visibleincamera:
 		uppernodevisibilitymask(processingnode, false)
+		processingnodeWaitingForFile = false
 		processingnode = successornode(processingnode, true)
 
 	elif processingnode.name[0] == "h":
@@ -195,6 +233,7 @@ func _process(delta):
 									   "byteOffset":processingnode.hierarchybyteOffset, 
 									   "byteSize":processingnode.hierarchybyteSize }
 			ImageSystem.fetchrequesturl(nonimagedataobject)
+
 		elif processingnodeReturnedFileHandle != null:
 			processingnodeWaitingForFile = false
 			var fhierarchyF = processingnodeReturnedFileHandle
@@ -210,15 +249,14 @@ func _process(delta):
 			var boxcentre = processingnode.global_transform.origin
 			var boxradius = (processingnode.ocellsize/2).length()
 			var cd = boxcentre.distance_to(primarycameraorigin)
-			var lvisible = true
+			var processingnodetobevisible = true
 			if cd > boxradius + 0.1:
 				var pointsize = pointsizefactor*processingnode.spacing/(cd-boxradius)
-				lvisible = (pointsize > pointsizevisibilitycutoff)
-			if visiblepointcount > visiblepointcountLimit:
-				lvisible = false
-			uppernodevisibilitymask(processingnode, lvisible)
+				processingnodetobevisible = (pointsize > pointsizevisibilitycutoff)
+			if sweptvisiblepointcount > visiblepointcountLimit:
+				processingnodetobevisible = false
 		
-			if processingnode.visible and processingnode.pointmaterial == null:
+			if processingnodetobevisible and processingnode.pointmaterial == null:
 				processingnodeWaitingForFile = true
 				processingnodeReturnedFileHandle = null
 				var nonimagedataobject = { "url":urloctree, "callbackobject":self, 
@@ -226,7 +264,11 @@ func _process(delta):
 										   "byteOffset":processingnode.byteOffset, 
 										   "byteSize":processingnode.byteSize }
 				ImageSystem.fetchrequesturl(nonimagedataobject)
+
 			else:
+				uppernodevisibilitymask(processingnode, processingnodetobevisible)
+				if processingnodetobevisible:
+					sweptvisiblepointcount += processingnode.numPoints
 				processingnode = successornode(processingnode, not processingnode.visible)
 
 		elif processingnodeReturnedFileHandle != null:
@@ -238,6 +280,12 @@ func _process(delta):
 					print("lll ", foctreeF.get_len(), "  ", processingnode.byteSize)
 			assert ((urloctree.substr(0, 4) != "http") or (foctreeF.get_len() == processingnode.byteSize))
 			var roottransforminverse = get_parent().global_transform.inverse()
-			processingnode.loadoctcellpoints(foctreeF, mdscale, mdoffset, pointsizefactor, roottransforminverse)
+			var t0 = OS.get_ticks_msec()
+			processingnode.loadoctcellpoints(foctreeF, mdscale, mdoffset, pointsizefactor, roottransforminverse, highlightplaneperp, highlightplanedot)
+			var dt = OS.get_ticks_msec() - t0
+			if dt > 100:
+				print("    Warning: long loadoctcellpoints ", processingnode.get_path(), " of ", dt, " msecs", " numPoints:", processingnode.numPoints, " carrieddown:", processingnode.numPointsCarriedDown)
 			totalpointcount += processingnode.numPoints + processingnode.numPointsCarriedDown
+			sweptvisiblepointcount += processingnode.numPoints
+			uppernodevisibilitymask(processingnode, true)
 			processingnode = successornode(processingnode, not processingnode.visible)

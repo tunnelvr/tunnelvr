@@ -74,8 +74,8 @@ func seteyestate(eyesopen):
 		rpc("puppeteyestate", eyesopen)
 	if is_instance_valid(doppelganger):
 		doppelganger.puppeteyestate(eyesopen)
-	$HeadCam/csgheadmesh/righteye.visible = eyesopen
-	$HeadCam/csgheadmesh/lefteye.visible = eyesopen
+	#$HeadCam/csgheadmesh/righteye.visible = eyesopen
+	#$HeadCam/csgheadmesh/lefteye.visible = eyesopen
 
 func setdoppelganger(doppelgangeron):
 	if doppelgangeron:
