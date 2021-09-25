@@ -6,16 +6,12 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
     survex.url = "github:matthewcroughan/nixpkgs/add-survex";
     godot-source = {
-      url = "github:godotengine/godot/3.3.3-stable";
-      flake = false;
-    };
-    tunnelvr = {
-      url = "github:goatchurchprime/tunnelvr/master";
+      url = "github:godotengine/godot/3.3.2-stable";
       flake = false;
     };
   };
 
-  outputs = { self, nixpkgs, godot-source, tunnelvr, survex }:
+  outputs = { self, nixpkgs, godot-source, survex }:
     let
       # Generate a user-friendly version numer.
       version = builtins.substring 0 8 self.lastModifiedDate;
@@ -81,7 +77,7 @@
 
           buildInputs = [ final.my-godot-headless godot-export-templates ];
 
-          src = tunnelvr;
+          src = self;
 
         } ''
           mkdir -p "$TMP/.config"

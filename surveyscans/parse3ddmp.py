@@ -9,7 +9,7 @@ from collections import namedtuple
 
 
 dump3dexe = '"C:\\Program Files (x86)\\Survex\\dump3d.exe"'
-if sys.platform == "linux":
+if sys.platform[:5] == "linux":
     dump3dexe = "dump3d"
 
 class P3(namedtuple('P3', ['x', 'y', 'z'])):
