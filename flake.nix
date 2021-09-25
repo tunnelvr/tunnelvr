@@ -31,6 +31,11 @@
 #    packages.x86_64-linux = let pkgs = import nixpkgs { system = "x86_64-linux"; }; in {
 #      tunnelvr = pkgs.callPackage ./nix/runcommand-tunnelvr.nix {};
 #    };
+     packages = forAllSystems (system: 
+       {
+         tunnelvr = nixpkgsFor."${system}".tunnelvr;
+       }
+     );
 
     nixosModules.tunnelvr =
       { pkgs, ... }:
