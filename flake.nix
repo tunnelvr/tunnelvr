@@ -28,14 +28,22 @@
     in
     {
 
-#    packages.x86_64-linux = let pkgs = import nixpkgs { system = "x86_64-linux"; }; in {
-#      tunnelvr = pkgs.callPackage ./nix/runcommand-tunnelvr.nix {};
-#    };
-     packages = forAllSystems (system: 
-       {
-         tunnelvr = nixpkgsFor."${system}".tunnelvr;
-       }
-     );
+    packages = forAllSystems
+      (system:
+        let
+          pkgs = nixpkgsFor."${system}";
+        in
+        rec
+        {
+          tunnelvr_head = pkgs.writeScriptBin "tunnelvr_headless" ''
+            ${pkgs.my-godot-headless}/bin/godot-headless --main-pack ${pkgs.tunnelvr}
+          '';
+          tunnelvr_headless = pkgs.writeScriptBin "tunnelvr_headless" ''
+            ${pkgs.my-godot}/bin/godot-headless --main-pack ${pkgs.tunnelvr}
+          '';
+          tunnelvr_pck = pkgs.tunnelvr;
+        }
+      );
 
     nixosModules.tunnelvr =
       { pkgs, ... }:
