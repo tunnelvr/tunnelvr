@@ -198,8 +198,8 @@ func caveworldreceivechunkingfailed(msg):
 	var guipanel3d = get_node("/root/Spatial/GuiSystem/GUIPanel3D")
 	if guipanel3d.websocketclient != null:
 		guipanel3d.websocketclient.disconnect_from_host()
-	if guipanel3d.networkedmultiplayerenet != null:
-		guipanel3d.networkedmultiplayerenet.close_connection()
+	if guipanel3d.networkedmultiplayerenetclient != null:
+		guipanel3d.networkedmultiplayerenetclient.close_connection()
 	return null
 	
 remote func actsketchchangeL(xcdatalist):
@@ -212,6 +212,7 @@ remote func actsketchchangeL(xcdatalist):
 			if xcdatalist[0]["sketchname"] != "importing_the_centreline__do_not_clear":
 				clearentirecaveworld()
 			else:
+				print("** not clearing due to sketchname being importing_the_centreline__do_not_clear")
 				PlayerDirections.forceontogroundtimedown = 0.75
 			if "playerMe" in xcdatalist[0]:
 				spawnplayerme(xcdatalist[0]["playerMe"])

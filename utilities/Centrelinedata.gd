@@ -6,7 +6,7 @@ class_name Centrelinedata
 # [remember to copy the 3d file from the source directory]
 # ssh godot@proxmox.dynamicdevices.co.uk -p 23
 
-const makecentrelrudsplays = true
+const makecentrelrudsplays = false
 const makecentrelinehextubes = false
 
 static func sketchdatadictlistfromcentreline(centrelinefile):
@@ -58,6 +58,7 @@ static func sketchdatadictlistfromcentreline(centrelinefile):
 			centrelinelegs.push_back(stationpointsnames[legsconnections[i*2]])
 			centrelinelegs.push_back(stationpointsnames[legsconnections[i*2+1]])
 
+	print("makecentrelrudsplays: ", makecentrelrudsplays)
 	if makecentrelrudsplays:
 		var ilrud = 1
 		var xsectgps = centrelinedata.xsectgps
