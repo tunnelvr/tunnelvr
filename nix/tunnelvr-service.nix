@@ -20,7 +20,6 @@ in
   config = mkIf cfg.enable {
     systemd.services.tunnelvr = {
       description = "TunnelVR Service";
-      path = [ pkgs.python3Minimal pkgs.survex ];
       wantedBy = [ "multi-user.target" ];
       after = [ "networking.target" ];
       serviceConfig = {
@@ -28,7 +27,7 @@ in
         Environment = [
           "HOME=${cfg.userDir}"
         ];
-        ExecStart = "${pkgs.my-godot-headless}/bin/godot-headless --main-pack ${pkgs.tunnelvr}";
+        ExecStart = "${pkgs.tunnelvr_headless}/bin/tunnelvr_headless";
         PrivateTmp = true;
         Restart = "always";
         StateDirectory = "tunnelvr";

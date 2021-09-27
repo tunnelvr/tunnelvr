@@ -35,13 +35,11 @@
         in
         rec
         {
-          tunnelvr_head = pkgs.writeScriptBin "tunnelvr_head" ''
-            ${pkgs.my-godot}/bin/godot --main-pack ${pkgs.tunnelvr}
-          '';
-          tunnelvr_headless = pkgs.writeScriptBin "tunnelvr_headless" ''
-            ${pkgs.my-godot-headless}/bin/godot-headless --main-pack ${pkgs.tunnelvr}
-          '';
-          tunnelvr_pck = pkgs.tunnelvr;
+          tunnelvr_head_withPrograms = pkgs.tunnelvr_head_withPrograms;
+          tunnelvr_headless_withPrograms = pkgs.tunnelvr_headless_withPrograms;
+          tunnelvr_head = pkgs.tunnelvr_head;
+          tunnelvr_headless = pkgs.tunnelvr_headless;
+          tunnelvr_pck = pkgs.tunnelvr_pck;
         }
       );
 
@@ -85,7 +83,7 @@
 
       survex = survex.legacyPackages.x86_64-linux.survex;
 
-      tunnelvr = 
+      tunnelvr_pck = 
         runCommandNoCC "tunnelvr" {
 
           buildInputs = [ final.my-godot-headless godot-export-templates ];
@@ -106,6 +104,34 @@
           godot-headless --path "$TMP/src" --export-pack "Linux/X11" tunnelvr.pck
           mv $TMP/src/tunnelvr.pck $out
         '';
+        tunnelvr_head = prev.writeScriptBin "tunnelvr_head" ''
+          ${final.my-godot}/bin/godot --main-pack ${final.tunnelvr_pck}
+        '';
+        tunnelvr_head_withPrograms = prev.symlinkJoin {
+          name = "tunnelvr";
+          paths = [ final.tunnelvr_head ];
+          buildInputs = [ prev.makeWrapper ];
+          postBuild = ''
+            ls -lah $out/bin
+            wrapProgram "$out/bin/tunnelvr_head" --prefix PATH : ${
+              with prev; lib.makeBinPath [ python3Minimal survex caddy ]
+            }
+          '';
+        };
+        tunnelvr_headless = prev.writeScriptBin "tunnelvr_headless" ''
+          ${final.my-godot-headless}/bin/godot-headless --main-pack ${final.tunnelvr_pck}
+        '';
+        tunnelvr_headless_withPrograms = prev.symlinkJoin {
+          name = "tunnelvr";
+          paths = [ final.tunnelvr_headless ];
+          buildInputs = [ prev.makeWrapper ];
+          postBuild = ''
+            ls -lah $out/bin
+            wrapProgram "$out/bin/tunnelvr_headless" --prefix PATH : ${
+              with prev; lib.makeBinPath [ python3Minimal survex caddy ]
+            }
+          '';
+        };
     };
   };
 }
