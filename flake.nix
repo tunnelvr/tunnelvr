@@ -3,14 +3,13 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
-    survex.url = "github:matthewcroughan/nixpkgs/add-survex";
     godot-source = {
       url = "github:godotengine/godot/3.3.2-stable";
       flake = false;
     };
   };
 
-  outputs = { self, nixpkgs, godot-source, survex }:
+  outputs = { self, nixpkgs, godot-source }:
     let
       # Generate a user-friendly version numer.
       version = builtins.substring 0 8 self.lastModifiedDate;
@@ -72,8 +71,6 @@
             version = godot-source.rev;
             src = godot-source;
           });
-
-          survex = survex.legacyPackages.x86_64-linux.survex;
 
           tunnelvr_pck = runCommandNoCC "tunnelvr" {
 

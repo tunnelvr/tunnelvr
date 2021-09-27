@@ -36,24 +36,7 @@
     "root": {
       "inputs": {
         "godot-source": "godot-source",
-        "nixpkgs": "nixpkgs",
-        "survex": "survex"
-      }
-    },
-    "survex": {
-      "locked": {
-        "lastModified": 1623256563,
-        "narHash": "sha256-XQd6VULbUsBksOF9hOZGBZzvzborDv1TvtmFmEsPrwc=",
-        "owner": "matthewcroughan",
-        "repo": "nixpkgs",
-        "rev": "9007ca34b8c4a02ba145eea102cb2c343de97aae",
-        "type": "github"
-      },
-      "original": {
-        "owner": "matthewcroughan",
-        "ref": "add-survex",
-        "repo": "nixpkgs",
-        "type": "github"
+        "nixpkgs": "nixpkgs"
       }
     }
   },
