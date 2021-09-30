@@ -249,7 +249,7 @@ func targettype(target):
 	return "unknown"
 		
 func targetwall(target, targettype):
-	if targettype == "XCdrawing" or targettype == "Papersheet":
+	if targettype == "XCdrawing":
 		return target.get_parent()
 	if targettype == "XCnode":
 		return target.get_parent().get_parent()
@@ -876,17 +876,11 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 				
 			clearintermediatepointplaneview()
 				
-	elif pointertargettype == "Papersheet" or pointertargettype == "PlanView":
+	elif pointertargettype == "PlanView":
 		clearactivetargetnode()
 		var alaserspot = activelaserroot.get_node("LaserSpot")
 		alaserspot.global_transform.origin = pointertargetpoint
-		
-		if pointertargettype == "PlanView":
-			activetargetwallgrabbed = pointertargetwall.get_node("PlanView")
-		else:
-			activetargetwallgrabbed = pointertargetwall
-			setactivetargetwall(pointertargetwall)
-		assert(activetargetwallgrabbed == (pointertargetwall if pointertargettype == "Papersheet" else pointertargetwall.get_node("PlanView")))
+		activetargetwallgrabbed = pointertargetwall.get_node("PlanView")
 
 		if gripbuttonheld:
 			activetargetwallgrabbedtransform = alaserspot.global_transform.affine_inverse() * activetargetwallgrabbed.global_transform
@@ -1111,18 +1105,6 @@ func buttonpressed_vrpad(gripbuttonheld, joypos):
 			pointertargetwall.get_node("XCdrawingplane").scale.y = max(1, pointertargetwall.get_node("XCdrawingplane").scale.y + dy)
 			pointertargetwall.updateformetresquaresscaletexture()
 				
-	elif pointertargettype == "Papersheet":
-		if abs(joypos.y) > 0.5:
-			var dd = (1 if joypos.x > 0 else -1)*(0.2 if activelaserroot.get_node("Length").scale.z < 1.5 else 1.0)
-			if activelaserroot.get_node("Length").scale.z + dd > 0.1:
-				pointertargetwall.global_transform.origin += -dd*LaserOrient.global_transform.basis.z
-		elif abs(joypos.x) > 0.1:
-			var fs = (0.5 if abs(joypos.x) < 0.8 else 0.9)
-			if joypos.x > 0:
-				fs = 1/fs
-			pointertargetwall.get_node("XCdrawingplane").scale.x *= fs
-			pointertargetwall.get_node("XCdrawingplane").scale.y *= fs
-
 	elif pointertargettype == "XCnode":
 		if pointertargetwall.drawingtype == DRAWING_TYPE.DT_ROPEHANG and pointertargetwall.drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_HIDE: 
 			pointertargetwall.get_node("RopeHang").iteratehangingrope_Verlet()
@@ -1203,8 +1185,6 @@ func buttonreleased_vrgrip():
 				eyept0vec = tubevec if eyept0vec.dot(tubevec) > 0 else -tubevec
 				if abs(xcdrawing0.global_transform.basis.z.y) > 0.3 and abs(xcdrawing1.global_transform.basis.z.y) > 0.3:
 					newxcvertplane = false
-			elif gripmenu.gripmenupointertargettype == "Papersheet":
-				pass
 			elif gripmenu.gripmenupointertargettype == "XCnode":
 				if gripmenu.gripmenupointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 					pt0 += -eyept0vec/2

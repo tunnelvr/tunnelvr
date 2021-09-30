@@ -102,9 +102,6 @@ func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointert
 		if Tglobal.wingmeshtrimmingmode:
 			gmlist.push_back("S_Triang")
 
-	elif gripmenupointertargettype == "Papersheet":
-		gmlist = [ ]
-
 	elif gripmenupointertargettype == "IntermediatePointView":
 		gmlist = [ ]
 		

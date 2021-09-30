@@ -13,7 +13,7 @@ enum {
 	CL_CentrelineStationPlanView \
 						=0b00000100000000,
 	CL_PlayerHotspot	=0b00010000000000,
-	CL_Papersheet		=0b00100000000000,
+	DDD_CL_Papersheet	=0b00100000000000,
 	CL_IntermediatePlane=0b01000000000000,
 	
 	CLV_MainRayAll		=0b01000011111000,
