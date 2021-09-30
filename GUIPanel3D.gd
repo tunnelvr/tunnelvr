@@ -430,8 +430,8 @@ func _on_textedit_focus_exited():
 	yield(get_tree().create_timer(0.1), "timeout")
 	$Viewport/GUI/Panel/TextRelatedActions.visible = false
 
-const clientips = [ "tunnelvr.goatchurch.org.uk",  # alex server
-					"Local-network",
+const clientips = [ "Local-network",
+					"192.168.43.193 JulianS9",
 					"godot.doesliverpool.xyz" ]
 var uniqueinstancestring = ""
 func _ready():
@@ -751,7 +751,7 @@ func _on_networkstate_selected(index):
 					ipnum = l
 			var kf = k["friendly"] + ": " + ipnum
 			print(kf)
-			if k["friendly"] == "Wi-Fi" or k["friendly"].begins_with("wlan"):
+			if k["friendly"] == "Wi-Fi" or k["friendly"].begins_with("wlan") or k["friendly"].begins_with("wlp2s"):
 				$Viewport/GUI/Panel/Label.text = kf
 			elif k["friendly"] == "Ethernet" and $Viewport/GUI/Panel/Label.text == "":
 				$Viewport/GUI/Panel/Label.text = kf
@@ -791,7 +791,7 @@ func _on_networkstate_selected(index):
 			$Viewport/GUI/Panel/Label.text = "server failed to start"
 		else:
 			$Viewport/GUI/Panel/Label.text = "networkID: "+str(selfSpatial.playerMe.networkID)
-				
+
 	elif nssel.begins_with("Local-network"):
 		udpdiscoveryreceivingserver = UDPServer.new()
 		var udperr = udpdiscoveryreceivingserver.listen(selfSpatial.udpserverdiscoveryport)
@@ -867,10 +867,12 @@ func networkstartasserver(fromgui):
 	selfSpatial.setnetworkidname(selfSpatial.playerMe, lnetworkID)
 	print("server networkID: ", selfSpatial.playerMe.networkID)
 	selfSpatial.mqttsystem.mqttpublish("startasserver", String(selfSpatial.playerMe.networkID))
-		
+	selfSpatial.get_node("BodyObjects/LaserOrient/NotificationTorus").visible = false
+
 func _connection_failed():
 	print("_connection_failed ", Tglobal.connectiontoserveractive, " ", websocketclient, " ", selfSpatial.players_connected_list)
 	selfSpatial.mqttsystem.mqttpublish("connectionfailed", String(playerMe.networkID))
+	selfSpatial.get_node("BodyObjects/LaserOrient/NotificationTorus").visible = true
 	websocketclient = null
 	if Tglobal.connectiontoserveractive:
 		_server_disconnected()
@@ -883,6 +885,7 @@ func removeallplayersdisconnection():
 	selfSpatial.mqttsystem.mqttpublish("serverdisconnected", String(playerMe.networkID))
 	selfSpatial.deferred_player_connected_list.clear()
 	$Viewport/GUI/Panel/Label.text = "server_disconnected"
+	selfSpatial.get_node("BodyObjects/LaserOrient/NotificationTorus").visible = true
 	for id in selfSpatial.players_connected_list.duplicate():
 		print("server_disconnected, calling _player_disconnected on ", id)
 		selfSpatial.call_deferred("_player_disconnected", id)

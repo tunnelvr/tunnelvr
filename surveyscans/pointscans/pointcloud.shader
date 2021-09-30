@@ -38,6 +38,7 @@ void vertex() {
 	COLOR.rgb = mix(closecol, farcol, distcamera/fardist);
 	float emissionfac = clamp(1.0 - abs(distplane)/highlightdist, 0.0, 1.0);
 	emissioncol = (distplane > 0.0 ? highlightcol : highlightcol2)*emissionfac;
+
 }
 
 void fragment() {
@@ -51,5 +52,4 @@ void fragment() {
 	// circular points
 	//float rsq = (POINT_COORD.x-0.5)*(POINT_COORD.x-0.5) + (POINT_COORD.y-0.5)*(POINT_COORD.y-0.5);
 	//if (rsq > 0.25)  discard;
-	
 }

@@ -281,7 +281,8 @@ func _connected_to_server():
 		setnetworkidname(playerMe, newnetworkID)
 	$GuiSystem/GUIPanel3D/Viewport/GUI/Panel/Label.text = "connected as "+String(playerMe.networkID)
 	mqttsystem.mqttpublish("connectedtoserver", String(newnetworkID))
-
+	get_node("BodyObjects/LaserOrient/NotificationTorus").visible = false
+			
 	print("SETTING connectiontoserveractive true now")
 	setconnectiontoserveractive(true)
 	assert(playerMe.networkID != 0)
