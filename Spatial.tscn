@@ -1,4 +1,4 @@
-[gd_scene load_steps=306 format=2]
+[gd_scene load_steps=305 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/underground_env.tres" type="Environment" id=2]
@@ -1425,16 +1425,12 @@ font_data = ExtResource( 39 )
 [sub_resource type="PlaneMesh" id=215]
 size = Vector2( 2, 0.1 )
 
-[sub_resource type="ViewportTexture" id=216]
-viewport_path = NodePath("LabelGenerator/Viewport")
-
 [sub_resource type="SpatialMaterial" id=217]
 resource_local_to_scene = true
 flags_unshaded = true
 flags_no_depth_test = true
 flags_do_not_receive_shadows = true
 params_cull_mode = 2
-albedo_texture = SubResource( 216 )
 
 [sub_resource type="BoxShape" id=218]
 

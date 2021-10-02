@@ -48,6 +48,8 @@ var ovr_guardian_system = null
 onready var playerMe = $Players/PlayerMe
 onready var mqttsystem = $MQTTExperiment
 
+const forceopenVR = true
+
 func checkloadinterface(larvrinterfacename):
 	var available_interfaces = ARVRServer.get_interfaces()
 	for x in available_interfaces:
@@ -82,6 +84,10 @@ func _ready():
 		# ../../Godot_v3.2.3-stable_linux_server.64 --main-pack linuxserverversion.pck	
 		# Using Ubuntu App on Windows to get the command line
 		playerMe.playerplatform = "Server"
+
+	elif OS.has_feature("HTML5"):
+		playerMe.playerplatform = "HTML5"
+		print("warning: untested HTML5 mode")
 		
 	elif checkloadinterface("OVRMobile"):  # ignores enablevr flag on quest platform
 		ovr_init_config = load("res://addons/godot_ovrmobile/OvrInitConfig.gdns").new()
@@ -100,7 +106,7 @@ func _ready():
 			Tglobal.arvrinterface = null
 		playerMe.playerplatform = "Quest"
 
-	elif false and enablevr and checkloadinterface("Oculus"):
+	elif not forceopenVR and enablevr and checkloadinterface("Oculus"):
 		print("  Found Oculus Interface.");
 		if Tglobal.arvrinterface.initialize():
 			get_viewport().arvr = true;
@@ -208,8 +214,10 @@ func _player_connected(id):
 	playerMe.set_name("NetworkedPlayer"+String(playerMe.networkID))
 	var playerothername = "NetworkedPlayer"+String(id)
 	if not $Players.has_node(playerothername):
+		print("instancing for ", playerothername)
 		var playerOther = load("res://nodescenes/PlayerPuppet.tscn").instance()
 		setnetworkidname(playerOther, id)
+		print("setnetworkidname for ", playerothername)
 		playerOther.visible = false
 		$Players.add_child(playerOther)
 		print("Added ", playerothername, " to $Players")
@@ -286,7 +294,6 @@ func _connected_to_server():
 	print("SETTING connectiontoserveractive true now")
 	setconnectiontoserveractive(true)
 	assert(playerMe.networkID != 0)
-	playerMe.rpc("initplayerappearance", playerMe.playerplatform, playerMe.get_node("HeadCam/csgheadmesh/skullcomponent").material.albedo_color)
 	playerMe.rpc("initplayerappearanceJ", playerMe.playerappearancedict())
 	
 	while len(deferred_player_connected_list) != 0:

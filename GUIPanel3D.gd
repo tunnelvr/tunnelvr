@@ -15,6 +15,8 @@ var regexacceptableprojectname = RegEx.new()
 # ln -s /home/julian/data/NorthernEngland/PeakDistrict/tunnelvrdata/cavefiles /home/julian/.local/share/godot/app_userdata/tunnelvr_v0.6/cavefiles
 var cavefilesdir = "user://cavefiles/"
 
+
+
 func _on_buttonload_pressed():
 	var savegamefileid = $Viewport/GUI/Panel/Savegamefilename.get_selected_id()
 	var savegamefilename = $Viewport/GUI/Panel/Savegamefilename.get_item_text(savegamefileid)
@@ -43,6 +45,9 @@ func _on_buttonload_pressed():
 		setguipanelhide()
 	Tglobal.soundsystem.quicksound("MenuClick", collision_point)
 	
+remote func setpanellabeltext(ltext):
+	$Viewport/GUI/Panel/Label.text = ltext
+			
 remote func setsavegamefilename(cfile):
 	var snames = $Viewport/GUI/Panel/Savegamefilename
 	for i in range(snames.get_item_count()):
@@ -68,12 +73,16 @@ func _on_buttonsave_pressed():
 		if $Viewport/GUI/Panel/ButtonServerside.pressed:
 			if Tglobal.connectiontoserveractive and playerMe.networkID != 1:
 				sketchsystem.rpc_id(1, "savesketchsystem", savegamefilenameU)
-				$Viewport/GUI/Panel/Label.text = "Saving server sketch"
+				setpanellabeltext("Saving server sketch")
+			elif Tglobal.platform != "HTML5":
+				setpanellabeltext("Saving local sketch")
+				sketchsystem.savesketchsystem(savegamefilenameU)
 			else:
-				$Viewport/GUI/Panel/Label.text = "File not saved"
+				setpanellabeltext("File not saved")
 		else:
+			setpanellabeltext("Saving local sketch")
 			sketchsystem.savesketchsystem(savegamefilenameU)
-			$Viewport/GUI/Panel/Label.text = "Sketch Saved"
+
 	Tglobal.soundsystem.quicksound("MenuClick", collision_point)
 	
 

@@ -117,6 +117,12 @@ remote func savesketchsystem(fname):
 	Directory.new().rename(fnamewriting, fname)
 	print("saved ", fname, " in ", OS.get_user_data_dir())
 
+	var guipanel3d = get_node("/root/Spatial/GuiSystem/GUIPanel3D")
+	guipanel3d.setpanellabeltext("Saved locally")
+	var playerMe = get_node("/root/Spatial").playerMe
+	if playerMe.networkID == 1:
+		guipanel3d.rpc("setpanellabeltext", "Saved on server")
+
 
 func combinabletransformposchange(xcdatalist):
 	if len(actsketchchangeundostack) > 0 and len(actsketchchangeundostack[-1]) == 1 and len(xcdatalist) == 1:
