@@ -355,8 +355,6 @@ func setpointertarget(laserroot, raycast, pointertargetshortdistance):
 
 	if newpointertarget != pointertarget:
 		#print("NN ", newpointertarget, " ", raycast.get_collision_point())
-		#if newpointertarget != null and Tglobal.wingmeshtrimmingmode:
-		#	print("PT: ", newpointertarget.get_name())
 		if pointertarget == guipanel3d or pointertarget == keyboardpanel:
 			panelsendreleasemousemotiontopointertarget()
 		clearpointertargetmaterial()
@@ -610,9 +608,6 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 		var xcdata = null
 		var ropepointuv = null
 		var prevactivetargetnodewall = null
-		if Tglobal.wingmeshtrimmingmode and (pointertargettype == "XCtubesector" or pointertargettype == "XCflatshell"):
-			ropepointuv = ropepointtargetUV()
-			prevactivetargetnodewall = activetargetnodewall
 		var newactivetargetnodeinfo = null
 		if gripbuttonheld:
 			if activetargetnode.get_name()[0] == ("k" if pointertargettype == "none" else "a"):
@@ -632,24 +627,7 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 			newactivetargetnodeinfo = [activetargetnodewall, newnodename]
 
 		var xcdatalist = [ xcdata ]
-		if Tglobal.wingmeshtrimmingmode and ropepointuv != null and xcdata != null and len(prevactivetargetnodewall.xctubesconn) == 1:
-			var xctube = prevactivetargetnodewall.xctubesconn[0]
-			var xcdrawingflatname = (xctube.xcname1 if xctube.xcname0 == prevactivetargetnodewall.get_name() else xctube.xcname0)
-			var xcdrawingf = sketchsystem.get_node("XCdrawings").get_node(xcdrawingflatname)
-			var Dpointertargetpoint = xcdrawingf.ropepointreprojectXYZ(ropepointuv, sketchsystem)
-			print("ropepointreprojectXYZ to ", Dpointertargetpoint, " should be ", pointertargetpoint)
-			var fnodename = (xcdata["nextnodepoints"].keys()[0] if len(xcdata["nextnodepoints"]) == 1 else null)
-			var xcdataf = { "name":xcdrawingflatname, 
-							"prevnodepoints":{ }, 
-							"nextnodepoints":{ fnodename:ropepointuv*Tglobal.wingmeshuvexpansionfac } 
-						  }
-			if xcdata["prevnodepoints"].has(fnodename) and xcdrawingf.nodepoints.has(fnodename):
-				xcdataf["prevnodepoints"][fnodename] = xcdrawingf.nodepoints[fnodename]
-			if xcdata.has("newonepathpairs") and xcdrawingf.nodepoints.has(xcdata["newonepathpairs"][0]):
-				xcdataf["prevonepathpairs"] = [ ]
-				xcdataf["newonepathpairs"] = xcdata["newonepathpairs"].duplicate()
-			xcdatalist.push_front(xcdataf)
-
+		
 		sketchsystem.actsketchchange(xcdatalist)
 		if newactivetargetnodeinfo != null:
 			setactivetargetnode(newactivetargetnodeinfo[0].get_node("XCnodes").get_node(newactivetargetnodeinfo[1]))
@@ -724,18 +702,7 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 			xcdata["newonepathpairs"] = [ ]
 		var xcdatalist = [ xcdata ]
 
-		if Tglobal.wingmeshtrimmingmode and pointertargetwall.drawingtype == DRAWING_TYPE.DT_ROPEHANG and len(activetargetnodewall.xctubesconn) == 1:
-			var xctube = activetargetnodewall.xctubesconn[0]
-			var xcdrawingflatname = (xctube.xcname1 if xctube.xcname0 == activetargetnodewall.get_name() else xctube.xcname0)
-			var xcdataf = { "name":xcdrawingflatname, 
-							"prevnodepoints":xcdata["prevnodepoints"].duplicate(), 
-							"nextnodepoints":xcdata["nextnodepoints"].duplicate()
-						  }
-			if xcdata.has("prevonepathpairs"):
-				xcdataf["prevonepathpairs"] = xcdata["prevonepathpairs"].duplicate()
-				xcdataf["newonepathpairs"] = xcdata["newonepathpairs"].duplicate()
-			xcdatalist.push_back(xcdataf)
-
+		
 		
 		for xctube in activetargetnodewall.xctubesconn:
 			var prevdrawinglinks = [ ]
@@ -1034,19 +1001,9 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 				xcdatalist.push_back({"xcvizstates":{ pointertargetwall.get_name():DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE } })
 			sketchsystem.actsketchchange(xcdatalist)
 
-			if Tglobal.wingmeshtrimmingmode and pointertargetwall.drawingtype == DRAWING_TYPE.DT_ROPEHANG and len(activetargetnodewall.xctubesconn) == 1:
-				var xctube = activetargetnodewall.xctubesconn[0]
-				var xcdrawingflatname = (xctube.xcname1 if xctube.xcname0 == activetargetnodewall.get_name() else xctube.xcname0)
-				var xcdataf = { "name":xcdrawingflatname, 
-								"prevonepathpairs":xcdata["prevonepathpairs"].duplicate(), 
-								"newonepathpairs":xcdata["newonepathpairs"].duplicate()
-							  }
-				sketchsystem.actsketchchange([xcdataf])
-
+			
 		elif activetargetnodewall != pointertargetwall:
 			var maketube = activetargetnodewall.drawingtype == DRAWING_TYPE.DT_XCDRAWING and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING
-			if Tglobal.wingmeshtrimmingmode and activetargetnodewall.drawingtype == DRAWING_TYPE.DT_ROPEHANG and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
-				maketube = true
 			if maketube:
 				var xcname0 = activetargetnodewall.get_name()
 				var nodename0 = activetargetnode.get_name()
@@ -1280,34 +1237,6 @@ func buttonreleased_vrgrip():
 						setactivetargetwall(null)
 
 
-			elif pointertarget.get_name() == "S_Triang":
-				assert (Tglobal.wingmeshtrimmingmode)
-				var xcdrawing = gripmenu.gripmenupointertargetwall
-				var psel = xcdrawing.global_transform.xform_inv(gripmenu.gripmenupointertargetpoint)
-				var fpolyname = "user://segmentedwing.txt"
-				var fout = File.new()
-				fout.open(fpolyname, File.WRITE)
-				fout.store_line(to_json([xcdrawing.nodepoints, xcdrawing.onepathpairs]))
-				fout.close()
-
-				var ipolys = Polynets.makexcdpolys(xcdrawing.nodepoints, xcdrawing.onepathpairs)
-				var polypoints = null
-				for ipoly in ipolys:
-					if len(ipoly) == 0:
-						continue
-					var lpolypoints = [ ]
-					for i in ipoly:
-						lpolypoints.push_back(Vector2(xcdrawing.nodepoints[i].x, xcdrawing.nodepoints[i].y))
-					var pointinpoly = Geometry.is_point_in_polygon(Vector2(psel.x, psel.y), PoolVector2Array(lpolypoints))
-					print("  pointinpoly ", pointinpoly)
-					if pointinpoly:
-						polypoints = PoolVector2Array(lpolypoints)
-
-				if polypoints != null and len(polypoints) != 0:
-					get_node("/root/Spatial/ExecutingFeatures").finemeshpolygon_networked(polypoints, 0.25, xcdrawing)
-				else:
-					xcdrawing.updatexcshellmesh(null)
-	
 			elif pointertarget.get_name() == "ShowFloor":
 				var xcdrawing = gripmenu.gripmenupointertargetwall
 				sketchsystem.actsketchchange([{ "xcvizstates":{xcdrawing.get_name():DRAWING_TYPE.VIZ_XCD_FLOOR_NORMAL}} ])

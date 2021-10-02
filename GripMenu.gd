@@ -99,8 +99,6 @@ func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointert
 			gmlist.push_back("NewXC")
 		if pointertargetwall.notubeconnections_so_delxcable():
 			gmlist.push_back("DelXC")
-		if Tglobal.wingmeshtrimmingmode:
-			gmlist.push_back("S_Triang")
 
 	elif gripmenupointertargettype == "IntermediatePointView":
 		gmlist = [ ]

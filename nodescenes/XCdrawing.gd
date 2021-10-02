@@ -646,60 +646,6 @@ func ropepointreprojectXYZ(uv, sketchsystem):  #  opposite of ropepointtargetUV
 
 	return lerp(pc, pcB, lambdaCalong)
 
-var parametricstepleng = 0.05
-func parametricropelines(surfaceTool):
-	assert (Tglobal.wingmeshtrimmingmode)
-	var sketchsystem = get_node("/root/Spatial/SketchSystem")
-	var xctube = xctubesconn[0]
-	var xcdrawingflatname = (xctube.xcname1 if xctube.xcname0 == get_name() else xctube.xcname0)
-	var xcdrawingf = sketchsystem.get_node("XCdrawings").get_node(xcdrawingflatname)
-
-	for j in range(0, len(onepathpairs), 2):
-		var p0 = nodepoints[onepathpairs[j]]
-		var p1 = nodepoints[onepathpairs[j+1]]
-		var vec = p1 - p0
-		var veclen = vec.length()
-		if veclen == 0.0:
-			continue
-		var veca = Vector3(0,1,0) if abs(vec.y) < 5*min(abs(vec.x), abs(vec.z)) else Vector3(1,0,0) 
-		var vp1 = vec.cross(veca).normalized()*linewidth*closewidthsca
-		var vp2 = vec.cross(vp1).normalized()*linewidth*closewidthsca
-
-		var pseq = [ p0 ]
-		var uv0 = xcdrawingf.nodepoints.get(onepathpairs[j])
-		var uv1 = xcdrawingf.nodepoints.get(onepathpairs[j+1])
-		if uv0 != null and uv1 != null:
-			uv0 /= Tglobal.wingmeshuvexpansionfac
-			uv1 /= Tglobal.wingmeshuvexpansionfac
-			var parasegs = ceil(uv0.distance_to(uv1)/parametricstepleng)
-			for k in range(1, parasegs):
-				var uv = lerp(uv0, uv1, k*1.0/parasegs)
-				var p = ropepointreprojectXYZ(uv, sketchsystem)
-				if p != null:
-					pseq.append(p)
-		pseq.append(p1)
-		
-		for l in range(len(pseq)-1):
-			var p0l = pseq[l]
-			var p1l = pseq[l+1]
-			var p0a = [p0l-vp1-vp2, p0l+vp1-vp2, p0l+vp1+vp2, p0l-vp1+vp2]
-			var p1a = [p1l-vp1-vp2, p1l+vp1-vp2, p1l+vp1+vp2, p1l-vp1+vp2]
-			for i in range(4):
-				var i1 = (i+1)%4
-				surfaceTool.add_uv(Vector2(i*uvfacx, 0))
-				surfaceTool.add_vertex(p0a[i])
-				surfaceTool.add_uv(Vector2(i*uvfacx, veclen*uvfacy))
-				surfaceTool.add_vertex(p1a[i])
-				surfaceTool.add_uv(Vector2((i+1)*uvfacx, veclen*uvfacy))
-				surfaceTool.add_vertex(p1a[i1])
-
-				surfaceTool.add_uv(Vector2(i*uvfacx, 0))
-				surfaceTool.add_vertex(p0a[i])
-				surfaceTool.add_uv(Vector2((i+1)*uvfacx, veclen*uvfacy))
-				surfaceTool.add_vertex(p1a[i1])
-				surfaceTool.add_uv(Vector2((i+1)*uvfacx, 0))
-				surfaceTool.add_vertex(p0a[i1])
-	
 func updatelinearropepaths():
 	var middlenodes = [ ]
 	if len(onepathpairs) == 0:
@@ -712,10 +658,7 @@ func updatelinearropepaths():
 	resetclosewidthsca(1.0 if countanchors < 5 else 0.5)
 	var surfaceTool = SurfaceTool.new()
 	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
-	if Tglobal.wingmeshtrimmingmode and countanchors >= 5 and len(xctubesconn) == 1:
-		parametricropelines(surfaceTool)
-	else:
-		middlenodes = ropepathseqribbons(surfaceTool)
+	middlenodes = ropepathseqribbons(surfaceTool)
 
 	surfaceTool.generate_normals()
 	var newmesh = surfaceTool.commit()

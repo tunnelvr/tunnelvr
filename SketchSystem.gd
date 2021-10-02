@@ -148,8 +148,6 @@ func actsketchchange(xcdatalist):
 		assert(playerMe.networkID != 0)
 		#print("Delaying transmission by 20 seconds to simulate bad connections")
 		#yield(get_tree().create_timer(20), "timeout")
-		if Tglobal.wingmeshtrimmingmode and "wingmesh" in xcdatalist[0]:
-			print("sending wingmesh data size ", len(var2bytes(xcdatalist)))
 		rpc("actsketchchangeL", xcdatalist)
 
 func clearentirecaveworld():
@@ -408,45 +406,6 @@ remote func actsketchchangeL(xcdatalist):
 				for xctube in xcdrawing.xctubesconn:
 					xctubestoupdate[xctube.get_name()] = xctube
 
-			if Tglobal.wingmeshtrimmingmode and "wingmesh" in xcdata:
-				var arraymesh = ArrayMesh.new()
-				var surfaceTool = SurfaceTool.new()
-				surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
-				var vertices = xcdata["wingmesh"]["vertices"]
-				var triangles = xcdata["wingmesh"]["triangles"]
-				var flattenedvertices = xcdata["wingmesh"].get("flattenedvertices", null)
-
-				var triangleflatdistortion = [ ]
-				if flattenedvertices != null:
-					for j in range(0, len(triangles), 3):
-						var tfduv = Polynets.triangledistortionmeasure(
-							vertices[triangles[j]], vertices[triangles[j+1]], vertices[triangles[j+2]], 
-							flattenedvertices[triangles[j]], flattenedvertices[triangles[j+1]], flattenedvertices[triangles[j+2]])
-						triangleflatdistortion.push_back(tfduv)
-					
-				var surfacedisplacement = Vector3(-2,0,0) if flattenedvertices != null else Vector3(0,0,0)
-				for j in range(len(triangles)):
-					var p = vertices[triangles[j]]
-					var fp = flattenedvertices[triangles[j]] if flattenedvertices != null else p
-					var tfduv = triangleflatdistortion[int(j/3)] if flattenedvertices != null else Vector2(0.5, 0.0)
-					surfaceTool.add_uv(Vector2(fp.x, fp.y))
-					surfaceTool.add_uv2(tfduv)
-					surfaceTool.add_vertex(surfacedisplacement + p)
-
-				if flattenedvertices != null:
-					var flattenedsurfacedisplacement = vertices[0] + Vector3(-4,0,0)
-					for j in range(len(triangles)):
-						#var p = vertices[triangles[j]]
-						var fp = flattenedvertices[triangles[j]]
-						var tfduv = triangleflatdistortion[int(j/3)]
-						surfaceTool.add_uv(Vector2(fp.x, fp.y))
-						surfaceTool.add_uv2(tfduv)
-						surfaceTool.add_vertex(flattenedsurfacedisplacement + Vector3(fp.x, 0.0, fp.y))
-
-				surfaceTool.generate_normals()
-				surfaceTool.commit(arraymesh)
-				print("committing ", len(triangles), " to ", xcdrawing.get_name())
-				xcdrawing.updatexcshellmesh(arraymesh)
 			
 			if caveworldchunkI == -1 and xcdrawing != null:
 				var tpos = null
@@ -916,8 +875,7 @@ func newXCuniquedrawingPaperN(xcresource, sname, drawingtype):
 func newXCtube(xcdrawing0, xcdrawing1):
 	assert ((xcdrawing0.drawingtype == DRAWING_TYPE.DT_XCDRAWING and xcdrawing1.drawingtype == DRAWING_TYPE.DT_XCDRAWING) or
 			(xcdrawing0.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE and xcdrawing1.drawingtype == DRAWING_TYPE.DT_XCDRAWING) or
-			(xcdrawing0.drawingtype == DRAWING_TYPE.DT_CENTRELINE and xcdrawing1.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE) or 
-			(Tglobal.wingmeshtrimmingmode and xcdrawing0.drawingtype == DRAWING_TYPE.DT_ROPEHANG and xcdrawing1.drawingtype == DRAWING_TYPE.DT_XCDRAWING))
+			(xcdrawing0.drawingtype == DRAWING_TYPE.DT_CENTRELINE and xcdrawing1.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE))
 		
 	var xctube = XCtube.instance()
 	xctube.xcname0 = xcdrawing0.get_name()
