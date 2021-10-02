@@ -73,12 +73,7 @@ func setxcdrawingvisiblehideL(hidenodes):
 func setxcdrawingvisibleL():
 	assert ($XCdrawingplane.visible != $XCdrawingplane/CollisionShape.disabled)	
 	if not $XCdrawingplane.visible and drawingtype == DRAWING_TYPE.DT_XCDRAWING:
-		var scax = 0.0
-		var scay = 0.0
-		for nodepoint in nodepoints.values():
-			scax = max(scax, abs(nodepoint.x))
-			scay = max(scay, abs(nodepoint.y))
-		$XCdrawingplane.set_scale(Vector3(scax + 2, scay + 2, 1.0))
+		setxcdrawingwidthfromnodes()
 	if drawingtype == DRAWING_TYPE.DT_XCDRAWING and get_name().begins_with("Hole"):
 		var xctubesector = DeHoleTubeShell(get_name())
 		if xctubesector != null:
@@ -317,7 +312,15 @@ func expandxcdrawingscale(nodepointglobal):
 		$XCdrawingplane.scale.y = ascay
 	updateformetresquaresscaletexture()
 
-func expandxcdrawingfitxcdrawing(xcdrawing):
+func setxcdrawingwidthfromnodes():
+	var scax = 0.0
+	var scay = 0.0
+	for nodepoint in nodepoints.values():
+		scax = max(scax, abs(nodepoint.x))
+		scay = max(scay, abs(nodepoint.y))
+	$XCdrawingplane.set_scale(Vector3(scax + 2, scay + 2, 1.0))
+
+func expandxcdrawingfitprojectedfromxcdrawingnodes(xcdrawing):
 	var scax = 0.0
 	var scay = 0.0
 	for xcn in xcdrawing.get_node("XCnodes").get_children():

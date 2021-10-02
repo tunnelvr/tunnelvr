@@ -1221,8 +1221,8 @@ func buttonreleased_vrgrip():
 				if gripmenu.gripmenupointertargettype == "XCtubesector":
 					var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(gripmenu.gripmenupointertargetwall.xcname0)
 					var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(gripmenu.gripmenupointertargetwall.xcname1)
-					xcdrawing.expandxcdrawingfitxcdrawing(xcdrawing0)
-					xcdrawing.expandxcdrawingfitxcdrawing(xcdrawing1)
+					xcdrawing.expandxcdrawingfitprojectedfromxcdrawingnodes(xcdrawing0)
+					xcdrawing.expandxcdrawingfitprojectedfromxcdrawingnodes(xcdrawing1)
 
 		elif pointertarget.get_name() == "Undo":
 			if len(sketchsystem.actsketchchangeundostack) != 0:

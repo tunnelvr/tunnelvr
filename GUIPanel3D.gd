@@ -28,14 +28,14 @@ func _on_buttonload_pressed():
 		var savegamefilenameU = cavefilesdir+savegamefilename+".res"
 		if $Viewport/GUI/Panel/ButtonServerside.pressed:
 			if Tglobal.connectiontoserveractive and playerMe.networkID != 1:
-				sketchsystem.rpc_id(1, "loadsketchsystemL", savegamefilenameU)
 				$Viewport/GUI/Panel/Label.text = "Loading server sketch"
+				sketchsystem.rpc_id(1, "loadsketchsystemL", savegamefilenameU)
 			else:
 				$Viewport/GUI/Panel/Label.text = "*server not connected"
 		else:
 			if File.new().file_exists(savegamefilenameU):
-				sketchsystem.loadsketchsystemL(savegamefilenameU)
-				$Viewport/GUI/Panel/Label.text = "Sketch Loaded"
+				$Viewport/GUI/Panel/Label.text = "Loading client sketch"
+				sketchsystem.call_deferred("loadsketchsystemL", savegamefilenameU)
 			else:
 				$Viewport/GUI/Panel/Label.text = "*" + savegamefilename + " does not exist"
 
