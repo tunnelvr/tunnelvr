@@ -49,6 +49,7 @@ remote func setpanellabeltext(ltext):
 	$Viewport/GUI/Panel/Label.text = ltext
 			
 remote func setsavegamefilename(cfile):
+	sketchsystem.sketchname = cfile
 	var snames = $Viewport/GUI/Panel/Savegamefilename
 	for i in range(snames.get_item_count()):
 		if cfile == snames.get_item_text(i).lstrip("*"):
@@ -68,7 +69,6 @@ func _on_buttonsave_pressed():
 		if savegamefilename[0] == "*":
 			savegamefilename = savegamefilename.lstrip("*")
 		var savegamefilenameU = cavefilesdir+savegamefilename+".res"
-		sketchsystem.rset("sketchname", savegamefilename)
 		rpc("setsavegamefilename", savegamefilename)
 		if $Viewport/GUI/Panel/ButtonServerside.pressed:
 			if Tglobal.connectiontoserveractive and playerMe.networkID != 1:
