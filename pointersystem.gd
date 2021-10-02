@@ -1003,8 +1003,8 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 
 			
 		elif activetargetnodewall != pointertargetwall:
-			var maketube = activetargetnodewall.drawingtype == DRAWING_TYPE.DT_XCDRAWING and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING
-			if maketube:
+			var applytubeconnection = activetargetnodewall.drawingtype == DRAWING_TYPE.DT_XCDRAWING and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING
+			if applytubeconnection:
 				var xcname0 = activetargetnodewall.get_name()
 				var nodename0 = activetargetnode.get_name()
 				var xcname1 = pointertargetwall.get_name()
@@ -1018,19 +1018,29 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 				else:
 					xctdata["tubename"] = xctube.get_name()
 					var j = xctube.linkspresentindex(nodename0, nodename1) if xctube.xcname0 == xcname0 else xctube.linkspresentindex(nodename1, nodename0)
+					
 					if j == -1:
 						xctdata["prevdrawinglinks"] = [ ]
 						xctdata["newdrawinglinks"] = [ nodename0, nodename1, "simpledirt", null ]
 					else:
+						var tubeshellholeindexes = xctube.gettubeshellholes(sketchsystem)
+						if tubeshellholeindexes != null:
+							for k in range(1, len(tubeshellholeindexes)):
+								var jh = tubeshellholeindexes[k]
+								if j == jh or j == ((jh + 1) % len(xctube.xcsectormaterials)):
+									print("suppressing deletion of tubelink connected to a HoleXC")
+									applytubeconnection = false
 						xctdata["prevdrawinglinks"] = [ nodename0, nodename1, xctube.xcsectormaterials[j], (xctube.xclinkintermediatenodes[j] if xctube.xclinkintermediatenodes != null else null) ]
 						xctdata["newdrawinglinks"] = [ ]
 						
-				var xctdatalist = [xctdata]
-				#if pointertargetwall.drawingvisiblecode != DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE and activetargetnodewall.drawingvisiblecode != DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE:
-				xctdatalist.push_back({ "xcvizstates":{ }, "updatetubeshells":[{"tubename":xctube.get_name() if xctube != null else "**notset", "xcname0": xcname0, "xcname1":xcname1 }] })
-				sketchsystem.actsketchchange(xctdatalist)
+				if applytubeconnection:
+					var xctdatalist = [xctdata]
+					#if pointertargetwall.drawingvisiblecode != DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE and activetargetnodewall.drawingvisiblecode != DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE:
+					xctdatalist.push_back({ "xcvizstates":{ }, "updatetubeshells":[{"tubename":xctube.get_name() if xctube != null else "**notset", "xcname0": xcname0, "xcname1":xcname1 }] })
+					sketchsystem.actsketchchange(xctdatalist)
+
 			else:
-				print("Cannot make tube to ropehangs")
+				print("Cannot make xcdrawiing to ropehang tube connection")
 		clearactivetargetnode()
 											
 	elif activetargetnode == null and pointertargettype == "XCnode":
@@ -1391,7 +1401,7 @@ func findconstructtubeshellholes(xctubes):
 	for xctube in xctubes:
 		var tubeshellholeindexes = xctube.gettubeshellholes(sketchsystem)
 		if tubeshellholeindexes != null:
-			var drawinghole = tubeshellholeindexes[0]
+			var drawingholeforconnupdate = tubeshellholeindexes[0]
 			for j in range(1, len(tubeshellholeindexes)):
 				var i = tubeshellholeindexes[j]
 				var xcdatashell = xctube.ConstructHoleXC(i, sketchsystem)
@@ -1399,7 +1409,7 @@ func findconstructtubeshellholes(xctubes):
 					if xcdatashellholes == null:
 						xcdatashellholes = [ ]
 					xcdatashellholes.push_back(xcdatashell)
-			var updatetubeshells = drawinghole.updatetubeshellsconn()
+			var updatetubeshells = drawingholeforconnupdate.updatetubeshellsconn()
 			if len(updatetubeshells) != 0:
 				xcdatashellholes.push_back({"xcvizstates":{ }, "updatetubeshells":updatetubeshells})
 	return xcdatashellholes
