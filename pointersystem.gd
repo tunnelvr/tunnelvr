@@ -1340,7 +1340,7 @@ func buttonreleased_vrgrip():
 								 "xcname0":xcdrawing.get_name(),
 								 "xcname1":wasactivetargettube.xcname1,
 								 "prevdrawinglinks":[], "newdrawinglinks":[] }
-				if wasactivetargettube.slicetubetoxcdrawing(xcdrawing, xcdata, xctdatadel, xctdata0, xctdata1):
+				if wasactivetargettube.slicetubetoxcdrawing(xcdrawing, xcdata, xctdatadel, xctdata0, xctdata1) and wasactivetargettube.gettubeshellholes(sketchsystem) == null:
 					clearactivetargetnode()
 					clearpointertarget()
 					var xctdataviz = {"xcvizstates":{ xcdrawing.get_name():DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE }, 
