@@ -110,7 +110,13 @@ func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointert
 		elif is_instance_valid(activetargetwall) and len(activetargetwall.nodepoints) == 0:
 			gmlist = ["DoSlice", "SelectXC", "HideXC", "materials"]
 		elif tubesectormaterialname == "hole" or tubesectormaterialname == "holegap":
-			gmlist = ["HoleXC", "SelectXC", "HideXC", "materials"]
+			var sketchsystem = get_node("/root/Spatial/SketchSystem")
+			var xcdrawinghole = sketchsystem.get_node("XCdrawings").get_node_or_null(gripmenupointertargetwall.HoleName(gripmenuactivetargettubesectorindex))
+			if xcdrawinghole == null or len(xcdrawinghole.nodepoints) == 0:
+				gmlist = ["HoleXC", "SelectXC", "HideXC", "materials"]
+			else:
+				gmlist = ["HoleXC", "SelectXC", "HideXC"]
+				 
 		else:
 			gmlist = ["DelTube", "NewXC", "SelectXC", "HideXC", "materials"]
 

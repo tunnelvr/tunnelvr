@@ -1,4 +1,4 @@
-[gd_scene load_steps=305 format=2]
+[gd_scene load_steps=303 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/underground_env.tres" type="Environment" id=2]
@@ -312,17 +312,6 @@ albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
 albedo_texture = ExtResource( 25 )
 uv1_scale = Vector3( 1, 0.05, 1 )
 uv1_offset = Vector3( -0.2, 0.9, 0 )
-
-[sub_resource type="QuadMesh" id=37]
-
-[sub_resource type="SpatialMaterial" id=38]
-flags_unshaded = true
-flags_do_not_receive_shadows = true
-params_cull_mode = 2
-albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
-albedo_texture = ExtResource( 25 )
-uv1_scale = Vector3( 1, 0.05, 1 )
-uv1_offset = Vector3( -0.2, 0.95, 0 )
 
 [sub_resource type="StyleBoxFlat" id=39]
 bg_color = Color( 0.0980392, 0.443137, 0.882353, 1 )
@@ -2216,19 +2205,6 @@ mesh = SubResource( 16 )
 material/0 = SubResource( 36 )
 
 [node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/HideXC"]
-shape = SubResource( 18 )
-
-[node name="S_Triang" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
-transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 1.16415e-10, 0, 1, 0.261259, -0.352818, -0.000878334 )
-collision_layer = 8
-collision_mask = 0
-
-[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/S_Triang"]
-cast_shadow = 0
-mesh = SubResource( 37 )
-material/0 = SubResource( 38 )
-
-[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/S_Triang"]
 shape = SubResource( 18 )
 
 [node name="MaterialButtons" type="Spatial" parent="GuiSystem/GripMenu"]

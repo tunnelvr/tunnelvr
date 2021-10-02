@@ -544,7 +544,6 @@ func slicetubetoxcdrawing(xcdrawing, xcdata, xctdatadel, xctdata0, xctdata1):
 func HoleName(i):
 	return "Hole"+("" if i == 0 else ";"+str(i))+";"+xcname0+";"+xcname1
 
-
 func ConstructHoleXC(i, sketchsystem):
 	assert (xcsectormaterials[i] == "hole")
 	var xcdrawingholename = HoleName(i)
@@ -591,7 +590,7 @@ func gettubeshellholes(sketchsystem):
 	for i in range(len(xcsectormaterials)):
 		if xcsectormaterials[i] == "hole":
 			var xcdrawingholename = HoleName(i)
-			var xcdrawinghole = sketchsystem.get_node_or_null("XCdrawings").get_node(xcdrawingholename)
+			var xcdrawinghole = sketchsystem.get_node("XCdrawings").get_node_or_null(xcdrawingholename)
 			if xcdrawinghole != null and len(xcdrawinghole.nodepoints) != 0:
 				if tubeshellholeindexes == null:
 					tubeshellholeindexes = [ xcdrawinghole ]

@@ -74,7 +74,7 @@ func _on_buttonsave_pressed():
 			if Tglobal.connectiontoserveractive and playerMe.networkID != 1:
 				sketchsystem.rpc_id(1, "savesketchsystem", savegamefilenameU)
 				setpanellabeltext("Saving server sketch")
-			elif Tglobal.platform != "HTML5":
+			elif playerMe.playerplatform != "HTML5":
 				setpanellabeltext("Saving local sketch")
 				sketchsystem.savesketchsystem(savegamefilenameU)
 			else:
