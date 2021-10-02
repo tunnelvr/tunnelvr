@@ -1404,7 +1404,7 @@ func findconstructtubeshellholes(xctubes):
 				xcdatashellholes.push_back({"xcvizstates":{ }, "updatetubeshells":updatetubeshells})
 	return xcdatashellholes
 
-var targetwallvertplane = true
+var targetwallvertplanesticky = true
 var prevactivetargetwallgrabbedorgtransform = null
 
 func targetwalltransformpos(optionalrevertcode):
@@ -1444,46 +1444,54 @@ func targetwalltransformpos(optionalrevertcode):
 			return txcdata
 	
 	#assert (activetargetwallgrabbed.drawingtype == DRAWING_TYPE.DT_XCDRAWING)	
-	var rotateonly = (activetargetwallgrabbedmotion == DRAWING_TYPE.GRABMOTION_PRIMARILY_LOCKED_VERTICAL_ROTATION_ONLY)
+	var primarilylocked = (activetargetwallgrabbedmotion == DRAWING_TYPE.GRABMOTION_PRIMARILY_LOCKED_VERTICAL_ROTATION_ONLY)
 			
 	var txcdata = { "name":activetargetwallgrabbed.get_name(), 
 					"rpcoptional":(0 if optionalrevertcode else 1),
 					"timestamp":OS.get_ticks_msec()*0.001,
 					"prevtransformpos":activetargetwallgrabbed.transform, }
+
 	if prevactivetargetwallgrabbedorgtransform == null or prevactivetargetwallgrabbedorgtransform != activetargetwallgrabbedorgtransform:
-		targetwallvertplane = abs(activetargetwallgrabbedorgtransform.basis.z.y) < 0.3
+		targetwallvertplanesticky = abs(activetargetwallgrabbedorgtransform.basis.z.y) < 0.3
 		prevactivetargetwallgrabbedorgtransform = activetargetwallgrabbedorgtransform
 
 	var laserrelvec = activelaserroot.global_transform.basis.xform_inv(activetargetwallgrabbedlaserroottrans.basis.z)
 	var angh = asin(activelaserroot.global_transform.basis.z.y)
-	if rotateonly:
+	if primarilylocked:
 		pass
-	elif targetwallvertplane and abs(angh) > deg2rad(60):
-		targetwallvertplane = false
-	elif (not targetwallvertplane) and abs(angh) < deg2rad(20):
-		targetwallvertplane = true
-	
+	elif targetwallvertplanesticky and abs(angh) > deg2rad(60):
+		targetwallvertplanesticky = false
+	elif (not targetwallvertplanesticky) and abs(angh) < deg2rad(20):
+		targetwallvertplanesticky = true
+
+	var grabbedtargetwallvertplane = (abs(activetargetwallgrabbedorgtransform.basis.z.y) < 0.3)	
 	if optionalrevertcode == 2:
 		txcdata["transformpos"] = activetargetwallgrabbedorgtransform
-	elif targetwallvertplane:
+	elif targetwallvertplanesticky:
 		var angy = -Vector2(laserrelvec.z, laserrelvec.x).angle()
-		if abs(activetargetwallgrabbedorgtransform.basis.z.y) < 0.3:  # should be 0 or 1 for vertical or horiz
+		if grabbedtargetwallvertplane:
 			txcdata["transformpos"] = activetargetwallgrabbedorgtransform.rotated(Vector3(0,1,0), angy)
-			var angpush = 0 if rotateonly else -(activetargetwallgrabbedlaserroottrans.origin.y - activelaserroot.global_transform.origin.y)
+			var angpush = 0 if primarilylocked else -(activetargetwallgrabbedlaserroottrans.origin.y - activelaserroot.global_transform.origin.y)
 			var activetargetwallgrabbedpointmoved = activetargetwallgrabbedpoint + 20*angpush*activetargetwallgrabbeddispvector.normalized()
 			txcdata["transformpos"].origin += activetargetwallgrabbedpointmoved - txcdata["transformpos"]*activetargetwallgrabbedlocalpoint
 		else:
 			var angt = Vector2(activetargetwallgrabbeddispvector.x, activetargetwallgrabbeddispvector.z).angle() + deg2rad(90) - angy
 			txcdata["transformpos"] = Transform(Basis().rotated(Vector3(0,-1,0), angt), activetargetwallgrabbedorgtransform.origin)
-			var angpush = 0 if rotateonly else -(activetargetwallgrabbedlaserroottrans.origin.y - activelaserroot.global_transform.origin.y)
+			var angpush = 0 if primarilylocked else -(activetargetwallgrabbedlaserroottrans.origin.y - activelaserroot.global_transform.origin.y)
 			var activetargetwallgrabbedpointmoved = activetargetwallgrabbedpoint + 20*angpush*Vector3(activetargetwallgrabbeddispvector.x, 0, activetargetwallgrabbeddispvector.z).normalized()
 			txcdata["transformpos"].origin += activetargetwallgrabbedpointmoved - txcdata["transformpos"]*activetargetwallgrabbedlocalpoint
+	elif primarilylocked and not grabbedtargetwallvertplane:
+		txcdata["transformpos"] = Transform(Vector3(1,0,0), Vector3(0,0,-1), Vector3(0,1,0), Vector3(0,0,0)) # .rotated(Vector3(0,1,0), angy)
+		var angpush = -(activetargetwallgrabbedlaserroottrans.origin.y - activelaserroot.global_transform.origin.y)
+		txcdata["transformpos"].origin = activetargetwallgrabbedorgtransform.origin + Vector3(0, 2*angpush, 0)
+
 	else:
 		#var angy = -Vector2(laserrelvec.z, laserrelvec.x).angle()
 		#txcdata["transformpos"] = Transform().rotated(Vector3(1,0,0), deg2rad(-90)).rotated(Vector3(0,1,0), angy)
 		txcdata["transformpos"] = Transform(Vector3(1,0,0), Vector3(0,0,-1), Vector3(0,1,0), Vector3(0,0,0)) # .rotated(Vector3(0,1,0), angy)
-		var angpush = 0 if rotateonly else -(activetargetwallgrabbedlaserroottrans.origin.y - activelaserroot.global_transform.origin.y)
+		var angpush = -(activetargetwallgrabbedlaserroottrans.origin.y - activelaserroot.global_transform.origin.y)
 		txcdata["transformpos"].origin = activetargetwallgrabbedpoint + Vector3(0, 20*angpush, 0)
+
 	return txcdata
 
 func clearintermediatepointplaneview():
