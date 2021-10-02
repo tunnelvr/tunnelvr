@@ -1951,18 +1951,18 @@ script = ExtResource( 15 )
 
 [node name="WordButtons" type="Spatial" parent="GuiSystem/GripMenu"]
 
-[node name="Up5" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
-transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, 0.000293921, -0.2, 0 )
-visible = false
+[node name="FixHoleXC" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
+transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 9.8953e-10, 0, 1, -0.253778, -0.52004, 0.0249872 )
 collision_layer = 8
 collision_mask = 0
 
-[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/Up5"]
+[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/FixHoleXC"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0 )
 cast_shadow = 0
 mesh = SubResource( 16 )
 material/0 = SubResource( 17 )
 
-[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/Up5"]
+[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/FixHoleXC"]
 shape = SubResource( 18 )
 
 [node name="Down5" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
@@ -2057,6 +2057,7 @@ mesh = SubResource( 16 )
 material/0 = SubResource( 25 )
 
 [node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/DelTube"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 5.82077e-11, 0, 1, 0, 0, 0 )
 shape = SubResource( 18 )
 
 [node name="ghost" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]

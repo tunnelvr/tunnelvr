@@ -31,8 +31,7 @@ var shortestpathseglength = 0.0
 var closewidthsca = 1.0
 var linewidth = 0.05
 
-func DeHoleTubeShell(xcname):
-	var sketchsystem = get_node("/root/Spatial/SketchSystem")
+static func tubesectorfromxchole(xcname, sketchsystem):
 	var hxc = xcname.split(";")
 	assert (len(hxc) == 3 or len(hxc) == 4)
 	assert (hxc[0] == "Hole")
@@ -50,11 +49,22 @@ func updatetubeshellsconn():
 		updatetubeshells.push_back({ "tubename":xctube.get_name(), "xcname0":xctube.xcname0, "xcname1":xctube.xcname1 })
 	return updatetubeshells
 
+func measurexcmatch(ltransformpos, lnextnodepoints):
+	var dist = 0.0
+	for k in lnextnodepoints.keys():
+		var pt = ltransformpos.xform(lnextnodepoints[k])
+		var npt = nodepoints.get(k)
+		if npt != null:
+			dist += pt.distance_to(transform.xform(npt))
+		else:
+			dist += 1.0
+		dist += max(0, len(nodepoints) - len(lnextnodepoints))
+	return dist
 		
 func setxcdrawingvisiblehideL(hidenodes):
 	assert ($XCdrawingplane.visible != $XCdrawingplane/CollisionShape.disabled)	
-	if drawingtype == DRAWING_TYPE.DT_XCDRAWING and get_name().begins_with("Hole"):
-		var xctubesector = DeHoleTubeShell(get_name())
+	if drawingtype == DRAWING_TYPE.DT_XCDRAWING and get_name().begins_with("Hole;"):
+		var xctubesector = tubesectorfromxchole(get_name(), get_node("/root/Spatial/SketchSystem"))
 		if xctubesector != null:
 			xctubesector.visible = false
 			xctubesector.get_node("CollisionShape").disabled = true
@@ -74,8 +84,8 @@ func setxcdrawingvisibleL():
 	assert ($XCdrawingplane.visible != $XCdrawingplane/CollisionShape.disabled)	
 	if not $XCdrawingplane.visible and drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		setxcdrawingwidthfromnodes()
-	if drawingtype == DRAWING_TYPE.DT_XCDRAWING and get_name().begins_with("Hole"):
-		var xctubesector = DeHoleTubeShell(get_name())
+	if drawingtype == DRAWING_TYPE.DT_XCDRAWING and get_name().begins_with("Hole;"):
+		var xctubesector = tubesectorfromxchole(get_name(), get_node("/root/Spatial/SketchSystem"))
 		if xctubesector != null:
 			xctubesector.visible = true
 			xctubesector.get_node("CollisionShape").disabled = false

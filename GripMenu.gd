@@ -115,10 +115,10 @@ func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointert
 			if xcdrawinghole == null or len(xcdrawinghole.nodepoints) == 0:
 				gmlist = ["HoleXC", "SelectXC", "HideXC", "materials"]
 			else:
-				gmlist = ["HoleXC", "SelectXC", "HideXC"]
+				gmlist = ["HoleXC", "SelectXC", "HideXC", "FixHoleXC"]
 				 
 		else:
-			gmlist = ["DelTube", "NewXC", "SelectXC", "HideXC", "materials"]
+			gmlist = ["DelTube", "NewXC", "SelectXC", "HideXC", "FixHoleXC", "materials"]
 
 	elif gripmenupointertargettype == "XCflatshell":
 		if activetargetwall == get_node("/root/Spatial/PlanViewSystem"):

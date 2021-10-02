@@ -1325,7 +1325,7 @@ func buttonreleased_vrgrip():
 													 ] } ] )
 													
 			elif pointertarget.get_name() == "DoSlice" and is_instance_valid(wasactivetargettube) and is_instance_valid(activetargetwall) and len(activetargetwall.nodepoints) == 0:
-				print("doslice ", wasactivetargettube, " ", len(activetargetwall.nodepoints))
+				print("doslice ", wasactivetargettube)
 				var xcdrawing = activetargetwall
 				var xcdata = { "name":xcdrawing.get_name(), "prevnodepoints":{}, "nextnodepoints":{}, "prevonepathpairs":[], "newonepathpairs":[] }
 				var xctdatadel = { "tubename":wasactivetargettube.get_name(), 
@@ -1353,6 +1353,10 @@ func buttonreleased_vrgrip():
 					setactivetargetwall(xcdrawing)
 					wasactivetargettube = null
 					activelaserroot.get_node("LaserSpot").visible = false
+
+			elif pointertarget.get_name() == "FixHoleXC" and is_instance_valid(wasactivetargettube):
+				print("FixHoleXC ", wasactivetargettube)
+				var xcdatalist = wasactivetargettube.FixtubeholeXCs(sketchsystem)
 
 		
 	elif pointertargettype == "GUIPanel3D":

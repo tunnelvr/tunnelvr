@@ -597,6 +597,26 @@ func gettubeshellholes(sketchsystem):
 				tubeshellholeindexes.push_back(i)
 	return tubeshellholeindexes
 
+func FixtubeholeXCs(sketchsystem):
+	var xcdatashellholes = [ ]
+	for i in range(len(xcsectormaterials)):
+		if xcsectormaterials[i] == "hole":
+			xcdatashellholes.push_back(ConstructHoleXC(i, sketchsystem))
+	var currentholexcnamesindexdistance = [ ]
+	for i in range(len(xcsectormaterials)+5):
+		var xcdrawingholename = HoleName(i)
+		var xcdrawinghole = sketchsystem.get_node("XCdrawings").get_node_or_null(xcdrawingholename)
+		if xcdrawinghole != null and len(xcdrawinghole.nodepoints) != 0:
+			var cdist = -1.0
+			var cj = -1
+			for j in range(len(xcdatashellholes)):
+				var dist = xcdrawinghole.measurexcmatch(xcdatashellholes[j]["transformpos"], xcdatashellholes[j]["nextnodepoints"])
+				if cj == -1 or dist < cdist:
+					cj = j
+					cdist = dist
+			currentholexcnamesindexdistance.push_back([xcdrawingholename, cj, cdist])
+	print("Beginning to find the association for xcdrawing renaming", currentholexcnamesindexdistance)
+
 
 func advanceuvFar(uvFixed, ptFixed, uvFar, ptFar, ptFarNew, bclockwise):
 	var uvvec = uvFar - uvFixed
