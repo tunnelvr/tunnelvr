@@ -813,10 +813,16 @@ func newXCuniquedrawing(drawingtype, sname):
 	if drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		xcdrawing.linewidth = 0.05
 		xcdrawing.drawingvisiblecode = DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE
-
+		xcdrawing.get_node("XCnodes").visible = false
+		xcdrawing.get_node("XCdrawingplane").visible = false
+		xcdrawing.get_node("XCdrawingplane/CollisionShape").disabled = true
+		
 	elif drawingtype == DRAWING_TYPE.DT_ROPEHANG:
 		xcdrawing.linewidth = 0.02
 		xcdrawing.drawingvisiblecode = DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE
+		xcdrawing.get_node("XCnodes").visible = true
+		xcdrawing.get_node("XCdrawingplane").visible = false
+		xcdrawing.get_node("XCdrawingplane/CollisionShape").disabled = true
 		xcdrawing.add_child(RopeHang.instance())
 		xcdrawing.get_node("RopeHang").setropematerialcolour(xcdrawing.get_name())
 
