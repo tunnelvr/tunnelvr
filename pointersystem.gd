@@ -682,8 +682,9 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 
 		clearactivetargetnode()
 		
-	# reselection when selected on grip deletes the node		
-	elif gripbuttonheld and activetargetnode != null and pointertarget == activetargetnode and (activetargetnodewall.drawingtype != DRAWING_TYPE.DT_CENTRELINE):
+	elif gripbuttonheld and activetargetnode != null and pointertarget == activetargetnode \
+			and (activetargetnodewall.drawingtype != DRAWING_TYPE.DT_CENTRELINE) \
+			and (not activetargetnodewall.get_name().begins_with("Hole;")):
 		if len(activetargetnodewall.nodepoints) == 1:
 			LaserOrient.get_node("RayCast").collision_mask = raynormalcollisionmask()
 		var xcname = activetargetnodewall.get_name()
@@ -702,8 +703,6 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 			xcdata["newonepathpairs"] = [ ]
 		var xcdatalist = [ xcdata ]
 
-		
-		
 		for xctube in activetargetnodewall.xctubesconn:
 			var prevdrawinglinks = [ ]
 			var m = 0 if xcname == xctube.xcname0 else 1
@@ -983,20 +982,21 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 			imagesystem.shuffleimagetotopoflist(pointertargetwall)
 			
 	elif activetargetnode != null and pointertargettype == "XCnode" and (pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING or pointertargetwall.drawingtype == DRAWING_TYPE.DT_ROPEHANG):
-		if activetargetnodewall == pointertargetwall and (activetargetnodewall.drawingtype == DRAWING_TYPE.DT_XCDRAWING or activetargetnodewall.drawingtype == DRAWING_TYPE.DT_ROPEHANG):
+		if activetargetnodewall == pointertargetwall and (activetargetnodewall.drawingtype == DRAWING_TYPE.DT_XCDRAWING or activetargetnodewall.drawingtype == DRAWING_TYPE.DT_ROPEHANG) \
+				and (not activetargetnodewall.get_name().begins_with("Hole;")):
 			var xcdata = { "name":pointertargetwall.get_name() }
 			var i0 = activetargetnode.get_name()
 			var i1 = pointertarget.get_name()
-			if pointertargetwall.pairpresentindex(i0, i1) != -1:  # add line
+			if pointertargetwall.pairpresentindex(i0, i1) != -1:
 				xcdata["prevonepathpairs"] = [i0, i1]
 				xcdata["newonepathpairs"] = [ ]
-			else:   # delete line
-				xcdata["newonepathpairs"] = [i0, i1]
+			else:
 				if initialsequencenodenameP != null and initialsequencenodenameP != activetargetnode.get_name() and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 					xcdata["prevonepathpairs"] = [ initialsequencenodenameP, pointertarget.get_name() ]
 				else:   # ^^ rejoin and delete straight line
 					xcdata["prevonepathpairs"] = [ ]
-			var xcdatalist = [xcdata]
+				xcdata["newonepathpairs"] = [i0, i1]
+			var xcdatalist = [ xcdata ]
 			if pointertargetwall.drawingvisiblecode != DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE:
 				xcdatalist.push_back({"xcvizstates":{ pointertargetwall.get_name():DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE } })
 			sketchsystem.actsketchchange(xcdatalist)
