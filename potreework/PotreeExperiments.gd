@@ -69,6 +69,7 @@ func potreeactivatebuttonpressed(buttondown):
 			elif selfSpatial.playerMe.playerplatform == "PC":
 				if selfSpatial.playerMe.playeroperatingsystem == "Windows":
 					urlotreedir = "D:/potreetests/outdir/"
+					urlotreedir = "D:/potreetests/outdircombined/"
 			rootnode.commenceloadotree(urlotreedir)	
 				
 		else:
