@@ -105,20 +105,18 @@ func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointert
 		
 	elif gripmenupointertargettype == "XCtubesector":
 		tubesectormaterialname = gripmenupointertargetwall.xcsectormaterials[gripmenuactivetargettubesectorindex]
-		if activetargetwall == get_node("/root/Spatial/PlanViewSystem"):
-			pass
-		elif is_instance_valid(activetargetwall) and len(activetargetwall.nodepoints) == 0:
+		if is_instance_valid(activetargetwall) and len(activetargetwall.nodepoints) == 0:
 			gmlist = ["DoSlice", "SelectXC", "HideXC", "materials"]
 		elif tubesectormaterialname == "hole" or tubesectormaterialname == "holegap":
+			var joinsfromhole = gripmenupointertargetwall.xcname0.begins_with("Hole;") or gripmenupointertargetwall.xcname1.begins_with("Hole;")
+			gmlist = ["SelectXC", "HideXC", "FixHoleXC"]
+			gmlist.push_back("HoleXCdisabled" if joinsfromhole else "HoleXC")
 			var sketchsystem = get_node("/root/Spatial/SketchSystem")
 			var xcdrawinghole = sketchsystem.get_node("XCdrawings").get_node_or_null(gripmenupointertargetwall.HoleName(gripmenuactivetargettubesectorindex))
 			if xcdrawinghole == null or len(xcdrawinghole.nodepoints) == 0:
-				gmlist = ["HoleXC", "SelectXC", "HideXC", "materials"]
-			else:
-				gmlist = ["HoleXC", "SelectXC", "HideXC", "FixHoleXC"]
-				 
+				gmlist.push_back("materials")
 		else:
-			gmlist = ["DelTube", "NewXC", "SelectXC", "HideXC", "FixHoleXC", "materials"]
+			gmlist = ["DelTube", "NewXC", "SelectXC", "HideXC", "materials"]
 
 	elif gripmenupointertargettype == "XCflatshell":
 		if activetargetwall == get_node("/root/Spatial/PlanViewSystem"):
