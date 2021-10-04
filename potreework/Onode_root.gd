@@ -34,7 +34,6 @@ func commenceloadotree(urlotreedir):
 	urlmetadata = urlotreedir+"metadata.json"
 	urlhierarchy = urlotreedir+"hierarchy.bin"
 	urloctree = urlotreedir+"octree.bin"
-		
 	ImageSystem.fetchrequesturl({ "url":urlmetadata, "callbackobject":self, "callbackfunction":"callbackloadotree" })
 
 func callbackloadotree(fmetadata, nonimagedataobject):
@@ -238,6 +237,7 @@ func _process(delta):
 			processingnodeWaitingForFile = false
 			var fhierarchyF = processingnodeReturnedFileHandle
 			processingnodeReturnedFileHandle = null
+			
 			assert ((urlhierarchy.substr(0, 4) != "http") or (fhierarchyF.get_len() == processingnode.hierarchybyteSize))
 			var nodesh = processingnode.loadhierarchychunk(fhierarchyF, get_parent().global_transform.inverse())
 			for node in nodesh:

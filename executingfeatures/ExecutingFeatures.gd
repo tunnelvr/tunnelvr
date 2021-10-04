@@ -159,9 +159,8 @@ remote func finemeshpolygon_execute(polypoints, trilineleng, xcdrawingname):
 
 
 func find_executingfeaturesavailable():
-	var playerplatform = get_node("/root/Spatial").playerMe.playerplatform
-	#print("force to not have executing features here")
-	#return [ ]
+	var playerplatform = get_node("/root/Spatial").playerMe.playerplatform	
+	var executingfeaturesavailable = [ ]
 	if playerplatform == "PC" or playerplatform == "Server":
 		var ffindexecutingfeaturespy = copytouserfilesystem("res://surveyscans/find_executingfeatures.py")
 		var arguments = PoolStringArray([ffindexecutingfeaturespy])
@@ -169,8 +168,14 @@ func find_executingfeaturesavailable():
 		# this is where parse3ddmp_centreline gets added
 		var ffindexecutingfeaturespy_status = OS.execute("python", arguments, true, output)
 		if ffindexecutingfeaturespy_status == 0 and len(output) == 1:
-			return Array(output[0].split(" "))
-	return [ ]
+			executingfeaturesavailable = Array(output[0].split(" "))
+
+		var caddyarguments = PoolStringArray(["version"])
+		output = [ ]
+		var caddyoutputstatus = OS.execute("caddy", caddyarguments, true, output)
+		if caddyoutputstatus == 0:
+			executingfeaturesavailable.push_back("caddy")
+	return executingfeaturesavailable
 
 
 
@@ -315,4 +320,4 @@ func parse3ddmpcentreline_execute(f3dfile, f3durl):
 
 
 func _ready():
-	print("The PATH environment is: ", OS.get_environment("PATH"), "\n\n")
+	print("The PATH environment is: ", OS.get_environment("PATH").substr(0, 100), "\n\n")

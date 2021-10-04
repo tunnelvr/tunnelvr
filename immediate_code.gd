@@ -14,7 +14,8 @@ func distAABB(aabb : AABB, p):
 	return Vector3(max(0, vx), max(0, vy), max(0, vz))
 
 func _run():
-	var a = [ 1,2,3,"llllk"]
-	var b = [ 80]
-	print(a+b)
-	
+	var output = [ ]
+	var arguments = PoolStringArray(["version"])	
+	var s = OS.execute("caddy", arguments, true, output)
+	print(s)
+	print(output)

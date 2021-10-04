@@ -35,7 +35,10 @@ extends Spatial
 var hostipnumber: String = ""
 export var hostportnumber: int = 4546
 export var udpserverdiscoveryport: int = 4547
+
+# caddy file-server -listen 0.0.0.0:8000 -browse
 export var potreeportnumber: int = 8000
+
 export var enablevr: = true
 export var usewebsockets: = false
 export var planviewonly: = false

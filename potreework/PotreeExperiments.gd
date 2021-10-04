@@ -63,7 +63,7 @@ func potreeactivatebuttonpressed(buttondown):
 			add_child(rootnode)
 
 			var selfSpatial = get_node("/root/Spatial")
-			var urlotreedir = "http://192.168.8.101:8000/"
+			var urlotreedir = "http://192.168.8.111:8000/"
 			if selfSpatial.hostipnumber != "":
 				urlotreedir = "http://%s:%d/" % [selfSpatial.hostipnumber, selfSpatial.potreeportnumber]
 			elif selfSpatial.playerMe.playerplatform == "PC":

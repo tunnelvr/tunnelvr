@@ -62,7 +62,7 @@ var intermediatepointpicked = null
 
 const handflickmotiongestureposition_normal = 0
 const handflickmotiongestureposition_shortpos = 1
-const handflickmotiongestureposition_shortpos_length = 0.25
+var handflickmotiongestureposition_shortpos_length = 0.25
 const handflickmotiongestureposition_gone = 2
 
 func clearpointertargetmaterial():
@@ -1593,6 +1593,15 @@ func _physics_process(delta):
 		playerMe.get_node("HandRight/PalmLight").visible = (Tglobal.handflickmotiongestureposition == handflickmotiongestureposition_gone)
 		playerMe.handflickmotiongesture = 0
 
+	var joyscrolldir = 0
+	if abs(handright.joypos.y) < 0.4:
+		joyposyscrollcountdown = 0
+	if abs(handright.joypos.y) > 0.9:
+		joyposyscrollcountdown -= delta
+		if joyposyscrollcountdown <= 0:
+			joyscrolldir = -1 if handright.joypos.y < 0 else 1
+			joyposyscrollcountdown = 0.3333
+
 	if handright.pointervalid:
 		var firstlasertarget = LaserOrient.get_node("RayCast").get_collider()
 		if firstlasertarget != null and firstlasertarget.is_queued_for_deletion():
@@ -1609,6 +1618,12 @@ func _physics_process(delta):
 			LaserOrient.visible = true
 			activelaserroot = LaserOrient
 			pointerplanviewtarget = null
+			if joyscrolldir == -1 and handflickmotiongestureposition_shortpos_length >= 0.3:
+				handflickmotiongestureposition_shortpos_length -= (0.25 if handflickmotiongestureposition_shortpos_length < 1.1 else (1.0 if handflickmotiongestureposition_shortpos_length < 8.1 else 2.0))
+				print(handflickmotiongestureposition_shortpos_length)
+			if joyscrolldir == 1 and handflickmotiongestureposition_shortpos_length <= 28.1:
+				handflickmotiongestureposition_shortpos_length += (0.25 if handflickmotiongestureposition_shortpos_length < 0.9 else (1.0 if handflickmotiongestureposition_shortpos_length < 7.9 else 2.0))
+				print(handflickmotiongestureposition_shortpos_length)
 			setpointertarget(activelaserroot, activelaserroot.get_node("RayCast"), handflickmotiongestureposition_shortpos_length)
 		elif firstlasertarget != null and firstlasertarget.get_name() == "PlanView" and planviewsystem.checkplanviewinfront(LaserOrient) and planviewsystem.planviewactive:
 			pointerplanviewtarget = planviewsystem
@@ -1624,14 +1639,9 @@ func _physics_process(delta):
 				activelaserroot.get_node("LaserSpot").global_transform.basis = LaserOrient.global_transform.basis
 				if inguipanelsection:
 					setpointertarget(activelaserroot, null, -1.0)
-					if planviewsystem.fileviewtree.visible:
-						if abs(handright.joypos.y) < 0.4:
-							joyposyscrollcountdown = 0
-						if abs(handright.joypos.y) > 0.9:
-							joyposyscrollcountdown -= delta
-							if joyposyscrollcountdown <= 0:
-								planviewsystem.scrolltree(handright.joypos.y < 0)
-								joyposyscrollcountdown = 0.3333
+					if planviewsystem.fileviewtree.visible and joyscrolldir != 0:
+						planviewsystem.scrolltree(joyscrolldir == -1)
+						joyscrolldir = 0
 				else:
 					activelaserroot.get_node("RayCast").force_raycast_update()
 					setpointertarget(activelaserroot, activelaserroot.get_node("RayCast"), -1.0)
@@ -1701,8 +1711,9 @@ func _input(event):
 		if event.button_index == BUTTON_WHEEL_UP or event.button_index == BUTTON_WHEEL_DOWN:
 			if event.is_pressed():
 				handright.joypos.y = 1.0 if event.button_index == BUTTON_WHEEL_UP else -1.0
+				print("handright.joypos.y ", handright.joypos.y)
 			else:
-				yield(get_tree(), "idle_frame") 
-				yield(get_tree(), "idle_frame") 
-				yield(get_tree(), "idle_frame") 
+				yield(get_tree(), "physics_frame") 
+				yield(get_tree(), "physics_frame") 
 				handright.joypos.y = 0.0
+				print("handright.joypos.y ", handright.joypos.y)
