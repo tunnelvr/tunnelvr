@@ -603,6 +603,7 @@ func FixtubeholeXCs(sketchsystem):
 		if xcsectormaterials[i] == "hole":
 			xcdatashellholes.push_back(ConstructHoleXC(i, sketchsystem))
 	var currentholexcnamesindexdistance = [ ]
+	
 	for i in range(len(xcsectormaterials)+5):
 		var xcdrawingholename = HoleName(i)
 		var xcdrawinghole = sketchsystem.get_node("XCdrawings").get_node_or_null(xcdrawingholename)
@@ -614,8 +615,68 @@ func FixtubeholeXCs(sketchsystem):
 				if cj == -1 or dist < cdist:
 					cj = j
 					cdist = dist
-			currentholexcnamesindexdistance.push_back([xcdrawingholename, cj, cdist])
-	print("Beginning to find the association for xcdrawing renaming", currentholexcnamesindexdistance)
+			currentholexcnamesindexdistance.push_back([cdist, xcdrawingholename, cj])
+			
+	currentholexcnamesindexdistance.sort()
+	print("HoleXC association for xcdrawing renaming", currentholexcnamesindexdistance)
+	var holexcorgnames = [ ]
+	var holexcnewconstructs = [ ]
+	var holexcnewnames = [ ]
+	for i in range(len(currentholexcnamesindexdistance)):
+		var holexcnewconstruct = xcdatashellholes[currentholexcnamesindexdistance[i][2]]
+		if currentholexcnamesindexdistance[i][0] < 0.1 and not holexcnewnames.has(holexcnewconstruct["name"]):
+			holexcnewnames.push_back(holexcnewconstruct["name"])
+			if holexcnewconstruct["name"] != currentholexcnamesindexdistance[i][1]:
+				holexcorgnames.push_back(currentholexcnamesindexdistance[i][1])
+				holexcnewconstructs.push_back(holexcnewconstruct)
+	if len(holexcorgnames) == 0:
+		return null
+
+	var xctdatatubedel = [ ]
+	var xctdatatubenew = [ ]
+	var xctdatadrawingdel = [ ]
+	var updatetubeshells = [ ]
+	var xcvizstates = { }
+	for i in range(len(holexcorgnames)):
+		var xcdrawingorgname = holexcorgnames[i]
+		var xcdrawingnewname = holexcnewconstructs[i]["name"]
+		var xcdrawing = sketchsystem.get_node("XCdrawings").get_node(xcdrawingorgname)
+		print("ChangeHoleXCname ", xcdrawingorgname, " to ", xcdrawingnewname)
+		for xctube in xcdrawing.xctubesconn:
+			var drawinglinks = [ ]
+			for j in range(0, len(xctube.xcdrawinglink), 2):
+				drawinglinks.push_back(xctube.xcdrawinglink[j])
+				drawinglinks.push_back(xctube.xcdrawinglink[j+1])
+				drawinglinks.push_back(xctube.xcsectormaterials[j/2])
+				drawinglinks.push_back(xctube.xclinkintermediatenodes[j/2] if xctube.xclinkintermediatenodes != null else null)
+			xctdatatubedel.push_back({ "tubename":xctube.get_name(), 
+									   "xcname0":xctube.xcname0, 
+									   "xcname1":xctube.xcname1,
+									   "prevdrawinglinks":drawinglinks,
+									   "newdrawinglinks":[ ] })
+			var xcname0new = xcdrawingnewname if xctube.xcname0 == xcdrawingorgname else xctube.xcname0
+			var xcname1new = xcdrawingnewname if xctube.xcname1 == xcdrawingorgname else xctube.xcname1
+			xctdatatubenew.push_back({ "tubename":"**notset", 
+									   "xcname0":xcname0new, 
+									   "xcname1":xcname1new,
+									   "prevdrawinglinks":[ ],
+									   "newdrawinglinks":drawinglinks })
+			updatetubeshells.push_back({"tubename":"**notset", "xcname0":xcname0new, "xcname1":xcname1new})
+
+		xctdatadrawingdel.push_back({ "name":xcdrawingorgname, 
+									  "prevnodepoints":xcdrawing.nodepoints.duplicate(),
+									  "nextnodepoints":{ }, 
+									  "prevonepathpairs":xcdrawing.onepathpairs.duplicate(),
+									  "newonepathpairs": [ ] })
+		xcvizstates[xcdrawingorgname] = DRAWING_TYPE.VIZ_XCD_HIDE
+	var xcv = { "xcvizstates":xcvizstates, 
+				"updatetubeshells":updatetubeshells,
+				"updatexcshells":[ ] }
+	for i in range(len(holexcorgnames)):
+		var xcdrawingnewname = holexcnewconstructs[i]["name"]
+		xcv["xcvizstates"][xcdrawingnewname] = DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE
+		xcv["updatexcshells"].push_back(xcdrawingnewname)
+	return xctdatatubedel + xctdatadrawingdel + holexcnewconstructs + xctdatatubenew + [ xcv ]
 
 
 func advanceuvFar(uvFixed, ptFixed, uvFar, ptFar, ptFarNew, bclockwise):

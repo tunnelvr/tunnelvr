@@ -1356,6 +1356,10 @@ func buttonreleased_vrgrip():
 			elif pointertarget.get_name() == "FixHoleXC" and is_instance_valid(wasactivetargettube):
 				print("FixHoleXC ", wasactivetargettube)
 				var xcdatalist = wasactivetargettube.FixtubeholeXCs(sketchsystem)
+				if xcdatalist != null:
+					clearactivetargetnode()
+					clearpointertarget()
+					sketchsystem.actsketchchange(xcdatalist)
 
 			elif pointertarget.get_name() == "Down5":
 				var xcdrawing = gripmenu.gripmenupointertargetwall
