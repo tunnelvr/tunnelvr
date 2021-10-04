@@ -170,8 +170,10 @@ func objsinglesurface(joff, fout, sname, mesh, transform, materialsystem, materi
 	if not materialdict.has(xcmaterialname):
 		 materialdict[xcmaterialname] = materialsystem.tubematerial(xcmaterialname, false)
 	var uvscale = materialdict[xcmaterialname].uv1_scale
-	fout.store_line(sname)
 	var sarrays = mesh.surface_get_arrays(0)
+	if len(sarrays) == 0:
+		return joff
+	fout.store_line(sname)
 	for p in sarrays[0]:
 		var tp = transform.xform(p)
 		fout.store_line("v %f %f %f"%[tp.x, tp.y, tp.z])
