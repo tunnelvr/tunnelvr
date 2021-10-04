@@ -538,7 +538,6 @@ remote func sendoverridingxctubesdata(xctubesrejected, playeridtoupdate):
 			updatetubeshells.push_back({"tubename":xcdata.get("tubename"), "xcname0":xct["xcname0"], "xcname1":xct["xcname1"] })
 	xcdatalist.push_back({ "xcvizstates":{ }, "updatetubeshells":updatetubeshells } )
 	rpc_id(playeridtoupdate, "actsketchchangeL", xcdatalist)
-
 	
 func xcdrawingfromdata(xcdata, fromremotecall):
 	var xcdrawing = $XCdrawings.get_node_or_null(xcdata["name"])

@@ -1264,8 +1264,7 @@ func buttonreleased_vrgrip():
 									   "prevonepathpairs":xcdrawing.onepathpairs.duplicate(),
 									   "newonepathpairs": [ ]
 									 }
-						var xcv = { "xcvizstates":{ xcname:DRAWING_TYPE.VIZ_XCD_PLANE_VISIBLE if xcdrawing.get_name().begins_with("Hole") else \
-															 DRAWING_TYPE.VIZ_XCD_HIDE }, 
+						var xcv = { "xcvizstates":{ xcname:DRAWING_TYPE.VIZ_XCD_HIDE }, 
 									"updatexcshells":[xcname] }
 						sketchsystem.actsketchchange([xcdata, xcv])
 					else:
@@ -1358,6 +1357,52 @@ func buttonreleased_vrgrip():
 				print("FixHoleXC ", wasactivetargettube)
 				var xcdatalist = wasactivetargettube.FixtubeholeXCs(sketchsystem)
 
+			elif pointertarget.get_name() == "Down5":
+				var xcdrawing = gripmenu.gripmenupointertargetwall
+				var xcdrawingorgname = xcdrawing.get_name()
+				var xcdrawingnewname = xcdrawing.get_name()+"_New"
+				print("ChangeXCname ", xcdrawing.get_name())
+				var xctdatatubedel = [ ]
+				var xctdatatubenew = [ ]
+				var updatetubeshells = [ ]
+				for xctube in xcdrawing.xctubesconn:
+					var drawinglinks = [ ]
+					for j in range(0, len(xctube.xcdrawinglink), 2):
+						drawinglinks.push_back(xctube.xcdrawinglink[j])
+						drawinglinks.push_back(xctube.xcdrawinglink[j+1])
+						drawinglinks.push_back(xctube.xcsectormaterials[j/2])
+						drawinglinks.push_back(xctube.xclinkintermediatenodes[j/2] if xctube.xclinkintermediatenodes != null else null)
+					xctdatatubedel.push_back({ "tubename":xctube.get_name(), 
+											   "xcname0":xctube.xcname0, 
+											   "xcname1":xctube.xcname1,
+											   "prevdrawinglinks":drawinglinks,
+											   "newdrawinglinks":[ ] })
+					var xcname0new = xcdrawingnewname if xctube.xcname0 == xcdrawingorgname else xctube.xcname0
+					var xcname1new = xcdrawingnewname if xctube.xcname1 == xcdrawingorgname else xctube.xcname1
+					xctdatatubenew.push_back({ "tubename":"**notset", 
+											   "xcname0":xcname0new, 
+											   "xcname1":xcname1new,
+											   "prevdrawinglinks":[ ],
+											   "newdrawinglinks":drawinglinks })
+					updatetubeshells.push_back({"tubename":"**notset", "xcname0":xcname0new, "xcname1":xcname1new})
+
+				var xcdatadel = { "name":xcdrawingorgname, 
+								  "prevnodepoints":xcdrawing.nodepoints.duplicate(),
+								  "nextnodepoints":{ }, 
+								  "prevonepathpairs":xcdrawing.onepathpairs.duplicate(),
+								  "newonepathpairs": [ ]
+								}
+				var xcdatanew = xcdrawing.exportxcrpcdata(true)
+				xcdatanew["name"] = xcdrawingnewname
+				xcdatanew["nodepoints"] = xcdatanew["nodepoints"].duplicate()
+				xcdatanew["onepathpairs"] = xcdatanew["onepathpairs"].duplicate()
+				var xcv = { "xcvizstates":{ xcdrawingorgname:DRAWING_TYPE.VIZ_XCD_HIDE, xcdrawingnewname: DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE }, 
+							"updatetubeshells":updatetubeshells,
+							"updatexcshells":[ xcdrawingnewname ] }
+				var xcdatalist = xctdatatubedel + [ xcdatadel, xcdatanew ] + xctdatatubenew + [ xcv ]
+				clearactivetargetnode()
+				clearpointertarget()
+				sketchsystem.actsketchchange(xcdatalist)
 		
 	elif pointertargettype == "GUIPanel3D":
 		guipanel3d.setguipanelhide()
@@ -1653,4 +1698,11 @@ func _input(event):
 				handright.gripbuttonheld = event.pressed
 				handright.process_handgesturefromcontrol()
 				
-	
+		if event.button_index == BUTTON_WHEEL_UP or event.button_index == BUTTON_WHEEL_DOWN:
+			if event.is_pressed():
+				handright.joypos.y = 1.0 if event.button_index == BUTTON_WHEEL_UP else -1.0
+			else:
+				yield(get_tree(), "idle_frame") 
+				yield(get_tree(), "idle_frame") 
+				yield(get_tree(), "idle_frame") 
+				handright.joypos.y = 0.0

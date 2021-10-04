@@ -99,6 +99,8 @@ func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointert
 			gmlist.push_back("NewXC")
 		if pointertargetwall.notubeconnections_so_delxcable():
 			gmlist.push_back("DelXC")
+		gmlist.push_back("Down5")
+
 
 	elif gripmenupointertargettype == "IntermediatePointView":
 		gmlist = [ ]
