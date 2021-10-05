@@ -19,6 +19,8 @@ const vec3 bordercolor = vec3(0.1, 0.1, 0.2);
 const float edgeborder = 0.5 - 0.05; 
 
 varying vec3 emissioncol;
+varying vec3 bordercol; 
+varying float edgebord; 
 
 void vertex() {
 	float distcamera = length(CAMERA_MATRIX[3].xyz - VERTEX); 
@@ -38,16 +40,17 @@ void vertex() {
 	COLOR.rgb = mix(closecol, farcol, distcamera/fardist);
 	float emissionfac = clamp(1.0 - abs(distplane)/highlightdist, 0.0, 1.0);
 	emissioncol = (distplane > 0.0 ? highlightcol : highlightcol2)*emissionfac;
-
+	float fadeoutfac = (POINT_SIZE-8.0)/16.0;
+	bordercol = mix(bordercolor, vec3(1.0, 1.0, 1.0), clamp(1.0 - fadeoutfac, 0.0, 1.0));
+	edgebord = edgeborder*clamp((fadeoutfac+1.0)/2.0, 0.7, 1.0); 
 }
 
 void fragment() {
 	ALBEDO = COLOR.rgb;
 	EMISSION = emissioncol;
-
 	float squarecentredist = max(abs(POINT_COORD.x-0.5), abs(POINT_COORD.y-0.5)); 
-	if (squarecentredist > edgeborder)
-		ALBEDO *= bordercolor;
+	if (squarecentredist > edgebord)
+		ALBEDO *= bordercol;
 		
 	// circular points
 	//float rsq = (POINT_COORD.x-0.5)*(POINT_COORD.x-0.5) + (POINT_COORD.y-0.5)*(POINT_COORD.y-0.5);
