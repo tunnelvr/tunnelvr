@@ -550,14 +550,23 @@ static func makecuboidshellmesh(nodepoints, cuboidfacs):
 	var arraymesh = ArrayMesh.new()
 	var surfaceTool = SurfaceTool.new()
 	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var nodepointsum = Vector3(0, 0, 0)
+	for pt in nodepoints.values():
+		nodepointsum += pt
+	var cuboidcentre = nodepointsum/len(nodepoints)
 	for cuboidfac in cuboidfacs:
 		var ppoly = [ ]
 		for c in cuboidfac:
 			ppoly.push_back(nodepoints[c])
 		var polynormsum = Vector3(0, 0, 0)
+		var polyptsum = Vector3(0, 0, 0)
 		for i in range(len(ppoly)):
 			polynormsum += (ppoly[i] - ppoly[i-1]).cross(ppoly[(i+1)%len(ppoly)] - ppoly[i])
+			polyptsum += ppoly[i]
+		var polycentre = polyptsum/len(ppoly)
 		var polynorm = polynormsum.normalized()
+		if polynorm.dot(polycentre - cuboidcentre) > 0.0:
+			polynorm = -polynorm
 		var polyax0 = polynormsum.cross(ppoly[1] - ppoly[0]).normalized()
 		var polyax1 = polynorm.cross(polyax0)
 		
