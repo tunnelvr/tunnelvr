@@ -233,7 +233,7 @@ func exportOBJ():
 
 			
 	fout.close()
-	print("exported to C:/Users/ViveOne/AppData/Roaming/Godot/app_userdata/tunnelvr/objexport")
+	print("exported to ", OS.get_user_data_dir(), "/objexport")
 
 	var fmtl = File.new()
 	fmtl.open(fmtlname, File.WRITE)

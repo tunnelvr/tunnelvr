@@ -62,12 +62,12 @@ func measurexcmatch(ltransformpos, lnextnodepoints):
 	return dist
 		
 func setxcdrawingvisiblehideL(hidenodes):
-	assert ($XCdrawingplane.visible != $XCdrawingplane/CollisionShape.disabled)	
+	assert ($XCdrawingplane/CollisionShape.disabled == (not $XCdrawingplane.visible))
 	if drawingtype == DRAWING_TYPE.DT_XCDRAWING and get_name().begins_with("Hole;"):
 		var xctubesector = tubesectorfromxchole(get_name(), get_node("/root/Spatial/SketchSystem"))
 		if xctubesector != null:
-			xctubesector.visible = false
-			xctubesector.get_node("CollisionShape").disabled = true
+			xctubesector.visible = (not hidenodes) or (len(nodepoints) == 0)
+			xctubesector.get_node("CollisionShape").disabled = not xctubesector.visible
 		$XCdrawingplane.visible = false
 		$XCdrawingplane/CollisionShape.disabled = true
 	else:

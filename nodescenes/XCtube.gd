@@ -547,7 +547,6 @@ func HoleName(i):
 func ConstructHoleXC(i, sketchsystem):
 	assert (xcsectormaterials[i] == "hole")
 	var xcdrawingholename = HoleName(i)
-	var xcdrawinghole = sketchsystem.get_node_or_null("XCdrawings").get_node(xcdrawingholename)
 	var xcdata = { "name":xcdrawingholename, 
 				   "drawingtype":DRAWING_TYPE.DT_XCDRAWING,
 				   "prevnodepoints":{}, "nextnodepoints":{}, 
@@ -570,6 +569,7 @@ func ConstructHoleXC(i, sketchsystem):
 	else:
 		xcdata["transformpos"] = Transform(Vector3(1,0,0), Vector3(0,0,-1), Vector3(0,1,0), avgpoint)
 
+	var xcdrawinghole = sketchsystem.get_node("XCdrawings").get_node_or_null(xcdrawingholename)
 	if xcdrawinghole != null:
 		xcdata["prevonepathpairs"] = xcdrawinghole.onepathpairs.duplicate()
 		xcdata["prevnodepoints"] = xcdrawinghole.nodepoints.duplicate()
@@ -904,7 +904,7 @@ func updatetubeshell(xcdrawings):
 			var sketchsystem = get_node("/root/Spatial/SketchSystem")
 			var xcdrawinghole = sketchsystem.get_node("XCdrawings").get_node_or_null(HoleName(i))
 			if xcdrawinghole != null:
-				if (xcdrawinghole.drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_PLANE_VISIBLE) == 0:
+				if len(xcdrawinghole.nodepoints) != 0 and (xcdrawinghole.drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_PLANE_VISIBLE) == 0:
 					xctubesector.get_node("MeshInstance").visible = false
 					xctubesector.get_node("CollisionShape").disabled = true
 		$XCtubesectors.add_child(xctubesector)

@@ -181,6 +181,7 @@ func raynormalcollisionmask():
 		return CollisionLayer.CLV_MainRayAllNoCentreline
 
 func setactivetargetwall(newactivetargetwall):
+	print("setactivetargetwall ", newactivetargetwall.get_name() if newactivetargetwall != null else "null")
 	if activetargetwall != null and activetargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		activetargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").set_surface_material(0, materialsystem.xcdrawingmaterial("normal"))
 		activetargetwall.get_node("PathLines").set_surface_material(0, materialsystem.pathlinematerial("normal"))
@@ -455,7 +456,8 @@ func setpointertarget(laserroot, raycast, pointertargetshortdistance):
 			LaserSelectLine.get_node("Scale").scale = Vector3(8, 8, -a)
 			nodetriggerpulledmaxd = max(nodetriggerpulledmaxd, abs(activetargetnodetriggerpulledz - tpnodepoint.z))
 			LaserSelectLine.visible = (skewdist < 0.1) and (abs(a) < nodetriggerpullinglimit) and \
-					(nodetriggerpulledmaxd > nodetriggerpullingmind) and (OS.get_ticks_msec()*0.001 - nodetriggerpulledtimestamp > nodetriggerpullingminduration)
+					(nodetriggerpulledmaxd > nodetriggerpullingmind) and (OS.get_ticks_msec()*0.001 - nodetriggerpulledtimestamp > nodetriggerpullingminduration) and \
+					not activetargetnodewall.get_name().begins_with("Hole;")
 			activetargetnodetriggerpulledz = a
 		else:
 			LaserSelectLine.visible = false
@@ -1046,7 +1048,7 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 	elif activetargetnode == null and pointertargettype == "XCnode":
 		if pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 			if pointertargetwall != activetargetwall:
-				setactivetargetwall(pointertargetwall)
+				setactivetargetwall(pointertargetwall if not pointertargetwall.get_name().begins_with("Hole;") else null)
 			setactivetargetnode(pointertarget)
 			activetargetnodetriggerpulling = true
 			nodetriggerpulledmaxd = 0.0
@@ -1313,7 +1315,8 @@ func buttonreleased_vrgrip():
 								{"xcvizstates":{ gripmenu.gripmenupointertargetwall.xcname0:DRAWING_TYPE.VIZ_XCD_HIDE, 
 												 gripmenu.gripmenupointertargetwall.xcname1:DRAWING_TYPE.VIZ_XCD_HIDE,
 												 xcdata["name"]:DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE }}])
-						setactivetargetwall(sketchsystem.get_node("XCdrawings").get_node(xcdata["name"]))
+						clearpointertarget()
+						#setactivetargetwall(sketchsystem.get_node("XCdrawings").get_node(xcdata["name"]))
 				elif xcsectormaterial == "holegap":
 					var xcdata = gripmenu.gripmenupointertargetwall.CopyHoleGapShape(gripmenu.gripmenuactivetargettubesectorindex, sketchsystem)
 					if xcdata != null:
@@ -1455,6 +1458,7 @@ func findconstructtubeshellholes(xctubes):
 		var tubeshellholeindexes = xctube.gettubeshellholes(sketchsystem)
 		if tubeshellholeindexes != null:
 			var drawingholeforconnupdate = tubeshellholeindexes[0]
+			var xcvizstates = { }
 			for j in range(1, len(tubeshellholeindexes)):
 				var i = tubeshellholeindexes[j]
 				var xcdatashell = xctube.ConstructHoleXC(i, sketchsystem)
@@ -1462,9 +1466,12 @@ func findconstructtubeshellholes(xctubes):
 					if xcdatashellholes == null:
 						xcdatashellholes = [ ]
 					xcdatashellholes.push_back(xcdatashell)
+					var xcholeforvisible = sketchsystem.get_node("XCdrawings").get_node_or_null(xcdatashell["name"])
+					if xcholeforvisible != null:
+						xcvizstates[xcdatashell["name"]] = xcholeforvisible.drawingvisiblecode
 			var updatetubeshells = drawingholeforconnupdate.updatetubeshellsconn()
-			if len(updatetubeshells) != 0:
-				xcdatashellholes.push_back({"xcvizstates":{ }, "updatetubeshells":updatetubeshells})
+			if xcdatashellholes != null and len(updatetubeshells) != 0:
+				xcdatashellholes.push_back({"xcvizstates":xcvizstates, "updatetubeshells":updatetubeshells})
 	return xcdatashellholes
 
 var targetwallvertplanesticky = true
