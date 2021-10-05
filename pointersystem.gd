@@ -394,7 +394,7 @@ func setpointertarget(laserroot, raycast, pointertargetshortdistance):
 				elif pointertargettype == "XCdrawing":
 					laserselectlinelogicallyvisible = false
 				elif Tglobal.handflickmotiongestureposition == 1:
-					laserselectlinelogicallyvisible = (pointertargettype == "none" or pointertargettype == "XCtubesector")
+					laserselectlinelogicallyvisible = (pointertargettype == "none" or pointertargettype == "XCtubesector" or pointertargettype == "XCflatshell")
 		elif pointertargettype == "IntermediatePointView":
 			laserselectlinelogicallyvisible = true
 		elif activetargetnodewall != null and activetargetnodewall.drawingtype == DRAWING_TYPE.DT_ROPEHANG:
@@ -815,6 +815,13 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 				IntermediatePointView.get_node("IntermediatePointPlane/CollisionShape").disabled = false
 				IntermediatePointView.get_node("IntermediatePointPlaneStartingMarker").transform.origin = pointertargettube.intermedpointpos(p0, p1, intermediatepointpicked)
 				intermediatepointplanetubename = pointertargettube.get_name()
+
+				var olddiscrad = IntermediatePointView.get_node("IntermediatePointPlane/CollisionShape").shape.radius
+				var mindiscrad = ceil(Vector2(intermediatepointpicked.x, intermediatepointpicked.y).length() + 0.05)
+				if mindiscrad > olddiscrad:
+					IntermediatePointView.get_node("IntermediatePointPlane/CollisionShape").shape.radius = mindiscrad
+					IntermediatePointView.get_node("IntermediatePointPlane/CollisionShape/MeshInstance").mesh.top_radius = mindiscrad
+					IntermediatePointView.get_node("IntermediatePointPlane/CollisionShape/MeshInstance").mesh.bottom_radius = mindiscrad
 			else:
 				print("intermediate node ", pointertarget.get_name(), " on link with only ", len(pointertargettube.xclinkintermediatenodes[intermediatepointplanesectorindex]), " elements")
 		else:
@@ -1607,13 +1614,13 @@ func _physics_process(delta):
 	var joyscrolldir = 0
 	if abs(handright.joypos.y) < 0.4:
 		joyposyscrollcountdown = 0
-	if abs(handright.joypos.y) > 0.9:
+	if abs(handright.joypos.y) > (0.7 if handright.vrpadbuttonheld else 0.9):
 		joyposyscrollcountdown -= delta
 		if joyposyscrollcountdown <= 0:
 			joyscrolldir = -1 if handright.joypos.y < 0 else 1
 			joyposyscrollcountdown = 0.3333
 
-	if handright.pointervalid:
+	if handright.pointervalid:  
 		var firstlasertarget = LaserOrient.get_node("RayCast").get_collider()
 		if firstlasertarget != null and firstlasertarget.is_queued_for_deletion():
 			firstlasertarget = null
@@ -1631,10 +1638,8 @@ func _physics_process(delta):
 			pointerplanviewtarget = null
 			if joyscrolldir == -1 and handflickmotiongestureposition_shortpos_length >= 0.3:
 				handflickmotiongestureposition_shortpos_length -= (0.25 if handflickmotiongestureposition_shortpos_length < 1.1 else (1.0 if handflickmotiongestureposition_shortpos_length < 8.1 else 2.0))
-				print(handflickmotiongestureposition_shortpos_length)
 			if joyscrolldir == 1 and handflickmotiongestureposition_shortpos_length <= 28.1:
 				handflickmotiongestureposition_shortpos_length += (0.25 if handflickmotiongestureposition_shortpos_length < 0.9 else (1.0 if handflickmotiongestureposition_shortpos_length < 7.9 else 2.0))
-				print(handflickmotiongestureposition_shortpos_length)
 			setpointertarget(activelaserroot, activelaserroot.get_node("RayCast"), handflickmotiongestureposition_shortpos_length)
 		elif firstlasertarget != null and firstlasertarget.get_name() == "PlanView" and planviewsystem.checkplanviewinfront(LaserOrient) and planviewsystem.planviewactive:
 			pointerplanviewtarget = planviewsystem
@@ -1662,6 +1667,13 @@ func _physics_process(delta):
 			pointerplanviewtarget = null
 			setpointertarget(activelaserroot, activelaserroot.get_node("RayCast"), -1.0)
 
+	if joyscrolldir != 0 and pointertargettype == "IntermediatePointView":
+		var IntermediatePointView = get_node("/root/Spatial/BodyObjects/IntermediatePointView")
+		var olddiscrad = IntermediatePointView.get_node("IntermediatePointPlane/CollisionShape").shape.radius
+		var newdiscrad = clamp(olddiscrad + joyscrolldir*1.0, 1.0, 5.0)
+		IntermediatePointView.get_node("IntermediatePointPlane/CollisionShape").shape.radius = newdiscrad
+		IntermediatePointView.get_node("IntermediatePointPlane/CollisionShape/MeshInstance").mesh.top_radius = newdiscrad
+		IntermediatePointView.get_node("IntermediatePointPlane/CollisionShape/MeshInstance").mesh.bottom_radius = newdiscrad
 	if pointerplanviewtarget == null or not planviewsystem.planviewactive:
 		planviewsystem.get_node("RealPlanCamera/LaserScope").visible = false
 		planviewsystem.planviewguipanelreleasemouse()
