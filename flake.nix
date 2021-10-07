@@ -103,7 +103,7 @@
               ls -lah $out/bin
               wrapProgram "$out/bin/tunnelvr_head" --prefix PATH : ${
                 with prev;
-                lib.makeBinPath [ python3Minimal survex caddy ]
+                lib.makeBinPath [ (pkgs.python39.withPackages (ps: [ pkgs.python39Packages.pyproj ])) survex caddy python39Packages.pyproj ]
               }
             '';
           };
@@ -118,7 +118,7 @@
               ls -lah $out/bin
               wrapProgram "$out/bin/tunnelvr_headless" --prefix PATH : ${
                 with prev;
-                lib.makeBinPath [ python3Minimal survex caddy ]
+                lib.makeBinPath [ (pkgs.python39.withPackages (ps: [ pkgs.python39Packages.pyproj ])) survex caddy ]
               }
             '';
           };
