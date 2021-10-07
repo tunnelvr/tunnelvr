@@ -27,7 +27,7 @@ in
         Environment = [
           "HOME=${cfg.userDir}"
         ];
-        ExecStart = "${pkgs.bash}/bin/bash ${pkgs.tunnelvr_headless}/bin/tunnelvr_headless";
+        ExecStart = "${pkgs.bash}/bin/bash ${pkgs.tunnelvr_headless_withPrograms}/bin/tunnelvr_headless";
         PrivateTmp = true;
         Restart = "always";
         StateDirectory = "tunnelvr";
