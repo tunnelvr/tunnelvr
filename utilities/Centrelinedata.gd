@@ -44,7 +44,7 @@ static func sketchdatadictlistfromcentreline(centrelinefile):
 		if stationpointname == "":
 			stationpointname = "%ds" % i
 		
-		if Tglobal.splaystationnoderegex == null or not Tglobal.splaystationnoderegex.search(stationpointname):
+		if Tglobal.splaystationnoderegex != null and Tglobal.splaystationnoderegex.search(stationpointname):
 			nsplaystations += 1
 			
 		stationpointsnames.push_back(stationpointname)
