@@ -6,7 +6,6 @@ class_name Centrelinedata
 # [remember to copy the 3d file from the source directory]
 # ssh godot@proxmox.dynamicdevices.co.uk -p 23
 
-const makecentrelrudsplays = false
 const makecentrelinehextubes = false
 
 static func sketchdatadictlistfromcentreline(centrelinefile):
@@ -35,6 +34,7 @@ static func sketchdatadictlistfromcentreline(centrelinefile):
 	var stationpointsnames = [ ]
 	var stationpoints = [ ]
 	var stationnodepoints = { }
+	var nsplaystations = 0
 	for i in range(len(stationpointsnamesorg)):
 		var stationpointname = stationpointsnamesorg[i].replace(".", ",")   # dots not allowed in node name, but commas are
 		
@@ -44,6 +44,9 @@ static func sketchdatadictlistfromcentreline(centrelinefile):
 		if stationpointname == "":
 			stationpointname = "%ds" % i
 		
+		if Tglobal.splaystationnoderegex == null or not Tglobal.splaystationnoderegex.search(stationpointname):
+			nsplaystations += 1
+			
 		stationpointsnames.push_back(stationpointname)
 		#nodepoints[k] = Vector3(stationpointscoords[i*3], 8.1+stationpointscoords[i*3+2], -stationpointscoords[i*3+1])
 		var stationpoint = Vector3(stationpointscoords[i*3] - bbcenvec.x, 
@@ -51,6 +54,9 @@ static func sketchdatadictlistfromcentreline(centrelinefile):
 								   -(stationpointscoords[i*3+1] - bbcenvec.z))
 		stationpoints.push_back(stationpoint)
 		stationnodepoints[stationpointname] = stationpoint
+
+	var makecentrelrudsplays = (nsplaystations < len(stationpointsnamesorg) - nsplaystations)
+	print("makecentrelrudsplays: ", makecentrelrudsplays, " for nsplaystations:", nsplaystations, " out of ", len(stationpointsnamesorg), " stations")
 
 	var centrelinelegs = [ ]
 	for i in range(len(legsstyles)):
