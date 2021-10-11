@@ -1200,6 +1200,12 @@ func buttonreleased_vrgrip():
 					xcdrawing.expandxcdrawingfitprojectedfromxcdrawingnodes(xcdrawing0)
 					xcdrawing.expandxcdrawingfitprojectedfromxcdrawingnodes(xcdrawing1)
 
+		elif pointertarget.get_name() == "toPaper":
+			if gripmenu.gripmenupointertargettype == "XCdrawing" and gripmenu.gripmenupointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
+				materialsystem.setfloormaptexture(gripmenu.gripmenupointertargetwall.get_name())
+				if Tglobal.connectiontoserveractive:
+					materialsystem.rpc("setfloormaptexture", gripmenu.gripmenupointertargetwall.get_name())
+			
 		elif pointertarget.get_name() == "Undo":
 			if len(sketchsystem.actsketchchangeundostack) != 0:
 				var xcdatalist = sketchsystem.actsketchchangeundostack[-1].duplicate()

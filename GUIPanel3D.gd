@@ -339,7 +339,7 @@ func _on_switchtest(index):
 		var materialsystem = get_node("/root/Spatial/MaterialSystem")
 		materialsystem.togglebackfacecull()
 		if Tglobal.connectiontoserveractive:
-			rpc("togglebackfacecull")
+			materialsystem.rpc("togglebackfacecull")
 		SwitchTest.selected = 0
 		setguipanelhide()
 				

@@ -13,7 +13,7 @@ var tubenamematerials = { }
 onready var materialsystem = get_node("/root/Spatial/MaterialSystem")
 
 var materialmatrix = [ ["simpledirt"], ["partialrock"], ["rockwater"], ["pebbles"], ["mediumrock"], 
-					   ["bluewater", "bluewaterfore", "bluewaterback"], ["hole"], ["calcite"], ["graphpaper"] ] # + , "holegap"]
+					   ["bluewater", "bluewaterfore", "bluewaterback"], ["hole"], ["calcite"], ["floormap"] ] # + , "holegap"]
 
 func _ready():
 	var tubematerials = materialsystem.get_node("tubematerials")
@@ -89,7 +89,7 @@ func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointert
 	var gmlist = [ ]
 	tubesectormaterialname = ""
 	if gripmenupointertargettype == "XCdrawing" and gripmenupointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
-		gmlist = ["NewXC"]
+		gmlist = ["NewXC", "toPaper"]
 			
 	elif gripmenupointertargettype == "XCdrawing" and gripmenupointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		gmlist = ["HideXC" if len(pointertargetwall.nodepoints) != 0  else "" ]

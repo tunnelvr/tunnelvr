@@ -648,4 +648,93 @@ static func addarrowmesh(surfaceTool, p0, p1, aperp, intermediatepts):
 	surfaceTool.add_vertex(pa + arrowfac*aperp)
 	surfaceTool.add_vertex(pa - arrowfac*aperp)
 
+static func triangulatetuberung(surfaceTool, tuberail0rung0, tuberail1rung0, tuberail0rung1, tuberail1rung1):
+	surfaceTool.add_uv(tuberail0rung0[1])
+	#surfaceTool.add_uv2(tuberail0rung0[1])
+	surfaceTool.add_uv2(Vector2(tuberail0rung0[0].x, tuberail0rung0[0].z))
+	surfaceTool.add_vertex(tuberail0rung0[0])
 
+	surfaceTool.add_uv(tuberail1rung0[1])
+	#surfaceTool.add_uv2(tuberail1rung0[1])
+	surfaceTool.add_uv2(Vector2(tuberail1rung0[0].x, tuberail1rung0[0].z))
+	surfaceTool.add_vertex(tuberail1rung0[0])
+
+	if tuberail1rung0[0] != tuberail1rung1[0]:
+		surfaceTool.add_uv(tuberail1rung1[1])
+		#surfaceTool.add_uv2(tuberail1rung1[1])
+		surfaceTool.add_uv2(Vector2(tuberail1rung1[0].x, tuberail1rung1[0].z))
+		surfaceTool.add_vertex(tuberail1rung1[0])
+		if tuberail0rung0[0] == tuberail0rung1[0]:
+			return
+
+		surfaceTool.add_uv(tuberail0rung0[1])
+		#surfaceTool.add_uv2(tuberail0rung0[1])
+		surfaceTool.add_uv2(Vector2(tuberail0rung0[0].x, tuberail0rung0[0].z))
+		surfaceTool.add_vertex(tuberail0rung0[0])
+
+		surfaceTool.add_uv(tuberail1rung1[1])
+		#surfaceTool.add_uv2(tuberail1rung1[1])
+		surfaceTool.add_uv2(Vector2(tuberail1rung1[0].x, tuberail1rung1[0].z))
+		surfaceTool.add_vertex(tuberail1rung1[0])
+
+	surfaceTool.add_uv(tuberail0rung1[1])
+	#surfaceTool.add_uv2(tuberail0rung1[1])
+	surfaceTool.add_uv2(Vector2(tuberail0rung1[0].x, tuberail0rung1[0].z))
+	surfaceTool.add_vertex(tuberail0rung1[0])
+
+
+static func triangulatetuberails(surfaceTool, tuberail0, tuberail1):
+	for i in range(len(tuberail0)-1):
+		triangulatetuberung(surfaceTool, tuberail0[i], tuberail1[i], tuberail0[i+1], tuberail1[i+1])
+
+static func advanceuvFar(uvFixed, ptFixed, uvFar, ptFar, ptFarNew, bclockwise):
+	var uvvec = uvFar - uvFixed
+	var uvperpvec = Vector2(uvvec.y, -uvvec.x) if bclockwise else Vector2(-uvvec.y, uvvec.x)
+	var vecFar = ptFar - ptFixed
+	var vecFarNew = ptFarNew - ptFixed
+	var vecFarFarNewprod = vecFar.length()*vecFarNew.length()
+	if vecFarFarNewprod == 0:
+		return uvFar
+	var vecFarFarNewRatio = vecFarNew.length()/vecFar.length()
+	var vecFarNewCos = vecFar.dot(vecFarNew)/vecFarFarNewprod
+	var vecFarNewSin = vecFar.cross(vecFarNew).length()/vecFarFarNewprod
+	var uvvecnew = uvvec*vecFarNewCos + uvperpvec*vecFarNewSin
+	var uvvecnewR = uvvecnew*vecFarFarNewRatio
+	return uvFixed + uvvecnewR
+
+static func intermediaterailsequence(zi, zi1, railsequencerung0, railsequencerung1):
+	var ij = -1
+	var i1j = -1
+	var zij0 = Vector3(0,0,0)
+	var zi1j0 = Vector3(0,0,0)
+	var zij1 = Vector3(0,0,1) if len(zi) == 0 else zi[0]
+	var zi1j1 = Vector3(0,0,1) if len(zi1) == 0 else zi1[0]
+
+	while true:
+		assert(ij < len(zi) or i1j < len(zi1))
+		var adv = 0
+		if ij == len(zi):
+			adv = 1
+		elif i1j == len(zi1):
+			adv = -1
+		elif zi1j1.z < zij1.z:
+			if zi1j1.z - zij0.z < zij1.z - zi1j1.z:
+				adv = 1
+		else:
+			if zij1.z - zi1j0.z < zi1j1.z - zij1.z:
+				adv = -1
+
+		if adv <= 0:
+			ij += 1
+			zij0 = zij1
+			if ij != len(zi):
+				zij1 = Vector3(0,0,1) if ij+1 == len(zi) else zi[ij+1] 
+		if adv >= 0:
+			i1j += 1
+			zi1j0 = zi1j1
+			if i1j != len(zi1):
+				zi1j1 = Vector3(0,0,1) if i1j+1 == len(zi1) else zi1[i1j+1] 
+		if ij == len(zi) and i1j == len(zi1):
+			break
+		railsequencerung0.push_back(zij0)
+		railsequencerung1.push_back(zi1j0)

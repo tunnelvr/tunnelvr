@@ -679,25 +679,11 @@ func FixtubeholeXCs(sketchsystem):
 	return xctdatatubedel + xctdatadrawingdel + holexcnewconstructs + xctdatatubenew + [ xcv ]
 
 
-func advanceuvFar(uvFixed, ptFixed, uvFar, ptFar, ptFarNew, bclockwise):
-	var uvvec = uvFar - uvFixed
-	var uvperpvec = Vector2(uvvec.y, -uvvec.x) if bclockwise else Vector2(-uvvec.y, uvvec.x)
-	var vecFar = ptFar - ptFixed
-	var vecFarNew = ptFarNew - ptFixed
-	var vecFarFarNewprod = vecFar.length()*vecFarNew.length()
-	if vecFarFarNewprod == 0:
-		return uvFar
-	var vecFarFarNewRatio = vecFarNew.length()/vecFar.length()
-	var vecFarNewCos = vecFar.dot(vecFarNew)/vecFarFarNewprod
-	var vecFarNewSin = vecFar.cross(vecFarNew).length()/vecFarFarNewprod
-	var uvvecnew = uvvec*vecFarNewCos + uvperpvec*vecFarNewSin
-	var uvvecnewR = uvvecnew*vecFarFarNewRatio
-	return uvFixed + uvvecnewR
 
-func get_pt(xcdrawing, poly, ila, i):
+static func get_pt(xcdrawing, poly, ila, i):
 	return xcdrawing.transform * xcdrawing.nodepoints[poly[(ila+i)%len(poly)]]
 
-func initialtuberails(xcdrawing0, poly0, ila0, ila0N, xcdrawing1, poly1, ila1, ila1N):
+static func initialtuberails(xcdrawing0, poly0, ila0, ila0N, xcdrawing1, poly1, ila1, ila1N):
 	var acc = -ila0N/2.0  if ila0N>=ila1N  else  ila1N/2
 	var i0 = 0
 	var i1 = 0
@@ -715,88 +701,20 @@ func initialtuberails(xcdrawing0, poly0, ila0, ila0N, xcdrawing1, poly1, ila1, i
 			acc += ila1N
 			i0 += 1
 			var pti0next = get_pt(xcdrawing0, poly0, ila0, i0)
-			uvi0 = advanceuvFar(uvi1, pti1, uvi0, pti0, pti0next, true)
+			uvi0 = Polynets.advanceuvFar(uvi1, pti1, uvi0, pti0, pti0next, true)
 			pti0 = pti0next
 		if i1 < ila1N and (acc >= 0 or i0 == ila0N):
 			acc -= ila0N
 			i1 += 1
 			var pti1next = get_pt(xcdrawing1, poly1, ila1, i1)
-			uvi1 = advanceuvFar(uvi0, pti0, uvi1, pti1, pti1next, false)
+			uvi1 = Polynets.advanceuvFar(uvi0, pti0, uvi1, pti1, pti1next, false)
 			pti1 = pti1next
 		tuberail0.push_back([pti0, uvi0, i0*1.0/ila0N if ila0N != 0 else 1.0])
 		tuberail1.push_back([pti1, uvi1, i1*1.0/ila1N if ila1N != 0 else 1.0])
 	return [tuberail0, tuberail1]
 		
 
-func triangulatetuberung(surfaceTool, tuberail0rung0, tuberail1rung0, tuberail0rung1, tuberail1rung1):
-	surfaceTool.add_uv(tuberail0rung0[1])
-	surfaceTool.add_uv2(tuberail0rung0[1])
-	surfaceTool.add_vertex(tuberail0rung0[0])
 
-	surfaceTool.add_uv(tuberail1rung0[1])
-	surfaceTool.add_uv2(tuberail1rung0[1])
-	surfaceTool.add_vertex(tuberail1rung0[0])
-
-	if tuberail1rung0[0] != tuberail1rung1[0]:
-		surfaceTool.add_uv(tuberail1rung1[1])
-		surfaceTool.add_uv2(tuberail1rung1[1])
-		surfaceTool.add_vertex(tuberail1rung1[0])
-		if tuberail0rung0[0] == tuberail0rung1[0]:
-			return
-
-		surfaceTool.add_uv(tuberail0rung0[1])
-		surfaceTool.add_uv2(tuberail0rung0[1])
-		surfaceTool.add_vertex(tuberail0rung0[0])
-
-		surfaceTool.add_uv(tuberail1rung1[1])
-		surfaceTool.add_uv2(tuberail1rung1[1])
-		surfaceTool.add_vertex(tuberail1rung1[0])
-
-	surfaceTool.add_uv(tuberail0rung1[1])
-	surfaceTool.add_uv2(tuberail0rung1[1])
-	surfaceTool.add_vertex(tuberail0rung1[0])
-
-
-func triangulatetuberails(surfaceTool, tuberail0, tuberail1):
-	for i in range(len(tuberail0)-1):
-		triangulatetuberung(surfaceTool, tuberail0[i], tuberail1[i], tuberail0[i+1], tuberail1[i+1])
-
-func intermediaterailsequence(zi, zi1, railsequencerung0, railsequencerung1):
-	var ij = -1
-	var i1j = -1
-	var zij0 = Vector3(0,0,0)
-	var zi1j0 = Vector3(0,0,0)
-	var zij1 = Vector3(0,0,1) if len(zi) == 0 else zi[0]
-	var zi1j1 = Vector3(0,0,1) if len(zi1) == 0 else zi1[0]
-
-	while true:
-		assert(ij < len(zi) or i1j < len(zi1))
-		var adv = 0
-		if ij == len(zi):
-			adv = 1
-		elif i1j == len(zi1):
-			adv = -1
-		elif zi1j1.z < zij1.z:
-			if zi1j1.z - zij0.z < zij1.z - zi1j1.z:
-				adv = 1
-		else:
-			if zij1.z - zi1j0.z < zi1j1.z - zij1.z:
-				adv = -1
-
-		if adv <= 0:
-			ij += 1
-			zij0 = zij1
-			if ij != len(zi):
-				zij1 = Vector3(0,0,1) if ij+1 == len(zi) else zi[ij+1] 
-		if adv >= 0:
-			i1j += 1
-			zi1j0 = zi1j1
-			if i1j != len(zi1):
-				zi1j1 = Vector3(0,0,1) if i1j+1 == len(zi1) else zi1[i1j+1] 
-		if ij == len(zi) and i1j == len(zi1):
-			break
-		railsequencerung0.push_back(zij0)
-		railsequencerung1.push_back(zi1j0)
 	
 func intermedpointpos(p0, p1, dp):
 	var sp = lerp(p0, p1, dp.z)
@@ -864,6 +782,7 @@ func updatetubeshell(xcdrawings):
 		var ila1 = ilaM[li]["ila1"]
 		var ila1N = ilaM[li]["ila1N"]
 			
+
 		var tuberails = initialtuberails(xcdrawing0, poly0, ila0, ila0N, xcdrawing1, poly1, ila1, ila1N)
 		var tuberail0 = tuberails[0]
 		var tuberail1 = tuberails[1]
@@ -875,7 +794,7 @@ func updatetubeshell(xcdrawings):
 			var xclinkintermediatenodesi1 = xclinkintermediatenodes[i1]
 			var railsequencerung0 = [ ]
 			var railsequencerung1 = [ ]
-			intermediaterailsequence(xclinkintermediatenodesi, xclinkintermediatenodesi1, railsequencerung0, railsequencerung1)
+			Polynets.intermediaterailsequence(xclinkintermediatenodesi, xclinkintermediatenodesi1, railsequencerung0, railsequencerung1)
 			assert(len(railsequencerung0) == len(railsequencerung1))
 			var tuberailk0 = tuberail0
 			for k in range(len(railsequencerung0)+1):
@@ -884,13 +803,15 @@ func updatetubeshell(xcdrawings):
 					tuberailk1 = slicerungsatintermediatetuberail(tuberail0, tuberail1, railsequencerung0[k], railsequencerung1[k])
 				else:
 					tuberailk1 = tuberail1
-				triangulatetuberails(surfaceTool, tuberailk0, tuberailk1)
+				Polynets.triangulatetuberails(surfaceTool, tuberailk0, tuberailk1)
 				tuberailk0 = tuberailk1
 		else:
-			triangulatetuberails(surfaceTool, tuberail0, tuberail1)
+			Polynets.triangulatetuberails(surfaceTool, tuberail0, tuberail1)
 		surfaceTool.generate_normals()
 		surfaceTool.generate_tangents()
 		var tubesectormesh = surfaceTool.commit()
+
+		
 		var xctubesector = preload("res://nodescenes/XCtubeshell.tscn").instance()
 		xctubesector.set_name("XCtubesector_"+String(i))
 		xctubesector.get_node("MeshInstance").mesh = tubesectormesh
