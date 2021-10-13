@@ -228,12 +228,14 @@ remote func actsketchchangeL(xcdatalist):
 			caveworldchunking_networkIDsource = xcdatalist[0]["networkIDsource"]
 			xcdatalistReceivedDuringChunking = [ ]
 			PlayerDirections.flywalkreversed = true
+			get_node("/root/Spatial/BodyObjects/LaserOrient/NotificationCylinder").visible = true
 		elif xcdatalist[0]["networkIDsource"] != caveworldchunking_networkIDsource:
 			return caveworldreceivechunkingfailed("mismatch in world chunk id source")
 		elif xcdatalist[0]["caveworldchunk"] != caveworldchunkI + 1:
 			return caveworldreceivechunkingfailed("mismatch in world chunk sequence")
 		caveworldchunkI = xcdatalist[0]["caveworldchunk"]
 		print("Loading caveworldchunk ", caveworldchunkI, " of ",  xcdatalist[0]["caveworldchunkLast"], " size ", len(xcdatalist))
+		get_node("/root/Spatial/BodyObjects/LaserOrient/NotificationCylinder").scale.y = (xcdatalist[0]["caveworldchunkLast"] - caveworldchunkI) + 1
 
 	elif caveworldchunkI != -1:
 		if xcdatalist[0]["networkIDsource"] == caveworldchunking_networkIDsource:
@@ -484,6 +486,7 @@ remote func actsketchchangeL(xcdatalist):
 			var flywalkreversed = get_node("/root/Spatial/GuiSystem/GUIPanel3D/Viewport/GUI/Panel/FlyWalkReversed").pressed
 			var PlayerDirections = get_node("/root/Spatial/BodyObjects/PlayerDirections")
 			PlayerDirections.flywalkreversed = flywalkreversed
+			get_node("/root/Spatial/BodyObjects/LaserOrient/NotificationCylinder").visible = false
 			if PlayerDirections.forceontogroundtimedown > 0:
 				PlayerDirections.forceontogroundtimedown = 0.25
 				
