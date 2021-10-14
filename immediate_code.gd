@@ -13,9 +13,14 @@ func distAABB(aabb : AABB, p):
 	var vz = max(aabb.position.z - p.z, p.z - aabb.end.z)
 	return Vector3(max(0, vx), max(0, vy), max(0, vz))
 
-func _run():
+func Drun():
 	var output = [ ]
 	var arguments = PoolStringArray(["version"])	
 	var s = OS.execute("caddy", arguments, true, output)
 	print(s)
 	print(output)
+
+func _run():
+	var q = Quat(10,20,30,40)
+	print(q.z)
+		

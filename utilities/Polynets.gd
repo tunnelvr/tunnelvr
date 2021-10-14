@@ -472,6 +472,36 @@ static func cuboidfacseq(nodename, ropeseqs, ropeseqqs):
 			nodename = ropeseq[0]
 	return cseq
 
+static func cuboidfacrailsseq(nodename0, ropeseqs, ropeseqqs):
+	assert (len(ropeseqqs) == 4)
+	var ropeseq0 = ropeseqs[ropeseqqs[0]]
+	var dropeseq0 = (ropeseq0[0] == nodename0)
+	var nodename1 = ropeseq0[-1] if dropeseq0 else ropeseq0[0]
+	var ropeseq1 = ropeseqs[ropeseqqs[1]]
+	var dropeseq1 = (ropeseq1[0] == nodename1)
+	var nodename2 = ropeseq1[-1] if dropeseq1 else ropeseq1[0]
+	var ropeseq2 = ropeseqs[ropeseqqs[2]]
+	var dropeseq2 = (ropeseq2[0] == nodename2)
+	var nodename3 = ropeseq2[-1] if dropeseq2 else ropeseq2[0]
+	var ropeseq3 = ropeseqs[ropeseqqs[3]]
+	var dropeseq3 = (ropeseq3[0] == nodename3)
+	var nodename4 = ropeseq3[-1] if dropeseq3 else ropeseq3[0]
+	assert (nodename4 == nodename0)
+	if max(len(ropeseq0), len(ropeseq2)) > max(len(ropeseq1), len(ropeseq3)):
+		var quadrail0 = ropeseq0.duplicate()  if dropeseq0  else ropeseq0.slice(len(ropeseq0)-1, 0, -1)
+		var quadrail1 = ropeseq2.duplicate()  if not dropeseq2  else ropeseq2.slice(len(ropeseq2)-1, 0, -1)
+		var railseqrung0 = ropeseq3.slice(1, len(ropeseq3)-2)  if dropeseq3  else ropeseq3.slice(len(ropeseq3)-2, 1, -1)
+		var railseqrung1 = ropeseq1.slice(1, len(ropeseq1)-2)  if not dropeseq1  else ropeseq1.slice(len(ropeseq1)-2, 1, -1)
+		assert (len(quadrail0) + len(quadrail1) + len(railseqrung0) + len(railseqrung1) == len(ropeseq0) + len(ropeseq1) + len(ropeseq2) + len(ropeseq3) - 4)
+		return [quadrail0, quadrail1, railseqrung0, railseqrung1]
+	var quadrail0 = ropeseq1.duplicate()  if dropeseq1  else ropeseq1.slice(len(ropeseq1)-1, 0, -1)
+	var quadrail1 = ropeseq3.duplicate()  if not dropeseq3  else ropeseq3.slice(len(ropeseq3)-1, 0, -1)
+	var railseqrung0 = ropeseq0.slice(1, len(ropeseq0)-2)  if dropeseq0  else ropeseq0.slice(len(ropeseq0)-2, 1, -1)
+	var railseqrung1 = ropeseq2.slice(1, len(ropeseq2)-2)  if not dropeseq2  else ropeseq2.slice(len(ropeseq2)-2, 1, -1)
+	assert (len(quadrail0) + len(quadrail1) + len(railseqrung0) + len(railseqrung1) == len(ropeseq0) + len(ropeseq1) + len(ropeseq2) + len(ropeseq3) - 4)
+	return [quadrail0, quadrail1, railseqrung0, railseqrung1]
+	
+
 static func cuboidfromropenodesequences(nodepoints, ropeseqs): # cube shape detection
 	if len(ropeseqs) != 12:
 		return null
@@ -533,10 +563,15 @@ static func cuboidfromropenodesequences(nodepoints, ropeseqs): # cube shape dete
 		assert (k == 0 or secondseqq[k][-1] == secondseqq[k-1][-1])
 
 	var cuboidfacs = [ ]
+	var cuboidrailfacs = [ ]
 	for k in range(3):
 		cuboidfacs.push_back(cuboidfacseq(topnode, ropeseqs, [secondseqq[k][0], secondseqq[k][4], secondseqq[(k+1)%3][2], secondseqq[(k+1)%3][0]]))
 		cuboidfacs.push_back(cuboidfacseq(secondseqq[k][1], ropeseqs, [secondseqq[k][2], secondseqq[(k+2)%3][6], secondseqq[k][6], secondseqq[k][4]]))
-	return cuboidfacs
+
+		cuboidrailfacs.push_back(cuboidfacrailsseq(topnode, ropeseqs, [secondseqq[k][0], secondseqq[k][4], secondseqq[(k+1)%3][2], secondseqq[(k+1)%3][0]]))
+		cuboidrailfacs.push_back(cuboidfacrailsseq(secondseqq[k][1], ropeseqs, [secondseqq[k][2], secondseqq[(k+2)%3][6], secondseqq[k][6], secondseqq[k][4]]))
+
+	return [cuboidfacs, cuboidrailfacs]
 	
 static func triangledistortionmeasure(p0, p1, p2, f0, f1, f2):
 	var parea = 0.5*(p1 - p0).cross(p2 - p0).length()
@@ -545,6 +580,9 @@ static func triangledistortionmeasure(p0, p1, p2, f0, f1, f2):
 	var u = clamp((areachange - 0.5), 0.001, 0.999)
 	#print(u, " ", parea, " ", farea)
 	return Vector2(u, 0.001)
+
+
+
 
 static func makecuboidshellmesh(nodepoints, cuboidfacs):
 	var arraymesh = ArrayMesh.new()
@@ -580,6 +618,137 @@ static func makecuboidshellmesh(nodepoints, cuboidfacs):
 			surfaceTool.add_uv(pv[u])
 			surfaceTool.add_uv2(pv[u])
 			surfaceTool.add_vertex(ppoly[u])
+			
+	surfaceTool.generate_normals()
+	surfaceTool.commit(arraymesh)
+	return arraymesh
+
+static func initialcuboidrails(nodepoints, quadrail0, quadrail1):
+	var ila0N = len(quadrail0) - 1
+	var ila1N = len(quadrail1) - 1
+	var acc = -ila0N/2.0  if ila0N>=ila1N  else  ila1N/2
+	var i0 = 0
+	var i1 = 0
+
+	var pti0 = nodepoints[quadrail0[0]]
+	var pti1 = nodepoints[quadrail1[0]]
+	var uvi0 = Vector2(0, 0)
+	var uvi1 = Vector2(pti0.distance_to(pti1),0)
+
+	var tuberail0 = [ [ pti0, uvi0, 0.0 ] ]
+	var tuberail1 = [ [ pti1, uvi1, 0.0 ] ]
+	while i0 < ila0N or i1 < ila1N:
+		assert (i0 <= ila0N and i1 <= ila1N)
+		if i0 < ila0N and (acc - ila0N < 0 or i1 == ila1N):
+			acc += ila1N
+			i0 += 1
+			var pti0next = nodepoints[quadrail0[i0]]
+			uvi0 = advanceuvFar(uvi1, pti1, uvi0, pti0, pti0next, true)
+			pti0 = pti0next
+		if i1 < ila1N and (acc >= 0 or i0 == ila0N):
+			acc -= ila0N
+			i1 += 1
+			var pti1next = nodepoints[quadrail1[i1]]
+			uvi1 = advanceuvFar(uvi0, pti0, uvi1, pti1, pti1next, false)
+			pti1 = pti1next
+		tuberail0.push_back([pti0, uvi0, i0*1.0/ila0N if ila0N != 0 else 1.0])
+		tuberail1.push_back([pti1, uvi1, i1*1.0/ila1N if ila1N != 0 else 1.0])
+	return [tuberail0, tuberail1]
+
+
+static func cubeintermedrailbasis(i, tuberail0, tuberail1):
+	assert (len(tuberail0) == len(tuberail1))
+	var pt0 = tuberail0[i][0]
+	var pt1 = tuberail1[i][0]
+	var im1 = max(i-1, 0)
+	var ip1 = min(i+1, len(tuberail0)-1)
+	var hpt = (pt0 + pt1)/2
+	var hptP1 = (tuberail0[ip1][0] + tuberail1[ip1][0])/2
+	var hptM1 = (tuberail0[im1][0] + tuberail1[im1][0])/2
+	var avec = pt1 - pt0
+	var svec = hptP1 - hptM1
+	return Basis(svec.normalized(), avec.cross(svec).normalized(), avec/avec.length_squared())
+	
+static func sidecubeintermedrail(nodepoints, tuberail0, tuberail1, quadrail, bfore):
+	var i = 0 if bfore else len(tuberail0)-1
+	var qib = cubeintermedrailbasis(i, tuberail0, tuberail1)
+	var pt0 = tuberail0[i][0]
+	var zi = [ ]
+	for qr in quadrail:
+		var qpt = nodepoints[qr]
+		var vpt = qpt - pt0
+		var z = clamp(qib.z.dot(vpt), 0.0 if len(zi) == 0 else zi[-1].z, 1.0)
+		zi.push_back(Vector3(qib.x.dot(vpt), qib.y.dot(vpt), z))
+	return zi
+	
+	
+static func slicerungsatintermediatecuberail(tuberail0, tuberail1, rung0k, rung1k):
+	assert(len(tuberail0) == len(tuberail1))
+	var tuberailk = [ ]
+	for i in range(len(tuberail0)):
+		var dpi
+		var x
+		if i != 0 and i != len(tuberail0) - 1:
+			var u0 = tuberail0[i][2]
+			var u1 = tuberail1[i][2]
+			var z0 = rung0k.z
+			var z1 = rung1k.z
+			x = (z0 + (z1-z0)*u0) / (1 - (z1-z0)*(u1-u0))
+			var y = u0 + x*(u1-u0)
+			assert(is_equal_approx(x, z0 + y*(z1-z0)))
+			assert(0 <= x and x <= 1 and 0 <= y and y <= 1)
+			dpi = lerp(rung0k, rung1k, y)
+		else:
+			if i == 0:
+				assert(tuberail0[i][2] == 0.0 and tuberail1[i][2] == 0.0)
+				dpi = rung0k
+			else:
+				assert(tuberail0[i][2] == 1.0 and tuberail1[i][2] == 1.0)
+				dpi = rung1k
+			x = dpi.z
+
+		var sp = lerp(tuberail0[i][0], tuberail1[i][0], dpi.z)
+		var qib = cubeintermedrailbasis(i, tuberail0, tuberail1)
+		tuberailk.push_back([sp + qib.x*dpi.x + qib.y*dpi.y, lerp(tuberail0[i][1], tuberail1[i][1], x)])
+
+	return tuberailk
+	
+static func makerailcuboidshellmesh(nodepoints, cuboidrailfacs):
+	var arraymesh = ArrayMesh.new()
+	var surfaceTool = SurfaceTool.new()
+	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var nodepointsum = Vector3(0, 0, 0)
+	for pt in nodepoints.values():
+		nodepointsum += pt
+	var cuboidcentre = nodepointsum/len(nodepoints)
+	for cuboidrailfac in cuboidrailfacs:
+		var quadrail0 = cuboidrailfac[0]
+		var quadrail1 = cuboidrailfac[1]
+		var railseqrung0 = cuboidrailfac[2]
+		var railseqrung1 = cuboidrailfac[3]
+		var tuberails = initialcuboidrails(nodepoints, quadrail0, quadrail1)
+		var tuberail0 = tuberails[0]
+		var tuberail1 = tuberails[1]
+			
+		if len(railseqrung0) != 0 or len(railseqrung1) != 0:
+			var zi = sidecubeintermedrail(nodepoints, tuberail0, tuberail1, railseqrung0, true)
+			var zi1 = sidecubeintermedrail(nodepoints, tuberail0, tuberail1, railseqrung1, false)
+			var railsequencerung0 = [ ]
+			var railsequencerung1 = [ ]
+			intermediaterailsequence(zi, zi1, railsequencerung0, railsequencerung1)
+			assert(len(railsequencerung0) == len(railsequencerung1))
+			var tuberailk0 = tuberail0
+			for k in range(len(railsequencerung0)+1):
+				var tuberailk1
+				if k < len(railsequencerung0):
+					tuberailk1 = slicerungsatintermediatecuberail(tuberail0, tuberail1, railsequencerung0[k], railsequencerung1[k])
+				else:
+					tuberailk1 = tuberail1
+				triangulatetuberails(surfaceTool, tuberailk0, tuberailk1)
+				tuberailk0 = tuberailk1
+				
+		else:
+			triangulatetuberails(surfaceTool, tuberail0, tuberail1)
 			
 	surfaceTool.generate_normals()
 	surfaceTool.commit(arraymesh)
