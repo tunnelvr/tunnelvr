@@ -875,7 +875,8 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 			setactivetargetwall(pointertargetwall)
 			
 		if gripbuttonheld:
-			pointertargetwall.expandxcdrawingscale(pointertargetpoint)
+			#pointertargetwall.expandxcdrawingscale(pointertargetpoint)
+			# madphil locking and unlocking to implement here
 			if true or len(pointertargetwall.nodepoints) == 0:
 				clearactivetargetnode()
 				var alaserspot = activelaserroot.get_node("LaserSpot")
@@ -989,6 +990,26 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 		else:
 			var imagesystem = get_node("/root/Spatial/ImageSystem")
 			imagesystem.shuffleimagetotopoflist(pointertargetwall)
+
+	elif pointertargettype == "XCflatshell" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_ROPEHANG and gripbuttonheld:
+		clearactivetargetnode()
+		var alaserspot = activelaserroot.get_node("LaserSpot")
+		alaserspot.global_transform.origin = pointertargetpoint
+		activetargetwallgrabbed = pointertargetwall
+		activetargetwallgrabbedlaserroottrans = activelaserroot.global_transform
+		activetargetwallgrabbedtransform = alaserspot.global_transform.affine_inverse() * activetargetwallgrabbed.global_transform
+		activetargetwallgrabbedorgtransform = activetargetwallgrabbed.global_transform
+		activetargetwallgrabbeddispvector = alaserspot.global_transform.origin - activelaserroot.global_transform.origin
+		activetargetwallgrabbedpoint = alaserspot.global_transform.origin
+		activetargetwallgrabbedlength = alaserspot.transform.origin.z
+		activetargetwalljoyposcumulative = joyposcumulative
+		activetargetwallgrabbedlocalpoint = activetargetwallgrabbed.global_transform.affine_inverse() * alaserspot.global_transform.origin
+		activetargetwallgrabbedpointoffset = alaserspot.global_transform.origin - activetargetwallgrabbed.global_transform.origin
+		activetargetwallgrabbedmotion = DRAWING_TYPE.GRABMOTION_DIRECTIONAL_DRAGGING
+		if Input.is_key_pressed(KEY_CONTROL) or handrightcontroller.is_button_pressed(BUTTONS.VR_BUTTON_AX):
+			activetargetwallgrabbedmotion = DRAWING_TYPE.GRABMOTION_ROTATION_ADDITIVE
+
+
 			
 	elif activetargetnode != null and pointertargettype == "XCnode" and (pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING or pointertargetwall.drawingtype == DRAWING_TYPE.DT_ROPEHANG):
 		if activetargetnodewall == pointertargetwall and (activetargetnodewall.drawingtype == DRAWING_TYPE.DT_XCDRAWING or activetargetnodewall.drawingtype == DRAWING_TYPE.DT_ROPEHANG) \
