@@ -628,11 +628,11 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 			xcdata["newonepathpairs"] = [ activetargetnode.get_name(), newnodename]
 			newactivetargetnodeinfo = [activetargetnodewall, newnodename]
 
-		var xcdatalist = [ xcdata ]
-		
-		sketchsystem.actsketchchange(xcdatalist)
-		if newactivetargetnodeinfo != null:
-			setactivetargetnode(newactivetargetnodeinfo[0].get_node("XCnodes").get_node(newactivetargetnodeinfo[1]))
+		if xcdata != null:
+			var xcdatalist = [ xcdata ]
+			sketchsystem.actsketchchange(xcdatalist)
+			if newactivetargetnodeinfo != null:
+				setactivetargetnode(newactivetargetnodeinfo[0].get_node("XCnodes").get_node(newactivetargetnodeinfo[1]))
 
 	elif Tglobal.handflickmotiongestureposition == 1 and activetargetnodewall != null and activetargetnodewall.drawingtype == DRAWING_TYPE.DT_CENTRELINE and \
 			len(activetargetnodewall.xctubesconn) == 0 and gripbuttonheld:
@@ -991,7 +991,7 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 			var imagesystem = get_node("/root/Spatial/ImageSystem")
 			imagesystem.shuffleimagetotopoflist(pointertargetwall)
 
-	elif pointertargettype == "XCflatshell" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_ROPEHANG and gripbuttonheld:
+	elif gripbuttonheld and pointertargettype == "XCflatshell" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_ROPEHANG and pointertargetwall.ropehangdetectedtype == DRAWING_TYPE.RH_BOULDER:
 		clearactivetargetnode()
 		var alaserspot = activelaserroot.get_node("LaserSpot")
 		alaserspot.global_transform.origin = pointertargetpoint
@@ -1008,7 +1008,6 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 		activetargetwallgrabbedmotion = DRAWING_TYPE.GRABMOTION_DIRECTIONAL_DRAGGING
 		if Input.is_key_pressed(KEY_CONTROL) or handrightcontroller.is_button_pressed(BUTTONS.VR_BUTTON_AX):
 			activetargetwallgrabbedmotion = DRAWING_TYPE.GRABMOTION_ROTATION_ADDITIVE
-
 
 			
 	elif activetargetnode != null and pointertargettype == "XCnode" and (pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING or pointertargetwall.drawingtype == DRAWING_TYPE.DT_ROPEHANG):
@@ -1030,7 +1029,6 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 			if pointertargetwall.drawingvisiblecode != DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE:
 				xcdatalist.push_back({"xcvizstates":{ pointertargetwall.get_name():DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE } })
 			sketchsystem.actsketchchange(xcdatalist)
-
 			
 		elif activetargetnodewall != pointertargetwall:
 			var applytubeconnection = activetargetnodewall.drawingtype == DRAWING_TYPE.DT_XCDRAWING and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING
@@ -1398,52 +1396,16 @@ func buttonreleased_vrgrip():
 					clearpointertarget()
 					sketchsystem.actsketchchange(xcdatalist)
 
-			elif pointertarget.get_name() == "Down5":
+			elif pointertarget.get_name() == "CopyRock":
 				var xcdrawing = gripmenu.gripmenupointertargetwall
-				var xcdrawingorgname = xcdrawing.get_name()
-				var xcdrawingnewname = xcdrawing.get_name()+"_New"
-				print("ChangeXCname ", xcdrawing.get_name())
-				var xctdatatubedel = [ ]
-				var xctdatatubenew = [ ]
-				var updatetubeshells = [ ]
-				for xctube in xcdrawing.xctubesconn:
-					var drawinglinks = [ ]
-					for j in range(0, len(xctube.xcdrawinglink), 2):
-						drawinglinks.push_back(xctube.xcdrawinglink[j])
-						drawinglinks.push_back(xctube.xcdrawinglink[j+1])
-						drawinglinks.push_back(xctube.xcsectormaterials[j/2])
-						drawinglinks.push_back(xctube.xclinkintermediatenodes[j/2] if xctube.xclinkintermediatenodes != null else null)
-					xctdatatubedel.push_back({ "tubename":xctube.get_name(), 
-											   "xcname0":xctube.xcname0, 
-											   "xcname1":xctube.xcname1,
-											   "prevdrawinglinks":drawinglinks,
-											   "newdrawinglinks":[ ] })
-					var xcname0new = xcdrawingnewname if xctube.xcname0 == xcdrawingorgname else xctube.xcname0
-					var xcname1new = xcdrawingnewname if xctube.xcname1 == xcdrawingorgname else xctube.xcname1
-					xctdatatubenew.push_back({ "tubename":"**notset", 
-											   "xcname0":xcname0new, 
-											   "xcname1":xcname1new,
-											   "prevdrawinglinks":[ ],
-											   "newdrawinglinks":drawinglinks })
-					updatetubeshells.push_back({"tubename":"**notset", "xcname0":xcname0new, "xcname1":xcname1new})
-
-				var xcdatadel = { "name":xcdrawingorgname, 
-								  "prevnodepoints":xcdrawing.nodepoints.duplicate(),
-								  "nextnodepoints":{ }, 
-								  "prevonepathpairs":xcdrawing.onepathpairs.duplicate(),
-								  "newonepathpairs": [ ]
-								}
-				var xcdatanew = xcdrawing.exportxcrpcdata(true)
-				xcdatanew["name"] = xcdrawingnewname
-				xcdatanew["nodepoints"] = xcdatanew["nodepoints"].duplicate()
-				xcdatanew["onepathpairs"] = xcdatanew["onepathpairs"].duplicate()
-				var xcv = { "xcvizstates":{ xcdrawingorgname:DRAWING_TYPE.VIZ_XCD_HIDE, xcdrawingnewname: DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE }, 
-							"updatetubeshells":updatetubeshells,
-							"updatexcshells":[ xcdrawingnewname ] }
-				var xcdatalist = xctdatatubedel + [ xcdatadel, xcdatanew ] + xctdatatubenew + [ xcv ]
-				clearactivetargetnode()
-				clearpointertarget()
-				sketchsystem.actsketchchange(xcdatalist)
+				if xcdrawing.drawingtype == DRAWING_TYPE.DT_ROPEHANG and xcdrawing.ropehangdetectedtype == DRAWING_TYPE.RH_BOULDER:
+					var xcdata = xcdrawing.exportxcrpcdata(true)
+					xcdata["nodepoints"] = xcdata["nodepoints"].duplicate()
+					xcdata["onepathpairs"] = xcdata["onepathpairs"].duplicate()
+					xcdata["name"] = sketchsystem.uniqueXCname("rc")
+					xcdata["xcresource"] = xcdrawing.get_name()
+					xcdata["transformpos"].origin += Vector3(0,1.1,0)
+					sketchsystem.actsketchchange([xcdata])
 		
 	elif pointertargettype == "GUIPanel3D":
 		guipanel3d.setguipanelhide()

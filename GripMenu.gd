@@ -99,8 +99,6 @@ func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointert
 			gmlist.push_back("NewXC")
 		if pointertargetwall.notubeconnections_so_delxcable():
 			gmlist.push_back("DelXC")
-		#gmlist.push_back("Down5")
-
 
 	elif gripmenupointertargettype == "IntermediatePointView":
 		gmlist = [ ]
@@ -124,7 +122,12 @@ func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointert
 		if activetargetwall == get_node("/root/Spatial/PlanViewSystem"):
 			pass
 		else:
-			gmlist = ["SelectXC", "NewXC", "HideXC", "materials"]
+			gmlist = ["SelectXC", "NewXC", "materials"]
+			if gripmenupointertargetwall.drawingtype == DRAWING_TYPE.DT_ROPEHANG:
+				if gripmenupointertargetwall.ropehangdetectedtype == DRAWING_TYPE.RH_BOULDER:
+					gmlist.push_back("CopyRock")
+			else:
+				gmlist.push_back("HideXC")
 
 	elif gripmenupointertargettype == "XCnode" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
 		gmlist = ["NewXC"]
@@ -157,8 +160,8 @@ func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointert
 
 # Calibri Fontsize 20: height 664 width 159
 var grip_commands_text = """
-Z+5
-Z-5
+FixHoleXC
+CopyRock
 to Paper
 to Solid
 HideFloor
@@ -175,6 +178,6 @@ NewXC
 Record
 Replay
 HoleXC
-f19
-f20"""
+HideXC
+no:HoleXC"""
 
