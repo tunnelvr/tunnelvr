@@ -294,6 +294,7 @@ func exportSTL():
 	$Viewport/GUI/Panel/Label.text = "Cave exported"
 
 var prevnssel = "normal"
+var backfaceculldisabled = true
 func _on_switchtest(index):
 	var SwitchTest = $Viewport/GUI/Panel/SwitchTest
 	var nssel = SwitchTest.get_item_text(index)
@@ -337,9 +338,10 @@ func _on_switchtest(index):
 
 	elif nssel == "BackfaceCull":
 		var materialsystem = get_node("/root/Spatial/MaterialSystem")
-		materialsystem.togglebackfacecull()
+		backfaceculldisabled = not backfaceculldisabled
+		materialsystem.setbackfacecull(backfaceculldisabled)
 		if Tglobal.connectiontoserveractive:
-			materialsystem.rpc("togglebackfacecull")
+			materialsystem.rpc("setbackfacecull", backfaceculldisabled)
 		SwitchTest.selected = 0
 		setguipanelhide()
 				
