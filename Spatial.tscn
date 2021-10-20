@@ -3604,7 +3604,7 @@ material/0 = SubResource( 211 )
 [node name="labelmaterials" type="Spatial" parent="MaterialSystem"]
 
 [node name="RopeLabel" type="MeshInstance" parent="MaterialSystem/labelmaterials"]
-transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 2.08877 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.1 )
 layers = 8192
 cast_shadow = 0
 mesh = SubResource( 213 )
