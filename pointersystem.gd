@@ -612,7 +612,7 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 		var prevactivetargetnodewall = null
 		var newactivetargetnodeinfo = null
 		if gripbuttonheld:
-			if activetargetnode.get_name()[0] == ("k" if pointertargettype == "none" else "a"):
+			if true or activetargetnode.get_name()[0] == ("k" if pointertargettype == "none" else "a"):
 				xcdata = { "name":activetargetnodewall.get_name(), 
 						   "prevnodepoints":{ activetargetnode.get_name():activetargetnode.translation }, 
 						   "nextnodepoints":{ activetargetnode.get_name():newnodepoint } 
@@ -739,57 +739,56 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 	elif activetargetnode != null and pointertarget == activetargetnode:
 		clearactivetargetnode()
 
-	elif activetargetnode == null and activetargetnodewall == null and pointertargettype == "XCtubesector":
+	elif activetargetnode == null and activetargetnodewall == null and Tglobal.handflickmotiongestureposition == 1 and (pointertargettype == "XCtubesector" or pointertargettype == "XCflatshell"):
+		var xcdata = { "name":sketchsystem.uniqueXCname("r"), 
+					   "drawingtype":DRAWING_TYPE.DT_ROPEHANG,
+					   "transformpos":Transform(),
+					   "prevnodepoints":{ },
+					   "nextnodepoints":{"a0":pointertargetpoint} }
+		sketchsystem.actsketchchange([xcdata, { "xcvizstates":{ xcdata["name"]:DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE }}])
+		var xcrope = sketchsystem.get_node("XCdrawings").get_node(xcdata["name"])
+		setactivetargetnode(xcrope.get_node("XCnodes").get_node("a0"))
+
+	elif activetargetnode == null and activetargetnodewall == null and Tglobal.handflickmotiongestureposition == 0 and pointertargettype == "XCtubesector" and pointertargetwall.get_node("PathLines").visible:
 		var pointertargettube = pointertargetwall
-		if Tglobal.handflickmotiongestureposition == 1:
-			var xcdata = { "name":sketchsystem.uniqueXCname("r"), 
-						   "drawingtype":DRAWING_TYPE.DT_ROPEHANG,
-						   "transformpos":Transform(),
-						   "prevnodepoints":{ },
-						   "nextnodepoints":{"a0":pointertargetpoint} }
-			sketchsystem.actsketchchange([xcdata, { "xcvizstates":{ xcdata["name"]:DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE }}])
-			var xcrope = sketchsystem.get_node("XCdrawings").get_node(xcdata["name"])
-			setactivetargetnode(xcrope.get_node("XCnodes").get_node("a0"))
+		var ipbasis = pointertargettube.intermedpointplanebasis(pointertargetpoint)
+		var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(pointertargettube.xcname0)
+		var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(pointertargettube.xcname1)
+		var xcdrawing0nodes = xcdrawing0.get_node("XCnodes")
+		var xcdrawing1nodes = xcdrawing1.get_node("XCnodes")
+		intermediatepointplanesectorindex = pointertarget.get_index()
+		var jA = intermediatepointplanesectorindex*2
+		if jA < len(pointertargettube.xcdrawinglink):
+			var p0 = xcdrawing0nodes.get_node(pointertargettube.xcdrawinglink[jA]).global_transform.origin
+			var p1 = xcdrawing1nodes.get_node(pointertargettube.xcdrawinglink[jA+1]).global_transform.origin
+			intermediatepointplanelambda = inverse_lerp(ipbasis.z.dot(p0), ipbasis.z.dot(p1), ipbasis.z.dot(pointertargetpoint))
+			var dv = pointertargettube.intermediatenodelerp(intermediatepointplanesectorindex, intermediatepointplanelambda)
+			var pc = pointertargettube.intermedpointpos(p0, p1, dv)
 
-		elif pointertargettube.get_node("PathLines").visible:
-			var ipbasis = pointertargettube.intermedpointplanebasis(pointertargetpoint)
-			var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(pointertargettube.xcname0)
-			var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(pointertargettube.xcname1)
-			var xcdrawing0nodes = xcdrawing0.get_node("XCnodes")
-			var xcdrawing1nodes = xcdrawing1.get_node("XCnodes")
-			intermediatepointplanesectorindex = pointertarget.get_index()
-			var jA = intermediatepointplanesectorindex*2
-			if jA < len(pointertargettube.xcdrawinglink):
-				var p0 = xcdrawing0nodes.get_node(pointertargettube.xcdrawinglink[jA]).global_transform.origin
-				var p1 = xcdrawing1nodes.get_node(pointertargettube.xcdrawinglink[jA+1]).global_transform.origin
-				intermediatepointplanelambda = inverse_lerp(ipbasis.z.dot(p0), ipbasis.z.dot(p1), ipbasis.z.dot(pointertargetpoint))
-				var dv = pointertargettube.intermediatenodelerp(intermediatepointplanesectorindex, intermediatepointplanelambda)
-				var pc = pointertargettube.intermedpointpos(p0, p1, dv)
+			var jB = (jA + 2) % len(pointertargettube.xcdrawinglink)
+			var intermediatepointplanesectorindexB = int(jB/2)
+			var p0B = xcdrawing0nodes.get_node(pointertargettube.xcdrawinglink[jB]).global_transform.origin
+			var p1B = xcdrawing1nodes.get_node(pointertargettube.xcdrawinglink[jB+1]).global_transform.origin
+			var intermediatepointplanelambdaB = inverse_lerp(ipbasis.z.dot(p0), ipbasis.z.dot(p1), ipbasis.z.dot(pointertargetpoint))
+			var dvB = pointertargettube.intermediatenodelerp(intermediatepointplanesectorindexB, intermediatepointplanelambdaB)
+			var pcB = pointertargettube.intermedpointpos(p0B, p1B, dvB)
+			
+			if jB != jA and pointertargetpoint.distance_to(pcB) < pointertargetpoint.distance_to(pc):
+				intermediatepointplanesectorindex = intermediatepointplanesectorindexB
+				p0 = p0B
+				p1 = p1B
+				dv = dvB
+				pc = pcB
 
-				var jB = (jA + 2) % len(pointertargettube.xcdrawinglink)
-				var intermediatepointplanesectorindexB = int(jB/2)
-				var p0B = xcdrawing0nodes.get_node(pointertargettube.xcdrawinglink[jB]).global_transform.origin
-				var p1B = xcdrawing1nodes.get_node(pointertargettube.xcdrawinglink[jB+1]).global_transform.origin
-				var intermediatepointplanelambdaB = inverse_lerp(ipbasis.z.dot(p0), ipbasis.z.dot(p1), ipbasis.z.dot(pointertargetpoint))
-				var dvB = pointertargettube.intermediatenodelerp(intermediatepointplanesectorindexB, intermediatepointplanelambdaB)
-				var pcB = pointertargettube.intermedpointpos(p0B, p1B, dvB)
-				
-				if jB != jA and pointertargetpoint.distance_to(pcB) < pointertargetpoint.distance_to(pc):
-					intermediatepointplanesectorindex = intermediatepointplanesectorindexB
-					p0 = p0B
-					p1 = p1B
-					dv = dvB
-					pc = pcB
-
-				var p = lerp(p0, p1, intermediatepointplanelambda)
-				intermediatepointpicked = null
-				if 0.01 < intermediatepointplanelambda and intermediatepointplanelambda < 0.99:
-					var IntermediatePointView = get_node("/root/Spatial/BodyObjects/IntermediatePointView")
-					IntermediatePointView.get_node("IntermediatePointPlane").transform = Transform(ipbasis, p)
-					IntermediatePointView.visible = true
-					IntermediatePointView.get_node("IntermediatePointPlane/CollisionShape").disabled = false
-					IntermediatePointView.get_node("IntermediatePointPlaneStartingMarker").transform.origin = pc
-					intermediatepointplanetubename = pointertargettube.get_name()
+			var p = lerp(p0, p1, intermediatepointplanelambda)
+			intermediatepointpicked = null
+			if 0.01 < intermediatepointplanelambda and intermediatepointplanelambda < 0.99:
+				var IntermediatePointView = get_node("/root/Spatial/BodyObjects/IntermediatePointView")
+				IntermediatePointView.get_node("IntermediatePointPlane").transform = Transform(ipbasis, p)
+				IntermediatePointView.visible = true
+				IntermediatePointView.get_node("IntermediatePointPlane/CollisionShape").disabled = false
+				IntermediatePointView.get_node("IntermediatePointPlaneStartingMarker").transform.origin = pc
+				intermediatepointplanetubename = pointertargettube.get_name()
 
 	
 	elif pointertargettype == "IntermediateNode":

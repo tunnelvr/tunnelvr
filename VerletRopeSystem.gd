@@ -130,7 +130,7 @@ func _process(delta):
 		verropthreadmutex.unlock()
 		if verropropehang != null:
 			verropthreadoperating = false
-			if verropropehang.get_parent().drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_HIDE:
+			if verropropehang.get_parent().drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_HIDE and verropropehang.get_parent().get_node("XCnodes").get_child_count() != 0:
 				verropropehang.verletiterations += 1
 				verropropehang.updatehangingrope_Verlet()
 				var verletstretch = verropropehang.verletstretch()
