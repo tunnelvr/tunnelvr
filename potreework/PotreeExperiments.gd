@@ -45,6 +45,14 @@ func sethighlightplane(planetransform):
 		rootnode.sethighlightplane(planetransform.basis.z, 
 								   planetransform.basis.z.dot(planetransform.origin))
 
+func killpotree():
+	if rootnode != null:
+		rootnode.processingnode = null
+		remove_child(rootnode)
+		rootnode.queue_free()
+		rootnode = null
+
+
 func potreeactivatebuttonpressed(buttondown):
 	if buttondown:
 		var primarycameraorigin = Vector3(0, 0, 0)

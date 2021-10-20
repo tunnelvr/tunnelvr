@@ -332,7 +332,11 @@ func _on_switchtest(index):
 		SwitchTest.selected = 0
 
 	elif nssel == "LoadPointMesh":
-		selfSpatial.get_node("PotreeExperiments").potreeactivatebuttonpressed(true)
+		var potreeexperiments = selfSpatial.get_node("PotreeExperiments")
+		if potreeexperiments.rootnode == null:
+			potreeexperiments.potreeactivatebuttonpressed(true)
+		else:
+			potreeexperiments.killpotree()
 		SwitchTest.selected = 0
 		setguipanelhide()
 

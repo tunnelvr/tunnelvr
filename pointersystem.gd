@@ -875,7 +875,7 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 			setactivetargetwall(pointertargetwall)
 			
 		if gripbuttonheld:
-			#pointertargetwall.expandxcdrawingscale(pointertargetpoint)
+			pointertargetwall.expandxcdrawingscale(pointertargetpoint)
 			# madphil locking and unlocking to implement here
 			if true or len(pointertargetwall.nodepoints) == 0:
 				clearactivetargetnode()
@@ -1476,16 +1476,16 @@ var prevactivetargetwallgrabbedorgtransform = null
 func targetwalltransformpos(optionalrevertcode):
 	if activetargetwallgrabbedmotion == DRAWING_TYPE.GRABMOTION_ROTATION_ADDITIVE or activetargetwallgrabbedmotion == DRAWING_TYPE.GRABMOTION_DIRECTIONAL_DRAGGING:
 		var targetisplanview = (activetargetwallgrabbed.get_name() == "PlanView")
+		var targetisscalablepicture = (not targetisplanview and (activetargetwallgrabbed.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE) and (activetargetwallgrabbed.drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE_B) != 0)
 		var newtrans = null
 		var laserspottransform = activelaserroot.get_node("LaserSpot").global_transform
 		var reljoyposcumulative = joyposcumulative - activetargetwalljoyposcumulative
 		if activetargetwallgrabbedlength != 0:
-			if activetargetwallgrabbedmotion == DRAWING_TYPE.GRABMOTION_DIRECTIONAL_DRAGGING and not targetisplanview and activetargetwallgrabbedlength != 0:
+			if targetisscalablepicture and activetargetwallgrabbedmotion == DRAWING_TYPE.GRABMOTION_DIRECTIONAL_DRAGGING:
 				var relscale = clamp(3*reljoyposcumulative.x + 1, 0.2, 5)
 				laserspottransform = laserspottransform.scaled(Vector3(relscale, relscale, relscale))
 			var reticulelength = min(-0.1, activetargetwallgrabbedlength - 5*reljoyposcumulative.y)
 			laserspottransform.origin = activelaserroot.global_transform.origin + reticulelength*activelaserroot.global_transform.basis.z
-
 		if activetargetwallgrabbedmotion == DRAWING_TYPE.GRABMOTION_DIRECTIONAL_DRAGGING:
 			newtrans = laserspottransform * activetargetwallgrabbedtransform
 		elif activetargetwallgrabbedpoint != null:
@@ -1592,6 +1592,7 @@ func buttonreleased_vrtrigger():
 var joyposyscrollcountdown = 0 
 func _physics_process(delta):
 	joyposcumulative += handright.joypos*delta
+	#joyposcumulative.x += ((-1 if Input.is_key_pressed(KEY_1) else 0) + (1 if Input.is_key_pressed(KEY_2) else 0))*delta
 	if playerMe.handflickmotiongesture != 0:
 		if playerMe.handflickmotiongesture == 1:
 			set_handflickmotiongestureposition(min(Tglobal.handflickmotiongestureposition+1, handflickmotiongestureposition_gone))
