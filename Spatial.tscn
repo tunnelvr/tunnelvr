@@ -1,4 +1,4 @@
-[gd_scene load_steps=310 format=2]
+[gd_scene load_steps=313 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/underground_env.tres" type="Environment" id=2]
@@ -477,6 +477,29 @@ metallic = 0.44
 metallic_specular = 0.22
 roughness = 0.74
 uv1_scale = Vector3( 1.5, 1.5, 1 )
+
+[sub_resource type="CylinderMesh" id=238]
+top_radius = 0.01
+bottom_radius = 0.01
+height = 10.0
+radial_segments = 4
+rings = 1
+
+[sub_resource type="SpatialMaterial" id=239]
+flags_transparent = true
+params_cull_mode = 2
+albedo_color = Color( 1, 0.45098, 0, 0.329412 )
+metallic = 0.44
+metallic_specular = 0.22
+roughness = 0.74
+uv1_scale = Vector3( 1.5, 1.5, 1 )
+
+[sub_resource type="CylinderMesh" id=240]
+top_radius = 3.0
+bottom_radius = 3.0
+height = 0.02
+radial_segments = 20
+rings = 0
 
 [sub_resource type="CanvasItemMaterial" id=72]
 
@@ -2530,6 +2553,16 @@ transform = Transform( 1, 0, 0, 0, 0.598017, 0.801484, 0, -0.801484, 0.598017, 0
 mesh = SubResource( 60 )
 material/0 = SubResource( 66 )
 
+[node name="RopeSpotGuide" type="Spatial" parent="BodyObjects"]
+
+[node name="Vertical" type="MeshInstance" parent="BodyObjects/RopeSpotGuide"]
+mesh = SubResource( 238 )
+material/0 = SubResource( 239 )
+
+[node name="Horizontal" type="MeshInstance" parent="BodyObjects/RopeSpotGuide"]
+mesh = SubResource( 240 )
+material/0 = SubResource( 239 )
+
 [node name="SketchSystem" type="Spatial" parent="."]
 script = ExtResource( 10 )
 
@@ -3451,7 +3484,7 @@ mesh = SubResource( 159 )
 material/0 = SubResource( 161 )
 
 [node name="spotinair" type="MeshInstance" parent="MaterialSystem/lasermaterial"]
-transform = Transform( 1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, -0.610968, 0, 0 )
+transform = Transform( 1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, -0.311707, 0, 0 )
 mesh = SubResource( 159 )
 material/0 = SubResource( 162 )
 

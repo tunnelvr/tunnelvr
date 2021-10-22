@@ -14,7 +14,10 @@ onready var keyboardpanel = get_node("/root/Spatial/GuiSystem/KeyboardPanel")
 
 onready var LaserOrient = get_node("/root/Spatial/BodyObjects/LaserOrient") 
 onready var LaserSelectLine = get_node("/root/Spatial/BodyObjects/LaserSelectLine") 
-
+onready var FloorLaserSpot = get_node("/root/Spatial/BodyObjects/FloorLaserSpot")
+onready var RopeSpotGuide = get_node("/root/Spatial/BodyObjects/RopeSpotGuide")
+		
+		
 var viewport_point = null
 
 onready var activelaserroot = LaserOrient
@@ -276,11 +279,12 @@ func clearpointertarget():
 
 func set_handflickmotiongestureposition(lhandflickmotiongestureposition):
 	Tglobal.handflickmotiongestureposition = lhandflickmotiongestureposition
-	if Tglobal.handflickmotiongestureposition == 0:
-		activelaserroot.get_node("LaserSpot").visible = false
-	elif Tglobal.handflickmotiongestureposition == 1:
+	if Tglobal.handflickmotiongestureposition == 1:
 		activelaserroot.get_node("LaserSpot").set_surface_material(0, materialsystem.lasermaterialN((1 if activetargetnode != null else 0) + 2))
 		activelaserroot.get_node("LaserSpot").visible = true
+	else:
+		if Tglobal.handflickmotiongestureposition == 0:
+			activelaserroot.get_node("LaserSpot").visible = false
 		
 func panelsendmousemotiontopointertarget():
 	var guipanel = pointertarget
@@ -418,7 +422,6 @@ func setpointertarget(laserroot, raycast, pointertargetshortdistance):
 		laserroot.get_node("Length").scale.z = -laserroot.get_node("RayCast").cast_to.z
 		
 	if laserroot == LaserOrient:
-		var FloorLaserSpot = get_node("/root/Spatial/BodyObjects/FloorLaserSpot")
 		if FloorLaserSpot.visible:
 			if pointertargetpoint != null and not (pointertargettype == "XCdrawing" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE) and (pointertarget != guipanel3d) and (pointertargettype != "PlanView"):
 				FloorLaserSpot.get_node("RayCast").transform.origin = pointertargetpoint
@@ -431,6 +434,12 @@ func setpointertarget(laserroot, raycast, pointertargetshortdistance):
 			else:
 				FloorLaserSpot.get_node("FloorSpot").visible = false
 
+		RopeSpotGuide.visible = (Tglobal.handflickmotiongestureposition == handflickmotiongestureposition_shortpos)
+		if RopeSpotGuide.visible:
+			RopeSpotGuide.transform.origin = pointertargetpoint
+	else:
+		RopeSpotGuide.visible = false
+		
 	if activetargetnodetriggerpulling:
 		# solve tpnodepoint + a*activetargetnodewall.transform.basis.z = LaserOrient.transform.origin - b*LaserOrient.transform.basis.z
 		var tpnodepoint = activetargetnodewall.nodepoints[activetargetnode.get_name()]
@@ -1637,7 +1646,7 @@ func _physics_process(delta):
 			LaserOrient.get_node("LaserSpot").global_transform.origin = planviewcontactpoint
 			LaserOrient.get_node("Length").scale.z = -LaserOrient.get_node("LaserSpot").translation.z
 			LaserOrient.get_node("LaserSpot").visible = false
-			get_node("/root/Spatial/BodyObjects/FloorLaserSpot/FloorSpot").visible = false
+			FloorLaserSpot.get_node("FloorSpot").visible = false
 			if planviewsystem.planviewactive:
 				var inguipanelsection = pointerplanviewtarget.processplanviewpointing(planviewcontactpoint, (handrightcontroller.is_button_pressed(BUTTONS.HT_PINCH_INDEX_FINGER) if Tglobal.questhandtrackingactive else handrightcontroller.is_button_pressed(BUTTONS.VR_TRIGGER)) or Input.is_mouse_button_pressed(BUTTON_LEFT))
 				activelaserroot = planviewsystem.get_node("RealPlanCamera/LaserScope/LaserOrient")
