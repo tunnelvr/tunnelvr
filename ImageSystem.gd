@@ -27,6 +27,7 @@ var imageloadingthread = Thread.new()
 var imageloadingthreadoperating = false
 var imageloadingthreaddrawingfile = null
 var imageloadingthreadloadedimagetexture = null
+var imagethreadloadedflags = Texture.FLAG_MIPMAPS|Texture.FLAG_REPEAT # |Texture.FILTER
 
 onready var imagesystemreportslabel = get_node("/root/Spatial/GuiSystem/GUIPanel3D/Viewport/GUI/Panel/ImageSystemReports")
 
@@ -53,7 +54,7 @@ func imageloadingthread_function(userdata):
 		if dt > 100:
 			print("thread loading ", limageloadingthreaddrawingfile, " took ", dt, " msecs")
 		var limageloadingthreadloadedimagetexture = ImageTexture.new()
-		limageloadingthreadloadedimagetexture.create_from_image(limageloadingthreadloadedimage)
+		limageloadingthreadloadedimagetexture.create_from_image(limageloadingthreadloadedimage, imagethreadloadedflags)
 		imageloadingthreadmutex.lock()
 		imageloadingthreadloadedimagetexture = limageloadingthreadloadedimagetexture
 		imageloadingthreadmutex.unlock()

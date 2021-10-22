@@ -74,19 +74,6 @@ remote func setbackfacecull(backfaceculldisabled):
 		else:
 			print("cant' change backface cull on material ", tmesh.get_name())
 
-
-
-# REFER TO
-#func applytrimmedpaperuvscale():
-#	get_node("XCdrawingplane").transform.origin = Vector3((imgtrimleftdown.x + imgtrimrightup.x)*0.5, (imgtrimleftdown.y + imgtrimrightup.y)*0.5, 0)
-#	get_node("XCdrawingplane").scale = Vector3((imgtrimrightup.x - imgtrimleftdown.x)*0.5, (imgtrimrightup.y - imgtrimleftdown.y)*0.5, 1)
-#	var m = get_node("XCdrawingplane/CollisionShape/MeshInstance").get_surface_material(0)
-#	var imgheight = imgwidth*imgheightwidthratio
-#	if imgheightwidthratio == 0:
-#		imgheight = imgwidth
-#	m.set_shader_param("uv1_scale", Vector3((imgtrimrightup.x - imgtrimleftdown.x)/imgwidth, (imgtrimrightup.y - imgtrimleftdown.y)/imgheight, 1))
-#	m.set_shader_param("uv1_offset", Vector3((imgtrimleftdown.x - (-imgwidth*0.5))/imgwidth, -(imgtrimrightup.y - (imgheight*0.5))/imgheight, 0))
-
 remote func setfloormaptexture(xcfloorname):
 	var xcdrawings = get_node("/root/Spatial/SketchSystem/XCdrawings")
 	var xcfloor = xcdrawings.get_node(xcfloorname)

@@ -168,7 +168,8 @@ func _process(delta):
 
 	else:
 		var img = $Viewport.get_texture().get_data()
-		if len(workingxcnodenamelist) == maxlabelstorenderperimage:   img.save_png("user://test.png")
+		if len(workingxcnodenamelist) == maxlabelstorenderperimage:   
+			img.save_png("user://test.png")
 		var tex = ImageTexture.new()
 		tex.create_from_image(img)
 		
