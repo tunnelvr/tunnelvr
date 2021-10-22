@@ -37,6 +37,8 @@ func commenceloadotree(urlotreedir):
 	ImageSystem.fetchrequesturl({ "url":urlmetadata, "callbackobject":self, "callbackfunction":"callbackloadotree" })
 
 func callbackloadotree(fmetadata, nonimagedataobject):
+	if nonimagedataobject.has("bad_response_code"):
+		return
 	metadata = parse_json(fmetadata.get_as_text())
 	mdoffset = Vector3(metadata["offset"][0], 
 					   metadata["offset"][1], 

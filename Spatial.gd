@@ -35,8 +35,6 @@ extends Spatial
 var hostipnumber: String = ""
 export var hostportnumber: int = 4546
 export var udpserverdiscoveryport: int = 4547
-
-# caddy file-server -listen 0.0.0.0:8000 -browse
 export var potreeportnumber: int = 8000
 
 export var enablevr: = true
@@ -188,7 +186,7 @@ func _ready():
 	playerMe.global_transform.origin.y += 5
 	$GuiSystem/GUIPanel3D.updateplayerlist()
 	get_node("/root").msaa = Viewport.MSAA_4X
-		
+	
 	$BatFlutter/BatCentre/batflap/AnimationPlayer.playback_speed = 2.0
 	$BatFlutter/BatCentre/batflap/AnimationPlayer.get_animation("ArmatureAction").loop = true
 	$BatFlutter/BatCentre/batflap/AnimationPlayer.play("ArmatureAction")

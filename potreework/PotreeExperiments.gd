@@ -3,7 +3,6 @@ extends Spatial
 #var d = "/home/julian/data/pointclouds/potreetests/outdir/"
 # PotreeConverter --source xxx.laz --outdir outdir --attributes position_cartesian --method poisson
 
-
 var potreethreadmutex = Mutex.new()
 var potreethreadsemaphore = Semaphore.new()
 var potreethread = null # Thread.new()
@@ -71,10 +70,10 @@ func potreeactivatebuttonpressed(buttondown):
 			add_child(rootnode)
 
 			var selfSpatial = get_node("/root/Spatial")
-			var urlotreedir = "http://192.168.8.111:8000/"
-			if selfSpatial.hostipnumber != "":
-				urlotreedir = "http://%s:%d/" % [selfSpatial.hostipnumber, selfSpatial.potreeportnumber]
-			elif selfSpatial.playerMe.playerplatform == "PC":
+			var potreeipnumber = selfSpatial.hostipnumber if selfSpatial.hostipnumber != "" else "192.168.8.111"
+			var potreesubdirectory = "potreewookey"
+			var urlotreedir = "http://%s:%d/%s/" % [potreeipnumber, selfSpatial.potreeportnumber, potreesubdirectory]
+			if selfSpatial.hostipnumber == "" and selfSpatial.playerMe.playerplatform == "PC":
 				if selfSpatial.playerMe.playeroperatingsystem == "Windows":
 					urlotreedir = "D:/potreetests/outdir/"
 					urlotreedir = "D:/potreetests/outdircombined/"

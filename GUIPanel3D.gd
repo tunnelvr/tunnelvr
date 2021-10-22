@@ -798,6 +798,7 @@ func _on_networkstate_selected(index):
 		selfSpatial.setconnectiontoserveractive(false)
 		get_tree().set_network_peer(null)
 
+		selfSpatial.get_node("ExecutingFeatures").stopcaddywebserver()
 
 		
 	if nssel == "Check IPnum" or nssel == "Network Off":
@@ -885,6 +886,9 @@ func networkstartasserver(fromgui):
 	print("server networkID: ", selfSpatial.playerMe.networkID)
 	selfSpatial.mqttsystem.mqttpublish("startasserver", String(selfSpatial.playerMe.networkID))
 	selfSpatial.get_node("BodyObjects/LaserOrient/NotificationTorus").visible = false
+
+	if selfSpatial.playerMe.executingfeaturesavailable.has("caddy"):
+		selfSpatial.get_node("ExecutingFeatures").startcaddywebserver()
 
 func _connection_failed():
 	print("_connection_failed ", Tglobal.connectiontoserveractive, " ", websocketclient, " ", selfSpatial.players_connected_list)

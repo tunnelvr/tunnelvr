@@ -44,6 +44,10 @@ func initplayerappearance_me():
 		get_node("GuardianPoly/floorareamesh").visible = true
 	executingfeaturesavailable = get_node("/root/Spatial/ExecutingFeatures").find_executingfeaturesavailable()
 	print("executingfeaturesavailable: ", executingfeaturesavailable)
+	print("get_user_data_dir: ", OS.get_user_data_dir())  # on the Server this will be /root/.local/share/godot/app_userdata/tunnelvr_v0.7
+	#print("has virtual keyboard ", OS.has_virtual_keyboard())
+	#print("cmdline args ", OS.get_cmdline_args())
+
 	
 func setheadtorchlight(torchon):
 	if torchon:

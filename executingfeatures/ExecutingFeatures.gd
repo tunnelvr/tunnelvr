@@ -1,5 +1,31 @@
 extends Node
 
+var caddywebserverpid = -1
+
+# This is where we store the potree files on the server; 
+# in a directory:  /home/julian/.local/share/godot/app_userdata/tunnelvr_v0.7/caddywebserver
+# or /root/.local/share/godot/app_userdata/tunnelvr_v0.7
+func startcaddywebserver():
+	if caddywebserverpid != -1:
+		stopcaddywebserver()
+	var dir = Directory.new()
+	if not dir.dir_exists("user://caddywebserver"):
+		dir.make_dir("user://caddywebserver")
+	var arguments = PoolStringArray([
+			"file-server", "-browse", 
+			"-root", ProjectSettings.globalize_path("user://caddywebserver"), 
+			"-listen", "0.0.0.0:8000" ])
+	caddywebserverpid = OS.execute("caddy", arguments, false)
+	print(caddywebserverpid, " caddy ", arguments)
+
+func stopcaddywebserver():
+	if caddywebserverpid != -1:
+		OS.kill(caddywebserverpid)
+		caddywebserverpid = -1
+
+func _exit_tree():
+	stopcaddywebserver()
+
 func finemeshpolygon_networked(polypoints, leng, xcdrawing):
 	var playerwithexecutefeatures = null
 	for player in get_node("/root/Spatial/Players").get_children():
@@ -17,7 +43,6 @@ func finemeshpolygon_networked(polypoints, leng, xcdrawing):
 		rpc_id(playerwithexecutefeatures.networkID, "finemeshpolygon_execute", polypoints, 0.25, xcdrawing.get_name())
 		print("rpc on finemeshpolygon_execute")
 		
-
 
 var pymeshpid = -1
 remote func finemeshpolygon_execute(polypoints, trilineleng, xcdrawingname):
