@@ -261,7 +261,10 @@ func _process(delta):
 		elif "callbackobject" in fetchednonimagedataobject:
 			var f = File.new()
 			f.open(fetchednonimagedataobject["fetchednonimagedataobjectfile"], File.READ)
-			fetchednonimagedataobject["callbackobject"].call_deferred(fetchednonimagedataobject["callbackfunction"], f, fetchednonimagedataobject)
+			if "callbackfunction" in fetchednonimagedataobject:
+				fetchednonimagedataobject["callbackobject"].call_deferred(fetchednonimagedataobject["callbackfunction"], f, fetchednonimagedataobject)
+			elif "callbacksignal" in fetchednonimagedataobject:
+				fetchednonimagedataobject["callbackobject"].emit_signal(fetchednonimagedataobject["callbacksignal"], f)
 		
 		fetchednonimagedataobject = null
 
@@ -292,7 +295,11 @@ func fetchrequesturl(nonimagedataobject):
 		f.open(url, File.READ)
 		if nonimagedataobject.has("byteOffset"):
 			f.seek(nonimagedataobject["byteOffset"])
-		nonimagedataobject["callbackobject"].call_deferred(nonimagedataobject["callbackfunction"], f, nonimagedataobject)
+		if "callbackfunction" in nonimagedataobject:
+			nonimagedataobject["callbackobject"].call_deferred(nonimagedataobject["callbackfunction"], f, nonimagedataobject)
+		elif "callbacksignal" in nonimagedataobject:
+			yield(get_tree(), "idle_frame")
+			nonimagedataobject["callbackobject"].emit_signal(nonimagedataobject["callbacksignal"], f)
 		
 func fetchpaperdrawing(paperdrawing):
 	paperdrawinglist.push_back(paperdrawing)

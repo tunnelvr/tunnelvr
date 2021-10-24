@@ -5,6 +5,7 @@ var hierarchybyteSize = 0
 
 var childMask = 0
 var spacing = 0
+var powdiv2 = 1.0
 var treedepth = 0
 var numPoints = 0
 var numPointsCarriedDown = 0
@@ -14,6 +15,7 @@ var byteSize = 0
 var ocellmask = 0
 var pointmaterial = null
 var visibleincamera = false
+var visibleincameratimestamp = 0
 var ocellsize = Vector3(0,0,0)
 var timestampatinvisibility = 0
 
@@ -21,7 +23,7 @@ var Dboxmin = Vector3(0,0,0)
 var Dboxmax = Vector3(0,0,0)
 
 const boxpointepsilon = 0.6
-const spacingdivider = 1.7
+const spacingdivider = 1.5
 const constructhcubes = false
 
 func createChildAABB(pnode, index):
@@ -44,6 +46,8 @@ func on_camera_entered(camera):
 func on_camera_exited(camera):
 	if camera.get_instance_id() == Tglobal.primarycamera_instanceid:
 		visibleincamera = false
+		visibleincameratimestamp = OS.get_ticks_msec()*0.001
+		
 
 func loadoctcellpoints(foctreeF, mdscale, mdoffset, pointsizefactor, roottransforminverse, highlightplaneperp, highlightplanedot):
 	var ocellcentre = roottransforminverse*global_transform.origin
@@ -101,6 +105,8 @@ func loadoctcellpoints(foctreeF, mdscale, mdoffset, pointsizefactor, roottransfo
 
 func constructnode(parentnode, childIndex, Droottransforminverse):
 	spacing = parentnode.spacing/spacingdivider
+	powdiv2 = parentnode.powdiv2/2.0
+	
 	treedepth = parentnode.treedepth + 1
 	ocellsize = parentnode.ocellsize/2
 	transform.origin = Vector3(ocellsize.x/2 if childIndex & 0b0100 else -ocellsize.x/2, 

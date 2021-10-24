@@ -10,7 +10,10 @@ uniform int ocellmask = 0;
 
 const vec3 closecol = vec3(1,0,0);
 const vec3 farcol = vec3(0,0,1);
-const float fardist = 20.0;
+const float fardist = 40.0;
+const float fardisttaper = 40.0;
+const float fardisttaperfac = -(fardisttaper*((fardisttaper + fardist)))/fardist;
+
 const vec3 highlightcol = vec3(1,1,0);
 const vec3 highlightcol2 = vec3(0,1,1);
 const float highlightdist = 0.5;
@@ -33,13 +36,18 @@ void vertex() {
 		POINT_SIZE = 0.0;
 
 	NORMAL = CAMERA_MATRIX[2].xyz;
+
 	float distplane = dot(VERTEX, highlightplaneperp) - highlightplanedot; 
-	if (abs(distplane) < sizebumpdist) {
-		POINT_SIZE *= 2.0;
-	}
-	COLOR.rgb = mix(closecol, farcol, distcamera/fardist);
 	float emissionfac = clamp(1.0 - abs(distplane)/highlightdist, 0.0, 1.0);
 	emissioncol = (distplane > 0.0 ? highlightcol : highlightcol2)*emissionfac;
+	
+	// distcamera : [ 0, fardist ]
+	// 1/(distcamera + fardisttaper)  : [ 1/(fardisttaper),  1/(fardisttaper + fardist) ]
+	// 1/(fardisttaper + fardist) - 1/(fardisttaper) =  -fardist/(fardisttaper*((fardisttaper + fardist))) = 
+	//float mixval = distcamera/fardist;
+	float mixval = (1.0/(distcamera + fardisttaper) - 1.0/fardisttaper)*fardisttaperfac;
+	COLOR.rgb = mix(closecol, farcol, mixval);
+	
 	float fadeoutfac = (POINT_SIZE-8.0)/16.0;
 	bordercol = mix(bordercolor, vec3(1.0, 1.0, 1.0), clamp(1.0 - fadeoutfac, 0.0, 1.0));
 	edgebord = edgeborder*clamp((fadeoutfac+1.0)/2.0, 0.7, 1.0); 
@@ -49,8 +57,11 @@ void fragment() {
 	ALBEDO = COLOR.rgb;
 	EMISSION = emissioncol;
 	float squarecentredist = max(abs(POINT_COORD.x-0.5), abs(POINT_COORD.y-0.5)); 
-	if (squarecentredist > edgebord)
-		ALBEDO *= bordercol;
+	
+	ALBEDO *= mix(vec3(1.0, 1.0, 1.0), bordercolor, squarecentredist);
+
+	//if (squarecentredist > edgebord)
+	//	ALBEDO *= bordercol;
 		
 	// circular points
 	//float rsq = (POINT_COORD.x-0.5)*(POINT_COORD.x-0.5) + (POINT_COORD.y-0.5)*(POINT_COORD.y-0.5);

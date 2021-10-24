@@ -253,7 +253,8 @@ func _process(delta):
 			var cd = boxcentre.distance_to(primarycameraorigin)
 			var processingnodetobevisible = true
 			if cd > boxradius + 0.1:
-				var pointsize = pointsizefactor*processingnode.spacing/(cd-boxradius)
+				#var pointsize = pointsizefactor*processingnode.spacing/(cd-boxradius)
+				var pointsize = pointsizefactor*self.spacing*powdiv2/(cd-boxradius)
 				processingnodetobevisible = (pointsize > pointsizevisibilitycutoff)
 			if sweptvisiblepointcount > visiblepointcountLimit:
 				processingnodetobevisible = false
@@ -277,17 +278,16 @@ func _process(delta):
 			processingnodeWaitingForFile = false
 			var foctreeF = processingnodeReturnedFileHandle
 			processingnodeReturnedFileHandle = null
-			if (urloctree.substr(0, 4) == "http"):
-				if (foctreeF.get_len() != processingnode.byteSize):
-					print("lll ", foctreeF.get_len(), "  ", processingnode.byteSize)
-			assert ((urloctree.substr(0, 4) != "http") or (foctreeF.get_len() == processingnode.byteSize))
-			var roottransforminverse = get_parent().global_transform.inverse()
-			var t0 = OS.get_ticks_msec()
-			processingnode.loadoctcellpoints(foctreeF, mdscale, mdoffset, pointsizefactor, roottransforminverse, highlightplaneperp, highlightplanedot)
-			var dt = OS.get_ticks_msec() - t0
-			if dt > 100:
-				print("    Warning: long loadoctcellpoints ", processingnode.get_path(), " of ", dt, " msecs", " numPoints:", processingnode.numPoints, " carrieddown:", processingnode.numPointsCarriedDown)
-			totalpointcount += processingnode.numPoints + processingnode.numPointsCarriedDown
-			sweptvisiblepointcount += processingnode.numPoints
-			uppernodevisibilitymask(processingnode, true)
+			if urloctree.substr(0, 4) != "http" or foctreeF.get_len() == processingnode.byteSize:
+				var roottransforminverse = get_parent().global_transform.inverse()
+				var t0 = OS.get_ticks_msec()
+				processingnode.loadoctcellpoints(foctreeF, mdscale, mdoffset, pointsizefactor, roottransforminverse, highlightplaneperp, highlightplanedot)
+				var dt = OS.get_ticks_msec() - t0
+				if dt > 100:
+					print("    Warning: long loadoctcellpoints ", processingnode.get_path(), " of ", dt, " msecs", " numPoints:", processingnode.numPoints, " carrieddown:", processingnode.numPointsCarriedDown)
+				totalpointcount += processingnode.numPoints + processingnode.numPointsCarriedDown
+				sweptvisiblepointcount += processingnode.numPoints
+				uppernodevisibilitymask(processingnode, true)
+			else:
+				print("bad lll ", foctreeF.get_len(), "  ", processingnode.byteSize)
 			processingnode = successornode(processingnode, not processingnode.visible)
