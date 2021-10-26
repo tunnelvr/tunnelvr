@@ -11,7 +11,7 @@ uniform int ocellmask = 0;
 const vec3 closecol = vec3(1,0,0);
 const vec3 farcol = vec3(0,0,1);
 const float fardist = 40.0;
-const float fardisttaper = 40.0;
+const float fardisttaper = 30.0;
 const float fardisttaperfac = -(fardisttaper*((fardisttaper + fardist)))/fardist;
 
 const vec3 highlightcol = vec3(1,1,0);
@@ -50,7 +50,7 @@ void vertex() {
 	
 	float fadeoutfac = (POINT_SIZE-8.0)/16.0;
 	bordercol = mix(bordercolor, vec3(1.0, 1.0, 1.0), clamp(1.0 - fadeoutfac, 0.0, 1.0));
-	edgebord = edgeborder*clamp((fadeoutfac+1.0)/2.0, 0.7, 1.0); 
+	edgebord = edgeborder*clamp((fadeoutfac+1.0)/2.0, 0.3, 1.0); 
 }
 
 void fragment() {
@@ -58,12 +58,16 @@ void fragment() {
 	EMISSION = emissioncol;
 	float squarecentredist = max(abs(POINT_COORD.x-0.5), abs(POINT_COORD.y-0.5)); 
 	
-	ALBEDO *= mix(vec3(1.0, 1.0, 1.0), bordercolor, squarecentredist);
+	//ALBEDO *= mix(vec3(1.0, 1.0, 1.0), bordercolor, squarecentredist);
 
 	//if (squarecentredist > edgebord)
 	//	ALBEDO *= bordercol;
 		
 	// circular points
-	//float rsq = (POINT_COORD.x-0.5)*(POINT_COORD.x-0.5) + (POINT_COORD.y-0.5)*(POINT_COORD.y-0.5);
-	//if (rsq > 0.25)  discard;
+	float rsq = (POINT_COORD.x-0.5)*(POINT_COORD.x-0.5) + (POINT_COORD.y-0.5)*(POINT_COORD.y-0.5);
+
+	if (rsq > 0.25+point_scale*0.002) 
+		discard;
+	else
+		ALBEDO *= mix(vec3(1.0, 1.0, 1.0), bordercolor, rsq*3.0);
 }

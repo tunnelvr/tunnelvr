@@ -96,6 +96,9 @@ const minvisiblepoints = 150000
 const pointsizefactor = 150.0
 const updatepotreeprioritiesworkingtimeout = 4.0
 signal updatepotreepriorities_fetchsignal(f)
+var Dres = null
+func Dstoreres(r):
+	Dres = r
 func updatepotreepriorities():
 	if rootnode == null:
 		return
@@ -130,6 +133,7 @@ func updatepotreepriorities():
 		  " pointsizes: ", res["pointsizes"].min(), " ", res["pointsizes"].max())
 
 	var t0 = OS.get_ticks_msec()*0.001
+	Dstoreres(res)
 	while len(res["hierarchynodestoload"]):
 		var hnode = res["hierarchynodestoload"].pop_front()
 		var nonimagedataobject = { "url":rootnode.urlhierarchy, "callbackobject":self, 
@@ -167,7 +171,9 @@ func updatepotreepriorities():
 					var dt = OS.get_ticks_msec() - tp0
 					if dt > 100:
 						print("    Warning: long loadoctcellpoints ", nnode.get_path(), " of ", dt, " msecs", " numPoints:", nnode.numPoints, " carrieddown:", nnode.numPointsCarriedDown)
-			if not nnode.visible:
+				else:
+					print("foctree nodesize bytes fail ", foctreeF.get_len(), " ", nnode.byteSize)
+			if not nnode.visible and nnode.pointmaterial != null:
 				rootnode.uppernodevisibilitymask(nnode, true)
 		
 		if OS.get_ticks_msec()*0.001 - t0 > updatepotreeprioritiesworkingtimeout:
@@ -222,12 +228,32 @@ func updatepotreeprioritiesfromcamera(primarycameraorigin, pointsizefactor, poin
 			 "sweptvisiblepointcount":sweptvisiblepointcount,
 			 "nscannednodes":nscannednodes }
 
+func Dcorrectvisibilitymask():
+	print("Dcorrectvisibilitymask runn")
+	var scanningnode = rootnode
+	while scanningnode != null:
+		var locellmask = 0
+		for i in range(1, scanningnode.get_child_count()):
+			var cnode = scanningnode.get_child(i)
+			if cnode.visible:
+				locellmask |= (1 << int(cnode.name))
+		if scanningnode.ocellmask != locellmask:
+			print("Incorrect--visibility ", scanningnode.ocellmask, " ", locellmask, " on ", scanningnode.get_name())
+		if scanningnode.pointmaterial != null:
+			var kk = scanningnode.pointmaterial.get_shader_param("ocellmask")
+			if scanningnode.ocellmask != kk:
+				print("ocellmask not matching ", scanningnode.ocellmask, " ", kk)
+			scanningnode.pointmaterial.set_shader_param("ocellmask", scanningnode.ocellmask)
+		scanningnode = rootnode.successornode(scanningnode, false)
+		print("Dcorrectvisibilitymask runn")
+	
 func _input(event):
 	if event is InputEventKey and event.scancode == KEY_7:
 		potreeactivatebuttonpressed(event.pressed)
 	if event is InputEventKey and event.pressed and event.scancode == KEY_6:
 		if rootnode != null and rootnode.processingnode == null:
-			rootnode.garbagecollectionsweep()
+			#rootnode.garbagecollectionsweep()
+			Dcorrectvisibilitymask()
 	if event is InputEventKey and event.pressed and event.scancode == KEY_5:
 		#updatepotreepriorities()
 		if $Timer.is_stopped():

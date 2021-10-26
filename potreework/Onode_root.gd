@@ -123,6 +123,8 @@ func updatenodeinvisibilitybelow(topnode):
 				var nodebit = (1 << int(node.name))
 				pnode.ocellmask |= nodebit
 				pnode.ocellmask ^= nodebit
+				if pnode.pointmaterial != null:
+					pnode.pointmaterial.set_shader_param("ocellmask", pnode.ocellmask)
 				node.timestampatinvisibility = OS.get_ticks_msec()
 				visiblepointcount -= node.numPoints
 				if node.get_child_count() > 1:
