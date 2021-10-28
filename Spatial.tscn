@@ -905,6 +905,7 @@ uniform vec3 uv2_xvec;
 void vertex() {
 	UV2=UV2.x*uv2_xvec.xy + UV2.y*vec2(-uv2_xvec.y, uv2_xvec.x);
 	UV2=UV2*uv2_scale.xy+uv2_offset.xy;
+
 	//if (dot(NORMAL, CAMERA_MATRIX[2].xyz) < 0.0)
 	//	NORMAL = -NORMAL;
 }
@@ -916,6 +917,7 @@ void fragment() {
 	METALLIC = metallic;
 	ROUGHNESS = roughness;
 	SPECULAR = specular;
+	if (!FRONT_FACING)  NORMAL = -NORMAL;	
 }
 "
 

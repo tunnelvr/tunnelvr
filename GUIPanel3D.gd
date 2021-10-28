@@ -334,7 +334,7 @@ func _on_switchtest(index):
 	elif nssel == "LoadPointMesh":
 		var potreeexperiments = selfSpatial.get_node("PotreeExperiments")
 		if potreeexperiments.rootnode == null:
-			potreeexperiments.potreeactivatebuttonpressed(true)
+			potreeexperiments.get_node("Timer").start()
 		else:
 			potreeexperiments.killpotree()
 		SwitchTest.selected = 0
