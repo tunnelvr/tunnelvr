@@ -152,15 +152,13 @@ func _on_button_pressed(p_button):
 		var t0 = OS.get_ticks_usec()
 		#playerMe.seteyestate(true)
 		#var PotreeExperiments = selfSpatial.get_node("PotreeExperiments")
-		#if PotreeExperiments.rootnode != null:
-		#	PotreeExperiments.potreeactivatebuttonpressed(true)
 		print("BUTTONS VR_BUTTON_BY ", (OS.get_ticks_usec() - t0)/1000.0)
 		
 func _on_button_release(p_button):
 	if p_button == BUTTONS.VR_BUTTON_BY:
 		#playerMe.seteyestate(false)
 		pass
-		#selfSpatial.get_node("PotreeExperiments").potreeactivatebuttonpressed(false)
+
 
 
 var laserangleadjustmode = false

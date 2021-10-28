@@ -52,64 +52,6 @@ func killpotree():
 		rootnode.queue_free()
 		rootnode = null
 
-func createpotree():
-	rootnode = MeshInstance.new()
-	rootnode.set_script(load("res://potreework/Onode_root.gd"))
-	rootnode.name = "hroot"
-	rootnode.visibleincamera = true
-	rootnode.visible = false
-	rootnode.cast_shadow = GeometryInstance.SHADOW_CASTING_SETTING_OFF
-	add_child(rootnode)
-
-	var selfSpatial = get_node("/root/Spatial")
-	var potreeipnumber = selfSpatial.hostipnumber if selfSpatial.hostipnumber != "" else "192.168.8.111"
-	var potreesubdirectory = "potreewookey"
-	var urlotreedir = "http://%s:%d/%s/" % [potreeipnumber, selfSpatial.potreeportnumber, potreesubdirectory]
-	if selfSpatial.hostipnumber == "" and selfSpatial.playerMe.playerplatform == "PC":
-		if selfSpatial.playerMe.playeroperatingsystem == "Windows":
-			urlotreedir = "D:/potreetests/outdir/"
-			urlotreedir = "D:/potreetests/outdircombined/"
-		elif selfSpatial.playerMe.playeroperatingsystem in ["Linux", "X11"]:
-			urlotreedir = "/home/julian/.local/share/godot/app_userdata/tunnelvr_v0.7/caddywebserver/potreewookey/"
-		else:
-			print("unknown operating system: ", selfSpatial.playerMe.playeroperatingsystem)
-
-
-func potreeactivatebuttonpressed(buttondown):
-	if buttondown:
-		var primarycameraorigin = Vector3(0, 0, 0)
-		var primarycamera = instance_from_id(Tglobal.primarycamera_instanceid)
-		if primarycamera != null:
-			primarycameraorigin = primarycamera.get_camera_transform().origin
-
-		if rootnode == null:
-			rootnode = MeshInstance.new()
-			rootnode.set_script(load("res://potreework/Onode_root.gd"))
-			rootnode.name = "hroot"
-			rootnode.visibleincamera = true
-			rootnode.visible = false
-			rootnode.cast_shadow = GeometryInstance.SHADOW_CASTING_SETTING_OFF
-			rootnode.primarycameraorigin = primarycameraorigin
-			add_child(rootnode)
-
-			var selfSpatial = get_node("/root/Spatial")
-			var potreeipnumber = selfSpatial.hostipnumber if selfSpatial.hostipnumber != "" else "192.168.8.111"
-			var potreesubdirectory = "potreewookey"
-			var urlotreedir = "http://%s:%d/%s/" % [potreeipnumber, selfSpatial.potreeportnumber, potreesubdirectory]
-			if selfSpatial.hostipnumber == "" and selfSpatial.playerMe.playerplatform == "PC":
-				if selfSpatial.playerMe.playeroperatingsystem == "Windows":
-					urlotreedir = "D:/potreetests/outdir/"
-					urlotreedir = "D:/potreetests/outdircombined/"
-				elif selfSpatial.playerMe.playeroperatingsystem in ["Linux", "X11"]:
-					urlotreedir = "/home/julian/.local/share/godot/app_userdata/tunnelvr_v0.7/caddywebserver/potreewookey/"
-				else:
-					print("unknown operating system: ", selfSpatial.playerMe.playeroperatingsystem)
-					
-			rootnode.commenceloadotree(urlotreedir)	
-				
-		else:
-			rootnode.primarycameraorigin = primarycameraorigin
-			rootnode.commenceocellprocessing()
 
 func getpotreeurl():
 	var selfSpatial = get_node("/root/Spatial")
@@ -146,11 +88,7 @@ func updatepotreepriorities():
 	if rootnode == null:
 		var urlotreedir = getpotreeurl()
 		var urlmetadata = urlotreedir+"metadata.json"
-		#urlhierarchy = urlotreedir+"hierarchy.bin"
-		#urloctree = urlotreedir+"octree.bin"
-		ImageSystem.fetchrequesturl({ "url":urlmetadata, "callbackobject":self, "callbackfunction":"callbackloadotree" })
-		var nonimagedataobject = { "url":urlmetadata, "callbackobject":self, 
-								   "callbacksignal":"updatepotreepriorities_fetchsignal" }
+		var nonimagedataobject = { "url":urlmetadata, "callbackobject":self, "callbacksignal":"updatepotreepriorities_fetchsignal" }
 		ImageSystem.fetchrequesturl(nonimagedataobject)
 		var fmetadataF = yield(self, "updatepotreepriorities_fetchsignal")
 		if fmetadataF == null:
@@ -161,31 +99,8 @@ func updatepotreepriorities():
 		rootnode = MeshInstance.new()
 		rootnode.set_script(load("res://potreework/Onode_root.gd"))
 		rootnode.name = "hroot"
-		rootnode.visibleincamera = true
-		rootnode.visible = false
-		rootnode.cast_shadow = GeometryInstance.SHADOW_CASTING_SETTING_OFF
+		rootnode.constructpotreerootnode(metadata, urlotreedir)
 		add_child(rootnode)
-		rootnode.metadata = metadata
-		rootnode.urlmetadata = urlmetadata
-		rootnode.urlhierarchy = urlotreedir+"hierarchy.bin"
-		rootnode.urloctree = urlotreedir+"octree.bin"
-
-		rootnode.mdoffset = Vector3(metadata["offset"][0], metadata["offset"][1],  metadata["offset"][2])
-		rootnode.mdscale = Vector3(metadata["scale"][0],  metadata["scale"][1], metadata["scale"][2])
-		assert(len(metadata["attributes"]) == 1)
-
-		rootnode.hierarchybyteOffset = 0
-		rootnode.hierarchybyteSize = metadata["hierarchy"]["firstChunkSize"]
-		var mdmin = Vector3(metadata["boundingBox"]["min"][0], metadata["boundingBox"]["min"][1], metadata["boundingBox"]["min"][2])
-		var mdmax = Vector3(metadata["boundingBox"]["max"][0], metadata["boundingBox"]["max"][1], metadata["boundingBox"]["max"][2])
-		rootnode.transform.origin = (mdmax+mdmin)/2
-		rootnode.spacing = metadata["spacing"]
-		rootnode.ocellsize = mdmax - mdmin
-
-		rootnode.Dboxmin = mdmin
-		rootnode.Dboxmax = mdmax
-		print("yyy ", mdmin, mdmax)
-		rootnode.constructcontainingmesh()
 
 	var primarycameraorigin = Vector3(0, 0, 0)
 	var primarycamera = instance_from_id(Tglobal.primarycamera_instanceid)
@@ -215,7 +130,7 @@ func updatepotreepriorities():
 		ImageSystem.fetchrequesturl(nonimagedataobject)
 		var fhierarchyF = yield(self, "updatepotreepriorities_fetchsignal")
 		# assert ((urlhierarchy.substr(0, 4) != "http") or (fhierarchyF.get_len() == processingnode.hierarchybyteSize))
-		var nodesh = hnode.loadhierarchychunk(fhierarchyF, rootnode.get_parent().global_transform.inverse())
+		var nodesh = yield(hnode.Yloadhierarchychunk(fhierarchyF, rootnode.get_parent().global_transform.inverse()), "completed")
 		for node in nodesh:
 			if node.name[0] != "h":
 				rootnode.otreecellscount += 1
@@ -239,7 +154,7 @@ func updatepotreepriorities():
 				if rootnode.urloctree.substr(0, 4) != "http" or foctreeF.get_len() == nnode.byteSize:
 					var roottransforminverse = rootnode.get_parent().global_transform.inverse()
 					var tp0 = OS.get_ticks_msec()
-					nnode.loadoctcellpoints(foctreeF, rootnode.mdscale, rootnode.mdoffset, pointsizefactor, roottransforminverse, rootnode.highlightplaneperp, rootnode.highlightplanedot)
+					yield(nnode.Yloadoctcellpoints(foctreeF, rootnode.mdscale, rootnode.mdoffset, pointsizefactor, roottransforminverse, rootnode.highlightplaneperp, rootnode.highlightplanedot), "completed")
 					var dt = OS.get_ticks_msec() - tp0
 					if dt > 100:
 						print("    Warning: long loadoctcellpoints ", nnode.get_path(), " of ", dt, " msecs", " numPoints:", nnode.numPoints, " carrieddown:", nnode.numPointsCarriedDown)
@@ -321,7 +236,7 @@ func Dcorrectvisibilitymask():
 	
 func _input(event):
 	if event is InputEventKey and event.scancode == KEY_7:
-		pass # potreeactivatebuttonpressed(event.pressed)
+		pass
 	if event is InputEventKey and event.pressed and event.scancode == KEY_6:
 		if rootnode != null and rootnode.processingnode == null:
 			#rootnode.garbagecollectionsweep()

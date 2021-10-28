@@ -23,7 +23,7 @@ var Dboxmin = Vector3(0,0,0)
 var Dboxmax = Vector3(0,0,0)
 
 const boxpointepsilon = 0.6
-const spacingdivider = 1.5
+const spacingdivider = 1.55
 const constructhcubes = false
 
 func createChildAABB(pnode, index):
@@ -48,8 +48,8 @@ func on_camera_exited(camera):
 		visibleincamera = false
 		visibleincameratimestamp = OS.get_ticks_msec()*0.001
 		
-
-func loadoctcellpoints(foctreeF, mdscale, mdoffset, pointsizefactor, roottransforminverse, highlightplaneperp, highlightplanedot):
+const Nloadcellpointsperframe = 10000
+func Yloadoctcellpoints(foctreeF, mdscale, mdoffset, pointsizefactor, roottransforminverse, highlightplaneperp, highlightplanedot):
 	var ocellcentre = roottransforminverse*global_transform.origin
 	var relativeocellcentre = transform.origin
 	var childIndex = int(name)
@@ -61,6 +61,8 @@ func loadoctcellpoints(foctreeF, mdscale, mdoffset, pointsizefactor, roottransfo
 	var st = SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_POINTS)
 	var Dnpointsnotinbox = 0
+	
+	yield(get_tree(), "idle_frame")
 	for i in range(numPoints):
 		var v0 = foctreeF.get_32()
 		var v1 = foctreeF.get_32()
@@ -71,6 +73,8 @@ func loadoctcellpoints(foctreeF, mdscale, mdoffset, pointsizefactor, roottransfo
 		st.add_vertex(p - ocellcentre)
 		if not Dboxminmax.has_point(p):
 			Dnpointsnotinbox += 1
+		if ((i+1) % Nloadcellpointsperframe) == 0:
+			yield(get_tree(), "idle_frame")
 		
 	numPointsCarriedDown = 0
 	if treedepth >= 1:
@@ -82,7 +86,10 @@ func loadoctcellpoints(foctreeF, mdscale, mdoffset, pointsizefactor, roottransfo
 			if pocellindex == childIndex:
 				var rp = p - relativeocellcentre
 				st.add_vertex(rp)
+				if ((Nloadcellpointsperframe+numPointsCarriedDown) % Nloadcellpointsperframe) == 0:
+					yield(get_tree(), "idle_frame")
 				numPointsCarriedDown += 1
+				
 				if not Dboxminmax.has_point(rp + ocellcentre):
 					Dnpointsnotinbox += 1
 
@@ -103,7 +110,7 @@ func loadoctcellpoints(foctreeF, mdscale, mdoffset, pointsizefactor, roottransfo
 
 
 
-func constructnode(parentnode, childIndex, Droottransforminverse):
+func constructpotreenode(parentnode, childIndex, Droottransforminverse):
 	spacing = parentnode.spacing/spacingdivider
 	powdiv2 = parentnode.powdiv2/2.0
 	
@@ -150,10 +157,12 @@ func loadnodedefinition(fhierarchy):
 		assert ((ntype == 1) == (childMask == 0))
 
 
-func loadhierarchychunk(fhierarchyF, Droottransforminverse):
+const Nhierarchyframe = 30
+func Yloadhierarchychunk(fhierarchyF, Droottransforminverse):
 	assert (name[0] == "h")
 	name[0] = "c"
 	
+	yield(get_tree(), "idle_frame")
 	var nodes = [ self ]
 	for i in range(hierarchybyteSize/22):
 		var pnode = nodes[i]
@@ -163,11 +172,13 @@ func loadhierarchychunk(fhierarchyF, Droottransforminverse):
 				if (pnode.childMask & (1 << childIndex)):
 					var cnode = MeshInstance.new()
 					cnode.set_script(load("res://potreework/Onode.gd"))
-					cnode.constructnode(pnode, childIndex, Droottransforminverse)
+					cnode.constructpotreenode(pnode, childIndex, Droottransforminverse)
 					cnode.visible = false
 					cnode.cast_shadow = GeometryInstance.SHADOW_CASTING_SETTING_OFF
 					pnode.add_child(cnode)
 					nodes.append(cnode)
+					if (len(nodes) % Nhierarchyframe) == 0:
+						yield(get_tree(), "idle_frame")
 	return nodes
 
 

@@ -30,43 +30,6 @@ var urloctree = ""
 
 onready var ImageSystem = get_node("/root/Spatial/ImageSystem")
 
-func commenceloadotree(urlotreedir):
-	urlmetadata = urlotreedir+"metadata.json"
-	urlhierarchy = urlotreedir+"hierarchy.bin"
-	urloctree = urlotreedir+"octree.bin"
-	ImageSystem.fetchrequesturl({ "url":urlmetadata, "callbackobject":self, "callbackfunction":"callbackloadotree" })
-
-func callbackloadotree(fmetadata, nonimagedataobject):
-	if nonimagedataobject.has("bad_response_code"):
-		return
-	metadata = parse_json(fmetadata.get_as_text())
-	mdoffset = Vector3(metadata["offset"][0], 
-					   metadata["offset"][1], 
-					   metadata["offset"][2])
-	mdscale = Vector3(metadata["scale"][0], 
-					  metadata["scale"][1], 
-					  metadata["scale"][2])
-
-	assert(len(metadata["attributes"]) == 1)
-
-	hierarchybyteOffset = 0
-	hierarchybyteSize = metadata["hierarchy"]["firstChunkSize"]
-	var mdmin = Vector3(metadata["boundingBox"]["min"][0], 
-						metadata["boundingBox"]["min"][1], 
-						metadata["boundingBox"]["min"][2])
-	var mdmax = Vector3(metadata["boundingBox"]["max"][0], 
-						metadata["boundingBox"]["max"][1], 
-						metadata["boundingBox"]["max"][2])
-	transform.origin = (mdmax+mdmin)/2
-	spacing = metadata["spacing"]
-	ocellsize = mdmax - mdmin
-
-	Dboxmin = mdmin
-	Dboxmax = mdmax
-	print("yyy ", mdmin, mdmax)
-	constructcontainingmesh()
-	commenceocellprocessing()
-
 func sethighlightplane(lhighlightplaneperp, lhighlightplanedot):
 	highlightplaneperp = lhighlightplaneperp
 	highlightplanedot = lhighlightplanedot
@@ -146,7 +109,6 @@ func updatenodeinvisibilitybelow(topnode):
 				node = pnode
 
 
-
 func freeinvisiblenoderesources(topnode):
 	var node = topnode
 	var goingdown = true
@@ -187,109 +149,29 @@ func garbagecollectionsweep():
 		freeinvisiblenoderesources(oldestinvisiblenode)
 		print("totalpointcount was: ", prevtotalpointcount, " now: ", totalpointcount)
 		
-func commenceocellprocessing():
-	processingnode = self
-	processingnodeWaitingForFile = false
-	processingnodeReturnedFileHandle = null
-	sweptvisiblepointcount = 0
-	#ImageSystem.clearallpotreeactivity(self)
-	print(" *** commenceocellprocessing")
-	set_process(true)
+func constructpotreerootnode(metadata, urlotreedir):
+	assert (name == "hroot")
+	self.metadata = metadata
+	visibleincamera = true
+	visible = false
+	cast_shadow = GeometryInstance.SHADOW_CASTING_SETTING_OFF
+	urlmetadata = urlotreedir+"metadata.json"
+	urlhierarchy = urlotreedir+"hierarchy.bin"
+	urloctree = urlotreedir+"octree.bin"
 
-var Dnonimagedataobject = null
-var Dprocessingnode = null
-func processingnodeWaitingEnded(f, nonimagedataobject):
-	Dnonimagedataobject = nonimagedataobject
-	Dprocessingnode = processingnode
-	if processingnode != null and processingnodeWaitingForFile:
-		if processingnode.name[0] == "h":
-			if nonimagedataobject["url"] == urlhierarchy and \
-					nonimagedataobject["byteOffset"] == processingnode.hierarchybyteOffset and \
-					nonimagedataobject["byteSize"] == processingnode.hierarchybyteSize:
-				processingnodeReturnedFileHandle = f
-			else:
-				print("** discarding returning fetchrequesturl", nonimagedataobject)
-		else:
-			if nonimagedataobject["url"] == urloctree and \
-					nonimagedataobject["byteOffset"] == processingnode.byteOffset and \
-					nonimagedataobject["byteSize"] == processingnode.byteSize:
-				processingnodeReturnedFileHandle = f
-			else:
-				print("** discarding returning fetchrequesturl", nonimagedataobject)
-	
-func _process(delta):
-	if processingnode == null:
-		print("  ** pointcount visible: ", visiblepointcount, " sweepviz: ", sweptvisiblepointcount, "  all: ", totalpointcount, " otrees: ", otreecellscount)
-		set_process(false)
-		
-	elif not processingnode.visibleincamera:
-		uppernodevisibilitymask(processingnode, false)
-		processingnodeWaitingForFile = false
-		processingnode = successornode(processingnode, true)
+	mdoffset = Vector3(metadata["offset"][0], metadata["offset"][1], metadata["offset"][2])
+	mdscale = Vector3(metadata["scale"][0], metadata["scale"][1], metadata["scale"][2])
+	assert(len(metadata["attributes"]) == 1)
 
-	elif processingnode.name[0] == "h":
-		if not processingnodeWaitingForFile:
-			processingnodeWaitingForFile = true
-			processingnodeReturnedFileHandle = null
-			var nonimagedataobject = { "url":urlhierarchy, "callbackobject":self, 
-									   "callbackfunction":"processingnodeWaitingEnded", 
-									   "byteOffset":processingnode.hierarchybyteOffset, 
-									   "byteSize":processingnode.hierarchybyteSize }
-			ImageSystem.fetchrequesturl(nonimagedataobject)
+	hierarchybyteOffset = 0
+	hierarchybyteSize = metadata["hierarchy"]["firstChunkSize"]
+	var mdmin = Vector3(metadata["boundingBox"]["min"][0], metadata["boundingBox"]["min"][1], metadata["boundingBox"]["min"][2])
+	var mdmax = Vector3(metadata["boundingBox"]["max"][0], metadata["boundingBox"]["max"][1], metadata["boundingBox"]["max"][2])
+	transform.origin = (mdmax+mdmin)/2
+	spacing = metadata["spacing"]
+	ocellsize = mdmax - mdmin
 
-		elif processingnodeReturnedFileHandle != null:
-			processingnodeWaitingForFile = false
-			var fhierarchyF = processingnodeReturnedFileHandle
-			processingnodeReturnedFileHandle = null
-			
-			assert ((urlhierarchy.substr(0, 4) != "http") or (fhierarchyF.get_len() == processingnode.hierarchybyteSize))
-			var nodesh = processingnode.loadhierarchychunk(fhierarchyF, get_parent().global_transform.inverse())
-			for node in nodesh:
-				if node.name[0] != "h":
-					otreecellscount += 1
-		
-	else:
-		if not processingnodeWaitingForFile:
-			var boxcentre = processingnode.global_transform.origin
-			var boxradius = (processingnode.ocellsize/2).length()
-			var cd = boxcentre.distance_to(primarycameraorigin)
-			var processingnodetobevisible = true
-			if cd > boxradius + 0.1:
-				#var pointsize = pointsizefactor*processingnode.spacing/(cd-boxradius)
-				var pointsize = pointsizefactor*self.spacing*powdiv2/(cd-boxradius)
-				processingnodetobevisible = (pointsize > pointsizevisibilitycutoff)
-			if sweptvisiblepointcount > visiblepointcountLimit:
-				processingnodetobevisible = false
-		
-			if processingnodetobevisible and processingnode.pointmaterial == null:
-				processingnodeWaitingForFile = true
-				processingnodeReturnedFileHandle = null
-				var nonimagedataobject = { "url":urloctree, "callbackobject":self, 
-										   "callbackfunction":"processingnodeWaitingEnded", 
-										   "byteOffset":processingnode.byteOffset, 
-										   "byteSize":processingnode.byteSize }
-				ImageSystem.fetchrequesturl(nonimagedataobject)
-
-			else:
-				uppernodevisibilitymask(processingnode, processingnodetobevisible)
-				if processingnodetobevisible:
-					sweptvisiblepointcount += processingnode.numPoints
-				processingnode = successornode(processingnode, not processingnode.visible)
-
-		elif processingnodeReturnedFileHandle != null:
-			processingnodeWaitingForFile = false
-			var foctreeF = processingnodeReturnedFileHandle
-			processingnodeReturnedFileHandle = null
-			if urloctree.substr(0, 4) != "http" or foctreeF.get_len() == processingnode.byteSize:
-				var roottransforminverse = get_parent().global_transform.inverse()
-				var t0 = OS.get_ticks_msec()
-				processingnode.loadoctcellpoints(foctreeF, mdscale, mdoffset, pointsizefactor, roottransforminverse, highlightplaneperp, highlightplanedot)
-				var dt = OS.get_ticks_msec() - t0
-				if dt > 100:
-					print("    Warning: long loadoctcellpoints ", processingnode.get_path(), " of ", dt, " msecs", " numPoints:", processingnode.numPoints, " carrieddown:", processingnode.numPointsCarriedDown)
-				totalpointcount += processingnode.numPoints + processingnode.numPointsCarriedDown
-				sweptvisiblepointcount += processingnode.numPoints
-				uppernodevisibilitymask(processingnode, true)
-			else:
-				print("bad lll ", foctreeF.get_len(), "  ", processingnode.byteSize)
-			processingnode = successornode(processingnode, not processingnode.visible)
+	Dboxmin = mdmin
+	Dboxmax = mdmax
+	print("yyy ", mdmin, mdmax)
+	constructcontainingmesh()

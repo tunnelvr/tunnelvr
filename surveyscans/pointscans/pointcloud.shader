@@ -10,8 +10,8 @@ uniform int ocellmask = 0;
 
 const vec3 closecol = vec3(1,0,0);
 const vec3 farcol = vec3(0,0,1);
-const float fardist = 40.0;
-const float fardisttaper = 30.0;
+const float fardist = 30.0;
+const float fardisttaper = 20.0;
 const float fardisttaperfac = -(fardisttaper*((fardisttaper + fardist)))/fardist;
 
 const vec3 highlightcol = vec3(1,1,0);
