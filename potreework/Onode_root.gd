@@ -33,13 +33,15 @@ onready var ImageSystem = get_node("/root/Spatial/ImageSystem")
 func sethighlightplane(lhighlightplaneperp, lhighlightplanedot):
 	highlightplaneperp = lhighlightplaneperp
 	highlightplanedot = lhighlightplanedot
+	var screendimensionsscreendoorfac = OS.get_screen_size()*4.0; 
 	var node = self
 	while node != null:
 		if node.pointmaterial != null:
 			node.pointmaterial.set_shader_param("highlightplaneperp", highlightplaneperp)
 			node.pointmaterial.set_shader_param("highlightplanedot", highlightplanedot)
+			node.pointmaterial.set_shader_param("screendimensionsscreendoorfac", screendimensionsscreendoorfac)
 		node = successornode(node, not node.visible)
-
+	
 func successornode(node, skip):
 	if not skip and node.get_child_count() > 1:
 		return node.get_child(1)
