@@ -151,6 +151,5 @@ func _process(delta):
 				ropehangsinprocess.erase(verropropehang)
 			
 	
-	
-	
+		
 	

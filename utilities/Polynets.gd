@@ -490,14 +490,14 @@ static func cuboidfacrailsseq(nodename0, ropeseqs, ropeseqqs):
 	if max(len(ropeseq0), len(ropeseq2)) > max(len(ropeseq1), len(ropeseq3)):
 		var quadrail0 = ropeseq0.duplicate()  if dropeseq0  else ropeseq0.slice(len(ropeseq0)-1, 0, -1)
 		var quadrail1 = ropeseq2.duplicate()  if not dropeseq2  else ropeseq2.slice(len(ropeseq2)-1, 0, -1)
-		var railseqrung0 = ropeseq3.slice(1, len(ropeseq3)-2)  if dropeseq3  else ropeseq3.slice(len(ropeseq3)-2, 1, -1)
-		var railseqrung1 = ropeseq1.slice(1, len(ropeseq1)-2)  if not dropeseq1  else ropeseq1.slice(len(ropeseq1)-2, 1, -1)
+		var railseqrung0 = ropeseq3.slice(1, len(ropeseq3)-2)  if not dropeseq3  else ropeseq3.slice(len(ropeseq3)-2, 1, -1)
+		var railseqrung1 = ropeseq1.slice(1, len(ropeseq1)-2)  if dropeseq1  else ropeseq1.slice(len(ropeseq1)-2, 1, -1)
 		assert (len(quadrail0) + len(quadrail1) + len(railseqrung0) + len(railseqrung1) == len(ropeseq0) + len(ropeseq1) + len(ropeseq2) + len(ropeseq3) - 4)
 		return [quadrail0, quadrail1, railseqrung0, railseqrung1]
 	var quadrail0 = ropeseq1.duplicate()  if dropeseq1  else ropeseq1.slice(len(ropeseq1)-1, 0, -1)
 	var quadrail1 = ropeseq3.duplicate()  if not dropeseq3  else ropeseq3.slice(len(ropeseq3)-1, 0, -1)
-	var railseqrung0 = ropeseq0.slice(1, len(ropeseq0)-2)  if dropeseq0  else ropeseq0.slice(len(ropeseq0)-2, 1, -1)
-	var railseqrung1 = ropeseq2.slice(1, len(ropeseq2)-2)  if not dropeseq2  else ropeseq2.slice(len(ropeseq2)-2, 1, -1)
+	var railseqrung0 = ropeseq0.slice(1, len(ropeseq0)-2)  if not dropeseq0  else ropeseq0.slice(len(ropeseq0)-2, 1, -1)
+	var railseqrung1 = ropeseq2.slice(1, len(ropeseq2)-2)  if dropeseq2  else ropeseq2.slice(len(ropeseq2)-2, 1, -1)
 	assert (len(quadrail0) + len(quadrail1) + len(railseqrung0) + len(railseqrung1) == len(ropeseq0) + len(ropeseq1) + len(ropeseq2) + len(ropeseq3) - 4)
 	return [quadrail0, quadrail1, railseqrung0, railseqrung1]
 	
@@ -677,16 +677,20 @@ static func sidecubeintermedrail(nodepoints, tuberail0, tuberail1, quadrail, bfo
 	for qr in quadrail:
 		var qpt = nodepoints[qr]
 		var vpt = qpt - pt0
-		var z = clamp(qib.z.dot(vpt), 0.0 if len(zi) == 0 else zi[-1].z, 1.0)
-		zi.push_back(Vector3(qib.x.dot(vpt), qib.y.dot(vpt), z))
+		var lz = qib.z.dot(vpt)
+		#var z = clamp(lz, 0.0 if len(zi) == 0 else zi[-1].z, 1.0)
+		var sp = lerp(tuberail0[i][0], tuberail1[i][0], lz)
+		var dpt = qpt - sp
+		zi.push_back(Vector3(qib.x.dot(dpt), qib.y.dot(dpt), lz))
+		zi.push_back(qpt)
 	return zi
 	
 	
-static func slicerungsatintermediatecuberail(tuberail0, tuberail1, rung0k, rung1k):
+static func slicerungsatintermediatecuberail(tuberail0, tuberail1, rung0k, rung1k, rung0kp, rung1kp):
 	assert(len(tuberail0) == len(tuberail1))
 	var tuberailk = [ ]
 	for i in range(len(tuberail0)):
-		var dpi
+		var dpp
 		var x
 		if i != 0 and i != len(tuberail0) - 1:
 			var u0 = tuberail0[i][2]
@@ -696,20 +700,31 @@ static func slicerungsatintermediatecuberail(tuberail0, tuberail1, rung0k, rung1
 			x = (z0 + (z1-z0)*u0) / (1 - (z1-z0)*(u1-u0))
 			var y = u0 + x*(u1-u0)
 			assert(is_equal_approx(x, z0 + y*(z1-z0)))
-			assert(0 <= x and x <= 1 and 0 <= y and y <= 1)
-			dpi = lerp(rung0k, rung1k, y)
+			#assert(0 <= x and x <= 1 and 0 <= y and y <= 1)
+			var dpi = lerp(rung0k, rung1k, y)
+			var qib = cubeintermedrailbasis(i, tuberail0, tuberail1)
+			var sp = lerp(tuberail0[i][0], tuberail1[i][0], dpi.z)
+			dpp = sp + qib.x*dpi.x + qib.y*dpi.y
 		else:
+			var dpi
 			if i == 0:
 				assert(tuberail0[i][2] == 0.0 and tuberail1[i][2] == 0.0)
 				dpi = rung0k
+				dpp = rung0kp
 			else:
 				assert(tuberail0[i][2] == 1.0 and tuberail1[i][2] == 1.0)
 				dpi = rung1k
+				dpp = rung1kp
+			if ((dpi.z == 0.0 or dpi.z == 1.0) and dpi.x == 0.0 and dpi.y == 0.0):
+				dpp = tuberail0[i][0] if dpi.z == 0.0 else tuberail1[i][0]
 			x = dpi.z
-
-		var sp = lerp(tuberail0[i][0], tuberail1[i][0], dpi.z)
-		var qib = cubeintermedrailbasis(i, tuberail0, tuberail1)
-		tuberailk.push_back([sp + qib.x*dpi.x + qib.y*dpi.y, lerp(tuberail0[i][1], tuberail1[i][1], x)])
+			var Dqib = cubeintermedrailbasis(i, tuberail0, tuberail1)
+			var Dsp = lerp(tuberail0[i][0], tuberail1[i][0], dpi.z)
+			var Ddpp = Dsp + Dqib.x*dpi.x + Dqib.y*dpi.y
+			assert (dpp.is_equal_approx(dpp))
+			
+		var dpuv = lerp(tuberail0[i][1], tuberail1[i][1], x)
+		tuberailk.push_back([dpp, dpuv])
 
 	return tuberailk
 	
@@ -735,13 +750,13 @@ static func makerailcuboidshellmesh(nodepoints, cuboidrailfacs):
 			var zi1 = sidecubeintermedrail(nodepoints, tuberail0, tuberail1, railseqrung1, false)
 			var railsequencerung0 = [ ]
 			var railsequencerung1 = [ ]
-			intermediaterailsequence(zi, zi1, railsequencerung0, railsequencerung1)
+			intermediaterailsequence2(zi, zi1, railsequencerung0, railsequencerung1)
 			assert(len(railsequencerung0) == len(railsequencerung1))
 			var tuberailk0 = tuberail0
-			for k in range(len(railsequencerung0)+1):
+			for k2 in range(0, len(railsequencerung0)+2, 2):
 				var tuberailk1
-				if k < len(railsequencerung0):
-					tuberailk1 = slicerungsatintermediatecuberail(tuberail0, tuberail1, railsequencerung0[k], railsequencerung1[k])
+				if k2 < len(railsequencerung0):
+					tuberailk1 = slicerungsatintermediatecuberail(tuberail0, tuberail1, railsequencerung0[k2], railsequencerung1[k2], railsequencerung0[k2+1], railsequencerung1[k2+1])
 				else:
 					tuberailk1 = tuberail1
 				triangulatetuberails(surfaceTool, tuberailk0, tuberailk1)
@@ -907,3 +922,52 @@ static func intermediaterailsequence(zi, zi1, railsequencerung0, railsequencerun
 			break
 		railsequencerung0.push_back(zij0)
 		railsequencerung1.push_back(zi1j0)
+
+static func intermediaterailsequence2(zi, zi1, railsequencerung0, railsequencerung1):
+	var ij = -2
+	var i1j = -2
+	var zij0 = Vector3(0,0,0)
+	var zi1j0 = Vector3(0,0,0)
+	var zij0z = 0.0
+	var zi1j0z = 0.0
+	var zij1 = Vector3(0,0,1) if len(zi) == 0 else zi[0]
+	var zi1j1 = Vector3(0,0,1) if len(zi1) == 0 else zi1[0]
+	var zij1z = 1.0 if len(zi) == 0 else 2.0/len(zi)
+	var zi1j1z = 1.0 if len(zi1) == 0 else 2.0/len(zi1)
+
+	while true:
+		assert(ij < len(zi) or i1j < len(zi1))
+		assert (zij1z >= 0.0 and zij1z <= 1.0 and zi1j1z >= 0.0 and zi1j1z <= 1.0)
+		var adv = 0
+		if ij == len(zi):
+			adv = 1
+		elif i1j == len(zi1):
+			adv = -1
+		elif zi1j1z < zij1z:
+			if zi1j1z - zij0z < zij1z - zi1j1z:
+				adv = 1
+		else:
+			if zij1z - zi1j0z < zi1j1z - zij1z:
+				adv = -1
+
+		if adv <= 0:
+			ij += 2
+			zij0 = zij1
+			zij0z = zij1z
+			if ij != len(zi):
+				zij1 = Vector3(0,0,1) if ij+2 == len(zi) else zi[ij+2] 
+				zij1z = 1.0 if ij+2 == len(zi) else (ij+2.0)/len(zi)
+		if adv >= 0:
+			i1j += 2
+			zi1j0 = zi1j1
+			zi1j0z = zi1j1z
+			if i1j != len(zi1):
+				zi1j1 = Vector3(0,0,1) if i1j+2 == len(zi1) else zi1[i1j+2] 
+				zi1j1z = 1.0 if i1j+2 == len(zi1) else (i1j+2.0)/len(zi1) 
+		if ij == len(zi) and i1j == len(zi1):
+			break
+		railsequencerung0.push_back(zij0)
+		railsequencerung0.push_back(zi[ij+1] if ij >= 0 and ij < len(zi) else Vector3(98,98,98))
+		
+		railsequencerung1.push_back(zi1j0)
+		railsequencerung1.push_back(zi1[i1j+1] if i1j >= 0 and i1j < len(zi1) else Vector3(99,99,99))

@@ -233,24 +233,6 @@ func copytouserfilesystem(f):
 	return ProjectSettings.globalize_path(dest)
 
 
-func _input(event):
-	if event is InputEventKey and event.pressed:
-		if event.scancode == KEY_8:
-			#parse3ddmpcentreline_networked("http://cave-registry.org.uk/svn/NorthernEngland/PeakDistrict/LoneOak/Skydusky.3d")
-			parse3ddmpcentreline_networked("http://cave-registry.org.uk/svn/NorthernEngland/Ingleborough/survexdata/SkirwithCave/skirwith-lower-entrance.3d")
-			#parse3ddmpcentreline_networked("http://cave-registry.org.uk/svn/NorthernEngland/Ingleborough/survexdata/JeanPot/JeanPot.3d")
-			var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
-			if not planviewsystem.planviewcontrols.get_node("CheckBoxCentrelinesVisible").pressed:
-				planviewsystem.planviewcontrols.get_node("CheckBoxCentrelinesVisible").pressed = true
-				planviewsystem.checkcentrelinesvisible_pressed()
-		if event.scancode == KEY_9:
-			parse3ddmpcentreline_networked("http://cave-registry.org.uk/svn/NorthernEngland/Ingleborough/survexdata/SkirwithCave/skirwith-lower-entrance_deflected.3d")
-			var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
-			if not planviewsystem.planviewcontrols.get_node("CheckBoxCentrelinesVisible").pressed:
-				planviewsystem.planviewcontrols.get_node("CheckBoxCentrelinesVisible").pressed = true
-				planviewsystem.checkcentrelinesvisible_pressed()
-
-
 
 func parse3ddmpcentreline_networked(f3durl):
 	var sketchsystem = get_node("/root/Spatial/SketchSystem")
@@ -346,3 +328,53 @@ func parse3ddmpcentreline_execute(f3dfile, f3durl):
 
 func _ready():
 	print("The PATH environment is: ", OS.get_environment("PATH").substr(0, 100), "\n\n")
+
+
+func _input(event):	
+	if event is InputEventKey and event.pressed and event.scancode == KEY_4:
+		var sketchsystem = get_node("/root/Spatial/SketchSystem")
+		var rnodepoints = { }
+		var ronepathpairs = [ ]
+		var ri = 1.8
+		var ro = 2.7
+		var rh = 0.9
+		var sweepdeg = 70.0
+		var hump = 0.8
+		var en = { "li":5, "lo":3, "hi":5, "ho":10}
+		var ens = {0:12, 100:3}
+		for l in en:
+			var rn = en[l]
+			var np = ""
+			for i in range(rn+1):
+				var ang = i*1.0/rn*sweepdeg+0
+				var j = int(i*1.0/rn*100 + 0.5)
+				var ct = cos(deg2rad(ang))
+				var st = sin(deg2rad(ang))
+				var r = ri if l[1] == "i" else ro
+				var nn = "%s%d" % [l, j]
+				rnodepoints[nn] = Vector3(ct*r, (0 if l[0] == "l" else rh), st*r)
+				if i != 0:
+					ronepathpairs.append_array([nn, np])
+				np = nn
+		for l in ens:
+			var ni = rnodepoints["hi%d" % l]
+			var no = rnodepoints["ho%d" % l]
+			var rn = ens[l]
+			var np = "hi%d"%l
+			for i in range(1, rn):
+				var a = i*1.0/rn
+				var nn = "h%dt%d" % [l, i]
+				rnodepoints[nn] = lerp(ni, no, a) + Vector3(0, hump*(1 - 4*pow(a-0.5, 2)), 0)
+				ronepathpairs.append_array([np, nn])
+				np = nn
+			ronepathpairs.append_array([np, "ho%d" % l])
+				
+		ronepathpairs.append_array(["li0","lo0", "lo0","ho0", "hi0","li0",  "li100","lo100", "lo100","ho100", "hi100","li100"])
+		var xcboulder = { "name":"rock2", 
+						  "drawingtype":DRAWING_TYPE.DT_ROPEHANG, 
+						  "drawingvisiblecode":DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE,
+						  "transformpos":Transform(Basis(), Vector3(10, 0.2, -12)), 
+						  "nodepoints":rnodepoints,
+						  "onepathpairs":ronepathpairs, 
+						 }
+		sketchsystem.actsketchchange([xcboulder])

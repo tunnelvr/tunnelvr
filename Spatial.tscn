@@ -487,8 +487,9 @@ rings = 1
 
 [sub_resource type="SpatialMaterial" id=73]
 flags_transparent = true
+flags_do_not_receive_shadows = true
 params_cull_mode = 2
-albedo_color = Color( 1, 0.45098, 0, 0.329412 )
+albedo_color = Color( 1, 0.45098, 0, 0.164706 )
 metallic = 0.44
 metallic_specular = 0.22
 roughness = 0.74
@@ -2556,10 +2557,12 @@ material/0 = SubResource( 66 )
 [node name="RopeSpotGuide" type="Spatial" parent="BodyObjects"]
 
 [node name="Vertical" type="MeshInstance" parent="BodyObjects/RopeSpotGuide"]
+cast_shadow = 0
 mesh = SubResource( 72 )
 material/0 = SubResource( 73 )
 
 [node name="Horizontal" type="MeshInstance" parent="BodyObjects/RopeSpotGuide"]
+cast_shadow = 0
 mesh = SubResource( 74 )
 material/0 = SubResource( 73 )
 
