@@ -324,12 +324,12 @@ albedo_texture = ExtResource( 25 )
 uv1_scale = Vector3( 1, 0.05, 1 )
 uv1_offset = Vector3( -0.2, 0.9, 0 )
 
-[sub_resource type="StyleBoxFlat" id=39]
-bg_color = Color( 0.0980392, 0.443137, 0.882353, 1 )
-
 [sub_resource type="DynamicFont" id=40]
 size = 22
 font_data = ExtResource( 40 )
+
+[sub_resource type="StyleBoxFlat" id=39]
+bg_color = Color( 0.0980392, 0.443137, 0.882353, 1 )
 
 [sub_resource type="BoxShape" id=41]
 extents = Vector3( 0.4, 0.2, 0.01 )
@@ -1497,14 +1497,14 @@ size = Vector2( 1.9, 0.3 )
 
 [sub_resource type="AudioStreamMicrophone" id=220]
 
-[sub_resource type="StyleBoxFlat" id=221]
-bg_color = Color( 0.0862745, 0.0509804, 0.0509804, 1 )
-anti_aliasing = false
-
 [sub_resource type="DynamicFont" id=222]
 outline_size = 1
 outline_color = Color( 0.0431373, 0.0392157, 0.0392157, 1 )
 font_data = ExtResource( 39 )
+
+[sub_resource type="StyleBoxFlat" id=221]
+bg_color = Color( 0.0862745, 0.0509804, 0.0509804, 1 )
+anti_aliasing = false
 
 [sub_resource type="PlaneMesh" id=223]
 size = Vector2( 2, 0.1 )
@@ -2344,8 +2344,8 @@ __meta__ = {
 margin_right = 41.0
 margin_bottom = 41.0
 focus_mode = 0
-custom_styles/hover = SubResource( 39 )
 custom_fonts/font = SubResource( 40 )
+custom_styles/hover = SubResource( 39 )
 enabled_focus_mode = 0
 text = "A"
 __meta__ = {
@@ -2394,8 +2394,8 @@ script = ExtResource( 23 )
 
 [node name="PlayerKinematicBody" type="KinematicBody" parent="BodyObjects/PlayerMotion"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, -6.412 )
-input_ray_pickable = false
 collision_mask = 38
+input_ray_pickable = false
 
 [node name="PlayerBodyCapsule" type="CollisionShape" parent="BodyObjects/PlayerMotion/PlayerKinematicBody"]
 transform = Transform( 1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0 )
@@ -2423,8 +2423,8 @@ material/0 = SubResource( 50 )
 
 [node name="PlayerEnlargedKinematicBody" type="KinematicBody" parent="BodyObjects/PlayerMotion"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, -6.412 )
-input_ray_pickable = false
 collision_mask = 38
+input_ray_pickable = false
 
 [node name="PlayerBodyCapsule" type="CollisionShape" parent="BodyObjects/PlayerMotion/PlayerEnlargedKinematicBody"]
 transform = Transform( 1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0 )
@@ -2432,8 +2432,8 @@ shape = SubResource( 51 )
 
 [node name="PlayerHeadKinematicBody" type="KinematicBody" parent="BodyObjects/PlayerMotion"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.55385, -6.3318 )
-input_ray_pickable = false
 collision_mask = 38
+input_ray_pickable = false
 
 [node name="PlayerHeadCapsule" type="CollisionShape" parent="BodyObjects/PlayerMotion/PlayerHeadKinematicBody"]
 shape = SubResource( 52 )
@@ -2557,11 +2557,13 @@ material/0 = SubResource( 66 )
 [node name="RopeSpotGuide" type="Spatial" parent="BodyObjects"]
 
 [node name="Vertical" type="MeshInstance" parent="BodyObjects/RopeSpotGuide"]
+visible = false
 cast_shadow = 0
 mesh = SubResource( 72 )
 material/0 = SubResource( 73 )
 
 [node name="Horizontal" type="MeshInstance" parent="BodyObjects/RopeSpotGuide"]
+visible = false
 cast_shadow = 0
 mesh = SubResource( 74 )
 material/0 = SubResource( 73 )
@@ -3730,9 +3732,9 @@ __meta__ = {
 margin_right = 113.0
 margin_bottom = 30.0
 size_flags_stretch_ratio = 0.0
-custom_styles/normal = SubResource( 221 )
 custom_fonts/mono_font = SubResource( 12 )
 custom_fonts/normal_font = SubResource( 222 )
+custom_styles/normal = SubResource( 221 )
 bbcode_enabled = true
 bbcode_text = "testing"
 text = "testing"
