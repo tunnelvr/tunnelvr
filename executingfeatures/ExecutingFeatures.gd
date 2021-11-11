@@ -338,10 +338,10 @@ func _input(event):
 		var ri = 1.8
 		var ro = 2.7
 		var rh = 0.9
-		var sweepdeg = 170.0
+		var sweepdeg = 70.0
 		var hump = 0.8
 		var en = { "li":5, "lo":3, "hi":5, "ho":10}
-		var ens = {0:7, 100:6}
+		var ens = {0:12, 100:3}
 		for l in en:
 			var rn = en[l]
 			var np = ""
