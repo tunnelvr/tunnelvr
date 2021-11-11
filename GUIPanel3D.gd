@@ -825,6 +825,8 @@ func _on_networkstate_selected(index):
 		get_tree().connect("network_peer_connected", selfSpatial, "_player_connected")
 		get_tree().connect("network_peer_disconnected", selfSpatial, "_player_disconnected")
 		selfSpatial.setconnectiontoserveractive(false)
+		selfSpatial.get_node("BodyObjects/LaserOrient/NotificationCylinder").visible = true
+		selfSpatial.get_node("BodyObjects/LaserOrient/NotificationCylinder").scale.y = 20
 		get_tree().connect("connected_to_server", selfSpatial, "_connected_to_server")
 		get_tree().connect("connection_failed", self, "_connection_failed")
 		get_tree().connect("server_disconnected", self, "_server_disconnected")
@@ -895,6 +897,7 @@ func _connection_failed():
 	print("_connection_failed ", Tglobal.connectiontoserveractive, " ", websocketclient, " ", selfSpatial.players_connected_list)
 	selfSpatial.mqttsystem.mqttpublish("connectionfailed", String(playerMe.networkID))
 	selfSpatial.get_node("BodyObjects/LaserOrient/NotificationTorus").visible = true
+	selfSpatial.get_node("BodyObjects/LaserOrient/NotificationCylinder").visible = false
 	websocketclient = null
 	if Tglobal.connectiontoserveractive:
 		_server_disconnected()
@@ -907,7 +910,6 @@ func removeallplayersdisconnection():
 	selfSpatial.mqttsystem.mqttpublish("serverdisconnected", String(playerMe.networkID))
 	selfSpatial.deferred_player_connected_list.clear()
 	$Viewport/GUI/Panel/Label.text = "server_disconnected"
-	selfSpatial.get_node("BodyObjects/LaserOrient/NotificationTorus").visible = true
 	for id in selfSpatial.players_connected_list.duplicate():
 		print("server_disconnected, calling _player_disconnected on ", id)
 		selfSpatial.call_deferred("_player_disconnected", id)
@@ -918,6 +920,8 @@ func _server_disconnected():
 	networkedmultiplayerenetclient = null
 	selfSpatial.setconnectiontoserveractive(false)
 	removeallplayersdisconnection()
+	selfSpatial.get_node("BodyObjects/LaserOrient/NotificationTorus").visible = true
+	selfSpatial.get_node("BodyObjects/LaserOrient/NotificationCylinder").visible = false
 	if $Viewport/GUI/Panel/Networkstate.selected != 0:
 		$Viewport/GUI/Panel/Networkstate.selected = 0
 
