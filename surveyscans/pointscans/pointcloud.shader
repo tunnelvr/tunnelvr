@@ -21,7 +21,7 @@ const float highlightdist = 0.5;
 const float sizebumpdist = 0.25;
 const vec3 bordercolor = vec3(0.1, 0.1, 0.2);
 const float edgeborder = 0.5 - 0.05; 
-const float closenessdist = 0.3;
+const float closenessdist = 0.8;
 
 varying vec3 emissioncol;
 varying vec3 bordercol; 

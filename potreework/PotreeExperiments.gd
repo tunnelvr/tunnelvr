@@ -55,13 +55,12 @@ func killpotree():
 
 func getpotreeurl():
 	var selfSpatial = get_node("/root/Spatial")
-	var potreeipnumber = selfSpatial.hostipnumber if selfSpatial.hostipnumber != "" else "192.168.8.111"
+	var potreeipnumber = selfSpatial.hostipnumber if selfSpatial.hostipnumber != "" else "godot.doesliverpool.xyz"
 	var potreesubdirectory = "potreewookey"
 	var urlotreedir = "http://%s:%d/%s/" % [potreeipnumber, selfSpatial.potreeportnumber, potreesubdirectory]
 	if selfSpatial.hostipnumber == "" and selfSpatial.playerMe.playerplatform == "PC":
 		if selfSpatial.playerMe.playeroperatingsystem == "Windows":
-			urlotreedir = "D:/potreetests/outdir/"
-			urlotreedir = "D:/potreetests/outdircombined/"
+			urlotreedir = "C:/Users/Julian/data/potreewookey/"
 		elif selfSpatial.playerMe.playeroperatingsystem in ["Linux", "X11"]:
 			urlotreedir = "/home/julian/.local/share/godot/app_userdata/tunnelvr_v0.7/caddywebserver/potreewookey/"
 		else:

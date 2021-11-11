@@ -151,9 +151,9 @@ func garbagecollectionsweep():
 		freeinvisiblenoderesources(oldestinvisiblenode)
 		print("totalpointcount was: ", prevtotalpointcount, " now: ", totalpointcount)
 		
-func constructpotreerootnode(metadata, urlotreedir):
+func constructpotreerootnode(lmetadata, urlotreedir):
 	assert (name == "hroot")
-	self.metadata = metadata
+	metadata = lmetadata
 	visibleincamera = true
 	visible = false
 	cast_shadow = GeometryInstance.SHADOW_CASTING_SETTING_OFF
