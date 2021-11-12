@@ -48,8 +48,8 @@ func on_camera_exited(camera):
 		visibleincamera = false
 		visibleincameratimestamp = OS.get_ticks_msec()*0.001
 		
-const Nloadcellpointsperframe = 10000
-func Yloadoctcellpoints(foctreeF, mdscale, mdoffset, pointsizefactor, roottransforminverse, highlightplaneperp, highlightplanedot):
+const Nloadcellpointsperframe = 3000
+func Yloadoctcellpoints(foctreeF, mdscale, mdoffset, pointsizefactor, roottransforminverse, highlightplaneperp, highlightplanedot, screendimensionsscreendoorfac):
 	var ocellcentre = roottransforminverse*global_transform.origin
 	var relativeocellcentre = transform.origin
 	var childIndex = int(name)
@@ -63,6 +63,7 @@ func Yloadoctcellpoints(foctreeF, mdscale, mdoffset, pointsizefactor, roottransf
 	var Dnpointsnotinbox = 0
 	
 	yield(get_tree(), "idle_frame")
+	var t0 = OS.get_ticks_msec()
 	for i in range(numPoints):
 		var v0 = foctreeF.get_32()
 		var v1 = foctreeF.get_32()
@@ -74,7 +75,11 @@ func Yloadoctcellpoints(foctreeF, mdscale, mdoffset, pointsizefactor, roottransf
 		if not Dboxminmax.has_point(p):
 			Dnpointsnotinbox += 1
 		if ((i+1) % Nloadcellpointsperframe) == 0:
+			var dt = OS.get_ticks_msec() - t0
+			if dt > 20:
+				print("Excessive Yloadoctcellpoints_A time ", dt)
 			yield(get_tree(), "idle_frame")
+			t0 = OS.get_ticks_msec()
 		
 	numPointsCarriedDown = 0
 	if treedepth >= 1:
@@ -87,17 +92,29 @@ func Yloadoctcellpoints(foctreeF, mdscale, mdoffset, pointsizefactor, roottransf
 				var rp = p - relativeocellcentre
 				st.add_vertex(rp)
 				if ((Nloadcellpointsperframe+numPointsCarriedDown) % Nloadcellpointsperframe) == 0:
+					var dt = OS.get_ticks_msec() - t0
+					if dt > 20:
+						print("Excessive Yloadoctcellpoints_B time ", dt)
 					yield(get_tree(), "idle_frame")
+					t0 = OS.get_ticks_msec()
 				numPointsCarriedDown += 1
 				
 				if not Dboxminmax.has_point(rp + ocellcentre):
 					Dnpointsnotinbox += 1
 
-	var pointsmesh = Mesh.new()
-	st.commit(pointsmesh)
-	mesh = pointsmesh
+	var dt = OS.get_ticks_msec() - t0
+	if dt > 20:
+		print("Excessive Yloadoctcellpoints_C time ", dt)
+	t0 = OS.get_ticks_msec()		
+	var pointmesh = Mesh.new()
+	st.commit(pointmesh)
+	mesh = pointmesh
 	if Dnpointsnotinbox != 0:
 		print("npointsnotinbox ", Dnpointsnotinbox, " of ", numPoints+numPointsCarriedDown)
+	dt = OS.get_ticks_msec() - t0
+	if dt > 20:
+		print("Excessive Yloadoctcellpoints_D time ", dt)
+	t0 = OS.get_ticks_msec()		
 	pointmaterial = load("res://potreework/pointcloudslice.material").duplicate()
 	pointmaterial.set_shader_param("point_scale", pointsizefactor*spacing)
 	pointmaterial.set_shader_param("ocellcentre", ocellcentre)
@@ -105,8 +122,12 @@ func Yloadoctcellpoints(foctreeF, mdscale, mdoffset, pointsizefactor, roottransf
 	pointmaterial.set_shader_param("roottransforminverse", roottransforminverse)
 	pointmaterial.set_shader_param("highlightplaneperp", highlightplaneperp)
 	pointmaterial.set_shader_param("highlightplanedot", highlightplanedot)
+	pointmaterial.set_shader_param("screendimensionsscreendoorfac", screendimensionsscreendoorfac)
 
 	set_surface_material(0, pointmaterial)
+	dt = OS.get_ticks_msec() - t0
+	if dt > 20:
+		print("Excessive Yloadoctcellpoints_E time ", dt)
 
 
 

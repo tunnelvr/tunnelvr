@@ -10,7 +10,8 @@ var pointsizefactor = 150.0
 
 var highlightplaneperp = Vector3(1,0,0)
 var highlightplanedot = 0.0
-
+var screendimensionsscreendoorfac = Vector2(100,100)
+	
 var primarycameraorigin = Vector3(0,0,0)
 var pointsizevisibilitycutoff = 15.0
 
@@ -33,7 +34,6 @@ onready var ImageSystem = get_node("/root/Spatial/ImageSystem")
 func sethighlightplane(lhighlightplaneperp, lhighlightplanedot):
 	highlightplaneperp = lhighlightplaneperp
 	highlightplanedot = lhighlightplanedot
-	var screendimensionsscreendoorfac = OS.get_screen_size()*4.0; 
 	var node = self
 	while node != null:
 		if node.pointmaterial != null:
@@ -153,6 +153,7 @@ func garbagecollectionsweep():
 		
 func constructpotreerootnode(lmetadata, urlotreedir):
 	assert (name == "hroot")
+	screendimensionsscreendoorfac = OS.get_screen_size()/8.0; 
 	metadata = lmetadata
 	visibleincamera = true
 	visible = false

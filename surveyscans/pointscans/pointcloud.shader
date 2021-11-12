@@ -7,7 +7,7 @@ uniform float highlightplanedot = 0.0;
 uniform mat4 roottransforminverse = mat4(1.0); 
 uniform vec3 ocellcentre = vec3(0,0,0);
 uniform int ocellmask = 0;
-uniform vec2 screendimensionsscreendoorfac = vec2(4800.0, 3200.0); // screen dimensions*4
+uniform vec2 screendimensionsscreendoorfac = vec2(240, 135); // screen dimensions/
 
 const vec3 closecol = vec3(1,0,0);
 const vec3 farcol = vec3(0,0,1);
@@ -77,14 +77,11 @@ void fragment() {
 		ALBEDO *= mix(vec3(1.0, 1.0, 1.0), bordercolor, rsq*3.0);
 	
 	if 	(closenessfrac < 1.0) {
-		if ((fract(SCREEN_UV.x*screendimensionsscreendoorfac.x) > closenessfrac) || 
-			(fract(SCREEN_UV.y*screendimensionsscreendoorfac.y) > closenessfrac))
-				discard; 
+		//if ((fract(SCREEN_UV.x*screendimensionsscreendoorfac.x) > closenessfrac) || 
+		//	(fract(SCREEN_UV.y*screendimensionsscreendoorfac.y) > closenessfrac))
+		//		discard; 
 
-		//if (fract(POINT_COORD.x*screendimensionsscreendoorfac.x) > closenessfrac)
-		//	discard; 
+		if ((abs(POINT_COORD.x*2.0-1.0)<1.0-closenessfrac) || (abs(POINT_COORD.y*2.0-1.0)<1.0-closenessfrac))
+			discard; 
 	}
-	//if (((int(POINT_COORD.x*closenessrate*closenessfreq) % int(closenessrate)) > int(closenessscreen)) || 
-	//	((int(POINT_COORD.y*closenessrate*closenessfreq) % int(closenessrate)) > int(closenessscreen)))
-	//		discard;
 }
