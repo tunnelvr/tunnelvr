@@ -4,7 +4,7 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
     godot-source = {
-      url = "github:godotengine/godot/3.3.2-stable";
+      url = "github:godotengine/godot/3.4-stable";
       flake = false;
     };
   };
