@@ -494,6 +494,8 @@ remote func actsketchchangeL(xcdatalist):
 				print("Now processing ", len(xcdatalistReceivedDuringChunkingL), " received during chunking")
 				for xcdatalistR in xcdatalistReceivedDuringChunkingL:
 					actsketchchangeL(xcdatalistR)
+					
+			get_node("/root/Spatial/MQTTExperiment").mqttupdatenetstatus()
 
 	if len(xcdrawingsrejected) != 0:
 		print("The following drawings have bad change sequences and need to be requested from the server", xcdrawingsrejected)

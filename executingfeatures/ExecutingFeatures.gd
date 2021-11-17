@@ -4,7 +4,7 @@ var caddywebserverpid = -1
 
 # This is where we store the potree files on the server; 
 # in a directory:  /home/julian/.local/share/godot/app_userdata/tunnelvr_v0.7/caddywebserver
-# or /root/.local/share/godot/app_userdata/tunnelvr_v0.7
+# or /var/lib/tunnelvr/.local/share/godot/app_userdata/tunnelvr_v0.7/caddywebserver
 func startcaddywebserver():
 	if caddywebserverpid != -1:
 		stopcaddywebserver()

@@ -232,7 +232,6 @@ func _player_connected(id):
 	players_connected_list.push_back(id)
 	$GuiSystem/GUIPanel3D/Viewport/GUI/Panel/Label.text = "player "+String(id)+" connected"
 
-	mqttsystem.mqttpublish("playercount/add", "%d %d" % [$Players.get_child_count(), id])
 	if playerMe.networkID == 1:
 		$GuiSystem/GUIPanel3D.rpc_id(id, "servercavesfilelist", $GuiSystem/GUIPanel3D.cavesfilelist())
 		print("Converting sketchsystemtodict")
@@ -256,7 +255,6 @@ func _player_connected(id):
 
 func _player_disconnected(id):
 	print("_player_disconnected ", id)
-	mqttsystem.mqttpublish("playerdisconnected", String(id))
 	if id in deferred_player_connected_list:
 		print(" _player_disconnected id still in  deferred_player_connected_list")
 		deferred_player_connected_list.erase(id)
@@ -273,7 +271,7 @@ func _player_disconnected(id):
 	$GuiSystem/GUIPanel3D.updateplayerlist()
 	playerMe.bouncetestnetworkID = nextplayernetworkidinringskippingdoppelganger(id)
 	$GuiSystem/GUIPanel3D/Viewport/GUI/Panel/Label.text = "player "+String(id)+" disconnected"
-	mqttsystem.mqttpublish("playercount/remove", "%d %d" % [$Players.get_child_count(), id])
+	get_node("/root/Spatial/MQTTExperiment").call_deferred("mqttupdatenetstatus")
 		
 func setconnectiontoserveractive(b):
 	Tglobal.connectiontoserveractive = b
@@ -289,7 +287,6 @@ func _connected_to_server():
 		print("setting the newnetworkID: ", newnetworkID)
 		setnetworkidname(playerMe, newnetworkID)
 	$GuiSystem/GUIPanel3D/Viewport/GUI/Panel/Label.text = "connected as "+String(playerMe.networkID)
-	mqttsystem.mqttpublish("connectedtoserver", String(newnetworkID))
 	get_node("BodyObjects/LaserOrient/NotificationTorus").visible = false
 			
 	print("SETTING connectiontoserveractive true now")

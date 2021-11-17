@@ -1,36 +1,58 @@
 extends Node
 
+var possibleusernames = ["Alice", "Beth", "Cath", "Dan", "Earl", "Fred", "George", "Harry", "Ivan", "John", "Kevin", "Larry", "Martin", "Oliver", "Peter", "Quentin", "Robert", "Samuel", "Thomas", "Ulrik", "Victor", "Wayne", "Xavier", "Youngs", "Zephir"]
+var topicstatus = ""
+var randomplayername = ""
 
-# Called when the node enters the scene tree for the first time.
-var uniqstring
-var topicstem
+func received_mqtt(topic, msg):
+	print("received_mqtt ", [topic, msg])
+
+func on_broker_disconnect():
+	print("broker_mqtt disconnect")
+	topicstatus = ""
+	
+func on_broker_connect():
+	print("broker_mqtt connect")
 
 func _ready():
-	uniqstring = OS.get_unique_id().replace("{", "").split("-")[0].to_upper()
-	print(uniqstring)
-	topicstem = "tunnelvr/u%s/" % uniqstring
-	$mqttnode.server = "mosquitto.doesliverpool.xyz"
-	$mqttnode.client_id = "u"+uniqstring
-	$mqttnode.connect("received_message", self, "received_message")
-	if false:
-		call_deferred("connectmqtt")
-	else:
-		print("disabling mqtt")
+	$MQTT.server = "mosquitto.doesliverpool.xyz"
+	$MQTT.connect("received_message", self, "received_mqtt")
+	$MQTT.connect("broker_connected", self, "on_broker_connect")
+	$MQTT.connect("broker_disconnected", self, "on_broker_disconnect")
+	randomize()
+	$MQTT.client_id = "s%d" % randi()
+	randomplayername = possibleusernames[randi()%len(possibleusernames)]
 
-func mqttpublish(subtopic, payload):
-	$mqttnode.publish(topicstem+subtopic, payload)
-	
-func connectmqtt():
-	$mqttnode.set_last_will(topicstem+"status", "stopped", true)
-	if yield($mqttnode.connect_to_server(), "completed"):
-		$mqttnode.publish(topicstem+"status", "connected", true)
-		print("subscribing to ", topicstem+"cmd")
-		$mqttnode.subscribe(topicstem+"cmd")
+func mqttupdatenetstatus():
+	var selfSpatial = get_node("/root/Spatial")
+	var playerplatform = selfSpatial.playerMe.playerplatform
+	var ltopicstatus = "tunnelvrv/%s/%s/%s/netstatus" % [$MQTT.client_id, playerplatform, randomplayername]
+	if ltopicstatus != topicstatus:
+		if topicstatus != "":
+			$MQTT.disconnect_from_server()
+			yield(get_tree(), "idle_frame")
+		topicstatus = ltopicstatus
+		$MQTT.set_last_will(topicstatus, "", true)
+		if not yield($MQTT.connect_to_server(), "completed"):
+			print("Failed to connect to mqtt broker")
+			return
+	var tunnelvrstatus = { }
+	var guipanel3d = selfSpatial.get_node("GuiSystem/GUIPanel3D")
+	tunnelvrstatus["ipnumber"] = selfSpatial.hostipnumber
+	tunnelvrstatus["portnumber"] = selfSpatial.hostportnumber
+	if guipanel3d.networkedmultiplayerenetserver != null or guipanel3d.websocketserver != null:
+		tunnelvrstatus["state"] = "server"
+	elif guipanel3d.networkedmultiplayerenetclient != null or guipanel3d.websocketclient != null:
+		tunnelvrstatus["state"] = "client"
 	else:
-		print("mqtt failed to connect")
+		tunnelvrstatus["state"] = "unconnected"
+	tunnelvrstatus["sketchname"] = selfSpatial.get_node("SketchSystem").sketchname
+	tunnelvrstatus["playermqttids"] = [ ]
+	for player in selfSpatial.get_node("Players").get_children():
+		if player != selfSpatial.playerMe:
+			tunnelvrstatus["playermqttids"].push_back(player.playermqttid)
+	$MQTT.publish(topicstatus, to_json(tunnelvrstatus), true)
 
-var msg = ""
-func received_message(topic, message):
-	print("MQTT RECEIVED: ", topic, ": ", message)
-	msg = message
-		
+func fpsbounce(mfpsbounce):
+	$MQTT.publish(topicstatus+"/fpsbounce", mfpsbounce)
+

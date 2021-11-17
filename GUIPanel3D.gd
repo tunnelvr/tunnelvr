@@ -162,7 +162,7 @@ func _on_playerscale_selected(index):
 			playerMe.playerflyscale = playerMe.playerscale*0.75
 		playerMe.playerwalkscale = 1.0
 	setguipanelhide()
-	selfSpatial.mqttsystem.mqttpublish("playerscale", String(newplayerscale))
+
 
 
 
@@ -675,9 +675,6 @@ func setguipanelvisible(controller_global_transform):
 	virtualkeyboard.global_transform = kpaneltrans
 	
 	$Viewport/GUI/Panel/Label.text = ""
-	var MQTTExperiment = get_node_or_null("/root/Spatial/MQTTExperiment")
-	if MQTTExperiment != null and MQTTExperiment.msg != "":
-		$Viewport/GUI/Panel/Label.text = MQTTExperiment.msg
 
 	visible = true
 	$CollisionShape.disabled = not visible
@@ -849,7 +846,7 @@ func _on_networkstate_selected(index):
 	
 func networkstartasserver(fromgui):
 	if not fromgui:
-		yield(get_tree().create_timer(2.0), "timeout")		
+		yield(get_tree().create_timer(2.0), "timeout")
 	print("Starting as server, ipnumber list:")
 	selfSpatial.hostipnumber = ""
 	for k in IP.get_local_interfaces():
@@ -886,15 +883,14 @@ func networkstartasserver(fromgui):
 	var lnetworkID = get_tree().get_network_unique_id()
 	selfSpatial.setnetworkidname(selfSpatial.playerMe, lnetworkID)
 	print("server networkID: ", selfSpatial.playerMe.networkID)
-	selfSpatial.mqttsystem.mqttpublish("startasserver", String(selfSpatial.playerMe.networkID))
 	selfSpatial.get_node("BodyObjects/LaserOrient/NotificationTorus").visible = false
 
 	if selfSpatial.playerMe.executingfeaturesavailable.has("caddy"):
 		selfSpatial.get_node("ExecutingFeatures").startcaddywebserver()
+	get_node("/root/Spatial/MQTTExperiment").mqttupdatenetstatus()
 
 func _connection_failed():
 	print("_connection_failed ", Tglobal.connectiontoserveractive, " ", websocketclient, " ", selfSpatial.players_connected_list)
-	selfSpatial.mqttsystem.mqttpublish("connectionfailed", String(playerMe.networkID))
 	selfSpatial.get_node("BodyObjects/LaserOrient/NotificationTorus").visible = true
 	selfSpatial.get_node("BodyObjects/LaserOrient/NotificationCylinder").visible = false
 	websocketclient = null
@@ -906,12 +902,12 @@ func _connection_failed():
 	$Viewport/GUI/Panel/Label.text = "connection_failed"
 
 func removeallplayersdisconnection():
-	selfSpatial.mqttsystem.mqttpublish("serverdisconnected", String(playerMe.networkID))
 	selfSpatial.deferred_player_connected_list.clear()
 	$Viewport/GUI/Panel/Label.text = "server_disconnected"
 	for id in selfSpatial.players_connected_list.duplicate():
 		print("server_disconnected, calling _player_disconnected on ", id)
 		selfSpatial.call_deferred("_player_disconnected", id)
+	get_node("/root/Spatial/MQTTExperiment").mqttupdatenetstatus()
 	
 func _server_disconnected():
 	print("\n\n***_server_disconnected ", websocketclient, "\n\n")
@@ -931,8 +927,7 @@ remote func recordnetworkmetrics(lnetworkmetricsreceived):
 	networkmetricsreceived = lnetworkmetricsreceived
 	var bouncetimems = networkmetricsreceived["ticksback"] - networkmetricsreceived["ticksout"]
 	#print("recordnetworkmetrics ", networkmetricsreceived)
-	selfSpatial.mqttsystem.mqttpublish("fpsbounce", "%d %d" % [Performance.get_monitor(Performance.TIME_FPS), bouncetimems])
-
+	selfSpatial.get_node("MQTTExperiment").fpsbounce("%d %d" % [Performance.get_monitor(Performance.TIME_FPS), bouncetimems])
 		
 remote func sendbacknetworkmetrics(lnetworkmetrics, networkIDsource):
 	var playerOthername = "NetworkedPlayer"+String(networkIDsource) if networkIDsource != -11 else "Doppelganger"

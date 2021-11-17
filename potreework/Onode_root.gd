@@ -162,7 +162,11 @@ func constructpotreerootnode(lmetadata, urlotreedir):
 	urlhierarchy = urlotreedir+"hierarchy.bin"
 	urloctree = urlotreedir+"octree.bin"
 
+	var bboffset = Vector3(0.0, 0.0, 0.0)  # Vector3(418728.616, 2793207.181, 161.586)
+	print("Forcing to centre bboffset", bboffset)
 	mdoffset = Vector3(metadata["offset"][0], metadata["offset"][1], metadata["offset"][2])
+	mdoffset -= bboffset
+
 	mdscale = Vector3(metadata["scale"][0], metadata["scale"][1], metadata["scale"][2])
 	assert(len(metadata["attributes"]) == 1)
 
@@ -170,6 +174,9 @@ func constructpotreerootnode(lmetadata, urlotreedir):
 	hierarchybyteSize = metadata["hierarchy"]["firstChunkSize"]
 	var mdmin = Vector3(metadata["boundingBox"]["min"][0], metadata["boundingBox"]["min"][1], metadata["boundingBox"]["min"][2])
 	var mdmax = Vector3(metadata["boundingBox"]["max"][0], metadata["boundingBox"]["max"][1], metadata["boundingBox"]["max"][2])
+	mdmin -= bboffset
+	mdmax -= bboffset
+
 	transform.origin = (mdmax+mdmin)/2
 	spacing = metadata["spacing"]
 	ocellsize = mdmax - mdmin

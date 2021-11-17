@@ -3,16 +3,16 @@
     "godot-source": {
       "flake": false,
       "locked": {
-        "lastModified": 1621856353,
-        "narHash": "sha256-oHxdVKICJX9mQvTB2zGa9TfMTnsKK6TMsXp/vpY21WU=",
+        "lastModified": 1636070779,
+        "narHash": "sha256-fWGDen/uV4pgrpVbaYc7yg+ZWiIDtByG609Xo+gXpHg=",
         "owner": "godotengine",
         "repo": "godot",
-        "rev": "7610409b8a14b8499763efa76578795c755a846d",
+        "rev": "206ba70f4b2a3eac4455bb21bd7c8af76285bd86",
         "type": "github"
       },
       "original": {
         "owner": "godotengine",
-        "ref": "3.3.2-stable",
+        "ref": "3.4-stable",
         "repo": "godot",
         "type": "github"
       }

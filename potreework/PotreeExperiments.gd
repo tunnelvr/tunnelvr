@@ -79,6 +79,7 @@ func getpotreeurl():
 			urlotreedir = "C:/Users/Julian/data/potreewookey/"
 		elif selfSpatial.playerMe.playeroperatingsystem in ["Linux", "X11"]:
 			urlotreedir = "/home/julian/.local/share/godot/app_userdata/tunnelvr_v0.7/caddywebserver/potreewookey/"
+			#urlotreedir = "/home/julian/data/madphilpointclouds/janet/"
 		else:
 			print("unknown operating system: ", selfSpatial.playerMe.playeroperatingsystem)
 	return urlotreedir
@@ -111,6 +112,7 @@ func updatepotreepriorities():
 		var metadata = parse_json(fmetadataF.get_as_text())
 		if metadata == null:
 			return
+
 		rootnode = MeshInstance.new()
 		rootnode.set_script(load("res://potreework/Onode_root.gd"))
 		rootnode.name = "hroot"

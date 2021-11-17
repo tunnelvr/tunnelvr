@@ -5,6 +5,7 @@ var playerplatform = ""
 var playertunnelvrversion = ""
 var playeroperatingsystem = ""
 var executingfeaturesavailable = [ ]
+var playermqttid = ""
 
 var puppetpositionstack = [ ]         # [ { "timestamp", "Ltimestamp", "playertransform", "headcamtransform" } ] 
 var puppetpointerpositionstack = [ ]  # [ { "timestamp", "Ltimestamp", "orient", "length", "spotvisible" } ] 
@@ -13,9 +14,10 @@ var puppetpointerpositionstack = [ ]  # [ { "timestamp", "Ltimestamp", "orient",
 remote func initplayerappearanceJ(playerappearance):
 	playerplatform = playerappearance.get("playerplatform", "unknown")
 	var headcolour = playerappearance.get("playerheadcolour", Color.white)
-	playertunnelvrversion = playerappearance.get("tun nelvrversion", "unknown")
+	playertunnelvrversion = playerappearance.get("tunnelvrversion", "unknown")
 	executingfeaturesavailable = playerappearance.get("executingfeaturesavailable", [ ])
 	playeroperatingsystem = playerappearance.get("playeroperatingsystem", "unknown")
+	playermqttid = playerappearance.get("playermqttid", "")
 
 	puppetsetheadtorchlight(playerappearance.get("torchon", false))
 	var guardianpoly = playerappearance.get("guardianpoly", null)
@@ -36,7 +38,7 @@ remote func initplayerappearanceJ(playerappearance):
 		get_node("HeadCam/visorline").get_surface_material(0).albedo_color = Color(0, 0, 0.3)
 	else:
 		get_node("HeadCam/visorline").visible = false
-
+	get_node("/root/Spatial/MQTTExperiment").mqttupdatenetstatus()
 	
 # reltime is localtime - remotetime.  More delay means message sent earlier, means bigger number. Find smallest filtering any outliers
 var relativetimeminmax = 0
