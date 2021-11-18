@@ -49,12 +49,6 @@
         let pkgs = nixpkgsFor."${system}";
         in pkgs.mkShell {
           buildInputs = [ pkgs.my-godot ];
-
-          shellHook = ''
-            run-godot(){
-              cd ../ && godot
-            }
-          '';
         });
 
       overlay = final: prev:
