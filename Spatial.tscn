@@ -1,4 +1,4 @@
-[gd_scene load_steps=315 format=2]
+[gd_scene load_steps=316 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/underground_env.tres" type="Environment" id=2]
@@ -64,6 +64,7 @@
 [ext_resource path="res://executingfeatures/ExecutingFeatures.gd" type="Script" id=62]
 [ext_resource path="res://lightweighttextures/distortiongradient.png" type="Texture" id=63]
 [ext_resource path="res://potreework/pointcloudslice_test.material" type="Material" id=64]
+[ext_resource path="res://executingfeatures/GithubAPI.gd" type="Script" id=65]
 [ext_resource path="res://guimaterials/f3dbuttonimg.png" type="Texture" id=66]
 [ext_resource path="res://lightweighttextures/scallopwall/scallopwall_orm.png" type="Texture" id=67]
 [ext_resource path="res://lightweighttextures/scallopwall/scallopwall_normal.png" type="Texture" id=68]
@@ -3759,6 +3760,9 @@ material/0 = SubResource( 224 )
 
 [node name="ImageSystem" type="Node" parent="."]
 script = ExtResource( 17 )
+
+[node name="GithubAPI" type="Node" parent="ImageSystem"]
+script = ExtResource( 65 )
 
 [node name="VerletRopeSystem" type="Node" parent="."]
 script = ExtResource( 30 )
