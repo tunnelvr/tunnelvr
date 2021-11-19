@@ -20,13 +20,23 @@ var cavefilesdir = "user://cavefiles/"
 func _on_buttonload_pressed():
 	var savegamefileid = $Viewport/GUI/Panel/Savegamefilename.get_selected_id()
 	var savegamefilename = $Viewport/GUI/Panel/Savegamefilename.get_item_text(savegamefileid)
+	if savegamefilename[0] == "*":
+		savegamefilename = savegamefilename.lstrip("*")
 	if savegamefilename == "--clearcave":
 		sketchsystem.loadsketchsystemL("clearcave")
 		$Viewport/GUI/Panel/Label.text = "Clearing cave"
 
+	elif $Viewport/GUI/Panel/ButtonEnableGithub.pressed:
+		var GithubAPI = get_node("/root/Spatial/ImageSystem/GithubAPI")
+		setpanellabeltext("Fetching sketch from Github")
+		var ghfetcheddatafile = yield(GithubAPI.Yfetchfile(savegamefilename+".res"), "completed")
+		if ghfetcheddatafile != null:
+			setpanellabeltext("Loading client sketch")
+			sketchsystem.call_deferred("loadsketchsystemL", ghfetcheddatafile)
+		else:
+			setpanellabeltext("Fetch failed")
+
 	elif not savegamefilename.ends_with(".res"):
-		if savegamefilename[0] == "*":
-			savegamefilename = savegamefilename.lstrip("*")
 		var savegamefilenameU = cavefilesdir+savegamefilename+".res"
 		if $Viewport/GUI/Panel/ButtonServerside.pressed:
 			if Tglobal.connectiontoserveractive and playerMe.networkID != 1:
@@ -48,7 +58,19 @@ func _on_buttonload_pressed():
 remote func setpanellabeltext(ltext):
 	$Viewport/GUI/Panel/Label.text = ltext
 			
-remote func setsavegamefilename(cfile):
+func _on_buttonenablegithub_toggled(pressed):
+	var GithubAPI = get_node("/root/Spatial/ImageSystem/GithubAPI")
+	var ghcavefiles = yield(GithubAPI.Ylistghfiles(), "completed")
+	$Viewport/GUI/Panel/Savegamefilename.clear()
+	$Viewport/GUI/Panel/Savegamefilename.add_item("--clearcave")
+	for cfile in ghcavefiles:
+		if cfile.ends_with(".res"):
+			$Viewport/GUI/Panel/Savegamefilename.add_item(cfile.substr(0, len(cfile)-4))
+	$Viewport/GUI/Panel/ButtonEnableGithub.disabled = true
+			
+remote func setsavegamefilename(cfile):   # this needs dealing with
+	if cfile == "recgithubfile":
+		return
 	sketchsystem.sketchname = cfile
 	var snames = $Viewport/GUI/Panel/Savegamefilename
 	for i in range(snames.get_item_count()):
@@ -62,12 +84,22 @@ func _on_buttonsave_pressed():
 	var snames = $Viewport/GUI/Panel/Savegamefilename
 	var savegamefileid = snames.get_selected_id()
 	var savegamefilename = snames.get_item_text(savegamefileid)
+	if savegamefilename[0] == "*":
+		savegamefilename = savegamefilename.lstrip("*")
 	if savegamefilename == "--clearcave":
 		$Viewport/GUI/Panel/Label.text = "Cannot oversave clearcave"
+	elif $Viewport/GUI/Panel/ButtonEnableGithub.pressed:
+		var GithubAPI = get_node("/root/Spatial/ImageSystem/GithubAPI")
+		# rpc("setsavegamefilename", savegamefilename)   # should be carried over on change anyway!
+		sketchsystem.savesketchsystem(GithubAPI.ghfetcheddatafile)
+		GithubAPI.ghfetcheddatafile
+		setpanellabeltext("Saving local sketch")
+		var message = "this is happening"
+		var cr = yield(GithubAPI.Ycommitfile(savegamefilename+".res", message), "completed")
+		if cr != null:
+			setpanellabeltext("Sketch committed")
 
 	elif not savegamefilename.ends_with(".res"):
-		if savegamefilename[0] == "*":
-			savegamefilename = savegamefilename.lstrip("*")
 		var savegamefilenameU = cavefilesdir+savegamefilename+".res"
 		rpc("setsavegamefilename", savegamefilename)
 		if $Viewport/GUI/Panel/ButtonServerside.pressed:
@@ -468,6 +500,7 @@ func _ready():
 	
 	$Viewport/GUI/Panel/ButtonLoad.connect("pressed", self, "_on_buttonload_pressed")
 	$Viewport/GUI/Panel/ButtonSave.connect("pressed", self, "_on_buttonsave_pressed")
+	$Viewport/GUI/Panel/ButtonEnableGithub.connect("toggled", self, "_on_buttonenablegithub_toggled")
 	$Viewport/GUI/Panel/ButtonPlanView.connect("pressed", self, "_on_buttonplanview_pressed")
 	$Viewport/GUI/Panel/ButtonHeadtorch.connect("toggled", self, "_on_buttonheadtorch_toggled")
 	$Viewport/GUI/Panel/ButtonDoppelganger.connect("toggled", self, "_on_buttondoppelganger_toggled")

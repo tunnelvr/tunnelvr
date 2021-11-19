@@ -23,11 +23,10 @@ func Yinitclient():
 	yield(Engine.get_main_loop(), "idle_frame")
 	if httpghapi.get_status() != HTTPClient.STATUS_CONNECTED:
 		var e = httpghapi.connect_to_host(ghattributes["apiurl"], -1, true)
-		print(e, " status ", httpghapi.get_status())
 		while httpghapi.get_status() == HTTPClient.STATUS_CONNECTING or httpghapi.get_status() == HTTPClient.STATUS_RESOLVING:
 			httpghapi.poll()
 			yield(Engine.get_main_loop(), "idle_frame")
-			print(httpghapi.get_status())
+
 
 func Yghapicall(method, rpath, body):
 	yield(Yinitclient(), "completed")
@@ -38,11 +37,10 @@ func Yghapicall(method, rpath, body):
 	var err = http.request(method, rpath, headers, body) 
 	if err != OK:
 		return null
-	print(" httpstatus ", http.get_status())
 	while http.get_status() == HTTPClient.STATUS_REQUESTING:
 		http.poll()
 		yield(Engine.get_main_loop(), "idle_frame")
-	if not http.has_response() or http.get_response_code() != 200 or http.get_status() != HTTPClient.STATUS_BODY:
+	if not http.has_response() or http.get_response_code() > 202 or http.get_status() != HTTPClient.STATUS_BODY:
 		print("bad response code: ", http.get_response_code())
 		return null
 	var rb = PoolByteArray()
@@ -98,6 +96,15 @@ func Ycommitfile(cname, message):
 	return ghfetcheddatafile
 
 
+
+
+
+
+
+
+# Temporary testing code below
+#
+#
 func addstufftofile():
 	var ghrawfile = File.new()
 	ghrawfile.open(ghfetcheddatafile, File.READ_WRITE)
@@ -105,6 +112,7 @@ func addstufftofile():
 	ghrawfile.store_buffer(h)
 	ghrawfile.store_buffer("\nding ding!\n".to_ascii())
 	ghrawfile.close()
+	
 var message = "saywhat"
 func D_input(event):	
 	if event is InputEventKey and event.pressed and event.scancode == KEY_8:

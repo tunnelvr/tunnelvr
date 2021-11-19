@@ -1793,9 +1793,9 @@ __meta__ = {
 }
 
 [node name="Savegamefilename" type="OptionButton" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 78.0
+margin_left = 81.3371
 margin_top = 43.0
-margin_right = 195.0
+margin_right = 198.337
 margin_bottom = 70.0
 text = "savegame.res"
 __meta__ = {
@@ -1811,6 +1811,18 @@ rect_pivot_offset = Vector2( 138.61, -8.13628 )
 hint_tooltip = "test tooltip"
 disabled = true
 text = "Serverside"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ButtonEnableGithub" type="CheckBox" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
+margin_left = 223.67
+margin_top = 72.6991
+margin_right = 318.67
+margin_bottom = 100.699
+rect_pivot_offset = Vector2( 138.61, -8.13628 )
+hint_tooltip = "test tooltip"
+text = "Githubsaving"
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -1901,20 +1913,20 @@ __meta__ = {
 }
 
 [node name="WorldScaleLabel" type="Label" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 207.0
-margin_top = 82.0
-margin_right = 294.0
-margin_bottom = 104.0
+margin_left = 211.005
+margin_top = 102.69
+margin_right = 298.005
+margin_bottom = 124.69
 text = "World scale:"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="WorldScale" type="OptionButton" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 296.0
-margin_top = 81.0
-margin_right = 345.0
-margin_bottom = 108.0
+margin_left = 299.0
+margin_top = 105.0
+margin_right = 348.0
+margin_bottom = 127.0
 text = "1x"
 items = [ "1x", null, false, 0, null, "0.25x", null, false, 1, null, "10x", null, false, 2, null, "2x", null, false, 3, null ]
 selected = 0
