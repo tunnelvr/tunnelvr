@@ -443,6 +443,7 @@ def GetWGSGeoidcorrection(lng, lat):
     return 0
 
 
+# (nxfac, nyfac) is 1 degree of vector latitude in metres, (exfac, eyfac) is 1 degree of longitude in metres
 def exportfortunnelvr(jsfile, dmp3d):
     entrancenodes = [node  for node in dmp3d.nodes  if "ENTRANCE" in node[2]]
     svxp0 = max((node[0]  for node in entrancenodes or dmp3d.nodes), key=(lambda X: (X[2], X[0], X[1])))
@@ -453,14 +454,19 @@ def exportfortunnelvr(jsfile, dmp3d):
         import pyproj
         proj = pyproj.Proj(dmp3d.cs)
         lngp0, latp0 = proj(svxp0[0], svxp0[1], inverse=True)
-        lngp0, latp0
+        lngp0x, latp0x = proj(svxp0[0]+1, svxp0[1], inverse=True)
+        lngp0y, latp0y = proj(svxp0[0], svxp0[1]+1, inverse=True)
+
         ddeg = 0.01
         pxn, pyn = proj(lngp0, latp0+ddeg)
         nyfac, nxfac = (pyn-svxp0[1])/ddeg, (pxn-svxp0[0])/ddeg 
         pxe, pye = proj(lngp0+ddeg, latp0)
         eyfac, exfac = (pye-svxp0[1])/ddeg, (pxe-svxp0[0])/ddeg 
-        csrec["svxp0"] = P3(lngp0, latp0, svxp0[2])
-        csrec.update({ "cs":dmp3d.cs, "nyfac":nyfac, "nxfac":nxfac, "eyfac":eyfac, "exfac":exfac })
+        csrec["cs"] = dmp3d.cs
+        csrec["gpsp0"] = P3(lngp0, latp0, 0.0)
+        csrec.update({ "nyfac":nyfac, "nxfac":nxfac, "eyfac":eyfac, "exfac":exfac })
+        csrec.update({ "xlngfac":lngp0x-lngp0, "xlatfac":latp0x-latp0, "ylngfac":lngp0y-lngp0, "ylatfac":latp0y-latp0 })
+
 
     leglines = [line  for line in dmp3d.lines  if line[0] != line[1] and "SURFACE" not in line[4]]
     xsects = [xsect  for xsect in dmp3d.xsects  if len(xsect) >= 2]
@@ -478,7 +484,7 @@ def exportfortunnelvr(jsfile, dmp3d):
         if "cs" in csrec:
             px, py = proj(p[0], p[1], inverse=True)
             p = P3(px, py, p[2])
-            r = p - csrec["svxp0"]
+            r = p - csrec["gpsp0"]
             r = P3(csrec["nxfac"]*r[1] + csrec["exfac"]*r[0], csrec["nyfac"]*r[1] + csrec["eyfac"]*r[0], r[2])
         else:
             r = p - csrec["svxp0"]
@@ -514,16 +520,6 @@ def exportfortunnelvr(jsfile, dmp3d):
         xsectlruds = sum((xs[1]  for xs in xsectseq), ())
         xsectlruds
         xsectgps.append({ "xsectindexes":xsectindexes, "xsectrightvecs":xsectrightvecs, "xsectlruds":xsectlruds })
-    xsectgps
-
-    jrec = { "stationpointscoords": stationpointscoords,
-             "stationpointsnames":  stationpointsnames, 
-             "legsconnections":     legsconnections,
-             "legsstyles":          legsstyles, 
-             "xsectgps":            xsectgps
-           }
-    jrec.update(csrec)
-    print(" ".join("%s:%d"%(k, len(v))  for k, v in jrec.items()  if type(v) in [tuple, list]))
 
     def round_floats(o):
         if isinstance(o, float):
@@ -534,8 +530,16 @@ def exportfortunnelvr(jsfile, dmp3d):
             return [round_floats(x) for x in o]
         return o
 
+    jrec = { "stationpointscoords": round_floats(stationpointscoords),
+             "stationpointsnames":  stationpointsnames, 
+             "legsconnections":     legsconnections,
+             "legsstyles":          legsstyles, 
+             "xsectgps":            round_floats(xsectgps)
+           }
+    jrec.update(csrec)
+    print(" ".join("%s:%d"%(k, len(v))  for k, v in jrec.items()  if type(v) in [tuple, list]))
     fout = open(jsfile, "w")
-    json.dump(round_floats(jrec), fout)
+    json.dump(jrec, fout)
     fout.close()
     
 

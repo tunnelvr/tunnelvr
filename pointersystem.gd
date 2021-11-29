@@ -15,8 +15,6 @@ onready var keyboardpanel = get_node("/root/Spatial/GuiSystem/KeyboardPanel")
 onready var LaserOrient = get_node("/root/Spatial/BodyObjects/LaserOrient") 
 onready var LaserSelectLine = get_node("/root/Spatial/BodyObjects/LaserSelectLine") 
 onready var FloorLaserSpot = get_node("/root/Spatial/BodyObjects/FloorLaserSpot")
-onready var RopeSpotGuide = get_node("/root/Spatial/BodyObjects/RopeSpotGuide")
-		
 		
 var viewport_point = null
 
@@ -434,11 +432,6 @@ func setpointertarget(laserroot, raycast, pointertargetshortdistance):
 			else:
 				FloorLaserSpot.get_node("FloorSpot").visible = false
 
-		RopeSpotGuide.visible = (Tglobal.handflickmotiongestureposition == handflickmotiongestureposition_shortpos)
-		if RopeSpotGuide.visible:
-			RopeSpotGuide.transform.origin = pointertargetpoint
-	else:
-		RopeSpotGuide.visible = false
 		
 	if activetargetnodetriggerpulling:
 		# solve tpnodepoint + a*activetargetnodewall.transform.basis.z = LaserOrient.transform.origin - b*LaserOrient.transform.basis.z
