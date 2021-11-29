@@ -236,6 +236,9 @@ func _player_connected(id):
 		$GuiSystem/GUIPanel3D.rpc_id(id, "servercavesfilelist", $GuiSystem/GUIPanel3D.cavesfilelist())
 		print("Converting sketchsystemtodict")
 		var sketchdatadict = $SketchSystem.sketchsystemtodict(false)
+		var GithubAPI = get_node("/root/Spatial/ImageSystem/GithubAPI")
+		if GithubAPI.ghcurrentname == sketchdatadict["sketchname"]:
+			sketchdatadict["ghcurrentsha"] = GithubAPI.ghcurrentsha
 		assert(playerMe.networkID != 0)
 		print("Generating sketchdicttochunks")
 		var xcdatachunks = $SketchSystem.sketchdicttochunks(sketchdatadict)
@@ -276,9 +279,11 @@ func _player_disconnected(id):
 func setconnectiontoserveractive(b):
 	Tglobal.connectiontoserveractive = b
 	playerMe.get_node("HandRight/HandFlickFaceY").set_surface_material(0, $MaterialSystem/handmaterials.get_node("serverconnected" if Tglobal.connectiontoserveractive else "serverdisconnected").get_surface_material(0))
-	$GuiSystem/GUIPanel3D/Viewport/GUI/Panel/ButtonServerside.disabled = (not b) or (playerMe.networkID == 1)
+	$GuiSystem/GUIPanel3D/Viewport/GUI/Panel/OptionSaveLocation.set_item_disabled(1, (not b))
 	if not Tglobal.connectiontoserveractive:
 		setnetworkidname(playerMe, 0)
+	
+	
 	
 func _connected_to_server():
 	print("_connected_to_server")

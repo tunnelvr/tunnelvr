@@ -387,6 +387,8 @@ func DD_run():
 	var http = HTTPClient.new()
 	var e = http.connect_to_host("api.github.com", -1, true)
 #https://github.com/goatchurchprime/abdulsdiodedisaster/blob/master/junk/madebyapi.txt
+#https://github.com/goatchurchprime/tunnelvr_cave_data/tree/main/cavedata/firstarea
+
 	print(e, " status ", http.get_status())
 	
 	while http.get_status() == HTTPClient.STATUS_CONNECTING or http.get_status() == HTTPClient.STATUS_RESOLVING:

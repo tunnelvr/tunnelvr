@@ -116,7 +116,20 @@ static func sketchdatadictlistfromcentreline(centrelinefile):
 				ilrud += 1
 
 			
-	var additionalproperties = { "stationnamecommonroot":findcommonroot(stationnodepoints) }
+	var additionalproperties = { "stationnamecommonroot":findcommonroot(stationnodepoints), 
+								 "svxp0":centrelinedata["svxp0"],
+								 "headdate":centrelinedata["headdate"] }
+	if centrelinedata.has("cs"):
+		additionalproperties["cs"] = centrelinedata["cs"]
+		additionalproperties["nyfac"] = centrelinedata["nyfac"]
+		additionalproperties["nxfac"] = centrelinedata["nxfac"]
+		additionalproperties["eyfac"] = centrelinedata["eyfac"]
+		additionalproperties["exfac"] = centrelinedata["exfac"]
+		# given original point p, the projected point in metres is:
+		# lng, lat = pyproj.Proj(cs).proj(p[0], p[1], inverse=True)
+		# r0, r1 = lng - svxp0[0], lat - svxp0[1]
+		# x, y = (nxfac*r1 + exfac*r0, nyfac*r1 + eyfac*r0)
+
 	var xcdrawingcentreline = { "name":"centreline2", 
 								"xcresource":"centrelinedata", 
 								"drawingtype":DRAWING_TYPE.DT_CENTRELINE, 

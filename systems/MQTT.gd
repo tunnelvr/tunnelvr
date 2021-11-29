@@ -175,6 +175,7 @@ func set_last_will(topic, msg, retain=false, qos=0):
 	self.lw_qos = qos
 	self.lw_retain = retain
 
+
 func firstmessagetoserver():
 	var clean_session = true
 	var msg = PoolByteArray()
@@ -186,7 +187,7 @@ func firstmessagetoserver():
 	msg.append(0x04);
 	msg.append(0x02);
 	msg.append(0x00);
-	msg.append(0x00);
+	msg.append(0x3C);
 
 	msg[1] = 10 + 2 + len(self.client_id)
 	msg[9] = (1<<1) if clean_session else 0
@@ -257,7 +258,7 @@ func connect_to_server(usessl=false):
 		
 	assert(data[0] == 0x20 and data[1] == 0x02)
 	if data[3] != 0:
-		print("MQTT exception ", data[3])
+		print("MQTT exception#", data[3])
 		in_wait_msg = false
 		return false
 

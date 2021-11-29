@@ -26,7 +26,7 @@ func _on_buttonload_pressed():
 		sketchsystem.loadsketchsystemL("clearcave")
 		$Viewport/GUI/Panel/Label.text = "Clearing cave"
 
-	elif $Viewport/GUI/Panel/ButtonEnableGithub.pressed:
+	elif $Viewport/GUI/Panel/OptionSaveLocation.selected == 2:
 		var GithubAPI = get_node("/root/Spatial/ImageSystem/GithubAPI")
 		setpanellabeltext("Fetching sketch from Github")
 		var ghfetcheddatafile = yield(GithubAPI.Yfetchfile(savegamefilename+".res"), "completed")
@@ -38,13 +38,13 @@ func _on_buttonload_pressed():
 
 	elif not savegamefilename.ends_with(".res"):
 		var savegamefilenameU = cavefilesdir+savegamefilename+".res"
-		if $Viewport/GUI/Panel/ButtonServerside.pressed:
+		if $Viewport/GUI/Panel/OptionSaveLocation.selected == 1:
 			if Tglobal.connectiontoserveractive and playerMe.networkID != 1:
 				$Viewport/GUI/Panel/Label.text = "Loading server sketch"
 				sketchsystem.rpc_id(1, "loadsketchsystemL", savegamefilenameU)
 			else:
 				$Viewport/GUI/Panel/Label.text = "*server not connected"
-		else:
+		elif $Viewport/GUI/Panel/OptionSaveLocation.selected == 0:
 			if File.new().file_exists(savegamefilenameU):
 				$Viewport/GUI/Panel/Label.text = "Loading client sketch"
 				sketchsystem.call_deferred("loadsketchsystemL", savegamefilenameU)
@@ -58,15 +58,26 @@ func _on_buttonload_pressed():
 remote func setpanellabeltext(ltext):
 	$Viewport/GUI/Panel/Label.text = ltext
 			
-func _on_buttonenablegithub_toggled(pressed):
-	var GithubAPI = get_node("/root/Spatial/ImageSystem/GithubAPI")
-	var ghcavefiles = yield(GithubAPI.Ylistghfiles(), "completed")
-	$Viewport/GUI/Panel/Savegamefilename.clear()
-	$Viewport/GUI/Panel/Savegamefilename.add_item("--clearcave")
-	for cfile in ghcavefiles:
-		if cfile.ends_with(".res"):
-			$Viewport/GUI/Panel/Savegamefilename.add_item(cfile.substr(0, len(cfile)-4))
-	$Viewport/GUI/Panel/ButtonEnableGithub.disabled = true
+func _on_optionsavelocation_selected(index):
+	if index == 2:
+		var GithubAPI = get_node("/root/Spatial/ImageSystem/GithubAPI")
+		var ghcavefiles = yield(GithubAPI.Ylistghfiles(), "completed")
+		print("fetched github filelist ", ghcavefiles)
+		$Viewport/GUI/Panel/Savegamefilename.clear()
+		$Viewport/GUI/Panel/Savegamefilename.add_item("--clearcave")
+		for cfile in ghcavefiles:
+			if cfile.ends_with(".res"):
+				$Viewport/GUI/Panel/Savegamefilename.add_item(cfile.substr(0, len(cfile)-4))
+	elif index == 0:
+		var savegamefileid = $Viewport/GUI/Panel/Savegamefilename.get_selected_id()
+		var savegamefilename = $Viewport/GUI/Panel/Savegamefilename.get_item_text(savegamefileid)
+		$Viewport/GUI/Panel/Savegamefilename.clear()
+		$Viewport/GUI/Panel/Savegamefilename.add_item("--clearcave")
+		for cfile in cavesfilelist():
+			$Viewport/GUI/Panel/Savegamefilename.add_item(cfile)
+		if savegamefilename[0] != "*" and savegamefilename != "--clearcave":
+			setsavegamefilename(savegamefilename)
+		
 			
 remote func setsavegamefilename(cfile):   # this needs dealing with
 	if cfile == "recgithubfile":
@@ -88,21 +99,13 @@ func _on_buttonsave_pressed():
 		savegamefilename = savegamefilename.lstrip("*")
 	if savegamefilename == "--clearcave":
 		$Viewport/GUI/Panel/Label.text = "Cannot oversave clearcave"
-	elif $Viewport/GUI/Panel/ButtonEnableGithub.pressed:
-		var GithubAPI = get_node("/root/Spatial/ImageSystem/GithubAPI")
-		# rpc("setsavegamefilename", savegamefilename)   # should be carried over on change anyway!
-		sketchsystem.savesketchsystem(GithubAPI.ghfetcheddatafile)
-		GithubAPI.ghfetcheddatafile
-		setpanellabeltext("Saving local sketch")
-		var message = "this is happening"
-		var cr = yield(GithubAPI.Ycommitfile(savegamefilename+".res", message), "completed")
-		if cr != null:
-			setpanellabeltext("Sketch committed")
+	elif $Viewport/GUI/Panel/OptionSaveLocation.selected == 2:
+		sketchsystem.savesketchcommitgithub(savegamefilename, "from server2")
 
 	elif not savegamefilename.ends_with(".res"):
 		var savegamefilenameU = cavefilesdir+savegamefilename+".res"
 		rpc("setsavegamefilename", savegamefilename)
-		if $Viewport/GUI/Panel/ButtonServerside.pressed:
+		if $Viewport/GUI/Panel/OptionSaveLocation.selected == 1:
 			if Tglobal.connectiontoserveractive and playerMe.networkID != 1:
 				sketchsystem.rpc_id(1, "savesketchsystem", savegamefilenameU)
 				setpanellabeltext("Saving server sketch")
@@ -111,7 +114,7 @@ func _on_buttonsave_pressed():
 				sketchsystem.savesketchsystem(savegamefilenameU)
 			else:
 				setpanellabeltext("File not saved")
-		else:
+		elif $Viewport/GUI/Panel/OptionSaveLocation.selected == 0:
 			setpanellabeltext("Saving local sketch")
 			sketchsystem.savesketchsystem(savegamefilenameU)
 
@@ -500,7 +503,7 @@ func _ready():
 	
 	$Viewport/GUI/Panel/ButtonLoad.connect("pressed", self, "_on_buttonload_pressed")
 	$Viewport/GUI/Panel/ButtonSave.connect("pressed", self, "_on_buttonsave_pressed")
-	$Viewport/GUI/Panel/ButtonEnableGithub.connect("toggled", self, "_on_buttonenablegithub_toggled")
+	$Viewport/GUI/Panel/OptionSaveLocation.connect("item_selected", self, "_on_optionsavelocation_selected")
 	$Viewport/GUI/Panel/ButtonPlanView.connect("pressed", self, "_on_buttonplanview_pressed")
 	$Viewport/GUI/Panel/ButtonHeadtorch.connect("toggled", self, "_on_buttonheadtorch_toggled")
 	$Viewport/GUI/Panel/ButtonDoppelganger.connect("toggled", self, "_on_buttondoppelganger_toggled")
@@ -610,6 +613,7 @@ func _on_buttonnewfile_pressed():
 	snames.add_item("*"+ftext)
 	var fi = snames.get_item_count()-1
 	snames.select(fi)
+	$Viewport/GUI/Panel/EditColorRect/TextEdit.text = ""
 	
 func _on_buttonremovefile_pressed():
 	pass
@@ -921,6 +925,12 @@ func networkstartasserver(fromgui):
 	if selfSpatial.playerMe.executingfeaturesavailable.has("caddy"):
 		selfSpatial.get_node("ExecutingFeatures").startcaddywebserver()
 	get_node("/root/Spatial/MQTTExperiment").mqttupdatenetstatus()
+
+	var GithubAPI = get_node("/root/Spatial/ImageSystem/GithubAPI")
+	if File.new().file_exists(GithubAPI.ghattributesfile):
+		$Viewport/GUI/Panel/OptionSaveLocation.selected = 2
+		_on_optionsavelocation_selected(2)
+
 
 func _connection_failed():
 	print("_connection_failed ", Tglobal.connectiontoserveractive, " ", websocketclient, " ", selfSpatial.players_connected_list)

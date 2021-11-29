@@ -73,8 +73,9 @@ func getpotreeurl():
 	var selfSpatial = get_node("/root/Spatial")
 	var potreeipnumber = selfSpatial.hostipnumber if selfSpatial.hostipnumber != "" else "godot.doesliverpool.xyz"
 	var potreesubdirectory = "potreewookey"
+	potreesubdirectory = "janet"
 	var urlotreedir = "http://%s:%d/%s/" % [potreeipnumber, selfSpatial.potreeportnumber, potreesubdirectory]
-	if selfSpatial.hostipnumber == "" and selfSpatial.playerMe.playerplatform == "PC":
+	if false and selfSpatial.hostipnumber == "" and selfSpatial.playerMe.playerplatform == "PC":
 		if selfSpatial.playerMe.playeroperatingsystem == "Windows":
 			urlotreedir = "C:/Users/Julian/data/potreewookey/"
 		elif selfSpatial.playerMe.playeroperatingsystem in ["Linux", "X11"]:

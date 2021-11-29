@@ -1802,27 +1802,14 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ButtonServerside" type="CheckBox" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 221.0
-margin_top = 44.0
-margin_right = 316.0
-margin_bottom = 72.0
-rect_pivot_offset = Vector2( 138.61, -8.13628 )
-hint_tooltip = "test tooltip"
-disabled = true
-text = "Serverside"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="ButtonEnableGithub" type="CheckBox" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 223.67
-margin_top = 72.6991
-margin_right = 318.67
-margin_bottom = 100.699
-rect_pivot_offset = Vector2( 138.61, -8.13628 )
-hint_tooltip = "test tooltip"
-text = "Githubsaving"
+[node name="OptionSaveLocation" type="OptionButton" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
+margin_left = 228.676
+margin_top = 47.2471
+margin_right = 304.676
+margin_bottom = 69.2471
+text = "ToLocal"
+items = [ "ToLocal", null, false, 0, null, "ToServer", null, false, 1, null, "ToGitHub", null, false, 2, null ]
+selected = 0
 __meta__ = {
 "_edit_use_anchors_": false
 }

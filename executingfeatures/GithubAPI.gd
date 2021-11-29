@@ -5,6 +5,7 @@ var ghattributes = null  # {"apiurl":"api.github.com", "owner":"goatchurchprime"
 var ghcurrentname = ""
 var ghcurrentsha = ""
 var ghfetcheddatafile = ghdirectory+"/recgithubfile.res"
+var ghattributesfile = ghdirectory+"/attributes.json"
 var httpghapi = HTTPClient.new()
 
 func Yinitclient():
@@ -14,11 +15,11 @@ func Yinitclient():
 			dir.make_dir(ghdirectory)
 
 		var ghjson = File.new()
-		ghjson.open(ghdirectory+"/attributes.json", File.READ)
+		ghjson.open(ghattributesfile, File.READ)
 		ghattributes = parse_json(ghjson.get_as_text())
 		ghjson.close()
 		if ghattributes == null:
-			ghattributes = '{"apiurl":"api.github.com", "owner":"goatchurchprime", "repo":"abdulsdiodedisaster", "path":"abdulsdiodedisaster", "token":"see https://github.com/settings/tokens"}'
+			ghattributes = parse_json('{"apiurl":"api.github.com", "owner":"goatchurchprime", "repo":"tunnelvr_cave_data", "path":"cavedata/firstarea", "token":"see https://github.com/settings/tokens"}')
 
 	yield(Engine.get_main_loop(), "idle_frame")
 	if httpghapi.get_status() != HTTPClient.STATUS_CONNECTED:
@@ -94,11 +95,6 @@ func Ycommitfile(cname, message):
 	ghcurrentname = d["content"]["name"]
 	ghcurrentsha = d["content"]["sha"]
 	return ghfetcheddatafile
-
-
-
-
-
 
 
 

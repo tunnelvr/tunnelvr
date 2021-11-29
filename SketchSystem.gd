@@ -69,6 +69,16 @@ func sketchsystemtodict(stripruntimedataforsaving):
 								   "headtrans":playerMe.get_node("HeadCam").global_transform }
 	return sketchdatadict
 	
+remote func savesketchcommitgithub(fname, message):
+	var GithubAPI = get_node("/root/Spatial/ImageSystem/GithubAPI")
+	savesketchsystem(GithubAPI.ghfetcheddatafile)
+	GithubAPI.ghfetcheddatafile
+	var guipanel3d = get_node("/root/Spatial/GuiSystem/GUIPanel3D")
+	guipanel3d.setpanellabeltext("Saving local sketch")
+	var cr = yield(GithubAPI.Ycommitfile(fname+".res", message), "completed")
+	if cr != null:
+		guipanel3d.setpanellabeltext("Sketch committed")
+
 remote func savesketchsystem(fname):
 	var sketchdatadict = sketchsystemtodict(true)
 	var sketchdatafile = File.new()
@@ -274,6 +284,10 @@ remote func actsketchchangeL(xcdatalist):
 	if "sketchname" in xcdatalist[0]:
 		if sketchname != "importing_the_centreline__do_not_clear":
 			sketchname = xcdatalist[0]["sketchname"]
+			if xcdatalist[0].has("ghcurrentsha"):
+				var GithubAPI = get_node("/root/Spatial/ImageSystem/GithubAPI")
+				GithubAPI.ghfetchedcurrentfile = xcdatalist[0]["sketchname"]
+				GithubAPI.ghcurrentsha = xcdatalist[0]["ghcurrentsha"]
 			if sketchname == "importing_the_centreline__do_not_clear":
 				sketchname = "--centrelinesketch"
 				if xcdatalist[1].get("drawingtype", 0) == DRAWING_TYPE.DT_CENTRELINE:
@@ -606,6 +620,8 @@ func subdictarray(d, a):
 
 func sketchdicttochunks(sketchdatadict):
 	var xcdatachunkL = [ { "caveworldchunk":0, "sketchname":sketchdatadict.get("sketchname", "unnamedsketch") } ]
+	if sketchdatadict.has("ghcurrentsha"):
+		xcdatachunkL[0]["ghcurrentsha"] = sketchdatadict["ghcurrentsha"]
 	playeroriginXCSorter = Vector3(0, 0, 0)
 	if "playerMe" in sketchdatadict:
 		xcdatachunkL[0]["playerMe"] = sketchdatadict["playerMe"]
@@ -734,6 +750,9 @@ remote func loadsketchsystemL(fname):
 			firstline = sketchdatafile.get_line()
 			var headerdata = firstline.split(" ")
 			sketchdatadict = { "sketchname":headerdata[1].percent_decode(), "xcdrawings": [ ], "xctubes": [ ] }
+			var GithubAPI = get_node("/root/Spatial/ImageSystem/GithubAPI")
+			if GithubAPI.ghcurrentname == sketchdatadict["sketchname"]:
+				sketchdatadict["ghcurrentsha"] = GithubAPI.ghcurrentsha
 			while true:
 				var jline = sketchdatafile.get_line()
 				if jline == null or jline == "":
