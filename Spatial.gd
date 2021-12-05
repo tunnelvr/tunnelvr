@@ -116,6 +116,13 @@ func _ready():
 			OS.vsync_enabled = false;
 			print("  Success initializing Oculus Interface.");
 			# C:/Users/henry/Appdata/Local/Android/Sdk/platform-tools/adb.exe logcat -s VrApi
+
+			# also for installing when the android signing isn't working
+			# jarsigner -verbose -sigalg SHA1withRSA -digestalg SHA1 -keystore .android\debug.keystore godot_oculus_quest_toolkit_demo_v0.4.2.apk androiddebugkey
+			# c:\Users\Julian\AppData\Local\Android\Sdk\platform-tools\adb install godot_oculus_quest_toolkit_demo_v0.4.2.apk
+			# "C:\Program Files\Android\Android Studio\jre\bin\keytool.exe" -printcert -jarfile godot_oculus_quest_toolkit_demo_v0.4.2.apk
+
+
 		else:
 			Tglobal.arvrinterface = null
 		playerMe.playerplatform = "Rift"

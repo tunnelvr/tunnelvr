@@ -435,11 +435,13 @@ func mergexcrpcdata(xcdata):
 			nodepoints[nA] = nodepointsAdd[nA]
 			var xcn = $XCnodes.get_node_or_null(nA)
 			if xcn == null:
+				var materialsystem = get_node("/root/Spatial/MaterialSystem")
 				if drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 					xcn = XCnode.instance()
 					if nA.begins_with("r"):
-						var materialsystem = get_node("/root/Spatial/MaterialSystem")
 						xcn.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("normalhole"))
+					else:
+						xcn.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("normal"))
 					xcn.set_name(nA)
 					maxnodepointnumber = max(maxnodepointnumber, int(nA))
 					xcn.get_node("CollisionShape").scale = Vector3(closewidthsca, closewidthsca, closewidthsca)
@@ -452,7 +454,6 @@ func mergexcrpcdata(xcdata):
 					xcn.set_name(nA)
 					maxnodepointnumber = max(maxnodepointnumber, int(nA))
 					xcn.scale = Vector3(closewidthsca, closewidthsca, closewidthsca)
-					var materialsystem = get_node("/root/Spatial/MaterialSystem")
 					xcn.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("normalfloorpos"))
 					$XCnodes.add_child(xcn)
 					xcn.translation = nodepointsAdd[nA]
@@ -461,7 +462,6 @@ func mergexcrpcdata(xcdata):
 					
 				elif drawingtype == DRAWING_TYPE.DT_ROPEHANG:
 					xcn = XCnode_knot.instance()
-					var materialsystem = get_node("/root/Spatial/MaterialSystem")
 					var mat = null
 					if nA[0] == "k":
 						xcn.get_node("CollisionShape").scale = Vector3(closewidthsca, closewidthsca*knotyscale, closewidthsca)
