@@ -484,6 +484,7 @@ func _on_textedit_focus_exited():
 
 const clientips = [ "Local-network",
 					"192.168.43.193 JulianS9",
+					"10.0.32.206",
 					"godot.doesliverpool.xyz" ]
 var uniqueinstancestring = ""
 func _ready():
@@ -536,6 +537,11 @@ func _ready():
 	$Viewport/GUI/Panel/Savegamefilename.add_item("--clearcave")
 	for cfile in cavesfilelist():
 		$Viewport/GUI/Panel/Savegamefilename.add_item(cfile)
+
+#func _physics_process(delta):
+#	var x = $Viewport/GUI/Panel/SwitchTest.get_popup()
+#	x.rect_position.y = -90
+
 
 func cavesfilelist():
 	var cfiles = [ ]
@@ -781,6 +787,7 @@ var websocketclient = null
 var networkedmultiplayerenetserver = null
 var networkedmultiplayerenetclient = null
 var udpdiscoveryreceivingserver = null
+var networksignalsalreadyconnected = false
 
 func _on_networkstate_selected(index):
 	print("_on_networkstate_selected: ", index, " ", OS.get_ticks_msec())
@@ -834,10 +841,18 @@ func _on_networkstate_selected(index):
 
 		selfSpatial.get_node("ExecutingFeatures").stopcaddywebserver()
 
-		
 	if nssel == "Check IPnum" or nssel == "Network Off":
-		pass
-	elif nssel.begins_with("As Server"):
+		return
+
+	if not networksignalsalreadyconnected:
+		get_tree().connect("network_peer_connected", selfSpatial, "_player_connected")
+		get_tree().connect("network_peer_disconnected", selfSpatial, "_player_disconnected")
+		get_tree().connect("connected_to_server", selfSpatial, "_connected_to_server")
+		get_tree().connect("connection_failed", self, "_connection_failed")
+		get_tree().connect("server_disconnected", self, "_server_disconnected")
+		networksignalsalreadyconnected = true
+		
+	if nssel.begins_with("As Server"):
 		networkstartasserver(true)
 		if selfSpatial.playerMe.networkID == 0:
 			$Viewport/GUI/Panel/Label.text = "server failed to start"
@@ -855,14 +870,9 @@ func _on_networkstate_selected(index):
 			selfSpatial.hostipnumber = selfSpatial.hostipnumber.left(selfSpatial.hostipnumber.find(" "))
 		print(nssel, "    ", selfSpatial.hostipnumber, "  ", selfSpatial.hostipnumber.is_valid_ip_address())
 		
-		get_tree().connect("network_peer_connected", selfSpatial, "_player_connected")
-		get_tree().connect("network_peer_disconnected", selfSpatial, "_player_disconnected")
 		selfSpatial.setconnectiontoserveractive(false)
 		selfSpatial.get_node("BodyObjects/LaserOrient/NotificationCylinder").visible = true
 		selfSpatial.get_node("BodyObjects/LaserOrient/NotificationCylinder").scale.y = 20
-		get_tree().connect("connected_to_server", selfSpatial, "_connected_to_server")
-		get_tree().connect("connection_failed", self, "_connection_failed")
-		get_tree().connect("server_disconnected", self, "_server_disconnected")
 		selfSpatial.playerMe.global_transform.origin += 3*Vector3(selfSpatial.playerMe.get_node("HeadCam").global_transform.basis.z.x, 0, selfSpatial.playerMe.get_node("HeadCam").global_transform.basis.z.z).normalized()
 		if selfSpatial.usewebsockets:
 			websocketclient = WebSocketClient.new();
@@ -876,10 +886,10 @@ func _on_networkstate_selected(index):
 			var inbandwidth = 0
 			var outbandwidth = 0
 			var e = networkedmultiplayerenetclient.create_client(selfSpatial.hostipnumber, selfSpatial.hostportnumber, inbandwidth, outbandwidth)
-			print("networkedmultiplayerenet createclient: ", e, " ", selfSpatial.hostipnumber)
+			print("networkedmultiplayerenet createclient: ", ("Error:" if e != 0 else ""), e, " ", selfSpatial.hostipnumber)
 			get_tree().set_network_peer(networkedmultiplayerenetclient)
 		$Viewport/GUI/Panel/Label.text = "connecting "+("websocket" if selfSpatial.usewebsockets else "ENET")
-		setguipanelhide()
+		#setguipanelhide()
 	
 func networkstartasserver(fromgui):
 	if not fromgui:
@@ -897,8 +907,6 @@ func networkstartasserver(fromgui):
 		elif selfSpatial.hostipnumber == "":
 			selfSpatial.hostipnumber = ipnum
 	
-	get_tree().connect("network_peer_connected", selfSpatial, "_player_connected")
-	get_tree().connect("network_peer_disconnected", selfSpatial, "_player_disconnected")
 	if selfSpatial.usewebsockets:
 		websocketserver = WebSocketServer.new();
 		var e = websocketserver.listen(selfSpatial.hostportnumber, PoolStringArray(), true)

@@ -43,7 +43,6 @@ var nodetriggerpulledmaxd = 0.0
 var nodetriggerpulledtimestamp = 0.0
 var activetargetnodetriggerpulledz = 0.0
 
-
 var activetargetwallgrabbed = null
 var activetargetwallgrabbedtransform = null
 var activetargetwallgrabbedmotion = DRAWING_TYPE.GRABMOTION_ROTATION_ADDITIVE

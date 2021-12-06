@@ -444,12 +444,13 @@ def GetWGSGeoidcorrection(lng, lat):
 
 
 # (nxfac, nyfac) is 1 degree of vector latitude in metres, (exfac, eyfac) is 1 degree of longitude in metres
-def exportfortunnelvr(jsfile, dmp3d):
+def exportfortunnelvr(jsfile, dmp3d, proj4):
     entrancenodes = [node  for node in dmp3d.nodes  if "ENTRANCE" in node[2]]
     svxp0 = max((node[0]  for node in entrancenodes or dmp3d.nodes), key=(lambda X: (X[2], X[0], X[1])))
     svxp0 = P3(svxp0[0], svxp0[1], 0.0)
-    csrec = { "svxp0":svxp0, "title":dmp3d.title, "headdate":dmp3d.headdate.isoformat() }
-    if dmp3d.cs:
+    csrec = { "svxp0":svxp0, "title":dmp3d.title, "headdate":dmp3d.headdate.isoformat(), "cs":dmp3d.cs or "" }
+    proj = None
+    if dmp3d.cs and proj4:
         print("We have a coordinate system (cs) ", dmp3d.cs)
         import pyproj
         proj = pyproj.Proj(dmp3d.cs)
@@ -463,10 +464,10 @@ def exportfortunnelvr(jsfile, dmp3d):
         pxe, pye = proj(lngp0+ddeg, latp0)
         eyfac, exfac = (pye-svxp0[1])/ddeg, (pxe-svxp0[0])/ddeg 
         csrec["cs"] = dmp3d.cs
-        csrec["gpsp0"] = P3(lngp0, latp0, 0.0)
+        csrec["gpsp0"] = [lngp0, latp0]
         csrec.update({ "nyfac":nyfac, "nxfac":nxfac, "eyfac":eyfac, "exfac":exfac })
         csrec.update({ "xlngfac":lngp0x-lngp0, "xlatfac":latp0x-latp0, "ylngfac":lngp0y-lngp0, "ylatfac":latp0y-latp0 })
-
+	
 
     leglines = [line  for line in dmp3d.lines  if line[0] != line[1] and "SURFACE" not in line[4]]
     xsects = [xsect  for xsect in dmp3d.xsects  if len(xsect) >= 2]
@@ -481,7 +482,7 @@ def exportfortunnelvr(jsfile, dmp3d):
     stationpointsdict = dict((p, i)  for i, p in enumerate(stationpoints))
 
     def convp(p):
-        if "cs" in csrec:
+        if proj:
             px, py = proj(p[0], p[1], inverse=True)
             p = P3(px, py, p[2])
             r = p - csrec["gpsp0"]
@@ -520,7 +521,6 @@ def exportfortunnelvr(jsfile, dmp3d):
         xsectlruds = sum((xs[1]  for xs in xsectseq), ())
         xsectlruds
         xsectgps.append({ "xsectindexes":xsectindexes, "xsectrightvecs":xsectrightvecs, "xsectlruds":xsectlruds })
-
     def round_floats(o):
         if isinstance(o, float):
             return round(o, 5)
@@ -554,7 +554,8 @@ if __name__ == "__main__":
     parser.add_option("-s", "--streamdump", dest="streamdmp",  default=False,action="store_true", help="Stream dmp from stdin")
     parser.add_option("-j", "--js",         dest="js",         metavar="FILE",                    help="Output js version 3d file")
     parser.add_option("-c", "--streamjs",   dest="streamjs",   default=False,action="store_true", help="Stream js to stdout")
-    parser.add_option("-t", "--tunnelvr",   dest="tunnelvr",    default=False,action="store_true", help="TunnelVR format")
+    parser.add_option("-t", "--tunnelvr",   dest="tunnelvr",   default=False,action="store_true", help="TunnelVR format")
+    parser.add_option(      "--proj4",      dest="proj4",      default=False,action="store_true", help="Apply proj4 local frame")
     parser.description = "Analyses or processes survex 3D file to do things with the passages\n(station beginning with 'fbmap_' should be mountaintops)"
     parser.epilog = "Best way to execute: dump3d yourcave.3d | ./parse3ddmp.py -s -r \n"
 
@@ -601,7 +602,7 @@ if __name__ == "__main__":
     # json output from here onwards
     
     if options.tunnelvr:
-        exportfortunnelvr(options.js, dmp3d)
+        exportfortunnelvr(options.js, dmp3d, options.proj4)
         exit(0)
 
     if options.streamjs:
@@ -635,7 +636,7 @@ if __name__ == "__main__":
     except ValueError:  # max of empty list
         svxp0 = max(legnodes, key=lambda X: X[2])
     fout.write('    "p0": [%.0f,%.0f,%.0f],\n' % (svxp0[0]*svxscale, svxp0[1]*svxscale, svxp0[2]*svxscale))
-    if dmp3d.cs:
+    if dmp3d.cs and options.proj4:
         try:
             import pyproj
         except ImportError:

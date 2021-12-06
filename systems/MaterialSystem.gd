@@ -2,6 +2,7 @@ extends Spatial
 
 func _ready():
 	visible = false
+	#setnodematerialdistancefade(2.0, 3.0)
 
 func tubematerialnamefromnumber(n):
 	var mm = $tubematerials.get_child(n)
@@ -35,6 +36,14 @@ func updateflatshellmaterial(xcdrawing, name, highlighted):
 func nodematerial(mtype):
 	var mm = $nodematerial.get_node(mtype)
 	return mm.get_surface_material(0)
+
+func setnodematerialdistancefade(startfadedistance, invisibledistance):
+	for mm in $nodematerial.get_children():
+		if not ("selected" in mm.name or "highlight" in mm.name):
+			var mat = mm.get_surface_material(0)
+			mat.distance_fade_mode = SpatialMaterial.DISTANCE_FADE_PIXEL_ALPHA
+			mat.distance_fade_max_distance = startfadedistance
+			mat.distance_fade_min_distance = invisibledistance
 
 func lasermaterial(mtype):
 	var mm = $lasermaterial.get_node(mtype)

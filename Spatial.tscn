@@ -976,6 +976,9 @@ emission = Color( 0.768627, 0.027451, 0.027451, 1 )
 emission_energy = 1.0
 emission_operator = 0
 emission_on_uv2 = false
+distance_fade_mode = 2
+distance_fade_min_distance = 0.0
+distance_fade_max_distance = 2.0
 
 [sub_resource type="SpatialMaterial" id=156]
 flags_no_depth_test = true
@@ -1810,6 +1813,7 @@ margin_right = 201.665
 margin_bottom = 103.955
 hint_tooltip = "Network state"
 text = "Network Off"
+clip_text = true
 items = [ "Network Off", null, false, 0, null, "Check IPnum", null, false, 1, null, "As Server", null, false, 2, null ]
 selected = 0
 __meta__ = {
@@ -1871,27 +1875,27 @@ margin_top = 235.0
 margin_right = 116.0
 margin_bottom = 262.0
 text = "normal"
-items = [ "normal", null, false, 0, null, "hide floors", null, false, 1, null, "all grey", null, false, 2, null, "hide xc", null, false, 3, null, "toggle guardian", null, false, 4, null, "export OBJ", null, false, 7, null, "choke", null, false, 6, null, "swap controllers", null, false, 7, null, "lock controls", null, false, 8, null, "LoadPointMesh", null, false, 10, null, "BackfaceCull", null, false, 11, null ]
+items = [ "normal", null, false, 0, null, "hide floors", null, false, 1, null, "all grey", null, false, 2, null, "hide xc", null, false, 3, null, "toggle guardian", null, false, 4, null, "export OBJ", null, false, 7, null, "choke", null, false, 6, null, "swap controllers", null, false, 7, null, "lock controls", null, false, 8, null, "LoadPointMesh", null, false, 10, null, "BackfaceCull", null, false, 11, null, "Item 11", null, false, 11, null, "Item 12", null, false, 12, null, "Item 13", null, false, 13, null, "Item 14", null, false, 14, null ]
 selected = 0
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="WorldScaleLabel" type="Label" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 211.005
-margin_top = 102.69
-margin_right = 298.005
-margin_bottom = 124.69
+margin_left = 215.762
+margin_top = 79.5005
+margin_right = 302.762
+margin_bottom = 101.5
 text = "World scale:"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="WorldScale" type="OptionButton" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 299.0
-margin_top = 105.0
-margin_right = 348.0
-margin_bottom = 127.0
+margin_left = 303.757
+margin_top = 79.432
+margin_right = 352.757
+margin_bottom = 101.432
 text = "1x"
 items = [ "1x", null, false, 0, null, "0.25x", null, false, 1, null, "10x", null, false, 2, null, "2x", null, false, 3, null ]
 selected = 0
