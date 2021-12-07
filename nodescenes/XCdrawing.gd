@@ -544,6 +544,9 @@ func mergexcrpcdata(xcdata):
 
 	if "additionalproperties" in xcdata:
 		additionalproperties = xcdata["additionalproperties"]
+	if "xcresource" in xcdata and xcresource != xcdata["xcresource"]:
+		print("Warning: xcdrawing.xcresource cannot be overridden, ", xcresource, " by ", xcdata["xcresource"])
+
 	if "drawingvisiblecode" in xcdata:
 		setdrawingvisiblecode(xcdata["drawingvisiblecode"])
 		
@@ -756,7 +759,7 @@ func updatexcpaths_centreline(pathlines, mlinewidth):
 		var p1 = nodepoints[s1]
 		var q0 = inverse_lerp(nodepointylo, nodepointyhi, p0.y)
 		var q1 = inverse_lerp(nodepointylo, nodepointyhi, p1.y)
-		var perp = Vector3(-(p1.z - p0.z), 0, p1.x - p0.x)
+		var perp = transform.basis.xform_inv(Vector3(-(p1.z - p0.z), 0, p1.x - p0.x))
 		if perp == Vector3(0,0,0):
 			perp = Vector3(1,0,0)
 		var fperp = llinewidth*perp.normalized()

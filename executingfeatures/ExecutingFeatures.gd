@@ -304,15 +304,13 @@ func parse3ddmpcentreline_execute(f3dfile, f3durl):
 		return
 	parse3ddmpcentrelinepid = -1
 
-	var maxcentrelinenumber = 0
+	var maxcentrelinenumber = -1
 	for xcdrawingcentreline in get_tree().get_nodes_in_group("gpcentrelinegeo"):
 		maxcentrelinenumber = max(maxcentrelinenumber, int(xcdrawingcentreline.get_name()))
-	var sketchdatadict = Centrelinedata.sketchdatadictlistfromcentreline(jcentreline)
+	var sketchdatadict = Centrelinedata.sketchdatadictlistfromcentreline(jcentreline, (maxcentrelinenumber+1)*2)
 	if sketchdatadict == null:
 		return
 	sketchdatadict["xcdrawings"][0]["name"] = "centreline%d" % (maxcentrelinenumber+1)
-	sketchdatadict["xcdrawings"][0]["transformpos"] = Transform(Basis(), Vector3(0, (maxcentrelinenumber+1)*2, 0))
-
 	var sketchsystem = get_node("/root/Spatial/SketchSystem")
 	#xcdatalist[0]["sketchname"] = f3durl.split("/")[-1].split(".")[0]
 	sketchdatadict["xcdrawings"][0]["xcresource"] = f3durl
@@ -322,7 +320,6 @@ func parse3ddmpcentreline_execute(f3dfile, f3durl):
 	for xcdatachunk in xcdatachunks:
 		yield(get_tree().create_timer(0.2), "timeout")
 		sketchsystem.actsketchchange(xcdatachunk)
-
 	#sketchsystem.rpc_id(id, "actsketchchangeL", [{"planview":$PlanViewSystem.planviewtodict()}]) 
 
 

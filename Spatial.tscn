@@ -1883,19 +1883,19 @@ __meta__ = {
 
 [node name="WorldScaleLabel" type="Label" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
 margin_left = 215.762
-margin_top = 79.5005
+margin_top = 76.1331
 margin_right = 302.762
-margin_bottom = 101.5
+margin_bottom = 98.1331
 text = "World scale:"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="WorldScale" type="OptionButton" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 303.757
-margin_top = 79.432
-margin_right = 352.757
-margin_bottom = 101.432
+margin_left = 304.318
+margin_top = 76.6258
+margin_right = 353.318
+margin_bottom = 98.6258
 text = "1x"
 items = [ "1x", null, false, 0, null, "0.25x", null, false, 1, null, "10x", null, false, 2, null, "2x", null, false, 3, null ]
 selected = 0
@@ -2007,6 +2007,18 @@ margin_top = 251.0
 margin_right = 376.0
 margin_bottom = 273.0
 text = "image system reports"
+
+[node name="ResourceOptions" type="OptionButton" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
+margin_left = 248.625
+margin_top = 102.705
+margin_right = 374.625
+margin_bottom = 124.705
+text = "--resources"
+items = [ "--resources", null, false, 0, null, "Set Potree URL", null, false, 1, null, "Get Potree URL", null, false, 2, null, "Show Potree", null, false, 3, null, "Get Xcresource", null, false, 4, null ]
+selected = 0
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="ViewportReal" type="Viewport" parent="GuiSystem/GUIPanel3D"]
 size = Vector2( 380, 280 )
@@ -3757,6 +3769,7 @@ material/0 = null
 
 [node name="WaterMaterialExpt" type="MeshInstance" parent="."]
 transform = Transform( 1, 0, 0, 0, 0.697453, 0.716631, 0, -0.716631, 0.697453, -126, 12, 60 )
+visible = false
 material_override = ExtResource( 3 )
 mesh = SubResource( 231 )
 material/0 = ExtResource( 3 )

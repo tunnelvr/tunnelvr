@@ -8,7 +8,7 @@ class_name Centrelinedata
 
 const makecentrelinehextubes = false
 
-static func sketchdatadictlistfromcentreline(centrelinefile):
+static func sketchdatadictlistfromcentreline(centrelinefile, perfectoverlayavoidingoffset):
 	print("Opening centreline file ", centrelinefile)
 	var centrelinedatafile = File.new()
 	centrelinedatafile.open(centrelinefile, File.READ)
@@ -28,8 +28,7 @@ static func sketchdatadictlistfromcentreline(centrelinefile):
 			bb[j] = min(bb[j], stationpointscoords[i*3+j])
 			bb[j+3] = max(bb[j+3], stationpointscoords[i*3+j])
 	print("svx bounding box xyzlo ", [bb[0], bb[1], bb[2]], " hi ", [bb[3], bb[4], bb[5]])
-	var bbcenvec = Vector3((bb[0]+bb[3])/2, (bb[2] - 1), (bb[1]+bb[4])/2)
-	print("\n\nbbcenvec ", bbcenvec)
+	var bbcenvec = Vector3((bb[0]+bb[3])/2, (bb[1]+bb[4])/2, (bb[2] - 1) - perfectoverlayavoidingoffset)
 
 	var stationpointsnames = [ ]
 	var stationpoints = [ ]
@@ -48,10 +47,7 @@ static func sketchdatadictlistfromcentreline(centrelinefile):
 			nsplaystations += 1
 			
 		stationpointsnames.push_back(stationpointname)
-		#nodepoints[k] = Vector3(stationpointscoords[i*3], 8.1+stationpointscoords[i*3+2], -stationpointscoords[i*3+1])
-		var stationpoint = Vector3(stationpointscoords[i*3] - bbcenvec.x, 
-								   stationpointscoords[i*3+2] - bbcenvec.y, 
-								   -(stationpointscoords[i*3+1] - bbcenvec.z))
+		var stationpoint = Vector3(stationpointscoords[i*3], stationpointscoords[i*3+1], stationpointscoords[i*3+2])
 		stationpoints.push_back(stationpoint)
 		stationnodepoints[stationpointname] = stationpoint
 
@@ -87,11 +83,11 @@ static func sketchdatadictlistfromcentreline(centrelinefile):
 
 				var p = stationpoints[xsectindexes[i]]
 				var spn = stationpointsnames[xsectindexes[i]]
-				var vh = Vector3(xsectrightvecs[i*2], 0, -xsectrightvecs[i*2+1])
+				var vh = Vector3(xsectrightvecs[i*2], xsectrightvecs[i*2+1], 0)
 				var pl = p - vh*xl
 				var pr = p + vh*xr
-				var pu = p + Vector3(0, xu, 0)
-				var pd = p - Vector3(0, xd, 0)
+				var pu = p + Vector3(0, 0, xu)
+				var pd = p - Vector3(0, 0, xd)
 
 				stationpointsnames.push_back(spnleft)
 				stationpoints.push_back(pl)
@@ -121,20 +117,18 @@ static func sketchdatadictlistfromcentreline(centrelinefile):
 								 "headdate":centrelinedata["headdate"], 
 								 "cs":centrelinedata["cs"] }
 
+	var rotzminus90 = Basis(Vector3(1,0,0), Vector3(0,0,-1), Vector3(0,1,0))
+	var centrelinetransformpos = Transform(rotzminus90, -rotzminus90.xform(bbcenvec))
 	var xcdrawingcentreline = { "name":"centreline2", 
 								"xcresource":"centrelinedata", 
 								"drawingtype":DRAWING_TYPE.DT_CENTRELINE, 
 								"drawingvisiblecode":DRAWING_TYPE.VIZ_XCD_HIDE,
-								"transformpos":Transform(), 
+								"transformpos":centrelinetransformpos, 
 								"nodepoints":stationnodepoints,
 								"onepathpairs":centrelinelegs, 
 								"additionalproperties":additionalproperties
 							  }
 	var xcdrawings = [ xcdrawingcentreline ]
-	#var xcvizstates = { xcdrawingcentreline["name"]:DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE }
-	#var xcvizstates = { xcdrawingcentreline["name"]:DRAWING_TYPE.VIZ_XCD_HIDE }
-	#var updatetubeshells = [ ]
-
 	var xctubes = [ ]
 	if makecentrelinehextubes:
 		var xsectgps = centrelinedata.xsectgps
@@ -161,7 +155,7 @@ static func sketchdatadictlistfromcentreline(centrelinefile):
 				hexnodepoints["hv"] = Vector3(+xr/2, xu, 0)
 				hexnodepoints["hd"] = Vector3(-xl/2, -xd, 0)
 				hexnodepoints["he"] = Vector3(+xr/2, -xd, 0)
-				var p = stationpoints[xsectindexes[i]]
+				var p = centrelinetransformpos.xform(stationpoints[xsectindexes[i]])
 				var ang = Vector2(xsectrightvecs[i*2], -xsectrightvecs[i*2+1]).angle()
 				var xcdata = { "name":sname, 
 							   "xcresource":"station_"+sname, 

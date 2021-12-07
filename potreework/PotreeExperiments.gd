@@ -103,21 +103,34 @@ func updatepotreepriorities():
 	yield(get_tree(), "idle_frame")
 
 	if rootnode == null:
-		var urlotreedir = getpotreeurl()
-		var urlmetadata = urlotreedir+"metadata.json"
+		var urlmetadata = null
+		var xcdrawingcentreline = null
+		for lxcdrawingcentreline in get_tree().get_nodes_in_group("gpcentrelinegeo"):
+			if lxcdrawingcentreline.additionalproperties != null and lxcdrawingcentreline.additionalproperties.has("potreeurlmetadata"):
+				xcdrawingcentreline = lxcdrawingcentreline
+				urlmetadata = xcdrawingcentreline.additionalproperties["potreeurlmetadata"]
+		if urlmetadata == null:
+			nupdatepotreeprioritiesSingleConcurrentOperations -= 1
+			return
 		var nonimagedataobject = { "url":urlmetadata, "callbackobject":self, "callbacksignal":"updatepotreepriorities_fetchsignal" }
 		ImageSystem.fetchrequesturl(nonimagedataobject)
 		var fmetadataF = yield(self, "updatepotreepriorities_fetchsignal")
 		if fmetadataF == null:
+			nupdatepotreeprioritiesSingleConcurrentOperations -= 1
 			return
 		var metadata = parse_json(fmetadataF.get_as_text())
 		if metadata == null:
+			nupdatepotreeprioritiesSingleConcurrentOperations -= 1
 			return
 
 		rootnode = MeshInstance.new()
 		rootnode.set_script(load("res://potreework/Onode_root.gd"))
 		rootnode.name = "hroot"
-		rootnode.constructpotreerootnode(metadata, urlotreedir)
+		var bboffseta = xcdrawingcentreline.additionalproperties["svxp0"]  if xcdrawingcentreline != null and xcdrawingcentreline.additionalproperties != null and xcdrawingcentreline.additionalproperties.has("svxp0")  else [0,0,0]
+		var bboffset = Vector3(bboffseta[0], bboffseta[1], bboffseta[2])
+		rootnode.constructpotreerootnode(metadata, urlmetadata, bboffset)
+		if xcdrawingcentreline != null:
+			transform = xcdrawingcentreline.transform
 		add_child(rootnode)
 
 	var primarycameraorigin = Vector3(0, 0, 0)

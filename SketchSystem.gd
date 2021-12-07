@@ -571,7 +571,9 @@ func xcdrawingfromdata(xcdata, fromremotecall):
 			xcdrawing = newXCuniquedrawingPaperN(xcdata["xcresource"], xcdata["name"], xcdata["drawingtype"])
 		else:
 			xcdrawing = newXCuniquedrawing(xcdata["drawingtype"], xcdata["name"])
-	
+			if xcdata["drawingtype"] == DRAWING_TYPE.DT_CENTRELINE and xcdata.has("xcresource"):
+				xcdrawing.xcresource = xcdata["xcresource"]
+				
 	elif Tglobal.printxcdrawingfromdatamessages and not (xcdata.get("rpcoptional", 0) == 1):
 		print("update xcdrawing ", xcdata.get("name"), " ", xcdrawing.xcchangesequence)
 

@@ -151,18 +151,18 @@ func garbagecollectionsweep():
 		freeinvisiblenoderesources(oldestinvisiblenode)
 		print("totalpointcount was: ", prevtotalpointcount, " now: ", totalpointcount)
 		
-func constructpotreerootnode(lmetadata, urlotreedir):
+func constructpotreerootnode(lmetadata, lurlmetadata, bboffset):
 	assert (name == "hroot")
 	screendimensionsscreendoorfac = OS.get_screen_size()/8.0; 
 	metadata = lmetadata
 	visibleincamera = true
 	visible = false
 	cast_shadow = GeometryInstance.SHADOW_CASTING_SETTING_OFF
-	urlmetadata = urlotreedir+"metadata.json"
-	urlhierarchy = urlotreedir+"hierarchy.bin"
-	urloctree = urlotreedir+"octree.bin"
+	urlmetadata = lurlmetadata
+	var urlotreedir = urlmetadata.substr(0, urlmetadata.find_last("/"))
+	urlhierarchy = urlotreedir+"/hierarchy.bin"
+	urloctree = urlotreedir+"/octree.bin"
 
-	var bboffset = Vector3(0.0, 0.0, 0.0)  # Vector3(418728.616, 2793207.181, 161.586)
 	print("Forcing to centre bboffset", bboffset)
 	mdoffset = Vector3(metadata["offset"][0], metadata["offset"][1], metadata["offset"][2])
 	mdoffset -= bboffset

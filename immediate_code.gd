@@ -7,6 +7,10 @@ extends EditorScript
 
 
 func _run():
-	print(Vector3(418728.61560000002, 2793207.1807999997, 161.58629999999999) - Vector3(419020.92989999976, 2793499.4950999995, 453.90059999973624))
+	var v = Basis().rotated(Vector3(1,0,0), deg2rad(-90))
+	print(v)
+	var rotzminus90 = Basis(Vector3(1,0,0), Vector3(0,0,-1), Vector3(0,1,0))
+	print(rotzminus90)
+	var p = Vector3(4000, 60000, 1)
+	print(rotzminus90.xform(p))
 	
-	print("   dfsdf.".strip_edges())

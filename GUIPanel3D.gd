@@ -104,7 +104,8 @@ func _on_buttonsave_pressed():
 
 	elif not savegamefilename.ends_with(".res"):
 		var savegamefilenameU = cavefilesdir+savegamefilename+".res"
-		rpc("setsavegamefilename", savegamefilename)
+		if Tglobal.connectiontoserveractive:
+			rpc("setsavegamefilename", savegamefilename)
 		if $Viewport/GUI/Panel/OptionSaveLocation.selected == 1:
 			if Tglobal.connectiontoserveractive and playerMe.networkID != 1:
 				sketchsystem.rpc_id(1, "savesketchsystem", savegamefilenameU)
@@ -524,7 +525,9 @@ func _ready():
 	$Viewport/GUI/Panel/ButtonGoto.connect("pressed", self, "_on_buttongoto_pressed")
 	$Viewport/GUI/Panel/WorldScale.connect("item_selected", self, "_on_playerscale_selected")
 	$Viewport/GUI/Panel/Networkstate.connect("item_selected", self, "_on_networkstate_selected")
-
+	$Viewport/GUI/Panel/ResourceOptions.connect("item_selected", self, "_on_resourceoptions_selected")
+	$Viewport/GUI/Panel/ResourceOptions.connect("button_down", self, "_on_resourceoptions_buttondown")
+	
 	$Viewport/GUI/Panel/TextRelatedActions/ButtonMessage.connect("pressed", self, "_on_buttonmessage_pressed")
 	$Viewport/GUI/Panel/TextRelatedActions/ButtonNewfile.connect("pressed", self, "_on_buttonnewfile_pressed")
 	$Viewport/GUI/Panel/TextRelatedActions/ButtonRemovefile.connect("pressed", self, "_on_buttonremovefile_pressed")
@@ -781,6 +784,49 @@ func _input(event):
 
 
 
+var prevnrosel = "--resources"
+func _on_resourceoptions_buttondown():
+	print("_on_resourceoptions_buttondown")
+	$Viewport/GUI/Panel/ResourceOptions.set_item_disabled(3, not $Viewport/GUI/Panel/ResourceOptions.is_item_disabled(3))
+	var nrosel = $Viewport/GUI/Panel/ResourceOptions.get_item_text($Viewport/GUI/Panel/ResourceOptions.selected)
+	if nrosel in ["Get Xcresource", "Set Potree URL", "Get Potree URL"]:
+		$Viewport/GUI/Panel/ResourceOptions.selected = 0
+
+func _on_resourceoptions_selected(index):
+	if $Viewport/GUI/Panel/ResourceOptions.selected != index:
+		$Viewport/GUI/Panel/ResourceOptions.selected = index
+	var nrosel = $Viewport/GUI/Panel/ResourceOptions.get_item_text(index)
+	print("Select resourceoption: ", nrosel)
+	var xcselecteddrawing = sketchsystem.pointersystem.activetargetnodewall
+	if nrosel == "Get Xcresource":
+		var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
+		if xcselecteddrawing != null:
+			$Viewport/GUI/Panel/EditColorRect/TextEdit.text = sketchsystem.pointersystem.activetargetnodewall.xcresource
+		elif planviewsystem.planviewactive and planviewsystem.activetargetfloor != null:
+			$Viewport/GUI/Panel/EditColorRect/TextEdit.text = planviewsystem.activetargetfloor.xcresource
+
+	elif nrosel == "Set Potree URL":
+		if xcselecteddrawing != null and xcselecteddrawing.drawingtype == DRAWING_TYPE.DT_CENTRELINE:
+			var texturl = $Viewport/GUI/Panel/EditColorRect/TextEdit.text.strip_edges()
+			if texturl.begins_with("http") and texturl.ends_with("metadata.json"):
+				if xcselecteddrawing.additionalproperties == null:
+					xcselecteddrawing.additionalproperties = {}
+				xcselecteddrawing.additionalproperties["potreeurlmetadata"] = texturl
+				$Viewport/GUI/Panel/Label.text = "Setting potreeurl"
+			else:
+				$Viewport/GUI/Panel/Label.text = "Must have metadata.json url"
+		else:
+			$Viewport/GUI/Panel/Label.text = "Must Connect to centreline"
+	elif nrosel == "Get Potree URL":
+		if xcselecteddrawing != null and xcselecteddrawing.drawingtype == DRAWING_TYPE.DT_CENTRELINE:
+			$Viewport/GUI/Panel/EditColorRect/TextEdit.text = xcselecteddrawing.additionalproperties.get("potreeurlmetadata", "--not set")  if xcselecteddrawing.additionalproperties != null  else "--not set"
+		else:
+			$Viewport/GUI/Panel/Label.text = "Must Connect to centreline"
+	prevnrosel = nrosel
+
+
+
+###############################
 #-------------networking system
 var websocketserver = null
 var websocketclient = null
