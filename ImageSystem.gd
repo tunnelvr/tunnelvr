@@ -7,6 +7,7 @@ const defaultfloordrawingres = "res://surveyscans/LambTrap-drawnup-1.png"
 
 var imgdir = "user://northernimages/"
 var nonimagedir = "user://nonimagewebpages/"
+var listregex = RegEx.new()
 
 var paperdrawinglist = [ ]
 var nonimagepageslist = [ ]
@@ -67,7 +68,8 @@ func _exit_tree():
 
 func _ready():
 	imageloadingthread.start(self, "imageloadingthread_function")
-
+	listregex.compile('<li><a href="([^"]*)">')
+	
 func clearallimageloadingactivity():
 	fetcheddrawing = null
 	paperdrawinglist.clear()
@@ -255,7 +257,19 @@ func _process(delta):
 			htmltextfile.open(fetchednonimagedataobject["fetchednonimagedataobjectfile"], File.READ)
 			var htmltext = htmltextfile.get_as_text()
 			htmltextfile.close()
-			get_node("/root/Spatial/PlanViewSystem").openlinklistpage(fetchednonimagedataobject["item"], htmltext)
+			var llinks = [ ]
+			if fetchednonimagedataobject.has("filetreeresource") and fetchednonimagedataobject["filetreeresource"].get("type") == "caddyfiles":
+				var jres = parse_json(htmltext)
+				if jres != null:
+					for jr in jres:
+						llinks.push_back(jr["name"] + ("/" if jr.get("is_dir") else ""))
+			else:
+				for m in listregex.search_all(htmltext):
+					var lk = m.get_string(1)
+					if not lk.begins_with("."):
+						lk = lk.replace("&amp;", "&")
+						llinks.push_back(lk)
+			get_node("/root/Spatial/PlanViewSystem").openlinklistpage(fetchednonimagedataobject["item"], llinks)
 
 		elif "callbackobject" in fetchednonimagedataobject:
 			var f = File.new()

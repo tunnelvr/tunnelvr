@@ -888,8 +888,7 @@ func _on_resourceoptions_selected(index):
 		var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
 		planviewsystem.filetreeresourcename = $Viewport/GUI/Panel/ResourceSelector.get_item_text($Viewport/GUI/Panel/ResourceSelector.selected)
 		var filetreerootpath = GithubAPI.riattributes["resourcedefs"][planviewsystem.filetreeresourcename].get("path", "")
-		filetreerootpath = filetreerootpath.lstrip("/").rstrip("/")
-		filetreerootpath += ("/" if filetreerootpath != "" else "")
+		filetreerootpath = filetreerootpath.rstrip("/") + "/"
 		planviewsystem.clearsetupfileviewtree(false, filetreerootpath)
 		$Viewport/GUI/Panel/Label.text = "Applied resource to filetree"
 					

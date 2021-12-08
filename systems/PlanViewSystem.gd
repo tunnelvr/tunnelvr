@@ -88,7 +88,7 @@ func fetchbuttonpressed(item, column, idx):
 		var GithubAPI = get_node("/root/Spatial/ImageSystem/GithubAPI")
 		filetreeresource = GithubAPI.riattributes["resourcedefs"].get(filetreeresourcename)
 		var path = item.get_tooltip(0)
-		url = filetreeresource.get("url") + path
+		url = filetreeresource.get("url") + path.lstrip("/")
 		
 	print("url to fetch: ", url)
 	if imgregex.search(fname):
@@ -220,15 +220,11 @@ func addsubitem(upperitem, fname, url):
 	item.add_button(0, tex, idx)
 	buttonidxtoitem[idx] = item
 
-func openlinklistpage(item, htmltext):
+func openlinklistpage(item, llinks):
 	item.clear_custom_bg_color(0)
-	var dirurl = item.get_tooltip(0).rstrip("/")
-	dirurl += ("/"  if dirurl != ""  else  "")
-	for m in listregex.search_all(htmltext):
-		var lk = m.get_string(1)
-		if not lk.begins_with("."):
-			lk = lk.replace("&amp;", "&")
-			addsubitem(item, lk.replace("%20", " "), dirurl + lk)
+	var dirurl = item.get_tooltip(0).rstrip("/") + "/"
+	for lk in llinks:
+		addsubitem(item, lk.replace("%20", " "), dirurl + lk)
 
 func transferintorealviewport(setascurrentcamera):
 	if setascurrentcamera:
@@ -263,7 +259,6 @@ func checkcentrelinesvisible_pressed():
 
 		
 func _ready():
-	listregex.compile('<li><a href="([^"]*)">')
 	imgregex.compile('(?i)\\.(png|jpg|jpeg)$')
 	f3dregex.compile('(?i)\\.(3d)$')
 	installbuttontex = get_node("/root/Spatial/MaterialSystem/buttonmaterials/InstallButton").get_surface_material(0).albedo_texture
