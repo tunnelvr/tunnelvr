@@ -7,7 +7,6 @@ const defaultfloordrawingres = "res://surveyscans/LambTrap-drawnup-1.png"
 
 var imgdir = "user://northernimages/"
 var nonimagedir = "user://nonimagewebpages/"
-var urldir = "http://cave-registry.org.uk/svn/NorthernEngland/ThreeCountiesArea/rawscans/Ireby/"
 
 var paperdrawinglist = [ ]
 var nonimagepageslist = [ ]
@@ -161,11 +160,11 @@ func _process(delta):
 				var err = Directory.new().make_dir(nonimagedir)
 				print("Making directory ", nonimagedir, " err code: ", err)
 			httprequest = HTTPRequest.new()
+			var headers = nonimagepage.get("headers", [])
 			add_child(httprequest)
 			nonimagepage["httprequest"] = httprequest
 			httprequest.connect("request_completed", self, "_http_request_completed", [nonimagepage])
 			httprequest.download_file = nonimagepage["fetchednonimagedataobjectfile"]
-			var headers = []
 			if nonimagepage.has("byteOffset"):
 				headers.push_back("Range: bytes=%d-%d" % [nonimagepage["byteOffset"], nonimagepage["byteOffset"]+nonimagepage["byteSize"]-1])
 			print("makinghttprequest ", nonimagepage["fetchednonimagedataobjectfile"], nonimagepage.get("byteOffset"))
@@ -278,11 +277,14 @@ func _process(delta):
 		print("Long image system process ", dt, " ", pt)
 
 
-func fetchunrolltree(fileviewtree, item, url):
+func fetchunrolltree(fileviewtree, item, url, filetreeresource):
 	var nonimagedataobject = { "url":url, "tree":fileviewtree, "item":item }
+	if filetreeresource != null:
+		nonimagedataobject["filetreeresource"] = filetreeresource
+		if filetreeresource.get("type") == "caddyfiles":
+			nonimagedataobject["headers"] = [ "accept: application/json" ]
 	nonimagepageslist.append(nonimagedataobject)
 	set_process(true)
-
 
 func fetchrequesturl(nonimagedataobject):
 	var url = nonimagedataobject["url"]

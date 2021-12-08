@@ -1,5 +1,9 @@
 extends Node
 
+var resourcesinformationfile = "user://resources.json"
+var resourcesinformationfileBAK = "user://resources.json-bak"
+var riattributes = null
+
 var ghdirectory = "user://githubcache"
 var ghattributes = null  # {"apiurl":"api.github.com", "owner":"goatchurchprime", "repo":"abdulsdiodedisaster", "path":"abdulsdiodedisaster", "token":"see https://github.com/settings/tokens"}
 var ghcurrentname = ""
@@ -8,6 +12,30 @@ var ghfetcheddatafile = ghdirectory+"/recgithubfile.res"
 var ghattributesfile = ghdirectory+"/attributes.json"
 var httpghapi = HTTPClient.new()
 
+func saveresourcesinformationfile():
+	var rijsonbak = File.new()
+	rijsonbak.open(resourcesinformationfileBAK, File.WRITE)
+	rijsonbak.store_string(JSON.print(riattributes, "  ", true))
+	rijsonbak.close()
+	var rijsondir = Directory.new()
+	rijsondir.rename(resourcesinformationfileBAK, resourcesinformationfile)
+			
+func _ready():
+	var rijson = File.new()
+	if rijson.file_exists(resourcesinformationfile):
+		rijson.open(resourcesinformationfile, File.READ)
+		riattributes = parse_json(rijson.get_as_text())
+	if true or riattributes == null:
+		riattributes = { "playername":"player%d"%randi() }
+		var resourcedefs = { "local":    { "name":"local", "type":"localfiles", "path":"cavefiles" }, 
+							 "cavereg1": { "name":"cavereg1", "type":"svnfiles", "url":"http://cave-registry.org.uk/svn/", "path":"NorthernEngland" },
+							 "caddyg":   { "name":"caddyg", "type":"caddyfiles", "url":"http://godot.doesliverpool.xyz:8000/", "path":"" },
+							 "ghfiles":  { "name":"ghfiles", "type":"githubapi", "apiurl":"api.github.com", "owner":"goatchurchprime", "repo":"tunnelvr_cave_data", "path":"cavedata/firstarea"}
+						   }
+		riattributes["resourcedefs"] = resourcedefs
+		saveresourcesinformationfile()
+		
+			
 func Yinitclient():
 	if ghattributes == null:
 		var dir = Directory.new()
@@ -95,7 +123,6 @@ func Ycommitfile(cname, message):
 	ghcurrentname = d["content"]["name"]
 	ghcurrentsha = d["content"]["sha"]
 	return ghfetcheddatafile
-
 
 
 # Temporary testing code below

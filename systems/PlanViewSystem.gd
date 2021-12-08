@@ -21,6 +21,8 @@ var fetchbuttontex = null
 var clearcachebuttontex = null
 var f3dbuttontex = null
 
+var filetreeresourcename = null
+
 func getactivetargetfloorViz(newactivetargetfloorname: String):
 	var xcviz = { "prevxcvizstates":{ }, "xcvizstates":{ } }
 	if activetargetfloor != null and newactivetargetfloorname != activetargetfloor.get_name():
@@ -69,18 +71,25 @@ func fetchbuttonpressed(item, column, idx):
 			if buttonidxtoitem[lidx] == item:
 				idx = lidx
 				break
-	print("iii ", idx, " ", item, " ", item.get_text(0), " ", column, "  ")
+	print("iii ", idx, " ", item, " ", item.get_text(0), " ", column, "  ", filetreeresourcename)
 	Tglobal.soundsystem.quicksound("MenuClick", raycastcollisionpointC)
 	var url = item.get_tooltip(0)
 	if url == "**clear-cache**":
 		print("Clearing image and webpage caches")
 		ImageSystem.clearcachedir(ImageSystem.imgdir)
 		ImageSystem.clearcachedir(ImageSystem.nonimagedir)
-		clearsetupfileviewtree(false)
+		clearsetupfileviewtree(false, "http://cave-registry.org.uk/svn/NorthernEngland/")
 		planviewcontrols.get_node("CheckBoxFileTree").pressed = false
 		return
 		
 	var fname = item.get_text(0)
+	var filetreeresource = null
+	if filetreeresourcename != null:
+		var GithubAPI = get_node("/root/Spatial/ImageSystem/GithubAPI")
+		filetreeresource = GithubAPI.riattributes["resourcedefs"].get(filetreeresourcename)
+		var path = item.get_tooltip(0)
+		url = filetreeresource.get("url") + path
+		
 	print("url to fetch: ", url)
 	if imgregex.search(fname):
 		var pt0 = $RealPlanCamera.global_transform.origin - Vector3(0,100,0)
@@ -116,7 +125,6 @@ func fetchbuttonpressed(item, column, idx):
 			checkcentrelinesvisible_pressed()
 		get_node("/root/Spatial/ExecutingFeatures").parse3ddmpcentreline_networked(url)
 
-			
 	elif not buttonidxloaded.has(idx):
 		item.set_button_disabled(column, idx, true)
 		item.erase_button(column, idx)
@@ -124,7 +132,11 @@ func fetchbuttonpressed(item, column, idx):
 		#item.erase_button(column, idx)
 		#buttonidxtoitem.erase(idx)
 		item.set_custom_bg_color(0, Color("#ff0099"))
-		ImageSystem.fetchunrolltree(fileviewtree, item, item.get_tooltip(0))
+		if filetreeresourcename != null:
+			ImageSystem.fetchunrolltree(fileviewtree, item, url, filetreeresource)
+		else:
+			ImageSystem.fetchunrolltree(fileviewtree, item, url, null)
+
 	else:
 		print("Suppressing button ", fname, " which should be disabled")
 
@@ -210,9 +222,8 @@ func addsubitem(upperitem, fname, url):
 
 func openlinklistpage(item, htmltext):
 	item.clear_custom_bg_color(0)
-	var dirurl = item.get_tooltip(0)
-	if not dirurl.ends_with("/"):
-		dirurl += "/"
+	var dirurl = item.get_tooltip(0).rstrip("/")
+	dirurl += ("/"  if dirurl != ""  else  "")
 	for m in listregex.search_all(htmltext):
 		var lk = m.get_string(1)
 		if not lk.begins_with("."):
@@ -268,10 +279,10 @@ func _ready():
 	planviewcontrols.get_node("CheckBoxCentrelinesVisible").connect("pressed", self, "checkcentrelinesvisible_pressed")
 	planviewcontrols.get_node("FloorMove/FloorStyle").connect("item_selected", self, "floorstyle_itemselected")
 	planviewcontrols.get_node("CheckBoxFileTree").connect("toggled", self, "checkboxfiletree_toggled")
-	call_deferred("clearsetupfileviewtree", true)
+	call_deferred("clearsetupfileviewtree", true, "http://cave-registry.org.uk/svn/NorthernEngland/")
 	set_process(visible)
 		
-func clearsetupfileviewtree(binit):
+func clearsetupfileviewtree(binit, filetreerootpath):
 	if binit:
 		fileviewtree.connect("button_pressed", self, "fetchbuttonpressed")
 		fileviewtree.connect("item_selected", self, "itemselected")
@@ -282,10 +293,10 @@ func clearsetupfileviewtree(binit):
 	var root = fileviewtree.create_item()
 	root.set_text(0, "Root of tree")
 	root.set_tooltip(0, "**clear-cache**")
-	#addsubitem(root, "Ireby", "http://cave-registry.org.uk/svn/NorthernEngland/ThreeCountiesArea/rawscans/Ireby/")
-	#addsubitem(root, "rawscans", "http://cave-registry.org.uk/svn/NorthernEngland/ThreeCountiesArea/rawscans/")
-	#addsubitem(root, "rawscans", "http://cave-registry.org.uk/svn/NorthernEngland/ThreeCountiesArea/")
-	addsubitem(root, "NorthernEngland", "http://cave-registry.org.uk/svn/NorthernEngland/")
+	if filetreeresourcename != "":
+		addsubitem(root, filetreerootpath, filetreerootpath)
+	else:
+		addsubitem(root, "NorthernEngland", filetreerootpath)
 	var idx = len(buttonidxtoitem)
 	root.add_button(0, clearcachebuttontex, idx)
 	buttonidxtoitem[idx] = root

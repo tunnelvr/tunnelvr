@@ -527,15 +527,7 @@ func _ready():
 	if $Viewport/GUI/Panel/Networkstate.selected != 0:  # could record saved settings on disk
 		call_deferred("_on_networkstate_selected", $Viewport/GUI/Panel/Networkstate.selected)
 
-	$Viewport/GUI/Panel/Savegamefilename.clear()
-	$Viewport/GUI/Panel/Savegamefilename.add_item("--clearcave")
-	for cfile in cavesfilelist():
-		$Viewport/GUI/Panel/Savegamefilename.add_item(cfile)
-
-#func _physics_process(delta):
-#	var x = $Viewport/GUI/Panel/SwitchTest.get_popup()
-#	x.rect_position.y = -90
-
+	resources_readycall()
 
 func cavesfilelist():
 	var cfiles = [ ]
@@ -775,18 +767,32 @@ func _input(event):
 
 
 
-var prevnrosel = "--resources"
-var resourceoptionlookup = null
+
+
+var resourceoptionlookup = { }
+func resources_readycall():
+	$Viewport/GUI/Panel/Savegamefilename.clear()
+	$Viewport/GUI/Panel/Savegamefilename.add_item("--clearcave")
+	for cfile in cavesfilelist():
+		$Viewport/GUI/Panel/Savegamefilename.add_item(cfile)
+	for idx in range($Viewport/GUI/Panel/ResourceOptions.get_item_count()):
+		resourceoptionlookup[$Viewport/GUI/Panel/ResourceOptions.get_item_text(idx)] = idx
+	call_deferred("updateresourceselector", "")
+	
+func updateresourceselector(seltext):
+	$Viewport/GUI/Panel/ResourceSelector.clear()
+	var GithubAPI = get_node("/root/Spatial/ImageSystem/GithubAPI")
+	for k in GithubAPI.riattributes["resourcedefs"]:
+		$Viewport/GUI/Panel/ResourceSelector.add_item(k)
+		if k == seltext:
+			$Viewport/GUI/Panel/ResourceSelector.selected = $Viewport/GUI/Panel/ResourceSelector.get_item_count() - 1
+
+var prevnrosel = ""
 func _on_resourceoptions_buttondown():
 	print("_on_resourceoptions_buttondown")
-	if resourceoptionlookup == null:
-		resourceoptionlookup = {}
-		for idx in range($Viewport/GUI/Panel/ResourceOptions.get_item_count()):
-			resourceoptionlookup[$Viewport/GUI/Panel/ResourceOptions.get_item_text(idx)] = idx
 	var idxselected = $Viewport/GUI/Panel/ResourceOptions.selected
 	var nrosel = $Viewport/GUI/Panel/ResourceOptions.get_item_text(idxselected)
-	if nrosel in ["Get Xcresource", "Set Potree URL", "Get Potree URL", "Get Xcresource", 
-				  "Show Potree", "Hide Potree", "Load Potree", "Remove"]:
+	if not (nrosel in ["--resources"]):
 		$Viewport/GUI/Panel/ResourceOptions.selected = 0
 
 	var potreeexperiments = selfSpatial.get_node("PotreeExperiments")
@@ -854,7 +860,44 @@ func _on_resourceoptions_selected(index):
 			potreeexperiments.visible = false
 			potreeexperiments.get_node("Timer").stop()
 		#setguipanelhide()
+	
+	elif nrosel == "Print resource":
+		var resourcename = $Viewport/GUI/Panel/ResourceSelector.get_item_text($Viewport/GUI/Panel/ResourceSelector.selected)
+		var GithubAPI = get_node("/root/Spatial/ImageSystem/GithubAPI")
+		var resourceselected = GithubAPI.riattributes["resourcedefs"].get(resourcename)
+		if resourceselected != null:
+			assert (resourceselected["name"] == resourcename)
+			$Viewport/GUI/Panel/EditColorRect/TextEdit.text = JSON.print(resourceselected, "  ", true)
 
+	elif nrosel == "Set resource":
+		var jresource = parse_json($Viewport/GUI/Panel/EditColorRect/TextEdit.text)
+		if jresource != null and jresource.has("name"):
+			var GithubAPI = get_node("/root/Spatial/ImageSystem/GithubAPI")
+			if jresource.get("delete"):
+				GithubAPI.riattributes["resourcedefs"].erase(jresource["name"])
+			else:
+				GithubAPI.riattributes["resourcedefs"][jresource["name"]] = jresource
+			GithubAPI.saveresourcesinformationfile()
+			$Viewport/GUI/Panel/Label.text = "Resource file saved"
+			updateresourceselector(jresource["name"])
+		else:
+			$Viewport/GUI/Panel/Label.text = "Resource definition not valid"
+
+	elif nrosel == "Apply to Filetree":
+		var GithubAPI = get_node("/root/Spatial/ImageSystem/GithubAPI")
+		var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
+		planviewsystem.filetreeresourcename = $Viewport/GUI/Panel/ResourceSelector.get_item_text($Viewport/GUI/Panel/ResourceSelector.selected)
+		var filetreerootpath = GithubAPI.riattributes["resourcedefs"][planviewsystem.filetreeresourcename].get("path", "")
+		filetreerootpath = filetreerootpath.lstrip("/").rstrip("/")
+		filetreerootpath += ("/" if filetreerootpath != "" else "")
+		planviewsystem.clearsetupfileviewtree(false, filetreerootpath)
+		$Viewport/GUI/Panel/Label.text = "Applied resource to filetree"
+					
+	elif nrosel == "Apply to Cavesave":
+		pass
+		# copy the value into a setting, then rerun  cavesfilelist()
+
+	Tglobal.soundsystem.quicksound("MenuClick", collision_point)
 	prevnrosel = nrosel
 
 

@@ -7,5 +7,5 @@ extends EditorScript
 
 
 func _run():
-	var x = "sdfsdf potresesd"
-	print(x.count("potree"))
+	var x = "sdfsdf potresesd/"
+	print(x.rstrip("/dse"))

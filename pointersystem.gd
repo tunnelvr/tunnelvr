@@ -1614,11 +1614,18 @@ func _physics_process(delta):
 		var firstlasertarget = LaserOrient.get_node("RayCast").get_collider()
 		if firstlasertarget != null and firstlasertarget.is_queued_for_deletion():
 			firstlasertarget = null
+			
 		if firstlasertarget == guipanel3d or firstlasertarget == keyboardpanel:
 			LaserOrient.visible = true
 			activelaserroot = LaserOrient
 			setpointertarget(activelaserroot, activelaserroot.get_node("RayCast"), -1.0)
 			pointerplanviewtarget = null
+			var textedit = guipanel3d.get_node("Viewport/GUI/Panel/EditColorRect/TextEdit")
+			if joyscrolldir != 0:
+				if textedit.has_focus() or Rect2(textedit.rect_global_position, textedit.rect_size).has_point(guipanel3d.viewport_point):
+					textedit.scroll_vertical += -joyscrolldir
+					joyscrolldir = 0
+			
 		elif Tglobal.handflickmotiongestureposition == handflickmotiongestureposition_gone or Tglobal.controlslocked:
 			LaserOrient.visible = false
 			pointerplanviewtarget = null
@@ -1651,6 +1658,7 @@ func _physics_process(delta):
 				else:
 					activelaserroot.get_node("RayCast").force_raycast_update()
 					setpointertarget(activelaserroot, activelaserroot.get_node("RayCast"), -1.0)
+
 		else:
 			LaserOrient.visible = true
 			activelaserroot = LaserOrient

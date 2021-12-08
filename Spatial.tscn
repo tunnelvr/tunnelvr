@@ -2009,12 +2009,24 @@ margin_bottom = 273.0
 text = "image system reports"
 
 [node name="ResourceOptions" type="OptionButton" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 248.625
-margin_top = 102.705
-margin_right = 374.625
-margin_bottom = 124.705
+margin_left = 234.371
+margin_top = 104.487
+margin_right = 360.371
+margin_bottom = 126.487
 text = "--resources"
-items = [ "--resources", null, false, 0, null, "Set Potree URL", null, false, 1, null, "Get Potree URL", null, false, 2, null, "Load Potree", null, false, 3, null, "Show Potree", null, false, 4, null, "Get Xcresource", null, false, 5, null ]
+items = [ "--resources", null, false, 0, null, "Set Potree URL", null, false, 1, null, "Get Potree URL", null, false, 2, null, "Load Potree", null, false, 3, null, "Show Potree", null, false, 4, null, "Get Xcresource", null, false, 5, null, "Print resource", null, false, 6, null, "Set resource", null, false, 7, null, "Apply to Filetree", null, false, 8, null, "Apply to Cavesave", null, false, 9, null ]
+selected = 0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ResourceSelector" type="OptionButton" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
+margin_left = 126.3
+margin_top = 104.0
+margin_right = 226.3
+margin_bottom = 126.0
+text = "--select"
+items = [ "--select", null, false, 1, null ]
 selected = 0
 __meta__ = {
 "_edit_use_anchors_": false
