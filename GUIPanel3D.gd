@@ -367,15 +367,6 @@ func _on_switchtest(index):
 				xcdrawingcentreline.additionalproperties = { "stationnamecommonroot":Centrelinedata.findcommonroot(xcdrawingcentreline.nodepoints) }
 		SwitchTest.selected = 0
 
-	elif nssel == "LoadPointMesh":
-		var potreeexperiments = selfSpatial.get_node("PotreeExperiments")
-		if potreeexperiments.rootnode == null:
-			potreeexperiments.get_node("Timer").start()
-		else:
-			potreeexperiments.killpotree()
-		SwitchTest.selected = 0
-		setguipanelhide()
-
 	elif nssel == "BackfaceCull":
 		var materialsystem = get_node("/root/Spatial/MaterialSystem")
 		backfaceculldisabled = not backfaceculldisabled
@@ -785,12 +776,23 @@ func _input(event):
 
 
 var prevnrosel = "--resources"
+var resourceoptionlookup = null
 func _on_resourceoptions_buttondown():
 	print("_on_resourceoptions_buttondown")
-	$Viewport/GUI/Panel/ResourceOptions.set_item_disabled(3, not $Viewport/GUI/Panel/ResourceOptions.is_item_disabled(3))
-	var nrosel = $Viewport/GUI/Panel/ResourceOptions.get_item_text($Viewport/GUI/Panel/ResourceOptions.selected)
-	if nrosel in ["Get Xcresource", "Set Potree URL", "Get Potree URL"]:
+	if resourceoptionlookup == null:
+		resourceoptionlookup = {}
+		for idx in range($Viewport/GUI/Panel/ResourceOptions.get_item_count()):
+			resourceoptionlookup[$Viewport/GUI/Panel/ResourceOptions.get_item_text(idx)] = idx
+	var idxselected = $Viewport/GUI/Panel/ResourceOptions.selected
+	var nrosel = $Viewport/GUI/Panel/ResourceOptions.get_item_text(idxselected)
+	if nrosel in ["Get Xcresource", "Set Potree URL", "Get Potree URL", "Get Xcresource", 
+				  "Show Potree", "Hide Potree", "Load Potree", "Remove"]:
 		$Viewport/GUI/Panel/ResourceOptions.selected = 0
+
+	var potreeexperiments = selfSpatial.get_node("PotreeExperiments")
+	$Viewport/GUI/Panel/ResourceOptions.set_item_text(resourceoptionlookup["Load Potree"], "Load Potree" if potreeexperiments.rootnode == null else "Remove Potree")
+	$Viewport/GUI/Panel/ResourceOptions.set_item_text(resourceoptionlookup["Show Potree"], "Show Potree" if not potreeexperiments.visible else "Hide Potree")
+
 
 func _on_resourceoptions_selected(index):
 	if $Viewport/GUI/Panel/ResourceOptions.selected != index:
@@ -822,7 +824,49 @@ func _on_resourceoptions_selected(index):
 			$Viewport/GUI/Panel/EditColorRect/TextEdit.text = xcselecteddrawing.additionalproperties.get("potreeurlmetadata", "--not set")  if xcselecteddrawing.additionalproperties != null  else "--not set"
 		else:
 			$Viewport/GUI/Panel/Label.text = "Must Connect to centreline"
+
+	elif nrosel.count("Potree"):
+		var potreeexperiments = selfSpatial.get_node("PotreeExperiments")
+		if nrosel == "Load Potree":
+			potreeexperiments.visible = true
+			if potreeexperiments.rootnode == null:
+				potreeexperiments.get_node("Timer").start()
+				$Viewport/GUI/Panel/Label.text = "Potree timer started"
+				# could do all the loading here async while the load button is disabled			
+			else:
+				$Viewport/GUI/Panel/Label.text = "Potree already there"
+		elif nrosel == "Remove Potree":
+			potreeexperiments.visible = false
+			if potreeexperiments.rootnode != null:
+				$Viewport/GUI/Panel/Label.text = "killing Potree"
+				potreeexperiments.queuekillpotree = true
+				potreeexperiments.get_node("Timer").start()
+			else:
+				$Viewport/GUI/Panel/Label.text = "Potree not there"
+		elif nrosel == "Show Potree":
+			potreeexperiments.visible = true
+			if potreeexperiments.rootnode != null:
+				potreeexperiments.get_node("Timer").start()
+				$Viewport/GUI/Panel/Label.text = "Potree shown"
+			else:
+				$Viewport/GUI/Panel/Label.text = "Potree not there"
+		elif nrosel == "Hide Potree":
+			potreeexperiments.visible = false
+			potreeexperiments.get_node("Timer").stop()
+		#setguipanelhide()
+
 	prevnrosel = nrosel
+
+
+
+
+
+
+
+
+
+
+
 
 
 

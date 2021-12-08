@@ -1875,7 +1875,7 @@ margin_top = 235.0
 margin_right = 116.0
 margin_bottom = 262.0
 text = "normal"
-items = [ "normal", null, false, 0, null, "hide floors", null, false, 1, null, "all grey", null, false, 2, null, "hide xc", null, false, 3, null, "toggle guardian", null, false, 4, null, "export OBJ", null, false, 7, null, "choke", null, false, 6, null, "swap controllers", null, false, 7, null, "lock controls", null, false, 8, null, "LoadPointMesh", null, false, 10, null, "BackfaceCull", null, false, 11, null, "Item 11", null, false, 11, null, "Item 12", null, false, 12, null, "Item 13", null, false, 13, null, "Item 14", null, false, 14, null ]
+items = [ "normal", null, false, 0, null, "hide floors", null, false, 1, null, "all grey", null, false, 2, null, "hide xc", null, false, 3, null, "toggle guardian", null, false, 4, null, "export OBJ", null, false, 7, null, "choke", null, false, 6, null, "swap controllers", null, false, 7, null, "lock controls", null, false, 8, null, "BackfaceCull", null, false, 11, null ]
 selected = 0
 __meta__ = {
 "_edit_use_anchors_": false
@@ -2014,7 +2014,7 @@ margin_top = 102.705
 margin_right = 374.625
 margin_bottom = 124.705
 text = "--resources"
-items = [ "--resources", null, false, 0, null, "Set Potree URL", null, false, 1, null, "Get Potree URL", null, false, 2, null, "Show Potree", null, false, 3, null, "Get Xcresource", null, false, 4, null ]
+items = [ "--resources", null, false, 0, null, "Set Potree URL", null, false, 1, null, "Get Potree URL", null, false, 2, null, "Load Potree", null, false, 3, null, "Show Potree", null, false, 4, null, "Get Xcresource", null, false, 5, null ]
 selected = 0
 __meta__ = {
 "_edit_use_anchors_": false

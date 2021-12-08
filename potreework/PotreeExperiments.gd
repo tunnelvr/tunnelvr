@@ -60,13 +60,6 @@ func sethighlightplane(planetransform):
 		rootnode.sethighlightplane(planetransform.basis.z, 
 								   planetransform.basis.z.dot(planetransform.origin))
 
-func killpotree():
-	$Timer.stop()
-	if rootnode != null:
-		rootnode.processingnode = null
-		remove_child(rootnode)
-		rootnode.queue_free()
-		rootnode = null
 
 
 func getpotreeurl():
@@ -94,6 +87,8 @@ const pointsizefactor = 150.0
 const updatepotreeprioritiesworkingtimeout = 4.0
 signal updatepotreepriorities_fetchsignal(f)
 
+var queuekillpotree = false
+
 func updatepotreepriorities():
 	nupdatepotreeprioritiesSingleConcurrentOperations += 1
 	if nupdatepotreeprioritiesSingleConcurrentOperations != 1:
@@ -101,6 +96,17 @@ func updatepotreepriorities():
 		print("drop out from updatepotreepriorities as not idle")
 		return
 	yield(get_tree(), "idle_frame")
+
+	if queuekillpotree:
+		$Timer.stop()
+		if rootnode != null:
+			rootnode.processingnode = null
+			remove_child(rootnode)
+			rootnode.queue_free()
+			rootnode = null
+		nupdatepotreeprioritiesSingleConcurrentOperations -= 1
+		queuekillpotree = false
+		return
 
 	if rootnode == null:
 		var urlmetadata = null
@@ -277,4 +283,4 @@ func _input(event):
 		if rootnode == null:
 			$Timer.start()
 		else:
-			killpotree()
+			queuekillpotree = true
