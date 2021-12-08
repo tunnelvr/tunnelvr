@@ -88,7 +88,16 @@ func fetchbuttonpressed(item, column, idx):
 		var GithubAPI = get_node("/root/Spatial/ImageSystem/GithubAPI")
 		filetreeresource = GithubAPI.riattributes["resourcedefs"].get(filetreeresourcename)
 		var path = item.get_tooltip(0)
-		url = filetreeresource.get("url") + path.lstrip("/")
+		if filetreeresource.get("type") == "githubapi":
+			if path.ends_with("/"):
+				url = "https://%s/repos/%s/%s/contents/%s" % [ filetreeresource["apiurl"], filetreeresource["owner"], filetreeresource["repo"], path.lstrip("/").rstrip("/") ]
+			else:
+				assert (filetreeresource["apiurl"] == "api.github.com")
+				url = "https://raw.githubusercontent.com/%s/%s/main/%s" % [ filetreeresource["owner"], filetreeresource["repo"], path.lstrip("/") ]
+		elif filetreeresource.get("type") == "caddyfiles":
+			url = filetreeresource.get("url") + path.lstrip("/")
+		elif filetreeresource.get("type") == "svnfiles":
+			url = filetreeresource.get("url") + path.lstrip("/")
 		
 	print("url to fetch: ", url)
 	if imgregex.search(fname):
