@@ -2014,7 +2014,7 @@ margin_top = 104.487
 margin_right = 360.371
 margin_bottom = 126.487
 text = "--resources"
-items = [ "--resources", null, false, 0, null, "Set Potree URL", null, false, 1, null, "Get Potree URL", null, false, 2, null, "Load Potree", null, false, 3, null, "Show Potree", null, false, 4, null, "Get Xcresource", null, false, 5, null, "Print resource", null, false, 6, null, "Set resource", null, false, 7, null, "Apply to Filetree", null, false, 8, null, "Apply to Cavesave", null, false, 9, null ]
+items = [ "--resources", null, false, 0, null, "Print XCproperties", null, false, 1, null, "Set XCproperties", null, false, 2, null, "Show/Hide/Load Potree", null, false, 4, null, "Print resource", null, false, 6, null, "Set resource", null, false, 7, null, "Apply to Filetree", null, false, 8, null, "Apply to Cavesave", null, false, 9, null ]
 selected = 0
 __meta__ = {
 "_edit_use_anchors_": false

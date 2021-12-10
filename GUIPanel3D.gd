@@ -517,7 +517,7 @@ func _ready():
 	$Viewport/GUI/Panel/WorldScale.connect("item_selected", self, "_on_playerscale_selected")
 	$Viewport/GUI/Panel/Networkstate.connect("item_selected", self, "_on_networkstate_selected")
 	$Viewport/GUI/Panel/ResourceOptions.connect("item_selected", self, "_on_resourceoptions_selected")
-	$Viewport/GUI/Panel/ResourceOptions.connect("button_down", self, "_on_resourceoptions_buttondown")
+	$Viewport/GUI/Panel/ResourceOptions.connect("button_down", self, "_on_resourceoptions_buttondown_setavailablefunctions")
 	
 	$Viewport/GUI/Panel/TextRelatedActions/ButtonMessage.connect("pressed", self, "_on_buttonmessage_pressed")
 	$Viewport/GUI/Panel/TextRelatedActions/ButtonNewfile.connect("pressed", self, "_on_buttonnewfile_pressed")
@@ -788,16 +788,36 @@ func updateresourceselector(seltext):
 			$Viewport/GUI/Panel/ResourceSelector.selected = $Viewport/GUI/Panel/ResourceSelector.get_item_count() - 1
 
 var prevnrosel = ""
-func _on_resourceoptions_buttondown():
-	print("_on_resourceoptions_buttondown")
+var centrelineselected_forresourcefunction = null
+var xcselecteddrawing_forrsourcefunctions = null
+func _on_resourceoptions_buttondown_setavailablefunctions():
+	print("_on_resourceoptions_buttondown_setavailablefunctions")
 	var idxselected = $Viewport/GUI/Panel/ResourceOptions.selected
 	var nrosel = $Viewport/GUI/Panel/ResourceOptions.get_item_text(idxselected)
 	if not (nrosel in ["--resources"]):
 		$Viewport/GUI/Panel/ResourceOptions.selected = 0
 
+	xcselecteddrawing_forrsourcefunctions = sketchsystem.pointersystem.activetargetnodewall if sketchsystem.pointersystem.activetargetnodewall != null else sketchsystem.pointersystem.activetargetwall
+	print("xcselecteddrawing_forrsourcefunctions ", xcselecteddrawing_forrsourcefunctions)
+	if xcselecteddrawing_forrsourcefunctions == null:
+		var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
+		if planviewsystem.planviewactive and planviewsystem.activetargetfloor != null:
+			xcselecteddrawing_forrsourcefunctions = planviewsystem.activetargetfloor
+	if xcselecteddrawing_forrsourcefunctions != null and xcselecteddrawing_forrsourcefunctions.drawingtype == DRAWING_TYPE.DT_CENTRELINE:
+		centrelineselected_forresourcefunction = xcselecteddrawing_forrsourcefunctions
+	else:
+		var xcdrawingcentrelines = get_tree().get_nodes_in_group("gpcentrelinegeo")
+		centrelineselected_forresourcefunction = (xcdrawingcentrelines[0] if len(xcdrawingcentrelines) != 0 else null)
+
 	var potreeexperiments = selfSpatial.get_node("PotreeExperiments")
-	$Viewport/GUI/Panel/ResourceOptions.set_item_text(resourceoptionlookup["Load Potree"], "Load Potree" if potreeexperiments.rootnode == null else "Remove Potree")
-	$Viewport/GUI/Panel/ResourceOptions.set_item_text(resourceoptionlookup["Show Potree"], "Show Potree" if not potreeexperiments.visible else "Hide Potree")
+	var showhigloadpotreeid = resourceoptionlookup["Show/Hide/Load Potree"]
+	if potreeexperiments.rootnode == null:
+		$Viewport/GUI/Panel/ResourceOptions.set_item_text(showhigloadpotreeid, "Load Potree")
+		$Viewport/GUI/Panel/ResourceOptions.set_item_disabled(showhigloadpotreeid, (centrelineselected_forresourcefunction == null or centrelineselected_forresourcefunction.additionalproperties == null or centrelineselected_forresourcefunction.additionalproperties.get("potreeurlmetadata") == null))
+	else:
+		$Viewport/GUI/Panel/ResourceOptions.set_item_text(showhigloadpotreeid, "Show Potree" if not potreeexperiments.visible else "Hide Potree")
+	$Viewport/GUI/Panel/ResourceOptions.set_item_disabled(resourceoptionlookup["Print XCproperties"], xcselecteddrawing_forrsourcefunctions == null)
+	$Viewport/GUI/Panel/ResourceOptions.set_item_disabled(resourceoptionlookup["Set XCproperties"], xcselecteddrawing_forrsourcefunctions == null)
 
 
 func _on_resourceoptions_selected(index):
@@ -806,30 +826,32 @@ func _on_resourceoptions_selected(index):
 	var nrosel = $Viewport/GUI/Panel/ResourceOptions.get_item_text(index)
 	print("Select resourceoption: ", nrosel)
 	var xcselecteddrawing = sketchsystem.pointersystem.activetargetnodewall
-	if nrosel == "Get Xcresource":
-		var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
-		if xcselecteddrawing != null:
-			$Viewport/GUI/Panel/EditColorRect/TextEdit.text = sketchsystem.pointersystem.activetargetnodewall.xcresource
-		elif planviewsystem.planviewactive and planviewsystem.activetargetfloor != null:
-			$Viewport/GUI/Panel/EditColorRect/TextEdit.text = planviewsystem.activetargetfloor.xcresource
-
-	elif nrosel == "Set Potree URL":
-		if xcselecteddrawing != null and xcselecteddrawing.drawingtype == DRAWING_TYPE.DT_CENTRELINE:
-			var texturl = $Viewport/GUI/Panel/EditColorRect/TextEdit.text.strip_edges()
-			if texturl.begins_with("http") and texturl.ends_with("metadata.json"):
-				if xcselecteddrawing.additionalproperties == null:
-					xcselecteddrawing.additionalproperties = {}
-				xcselecteddrawing.additionalproperties["potreeurlmetadata"] = texturl
-				$Viewport/GUI/Panel/Label.text = "Setting potreeurl"
+	if nrosel == "Print XCproperties":
+		if xcselecteddrawing_forrsourcefunctions != null:
+			var xcproperties = xcselecteddrawing_forrsourcefunctions.additionalproperties.duplicate() if xcselecteddrawing_forrsourcefunctions.additionalproperties != null else {}
+			xcproperties["xcname"] = xcselecteddrawing_forrsourcefunctions.get_name()
+			if xcselecteddrawing_forrsourcefunctions["xcresource"]:
+				xcproperties["xcresource"] = xcselecteddrawing_forrsourcefunctions["xcresource"]
+			$Viewport/GUI/Panel/EditColorRect/TextEdit.text = JSON.print(xcproperties, "  ", true)
+		else:
+			$Viewport/GUI/Panel/Label.text = "No XCdrawing selected"
+			
+	if nrosel == "Set XCproperties":
+		var jresource = parse_json($Viewport/GUI/Panel/EditColorRect/TextEdit.text)
+		if jresource != null and jresource.has("xcname"):
+			xcselecteddrawing_forrsourcefunctions = sketchsystem.get_node("XCdrawings").get_node_or_null(jresource["xcname"])
+			jresource.erase("xcname")
+		if xcselecteddrawing_forrsourcefunctions != null:
+			if jresource != null:
+				if jresource.has("xcresource"):
+					xcselecteddrawing_forrsourcefunctions.xcresource = jresource["xcresource"]
+					jresource.erase("xcresource")
+				xcselecteddrawing_forrsourcefunctions.additionalproperties = jresource
+				$Viewport/GUI/Panel/Label.text = "XCdrawing properties updated"
 			else:
-				$Viewport/GUI/Panel/Label.text = "Must have metadata.json url"
+				$Viewport/GUI/Panel/Label.text = "Bad JSON format"
 		else:
-			$Viewport/GUI/Panel/Label.text = "Must Connect to centreline"
-	elif nrosel == "Get Potree URL":
-		if xcselecteddrawing != null and xcselecteddrawing.drawingtype == DRAWING_TYPE.DT_CENTRELINE:
-			$Viewport/GUI/Panel/EditColorRect/TextEdit.text = xcselecteddrawing.additionalproperties.get("potreeurlmetadata", "--not set")  if xcselecteddrawing.additionalproperties != null  else "--not set"
-		else:
-			$Viewport/GUI/Panel/Label.text = "Must Connect to centreline"
+			$Viewport/GUI/Panel/Label.text = "No XCdrawing selected"
 
 	elif nrosel.count("Potree"):
 		var potreeexperiments = selfSpatial.get_node("PotreeExperiments")
