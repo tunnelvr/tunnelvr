@@ -908,11 +908,14 @@ func _on_resourceoptions_selected(index):
 	elif nrosel == "Apply to Filetree":
 		var GithubAPI = get_node("/root/Spatial/ImageSystem/GithubAPI")
 		var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
-		planviewsystem.filetreeresourcename = $Viewport/GUI/Panel/ResourceSelector.get_item_text($Viewport/GUI/Panel/ResourceSelector.selected)
-		var filetreerootpath = GithubAPI.riattributes["resourcedefs"][planviewsystem.filetreeresourcename].get("path", "")
-		filetreerootpath = filetreerootpath.rstrip("/") + "/"
-		planviewsystem.clearsetupfileviewtree(false, filetreerootpath)
-		$Viewport/GUI/Panel/Label.text = "Applied resource to filetree"
+		var resourcename = $Viewport/GUI/Panel/ResourceSelector.get_item_text($Viewport/GUI/Panel/ResourceSelector.selected)
+		var resourcedef = GithubAPI.riattributes["resourcedefs"][resourcename]
+		if resourcedef.get("type") in ["svnfiles", "caddyfiles", "githubapi"]:
+			planviewsystem.filetreeresourcename = resourcename
+			var filetreerootpath = resourcedef.get("path", "")
+			filetreerootpath = filetreerootpath.rstrip("/") + "/"
+			planviewsystem.clearsetupfileviewtree(false, filetreerootpath)
+			$Viewport/GUI/Panel/Label.text = "Applied resource to filetree"
 					
 	elif nrosel == "Apply to Cavesave":
 		pass
