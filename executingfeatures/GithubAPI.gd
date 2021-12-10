@@ -2,10 +2,10 @@ extends Node
 
 var resourcesinformationfile = "user://resources.json"
 var resourcesinformationfileBAK = "user://resources.json-bak"
-var riattributes = null
+var riattributes = { }
 
 var ghdirectory = "user://githubcache"
-var ghattributes = null  # {"apiurl":"api.github.com", "owner":"goatchurchprime", "repo":"abdulsdiodedisaster", "path":"abdulsdiodedisaster", "token":"see https://github.com/settings/tokens"}
+var ghattributes = { }  # {"apiurl":"api.github.com", "owner":"goatchurchprime", "repo":"abdulsdiodedisaster", "path":"abdulsdiodedisaster", "token":"see https://github.com/settings/tokens"}
 var ghcurrentname = ""
 var ghcurrentsha = ""
 var ghfetcheddatafile = ghdirectory+"/recgithubfile.res"
@@ -27,42 +27,88 @@ func _ready():
 		riattributes = parse_json(rijson.get_as_text())
 	if true or riattributes == null:
 		riattributes = { "playername":"player%d"%randi() }
-		var resourcedefs = { "local":    { "name":"local", "type":"localfiles", "path":"cavefiles" }, 
+		var resourcedefs = { "local":    { "name":"local", "type":"localfiles", "path":"user://cavefiles/" }, 
 							 "cavereg1": { "name":"cavereg1", "type":"svnfiles", "url":"http://cave-registry.org.uk/svn/", "path":"NorthernEngland" },
 							 "caddyg":   { "name":"caddyg", "type":"caddyfiles", "url":"http://godot.doesliverpool.xyz:8000/", "path":"" },
-							 "ghfiles":  { "name":"ghfiles", "type":"githubapi", "apiurl":"api.github.com", "owner":"goatchurchprime", "repo":"tunnelvr_cave_data", "path":""}
+							 "ghfiles":  { "name":"ghfiles", "type":"githubapi", "apiurl":"api.github.com", "owner":"goatchurchprime", "repo":"tunnelvr_cave_data", "path":"cavedata/firstarea" }
 						   }
 		riattributes["resourcedefs"] = resourcedefs
 		saveresourcesinformationfile()
-		
+	var dir = Directory.new()
+	if not dir.dir_exists(ghdirectory):
+		dir.make_dir(ghdirectory)
 			
 func Yinitclient():
-	if ghattributes == null:
-		var dir = Directory.new()
-		if not dir.dir_exists(ghdirectory):
-			dir.make_dir(ghdirectory)
-
-		var ghjson = File.new()
-		ghjson.open(ghattributesfile, File.READ)
-		ghattributes = parse_json(ghjson.get_as_text())
-		ghjson.close()
-		if ghattributes == null:
-			ghattributes = parse_json('{"apiurl":"api.github.com", "owner":"goatchurchprime", "repo":"tunnelvr_cave_data", "path":"cavedata/firstarea", "token":"see https://github.com/settings/tokens"}')
-
 	yield(Engine.get_main_loop(), "idle_frame")
-	if httpghapi.get_status() != HTTPClient.STATUS_CONNECTED:
-		var e = httpghapi.connect_to_host(ghattributes["apiurl"], -1, true)
-		while httpghapi.get_status() == HTTPClient.STATUS_CONNECTING or httpghapi.get_status() == HTTPClient.STATUS_RESOLVING:
-			httpghapi.poll()
-			yield(Engine.get_main_loop(), "idle_frame")
+	if ghattributes.get("type") == "githubapi":
+		if httpghapi.get_status() != HTTPClient.STATUS_CONNECTED:
+			var e = httpghapi.connect_to_host(ghattributes["apiurl"], -1, true)
+			while httpghapi.get_status() == HTTPClient.STATUS_CONNECTING or httpghapi.get_status() == HTTPClient.STATUS_RESOLVING:
+				httpghapi.poll()
+				yield(Engine.get_main_loop(), "idle_frame")
+
+func Yupdatecavefilelist():
+	yield(Engine.get_main_loop(), "idle_frame")
+	var cfiles = [ ]
+	if ghattributes.get("type") == "localfiles":
+		var dir = Directory.new()
+		var cavefilesdir = riattributes.get("path", "user://cavefiles")
+		if not dir.dir_exists(cavefilesdir):
+			var err = Directory.new().make_dir(cavefilesdir)
+			print("Making directory ", cavefilesdir, " err code: ", err)
+		var e = dir.open(cavefilesdir)
+		if e == OK:
+			dir.list_dir_begin()
+			var file_name = dir.get_next()
+			while file_name != "":
+				if file_name != "." and file_name != "..":
+					assert (not dir.current_is_dir())
+					if file_name.ends_with(".res"):
+						var cname = file_name.substr(0, len(file_name)-4)
+						cfiles.push_back(cname)
+				file_name = dir.get_next()
+		else:
+			print("list dir error ", e)
+
+	elif ghattributes.get("type") == "githubapi":
+		cfiles = yield(Ylistghfiles(), "completed")
+
+	var guipanel3d = get_node("/root/Spatial/GuiSystem/GUIPanel3D")
+	var savegamefilenameoptionbutton = guipanel3d.get_node("Viewport/GUI/Panel/Savegamefilename")
+	var savegamefileid = savegamefilenameoptionbutton.get_selected_id()
+	var savegamefilename = savegamefilenameoptionbutton.get_item_text(savegamefileid).lstrip("*")
+	savegamefilenameoptionbutton.clear()
+	savegamefilenameoptionbutton.add_item("--clearcave")
+	for cfile in cfiles:
+		savegamefilenameoptionbutton.add_item(cfile)
+	if savegamefilename[0] != "*" and savegamefilename != "--clearcave":
+		guipanel3d.setsavegamefilename(savegamefilename)
+
+
+func Yloadcavefile(savegamefilename):
+	var sketchsystem = get_node("/root/Spatial/SketchSystem")	
+	var guipanel3d = get_node("/root/Spatial/GuiSystem/GUIPanel3D")
+	if ghattributes.get("type") == "localfiles":
+		var cavefilesdir = riattributes.get("path", "user://cavefiles").rstrip("/")
+		var savegamefilenameU = cavefilesdir+"/"+savegamefilename+".res"
+		if File.new().file_exists(savegamefilenameU):
+			$Viewport/GUI/Panel/Label.text = "Loading client sketch"
+			sketchsystem.call_deferred("loadsketchsystemL", savegamefilenameU)
+	elif ghattributes.get("type") == "githubapi":
+		var ghfetcheddatafile = yield(Yfetchfile(savegamefilename+".res"), "completed")
+		if ghfetcheddatafile != null:
+			sketchsystem.call_deferred("loadsketchsystemL", ghfetcheddatafile)
+		else:
+			print("Fetch failed")
 
 
 func Yghapicall(method, rpath, body):
 	yield(Yinitclient(), "completed")
 	var http = httpghapi
 	var headers = [ "User-Agent: TunnelVR/0.7 (Godot)", 
-					"Accept: application/vnd.github.v3+json", 
-					"Authorization: token "+ghattributes["token"] ]
+					"Accept: application/vnd.github.v3+json" ] 
+	if ghattributes.get("token"):
+		headers.push_back("Authorization: token "+ghattributes["token"])
 	var err = http.request(method, rpath, headers, body) 
 	if err != OK:
 		return null
@@ -90,7 +136,12 @@ func Ylistghfiles():
 	var cfiles = [ ]
 	for k in d:
 		if k["type"] == "file":
-			cfiles.push_back(k["name"])
+			var file_name = k["name"]
+			if file_name.ends_with(".res"):
+				var cname = file_name.substr(0, len(file_name)-4)
+				cfiles.push_back(cname)
+			else:
+				print("skipping githubfile ", file_name)
 	return cfiles
 
 func Yfetchfile(cname):
@@ -123,6 +174,8 @@ func Ycommitfile(cname, message):
 	ghcurrentname = d["content"]["name"]
 	ghcurrentsha = d["content"]["sha"]
 	return ghfetcheddatafile
+
+
 
 
 # Temporary testing code below

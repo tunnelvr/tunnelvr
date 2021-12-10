@@ -15,26 +15,25 @@ var regexacceptableprojectname = RegEx.new()
 # ln -s /home/julian/data/NorthernEngland/PeakDistrict/tunnelvrdata/cavefiles /home/julian/.local/share/godot/app_userdata/tunnelvr_v0.6/cavefiles
 var cavefilesdir = "user://cavefiles/"
 
-
-
 func _on_buttonload_pressed():
 	var savegamefileid = $Viewport/GUI/Panel/Savegamefilename.get_selected_id()
-	var savegamefilename = $Viewport/GUI/Panel/Savegamefilename.get_item_text(savegamefileid)
-	if savegamefilename[0] == "*":
-		savegamefilename = savegamefilename.lstrip("*")
+	var savegamefilename = $Viewport/GUI/Panel/Savegamefilename.get_item_text(savegamefileid).lstrip("*")
+	var GithubAPI = get_node("/root/Spatial/ImageSystem/GithubAPI")
 	if savegamefilename == "--clearcave":
 		sketchsystem.loadsketchsystemL("clearcave")
-		$Viewport/GUI/Panel/Label.text = "Clearing cave"
+		setpanellabeltext("Clearing cave")
 
-	elif $Viewport/GUI/Panel/OptionSaveLocation.selected == 2:
-		var GithubAPI = get_node("/root/Spatial/ImageSystem/GithubAPI")
-		setpanellabeltext("Fetching sketch from Github")
-		var ghfetcheddatafile = yield(GithubAPI.Yfetchfile(savegamefilename+".res"), "completed")
-		if ghfetcheddatafile != null:
-			setpanellabeltext("Loading client sketch")
-			sketchsystem.call_deferred("loadsketchsystemL", ghfetcheddatafile)
-		else:
-			setpanellabeltext("Fetch failed")
+	elif GithubAPI.ghattributes.get("type"):
+		GithubAPI.Yloadcavefile(savegamefilename)
+
+	#elif $Viewport/GUI/Panel/OptionSaveLocation.selected == 2:
+	#	setpanellabeltext("Fetching sketch from Github")
+	#	var ghfetcheddatafile = yield(GithubAPI.Yfetchfile(savegamefilename+".res"), "completed")
+	#	if ghfetcheddatafile != null:
+	#		setpanellabeltext("Loading client sketch")
+	#		sketchsystem.call_deferred("loadsketchsystemL", ghfetcheddatafile)
+	#	else:
+	#		setpanellabeltext("Fetch failed")
 
 	elif not savegamefilename.ends_with(".res"):
 		var savegamefilenameU = cavefilesdir+savegamefilename+".res"
@@ -43,13 +42,13 @@ func _on_buttonload_pressed():
 				$Viewport/GUI/Panel/Label.text = "Loading server sketch"
 				sketchsystem.rpc_id(1, "loadsketchsystemL", savegamefilenameU)
 			else:
-				$Viewport/GUI/Panel/Label.text = "*server not connected"
+				setpanellabeltext("*server not connected")
 		elif $Viewport/GUI/Panel/OptionSaveLocation.selected == 0:
 			if File.new().file_exists(savegamefilenameU):
-				$Viewport/GUI/Panel/Label.text = "Loading client sketch"
+				setpanellabeltext("Loading client sketch")
 				sketchsystem.call_deferred("loadsketchsystemL", savegamefilenameU)
 			else:
-				$Viewport/GUI/Panel/Label.text = "*" + savegamefilename + " does not exist"
+				setpanellabeltext("*" + savegamefilename + " does not exist")
 
 	if not $Viewport/GUI/Panel/Label.text.begins_with("*"):
 		setguipanelhide()
@@ -60,14 +59,15 @@ remote func setpanellabeltext(ltext):
 			
 func _on_optionsavelocation_selected(index):
 	if index == 2:
-		var GithubAPI = get_node("/root/Spatial/ImageSystem/GithubAPI")
-		var ghcavefiles = yield(GithubAPI.Ylistghfiles(), "completed")
-		print("fetched github filelist ", ghcavefiles)
-		$Viewport/GUI/Panel/Savegamefilename.clear()
-		$Viewport/GUI/Panel/Savegamefilename.add_item("--clearcave")
-		for cfile in ghcavefiles:
-			if cfile.ends_with(".res"):
-				$Viewport/GUI/Panel/Savegamefilename.add_item(cfile.substr(0, len(cfile)-4))
+		print("to kill")
+		#var GithubAPI = get_node("/root/Spatial/ImageSystem/GithubAPI")
+		#var ghcavefiles = yield(GithubAPI.Ylistghfiles(), "completed")
+		#print("fetched github filelist ", ghcavefiles)
+		#$Viewport/GUI/Panel/Savegamefilename.clear()
+		#$Viewport/GUI/Panel/Savegamefilename.add_item("--clearcave")
+		#for cfile in ghcavefiles:
+		#	if cfile.ends_with(".res"):
+		#		$Viewport/GUI/Panel/Savegamefilename.add_item(cfile.substr(0, len(cfile)-4))
 	elif index == 0:
 		var savegamefileid = $Viewport/GUI/Panel/Savegamefilename.get_selected_id()
 		var savegamefilename = $Viewport/GUI/Panel/Savegamefilename.get_item_text(savegamefileid)
@@ -88,7 +88,7 @@ remote func setsavegamefilename(cfile):   # this needs dealing with
 		if cfile == snames.get_item_text(i).lstrip("*"):
 			snames.select(i)
 			return
-	snames.add_item(cfile)
+	snames.add_item("*"+cfile)
 	snames.select(snames.get_item_count() - 1)	
 	
 func _on_buttonsave_pressed():
@@ -538,7 +538,7 @@ func cavesfilelist():
 	var e = dir.open(cavefilesdir)
 	if e != OK:
 		print("list dir error ", e)
-		return
+		return cfiles
 	dir.list_dir_begin()
 	var file_name = dir.get_next()
 	while file_name != "":
@@ -916,10 +916,25 @@ func _on_resourceoptions_selected(index):
 			filetreerootpath = filetreerootpath.rstrip("/") + "/"
 			planviewsystem.clearsetupfileviewtree(false, filetreerootpath)
 			$Viewport/GUI/Panel/Label.text = "Applied resource to filetree"
+		else:
+			$Viewport/GUI/Panel/Label.text = "Cannot apply to resource type"
+			
 					
 	elif nrosel == "Apply to Cavesave":
-		pass
-		# copy the value into a setting, then rerun  cavesfilelist()
+		var GithubAPI = get_node("/root/Spatial/ImageSystem/GithubAPI")
+		var resourcename = $Viewport/GUI/Panel/ResourceSelector.get_item_text($Viewport/GUI/Panel/ResourceSelector.selected)
+		var resourcedef = GithubAPI.riattributes["resourcedefs"][resourcename]
+		if resourcedef.get("type") == "localfiles":
+			GithubAPI.ghattributes = resourcedef
+		elif resourcedef.get("type") == "githubapi":
+			GithubAPI.ghattributes = resourcedef
+		else:
+			$Viewport/GUI/Panel/Label.text = "Cannot apply to cavesave"
+		GithubAPI.httpghapi.poll()
+		if GithubAPI.httpghapi.get_status() == HTTPClient.STATUS_CONNECTED:
+			GithubAPI.httpghapi.close()
+			GithubAPI.httpghapi = HTTPClient.new()
+		GithubAPI.Yupdatecavefilelist()
 
 	Tglobal.soundsystem.quicksound("MenuClick", collision_point)
 	prevnrosel = nrosel
