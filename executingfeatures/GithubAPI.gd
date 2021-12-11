@@ -25,9 +25,12 @@ func _ready():
 	if rijson.file_exists(resourcesinformationfile):
 		rijson.open(resourcesinformationfile, File.READ)
 		riattributes = parse_json(rijson.get_as_text())
-	if true or riattributes == null:
+	if riattributes == null:
 		riattributes = { "playername":"player%d"%randi() }
-		var resourcedefs = { "local":    { "name":"local", "type":"localfiles", "path":"user://cavefiles/" }, 
+		randomize()
+		var possibleusernames = get_node("/root/Spatial/MQTTExperiment").possibleusernames
+		var randomplayername = possibleusernames[randi()%len(possibleusernames)]
+		var resourcedefs = { "local":    { "name":"local", "type":"localfiles", "path":"user://cavefiles/", "playername":randomplayername }, 
 							 "cavereg1": { "name":"cavereg1", "type":"svnfiles", "url":"http://cave-registry.org.uk/svn/", "path":"NorthernEngland" },
 							 "caddyg":   { "name":"caddyg", "type":"caddyfiles", "url":"http://godot.doesliverpool.xyz:8000/", "path":"" },
 							 "ghfiles":  { "name":"ghfiles", "type":"githubapi", "apiurl":"api.github.com", "owner":"goatchurchprime", "repo":"tunnelvr_cave_data", "path":"cavedata/firstarea" }
@@ -50,6 +53,7 @@ func Yinitclient():
 func Yupdatecavefilelist():
 	yield(Engine.get_main_loop(), "idle_frame")
 	var cfiles = [ ]
+	var mcfiles = null
 	if ghattributes.get("type") == "localfiles":
 		var dir = Directory.new()
 		var cavefilesdir = riattributes.get("path", "user://cavefiles")
@@ -71,35 +75,78 @@ func Yupdatecavefilelist():
 			print("list dir error ", e)
 
 	elif ghattributes.get("type") == "githubapi":
-		cfiles = yield(Ylistghfiles(), "completed")
-
+		mcfiles = yield(Ylistghfiles(), "completed")
+		cfiles = mcfiles.keys()
 	var guipanel3d = get_node("/root/Spatial/GuiSystem/GUIPanel3D")
 	var savegamefilenameoptionbutton = guipanel3d.get_node("Viewport/GUI/Panel/Savegamefilename")
 	var savegamefileid = savegamefilenameoptionbutton.get_selected_id()
-	var savegamefilename = savegamefilenameoptionbutton.get_item_text(savegamefileid).lstrip("*")
+	var savegamefilename = savegamefilenameoptionbutton.get_item_text(savegamefileid).lstrip("*#")
 	savegamefilenameoptionbutton.clear()
 	savegamefilenameoptionbutton.add_item("--clearcave")
 	for cfile in cfiles:
-		savegamefilenameoptionbutton.add_item(cfile)
+		if ghattributes.get("type") == "githubapi" and cfile+".res" == ghcurrentname and mcfiles[cfile] == ghcurrentsha:
+			savegamefilenameoptionbutton.add_item("#"+cfile)
+		else:
+			savegamefilenameoptionbutton.add_item(cfile)
 	if savegamefilename[0] != "*" and savegamefilename != "--clearcave":
 		guipanel3d.setsavegamefilename(savegamefilename)
 
 
 func Yloadcavefile(savegamefilename):
 	var sketchsystem = get_node("/root/Spatial/SketchSystem")	
-	var guipanel3d = get_node("/root/Spatial/GuiSystem/GUIPanel3D")
 	if ghattributes.get("type") == "localfiles":
 		var cavefilesdir = riattributes.get("path", "user://cavefiles").rstrip("/")
 		var savegamefilenameU = cavefilesdir+"/"+savegamefilename+".res"
 		if File.new().file_exists(savegamefilenameU):
-			$Viewport/GUI/Panel/Label.text = "Loading client sketch"
 			sketchsystem.call_deferred("loadsketchsystemL", savegamefilenameU)
+			return true
 	elif ghattributes.get("type") == "githubapi":
 		var ghfetcheddatafile = yield(Yfetchfile(savegamefilename+".res"), "completed")
 		if ghfetcheddatafile != null:
 			sketchsystem.call_deferred("loadsketchsystemL", ghfetcheddatafile)
+			return true
 		else:
 			print("Fetch failed")
+	return false
+
+func Ysavecavefile(savegamefilename, bfileisnew):
+	var sketchsystem = get_node("/root/Spatial/SketchSystem")	
+	yield(Engine.get_main_loop(), "idle_frame")
+
+	if ghattributes.get("type") == "localfiles":
+		var cavefilesdir = riattributes.get("path", "user://cavefiles").rstrip("/")
+		var savegamefilenameU = cavefilesdir+"/"+savegamefilename+".res"
+		sketchsystem.savesketchsystem(savegamefilenameU)
+		return "Saved locally"
+
+	elif ghattributes.get("type") == "githubapi":
+		var savegamefilenameU = savegamefilename + ".res"
+		if not bfileisnew and savegamefilenameU != ghcurrentname:
+			return "Mismatch name"
+		elif not ghattributes.has("token"):
+			return "Missing github API token"
+		else:
+			var playername = riattributes.get("resourcedefs", {}).get("local", {}).get("playername", "unknown")
+			var playerplatform = get_node("/root/Spatial").playerMe.playerplatform
+			var message = "Saved by %s from %s" % [ playername, playerplatform ]
+			sketchsystem.savesketchsystem(ghfetcheddatafile)
+			yield(Yinitclient(), "completed")
+			var f = File.new()
+			f.open(ghfetcheddatafile, File.READ)
+			var jput_parameters = to_json({ "message":message, 
+											"sha":"" if bfileisnew else ghcurrentsha,
+											"content":Marshalls.raw_to_base64(f.get_buffer(f.get_len())) })
+			f.close()
+			var rpath = "/repos/%s/%s/contents/%s/%s" % [ ghattributes["owner"], ghattributes["repo"], ghattributes["path"], savegamefilenameU ]
+			var d = yield(Yghapicall(HTTPClient.METHOD_PUT, rpath, jput_parameters), "completed")
+			if d == null or not d.has("content") or d["content"].get("type") != "file":
+				print("Ycommitfile fail ", d)
+				return "Commit file fail"
+			ghcurrentname = d["content"]["name"]
+			ghcurrentsha = d["content"]["sha"]
+			return "Commit success!!!"
+
+	return "Ysavecavefile fail"
 
 
 func Yghapicall(method, rpath, body):
@@ -133,22 +180,23 @@ func Ylistghfiles():
 	yield(Yinitclient(), "completed")
 	var rpath = "/repos/%s/%s/contents/%s" % [ ghattributes["owner"], ghattributes["repo"], ghattributes["path"] ]
 	var d = yield(Yghapicall(HTTPClient.METHOD_GET, rpath, ""), "completed")
-	var cfiles = [ ]
+	var mcfiles = { }
 	for k in d:
 		if k["type"] == "file":
 			var file_name = k["name"]
 			if file_name.ends_with(".res"):
 				var cname = file_name.substr(0, len(file_name)-4)
-				cfiles.push_back(cname)
+				mcfiles[cname] = k["sha"]
 			else:
 				print("skipping githubfile ", file_name)
-	return cfiles
+	return mcfiles
 
 func Yfetchfile(cname):
 	yield(Yinitclient(), "completed")
 	var rpath = "/repos/%s/%s/contents/%s/%s" % [ ghattributes["owner"], ghattributes["repo"], ghattributes["path"], cname ]
 	var d = yield(Yghapicall(HTTPClient.METHOD_GET, rpath, ""), "completed")
-	if d.get("type") != "file" or d["encoding"] != "base64":
+	if d == null or d.get("type") != "file" or d["encoding"] != "base64":
+		print("Yfetchfile failed ", d)
 		return null
 	ghcurrentname = d["name"]
 	ghcurrentsha = d["sha"]
@@ -170,11 +218,11 @@ func Ycommitfile(cname, message):
 		put_parameters["sha"] = ghcurrentsha
 	var d = yield(Yghapicall(HTTPClient.METHOD_PUT, rpath, to_json(put_parameters)), "completed")
 	if d == null or not d.has("content") or d["content"].get("type") != "file":
+		print("Ycommitfile fail ", d)
 		return null
 	ghcurrentname = d["content"]["name"]
 	ghcurrentsha = d["content"]["sha"]
 	return ghfetcheddatafile
-
 
 
 
@@ -189,7 +237,7 @@ func addstufftofile():
 	ghrawfile.store_buffer("\nding ding!\n".to_ascii())
 	ghrawfile.close()
 	
-var message = "saywhat"
+var Dmessage = "saywhat"
 func D_input(event):	
 	if event is InputEventKey and event.pressed and event.scancode == KEY_8:
 		print(yield(Ylistghfiles(), "completed"))
@@ -200,5 +248,5 @@ func D_input(event):
 		
 	if event is InputEventKey and event.pressed and event.scancode == KEY_K:
 		addstufftofile()
-		message = message + "-"
-		print(yield(Ycommitfile("madebyapi.txt", message), "completed"))
+		Dmessage = Dmessage + "-"
+		print(yield(Ycommitfile("madebyapi.txt", Dmessage), "completed"))

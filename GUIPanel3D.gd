@@ -17,24 +17,21 @@ var cavefilesdir = "user://cavefiles/"
 
 func _on_buttonload_pressed():
 	var savegamefileid = $Viewport/GUI/Panel/Savegamefilename.get_selected_id()
-	var savegamefilename = $Viewport/GUI/Panel/Savegamefilename.get_item_text(savegamefileid).lstrip("*")
+	var savegamefilename = $Viewport/GUI/Panel/Savegamefilename.get_item_text(savegamefileid).lstrip("*#")
 	var GithubAPI = get_node("/root/Spatial/ImageSystem/GithubAPI")
 	if savegamefilename == "--clearcave":
 		sketchsystem.loadsketchsystemL("clearcave")
 		setpanellabeltext("Clearing cave")
 
 	elif GithubAPI.ghattributes.get("type"):
-		GithubAPI.Yloadcavefile(savegamefilename)
-
-	#elif $Viewport/GUI/Panel/OptionSaveLocation.selected == 2:
-	#	setpanellabeltext("Fetching sketch from Github")
-	#	var ghfetcheddatafile = yield(GithubAPI.Yfetchfile(savegamefilename+".res"), "completed")
-	#	if ghfetcheddatafile != null:
-	#		setpanellabeltext("Loading client sketch")
-	#		sketchsystem.call_deferred("loadsketchsystemL", ghfetcheddatafile)
-	#	else:
-	#		setpanellabeltext("Fetch failed")
-
+		Tglobal.soundsystem.quicksound("MenuClick", collision_point)
+		setpanellabeltext("Fetching file")
+		if yield(GithubAPI.Yloadcavefile(savegamefilename), "completed"):
+			setguipanelhide()
+		else:
+			setpanellabeltext("Fetch failed: "+GithubAPI.ghattributes.get("name", ""))
+		GithubAPI.Yupdatecavefilelist()
+		
 	elif not savegamefilename.ends_with(".res"):
 		var savegamefilenameU = cavefilesdir+savegamefilename+".res"
 		if $Viewport/GUI/Panel/OptionSaveLocation.selected == 1:
@@ -49,26 +46,15 @@ func _on_buttonload_pressed():
 				sketchsystem.call_deferred("loadsketchsystemL", savegamefilenameU)
 			else:
 				setpanellabeltext("*" + savegamefilename + " does not exist")
-
-	if not $Viewport/GUI/Panel/Label.text.begins_with("*"):
-		setguipanelhide()
-	Tglobal.soundsystem.quicksound("MenuClick", collision_point)
+		if not $Viewport/GUI/Panel/Label.text.begins_with("*"):
+			setguipanelhide()
+		Tglobal.soundsystem.quicksound("MenuClick", collision_point)
 	
 remote func setpanellabeltext(ltext):
 	$Viewport/GUI/Panel/Label.text = ltext
 			
 func _on_optionsavelocation_selected(index):
-	if index == 2:
-		print("to kill")
-		#var GithubAPI = get_node("/root/Spatial/ImageSystem/GithubAPI")
-		#var ghcavefiles = yield(GithubAPI.Ylistghfiles(), "completed")
-		#print("fetched github filelist ", ghcavefiles)
-		#$Viewport/GUI/Panel/Savegamefilename.clear()
-		#$Viewport/GUI/Panel/Savegamefilename.add_item("--clearcave")
-		#for cfile in ghcavefiles:
-		#	if cfile.ends_with(".res"):
-		#		$Viewport/GUI/Panel/Savegamefilename.add_item(cfile.substr(0, len(cfile)-4))
-	elif index == 0:
+	if index == 0:
 		var savegamefileid = $Viewport/GUI/Panel/Savegamefilename.get_selected_id()
 		var savegamefilename = $Viewport/GUI/Panel/Savegamefilename.get_item_text(savegamefileid)
 		$Viewport/GUI/Panel/Savegamefilename.clear()
@@ -85,7 +71,7 @@ remote func setsavegamefilename(cfile):   # this needs dealing with
 	sketchsystem.sketchname = cfile
 	var snames = $Viewport/GUI/Panel/Savegamefilename
 	for i in range(snames.get_item_count()):
-		if cfile == snames.get_item_text(i).lstrip("*"):
+		if cfile == snames.get_item_text(i).lstrip("*#"):
 			snames.select(i)
 			return
 	snames.add_item("*"+cfile)
@@ -94,13 +80,18 @@ remote func setsavegamefilename(cfile):   # this needs dealing with
 func _on_buttonsave_pressed():
 	var snames = $Viewport/GUI/Panel/Savegamefilename
 	var savegamefileid = snames.get_selected_id()
-	var savegamefilename = snames.get_item_text(savegamefileid)
-	if savegamefilename[0] == "*":
-		savegamefilename = savegamefilename.lstrip("*")
+	var bfileisnew = snames.get_item_text(savegamefileid)[0] == "*"
+	var savegamefilename = snames.get_item_text(savegamefileid).lstrip("#*")
+	var GithubAPI = get_node("/root/Spatial/ImageSystem/GithubAPI")
 	if savegamefilename == "--clearcave":
-		$Viewport/GUI/Panel/Label.text = "Cannot oversave clearcave"
-	elif $Viewport/GUI/Panel/OptionSaveLocation.selected == 2:
-		sketchsystem.savesketchcommitgithub(savegamefilename, "from server2")
+		setpanellabeltext("Cannot oversave clearcave")
+
+	elif GithubAPI.ghattributes.get("type"):
+		Tglobal.soundsystem.quicksound("MenuClick", collision_point)
+		setpanellabeltext("Saving file")
+		var ltext = yield(GithubAPI.Ysavecavefile(savegamefilename, bfileisnew), "completed")
+		setpanellabeltext(ltext)
+		GithubAPI.Yupdatecavefilelist()
 
 	elif not savegamefilename.ends_with(".res"):
 		var savegamefilenameU = cavefilesdir+savegamefilename+".res"
@@ -554,7 +545,7 @@ remote func servercavesfilelist(scfiles):
 	var snames = $Viewport/GUI/Panel/Savegamefilename
 	var snamelist = [ ]
 	for i in range(snames.get_item_count()):
-		snamelist.push_back(snames.get_item_text(i).lstrip("*"))
+		snamelist.push_back(snames.get_item_text(i).lstrip("*#"))
 	for cfile in scfiles:
 		if not snamelist.has(cfile):
 			snames.add_item(cfile)

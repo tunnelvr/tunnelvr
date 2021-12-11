@@ -69,15 +69,6 @@ func sketchsystemtodict(stripruntimedataforsaving):
 								   "headtrans":playerMe.get_node("HeadCam").global_transform }
 	return sketchdatadict
 	
-remote func savesketchcommitgithub(fname, message):
-	var GithubAPI = get_node("/root/Spatial/ImageSystem/GithubAPI")
-	savesketchsystem(GithubAPI.ghfetcheddatafile)
-	GithubAPI.ghfetcheddatafile
-	var guipanel3d = get_node("/root/Spatial/GuiSystem/GUIPanel3D")
-	guipanel3d.setpanellabeltext("Saving local sketch")
-	var cr = yield(GithubAPI.Ycommitfile(fname+".res", message), "completed")
-	if cr != null:
-		guipanel3d.setpanellabeltext("Sketch committed")
 
 remote func savesketchsystem(fname):
 	var sketchdatadict = sketchsystemtodict(true)

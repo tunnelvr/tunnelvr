@@ -291,7 +291,6 @@ func setconnectiontoserveractive(b):
 		setnetworkidname(playerMe, 0)
 	
 	
-	
 func _connected_to_server():
 	print("_connected_to_server")
 	var newnetworkID = get_tree().get_network_unique_id()

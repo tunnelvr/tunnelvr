@@ -1789,7 +1789,7 @@ margin_top = 47.2471
 margin_right = 304.676
 margin_bottom = 69.2471
 text = "ToLocal"
-items = [ "ToLocal", null, false, 0, null, "ToServer", null, false, 1, null, "ToGitHub", null, false, 2, null ]
+items = [ "ToLocal", null, false, 0, null, "ToServer", null, false, 1, null ]
 selected = 0
 __meta__ = {
 "_edit_use_anchors_": false
