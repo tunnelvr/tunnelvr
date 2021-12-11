@@ -5,7 +5,7 @@ var resourcesinformationfileBAK = "user://resources.json-bak"
 var riattributes = { }
 
 var ghdirectory = "user://githubcache"
-var ghattributes = { }  # {"apiurl":"api.github.com", "owner":"goatchurchprime", "repo":"abdulsdiodedisaster", "path":"abdulsdiodedisaster", "token":"see https://github.com/settings/tokens"}
+var ghattributes = { }
 var ghcurrentname = ""
 var ghcurrentsha = ""
 var ghfetcheddatafile = ghdirectory+"/recgithubfile.res"
@@ -20,7 +20,7 @@ func saveresourcesinformationfile():
 	var rijsondir = Directory.new()
 	rijsondir.rename(resourcesinformationfileBAK, resourcesinformationfile)
 			
-func _ready():
+func resources_readycallloadinfo():
 	var rijson = File.new()
 	if rijson.file_exists(resourcesinformationfile):
 		rijson.open(resourcesinformationfile, File.READ)
@@ -93,7 +93,8 @@ func Yupdatecavefilelist():
 
 
 func Yloadcavefile(savegamefilename):
-	var sketchsystem = get_node("/root/Spatial/SketchSystem")	
+	yield(Engine.get_main_loop(), "idle_frame")
+	var sketchsystem = get_node("/root/Spatial/SketchSystem")
 	if ghattributes.get("type") == "localfiles":
 		var cavefilesdir = riattributes.get("path", "user://cavefiles").rstrip("/")
 		var savegamefilenameU = cavefilesdir+"/"+savegamefilename+".res"

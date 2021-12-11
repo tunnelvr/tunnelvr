@@ -32,38 +32,12 @@ func _on_buttonload_pressed():
 			setpanellabeltext("Fetch failed: "+GithubAPI.ghattributes.get("name", ""))
 		GithubAPI.Yupdatecavefilelist()
 		
-	elif not savegamefilename.ends_with(".res"):
-		var savegamefilenameU = cavefilesdir+savegamefilename+".res"
-		if $Viewport/GUI/Panel/OptionSaveLocation.selected == 1:
-			if Tglobal.connectiontoserveractive and playerMe.networkID != 1:
-				$Viewport/GUI/Panel/Label.text = "Loading server sketch"
-				sketchsystem.rpc_id(1, "loadsketchsystemL", savegamefilenameU)
-			else:
-				setpanellabeltext("*server not connected")
-		elif $Viewport/GUI/Panel/OptionSaveLocation.selected == 0:
-			if File.new().file_exists(savegamefilenameU):
-				setpanellabeltext("Loading client sketch")
-				sketchsystem.call_deferred("loadsketchsystemL", savegamefilenameU)
-			else:
-				setpanellabeltext("*" + savegamefilename + " does not exist")
-		if not $Viewport/GUI/Panel/Label.text.begins_with("*"):
-			setguipanelhide()
-		Tglobal.soundsystem.quicksound("MenuClick", collision_point)
+	else:
+		setpanellabeltext("Cannot do")
 	
 remote func setpanellabeltext(ltext):
 	$Viewport/GUI/Panel/Label.text = ltext
 			
-func _on_optionsavelocation_selected(index):
-	if index == 0:
-		var savegamefileid = $Viewport/GUI/Panel/Savegamefilename.get_selected_id()
-		var savegamefilename = $Viewport/GUI/Panel/Savegamefilename.get_item_text(savegamefileid)
-		$Viewport/GUI/Panel/Savegamefilename.clear()
-		$Viewport/GUI/Panel/Savegamefilename.add_item("--clearcave")
-		for cfile in cavesfilelist():
-			$Viewport/GUI/Panel/Savegamefilename.add_item(cfile)
-		if savegamefilename[0] != "*" and savegamefilename != "--clearcave":
-			setsavegamefilename(savegamefilename)
-		
 			
 remote func setsavegamefilename(cfile):   # this needs dealing with
 	if cfile == "recgithubfile":
@@ -93,22 +67,8 @@ func _on_buttonsave_pressed():
 		setpanellabeltext(ltext)
 		GithubAPI.Yupdatecavefilelist()
 
-	elif not savegamefilename.ends_with(".res"):
-		var savegamefilenameU = cavefilesdir+savegamefilename+".res"
-		if Tglobal.connectiontoserveractive:
-			rpc("setsavegamefilename", savegamefilename)
-		if $Viewport/GUI/Panel/OptionSaveLocation.selected == 1:
-			if Tglobal.connectiontoserveractive and playerMe.networkID != 1:
-				sketchsystem.rpc_id(1, "savesketchsystem", savegamefilenameU)
-				setpanellabeltext("Saving server sketch")
-			elif playerMe.playerplatform != "HTML5":
-				setpanellabeltext("Saving local sketch")
-				sketchsystem.savesketchsystem(savegamefilenameU)
-			else:
-				setpanellabeltext("File not saved")
-		elif $Viewport/GUI/Panel/OptionSaveLocation.selected == 0:
-			setpanellabeltext("Saving local sketch")
-			sketchsystem.savesketchsystem(savegamefilenameU)
+	else:
+		setpanellabeltext("Cannot do")
 
 	Tglobal.soundsystem.quicksound("MenuClick", collision_point)
 	
@@ -487,7 +447,6 @@ func _ready():
 	
 	$Viewport/GUI/Panel/ButtonLoad.connect("pressed", self, "_on_buttonload_pressed")
 	$Viewport/GUI/Panel/ButtonSave.connect("pressed", self, "_on_buttonsave_pressed")
-	$Viewport/GUI/Panel/OptionSaveLocation.connect("item_selected", self, "_on_optionsavelocation_selected")
 	$Viewport/GUI/Panel/ButtonPlanView.connect("pressed", self, "_on_buttonplanview_pressed")
 	$Viewport/GUI/Panel/ButtonHeadtorch.connect("toggled", self, "_on_buttonheadtorch_toggled")
 	$Viewport/GUI/Panel/ButtonDoppelganger.connect("toggled", self, "_on_buttondoppelganger_toggled")
@@ -512,7 +471,6 @@ func _ready():
 	
 	$Viewport/GUI/Panel/TextRelatedActions/ButtonMessage.connect("pressed", self, "_on_buttonmessage_pressed")
 	$Viewport/GUI/Panel/TextRelatedActions/ButtonNewfile.connect("pressed", self, "_on_buttonnewfile_pressed")
-	$Viewport/GUI/Panel/TextRelatedActions/ButtonRemovefile.connect("pressed", self, "_on_buttonremovefile_pressed")
 	$Viewport/GUI/Panel/TextRelatedActions/ButtonApplyFlagSign.connect("pressed", self, "_on_buttonflagsign_pressed")
 
 	if $Viewport/GUI/Panel/Networkstate.selected != 0:  # could record saved settings on disk
@@ -598,8 +556,6 @@ func _on_buttonnewfile_pressed():
 	snames.select(fi)
 	$Viewport/GUI/Panel/EditColorRect/TextEdit.text = ""
 	
-func _on_buttonremovefile_pressed():
-	pass
 
 func _on_buttonflagsign_pressed():
 	print("_on_buttonflagsign_pressed")
@@ -768,7 +724,18 @@ func resources_readycall():
 		$Viewport/GUI/Panel/Savegamefilename.add_item(cfile)
 	for idx in range($Viewport/GUI/Panel/ResourceOptions.get_item_count()):
 		resourceoptionlookup[$Viewport/GUI/Panel/ResourceOptions.get_item_text(idx)] = idx
-	call_deferred("updateresourceselector", "")
+	var GithubAPI = get_node("/root/Spatial/ImageSystem/GithubAPI")
+	GithubAPI.resources_readycallloadinfo()
+	updateresourceselector("")
+	var resourcesel = ""
+	var resourcetype = ""
+	for k in GithubAPI.riattributes["resourcedefs"].values():
+		if (k["type"] == "local" and resourcetype == "") or \
+				(k["type"] == "githubapi" and k.get("token")):
+			resourcesel = k["name"]
+			resourcetype = k["type"]
+	updateresourceselector(resourcesel)
+	ApplyToCaveSave()
 	
 func updateresourceselector(seltext):
 	$Viewport/GUI/Panel/ResourceSelector.clear()
@@ -909,33 +876,29 @@ func _on_resourceoptions_selected(index):
 			$Viewport/GUI/Panel/Label.text = "Applied resource to filetree"
 		else:
 			$Viewport/GUI/Panel/Label.text = "Cannot apply to resource type"
-			
 					
 	elif nrosel == "Apply to Cavesave":
-		var GithubAPI = get_node("/root/Spatial/ImageSystem/GithubAPI")
-		var resourcename = $Viewport/GUI/Panel/ResourceSelector.get_item_text($Viewport/GUI/Panel/ResourceSelector.selected)
-		var resourcedef = GithubAPI.riattributes["resourcedefs"][resourcename]
-		if resourcedef.get("type") == "localfiles":
-			GithubAPI.ghattributes = resourcedef
-		elif resourcedef.get("type") == "githubapi":
-			GithubAPI.ghattributes = resourcedef
-		else:
-			$Viewport/GUI/Panel/Label.text = "Cannot apply to cavesave"
-		GithubAPI.httpghapi.poll()
-		if GithubAPI.httpghapi.get_status() == HTTPClient.STATUS_CONNECTED:
-			GithubAPI.httpghapi.close()
-			GithubAPI.httpghapi = HTTPClient.new()
-		GithubAPI.Yupdatecavefilelist()
+		ApplyToCaveSave()
 
 	Tglobal.soundsystem.quicksound("MenuClick", collision_point)
 	prevnrosel = nrosel
 
-
-
-
-
-
-
+func ApplyToCaveSave():
+	var GithubAPI = get_node("/root/Spatial/ImageSystem/GithubAPI")
+	var resourcename = $Viewport/GUI/Panel/ResourceSelector.get_item_text($Viewport/GUI/Panel/ResourceSelector.selected)
+	var resourcedef = GithubAPI.riattributes["resourcedefs"][resourcename]
+	$Viewport/GUI/Panel/CaveSaveResourcename.text = resourcename
+	if resourcedef.get("type") == "localfiles":
+		GithubAPI.ghattributes = resourcedef
+	elif resourcedef.get("type") == "githubapi":
+		GithubAPI.ghattributes = resourcedef
+	else:
+		$Viewport/GUI/Panel/Label.text = "Cannot apply to cavesave"
+	GithubAPI.httpghapi.poll()
+	if GithubAPI.httpghapi.get_status() == HTTPClient.STATUS_CONNECTED:
+		GithubAPI.httpghapi.close()
+		GithubAPI.httpghapi = HTTPClient.new()
+	GithubAPI.Yupdatecavefilelist()
 
 
 
@@ -1096,11 +1059,6 @@ func networkstartasserver(fromgui):
 	if selfSpatial.playerMe.executingfeaturesavailable.has("caddy"):
 		selfSpatial.get_node("ExecutingFeatures").startcaddywebserver()
 	get_node("/root/Spatial/MQTTExperiment").mqttupdatenetstatus()
-
-	var GithubAPI = get_node("/root/Spatial/ImageSystem/GithubAPI")
-	if File.new().file_exists(GithubAPI.ghattributesfile):
-		$Viewport/GUI/Panel/OptionSaveLocation.selected = 2
-		_on_optionsavelocation_selected(2)
 
 
 func _connection_failed():

@@ -286,7 +286,6 @@ func _player_disconnected(id):
 func setconnectiontoserveractive(b):
 	Tglobal.connectiontoserveractive = b
 	playerMe.get_node("HandRight/HandFlickFaceY").set_surface_material(0, $MaterialSystem/handmaterials.get_node("serverconnected" if Tglobal.connectiontoserveractive else "serverdisconnected").get_surface_material(0))
-	$GuiSystem/GUIPanel3D/Viewport/GUI/Panel/OptionSaveLocation.set_item_disabled(1, (not b))
 	if not Tglobal.connectiontoserveractive:
 		setnetworkidname(playerMe, 0)
 	

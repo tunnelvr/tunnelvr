@@ -1783,14 +1783,12 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="OptionSaveLocation" type="OptionButton" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 228.676
-margin_top = 47.2471
-margin_right = 304.676
-margin_bottom = 69.2471
-text = "ToLocal"
-items = [ "ToLocal", null, false, 0, null, "ToServer", null, false, 1, null ]
-selected = 0
+[node name="CaveSaveResourcename" type="Label" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
+margin_left = 238.936
+margin_top = 45.3846
+margin_right = 314.936
+margin_bottom = 67.3846
+text = "--cavesave"
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -1940,17 +1938,17 @@ __meta__ = {
 margin_left = 153.0
 margin_top = 130.0
 margin_right = 376.0
-margin_bottom = 192.0
+margin_bottom = 214.0
 color = Color( 0.133333, 0.6, 0.784314, 1 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="TextEdit" type="TextEdit" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel/EditColorRect"]
-margin_left = 2.62997
+margin_left = 3.0
 margin_top = 3.0
-margin_right = 218.63
-margin_bottom = 60.0
+margin_right = 219.0
+margin_bottom = 82.0
 custom_fonts/font = SubResource( 12 )
 highlight_current_line = true
 __meta__ = {
@@ -1959,7 +1957,7 @@ __meta__ = {
 
 [node name="TextRelatedActions" type="Panel" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
 margin_left = 154.0
-margin_top = 194.0
+margin_top = 219.0
 margin_right = 373.0
 margin_bottom = 247.0
 __meta__ = {
@@ -1967,10 +1965,10 @@ __meta__ = {
 }
 
 [node name="ButtonNewfile" type="Button" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel/TextRelatedActions"]
-margin_left = 161.194
-margin_top = 2.51987
-margin_right = 220.194
-margin_bottom = 26.5199
+margin_left = 133.83
+margin_top = 0.517612
+margin_right = 192.83
+margin_bottom = 24.5176
 text = "newfile"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -1983,13 +1981,6 @@ margin_right = 135.198
 margin_bottom = 25.2599
 rect_scale = Vector2( 0.957083, 1 )
 text = "message"
-
-[node name="ButtonRemovefile" type="Button" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel/TextRelatedActions"]
-margin_left = 139.52
-margin_top = 28.9782
-margin_right = 220.52
-margin_bottom = 52.9782
-text = "removefile"
 
 [node name="ButtonApplyFlagSign" type="Button" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel/TextRelatedActions"]
 margin_left = 1.28952
