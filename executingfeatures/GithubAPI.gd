@@ -25,7 +25,7 @@ func resources_readycallloadinfo():
 	if rijson.file_exists(resourcesinformationfile):
 		rijson.open(resourcesinformationfile, File.READ)
 		riattributes = parse_json(rijson.get_as_text())
-	if riattributes == null:
+	if not riattributes:
 		riattributes = { "playername":"player%d"%randi() }
 		randomize()
 		var possibleusernames = get_node("/root/Spatial/MQTTExperiment").possibleusernames
