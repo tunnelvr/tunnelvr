@@ -1738,9 +1738,9 @@ func _input(event):
 		if event.button_index == BUTTON_WHEEL_UP or event.button_index == BUTTON_WHEEL_DOWN:
 			if event.is_pressed():
 				handright.joypos.y = 1.0 if event.button_index == BUTTON_WHEEL_UP else -1.0
-				print("handright.joypos.y ", handright.joypos.y)
+				#print("handright.joypos.y ", handright.joypos.y)
 			else:
 				yield(get_tree(), "physics_frame") 
 				yield(get_tree(), "physics_frame") 
 				handright.joypos.y = 0.0
-				print("handright.joypos.y ", handright.joypos.y)
+				#print("handright.joypos.y ", handright.joypos.y)

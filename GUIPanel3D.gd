@@ -530,7 +530,10 @@ func _on_buttongoto_pressed():
 	setguipanelhide()
 
 remote func copyacrosstextedit(text):
+	if not visible:
+		setguipanelvisible(sketchsystem.pointersystem.LaserOrient.global_transform)
 	$Viewport/GUI/Panel/EditColorRect/TextEdit.text = text
+	$Viewport/GUI/Panel/EditColorRect/TextEdit.grab_focus()
 
 func _on_buttonmessage_pressed():
 	if Tglobal.connectiontoserveractive:
@@ -725,7 +728,7 @@ func resources_readycall():
 	var resourcesel = ""
 	var resourcetype = ""
 	for k in GithubAPI.riattributes["resourcedefs"].values():
-		if (k["type"] == "local" and resourcetype == "") or \
+		if (k["type"] == "localfiles" and resourcetype == "") or \
 				(k["type"] == "githubapi" and k.get("token")):
 			resourcesel = k["name"]
 			resourcetype = k["type"]
@@ -839,24 +842,38 @@ func _on_resourceoptions_selected(index):
 	elif nrosel == "Print resource":
 		var resourcename = $Viewport/GUI/Panel/ResourceSelector.get_item_text($Viewport/GUI/Panel/ResourceSelector.selected)
 		var GithubAPI = get_node("/root/Spatial/ImageSystem/GithubAPI")
-		var resourceselected = GithubAPI.riattributes["resourcedefs"].get(resourcename)
-		if resourceselected != null:
-			assert (resourceselected["name"] == resourcename)
-			$Viewport/GUI/Panel/EditColorRect/TextEdit.text = JSON.print(resourceselected, "  ", true)
+		var lresourceselected = GithubAPI.riattributes["resourcedefs"].get(resourcename).duplicate()
+		if lresourceselected != null:
+			assert (lresourceselected["name"] == resourcename)
+			if lresourceselected.get("type") == "localfiles":
+				lresourceselected["unique_id"] = OS.get_unique_id()
+			$Viewport/GUI/Panel/EditColorRect/TextEdit.text = JSON.print(lresourceselected, "  ", true)
 
 	elif nrosel == "Set resource":
 		var jresource = parse_json($Viewport/GUI/Panel/EditColorRect/TextEdit.text)
 		if jresource != null and jresource.has("name"):
 			var GithubAPI = get_node("/root/Spatial/ImageSystem/GithubAPI")
-			if jresource.get("delete"):
+			var ltext = "Resource file saved"
+			if jresource["name"] == "local":
+				if jresource.get("delete"):
+					ltext = "cannot delete local"
+				elif jresource.get("type") != "localfiles":
+					ltext = "local must be type localfiles"
+				elif not jresource.get("playername"):
+					ltext = "must have playername"
+				elif jresource.get("unique_id") and jresource["unique_id"] != OS.get_unique_id():
+					ltext = "unique_id mismatch"
+				else:
+					GithubAPI.riattributes["resourcedefs"][jresource["name"]] = jresource
+			elif jresource.get("delete"):
 				GithubAPI.riattributes["resourcedefs"].erase(jresource["name"])
 			else:
 				GithubAPI.riattributes["resourcedefs"][jresource["name"]] = jresource
 			GithubAPI.saveresourcesinformationfile()
-			$Viewport/GUI/Panel/Label.text = "Resource file saved"
+			setpanellabeltext(ltext)
 			updateresourceselector(jresource["name"])
 		else:
-			$Viewport/GUI/Panel/Label.text = "Resource definition not valid"
+			setpanellabeltext("Resource definition not valid")
 
 	elif nrosel == "Apply to Filetree":
 		var GithubAPI = get_node("/root/Spatial/ImageSystem/GithubAPI")
