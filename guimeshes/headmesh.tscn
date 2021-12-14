@@ -5,7 +5,7 @@ size = Vector3( 0.2, 0.1, 0.1 )
 
 [sub_resource type="SpatialMaterial" id=2]
 resource_local_to_scene = true
-albedo_color = Color( 0.105882, 0.188235, 0.509804, 1 )
+albedo_color = Color( 0.188828, 0.249881, 0.488281, 1 )
 
 [sub_resource type="SphereMesh" id=3]
 radius = 0.14

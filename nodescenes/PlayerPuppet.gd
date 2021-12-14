@@ -10,6 +10,9 @@ var playermqttid = ""
 var puppetpositionstack = [ ]         # [ { "timestamp", "Ltimestamp", "playertransform", "headcamtransform" } ] 
 var puppetpointerpositionstack = [ ]  # [ { "timestamp", "Ltimestamp", "orient", "length", "spotvisible" } ] 
 
+const gogglescoloursolid = Color("#1b3082")
+const gogglescolourghostly = Color("#1b7682")
+
 
 remote func initplayerappearanceJ(playerappearance):
 	playerplatform = playerappearance.get("playerplatform", "unknown")
@@ -28,8 +31,6 @@ remote func initplayerappearanceJ(playerappearance):
 		
 	get_node("HeadCam/csgheadmesh/skullcomponent").material.albedo_color = headcolour
 	get_node("headlocator/locatorline").get_surface_material(0).albedo_color = headcolour
-	#if playerplatform == "PC":
-	#	get_node("HeadCam/csgheadmesh").mesh.size.x = 0.15
 	if playerplatform == "Quest":
 		get_node("HeadCam/visorline").visible = true
 		get_node("HeadCam/visorline").get_surface_material(0).albedo_color = headcolour
@@ -100,7 +101,9 @@ remote func setavatarposition(positiondict):
 			get_node("HandLeft").setcontrollerhandtransform(playerscale)
 			get_node("HandRight").setcontrollerhandtransform(playerscale)
 	if positiondict.has("playerghostphysics"):
-		playerghostphysics = positiondict["playerghostphysics"]
+		if playerghostphysics != positiondict["playerghostphysics"]:
+			playerghostphysics = positiondict["playerghostphysics"]
+			get_node("HeadCam/csgheadmesh").material.albedo_color = gogglescolourghostly  if playerghostphysics  else gogglescoloursolid
 	
 	if positiondict.has("puppetbody"):
 		var puppetbody = positiondict["puppetbody"]
@@ -109,7 +112,6 @@ remote func setavatarposition(positiondict):
 		while len(puppetpositionstack) > maxstacklength:
 			puppetpositionstack.pop_front()
 		puppetpositionstack.push_back(puppetbody)
-		#print(" ", get_name(), " stacksize ", len(puppetpositionstack))
 		
 	if positiondict.has("laserpointer"):
 		var puppetpointerposition = positiondict["laserpointer"]
