@@ -315,6 +315,7 @@ func updateformetresquaresscaletexture():
 func expandxcdrawingscale(nodepointglobal):
 	assert (drawingtype == DRAWING_TYPE.DT_XCDRAWING)
 	var nodepointlocal = global_transform.xform_inv(nodepointglobal)
+	print("expandxcdrawingscale ", nodepointlocal)
 	var ascax = abs(nodepointlocal.x) + 2
 	var ascay = abs(nodepointlocal.y) + 2
 	if ascax > $XCdrawingplane.scale.x:
@@ -322,6 +323,23 @@ func expandxcdrawingscale(nodepointglobal):
 	if ascay > $XCdrawingplane.scale.y:
 		$XCdrawingplane.scale.y = ascay
 	updateformetresquaresscaletexture()
+
+func expandxcdrawingscaletoray(raycast, pointertargetpoint):
+	var rayorigin = raycast.global_transform.origin 
+	var rayvector = raycast.global_transform.basis.xform(raycast.cast_to)
+	# solve 0=activetargetnodewall.global_transform.xform_inv(rayorigin + lambda*rayvector).z
+	var rayoriginz = transform.xform_inv(rayorigin).z
+	var rayvectorz = transform.basis.xform_inv(rayvector).z
+	if rayvectorz != 0:
+		var lam = -rayoriginz/rayvectorz
+		var lam1 = 1.0
+		if pointertargetpoint != null:
+			lam1 = rayvector.dot(pointertargetpoint - rayorigin)/rayvector.length_squared()
+		if 0 < lam and lam < min(1.0, lam1):
+			var pointerplaneintersection = rayorigin + rayvector*lam
+			expandxcdrawingscale(pointerplaneintersection)
+			return true
+	return false
 
 func setxcdrawingwidthfromnodes():
 	var scax = 0.0

@@ -650,7 +650,8 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 		clearactivetargetnode()
 				
 	elif not is_instance_valid(pointertarget):
-		pass
+		if activetargetwall != null:
+			activetargetwall.expandxcdrawingscaletoray(activelaserroot.get_node("RayCast"), null)
 		
 	elif pointertarget == guipanel3d:
 		pass  # done in _process()
@@ -659,7 +660,6 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 		pointertarget.jump_up()
 
 	# grip click moves node on xcwall
-
 
 	elif gripbuttonheld and activetargetnode != null and pointertargettype == "XCdrawing" and pointertargetwall == activetargetnodewall:
 		var movetopoint = activetargetnodewall.global_transform.xform_inv(pointertargetpoint)
@@ -991,8 +991,9 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 				activetargetwallgrabbedmotion = DRAWING_TYPE.GRABMOTION_ROTATION_ADDITIVE
 
 		else:
-			var imagesystem = get_node("/root/Spatial/ImageSystem")
-			imagesystem.shuffleimagetotopoflist(pointertargetwall)
+			if not (activetargetwall != null and activetargetwall.expandxcdrawingscaletoray(activelaserroot.get_node("RayCast"), pointertargetpoint)):
+				var imagesystem = get_node("/root/Spatial/ImageSystem")
+				imagesystem.shuffleimagetotopoflist(pointertargetwall)
 
 	elif gripbuttonheld and pointertargettype == "XCflatshell" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_ROPEHANG and pointertargetwall.ropehangdetectedtype == DRAWING_TYPE.RH_BOULDER:
 		clearactivetargetnode()
@@ -1089,6 +1090,8 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 			setactivetargetnode(pointertarget)
 		initialsequencenodename = pointertarget.get_name()
 
+	elif activetargetwall != null:
+		activetargetwall.expandxcdrawingscaletoray(activelaserroot.get_node("RayCast"), pointertargetpoint)
 		
 	if gripbuttonheld:
 		gripbuttonpressused = true
