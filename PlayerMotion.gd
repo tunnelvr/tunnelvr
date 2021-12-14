@@ -312,7 +312,7 @@ func process_directedflight(delta, playerdirectedflightvelocity):
 	$PlayerEnlargedKinematicBody/PlayerBodyCapsule.shape.height = capsuleshaftheight
 	$PlayerEnlargedKinematicBody.global_transform.origin = playerbodycentre
 	if playerdirectedflightvelocity != Vector3(0,0,0):
-		if playerMe.playerscale <= 1.0:
+		if not playerMe.playerghostphysics:
 			playerfreefallbodyvelocity = $PlayerEnlargedKinematicBody.move_and_slide(playerdirectedflightvelocity, Vector3(0, 1, 0))
 			if playerfreefallbodyvelocity.normalized().dot(playerdirectedflightvelocity.normalized()) < 0.86:
 				pass # Tglobal.soundsystem.quicksoundonpositionchange("GlancingMotion", playerbodycentre + Vector3(0,3,0), 0)			
@@ -389,6 +389,12 @@ func filter_playerposition_bandwidth(positiondict):
 			positiondict.erase("playerscale")
 		else:
 			prevpositiondict["playerscale"] = positiondict["playerscale"]
+	if positiondict.has("playerghostphysics"):
+		if prevpositiondict["playerghostphysics"] == positiondict["playerghostphysics"]:
+			positiondict.erase("playerghostphysics")
+		else:
+			prevpositiondict["playerghostphysics"] = positiondict["playerghostphysics"]
+
 	
 	if transformwithinrange(prevpositiondict["puppetbody"]["playertransform"], positiondict["puppetbody"]["playertransform"], headpositionchange, headanglechange) and \
 	   transformwithinrange(prevpositiondict["puppetbody"]["headcamtransform"], positiondict["puppetbody"]["headcamtransform"], headpositionchange, headanglechange):

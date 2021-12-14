@@ -1860,18 +1860,6 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="FlyWalkReversed" type="CheckBox" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 18.6818
-margin_top = 180.364
-margin_right = 121.682
-margin_bottom = 208.364
-rect_pivot_offset = Vector2( 138.61, -8.13628 )
-hint_tooltip = "test tooltip"
-text = "Fly/Walk"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
 [node name="SwitchTest" type="OptionButton" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
 margin_left = 22.0
 margin_top = 235.0
@@ -1885,22 +1873,22 @@ __meta__ = {
 }
 
 [node name="WorldScaleLabel" type="Label" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 215.762
-margin_top = 76.1331
-margin_right = 302.762
-margin_bottom = 98.1331
-text = "World scale:"
+margin_left = 203.0
+margin_top = 80.0
+margin_right = 285.0
+margin_bottom = 102.0
+text = "Avatar size:"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="WorldScale" type="OptionButton" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 304.318
-margin_top = 76.6258
-margin_right = 353.318
-margin_bottom = 98.6258
-text = "1x"
-items = [ "1x", null, false, 0, null, "0.25x", null, false, 1, null, "10x", null, false, 2, null, "2x", null, false, 3, null ]
+margin_left = 288.0
+margin_top = 80.0
+margin_right = 366.0
+margin_bottom = 102.0
+text = "1x solid"
+items = [ "1x solid", null, false, 0, null, "10x ghost", null, false, 1, null, "1x ghost", null, false, 2, null, "0.25x solid", null, false, 4, null ]
 selected = 0
 __meta__ = {
 "_edit_use_anchors_": false

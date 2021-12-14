@@ -14,7 +14,7 @@ var nextphysicssetposition = null
 var playerdirectedflight = false
 var playerdirectedflightvelocity = Vector3(0,0,0)
 var playerdirectedwalkingvelocity = Vector3(0,0,0)
-var flywalkreversed = false
+
 var forceontogroundtimedown = 0
 var floorprojectdistance = 10
 
@@ -79,8 +79,7 @@ func _process(delta):
 
 
 func _physics_process(delta):
-	playerdirectedflight = ((HandLeft.gripbuttonheld or Input.is_action_pressed("lh_ctrl")) != flywalkreversed) or \
-							(playerMe.playerscale > 1.0)
+	playerdirectedflight = ((HandLeft.gripbuttonheld or Input.is_action_pressed("lh_ctrl"))) or playerMe.playerghostphysics
 	playerdirectedflightvelocity = Vector3(0,0,0)
 	playerdirectedwalkingvelocity = Vector3(0,0,0)
 

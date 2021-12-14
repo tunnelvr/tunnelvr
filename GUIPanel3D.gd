@@ -105,14 +105,9 @@ func _on_buttondoppelganger_toggled(button_pressed):
 	$Viewport/GUI/Panel/Label.text = "Doppelganger on" if button_pressed else "Doppelganger off"
 	setguipanelhide()
 
-func _on_buttonflywalkreversed_toggled(button_pressed):
-	get_node("/root/Spatial/BodyObjects/PlayerDirections").flywalkreversed = button_pressed
-	$Viewport/GUI/Panel/Label.text = "Fly/Walk reversed" if button_pressed else "Fly/Walk normal"
-	setguipanelhide()
-
-
 func _on_playerscale_selected(index):
-	var newplayerscale = float($Viewport/GUI/Panel/WorldScale.get_item_text(index))
+	var splayerscale = $Viewport/GUI/Panel/WorldScale.get_item_text(index)
+	var newplayerscale = float(splayerscale)
 	var oldplayerscale = playerMe.playerscale
 	print("transorig ", playerMe.get_node("HeadCam").transform.origin)
 	var headcamvec = playerMe.get_node("HeadCam").transform.origin
@@ -127,6 +122,7 @@ func _on_playerscale_selected(index):
 	PlayerMotion.get_node("PlayerKinematicBody").scale = pscavec
 	PlayerMotion.get_node("PlayerEnlargedKinematicBody").scale = pscavec
 	PlayerMotion.get_node("PlayerHeadKinematicBody").scale = pscavec
+	playerMe.playerghostphysics = (splayerscale.count("ghost") != 0)
 	if playerMe.playerscale == 1.0:
 		playerMe.transform.origin = newplayermetransformheadfixed + Vector3(0,2,0)
 		PlayerDirections.forceontogroundtimedown = 0.75
@@ -452,7 +448,6 @@ func _ready():
 	$Viewport/GUI/Panel/ButtonDoppelganger.connect("toggled", self, "_on_buttondoppelganger_toggled")
 	#$Viewport/GUI/Panel/ButtonSwapControllers.connect("pressed", self, "_on_buttonswapcontrollers_pressed")
 	#$Viewport/GUI/Panel/ButtonLockControls.connect("toggled", self, "_on_buttonlockcontrols_toggled")
-	$Viewport/GUI/Panel/FlyWalkReversed.connect("toggled", self, "_on_buttonflywalkreversed_toggled")
 	#$Viewport/GUI/Panel/ButtonRecord.connect("button_down", self, "_on_buttonrecord_down")
 	#$Viewport/GUI/Panel/ButtonRecord.connect("button_up", self, "_on_buttonrecord_up")
 	#$Viewport/GUI/Panel/ButtonPlay.connect("pressed", self, "_on_buttonplay_pressed")

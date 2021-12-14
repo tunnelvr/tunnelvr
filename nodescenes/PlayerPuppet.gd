@@ -51,6 +51,7 @@ var relativetimemax = 0
 var remotetimegap_dtmax = 0.8  # copied from PlayerMotion.gd
 const maxstacklength = 80
 var playerscale = 1.0
+var playerghostphysics = false
 onready var guipanel3d = get_node("/root/Spatial/GuiSystem/GUIPanel3D")
 
 
@@ -98,7 +99,9 @@ remote func setavatarposition(positiondict):
 			playerscale = positiondict["playerscale"]
 			get_node("HandLeft").setcontrollerhandtransform(playerscale)
 			get_node("HandRight").setcontrollerhandtransform(playerscale)
-		
+	if positiondict.has("playerghostphysics"):
+		playerghostphysics = positiondict["playerghostphysics"]
+	
 	if positiondict.has("puppetbody"):
 		var puppetbody = positiondict["puppetbody"]
 		puppetbody["timestamp"] = positiondict["timestamp"]

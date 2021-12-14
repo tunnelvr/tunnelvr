@@ -9,6 +9,7 @@ onready var playertunnelvrversion = Tglobal.tunnelvrversion
 var guardianpoly = null
 var executingfeaturesavailable = [ ]
 var playerscale = 1.0
+var playerghostphysics = false
 var playerflyscale = 1.0
 var playerwalkscale = 1.0
 
@@ -215,6 +216,7 @@ func playerpositiondict():
 	var t0 = OS.get_ticks_msec()*0.001
 	return { "timestamp": t0, 
 			 "playerscale":playerscale,
+			 "playerghostphysics":playerghostphysics,
 			 "puppetbody": puppetbodydict(),
 			 "handleft": $HandLeft.handpositiondict(t0), 
 			 "handright": $HandRight.handpositiondict(t0), 
