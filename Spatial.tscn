@@ -1,4 +1,4 @@
-[gd_scene load_steps=313 format=2]
+[gd_scene load_steps=314 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/underground_env.tres" type="Environment" id=2]
@@ -1063,6 +1063,11 @@ size = Vector3( 0.002, 0.002, 1 )
 flags_unshaded = true
 params_diffuse_mode = 1
 albedo_color = Color( 1, 0.156863, 0.156863, 0.741176 )
+
+[sub_resource type="SpatialMaterial" id=242]
+flags_unshaded = true
+params_diffuse_mode = 1
+albedo_color = Color( 0.737255, 0.156863, 1, 1 )
 
 [sub_resource type="QuadMesh" id=168]
 
@@ -3489,6 +3494,12 @@ transform = Transform( 1, 0, 0, 0, 0.707107, 0.353553, 0, -0.707107, 0.353553, 0
 cast_shadow = 0
 mesh = SubResource( 166 )
 material/0 = SubResource( 167 )
+
+[node name="laserinair" type="MeshInstance" parent="MaterialSystem/lasermaterial"]
+transform = Transform( 1, 0, 0, 0, 0.707107, 0.353553, 0, -0.707107, 0.353553, -0.313084, 0.14, 0.139999 )
+cast_shadow = 0
+mesh = SubResource( 166 )
+material/0 = SubResource( 242 )
 
 [node name="xcdrawingmaterials" type="Spatial" parent="MaterialSystem"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -1.56677, 0, -3.12992 )

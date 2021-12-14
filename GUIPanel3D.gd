@@ -426,8 +426,8 @@ func _on_textedit_focus_exited():
 	$Viewport/GUI/Panel/TextRelatedActions.visible = false
 
 const clientips = [ "Local-network",
-					"192.168.43.193 JulianS9",
-					"10.0.32.206",
+					#"192.168.43.193 JulianS9",
+					#"10.0.32.206",
 					"godot.doesliverpool.xyz" ]
 var uniqueinstancestring = ""
 func _ready():

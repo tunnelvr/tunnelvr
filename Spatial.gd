@@ -49,7 +49,7 @@ var ovr_guardian_system = null
 onready var playerMe = $Players/PlayerMe
 onready var mqttsystem = $MQTTExperiment
 
-const forceopenVR = true
+export var forceopenVR = false
 
 func checkloadinterface(larvrinterfacename):
 	var available_interfaces = ARVRServer.get_interfaces()

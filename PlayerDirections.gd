@@ -137,9 +137,10 @@ func _physics_process(delta):
 			playerdirectedwalkingvelocity = (-dir*joyposforeback + perpdir*joyposstrafe)*walkspeed*playerMe.playerwalkscale
 			
 func _on_button_pressed(p_button):
+	var pointersystem = playerMe.get_node("pointersystem")
 	print("DDD p_button ", p_button)
 	if p_button == BUTTONS.VR_MENU and Tglobal.arvrinterfacename == "OVRMobile":
-		playerMe.get_node("pointersystem").buttonpressed_vrby()
+		pointersystem.buttonpressed_vrby()
 
 	elif p_button == BUTTONS.VR_PAD:
 		var joypos = HandLeft.joypos
@@ -148,15 +149,12 @@ func _on_button_pressed(p_button):
 			#if Tglobal.arvrinterfacename != "OVRMobile" and Tglobal.arvrinterfacename != "Oculus":
 			#	print("clicked turn (touchpad type), disabling non-click snap rotate")
 			#	joyposxrotsnaphysteresis = 2
+
 	elif p_button == BUTTONS.VR_BUTTON_BY:
-		var t0 = OS.get_ticks_usec()
-		#playerMe.seteyestate(true)
-		#var PotreeExperiments = selfSpatial.get_node("PotreeExperiments")
-		print("BUTTONS VR_BUTTON_BY ", (OS.get_ticks_usec() - t0)/1000.0)
+		pointersystem.set_handflickmotiongestureposition(pointersystem.handflickmotiongestureposition_shortpos if Tglobal.handflickmotiongestureposition == pointersystem.handflickmotiongestureposition_normal else pointersystem.handflickmotiongestureposition_normal)
 		
 func _on_button_release(p_button):
 	if p_button == BUTTONS.VR_BUTTON_BY:
-		#playerMe.seteyestate(false)
 		pass
 
 
