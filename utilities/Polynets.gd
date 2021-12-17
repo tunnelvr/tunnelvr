@@ -98,7 +98,7 @@ static func makexcdpolys(nodepoints, onepathpairs):
 	return [ ]
 
 
-static func makeropenodesequences(nodepoints, onepathpairs, oddropeverts):
+static func makeropenodesequences(nodepoints, onepathpairs, oddropeverts, suppresswallnodeson8):
 	var Lpathvectorseq = { } 
 	for ii in nodepoints.keys():
 		Lpathvectorseq[ii] = [ ]
@@ -111,12 +111,14 @@ static func makeropenodesequences(nodepoints, onepathpairs, oddropeverts):
 		Lpathvectorseq[i1].append(j)
 		opvisits.append(0)
 
+	var breaksequenceatwallnodes = true
 	if oddropeverts != null:
 		oddropeverts.clear()
 		for ii in nodepoints.keys():
 			if (len(Lpathvectorseq[ii])%2) == 1:
 				oddropeverts.push_back(ii)
-	
+		breaksequenceatwallnodes = not (suppresswallnodeson8 and len(oddropeverts) == 8)
+		
 	var ropesequences = [ ]
 	for j in range(Npaths):
 		if opvisits[j] != 0:
@@ -128,7 +130,7 @@ static func makeropenodesequences(nodepoints, onepathpairs, oddropeverts):
 			var i1 = ropeseq[-1]
 			if len(Lpathvectorseq[i1]) != 2:
 				break
-			if i1[0] == "a":
+			if breaksequenceatwallnodes and i1[0] == "a":
 				break
 			assert (Lpathvectorseq[i1].has(j1))
 			j1 = Lpathvectorseq[i1][1] if Lpathvectorseq[i1][0] == j1 else Lpathvectorseq[i1][0]
@@ -144,7 +146,7 @@ static func makeropenodesequences(nodepoints, onepathpairs, oddropeverts):
 			var i1 = ropeseq[-1]
 			if len(Lpathvectorseq[i1]) != 2:
 				break
-			if i1[0] == "a":
+			if breaksequenceatwallnodes and i1[0] == "a":
 				break
 			assert (Lpathvectorseq[i1].has(j1))
 			j1 = Lpathvectorseq[i1][1] if Lpathvectorseq[i1][0] == j1 else Lpathvectorseq[i1][0]
@@ -156,7 +158,7 @@ static func makeropenodesequences(nodepoints, onepathpairs, oddropeverts):
 			assert ((i1 == onepathpairs[j1*2]) or (i1 == onepathpairs[j1*2+1]))
 			ropeseq.append(onepathpairs[j1*2+1] if (i1 == onepathpairs[j1*2]) else onepathpairs[j1*2])
 		if len(ropeseq) >= 2:
-			if ropeseq[-1][0] == "a":
+			if breaksequenceatwallnodes and ropeseq[-1][0] == "a":
 				ropeseq.invert()
 			elif len(Lpathvectorseq[ropeseq[0]]) == 1:
 				ropeseq.invert()

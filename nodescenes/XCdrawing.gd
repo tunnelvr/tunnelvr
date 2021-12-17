@@ -152,7 +152,7 @@ func setdrawingvisiblecode(ldrawingvisiblecode):
 	elif drawingtype == DRAWING_TYPE.DT_ROPEHANG:
 		var hidenodeshang = ((drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE) == 0) and (len(onepathpairs) != 0)
 		if hidenodeshang:
-			var ropeseqs = Polynets.makeropenodesequences(nodepoints, onepathpairs, $RopeHang.oddropeverts)
+			var ropeseqs = Polynets.makeropenodesequences(nodepoints, onepathpairs, $RopeHang.oddropeverts, true)
 			var cuboidfacs = Polynets.cuboidfromropenodesequences(nodepoints, ropeseqs)
 			var stalseqax = Polynets.stalfromropenodesequences(nodepoints, ropeseqs) if cuboidfacs == null else null
 			var signseqax = Polynets.signpostfromropenodesequences(nodepoints, ropeseqs, (additionalproperties if additionalproperties != null else {}).get("flagsignlabels", {})) if (cuboidfacs == null and stalseqax == null) else null
@@ -576,8 +576,9 @@ func mergexcrpcdata(xcdata):
 			var playermeheadcam = get_node("/root/Spatial").playerMe.get_node("HeadCam")
 			labelgenerator.restartlabelmakingprocess(playermeheadcam.global_transform.origin)
 		
-	elif drawingtype != DRAWING_TYPE.DT_ROPEHANG:
-		updatexcpaths()
+	# this is was calling twice, also from xcdrawingstoupdate
+	#elif drawingtype != DRAWING_TYPE.DT_ROPEHANG:
+	#	updatexcpaths()
 
 
 	
@@ -608,7 +609,7 @@ const uvfacy = 0.4
 
 func ropepathseqribbons(surfaceTool):
 	var middlenodes = [ ]
-	var ropesequences = Polynets.makeropenodesequences(nodepoints, onepathpairs, null)
+	var ropesequences = Polynets.makeropenodesequences(nodepoints, onepathpairs, null, false)
 	for ropeseq in ropesequences:
 		var p0 = nodepoints[ropeseq[0]]
 		var p1 = nodepoints[ropeseq[1]]

@@ -271,9 +271,9 @@ func _process(delta):
 
 	elif Tglobal.VRoperating:
 		if $HandRight.handstate == HS_INVALID:
-			$HandRight.handstate = HS_HAND
+			$HandRight.handstate = HS_TOUCHCONTROLLER if Tglobal.arvrinterfacename == "oculus" else HS_HAND
 		if $HandLeft.handstate == HS_INVALID:
-			$HandLeft.handstate = HS_HAND
+			$HandLeft.handstate = HS_TOUCHCONTROLLER if Tglobal.arvrinterfacename == "oculus" else HS_HAND
 		$HandLeft.process_normalvrtracking(delta)
 		$HandRight.process_normalvrtracking(delta)
 		

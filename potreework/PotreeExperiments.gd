@@ -271,16 +271,3 @@ func Dcorrectvisibilitymask():
 		scanningnode = rootnode.successornode(scanningnode, false)
 		print("Dcorrectvisibilitymask runn")
 	
-func _input(event):
-	if event is InputEventKey and event.scancode == KEY_7:
-		pass
-	if event is InputEventKey and event.pressed and event.scancode == KEY_6:
-		if rootnode != null and rootnode.processingnode == null:
-			#rootnode.garbagecollectionsweep()
-			Dcorrectvisibilitymask()
-	if event is InputEventKey and event.pressed and event.scancode == KEY_5:
-		#updatepotreepriorities()
-		if rootnode == null:
-			$Timer.start()
-		else:
-			queuekillpotree = true
