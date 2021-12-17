@@ -788,6 +788,11 @@ func _on_resourceoptions_selected(index):
 			xcproperties["xcname"] = xcselecteddrawing_forrsourcefunctions.get_name()
 			if xcselecteddrawing_forrsourcefunctions["xcresource"]:
 				xcproperties["xcresource"] = xcselecteddrawing_forrsourcefunctions["xcresource"]
+			if xcselecteddrawing_forrsourcefunctions["xcresource"]:
+				xcproperties["xcresource"] = xcselecteddrawing_forrsourcefunctions["xcresource"]
+			if sketchsystem.pointersystem.activetargetnode != null:
+				xcproperties["snodename"] = sketchsystem.pointersystem.activetargetnode.get_name()
+
 			$Viewport/GUI/Panel/EditColorRect/TextEdit.text = JSON.print(xcproperties, "  ", true)
 		else:
 			$Viewport/GUI/Panel/Label.text = "No XCdrawing selected"
@@ -802,6 +807,8 @@ func _on_resourceoptions_selected(index):
 				if jresource.has("xcresource"):
 					xcselecteddrawing_forrsourcefunctions.xcresource = jresource["xcresource"]
 					jresource.erase("xcresource")
+				if jresource.has("snodename"):
+					jresource.erase("snodename")
 				xcselecteddrawing_forrsourcefunctions.additionalproperties = jresource
 				$Viewport/GUI/Panel/Label.text = "XCdrawing properties updated"
 			else:
