@@ -75,7 +75,7 @@ func clearpointertargetmaterial():
 				pointertargetnonplan.get_node("StationLabel").visible = false
 			pointertargetplanview.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("selected" if pointertarget == activetargetnode else "station"))
 		else:
-			pointertarget.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("selected" if pointertarget == activetargetnode else clearednodematerialtype(pointertarget, (pointertargetwall == activetargetwall), pointertargetwall.drawingtype)))
+			pointertarget.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("selected" if pointertarget == activetargetnode else clearednodematerialtype(pointertarget, (pointertargetwall == activetargetwall), pointertargetwall.drawingtype, pointertargetwall.nodepointvalence1s)))
 	if pointertargettype == "IntermediateNode":
 		pointertarget.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("nodeintermediate"))
 	if pointertargettype == "IntermediatePointView":
@@ -115,13 +115,16 @@ func setpointertargetmaterial():
 		gripmenu.setgripmenupointer(pointertarget)
 
 
-func clearednodematerialtype(xcn, bwallactive, walldrawingtype):
-	var ch = xcn.get_name()[0]
+func clearednodematerialtype(xcn, bwallactive, walldrawingtype, nodepointvalence1s):
+	var xcnname = xcn.get_name()
+	var ch = xcnname[0]
 	if bwallactive:
 		if ch == "r":
 			return "nodepthtesthole"
 		elif ch == "a" or ch == "k":
 			return "nodepthtestknot"
+		elif nodepointvalence1s.has(xcnname):
+			return "nodepthtestend"
 		else:
 			return "nodepthtest"
 	if walldrawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
@@ -132,6 +135,8 @@ func clearednodematerialtype(xcn, bwallactive, walldrawingtype):
 		return "normalknot"
 	elif ch == "a":
 		return "normalknotwall"
+	elif nodepointvalence1s.has(xcnname):
+		return "normalend"
 	else:
 		return "normal"
 
@@ -144,7 +149,7 @@ func clearactivetargetnode():
 			activetargetnodeplanview.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("station"))
 			activetargetnodenonplan.get_node("StationLabel").visible = false
 		else:
-			activetargetnode.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial(clearednodematerialtype(activetargetnode, (activetargetnodewall == activetargetwall), activetargetnodewall.drawingtype)))
+			activetargetnode.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial(clearednodematerialtype(activetargetnode, (activetargetnodewall == activetargetwall), activetargetnodewall.drawingtype, activetargetnodewall.nodepointvalence1s)))
 	activetargetnode = null
 	activetargetnodewall = null
 	activetargetnodetriggerpulling = false
@@ -186,7 +191,7 @@ func setactivetargetwall(newactivetargetwall):
 		activetargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").set_surface_material(0, materialsystem.xcdrawingmaterial("normal"))
 		activetargetwall.get_node("PathLines").set_surface_material(0, materialsystem.pathlinematerial("normal"))
 		for xcnode in activetargetwall.get_node("XCnodes").get_children():
-			xcnode.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("selected" if xcnode == activetargetnode else clearednodematerialtype(xcnode, false, DRAWING_TYPE.DT_XCDRAWING)))
+			xcnode.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("selected" if xcnode == activetargetnode else clearednodematerialtype(xcnode, false, DRAWING_TYPE.DT_XCDRAWING, activetargetwall.nodepointvalence1s)))
 	
 	activetargetwall = newactivetargetwall
 	activetargetwallgrabbedtransform = null
@@ -210,7 +215,7 @@ func setactivetargetwall(newactivetargetwall):
 		activetargetwall.get_node("PathLines").set_surface_material(0, materialsystem.pathlinematerial("nodepthtest"))
 		for xcnode in activetargetwall.get_node("XCnodes").get_children():
 			if xcnode != activetargetnode:
-				xcnode.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial(clearednodematerialtype(xcnode, true, DRAWING_TYPE.DT_XCDRAWING)))
+				xcnode.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial(clearednodematerialtype(xcnode, true, DRAWING_TYPE.DT_XCDRAWING, activetargetwall.nodepointvalence1s)))
 		if len(activetargetwall.nodepoints) != 0:
 			LaserOrient.get_node("RayCast").collision_mask = CollisionLayer.CLV_MainRayXC
 

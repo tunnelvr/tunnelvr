@@ -30,6 +30,7 @@ var imgheightwidthratio = 0  # known from the xcresource image (though could be 
 var shortestpathseglength = 0.0
 var closewidthsca = 1.0
 var linewidth = 0.05
+var nodepointvalence1s = [ ]
 
 static func tubesectorfromxchole(xcname, sketchsystem):
 	var hxc = xcname.split(";")
@@ -546,9 +547,14 @@ func mergexcrpcdata(xcdata):
 
 	if "nodepoints" in xcdata or "prevnodepoints" in xcdata or "onepathpairs" in xcdata or "prevonepathpairs" in xcdata:
 		var shortestpathseglengthsq = -1.0
+		var nodepointvalences = { } 
 		for j in range(0, len(onepathpairs), 2):
-			var p0 = nodepoints.get(onepathpairs[j])
-			var p1 = nodepoints.get(onepathpairs[j+1])
+			var e0 = onepathpairs[j]
+			var e1 = onepathpairs[j+1]
+			nodepointvalences[e0] = nodepointvalences.get(e0, 0)+1
+			nodepointvalences[e1] = nodepointvalences.get(e1, 0)+1
+			var p0 = nodepoints.get(e0)
+			var p1 = nodepoints.get(e1)
 			if p0 == null or p1 == null:
 				print("***  Deleting unknown point from onepathpairs ", (onepathpairs[j] if p0 == null else ""), "  ", (onepathpairs[j+1] if p1 == null else ""))
 				#assert (false)  # assert (fromremotecall)
@@ -559,6 +565,10 @@ func mergexcrpcdata(xcdata):
 				if shortestpathseglengthsq == -1.0 or vlensq < shortestpathseglengthsq:
 					shortestpathseglengthsq = vlensq
 		shortestpathseglength = sqrt(max(0, shortestpathseglengthsq))
+		nodepointvalence1s = { } 
+		for e in nodepointvalences:
+			if nodepointvalences[e] == 1:
+				nodepointvalence1s[e] = 1
 
 	if "additionalproperties" in xcdata:
 		additionalproperties = xcdata["additionalproperties"]
@@ -710,7 +720,6 @@ func resetclosewidthsca(lclosewidthsca):
 			var kscale = 0.5 if xcn.get_name()[0] == "a" else 1.0
 			xcn.get_node("CollisionShape").scale = Vector3(closewidthsca, closewidthsca*kscale, closewidthsca)
 
-
 func updatexcpaths():
 	var pathlines = $PathLines
 	if len(onepathpairs) == 0:
@@ -722,8 +731,10 @@ func updatexcpaths():
 	var surfaceTool = SurfaceTool.new()
 	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
 	for j in range(0, len(onepathpairs), 2):
-		var p0 = nodepoints[onepathpairs[j]]
-		var p1 = nodepoints[onepathpairs[j+1]]
+		var e0 = onepathpairs[j]
+		var e1 = onepathpairs[j+1]
+		var p0 = nodepoints[e0]
+		var p1 = nodepoints[e1]
 		var perp = Vector3(-(p1.y - p0.y), p1.x - p0.x, 0)
 		var fperp = llinewidth*perp.normalized()
 		var p0left = p0 - fperp

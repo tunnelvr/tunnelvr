@@ -1,4 +1,4 @@
-[gd_scene load_steps=314 format=2]
+[gd_scene load_steps=316 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/underground_env.tres" type="Environment" id=2]
@@ -928,6 +928,9 @@ rings = 1
 [sub_resource type="SpatialMaterial" id=145]
 albedo_color = Color( 0.180392, 0.482353, 0.905882, 1 )
 
+[sub_resource type="SpatialMaterial" id=243]
+albedo_color = Color( 0, 0.992157, 0.921569, 1 )
+
 [sub_resource type="SpatialMaterial" id=146]
 albedo_color = Color( 0.180392, 0.905882, 0.243137, 1 )
 
@@ -957,6 +960,10 @@ albedo_color = Color( 0.984314, 0.556863, 0.72549, 1 )
 [sub_resource type="SpatialMaterial" id=152]
 flags_no_depth_test = true
 albedo_color = Color( 0.180392, 0.482353, 0.905882, 1 )
+
+[sub_resource type="SpatialMaterial" id=244]
+flags_no_depth_test = true
+albedo_color = Color( 0, 0.992157, 0.921569, 1 )
 
 [sub_resource type="SpatialMaterial" id=153]
 flags_no_depth_test = true
@@ -3385,12 +3392,17 @@ material/0 = SubResource( 139 )
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -1.22537, 0, 0.534184 )
 
 [node name="normal" type="MeshInstance" parent="MaterialSystem/nodematerial"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0387917, 0.00289416, -0.305521 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0161171, 0.049896, -0.244059 )
 mesh = SubResource( 144 )
 material/0 = SubResource( 145 )
 
+[node name="normalend" type="MeshInstance" parent="MaterialSystem/nodematerial"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0583305, -0.130604, -0.469183 )
+mesh = SubResource( 144 )
+material/0 = SubResource( 243 )
+
 [node name="normalhole" type="MeshInstance" parent="MaterialSystem/nodematerial"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0411263, 0.000226021, 0.0731487 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0363464, 0.0206513, 0.100048 )
 mesh = SubResource( 144 )
 material/0 = SubResource( 146 )
 
@@ -3405,7 +3417,7 @@ mesh = SubResource( 148 )
 material/0 = SubResource( 149 )
 
 [node name="normalfloorpos" type="MeshInstance" parent="MaterialSystem/nodematerial"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0733414, 0, 0.797792 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0524902, 0.0593436, 0.875687 )
 mesh = SubResource( 150 )
 material/0 = SubResource( 151 )
 
@@ -3413,6 +3425,11 @@ material/0 = SubResource( 151 )
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.633877, 0, -0.261196 )
 mesh = SubResource( 144 )
 material/0 = SubResource( 152 )
+
+[node name="nodepthtestend" type="MeshInstance" parent="MaterialSystem/nodematerial"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.633877, 0, -0.482302 )
+mesh = SubResource( 144 )
+material/0 = SubResource( 244 )
 
 [node name="nodepthtesthole" type="MeshInstance" parent="MaterialSystem/nodematerial"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.593304, 0, 0.0741062 )
@@ -3425,12 +3442,12 @@ mesh = SubResource( 144 )
 material/0 = SubResource( 154 )
 
 [node name="highlight" type="MeshInstance" parent="MaterialSystem/nodematerial"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0111227, 0, -0.62862 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0270882, -0.111254, -0.77552 )
 mesh = SubResource( 144 )
 material/0 = SubResource( 155 )
 
 [node name="selected" type="MeshInstance" parent="MaterialSystem/nodematerial"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.696095, 0, -0.631187 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.635094, -0.101225, -0.7631 )
 mesh = SubResource( 144 )
 material/0 = SubResource( 156 )
 
@@ -3627,7 +3644,7 @@ material/0 = SubResource( 214 )
 [node name="labelmaterials" type="Spatial" parent="MaterialSystem"]
 
 [node name="RopeLabel" type="MeshInstance" parent="MaterialSystem/labelmaterials"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.1 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1.93251 )
 layers = 8192
 cast_shadow = 0
 mesh = SubResource( 216 )
