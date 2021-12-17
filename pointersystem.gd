@@ -604,6 +604,8 @@ func ropepointtargetUV():
 		
 var initialsequencenodename = null
 var initialsequencenodenameP = null
+var vrtrigger_prevbuttontime_forxcdrawinggrabmotion = 0
+const vrtrigger_prevbuttontime_forxcdrawinggrabmotion_doubleclicktime = 700
 func buttonpressed_vrtrigger(gripbuttonheld):
 	initialsequencenodenameP = initialsequencenodename
 	initialsequencenodename = null
@@ -879,8 +881,15 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 			
 		if gripbuttonheld:
 			pointertargetwall.expandxcdrawingscale(pointertargetpoint)
-			# madphil locking and unlocking to implement here
-			if true or len(pointertargetwall.nodepoints) == 0:
+			if len(pointertargetwall.nodepoints) == 0:
+				activetargetwallgrabbedmotion = DRAWING_TYPE.GRABMOTION_PRIMARILY_LOCKED_VERTICAL
+			elif OS.get_ticks_msec() - vrtrigger_prevbuttontime_forxcdrawinggrabmotion < vrtrigger_prevbuttontime_forxcdrawinggrabmotion_doubleclicktime:
+				activetargetwallgrabbedmotion = DRAWING_TYPE.GRABMOTION_PRIMARILY_LOCKED_VERTICAL_ROTATION_ONLY
+			else:
+				activetargetwallgrabbedmotion = DRAWING_TYPE.GRABMOTION_NONE
+				vrtrigger_prevbuttontime_forxcdrawinggrabmotion = OS.get_ticks_msec()
+
+			if activetargetwallgrabbedmotion != DRAWING_TYPE.GRABMOTION_NONE:
 				clearactivetargetnode()
 				var alaserspot = activelaserroot.get_node("LaserSpot")
 				alaserspot.global_transform.origin = pointertargetpoint
@@ -894,7 +903,6 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 				activetargetwalljoyposcumulative = joyposcumulative
 				activetargetwallgrabbedlocalpoint = activetargetwallgrabbed.global_transform.affine_inverse() * alaserspot.global_transform.origin
 				activetargetwallgrabbedpointoffset = alaserspot.global_transform.origin - activetargetwallgrabbed.global_transform.origin
-				activetargetwallgrabbedmotion = DRAWING_TYPE.GRABMOTION_PRIMARILY_LOCKED_VERTICAL if (len(activetargetwallgrabbed.nodepoints) == 0) else DRAWING_TYPE.GRABMOTION_PRIMARILY_LOCKED_VERTICAL_ROTATION_ONLY
 
 		elif (activetargetnode != null and activetargetnodewall == pointertargetwall) or len(pointertargetwall.nodepoints) == 0:
 			if len(pointertargetwall.nodepoints) == 0:
