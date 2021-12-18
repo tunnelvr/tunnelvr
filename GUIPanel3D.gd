@@ -17,27 +17,33 @@ var cavefilesdir = "user://cavefiles/"
 
 func _on_buttonload_pressed():
 	var savegamefileid = $Viewport/GUI/Panel/Savegamefilename.get_selected_id()
-	var savegamefilename = $Viewport/GUI/Panel/Savegamefilename.get_item_text(savegamefileid).lstrip("*#")
-	var GithubAPI = get_node("/root/Spatial/ImageSystem/GithubAPI")
-	if savegamefilename == "--clearcave":
+	var savegamefilestring = $Viewport/GUI/Panel/Savegamefilename.get_item_text(savegamefileid)
+	if savegamefilestring == "--clearcave":
 		sketchsystem.loadsketchsystemL("clearcave")
 		setpanellabeltext("Clearing cave")
-
-	elif GithubAPI.ghattributes.get("type"):
+		return
+	var savegamefilestringL = savegamefilestring.split(":")
+	var savegamefilename = savegamefilestringL[-1].strip_edges().lstrip("*#")
+	var GithubAPI = get_node("/root/Spatial/ImageSystem/GithubAPI")
+	var giattributesname = savegamefilestringL[0].strip_edges() if len(savegamefilestringL) == 2 else GithubAPI.ghattributes.get("name")
+	var lghattributes = GithubAPI.riattributes.get("resourcedefs", {}).get(giattributesname, {})
+	if lghattributes.get("type"):
 		Tglobal.soundsystem.quicksound("MenuClick", collision_point)
 		setpanellabeltext("Fetching file")
-		if yield(GithubAPI.Yloadcavefile(savegamefilename), "completed"):
+		if lghattributes["type"] != "localfiles" and GithubAPI.ghattributes["name"] != lghattributes["name"]:
+			setpanellabeltext("ghattributes must match prefix")
+		elif yield(GithubAPI.Yloadcavefile(lghattributes, savegamefilename), "completed"):
 			setguipanelhide()
 		else:
-			setpanellabeltext("Fetch failed: "+GithubAPI.ghattributes.get("name", ""))
-		GithubAPI.Yupdatecavefilelist()
+			setpanellabeltext("Fetch failed: "+lghattributes.get("name", ""))
+		Yupdatecavefilelist()
 		
 	else:
 		setpanellabeltext("Cannot do")
 	
 remote func setpanellabeltext(ltext):
+	print("setpanellabeltext: ", ltext)
 	$Viewport/GUI/Panel/Label.text = ltext
-			
 			
 remote func setsavegamefilename(cfile):   # this needs dealing with
 	if cfile == "recgithubfile":
@@ -45,11 +51,14 @@ remote func setsavegamefilename(cfile):   # this needs dealing with
 	sketchsystem.sketchname = cfile
 	var snames = $Viewport/GUI/Panel/Savegamefilename
 	for i in range(snames.get_item_count()):
-		if cfile == snames.get_item_text(i).lstrip("*#"):
+		var savegamefilestring = snames.get_item_text(i)
+		var savegamefilename = savegamefilestring.split(":", true, 1)[-1].strip_edges().lstrip("*#")
+		if cfile == savegamefilename:
 			snames.select(i)
 			return
-	snames.add_item("*"+cfile)
-	snames.select(snames.get_item_count() - 1)	
+	var GithubAPI = get_node("/root/Spatial/ImageSystem/GithubAPI")
+	snames.add_item(GithubAPI.ghattributes["name"]+": *"+cfile)
+	snames.select(snames.get_item_count() - 1)
 	
 func _on_buttonsave_pressed():
 	var snames = $Viewport/GUI/Panel/Savegamefilename
@@ -65,7 +74,7 @@ func _on_buttonsave_pressed():
 		setpanellabeltext("Saving file")
 		var ltext = yield(GithubAPI.Ysavecavefile(savegamefilename, bfileisnew), "completed")
 		setpanellabeltext(ltext)
-		GithubAPI.Yupdatecavefilelist()
+		Yupdatecavefilelist()
 
 	else:
 		setpanellabeltext("Cannot do")
@@ -495,15 +504,7 @@ func cavesfilelist():
 	return cfiles
 
 remote func servercavesfilelist(scfiles):
-	var snames = $Viewport/GUI/Panel/Savegamefilename
-	var snamelist = [ ]
-	for i in range(snames.get_item_count()):
-		snamelist.push_back(snames.get_item_text(i).lstrip("*#"))
-	for cfile in scfiles:
-		if not snamelist.has(cfile):
-			snames.add_item(cfile)
-		else:
-			print(" file ", cfile, " already listed")
+	pass # to abolish
 
 remote func setguardianstate(guardianpolyvisible):
 	for player in get_node("/root/Spatial/Players").get_children():
@@ -541,18 +542,10 @@ func _on_buttonmessage_pressed():
 	
 func _on_buttonnewfile_pressed():
 	var snames = $Viewport/GUI/Panel/Savegamefilename
-	var mtext = $Viewport/GUI/Panel/EditColorRect/TextEdit.text
+	var mtext = $Viewport/GUI/Panel/EditColorRect/TextEdit.text.strip_edges()
 	var mmtext = regexacceptableprojectname.search(mtext)
-	if mmtext == null:
-		return
-	var ftext = mmtext.get_string(0)
-	for i in range(snames.get_item_count()):
-		if ftext == snames.get_item_text(i):
-			return
-	snames.add_item("*"+ftext)
-	var fi = snames.get_item_count()-1
-	snames.select(fi)
-	$Viewport/GUI/Panel/EditColorRect/TextEdit.text = ""
+	if mmtext != null:
+		setsavegamefilename(mmtext.get_string(0))
 	
 
 func _on_buttonflagsign_pressed():
@@ -863,22 +856,26 @@ func _on_resourceoptions_selected(index):
 			var ltext = "Resource file saved"
 			if jresource["name"] == "local":
 				if jresource.get("delete"):
-					ltext = "cannot delete local"
+					ltext = "Err: cannot delete local"
 				elif jresource.get("type") != "localfiles":
-					ltext = "local must be type localfiles"
+					ltext = "Err: must be type localfiles"
 				elif not jresource.get("playername"):
-					ltext = "must have playername"
+					ltext = "Err: must have playername"
 				elif jresource.get("unique_id") and jresource["unique_id"] != OS.get_unique_id():
-					ltext = "unique_id mismatch"
+					ltext = "Err: unique_id mismatch"
 				else:
 					GithubAPI.riattributes["resourcedefs"][jresource["name"]] = jresource
-			elif jresource.get("delete"):
+			elif jresource.get("type") == "erase" or jresource.get("type") == "delete":
 				GithubAPI.riattributes["resourcedefs"].erase(jresource["name"])
-			else:
+				ltext = "resource deleted"
+			elif jresource.get("type") in ["githubapi", "svnfiles", "caddyfiles"]:
 				GithubAPI.riattributes["resourcedefs"][jresource["name"]] = jresource
-			GithubAPI.saveresourcesinformationfile()
+			else:
+				ltext = "Err: unknown type"
+			if ltext[0] != "E":
+				GithubAPI.saveresourcesinformationfile()
+				updateresourceselector(jresource["name"])
 			setpanellabeltext(ltext)
-			updateresourceselector(jresource["name"])
 		else:
 			setpanellabeltext("Resource definition not valid")
 
@@ -902,26 +899,42 @@ func _on_resourceoptions_selected(index):
 	Tglobal.soundsystem.quicksound("MenuClick", collision_point)
 	prevnrosel = nrosel
 
+
+func Yupdatecavefilelist():
+	var savegamefilenameoptionbutton = $Viewport/GUI/Panel/Savegamefilename
+	var savegamefileid = savegamefilenameoptionbutton.get_selected_id()
+	var savegamefilestring = savegamefilenameoptionbutton.get_item_text(savegamefileid)
+	var savegamefilename = savegamefilestring.split(":", true, 1)[-1].strip_edges().lstrip("*#")
+
+	var GithubAPI = get_node("/root/Spatial/ImageSystem/GithubAPI")
+	var cfiles = yield(GithubAPI.Ylistdircavefilelist(), "completed")
+	if len(cfiles) == 1 and cfiles[0].begins_with("Err:"):
+		setpanellabeltext(cfiles[0])
+	else:
+		savegamefilenameoptionbutton.clear()
+		savegamefilenameoptionbutton.add_item("--clearcave")
+		for cfile in cfiles:
+			savegamefilenameoptionbutton.add_item(cfile)
+		if savegamefilename != "--clearcave":
+			setsavegamefilename(savegamefilename)
+		
 func ApplyToCaveSave():
 	var GithubAPI = get_node("/root/Spatial/ImageSystem/GithubAPI")
 	var resourcename = $Viewport/GUI/Panel/ResourceSelector.get_item_text($Viewport/GUI/Panel/ResourceSelector.selected)
 	var resourcedef = GithubAPI.riattributes["resourcedefs"][resourcename]
-	$Viewport/GUI/Panel/CaveSaveResourcename.text = resourcename
+	setpanellabeltext("set cave save to: "+resourcename)
 	if resourcedef.get("type") == "localfiles":
 		GithubAPI.ghattributes = resourcedef
 	elif resourcedef.get("type") == "githubapi":
 		GithubAPI.ghattributes = resourcedef
 	else:
-		$Viewport/GUI/Panel/Label.text = "Cannot apply to cavesave"
+		setpanellabeltext("Cannot apply to cavesave")
+		return
 	GithubAPI.httpghapi.poll()
 	if GithubAPI.httpghapi.get_status() == HTTPClient.STATUS_CONNECTED:
 		GithubAPI.httpghapi.close()
 		GithubAPI.httpghapi = HTTPClient.new()
-	GithubAPI.Yupdatecavefilelist()
-
-
-
-
+	Yupdatecavefilelist()
 
 
 

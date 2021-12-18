@@ -7,7 +7,5 @@ extends EditorScript
 
 
 func _run():
-	var x = "sdfsdf potresesd/"
-	print(x.rstrip("/dse"))
-	var y = Vector3(0,0,0)
-	print(y.normalized())
+	var x = "sdfsdf  #potresesd/   "
+	print(x.split(":", true, 1)[-1].strip_edges().lstrip("#*"))

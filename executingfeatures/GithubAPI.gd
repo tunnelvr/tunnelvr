@@ -50,13 +50,12 @@ func Yinitclient():
 				httpghapi.poll()
 				yield(Engine.get_main_loop(), "idle_frame")
 
-func Yupdatecavefilelist():
+func Ylistdircavefilelist():
 	yield(Engine.get_main_loop(), "idle_frame")
 	var cfiles = [ ]
-	var mcfiles = null
 	if ghattributes.get("type") == "localfiles":
 		var dir = Directory.new()
-		var cavefilesdir = riattributes.get("path", "user://cavefiles")
+		var cavefilesdir = ghattributes.get("path", "user://cavefiles")
 		if not dir.dir_exists(cavefilesdir):
 			var err = Directory.new().make_dir(cavefilesdir)
 			print("Making directory ", cavefilesdir, " err code: ", err)
@@ -69,39 +68,32 @@ func Yupdatecavefilelist():
 					assert (not dir.current_is_dir())
 					if file_name.ends_with(".res"):
 						var cname = file_name.substr(0, len(file_name)-4)
-						cfiles.push_back(cname)
+						cfiles.push_back(ghattributes["name"]+": "+cname)
 				file_name = dir.get_next()
 		else:
-			print("list dir error ", e)
+			return ["Err: list local dir error"]
 
 	elif ghattributes.get("type") == "githubapi":
-		mcfiles = yield(Ylistghfiles(), "completed")
-		cfiles = mcfiles.keys()
-	var guipanel3d = get_node("/root/Spatial/GuiSystem/GUIPanel3D")
-	var savegamefilenameoptionbutton = guipanel3d.get_node("Viewport/GUI/Panel/Savegamefilename")
-	var savegamefileid = savegamefilenameoptionbutton.get_selected_id()
-	var savegamefilename = savegamefilenameoptionbutton.get_item_text(savegamefileid).lstrip("*#")
-	savegamefilenameoptionbutton.clear()
-	savegamefilenameoptionbutton.add_item("--clearcave")
-	for cfile in cfiles:
-		if ghattributes.get("type") == "githubapi" and cfile+".res" == ghcurrentname and mcfiles[cfile] == ghcurrentsha:
-			savegamefilenameoptionbutton.add_item("#"+cfile)
-		else:
-			savegamefilenameoptionbutton.add_item(cfile)
-	if savegamefilename[0] != "*" and savegamefilename != "--clearcave":
-		guipanel3d.setsavegamefilename(savegamefilename)
+		var mcfiles = yield(Ylistghfiles(), "completed")
+		if mcfiles == null:
+			return ["Err: githubapi listdir failure"]
 
+		for mcfile in mcfiles:
+			var matchesgha = (mcfile+".res" == ghcurrentname) and (mcfiles[mcfile] == ghcurrentsha)
+			cfiles.push_back(ghattributes["name"]+": "+("#" if matchesgha else "")+mcfile)
+		return cfiles
 
-func Yloadcavefile(savegamefilename):
+func Yloadcavefile(lghattributes, savegamefilename):
 	yield(Engine.get_main_loop(), "idle_frame")
 	var sketchsystem = get_node("/root/Spatial/SketchSystem")
-	if ghattributes.get("type") == "localfiles":
-		var cavefilesdir = riattributes.get("path", "user://cavefiles").rstrip("/")
+	if lghattributes.get("type") == "localfiles":
+		var cavefilesdir = lghattributes.get("path", "user://cavefiles").rstrip("/")
 		var savegamefilenameU = cavefilesdir+"/"+savegamefilename+".res"
 		if File.new().file_exists(savegamefilenameU):
 			sketchsystem.call_deferred("loadsketchsystemL", savegamefilenameU)
 			return true
-	elif ghattributes.get("type") == "githubapi":
+	elif lghattributes.get("type") == "githubapi":
+		assert (lghattributes["name"] == ghattributes["name"])
 		var ghfetcheddatafile = yield(Yfetchfile(savegamefilename+".res"), "completed")
 		if ghfetcheddatafile != null:
 			sketchsystem.call_deferred("loadsketchsystemL", ghfetcheddatafile)
@@ -115,7 +107,7 @@ func Ysavecavefile(savegamefilename, bfileisnew):
 	yield(Engine.get_main_loop(), "idle_frame")
 
 	if ghattributes.get("type") == "localfiles":
-		var cavefilesdir = riattributes.get("path", "user://cavefiles").rstrip("/")
+		var cavefilesdir = ghattributes.get("path", "user://cavefiles").rstrip("/")
 		var savegamefilenameU = cavefilesdir+"/"+savegamefilename+".res"
 		sketchsystem.savesketchsystem(savegamefilenameU)
 		return "Saved locally"
@@ -131,6 +123,8 @@ func Ysavecavefile(savegamefilename, bfileisnew):
 			var playerplatform = get_node("/root/Spatial").playerMe.playerplatform
 			var message = "Saved by %s from %s" % [ playername, playerplatform ]
 			sketchsystem.savesketchsystem(ghfetcheddatafile)
+			var guipanel3d = get_node("/root/Spatial/GuiSystem/GUIPanel3D")
+			guipanel3d.setpanellabeltext("Committing file")
 			yield(Yinitclient(), "completed")
 			var f = File.new()
 			f.open(ghfetcheddatafile, File.READ)
@@ -178,19 +172,19 @@ func Yghapicall(method, rpath, body):
 	return parse_json(rt)
 
 func Ylistghfiles():
-	yield(Yinitclient(), "completed")
 	var rpath = "/repos/%s/%s/contents/%s" % [ ghattributes["owner"], ghattributes["repo"], ghattributes["path"] ]
 	var d = yield(Yghapicall(HTTPClient.METHOD_GET, rpath, ""), "completed")
+	if d == null:
+		return null
 	var mcfiles = { }
-	if d:
-		for k in d:
-			if k["type"] == "file":
-				var file_name = k["name"]
-				if file_name.ends_with(".res"):
-					var cname = file_name.substr(0, len(file_name)-4)
-					mcfiles[cname] = k["sha"]
-				else:
-					print("skipping githubfile ", file_name)
+	for k in d:
+		if k["type"] == "file":
+			var file_name = k["name"]
+			if file_name.ends_with(".res"):
+				var cname = file_name.substr(0, len(file_name)-4)
+				mcfiles[cname] = k["sha"]
+			else:
+				print("skipping githubfile ", file_name)
 	return mcfiles
 
 func Yfetchfile(cname):
@@ -226,29 +220,3 @@ func Ycommitfile(cname, message):
 	ghcurrentsha = d["content"]["sha"]
 	return ghfetcheddatafile
 
-
-
-# Temporary testing code below
-#
-#
-func addstufftofile():
-	var ghrawfile = File.new()
-	ghrawfile.open(ghfetcheddatafile, File.READ_WRITE)
-	var h = ghrawfile.get_buffer(ghrawfile.get_len())
-	ghrawfile.store_buffer(h)
-	ghrawfile.store_buffer("\nding ding!\n".to_ascii())
-	ghrawfile.close()
-	
-var Dmessage = "saywhat"
-func D_input(event):	
-	if event is InputEventKey and event.pressed and event.scancode == KEY_8:
-		print(yield(Ylistghfiles(), "completed"))
-		
-	var ghfetchedname = "madebyapi.txt"
-	if event is InputEventKey and event.pressed and event.scancode == KEY_9:
-		print(yield(Yfetchfile("madebyapi.txt"), "completed"))
-		
-	if event is InputEventKey and event.pressed and event.scancode == KEY_K:
-		addstufftofile()
-		Dmessage = Dmessage + "-"
-		print(yield(Ycommitfile("madebyapi.txt", Dmessage), "completed"))

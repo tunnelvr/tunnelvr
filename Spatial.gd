@@ -240,7 +240,6 @@ func _player_connected(id):
 	$GuiSystem/GUIPanel3D/Viewport/GUI/Panel/Label.text = "player "+String(id)+" connected"
 
 	if playerMe.networkID == 1:
-		$GuiSystem/GUIPanel3D.rpc_id(id, "servercavesfilelist", $GuiSystem/GUIPanel3D.cavesfilelist())
 		print("Converting sketchsystemtodict")
 		var sketchdatadict = $SketchSystem.sketchsystemtodict(false)
 		var GithubAPI = get_node("/root/Spatial/ImageSystem/GithubAPI")

@@ -1786,21 +1786,11 @@ __meta__ = {
 }
 
 [node name="Savegamefilename" type="OptionButton" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 177.0
-margin_top = 47.0
-margin_right = 294.0
-margin_bottom = 74.0
+margin_left = 116.0
+margin_top = 44.0
+margin_right = 297.0
+margin_bottom = 71.0
 text = "savegame.res"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="CaveSaveResourcename" type="Label" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 89.0
-margin_top = 48.0
-margin_right = 165.0
-margin_bottom = 70.0
-text = "--cavesave"
 __meta__ = {
 "_edit_use_anchors_": false
 }
