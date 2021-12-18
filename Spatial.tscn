@@ -1786,7 +1786,7 @@ __meta__ = {
 }
 
 [node name="Savegamefilename" type="OptionButton" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 116.0
+margin_left = 99.0
 margin_top = 44.0
 margin_right = 297.0
 margin_bottom = 71.0
@@ -1945,43 +1945,6 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="TextRelatedActions" type="Panel" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 154.0
-margin_top = 219.0
-margin_right = 373.0
-margin_bottom = 247.0
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="ButtonNewfile" type="Button" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel/TextRelatedActions"]
-margin_left = 133.83
-margin_top = 0.517612
-margin_right = 192.83
-margin_bottom = 24.5176
-text = "newfile"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="ButtonMessage" type="Button" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel/TextRelatedActions"]
-margin_left = 66.1977
-margin_top = 1.25989
-margin_right = 135.198
-margin_bottom = 25.2599
-rect_scale = Vector2( 0.957083, 1 )
-text = "message"
-
-[node name="ButtonApplyFlagSign" type="Button" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel/TextRelatedActions"]
-margin_left = 1.28952
-margin_top = 1.48491
-margin_right = 64.2895
-margin_bottom = 25.4849
-text = "FlagSign"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
 [node name="ImageSystemReports" type="Label" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
 margin_left = 161.0
 margin_top = 251.0
@@ -1995,7 +1958,7 @@ margin_top = 104.487
 margin_right = 360.371
 margin_bottom = 126.487
 text = "--resources"
-items = [ "--resources", null, false, 0, null, "Print XCproperties", null, false, 1, null, "Set XCproperties", null, false, 2, null, "Show/Hide/Load Potree", null, false, 4, null, "Print resource", null, false, 6, null, "Set resource", null, false, 7, null, "Apply to Filetree", null, false, 8, null, "Apply to Cavesave", null, false, 9, null ]
+items = [ "--resources", null, false, 0, null, "Print XCproperties", null, false, 1, null, "Set XCproperties", null, false, 2, null, "Show/Hide/Load Potree", null, false, 4, null, "Print resource", null, false, 6, null, "Set resource", null, false, 7, null, "Clear text", null, false, 8, null, "Set new file", null, false, 9, null, "Send message", null, false, 8, null, "Apply to flagsign", null, false, 9, null, "Apply to Filetree", null, false, 10, null, "Apply to Cavesave", null, false, 11, null ]
 selected = 0
 __meta__ = {
 "_edit_use_anchors_": false

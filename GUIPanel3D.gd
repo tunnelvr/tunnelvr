@@ -418,7 +418,6 @@ func _on_textedit_focus_entered():
 	Tglobal.virtualkeyboardactive = true
 	virtualkeyboard.get_node("CollisionShape").disabled = not virtualkeyboard.visible
 	#$Viewport.render_target_update_mode = Viewport.UPDATE_ALWAYS
-	$Viewport/GUI/Panel/TextRelatedActions.visible = true
 
 func _on_textedit_focus_exited():
 	print("text edit focus exited")
@@ -428,7 +427,6 @@ func _on_textedit_focus_exited():
 	virtualkeyboard._toggle_symbols(false)
 	virtualkeyboard._toggle_case(false)
 	yield(get_tree().create_timer(0.1), "timeout")
-	$Viewport/GUI/Panel/TextRelatedActions.visible = false
 
 const clientips = [ "Local-network",
 					#"192.168.43.193 JulianS9",
@@ -472,10 +470,6 @@ func _ready():
 	$Viewport/GUI/Panel/Networkstate.connect("item_selected", self, "_on_networkstate_selected")
 	$Viewport/GUI/Panel/ResourceOptions.connect("item_selected", self, "_on_resourceoptions_selected")
 	$Viewport/GUI/Panel/ResourceOptions.connect("button_down", self, "_on_resourceoptions_buttondown_setavailablefunctions")
-	
-	$Viewport/GUI/Panel/TextRelatedActions/ButtonMessage.connect("pressed", self, "_on_buttonmessage_pressed")
-	$Viewport/GUI/Panel/TextRelatedActions/ButtonNewfile.connect("pressed", self, "_on_buttonnewfile_pressed")
-	$Viewport/GUI/Panel/TextRelatedActions/ButtonApplyFlagSign.connect("pressed", self, "_on_buttonflagsign_pressed")
 
 	if $Viewport/GUI/Panel/Networkstate.selected != 0:  # could record saved settings on disk
 		call_deferred("_on_networkstate_selected", $Viewport/GUI/Panel/Networkstate.selected)
@@ -536,20 +530,7 @@ remote func copyacrosstextedit(text):
 	$Viewport/GUI/Panel/EditColorRect/TextEdit.text = text
 	$Viewport/GUI/Panel/EditColorRect/TextEdit.grab_focus()
 
-func _on_buttonmessage_pressed():
-	if Tglobal.connectiontoserveractive:
-		rpc("copyacrosstextedit", $Viewport/GUI/Panel/EditColorRect/TextEdit.text)
-	
-func _on_buttonnewfile_pressed():
-	var snames = $Viewport/GUI/Panel/Savegamefilename
-	var mtext = $Viewport/GUI/Panel/EditColorRect/TextEdit.text.strip_edges()
-	var mmtext = regexacceptableprojectname.search(mtext)
-	if mmtext != null:
-		setsavegamefilename(mmtext.get_string(0))
-	
-
-func _on_buttonflagsign_pressed():
-	print("_on_buttonflagsign_pressed")
+func buttonflagsign_pressed():
 	if sketchsystem.pointersystem.activetargetnode != null and sketchsystem.pointersystem.activetargetnodewall != null and \
 			sketchsystem.pointersystem.activetargetnodewall.drawingtype == DRAWING_TYPE.DT_ROPEHANG:
 		var xcdrawing = sketchsystem.pointersystem.activetargetnodewall
@@ -758,6 +739,7 @@ func _on_resourceoptions_buttondown_setavailablefunctions():
 		var xcdrawingcentrelines = get_tree().get_nodes_in_group("gpcentrelinegeo")
 		centrelineselected_forresourcefunction = (xcdrawingcentrelines[0] if len(xcdrawingcentrelines) != 0 else null)
 
+	var mtext = $Viewport/GUI/Panel/EditColorRect/TextEdit.text.strip_edges()
 	var potreeexperiments = selfSpatial.get_node("PotreeExperiments")
 	var showhigloadpotreeid = resourceoptionlookup["Show/Hide/Load Potree"]
 	if potreeexperiments.rootnode == null:
@@ -767,7 +749,9 @@ func _on_resourceoptions_buttondown_setavailablefunctions():
 		$Viewport/GUI/Panel/ResourceOptions.set_item_text(showhigloadpotreeid, "Show Potree" if not potreeexperiments.visible else "Hide Potree")
 	$Viewport/GUI/Panel/ResourceOptions.set_item_disabled(resourceoptionlookup["Print XCproperties"], xcselecteddrawing_forrsourcefunctions == null)
 	$Viewport/GUI/Panel/ResourceOptions.set_item_disabled(resourceoptionlookup["Set XCproperties"], xcselecteddrawing_forrsourcefunctions == null)
-
+	$Viewport/GUI/Panel/ResourceOptions.set_item_disabled(resourceoptionlookup["Set new file"], regexacceptableprojectname.search(mtext) == null)
+	$Viewport/GUI/Panel/ResourceOptions.set_item_disabled(resourceoptionlookup["Send message"], not Tglobal.connectiontoserveractive)
+	$Viewport/GUI/Panel/ResourceOptions.set_item_disabled(resourceoptionlookup["Apply to flagsign"], not (sketchsystem.pointersystem.activetargetnode != null and sketchsystem.pointersystem.activetargetnodewall != null and sketchsystem.pointersystem.activetargetnodewall.drawingtype == DRAWING_TYPE.DT_ROPEHANG))
 
 func _on_resourceoptions_selected(index):
 	if $Viewport/GUI/Panel/ResourceOptions.selected != index:
@@ -788,7 +772,7 @@ func _on_resourceoptions_selected(index):
 
 			$Viewport/GUI/Panel/EditColorRect/TextEdit.text = JSON.print(xcproperties, "  ", true)
 		else:
-			$Viewport/GUI/Panel/Label.text = "No XCdrawing selected"
+			setpanellabeltext("No XCdrawing selected")
 			
 	if nrosel == "Set XCproperties":
 		var jresource = parse_json($Viewport/GUI/Panel/EditColorRect/TextEdit.text)
@@ -803,11 +787,11 @@ func _on_resourceoptions_selected(index):
 				if jresource.has("snodename"):
 					jresource.erase("snodename")
 				xcselecteddrawing_forrsourcefunctions.additionalproperties = jresource
-				$Viewport/GUI/Panel/Label.text = "XCdrawing properties updated"
+				setpanellabeltext("XCdrawing properties updated")
 			else:
-				$Viewport/GUI/Panel/Label.text = "Bad JSON format"
+				setpanellabeltext("Bad JSON format")
 		else:
-			$Viewport/GUI/Panel/Label.text = "No XCdrawing selected"
+			setpanellabeltext("No XCdrawing selected")
 
 	elif nrosel.count("Potree"):
 		var potreeexperiments = selfSpatial.get_node("PotreeExperiments")
@@ -815,25 +799,25 @@ func _on_resourceoptions_selected(index):
 			potreeexperiments.visible = true
 			if potreeexperiments.rootnode == null:
 				potreeexperiments.get_node("Timer").start()
-				$Viewport/GUI/Panel/Label.text = "Potree timer started"
+				setpanellabeltext("Potree timer started")
 				# could do all the loading here async while the load button is disabled			
 			else:
-				$Viewport/GUI/Panel/Label.text = "Potree already there"
+				setpanellabeltext("Potree already there")
 		elif nrosel == "Remove Potree":
 			potreeexperiments.visible = false
 			if potreeexperiments.rootnode != null:
-				$Viewport/GUI/Panel/Label.text = "killing Potree"
+				setpanellabeltext("killing Potree")
 				potreeexperiments.queuekillpotree = true
 				potreeexperiments.get_node("Timer").start()
 			else:
-				$Viewport/GUI/Panel/Label.text = "Potree not there"
+				setpanellabeltext("Potree not there")
 		elif nrosel == "Show Potree":
 			potreeexperiments.visible = true
 			if potreeexperiments.rootnode != null:
 				potreeexperiments.get_node("Timer").start()
-				$Viewport/GUI/Panel/Label.text = "Potree shown"
+				setpanellabeltext("Potree shown")
 			else:
-				$Viewport/GUI/Panel/Label.text = "Potree not there"
+				setpanellabeltext("Potree not there")
 		elif nrosel == "Hide Potree":
 			potreeexperiments.visible = false
 			potreeexperiments.get_node("Timer").stop()
@@ -889,12 +873,29 @@ func _on_resourceoptions_selected(index):
 			var filetreerootpath = resourcedef.get("path", "")
 			filetreerootpath = filetreerootpath.rstrip("/") + "/"
 			planviewsystem.clearsetupfileviewtree(false, filetreerootpath)
-			$Viewport/GUI/Panel/Label.text = "Applied resource to filetree"
+			setpanellabeltext("Applied resource to filetree")
 		else:
-			$Viewport/GUI/Panel/Label.text = "Cannot apply to resource type"
+			setpanellabeltext("Cannot apply to resource type")
 					
 	elif nrosel == "Apply to Cavesave":
 		ApplyToCaveSave()
+		
+	elif nrosel == "Set new file":
+		var mtext = $Viewport/GUI/Panel/EditColorRect/TextEdit.text.strip_edges()
+		var mmtext = regexacceptableprojectname.search(mtext)
+		if mmtext != null:
+			setsavegamefilename(mmtext.get_string(0))
+
+	elif nrosel == "Send message":
+		if Tglobal.connectiontoserveractive:
+			rpc("copyacrosstextedit", $Viewport/GUI/Panel/EditColorRect/TextEdit.text)
+			setpanellabeltext("message sent")
+
+	elif nrosel == "Apply to flagsign":
+		buttonflagsign_pressed()
+		
+	elif nrosel == "Clear text":
+		$Viewport/GUI/Panel/EditColorRect/TextEdit.text = ""
 
 	Tglobal.soundsystem.quicksound("MenuClick", collision_point)
 	prevnrosel = nrosel
