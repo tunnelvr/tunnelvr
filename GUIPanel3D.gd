@@ -973,9 +973,11 @@ func _on_networkstate_selected(index):
 		if networkedmultiplayerenetclient != null:
 			networkedmultiplayerenetclient.close_connection()
 			networkedmultiplayerenetclient = null
+			setpanellabeltext("enet client closed")
 		if networkedmultiplayerenetserver != null:
 			networkedmultiplayerenetserver.close_connection()
 			networkedmultiplayerenetserver = null
+			setpanellabeltext("enet server closed")
 		if udpdiscoveryreceivingserver != null:
 			udpdiscoveryreceivingserver.stop()
 			udpdiscoveryreceivingserver = null
@@ -1000,14 +1002,15 @@ func _on_networkstate_selected(index):
 	if nssel.begins_with("As Server"):
 		networkstartasserver(true)
 		if selfSpatial.playerMe.networkID == 0:
-			$Viewport/GUI/Panel/Label.text = "server failed to start"
+			setpanellabeltext("server failed to start")
 		else:
-			$Viewport/GUI/Panel/Label.text = "networkID: "+str(selfSpatial.playerMe.networkID)
+			setpanellabeltext("networkID: "+str(selfSpatial.playerMe.networkID))
 
 	elif nssel.begins_with("Local-network"):
 		udpdiscoveryreceivingserver = UDPServer.new()
 		var udperr = udpdiscoveryreceivingserver.listen(selfSpatial.udpserverdiscoveryport)
 		print("UDP err ", udperr)
+		setpanellabeltext("Local server discovery")
 
 	else:
 		selfSpatial.hostipnumber = nssel.replace("Client->", "")
@@ -1094,7 +1097,6 @@ func _connection_failed():
 
 func removeallplayersdisconnection():
 	selfSpatial.deferred_player_connected_list.clear()
-	$Viewport/GUI/Panel/Label.text = "server_disconnected"
 	for id in selfSpatial.players_connected_list.duplicate():
 		print("server_disconnected, calling _player_disconnected on ", id)
 		selfSpatial.call_deferred("_player_disconnected", id)

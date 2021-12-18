@@ -182,14 +182,15 @@ func Ylistghfiles():
 	var rpath = "/repos/%s/%s/contents/%s" % [ ghattributes["owner"], ghattributes["repo"], ghattributes["path"] ]
 	var d = yield(Yghapicall(HTTPClient.METHOD_GET, rpath, ""), "completed")
 	var mcfiles = { }
-	for k in d:
-		if k["type"] == "file":
-			var file_name = k["name"]
-			if file_name.ends_with(".res"):
-				var cname = file_name.substr(0, len(file_name)-4)
-				mcfiles[cname] = k["sha"]
-			else:
-				print("skipping githubfile ", file_name)
+	if d:
+		for k in d:
+			if k["type"] == "file":
+				var file_name = k["name"]
+				if file_name.ends_with(".res"):
+					var cname = file_name.substr(0, len(file_name)-4)
+					mcfiles[cname] = k["sha"]
+				else:
+					print("skipping githubfile ", file_name)
 	return mcfiles
 
 func Yfetchfile(cname):
