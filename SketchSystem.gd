@@ -404,7 +404,10 @@ remote func actsketchchangeL(xcdatalist):
 				xcdrawingsrejected.append(xcdata["name"])
 				print("rejecting XC drawing from data", xcdata)
 			elif "nodepoints" in xcdata or "nextnodepoints" in xcdata or "onepathpairs" in xcdata or "newonepathpairs" in xcdata:
+				if xcdata.has("drawingvisiblecode") and xcdrawing.drawingtype == DRAWING_TYPE.DT_ROPEHANG:
+					xcdrawing.drawingvisiblecode = xcdata["drawingvisiblecode"]
 				xcdrawingstoupdate[xcdrawing.get_name()] = xcdrawing
+				
 				if len(xcdata.get("prevnodepoints", [])) != 0:
 					for xctube in xcdrawing.xctubesconn:
 						xctubestoupdate[xctube.get_name()] = xctube
@@ -443,8 +446,9 @@ remote func actsketchchangeL(xcdatalist):
 				
 	for xcdrawing in xcdrawingstoupdate.values():
 		if xcdrawing.drawingtype == DRAWING_TYPE.DT_ROPEHANG:
-			if xcdrawing.drawingvisiblecode != DRAWING_TYPE.VIZ_XCD_HIDE:
-				xcdrawing.updatelinearropepaths()
+			#if xcdrawing.drawingvisiblecode != DRAWING_TYPE.VIZ_XCD_HIDE:
+			#	xcdrawing.updatelinearropepaths()
+			xcdrawing.setdrawingvisiblecode(xcdrawing.drawingvisiblecode)
 		elif xcdrawing.drawingtype == DRAWING_TYPE.DT_CENTRELINE:
 			xcdrawing.updatexcpaths_centreline(xcdrawing.get_node("PathLines"), xcdrawing.linewidth)
 		else:

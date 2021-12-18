@@ -575,8 +575,8 @@ func mergexcrpcdata(xcdata):
 	if "xcresource" in xcdata and xcresource != xcdata["xcresource"]:
 		print("Warning: xcdrawing.xcresource cannot be overridden, ", xcresource, " by ", xcdata["xcresource"])
 
-	if "drawingvisiblecode" in xcdata:
-		setdrawingvisiblecode(xcdata["drawingvisiblecode"])
+	#if "drawingvisiblecode" in xcdata:
+		#	setdrawingvisiblecode(xcdata["drawingvisiblecode"])
 		
 	if drawingtype == DRAWING_TYPE.DT_CENTRELINE:
 		if xcdata.get("partialxcchunk", "no") != "yes":

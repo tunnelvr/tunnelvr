@@ -457,6 +457,8 @@ static func makesignpostshellmesh(xcdrawing, ptsignroot, ptsigntopy, postrad):
 	
 static func oppositenode(nodename, ropeseq):
 	return ropeseq[-1 if (ropeseq[0] == nodename) else 0]
+static func nextseqnode(nodename, ropeseq):
+	return ropeseq[1 if (ropeseq[0] == nodename) else -2]
 static func swaparrindexes(arr, i, j):
 	var b = arr[i]
 	arr[i] = arr[j]
@@ -529,8 +531,16 @@ static func cuboidfromropenodesequences(nodepoints, ropeseqs): # cube shape dete
 		if topnode == null or (nodepoints[nodename].y > nodepoints[topnode].y):
 			topnode = nodename
 
+	var ropeseqendsoftopnode = ropeseqends[topnode]
+	var tcpn0 = nodepoints[nextseqnode(topnode, ropeseqs[ropeseqendsoftopnode[0]])]
+	var tcpn1 = nodepoints[nextseqnode(topnode, ropeseqs[ropeseqendsoftopnode[1]])]
+	var tcpn2 = nodepoints[nextseqnode(topnode, ropeseqs[ropeseqendsoftopnode[2]])]
+	var tcpnN = ((tcpn1 - tcpn0).cross(tcpn2 - tcpn0))
+	if tcpnN.y < 0:
+		swaparrindexes(ropeseqendsoftopnode, 1, 2)
+
 	var secondseqq = [ ]
-	for j in ropeseqends[topnode]:
+	for j in ropeseqendsoftopnode:
 		var secondseqqj = [ j ]
 		var jo = oppositenode(topnode, ropeseqs[j])
 		secondseqqj.push_back(jo)

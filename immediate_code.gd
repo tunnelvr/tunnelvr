@@ -9,3 +9,5 @@ extends EditorScript
 func _run():
 	var x = "sdfsdf potresesd/"
 	print(x.rstrip("/dse"))
+	var y = Vector3(0,0,0)
+	print(y.normalized())
