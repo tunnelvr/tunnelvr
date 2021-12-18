@@ -9,7 +9,6 @@ var ghattributes = { }
 var ghcurrentname = ""
 var ghcurrentsha = ""
 var ghfetcheddatafile = ghdirectory+"/recgithubfile.res"
-var ghattributesfile = ghdirectory+"/attributes.json"
 var httpghapi = HTTPClient.new()
 
 func saveresourcesinformationfile():

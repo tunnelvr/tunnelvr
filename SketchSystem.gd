@@ -269,7 +269,7 @@ remote func actsketchchangeL(xcdatalist):
 			sketchname = xcdatalist[0]["sketchname"]
 			if xcdatalist[0].has("ghcurrentsha"):
 				var GithubAPI = get_node("/root/Spatial/ImageSystem/GithubAPI")
-				GithubAPI.ghfetchedcurrentfile = xcdatalist[0]["sketchname"]
+				GithubAPI.ghcurrentname = sketchname+".res"
 				GithubAPI.ghcurrentsha = xcdatalist[0]["ghcurrentsha"]
 			if sketchname == "importing_the_centreline__do_not_clear":
 				sketchname = "--centrelinesketch"
@@ -733,12 +733,12 @@ remote func loadsketchsystemL(fname):
 		sketchdatafile.open(fname, File.READ)
 		var firstline = sketchdatafile.get_buffer(20).get_string_from_ascii()
 		sketchdatafile.seek(0)
+		var GithubAPI = get_node("/root/Spatial/ImageSystem/GithubAPI")
 		if firstline.begins_with(fileheading):
 			firstline = sketchdatafile.get_line()
 			var headerdata = firstline.split(" ")
 			sketchdatadict = { "sketchname":headerdata[1].percent_decode(), "xcdrawings": [ ], "xctubes": [ ] }
-			var GithubAPI = get_node("/root/Spatial/ImageSystem/GithubAPI")
-			if GithubAPI.ghcurrentname == sketchdatadict["sketchname"]:
+			if GithubAPI.ghcurrentname == sketchdatadict["sketchname"]+".res":
 				sketchdatadict["ghcurrentsha"] = GithubAPI.ghcurrentsha
 			while true:
 				var jline = sketchdatafile.get_line()
@@ -788,7 +788,7 @@ remote func loadsketchsystemL(fname):
 		sketchdatafile.close()
 		print("items loaded: ", len(sketchdatadict["xcdrawings"]), " drawings,  ", len(sketchdatadict["xctubes"]), " tubes.")
 		var fsketchname = fname.split("/")[-1].split(".")[0]
-		if sketchdatadict.get("sketchname", "unnamedsketch") != fsketchname:
+		if sketchdatadict.get("sketchname", "unnamedsketch") != fsketchname and fname != GithubAPI.ghfetcheddatafile:
 			print("resetting sketchname from ", sketchdatadict.get("sketchname", "unnamedsketch"), " to ", fsketchname, " on load")
 			sketchdatadict["sketchname"] = fsketchname
 	else:

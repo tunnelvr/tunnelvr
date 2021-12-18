@@ -243,8 +243,9 @@ func _player_connected(id):
 		print("Converting sketchsystemtodict")
 		var sketchdatadict = $SketchSystem.sketchsystemtodict(false)
 		var GithubAPI = get_node("/root/Spatial/ImageSystem/GithubAPI")
-		if GithubAPI.ghcurrentname == sketchdatadict["sketchname"]:
+		if GithubAPI.ghcurrentname == sketchdatadict["sketchname"]+".res":
 			sketchdatadict["ghcurrentsha"] = GithubAPI.ghcurrentsha
+			print("setting ghcurrentsha ", GithubAPI.ghcurrentsha)
 		assert(playerMe.networkID != 0)
 		print("Generating sketchdicttochunks")
 		var xcdatachunks = $SketchSystem.sketchdicttochunks(sketchdatadict)

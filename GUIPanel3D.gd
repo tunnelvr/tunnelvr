@@ -45,7 +45,8 @@ remote func setpanellabeltext(ltext):
 	print("setpanellabeltext: ", ltext)
 	$Viewport/GUI/Panel/Label.text = ltext
 			
-remote func setsavegamefilename(cfile):   # this needs dealing with
+remote func setsavegamefilename(cfile):
+	print(" setsavegamefilename ", cfile)
 	if cfile == "recgithubfile":
 		return
 	sketchsystem.sketchname = cfile
