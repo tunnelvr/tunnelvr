@@ -910,7 +910,7 @@ func Yupdatecavefilelist():
 
 	var GithubAPI = get_node("/root/Spatial/ImageSystem/GithubAPI")
 	var cfiles = yield(GithubAPI.Ylistdircavefilelist(), "completed")
-	if len(cfiles) == 1 and cfiles[0].begins_with("Err:"):
+	if cfiles.size() == 1 and cfiles[0].begins_with("Err:"):
 		setpanellabeltext(cfiles[0])
 	else:
 		savegamefilenameoptionbutton.clear()

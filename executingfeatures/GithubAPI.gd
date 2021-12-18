@@ -69,8 +69,8 @@ func Ylistdircavefilelist():
 						var cname = file_name.substr(0, len(file_name)-4)
 						cfiles.push_back(ghattributes["name"]+": "+cname)
 				file_name = dir.get_next()
-		else:
-			return ["Err: list local dir error"]
+			return cfiles
+		return ["Err: list local dir error"]
 
 	elif ghattributes.get("type") == "githubapi":
 		var mcfiles = yield(Ylistghfiles(), "completed")
