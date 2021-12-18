@@ -1863,7 +1863,7 @@ margin_top = 235.0
 margin_right = 116.0
 margin_bottom = 262.0
 text = "normal"
-items = [ "normal", null, false, 0, null, "hide floors", null, false, 1, null, "all grey", null, false, 2, null, "hide xc", null, false, 3, null, "toggle guardian", null, false, 4, null, "export OBJ", null, false, 7, null, "choke", null, false, 6, null, "swap controllers", null, false, 7, null, "lock controls", null, false, 8, null, "BackfaceCull", null, false, 11, null ]
+items = [ "normal", null, false, 0, null, "Hide XCs", null, false, 1, null, "opt: all grey", null, false, 2, null, "opt: hide xc", null, false, 3, null, "toggle guardian", null, false, 4, null, "export OBJ", null, false, 7, null, "choke", null, false, 6, null, "swap controllers", null, false, 7, null, "lock controls", null, false, 8, null, "BackfaceCull", null, false, 11, null ]
 selected = 0
 __meta__ = {
 "_edit_use_anchors_": false

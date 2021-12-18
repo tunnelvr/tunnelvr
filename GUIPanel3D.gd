@@ -356,7 +356,17 @@ func _on_switchtest(index):
 		Tglobal.controlslocked = true
 		Tglobal.soundsystem.quicksound("MenuClick", collision_point)		
 		
-	elif prevnssel == "hide floors" or prevnssel == "all grey" or prevnssel == "hide xc":
+	elif nssel == "Hide XCs":
+		Tglobal.soundsystem.quicksound("MenuClick", collision_point)
+		var xcvizstates = { }
+		for xcdrawing in sketchsystem.get_node("XCdrawings").get_children():
+			if xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING and xcdrawing.drawingvisiblecode != DRAWING_TYPE.VIZ_XCD_HIDE:
+				xcvizstates[xcdrawing.get_name()] = DRAWING_TYPE.VIZ_XCD_HIDE
+		sketchsystem.actsketchchange([{ "xcvizstates":xcvizstates}])
+		setguipanelhide()
+		SwitchTest.selected = 0
+		
+	elif prevnssel.begins_with("opt:") or nssel.begins_with("opt:"):
 		var n = 0
 		var showall = (nssel == "normal")
 		for xcdrawing in sketchsystem.get_node("XCdrawings").get_children():
@@ -364,12 +374,12 @@ func _on_switchtest(index):
 				if true or (xcdrawing.drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_GHOSTLY_B) != 0:
 					xcdrawing.get_node("XCdrawingplane").visible = showall
 					n += 1
-		if nssel == "all grey":
+		if nssel == "opt: all grey":
 			var materialsystem = get_node("/root/Spatial/MaterialSystem")
 			for xctube in sketchsystem.get_node("XCtubes").get_children():
 				for xctubesector in xctube.get_node("XCtubesectors").get_children():
 					materialsystem.updatetubesectormaterial(xctubesector, "flatgrey", false)
-		if nssel == "hide xc":
+		if nssel == "opt: hide xc":
 			sketchsystem.get_node("XCdrawings").visible = false
 		elif nssel == "normal":
 			sketchsystem.get_node("XCdrawings").visible = true
