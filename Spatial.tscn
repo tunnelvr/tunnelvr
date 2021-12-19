@@ -1,4 +1,4 @@
-[gd_scene load_steps=316 format=2]
+[gd_scene load_steps=318 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/underground_env.tres" type="Environment" id=2]
@@ -74,6 +74,7 @@
 [ext_resource path="res://assets/ovrmodels/left_hand_model.glb" type="PackedScene" id=72]
 [ext_resource path="res://assets/ovrmodels/OculusQuestTouchController_Left_Reactive.gltf" type="PackedScene" id=73]
 [ext_resource path="res://potreework/PotreeExperiments.gd" type="Script" id=74]
+[ext_resource path="res://potreework/ocellcube.material" type="Material" id=75]
 
 [sub_resource type="CubeMesh" id=1]
 size = Vector3( 0.35, 0.01, 0.01 )
@@ -1607,6 +1608,8 @@ height = 1.1
 albedo_color = Color( 0.168627, 0.972549, 0.027451, 1 )
 
 [sub_resource type="PointMesh" id=241]
+
+[sub_resource type="CubeMesh" id=245]
 
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
@@ -3847,5 +3850,10 @@ wait_time = 1.1
 transform = Transform( 1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 2.97562, 5.65291e-09, -0.129323 )
 mesh = SubResource( 241 )
 material/0 = ExtResource( 64 )
+
+[node name="LoadingCube" type="MeshInstance" parent="PotreeExperiments"]
+cast_shadow = 0
+mesh = SubResource( 245 )
+material/0 = ExtResource( 75 )
 
 [connection signal="timeout" from="PotreeExperiments/Timer" to="PotreeExperiments" method="updatepotreepriorities"]

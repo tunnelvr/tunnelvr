@@ -5,7 +5,7 @@ extends Spatial
 
 var potreethreadmutex = Mutex.new()
 var potreethreadsemaphore = Semaphore.new()
-var potreethread = null # Thread.new()
+var potreethread = null
 var threadtoexit = false
 var nodestoload = [ ]
 var nodestopointload = [ ]
@@ -57,10 +57,7 @@ func _exit_tree():
 
 func sethighlightplane(planetransform):
 	if rootnode != null:
-		rootnode.sethighlightplane(planetransform.basis.z, 
-								   planetransform.basis.z.dot(planetransform.origin))
-
-
+		rootnode.sethighlightplane(planetransform.basis.z, planetransform.basis.z.dot(planetransform.origin))
 
 func getpotreeurl():
 	var selfSpatial = get_node("/root/Spatial")
@@ -89,6 +86,48 @@ signal updatepotreepriorities_fetchsignal(f)
 
 var queuekillpotree = false
 
+func LoadPotree():
+	assert (rootnode == null)
+	var urlmetadata = null
+	var xcdrawingcentreline = null
+	for lxcdrawingcentreline in get_tree().get_nodes_in_group("gpcentrelinegeo"):
+		if lxcdrawingcentreline.additionalproperties != null and lxcdrawingcentreline.additionalproperties.has("potreeurlmetadata"):
+			xcdrawingcentreline = lxcdrawingcentreline
+			urlmetadata = xcdrawingcentreline.additionalproperties["potreeurlmetadata"]
+	if urlmetadata == null:
+		return
+	var nonimagedataobject = { "url":urlmetadata, "callbackobject":self, "callbacksignal":"updatepotreepriorities_fetchsignal" }
+	ImageSystem.fetchrequesturl(nonimagedataobject)
+	var fmetadataF = yield(self, "updatepotreepriorities_fetchsignal")
+	if fmetadataF == null:
+		return
+	var metadata = parse_json(fmetadataF.get_as_text())
+	if metadata == null:
+		return
+	rootnode = MeshInstance.new()
+	rootnode.set_script(load("res://potreework/Onode_root.gd"))
+	rootnode.name = "hroot"
+	var bboffseta = xcdrawingcentreline.additionalproperties["svxp0"]  if xcdrawingcentreline != null and xcdrawingcentreline.additionalproperties != null and xcdrawingcentreline.additionalproperties.has("svxp0")  else [0,0,0]
+	var bboffset = Vector3(bboffseta[0], bboffseta[1], bboffseta[2])
+	rootnode.constructpotreerootnode(metadata, urlmetadata, bboffset)
+	if xcdrawingcentreline != null:
+		transform = xcdrawingcentreline.transform
+	add_child(rootnode)
+	$Timer.start()
+
+func RemovePotree():
+	queuekillpotree = true
+	$Timer.start()
+
+func ShowPotree():
+	visible = true
+	$Timer.start()
+
+func HidePotree():
+	visible = false
+	$Timer.stop()
+
+
 func updatepotreepriorities():
 	nupdatepotreeprioritiesSingleConcurrentOperations += 1
 	if nupdatepotreeprioritiesSingleConcurrentOperations != 1:
@@ -97,7 +136,7 @@ func updatepotreepriorities():
 		return
 	yield(get_tree(), "idle_frame")
 
-	if queuekillpotree:
+	if queuekillpotree or rootnode == null:
 		$Timer.stop()
 		if rootnode != null:
 			rootnode.processingnode = null
@@ -107,37 +146,6 @@ func updatepotreepriorities():
 		nupdatepotreeprioritiesSingleConcurrentOperations -= 1
 		queuekillpotree = false
 		return
-
-	if rootnode == null:
-		var urlmetadata = null
-		var xcdrawingcentreline = null
-		for lxcdrawingcentreline in get_tree().get_nodes_in_group("gpcentrelinegeo"):
-			if lxcdrawingcentreline.additionalproperties != null and lxcdrawingcentreline.additionalproperties.has("potreeurlmetadata"):
-				xcdrawingcentreline = lxcdrawingcentreline
-				urlmetadata = xcdrawingcentreline.additionalproperties["potreeurlmetadata"]
-		if urlmetadata == null:
-			nupdatepotreeprioritiesSingleConcurrentOperations -= 1
-			return
-		var nonimagedataobject = { "url":urlmetadata, "callbackobject":self, "callbacksignal":"updatepotreepriorities_fetchsignal" }
-		ImageSystem.fetchrequesturl(nonimagedataobject)
-		var fmetadataF = yield(self, "updatepotreepriorities_fetchsignal")
-		if fmetadataF == null:
-			nupdatepotreeprioritiesSingleConcurrentOperations -= 1
-			return
-		var metadata = parse_json(fmetadataF.get_as_text())
-		if metadata == null:
-			nupdatepotreeprioritiesSingleConcurrentOperations -= 1
-			return
-
-		rootnode = MeshInstance.new()
-		rootnode.set_script(load("res://potreework/Onode_root.gd"))
-		rootnode.name = "hroot"
-		var bboffseta = xcdrawingcentreline.additionalproperties["svxp0"]  if xcdrawingcentreline != null and xcdrawingcentreline.additionalproperties != null and xcdrawingcentreline.additionalproperties.has("svxp0")  else [0,0,0]
-		var bboffset = Vector3(bboffseta[0], bboffseta[1], bboffseta[2])
-		rootnode.constructpotreerootnode(metadata, urlmetadata, bboffset)
-		if xcdrawingcentreline != null:
-			transform = xcdrawingcentreline.transform
-		add_child(rootnode)
 
 	var primarycameraorigin = Vector3(0, 0, 0)
 	var primarycamera = instance_from_id(Tglobal.primarycamera_instanceid)
@@ -155,11 +163,14 @@ func updatepotreepriorities():
 		var Dsweptvisiblepointcount = res["sweptvisiblepointcount"]
 		res = yield(updatepotreeprioritiesfromcamera(primarycameraorigin, pointsizefactor, Cpointsizevisibilitycutoff), "completed")
 		print("scaling up Cpointsizevisibilitycutoff ", Cpointsizevisibilitycutoff, "  prevcount: ", Dsweptvisiblepointcount, " newcount: ", res["sweptvisiblepointcount"])
-	print("hierarchynodestoload ", len(res["hierarchynodestoload"]), "   pointcloudnodestoshow  ", len(res["pointcloudnodestoshow"]), "   pointcloudnodestohide  ", len(res["pointcloudnodestohide"]),  "  sweptvisiblepointcount ", res["sweptvisiblepointcount"],  "  nscannednodes ", res["nscannednodes"],   " pointsizes: ", res["pointsizes"].min(), " ", res["pointsizes"].max())
+	print("hierarchynodestoload ", len(res["hierarchynodestoload"]), "   pointcloudnodestoshow  ", len(res["pointcloudnodestoshow"]), "   pointcloudnodestohide  ", len(res["pointcloudnodestohide"]),  "  sweptvisiblepointcount ", res["sweptvisiblepointcount"],  "  nscannednodes ", res["nscannednodes"]) #,   " pointsizes: ", res["pointsizes"].min(), " ", res["pointsizes"].max())
 
 	var t0 = OS.get_ticks_msec()*0.001
 	while len(res["hierarchynodestoload"]):
 		var hnode = res["hierarchynodestoload"].pop_front()
+		$LoadingCube.mesh.size = hnode.ocellsize
+		$LoadingCube.global_transform.origin = hnode.global_transform.origin
+		$LoadingCube.visible = true
 		var nonimagedataobject = { "url":rootnode.urlhierarchy, "callbackobject":self, 
 								   "callbacksignal":"updatepotreepriorities_fetchsignal", 
 								   "byteOffset":hnode.hierarchybyteOffset, 
@@ -168,6 +179,7 @@ func updatepotreepriorities():
 		var fhierarchyF = yield(self, "updatepotreepriorities_fetchsignal")
 		# assert ((urlhierarchy.substr(0, 4) != "http") or (fhierarchyF.get_len() == processingnode.hierarchybyteSize))
 		var nodesh = yield(hnode.Yloadhierarchychunk(fhierarchyF, rootnode.get_parent().global_transform.inverse()), "completed")
+		$LoadingCube.visible = false
 		for node in nodesh:
 			if node.name[0] != "h":
 				rootnode.otreecellscount += 1
@@ -186,6 +198,9 @@ func updatepotreepriorities():
 										   "callbacksignal":"updatepotreepriorities_fetchsignal", 
 										   "byteOffset":nnode.byteOffset, 
 										   "byteSize":nnode.byteSize }
+				$LoadingCube.mesh.size = nnode.ocellsize
+				$LoadingCube.global_transform.origin = nnode.global_transform.origin
+				$LoadingCube.visible = true
 				ImageSystem.fetchrequesturl(nonimagedataobject)
 				var foctreeF = yield(self, "updatepotreepriorities_fetchsignal")
 				if rootnode.urloctree.substr(0, 4) != "http" or foctreeF.get_len() == nnode.byteSize:
@@ -197,6 +212,7 @@ func updatepotreepriorities():
 						print("    Warning: long loadoctcellpoints ", nnode.get_path(), " of ", dt, " msecs", " numPoints:", nnode.numPoints, " carrieddown:", nnode.numPointsCarriedDown)
 				else:
 					print("foctree nodesize bytes fail ", foctreeF.get_len(), " ", nnode.byteSize)
+				$LoadingCube.visible = false
 			if not nnode.visible and nnode.pointmaterial != null:
 				rootnode.uppernodevisibilitymask(nnode, true)
 		
@@ -204,7 +220,7 @@ func updatepotreepriorities():
 			print("breakout from updatepotreepriorities in showed nodesnodestoload")
 			break
 			
-	print("DONEDONE updatepotreepriorities")
+	#print("DONEDONE updatepotreepriorities")
 	nupdatepotreeprioritiesSingleConcurrentOperations -= 1
 
 

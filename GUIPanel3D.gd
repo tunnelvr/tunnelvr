@@ -62,24 +62,25 @@ remote func setsavegamefilename(cfile):
 	snames.select(snames.get_item_count() - 1)
 	
 func _on_buttonsave_pressed():
+	var GithubAPI = get_node("/root/Spatial/ImageSystem/GithubAPI")
 	var snames = $Viewport/GUI/Panel/Savegamefilename
 	var savegamefileid = snames.get_selected_id()
-	var bfileisnew = snames.get_item_text(savegamefileid)[0] == "*"
-	var savegamefilename = snames.get_item_text(savegamefileid).lstrip("#*")
-	var GithubAPI = get_node("/root/Spatial/ImageSystem/GithubAPI")
-	if savegamefilename == "--clearcave":
+	var savegamefilestring = snames.get_item_text(savegamefileid)
+	if savegamefilestring == "--clearcave":
 		setpanellabeltext("Cannot oversave clearcave")
-
-	elif GithubAPI.ghattributes.get("type"):
-		Tglobal.soundsystem.quicksound("MenuClick", collision_point)
+		return
+	var savegamefilenameL = savegamefilestring.split(":", true, 1)
+	var savegamefileresource = savegamefilenameL[0].strip_edges() if len(savegamefilenameL) == 2 else GithubAPI.ghattributes["name"]
+	var savegamefilename = savegamefilenameL[-1].strip_edges()
+	var bfileisnew = savegamefilename[0] == "*"
+	savegamefilename = savegamefilename.lstrip("*#")
+	if GithubAPI.ghattributes["name"] == savegamefileresource:
 		setpanellabeltext("Saving file")
 		var ltext = yield(GithubAPI.Ysavecavefile(savegamefilename, bfileisnew), "completed")
 		setpanellabeltext(ltext)
 		Yupdatecavefilelist()
-
 	else:
 		setpanellabeltext("Cannot do")
-
 	Tglobal.soundsystem.quicksound("MenuClick", collision_point)
 	
 
@@ -714,7 +715,7 @@ func resources_readycall():
 	var resourcetype = ""
 	for k in GithubAPI.riattributes["resourcedefs"].values():
 		if (k["type"] == "localfiles" and resourcetype == "") or \
-				(k["type"] == "githubapi" and k.get("token")):
+				(false and k["type"] == "githubapi" and k.get("token")):
 			resourcesel = k["name"]
 			resourcetype = k["type"]
 	updateresourceselector(resourcesel)
@@ -809,29 +810,26 @@ func _on_resourceoptions_selected(index):
 		if nrosel == "Load Potree":
 			potreeexperiments.visible = true
 			if potreeexperiments.rootnode == null:
-				potreeexperiments.get_node("Timer").start()
+				potreeexperiments.LoadPotree()
 				setpanellabeltext("Potree timer started")
-				# could do all the loading here async while the load button is disabled			
 			else:
 				setpanellabeltext("Potree already there")
 		elif nrosel == "Remove Potree":
 			potreeexperiments.visible = false
 			if potreeexperiments.rootnode != null:
-				setpanellabeltext("killing Potree")
-				potreeexperiments.queuekillpotree = true
-				potreeexperiments.get_node("Timer").start()
+				setpanellabeltext("Removing Potree")
+				potreeexperiments.RemovePotree()
 			else:
 				setpanellabeltext("Potree not there")
 		elif nrosel == "Show Potree":
-			potreeexperiments.visible = true
 			if potreeexperiments.rootnode != null:
-				potreeexperiments.get_node("Timer").start()
+				potreeexperiments.ShowPotree()
 				setpanellabeltext("Potree shown")
 			else:
 				setpanellabeltext("Potree not there")
 		elif nrosel == "Hide Potree":
-			potreeexperiments.visible = false
-			potreeexperiments.get_node("Timer").stop()
+			potreeexperiments.HidePotree()
+			setpanellabeltext("Potree hidden")
 		#setguipanelhide()
 	
 	elif nrosel == "Print resource":

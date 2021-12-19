@@ -150,10 +150,6 @@ func constructpotreenode(parentnode, childIndex, Droottransforminverse):
 	constructcontainingmesh()
 
 func constructcontainingmesh():
-	if constructhcubes:
-		mesh = CubeMesh.new()
-		mesh.surface_set_material(0, load("res://potreework/ocellcube.material"))
-		mesh.size = ocellsize
 	var visnote = VisibilityNotifier.new()
 	visnote.name = "visnote"
 	visnote.aabb = AABB(-ocellsize/2, ocellsize)
@@ -161,6 +157,14 @@ func constructcontainingmesh():
 	add_child(visnote)
 	visnote.connect("camera_entered", self, "on_camera_entered")
 	visnote.connect("camera_exited", self, "on_camera_exited")
+	if constructhcubes:
+		mesh = CubeMesh.new()
+		mesh.surface_set_material(0, load("res://potreework/ocellcube.material"))
+		mesh.size = ocellsize if ocellsize.x < 5 else Vector3(5,5,5)
+		visible = true
+
+
+
 
 func loadnodedefinition(fhierarchy):
 	assert (name[0] == "c")
