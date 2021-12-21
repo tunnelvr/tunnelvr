@@ -3843,17 +3843,13 @@ script = ExtResource( 62 )
 transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 2, 0 )
 script = ExtResource( 74 )
 
-[node name="Timer" type="Timer" parent="PotreeExperiments"]
-wait_time = 1.1
-
 [node name="PointSample" type="MeshInstance" parent="PotreeExperiments"]
 transform = Transform( 1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 2.97562, 5.65291e-09, -0.129323 )
 mesh = SubResource( 241 )
 material/0 = ExtResource( 64 )
 
 [node name="LoadingCube" type="MeshInstance" parent="PotreeExperiments"]
+visible = false
 cast_shadow = 0
 mesh = SubResource( 245 )
 material/0 = ExtResource( 75 )
-
-[connection signal="timeout" from="PotreeExperiments/Timer" to="PotreeExperiments" method="updatepotreepriorities"]

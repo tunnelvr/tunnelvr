@@ -14,6 +14,7 @@ var rootnode = null
 
 onready var ImageSystem = get_node("/root/Spatial/ImageSystem")
 
+
 func _ready():
 	var st = SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_POINTS)
@@ -76,7 +77,7 @@ func getpotreeurl():
 	return urlotreedir
 
 
-var nupdatepotreeprioritiesSingleConcurrentOperations = 0
+
 var Cpointsizevisibilitycutoff = 15.0
 const maxvisiblepoints = 300000
 const minvisiblepoints = 150000
@@ -84,7 +85,18 @@ const pointsizefactor = 150.0
 const updatepotreeprioritiesworkingtimeout = 4.0
 signal updatepotreepriorities_fetchsignal(f)
 
+
+const timems_fornextupdatepriorities = 3500
+
+
 var queuekillpotree = false
+
+onready var matloadingcube = $LoadingCube.get_surface_material(0)
+
+const colhierarchyfetching = Color("#901fe51f")
+const colhierarchyloading = Color("#361fe51f")
+const coloctcellpointsfetching = Color("#80e418e6")
+const coloctcellpointsloading = Color("#36e418e6")
 
 func LoadPotree():
 	assert (rootnode == null)
@@ -113,119 +125,10 @@ func LoadPotree():
 	if xcdrawingcentreline != null:
 		transform = xcdrawingcentreline.transform
 	add_child(rootnode)
-	$Timer.start()
+	queuekillpotree = false
+	call_deferred("updatepotreeprioritiesLoop")
 
-func RemovePotree():
-	queuekillpotree = true
-	$Timer.start()
-
-func ShowPotree():
-	visible = true
-	$Timer.start()
-
-func HidePotree():
-	visible = false
-	$Timer.stop()
-
-
-func updatepotreepriorities():
-	nupdatepotreeprioritiesSingleConcurrentOperations += 1
-	if nupdatepotreeprioritiesSingleConcurrentOperations != 1:
-		nupdatepotreeprioritiesSingleConcurrentOperations -= 1
-		print("drop out from updatepotreepriorities as not idle")
-		return
-	yield(get_tree(), "idle_frame")
-
-	if queuekillpotree or rootnode == null:
-		$Timer.stop()
-		if rootnode != null:
-			rootnode.processingnode = null
-			remove_child(rootnode)
-			rootnode.queue_free()
-			rootnode = null
-		nupdatepotreeprioritiesSingleConcurrentOperations -= 1
-		queuekillpotree = false
-		return
-
-	var primarycameraorigin = Vector3(0, 0, 0)
-	var primarycamera = instance_from_id(Tglobal.primarycamera_instanceid)
-	if primarycamera != null:
-		primarycameraorigin = primarycamera.get_camera_transform().origin
-		
-	var res = yield(updatepotreeprioritiesfromcamera(primarycameraorigin, pointsizefactor, Cpointsizevisibilitycutoff), "completed")
-	while res["sweptvisiblepointcount"] < minvisiblepoints and len(res["pointsizes"]) != 0 and res["pointsizes"].min() < Cpointsizevisibilitycutoff:
-		Cpointsizevisibilitycutoff *= 0.5
-		var Dsweptvisiblepointcount = res["sweptvisiblepointcount"]
-		res = yield(updatepotreeprioritiesfromcamera(primarycameraorigin, pointsizefactor, Cpointsizevisibilitycutoff), "completed")
-		print("scaling down Cpointsizevisibilitycutoff ", Cpointsizevisibilitycutoff, "  prevcount: ", Dsweptvisiblepointcount, " newcount: ", res["sweptvisiblepointcount"])
-	while res["sweptvisiblepointcount"] > maxvisiblepoints and len(res["pointsizes"]) != 0 and res["pointsizes"].max() > Cpointsizevisibilitycutoff:
-		Cpointsizevisibilitycutoff *= 2.0
-		var Dsweptvisiblepointcount = res["sweptvisiblepointcount"]
-		res = yield(updatepotreeprioritiesfromcamera(primarycameraorigin, pointsizefactor, Cpointsizevisibilitycutoff), "completed")
-		print("scaling up Cpointsizevisibilitycutoff ", Cpointsizevisibilitycutoff, "  prevcount: ", Dsweptvisiblepointcount, " newcount: ", res["sweptvisiblepointcount"])
-	print("hierarchynodestoload ", len(res["hierarchynodestoload"]), "   pointcloudnodestoshow  ", len(res["pointcloudnodestoshow"]), "   pointcloudnodestohide  ", len(res["pointcloudnodestohide"]),  "  sweptvisiblepointcount ", res["sweptvisiblepointcount"],  "  nscannednodes ", res["nscannednodes"]) #,   " pointsizes: ", res["pointsizes"].min(), " ", res["pointsizes"].max())
-
-	var t0 = OS.get_ticks_msec()*0.001
-	while len(res["hierarchynodestoload"]):
-		var hnode = res["hierarchynodestoload"].pop_front()
-		$LoadingCube.mesh.size = hnode.ocellsize
-		$LoadingCube.global_transform.origin = hnode.global_transform.origin
-		$LoadingCube.visible = true
-		var nonimagedataobject = { "url":rootnode.urlhierarchy, "callbackobject":self, 
-								   "callbacksignal":"updatepotreepriorities_fetchsignal", 
-								   "byteOffset":hnode.hierarchybyteOffset, 
-								   "byteSize":hnode.hierarchybyteSize }
-		ImageSystem.fetchrequesturl(nonimagedataobject)
-		var fhierarchyF = yield(self, "updatepotreepriorities_fetchsignal")
-		# assert ((urlhierarchy.substr(0, 4) != "http") or (fhierarchyF.get_len() == processingnode.hierarchybyteSize))
-		var nodesh = yield(hnode.Yloadhierarchychunk(fhierarchyF, rootnode.get_parent().global_transform.inverse()), "completed")
-		$LoadingCube.visible = false
-		for node in nodesh:
-			if node.name[0] != "h":
-				rootnode.otreecellscount += 1
-		if OS.get_ticks_msec()*0.001 - t0 > updatepotreeprioritiesworkingtimeout:
-			print("breakout from updatepotreepriorities in hierarchynodestoload")
-			break
-			
-	for nnode in res["pointcloudnodestohide"]:
-		if nnode.visible:
-			rootnode.uppernodevisibilitymask(nnode, false)
-			
-	for nnode in res["pointcloudnodestoshow"]:
-		if not nnode.visible:
-			if nnode.pointmaterial == null:
-				var nonimagedataobject = { "url":rootnode.urloctree, "callbackobject":self, 
-										   "callbacksignal":"updatepotreepriorities_fetchsignal", 
-										   "byteOffset":nnode.byteOffset, 
-										   "byteSize":nnode.byteSize }
-				$LoadingCube.mesh.size = nnode.ocellsize
-				$LoadingCube.global_transform.origin = nnode.global_transform.origin
-				$LoadingCube.visible = true
-				ImageSystem.fetchrequesturl(nonimagedataobject)
-				var foctreeF = yield(self, "updatepotreepriorities_fetchsignal")
-				if rootnode.urloctree.substr(0, 4) != "http" or foctreeF.get_len() == nnode.byteSize:
-					var roottransforminverse = rootnode.get_parent().global_transform.inverse()
-					var tp0 = OS.get_ticks_msec()
-					yield(nnode.Yloadoctcellpoints(foctreeF, rootnode.mdscale, rootnode.mdoffset, pointsizefactor, roottransforminverse, rootnode.highlightplaneperp, rootnode.highlightplanedot, rootnode.screendimensionsscreendoorfac), "completed")
-					var dt = OS.get_ticks_msec() - tp0
-					if dt > 100:
-						print("    Warning: long loadoctcellpoints ", nnode.get_path(), " of ", dt, " msecs", " numPoints:", nnode.numPoints, " carrieddown:", nnode.numPointsCarriedDown)
-				else:
-					print("foctree nodesize bytes fail ", foctreeF.get_len(), " ", nnode.byteSize)
-				$LoadingCube.visible = false
-			if not nnode.visible and nnode.pointmaterial != null:
-				rootnode.uppernodevisibilitymask(nnode, true)
-		
-		if OS.get_ticks_msec()*0.001 - t0 > updatepotreeprioritiesworkingtimeout:
-			print("breakout from updatepotreepriorities in showed nodesnodestoload")
-			break
-			
-	#print("DONEDONE updatepotreepriorities")
-	nupdatepotreeprioritiesSingleConcurrentOperations -= 1
-
-
-
-func updatepotreeprioritiesfromcamera(primarycameraorigin, pointsizefactor, pointsizevisibilitycutoff):
+func Yupdatepotreeprioritiesfromcamera(primarycameraorigin, pointsizefactor, pointsizevisibilitycutoff):
 	var hierarchynodestoload = [ ]
 	var pointcloudnodestoshow = [ ]
 	var pointcloudnodestohide = [ ]
@@ -267,6 +170,107 @@ func updatepotreeprioritiesfromcamera(primarycameraorigin, pointsizefactor, poin
 			 "pointsizes":pointsizes,
 			 "sweptvisiblepointcount":sweptvisiblepointcount,
 			 "nscannednodes":nscannednodes }
+
+func Yupdatepotreeprioritiesfull():
+	var primarycameraorigin = Vector3(0, 0, 0)
+	var primarycamera = instance_from_id(Tglobal.primarycamera_instanceid)
+	if primarycamera != null:
+		primarycameraorigin = primarycamera.get_camera_transform().origin
+
+	var res = yield(Yupdatepotreeprioritiesfromcamera(primarycameraorigin, pointsizefactor, Cpointsizevisibilitycutoff), "completed")
+	while res["sweptvisiblepointcount"] < minvisiblepoints and len(res["pointsizes"]) != 0 and res["pointsizes"].min() < Cpointsizevisibilitycutoff:
+		Cpointsizevisibilitycutoff *= 0.5
+		var Dsweptvisiblepointcount = res["sweptvisiblepointcount"]
+		res = yield(Yupdatepotreeprioritiesfromcamera(primarycameraorigin, pointsizefactor, Cpointsizevisibilitycutoff), "completed")
+		print("scaling down Cpointsizevisibilitycutoff ", Cpointsizevisibilitycutoff, "  prevcount: ", Dsweptvisiblepointcount, " newcount: ", res["sweptvisiblepointcount"])
+	while res["sweptvisiblepointcount"] > maxvisiblepoints and len(res["pointsizes"]) != 0 and res["pointsizes"].max() > Cpointsizevisibilitycutoff:
+		Cpointsizevisibilitycutoff *= 2.0
+		var Dsweptvisiblepointcount = res["sweptvisiblepointcount"]
+		res = yield(Yupdatepotreeprioritiesfromcamera(primarycameraorigin, pointsizefactor, Cpointsizevisibilitycutoff), "completed")
+		print("scaling up Cpointsizevisibilitycutoff ", Cpointsizevisibilitycutoff, "  prevcount: ", Dsweptvisiblepointcount, " newcount: ", res["sweptvisiblepointcount"])
+	print("hierarchynodestoload ", len(res["hierarchynodestoload"]), "   pointcloudnodestoshow  ", len(res["pointcloudnodestoshow"]), "   pointcloudnodestohide  ", len(res["pointcloudnodestohide"]),  "  sweptvisiblepointcount ", res["sweptvisiblepointcount"],  "  nscannednodes ", res["nscannednodes"]) #,   " pointsizes: ", res["pointsizes"].min(), " ", res["pointsizes"].max())
+	return res
+
+func updatepotreeprioritiesLoop():
+
+
+
+
+	while true:
+		if queuekillpotree or rootnode == null:
+			if rootnode != null:
+				rootnode.processingnode = null
+				remove_child(rootnode)
+				rootnode.queue_free()
+				rootnode = null
+			break
+
+		if not visible:
+			yield(get_tree().create_timer(timems_fornextupdatepriorities*0.001), "timeout")
+			continue
+		yield(get_tree(), "idle_frame")
+		var ticksms_tonextupdatepriorities = OS.get_ticks_msec() + timems_fornextupdatepriorities
+
+		var res = yield(Yupdatepotreeprioritiesfull(), "completed")
+		for nnode in res["pointcloudnodestohide"]:
+			if nnode.visible:
+				rootnode.uppernodevisibilitymask(nnode, false)
+
+		while visible and len(res["pointcloudnodestoshow"]) != 0 and OS.get_ticks_msec() < ticksms_tonextupdatepriorities:
+			var nnode = res["pointcloudnodestoshow"].pop_front()
+			if not nnode.visible:
+				if nnode.pointmaterial == null:
+					var nonimagedataobject = { "url":rootnode.urloctree, "callbackobject":self, 
+											   "callbacksignal":"updatepotreepriorities_fetchsignal", 
+											   "byteOffset":nnode.byteOffset, 
+											   "byteSize":nnode.byteSize }
+					$LoadingCube.mesh.size = nnode.ocellsize
+					$LoadingCube.global_transform.origin = nnode.global_transform.origin
+					matloadingcube.albedo_color = coloctcellpointsfetching
+					$LoadingCube.visible = true
+					ImageSystem.fetchrequesturl(nonimagedataobject)
+					var foctreeF = yield(self, "updatepotreepriorities_fetchsignal")
+					if rootnode.urloctree.substr(0, 4) != "http" or foctreeF.get_len() == nnode.byteSize:
+						var roottransforminverse = rootnode.get_parent().global_transform.inverse()
+						var tp0 = OS.get_ticks_msec()
+						matloadingcube.albedo_color = coloctcellpointsloading
+						yield(nnode.Yloadoctcellpoints(foctreeF, rootnode.mdscale, rootnode.mdoffset, pointsizefactor, roottransforminverse, rootnode.highlightplaneperp, rootnode.highlightplanedot, rootnode.screendimensionsscreendoorfac), "completed")
+						var dt = OS.get_ticks_msec() - tp0
+						if dt > 100:
+							print("    Warning: long loadoctcellpoints ", nnode.get_path(), " of ", dt, " msecs", " numPoints:", nnode.numPoints, " carrieddown:", nnode.numPointsCarriedDown)
+					else:
+						print("foctree nodesize bytes fail ", foctreeF.get_len(), " ", nnode.byteSize)
+					$LoadingCube.visible = false
+				if not nnode.visible and nnode.pointmaterial != null:
+					rootnode.uppernodevisibilitymask(nnode, true)
+		
+			
+		while visible and len(res["hierarchynodestoload"]) != 0 and OS.get_ticks_msec() < ticksms_tonextupdatepriorities:
+			var hnode = res["hierarchynodestoload"].pop_front()
+			$LoadingCube.mesh.size = hnode.ocellsize
+			$LoadingCube.global_transform.origin = hnode.global_transform.origin
+			matloadingcube.albedo_color = colhierarchyfetching
+			$LoadingCube.visible = true
+			var nonimagedataobject = { "url":rootnode.urlhierarchy, "callbackobject":self, 
+									   "callbacksignal":"updatepotreepriorities_fetchsignal", 
+									   "byteOffset":hnode.hierarchybyteOffset, 
+									   "byteSize":hnode.hierarchybyteSize }
+			ImageSystem.fetchrequesturl(nonimagedataobject)
+			var fhierarchyF = yield(self, "updatepotreepriorities_fetchsignal")
+			# assert ((urlhierarchy.substr(0, 4) != "http") or (fhierarchyF.get_len() == processingnode.hierarchybyteSize))
+			matloadingcube.albedo_color = colhierarchyloading
+			var nodesh = yield(hnode.Yloadhierarchychunk(fhierarchyF, rootnode.get_parent().global_transform.inverse()), "completed")
+			$LoadingCube.visible = false
+			for node in nodesh:
+				if node.name[0] != "h":
+					rootnode.otreecellscount += 1
+
+		var tremaining = ticksms_tonextupdatepriorities - OS.get_ticks_msec()
+		if tremaining > 5:
+			yield(get_tree().create_timer(tremaining*0.001), "timeout")
+
+
+
 
 func Dcorrectvisibilitymask():
 	print("Dcorrectvisibilitymask runn")

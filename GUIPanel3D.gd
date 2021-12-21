@@ -811,24 +811,24 @@ func _on_resourceoptions_selected(index):
 			potreeexperiments.visible = true
 			if potreeexperiments.rootnode == null:
 				potreeexperiments.LoadPotree()
-				setpanellabeltext("Potree timer started")
+				setpanellabeltext("Potree started")
 			else:
 				setpanellabeltext("Potree already there")
 		elif nrosel == "Remove Potree":
 			potreeexperiments.visible = false
 			if potreeexperiments.rootnode != null:
 				setpanellabeltext("Removing Potree")
-				potreeexperiments.RemovePotree()
+				potreeexperiments.queuekillpotree = true
 			else:
 				setpanellabeltext("Potree not there")
 		elif nrosel == "Show Potree":
 			if potreeexperiments.rootnode != null:
-				potreeexperiments.ShowPotree()
+				potreeexperiments.visible = true
 				setpanellabeltext("Potree shown")
 			else:
 				setpanellabeltext("Potree not there")
 		elif nrosel == "Hide Potree":
-			potreeexperiments.HidePotree()
+			potreeexperiments.visible = false
 			setpanellabeltext("Potree hidden")
 		#setguipanelhide()
 	
