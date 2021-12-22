@@ -326,6 +326,8 @@ func expandxcdrawingscale(nodepointglobal):
 	updateformetresquaresscaletexture()
 
 func expandxcdrawingscaletoray(raycast, pointertargetpoint):
+	if drawingtype != DRAWING_TYPE.DT_XCDRAWING:
+		return
 	var rayorigin = raycast.global_transform.origin 
 	var rayvector = raycast.global_transform.basis.xform(raycast.cast_to)
 	# solve 0=activetargetnodewall.global_transform.xform_inv(rayorigin + lambda*rayvector).z
@@ -482,12 +484,12 @@ func mergexcrpcdata(xcdata):
 				elif drawingtype == DRAWING_TYPE.DT_ROPEHANG:
 					xcn = XCnode_knot.instance()
 					var mat = null
-					if nA[0] == "k":
-						xcn.get_node("CollisionShape").scale = Vector3(closewidthsca, closewidthsca*knotyscale, closewidthsca)
-						mat = materialsystem.nodematerial("normalknot")
-					else:
+					if nA[0] == "a":
 						xcn.get_node("CollisionShape").scale = Vector3(closewidthsca, closewidthsca, closewidthsca)
 						mat = materialsystem.nodematerial("normalknotwall")
+					else:
+						xcn.get_node("CollisionShape").scale = Vector3(closewidthsca, closewidthsca*knotyscale, closewidthsca)
+						mat = materialsystem.nodematerial("normalknot")
 					xcn.get_node("CollisionShape/MeshInstance").set_surface_material(0, mat)
 					xcn.set_name(nA)
 					maxnodepointnumber = max(maxnodepointnumber, int(nA))

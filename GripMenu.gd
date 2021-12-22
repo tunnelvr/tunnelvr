@@ -68,16 +68,18 @@ func setgripmenupointer(pointertarget):
 		pointertarget.get_node("MeshInstance").get_surface_material(0).albedo_color = Color("#FFCCCC")
 
 
-func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointertargettype, activetargettube, activetargettubesectorindex, activetargetwall, activetargetnode):
+func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointertargettype, activetargettube, activetargettubesectorindex, activetargetwall, activetargetnode, activetargetnodewall):
 	gripmenupointertargetpoint = pointertargetpoint if pointertargetpoint != null else controllertrans.origin
 	gripmenupointertargetwall = pointertargetwall
 	gripmenulaservector = -controllertrans.basis.z
 	gripmenupointertargettype = pointertargettype
 	gripmenuactivetargettubesectorindex = activetargettubesectorindex
 	gripmenuactivetargetnode = activetargetnode
-	if Tglobal.handflickmotiongestureposition == 0:
-		get_node("/root/Spatial/BodyObjects/GripLaserSpot").translation = gripmenupointertargetpoint
-		get_node("/root/Spatial/BodyObjects/GripLaserSpot").visible = get_node("/root/Spatial/BodyObjects/LaserOrient/LaserSpot").visible
+	
+	if (Tglobal.handflickmotiongestureposition == 0) or (activetargetnode != null and activetargetnodewall != null and activetargetnodewall.drawingtype == DRAWING_TYPE.DT_ROPEHANG):
+		var GripLaserSpot = get_node("/root/Spatial/BodyObjects/GripLaserSpot")
+		GripLaserSpot.translation = gripmenupointertargetpoint
+		GripLaserSpot.visible = get_node("/root/Spatial/BodyObjects/LaserOrient/LaserSpot").visible
 	
 	var paneltrans = global_transform
 	paneltrans.origin = controllertrans.origin - 0.8*ARVRServer.world_scale*(controllertrans.basis.z)
@@ -88,7 +90,11 @@ func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointert
 
 	var gmlist = [ ]
 	tubesectormaterialname = ""
-	if gripmenupointertargettype == "XCdrawing" and gripmenupointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
+	
+	if activetargetnode != null and activetargetnodewall != null and activetargetnodewall.drawingtype == DRAWING_TYPE.DT_ROPEHANG:
+		gmlist = [ "DragXC" ]
+	
+	elif gripmenupointertargettype == "XCdrawing" and gripmenupointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
 		gmlist = ["NewXC", "toPaper"]
 			
 	elif gripmenupointertargettype == "XCdrawing" and gripmenupointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:

@@ -15,6 +15,7 @@ onready var keyboardpanel = get_node("/root/Spatial/GuiSystem/KeyboardPanel")
 onready var LaserOrient = get_node("/root/Spatial/BodyObjects/LaserOrient") 
 onready var LaserSelectLine = get_node("/root/Spatial/BodyObjects/LaserSelectLine") 
 onready var FloorLaserSpot = get_node("/root/Spatial/BodyObjects/FloorLaserSpot")
+onready var GripLaserSpot = get_node("/root/Spatial/BodyObjects/GripLaserSpot")
 		
 var viewport_point = null
 
@@ -118,7 +119,7 @@ func setpointertargetmaterial():
 func clearednodematerialtype(xcn, bwallactive, walldrawingtype, nodepointvalence1s):
 	var xcnname = xcn.get_name()
 	var ch = xcnname[0]
-	if bwallactive:
+	if bwallactive and walldrawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
 		if ch == "r":
 			return "nodepthtesthole"
 		elif ch == "a" or ch == "k":
@@ -131,10 +132,13 @@ func clearednodematerialtype(xcn, bwallactive, walldrawingtype, nodepointvalence
 		return "normalfloorpos"
 	elif ch == "r":
 		return "normalhole"
-	elif ch == "k":
-		return "normalknot"
-	elif ch == "a":
-		return "normalknotwall"
+	elif walldrawingtype == DRAWING_TYPE.DT_ROPEHANG:
+		if ch == "a":
+			return "normalknotwall"
+		elif nodepointvalence1s.has(xcnname):
+			return "normalknotend"
+		else:
+			return "normalknot"
 	elif nodepointvalence1s.has(xcnname):
 		return "normalend"
 	else:
@@ -212,6 +216,7 @@ func setactivetargetwall(newactivetargetwall):
 		if not activetargetwall.get_node("XCdrawingplane").visible:
 			sketchsystem.actsketchchange([{"xcvizstates":{activetargetwall.get_name():DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE}}])
 		activetargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").set_surface_material(0, materialsystem.xcdrawingmaterial("active"))
+		assert (activetargetwall.get_node("PathLines").get_surface_material_count() != 0)
 		activetargetwall.get_node("PathLines").set_surface_material(0, materialsystem.pathlinematerial("nodepthtest"))
 		for xcnode in activetargetwall.get_node("XCnodes").get_children():
 			if xcnode != activetargetnode:
@@ -483,9 +488,9 @@ func setpointertarget(laserroot, raycast, pointertargetshortdistance):
 		else:
 			LaserSelectLine.visible = false
 		if lslfrom != null:
-			LaserSelectLine.transform.origin = pointertargetpoint
-			LaserSelectLine.get_node("Scale").scale.z = pointertargetpoint.distance_to(lslfrom)
-			LaserSelectLine.transform = laserroot.get_node("LaserSpot").global_transform.looking_at(lslfrom, Vector3(0,1,0))
+			LaserSelectLine.transform.origin = GripLaserSpot.transform.origin if GripLaserSpot.visible else pointertargetpoint
+			LaserSelectLine.get_node("Scale").scale.z = LaserSelectLine.transform.origin.distance_to(lslfrom)
+			LaserSelectLine.transform = LaserSelectLine.transform.looking_at(lslfrom, Vector3(0,1,0))
 
 func _on_button_pressed(p_button):
 	var gripbuttonheld = handright.gripbuttonheld
@@ -578,7 +583,7 @@ func buttonpressed_vrgrip():
 		var xcflatshellmaterialname = activetargetxcflatshell.xcflatshellmaterial
 		materialsystem.updateflatshellmaterial(activetargetxcflatshell, xcflatshellmaterialname, true)
 
-	gripmenu.gripmenuon(LaserOrient.global_transform, pointertargetpoint, pointertargetwall, pointertargettype, activetargettube, activetargettubesectorindex, activetargetwall, activetargetnode)
+	gripmenu.gripmenuon(LaserOrient.global_transform, pointertargetpoint, pointertargetwall, pointertargettype, activetargettube, activetargettubesectorindex, activetargetwall, activetargetnode, activetargetnodewall)
 	
 func ropepointtargetUV():
 	var pointertargettube = pointertargetwall
@@ -1258,6 +1263,15 @@ func buttonreleased_vrgrip():
 				xcdatalist[0]["undoact"] = 1
 				sketchsystem.actsketchchange(xcdatalist)
 
+		elif activetargetnode != null and activetargetnodewall.drawingtype == DRAWING_TYPE.DT_ROPEHANG:
+			if pointertarget.get_name() == "DragXC":
+				var dragvec = gripmenu.gripmenupointertargetpoint - activetargetnode.global_transform.origin
+				sketchsystem.actsketchchange([{ "name":activetargetnodewall.get_name(), 
+												"prevtransformpos":activetargetnodewall.transform,
+												"transformpos":activetargetnodewall.transform.translated(dragvec)
+											}])
+				clearactivetargetnode()
+
 		elif is_instance_valid(gripmenu.gripmenupointertargetwall):
 			print("executing ", pointertarget.get_name(), " on ", gripmenu.gripmenupointertargetwall.get_name())
 			if pointertarget.get_name() == "SelectXC":
@@ -1342,7 +1356,7 @@ func buttonreleased_vrgrip():
 								  }
 					sketchsystem.actsketchchange([xcv, xctdata])
 
-			elif pointertarget.get_name() == "DragXC" and is_instance_valid(activetargetnode):
+			elif pointertarget.get_name() == "DragXC" and activetargetnode != null and activetargetnodewall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 				var dragvec = activetargetnodewall.global_transform.xform_inv(gripmenu.gripmenupointertargetpoint) - activetargetnode.translation
 				dragvec.z = 0.0
 				var prevnodepoints = { }
@@ -1452,6 +1466,8 @@ func buttonreleased_vrgrip():
 		sketchsystem.actsketchchange([{ "xcvizstates":{ pointertargetwall.get_name():ds }, "updatetubeshells":updatetubeshells, "updatexcshells":updatexcshells }])
 		if pointertargetwall == activetargetwall:
 			setactivetargetwall(null)
+		if ds == DRAWING_TYPE.VIZ_XCD_HIDE:
+			clearactivetargetnode()
 
 	elif activetargetwall != null and activetargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		var updatexcshells = [ activetargetwall.get_name() ]
