@@ -67,8 +67,7 @@ func setgripmenupointer(pointertarget):
 	else:
 		pointertarget.get_node("MeshInstance").get_surface_material(0).albedo_color = Color("#FFCCCC")
 
-
-func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointertargettype, activetargettube, activetargettubesectorindex, activetargetwall, activetargetnode, activetargetnodewall):
+func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointertargettype, activetargettube, activetargettubesectorindex, activetargetwall, activetargetnode, activetargetnodewall, pointertargetofstartofropehang):
 	gripmenupointertargetpoint = pointertargetpoint if pointertargetpoint != null else controllertrans.origin
 	gripmenupointertargetwall = pointertargetwall
 	gripmenulaservector = -controllertrans.basis.z
@@ -92,7 +91,9 @@ func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointert
 	tubesectormaterialname = ""
 	
 	if activetargetnode != null and activetargetnodewall != null and activetargetnodewall.drawingtype == DRAWING_TYPE.DT_ROPEHANG:
-		gmlist = [ "DragXC" ]
+		gmlist = [ "DragXC", "DistortXC" ]
+		if pointertargetofstartofropehang != null and len(activetargetnodewall.nodepoints) == 1:
+			gmlist.push_back("ProjectXC")
 	
 	elif gripmenupointertargettype == "XCdrawing" and gripmenupointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
 		gmlist = ["NewXC", "toPaper"]

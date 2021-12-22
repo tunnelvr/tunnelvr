@@ -28,6 +28,7 @@ var pointertargetpoint = Vector3(0, 0, 0)
 var gripbuttonpressused = false
 var laserselectlinelogicallyvisible = false
 var joyposcumulative = Vector2(0, 0)
+var pointertargetofstartofropehang = null
 
 var activetargetnode = null
 var activetargetnodewall = null
@@ -198,6 +199,7 @@ func setactivetargetwall(newactivetargetwall):
 			xcnode.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("selected" if xcnode == activetargetnode else clearednodematerialtype(xcnode, false, DRAWING_TYPE.DT_XCDRAWING, activetargetwall.nodepointvalence1s)))
 	
 	activetargetwall = newactivetargetwall
+	pointertargetofstartofropehang = null
 	activetargetwallgrabbedtransform = null
 	if activetargetwall == planviewsystem:
 		print("Waaat")
@@ -583,7 +585,7 @@ func buttonpressed_vrgrip():
 		var xcflatshellmaterialname = activetargetxcflatshell.xcflatshellmaterial
 		materialsystem.updateflatshellmaterial(activetargetxcflatshell, xcflatshellmaterialname, true)
 
-	gripmenu.gripmenuon(LaserOrient.global_transform, pointertargetpoint, pointertargetwall, pointertargettype, activetargettube, activetargettubesectorindex, activetargetwall, activetargetnode, activetargetnodewall)
+	gripmenu.gripmenuon(LaserOrient.global_transform, pointertargetpoint, pointertargetwall, pointertargettype, activetargettube, activetargettubesectorindex, activetargetwall, activetargetnode, activetargetnodewall, pointertargetofstartofropehang)
 	
 func ropepointtargetUV():
 	var pointertargettube = pointertargetwall
@@ -756,6 +758,7 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 		clearactivetargetnode()
 
 	elif activetargetnode == null and activetargetnodewall == null and Tglobal.handflickmotiongestureposition == 1 and (pointertargettype == "XCtubesector" or pointertargettype == "XCflatshell"):
+		pointertargetofstartofropehang = pointertarget
 		var xcdata = { "name":sketchsystem.uniqueXCname("r"), 
 					   "drawingtype":DRAWING_TYPE.DT_ROPEHANG,
 					   "transformpos":Transform(),
@@ -1271,7 +1274,43 @@ func buttonreleased_vrgrip():
 												"transformpos":activetargetnodewall.transform.translated(dragvec)
 											}])
 				clearactivetargetnode()
+				
+			elif pointertarget.get_name() == "DistortXC":
+				var targetpointL = activetargetnodewall.transform.xform_inv(gripmenu.gripmenupointertargetpoint)
+				var dragvecL = targetpointL - activetargetnode.transform.origin
+				var ropeseqs = Polynets.makeropenodesequences(activetargetnodewall.nodepoints, activetargetnodewall.onepathpairs, null, true)
+				var ropeseqsfordistort = [ ]
+				var activetargetnodename = activetargetnode.get_name()
+				for ropeseq in ropeseqs:
+					var i = ropeseq.find(activetargetnodename)
+					if i == 0:
+						ropeseqsfordistort.push_back(ropeseq)
+					elif i == len(ropeseq) - 1:
+						ropeseq.invert()
+						ropeseqsfordistort.push_back(ropeseq)
+					elif i != -1:
+						ropeseqsfordistort.push_back(ropeseq.slice(0, i))
+						ropeseqsfordistort[-1].invert()
+						ropeseqsfordistort.push_back(ropeseq.slice(i, len(ropeseq)))
+				var prevnodepoints = { activetargetnodename:activetargetnodewall.nodepoints[activetargetnodename] }
+				var nextnodepoints = { activetargetnodename:targetpointL }
+				for ropeseq in ropeseqsfordistort:
+					for j in range(1, len(ropeseq) - 1):
+						var nodename = ropeseq[j]
+						prevnodepoints[nodename] = activetargetnodewall.nodepoints[nodename]
+						nextnodepoints[nodename] = prevnodepoints[nodename] + dragvecL*(1.0 - j*1.0/(len(ropeseq) - 1))
+				sketchsystem.actsketchchange([{ "name":activetargetnodewall.get_name(), 
+												"prevnodepoints":prevnodepoints,
+												"nextnodepoints":nextnodepoints
+											}])
+				clearactivetargetnode()
 
+
+				print(ropeseqsfordistort)
+				
+			elif pointertarget.get_name() == "ProjectXC":
+				print("ProjectXC")
+				
 		elif is_instance_valid(gripmenu.gripmenupointertargetwall):
 			print("executing ", pointertarget.get_name(), " on ", gripmenu.gripmenupointertargetwall.get_name())
 			if pointertarget.get_name() == "SelectXC":

@@ -1,4 +1,4 @@
-[gd_scene load_steps=319 format=2]
+[gd_scene load_steps=321 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/underground_env.tres" type="Environment" id=2]
@@ -318,6 +318,17 @@ albedo_texture = ExtResource( 25 )
 uv1_scale = Vector3( 1, 0.05, 1 )
 uv1_offset = Vector3( -0.2, 0.94, 0 )
 
+[sub_resource type="QuadMesh" id=247]
+
+[sub_resource type="SpatialMaterial" id=248]
+flags_unshaded = true
+flags_do_not_receive_shadows = true
+params_cull_mode = 2
+albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
+albedo_texture = ExtResource( 25 )
+uv1_scale = Vector3( 1, 0.05, 1 )
+uv1_offset = Vector3( -0.15, 0.9, 0 )
+
 [sub_resource type="SpatialMaterial" id=38]
 flags_unshaded = true
 flags_do_not_receive_shadows = true
@@ -325,7 +336,7 @@ params_cull_mode = 2
 albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
 albedo_texture = ExtResource( 25 )
 uv1_scale = Vector3( 1, 0.05, 1 )
-uv1_offset = Vector3( -0.2, 0.9, 0 )
+uv1_offset = Vector3( -0.15, 0.155, 0 )
 
 [sub_resource type="DynamicFont" id=40]
 size = 22
@@ -2024,7 +2035,7 @@ collision_layer = 8
 collision_mask = 0
 
 [node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/CopyRock"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 1.16415e-10, 0, 1, 0, 0, 0 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 1.74623e-10, 0, 1, 0, 0, 0 )
 cast_shadow = 0
 mesh = SubResource( 16 )
 material/0 = SubResource( 19 )
@@ -2142,11 +2153,12 @@ shape = SubResource( 18 )
 
 [node name="toSolid" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
 transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, -0.25, -0.2, 0 )
-visible = false
 collision_layer = 8
 collision_mask = 0
 
 [node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/toSolid"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 1.74623e-10, 0, 1, 1.75462, 0, -0.00118446 )
+visible = false
 cast_shadow = 0
 mesh = SubResource( 16 )
 material/0 = SubResource( 28 )
@@ -2180,18 +2192,17 @@ material/0 = SubResource( 30 )
 [node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/ShowFloor"]
 shape = SubResource( 18 )
 
-[node name="toBig" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
-transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, 0.25, -0.2, 0 )
-visible = false
+[node name="DistortXC" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
+transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 1.16415e-10, 0, 1, 0.250126, -0.2, 0.0372858 )
 collision_layer = 8
 collision_mask = 0
 
-[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/toBig"]
+[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/DistortXC"]
 cast_shadow = 0
 mesh = SubResource( 16 )
 material/0 = SubResource( 31 )
 
-[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/toBig"]
+[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/DistortXC"]
 shape = SubResource( 18 )
 
 [node name="NewXC" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
@@ -2226,7 +2237,7 @@ collision_layer = 8
 collision_mask = 0
 
 [node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/Undo"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -1.19209e-07, 0, 0.0314903 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 5.82077e-11, 0, 1, -1.11759e-07, 0, 0.0314913 )
 cast_shadow = 0
 mesh = SubResource( 16 )
 material/0 = SubResource( 34 )
@@ -2261,16 +2272,31 @@ material/0 = SubResource( 37 )
 shape = SubResource( 18 )
 
 [node name="HideXC" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
-transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, 0.000563572, -0.352818, 0 )
+transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 3.49246e-10, 0, 1, 0.000791224, -0.352818, 0.0675917 )
 collision_layer = 8
 collision_mask = 0
 
 [node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/HideXC"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 5.82077e-11, 0, 1, 0, 0, 0 )
+cast_shadow = 0
+mesh = SubResource( 247 )
+material/0 = SubResource( 248 )
+
+[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/HideXC"]
+shape = SubResource( 18 )
+
+[node name="ProjectXC" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
+transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 5.82077e-11, 0, 1, 0.000563573, -0.352818, 0 )
+collision_layer = 8
+collision_mask = 0
+
+[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/ProjectXC"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 1.16415e-10, 0, 1, 0.000675216, 0, 0.0400953 )
 cast_shadow = 0
 mesh = SubResource( 16 )
 material/0 = SubResource( 38 )
 
-[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/HideXC"]
+[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/ProjectXC"]
 shape = SubResource( 18 )
 
 [node name="MaterialButtons" type="Spatial" parent="GuiSystem/GripMenu"]
