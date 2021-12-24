@@ -7,9 +7,14 @@
       url = "github:godotengine/godot/3.4-stable";
       flake = false;
     };
+    flake-compat-ci.url = "github:hercules-ci/flake-compat-ci";
+    flake-compat = {
+      url = "github:edolstra/flake-compat";
+      flake = false;
+    };
   };
 
-  outputs = { self, nixpkgs, godot-source }:
+  outputs = { self, nixpkgs, godot-source, flake-compat, flake-compat-ci }:
     let
       # Generate a user-friendly version numer.
       version = builtins.substring 0 8 self.lastModifiedDate;
@@ -30,6 +35,11 @@
         });
 
     in {
+
+      ciNix = flake-compat-ci.lib.recurseIntoFlakeWith {
+        flake = self;
+        systems = [ "x86_64-linux" ];
+      };
 
       packages = forAllSystems (system:
         let pkgs = nixpkgsFor."${system}";
