@@ -1,3 +1,22 @@
+[![Hercules-ci][Herc badge]][Herc link]
+[![Cachix Cache][Cachix badge]][Cachix link]
+
+[Herc badge]: https://img.shields.io/badge/ci--by--hercules-green.svg
+[Herc link]: https://hercules-ci.com/github/tunnelvr/tunnelvr
+[Cachix badge]: https://img.shields.io/badge/cachix--tunnelvr-blue.svg
+[Cachix link]: https://tunnelvr.cachix.org 
+
+# Using the Nix Binary Cache
+
+Add the following to your NixOS configuration, often in
+`/etc/nixos/configuration.nix` for example.
+
+```nix
+nix.binaryCachePublicKeys = [ "tunnelvr.cachix.org-1:IZUIF+ytsd6o+5F0wi45s83mHI+aQaFSoHJ3zHrc2G0=" ];
+nix.binaryCaches = [ "https://tunnelvr.cachix.org" ];
+nix.trustedBinaryCaches = [ "https://tunnelvr.cachix.org" ];
+```
+
 # Introduction 
 
 **TunnelVR** is a follow-on from [TunnelX](https://github.com/CaveSurveying/tunnelx) -- a long-running 
