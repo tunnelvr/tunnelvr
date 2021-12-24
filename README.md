@@ -11,7 +11,7 @@
 Add the following to your NixOS configuration, often in
 `/etc/nixos/configuration.nix` for example.
 
-```nix
+```bash
 nix.binaryCachePublicKeys = [ "tunnelvr.cachix.org-1:IZUIF+ytsd6o+5F0wi45s83mHI+aQaFSoHJ3zHrc2G0=" ];
 nix.binaryCaches = [ "https://tunnelvr.cachix.org" ];
 nix.trustedBinaryCaches = [ "https://tunnelvr.cachix.org" ];
