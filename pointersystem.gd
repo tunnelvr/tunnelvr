@@ -1267,8 +1267,13 @@ func buttonreleased_vrgrip():
 				sketchsystem.actsketchchange(xcdatalist)
 
 		elif activetargetnode != null and activetargetnodewall.drawingtype == DRAWING_TYPE.DT_ROPEHANG:
+			var secondsegmentdrag = (pointertargetofstartofropehang != null and len(activetargetnodewall.nodepoints) == 1)
+			var ropexc = pointertargetofstartofropehang if secondsegmentdrag else activetargetnodewall
+			var dragvec = gripmenu.gripmenupointertargetpoint - activetargetnode.global_transform.origin
+			var targetpointL = ropexc.transform.xform_inv(gripmenu.gripmenupointertargetpoint)
+			var dragvecL = targetpointL - activetargetnode.transform.origin
+			var ropeseqs = Polynets.makeropenodesequences(ropexc.nodepoints, ropexc.onepathpairs, null, true)
 			if pointertarget.get_name() == "DragXC":
-				var dragvec = gripmenu.gripmenupointertargetpoint - activetargetnode.global_transform.origin
 				sketchsystem.actsketchchange([{ "name":activetargetnodewall.get_name(), 
 												"prevtransformpos":activetargetnodewall.transform,
 												"transformpos":activetargetnodewall.transform.translated(dragvec)
@@ -1276,25 +1281,10 @@ func buttonreleased_vrgrip():
 				clearactivetargetnode()
 				
 			elif pointertarget.get_name() == "DistortXC":
-				var targetpointL = activetargetnodewall.transform.xform_inv(gripmenu.gripmenupointertargetpoint)
-				var dragvecL = targetpointL - activetargetnode.transform.origin
-				var ropeseqs = Polynets.makeropenodesequences(activetargetnodewall.nodepoints, activetargetnodewall.onepathpairs, null, true)
-				var ropeseqsfordistort = [ ]
-				var activetargetnodename = activetargetnode.get_name()
-				for ropeseq in ropeseqs:
-					var i = ropeseq.find(activetargetnodename)
-					if i == 0:
-						ropeseqsfordistort.push_back(ropeseq)
-					elif i == len(ropeseq) - 1:
-						ropeseq.invert()
-						ropeseqsfordistort.push_back(ropeseq)
-					elif i != -1:
-						ropeseqsfordistort.push_back(ropeseq.slice(0, i))
-						ropeseqsfordistort[-1].invert()
-						ropeseqsfordistort.push_back(ropeseq.slice(i, len(ropeseq)))
+				var ropeseqsselected = Polynets.ropeseqsfindsplitatnode(ropeseqs, activetargetnode.get_name())
 				var prevnodepoints = { activetargetnodename:activetargetnodewall.nodepoints[activetargetnodename] }
 				var nextnodepoints = { activetargetnodename:targetpointL }
-				for ropeseq in ropeseqsfordistort:
+				for ropeseq in ropeseqsselected:
 					for j in range(1, len(ropeseq) - 1):
 						var nodename = ropeseq[j]
 						prevnodepoints[nodename] = activetargetnodewall.nodepoints[nodename]
@@ -1304,12 +1294,27 @@ func buttonreleased_vrgrip():
 												"nextnodepoints":nextnodepoints
 											}])
 				clearactivetargetnode()
-
-
-				print(ropeseqsfordistort)
 				
 			elif pointertarget.get_name() == "ProjectXC":
-				print("ProjectXC")
+				var ropeseqends = Polynets.calcropeseqends(ropeseqs)
+				var nodestoprojectD = { }
+				for ropeseq in ropeseqs:
+					if ropeseq.find(nodename) != -1:
+						for n in ropeseq:
+							nodestoproject[n] = 1
+				var nextnodepoints = { } 
+				for n in nodestoprojectD:
+					RayCast activetargetnodename:targetpointL }
+				var prevnodepoints = { }
+				for n in nextnodepoints:
+					prevnodepoints[n] = ropexc.nodepoints[n]
+				# nextnodepoints[nodename] = prevnodepoints[nodename] + dragvecL*(1.0 - j*1.0/(len(ropeseq) - 1))
+
+
+				var 
+					print("project face")
+				else:
+					
 				
 		elif is_instance_valid(gripmenu.gripmenupointertargetwall):
 			print("executing ", pointertarget.get_name(), " on ", gripmenu.gripmenupointertargetwall.get_name())

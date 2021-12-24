@@ -94,7 +94,9 @@ func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointert
 		gmlist = [ "DragXC", "DistortXC" ]
 		if pointertargetofstartofropehang != null and len(activetargetnodewall.nodepoints) == 1:
 			gmlist.push_back("ProjectXC")
-	
+		else:
+			gmlist.push_back("ProjectXC")
+				
 	elif gripmenupointertargettype == "XCdrawing" and gripmenupointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
 		gmlist = ["NewXC", "toPaper"]
 			

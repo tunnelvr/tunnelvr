@@ -32,6 +32,15 @@ extends Spatial
 
 # use this to sniff out waiting for godot performances https://www.concordtheatricals.co.uk/p/7476/waiting-for-godot
 	
+# optimize for GPU running using renderdoc:  https://developer.oculus.com/documentation/unity/ts-renderdoc-capture/
+# https://developer.oculus.com/blog/how-to-level-up-your-profiling-with-renderdoc-for-oculus/
+# bottom left of renderdock select 1: replay context quest (not profiling mode)
+# select program executable path tunnelvr, and launch.  (It records it, but needs the hardware to replay it and get the timings)
+# make a capture, save it, then put quest into profiling mode and open capture with options to set fastest
+
+
+	
+	
 var hostipnumber: String = ""
 export var hostportnumber: int = 4546
 export var udpserverdiscoveryport: int = 4547

@@ -567,6 +567,7 @@ func mergexcrpcdata(xcdata):
 				if shortestpathseglengthsq == -1.0 or vlensq < shortestpathseglengthsq:
 					shortestpathseglengthsq = vlensq
 		shortestpathseglength = sqrt(max(0, shortestpathseglengthsq))
+		print("shortestpathseglength ", shortestpathseglength)
 		nodepointvalence1s = { } 
 		for e in nodepointvalences:
 			if nodepointvalences[e] == 1:
@@ -700,7 +701,7 @@ func updatelinearropepaths():
 	for nname in nodepoints:
 		if nname[0] == "a":
 			countanchors += 1
-	resetclosewidthsca(1.0 if countanchors < 5 else 0.5)
+	resetclosewidthsca(1.0)
 	var surfaceTool = SurfaceTool.new()
 	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
 	middlenodes = ropepathseqribbons(surfaceTool)

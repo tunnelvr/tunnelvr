@@ -165,6 +165,22 @@ static func makeropenodesequences(nodepoints, onepathpairs, oddropeverts, suppre
 			ropesequences.append(ropeseq)
 	return ropesequences
 
+static func ropeseqsfindsplitatnode(ropeseqs, nodename):
+	var ropeseqssplit = [ ]
+	for ropeseq in ropeseqs:
+		var i = ropeseq.find(nodename)
+		if i == 0:
+			ropeseqssplit.push_back(ropeseq)
+		elif i == len(ropeseq) - 1:
+			ropeseq.invert()
+			ropeseqssplit.push_back(ropeseq)
+		elif i != -1:
+			ropeseqssplit.push_back(ropeseq.slice(0, i))
+			ropeseqssplit[-1].invert()
+			ropeseqssplit.push_back(ropeseq.slice(i, len(ropeseq)))
+	return ropeseqssplit
+	
+
 static func triangulatepolygon(poly):
 	var surfaceTool = SurfaceTool.new()
 	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
@@ -505,10 +521,7 @@ static func cuboidfacrailsseq(nodename0, ropeseqs, ropeseqqs):
 	assert (len(quadrail0) + len(quadrail1) + len(railseqrung0) + len(railseqrung1) == len(ropeseq0) + len(ropeseq1) + len(ropeseq2) + len(ropeseq3) - 4)
 	return [quadrail0, quadrail1, railseqrung0, railseqrung1]
 	
-
-static func cuboidfromropenodesequences(nodepoints, ropeseqs): # cube shape detection
-	if len(ropeseqs) != 12:
-		return null
+static func calcropeseqends(ropeseqs):
 	var ropeseqends = { } 
 	for j in range(len(ropeseqs)):
 		var e0 = ropeseqs[j][0]
@@ -521,6 +534,12 @@ static func cuboidfromropenodesequences(nodepoints, ropeseqs): # cube shape dete
 			ropeseqends[e1].push_back(j)
 		else:
 			ropeseqends[e1] = [ j ]
+	return ropeseqends
+	
+static func cuboidfromropenodesequences(nodepoints, ropeseqs): # cube shape detection
+	if len(ropeseqs) != 12:
+		return null
+	var ropeseqends = calcropeseqends(ropeseqs)
 	if len(ropeseqends) != 8:
 		return null
 		
