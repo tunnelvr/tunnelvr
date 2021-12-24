@@ -2,14 +2,19 @@
   description = "TunnelVR for Nix automation purposes";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-21.11";
     godot-source = {
       url = "github:godotengine/godot/3.4-stable";
       flake = false;
     };
+    flake-compat-ci.url = "github:hercules-ci/flake-compat-ci";
+    flake-compat = {
+      url = "github:edolstra/flake-compat";
+      flake = false;
+    };
   };
 
-  outputs = { self, nixpkgs, godot-source }:
+  outputs = { self, nixpkgs, godot-source, flake-compat, flake-compat-ci }:
     let
       # Generate a user-friendly version numer.
       version = builtins.substring 0 8 self.lastModifiedDate;
@@ -26,9 +31,15 @@
         import nixpkgs {
           inherit system;
           overlays = [ self.overlay ];
+          config.android_sdk.accept_license = true;
         });
 
     in {
+
+      ciNix = flake-compat-ci.lib.recurseIntoFlakeWith {
+        flake = self;
+        systems = [ "x86_64-linux" ];
+      };
 
       packages = forAllSystems (system:
         let pkgs = nixpkgsFor."${system}";
@@ -48,22 +59,79 @@
       devShell = forAllSystems (system:
         let pkgs = nixpkgsFor."${system}";
         in pkgs.mkShell {
-          buildInputs = [ pkgs.my-godot ];
+          buildInputs = with pkgs; [ my-godot-wrapped jre_headless ];
         });
 
       overlay = final: prev:
         let
           inherit (final)
             stdenv lib fetchFromGitHub godot godot-headless
-            godot-export-templates fetchurl runCommandNoCC unzip;
+            godot-export-templates fetchurl runCommandNoCC unzip symlinkJoin;
         in {
           my-godot-headless = godot-headless.overrideAttrs (oldAttrs: rec {
             version = godot-source.rev;
             src = godot-source;
           });
+          my-godot-wrapped = symlinkJoin {
+            name = "my-godot-with-android-sdk";
+            nativeBuildInputs = [ final.makeWrapper ];
+            paths = [ final.my-godot ];
+            postBuild =
+              let
+                # Godot's source code has `version.py` in it, which means we
+                # can parse it using regex in order to construct the link to
+                # download the export templates from.
+                version = rec {
+                  # Fully constructed string, example: "3.4".
+                  string = "${major + "." + minor + (final.lib.optionalString (patch != "") "." + patch)}";
+                  file = "${godot-source}/version.py";
+                  major = toString (builtins.match ".+major = ([0-9]+).+" (builtins.readFile file));
+                  minor = toString (builtins.match ".+minor = ([0-9]+).+" (builtins.readFile file));
+                  patch = toString (builtins.match ".+patch = ([1-9]+).+" (builtins.readFile file));
+                  # stable, rc, dev, etc.
+                  status = toString (builtins.match ".+status = \"([A-z]+)\".+" (builtins.readFile file));
+                };
+                debugKey = final.runCommand "debugKey" {} ''
+                  ${final.jre_minimal}/bin/keytool -keyalg RSA -genkeypair -alias androiddebugkey -keypass android -keystore debug.keystore -storepass android -dname "CN=Android Debug,O=Android,C=US" -validity 9999 -deststoretype pkcs12
+                  mv debug.keystore $out
+                '';
+                export-templates = final.fetchzip {
+                  url = "https://downloads.tuxfamily.org/godotengine/${version.string}/Godot_v${version.string}-${version.status}_export_templates.tpz";
+                  sha256 = "sha256-3trC1ocgIVNWN19k6LUnZ6NhDTme+aT7RVL2XmkXzr0=";
+                  # postFetch is necessary because the downloaded file has a
+                  # .tpz extension, meaning `fetchzip` cannot otherwise extract
+                  # it properly. Additionally, the game engine expects the
+                  # template path to be in a folder by the name of the current
+                  # version + status, like '3.4-stable/templates' for example,
+                  # so we accomplish that here.
+                  postFetch = ''
+                    unzip $downloadedFile -d ./
+                    mkdir -p $out/templates/${version.string}.${version.status}
+                    mv ./templates/* $out/templates/${version.string}.${version.status}
+                  '';
+                };
+              in
+              ''
+                wrapProgram $out/bin/godot \
+                  --set tunnelvr_ANDROID_SDK "${final.androidenv.androidPkgs_9_0.androidsdk}/libexec/android-sdk"\
+                  --set tunnelvr_EXPORT_TEMPLATES "${export-templates}/templates" \
+                  --set tunnelvr_DEBUG_KEY "${debugKey}"
+              '';
+          };
           my-godot = godot.overrideAttrs (oldAttrs: rec {
             version = godot-source.rev;
             src = godot-source;
+            preBuild =
+              ''
+                substituteInPlace platform/android/export/export_plugin.cpp \
+                  --replace 'String sdk_path = EditorSettings::get_singleton()->get("export/android/android_sdk_path")' 'String sdk_path = std::getenv("tunnelvr_ANDROID_SDK")'
+
+                substituteInPlace platform/android/export/export_plugin.cpp \
+                  --replace 'EditorSettings::get_singleton()->get("export/android/debug_keystore")' 'std::getenv("tunnelvr_DEBUG_KEY")'
+
+                substituteInPlace editor/editor_settings.cpp \
+                  --replace 'get_data_dir().plus_file("templates")' 'std::getenv("tunnelvr_EXPORT_TEMPLATES")'
+              '';
           });
 
           tunnelvr_pck = runCommandNoCC "tunnelvr" {
