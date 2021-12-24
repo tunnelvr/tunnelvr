@@ -49,23 +49,24 @@
       devShell = forAllSystems (system:
         let pkgs = nixpkgsFor."${system}";
         in pkgs.mkShell {
-          buildInputs = with pkgs; [ my-godot jre_headless ];
+          buildInputs = with pkgs; [ my-godot-wrapped jre_headless ];
         });
 
       overlay = final: prev:
         let
           inherit (final)
             stdenv lib fetchFromGitHub godot godot-headless
-            godot-export-templates fetchurl runCommandNoCC unzip;
+            godot-export-templates fetchurl runCommandNoCC unzip symlinkJoin;
         in {
           my-godot-headless = godot-headless.overrideAttrs (oldAttrs: rec {
             version = godot-source.rev;
             src = godot-source;
           });
-          my-godot = godot.overrideAttrs (oldAttrs: rec {
-            version = godot-source.rev;
-            src = godot-source;
-            preBuild =
+          my-godot-wrapped = symlinkJoin {
+            name = "my-godot-with-android-sdk";
+            nativeBuildInputs = [ final.makeWrapper ];
+            paths = [ final.my-godot ];
+            postBuild =
               let
                 # Godot's source code has `version.py` in it, which means we
                 # can parse it using regex in order to construct the link to
@@ -73,7 +74,7 @@
                 version = rec {
                   # Fully constructed string, example: "3.4".
                   string = "${major + "." + minor + (final.lib.optionalString (patch != "") "." + patch)}";
-                  file = "${src}/version.py";
+                  file = "${godot-source}/version.py";
                   major = toString (builtins.match ".+major = ([0-9]+).+" (builtins.readFile file));
                   minor = toString (builtins.match ".+minor = ([0-9]+).+" (builtins.readFile file));
                   patch = toString (builtins.match ".+patch = ([1-9]+).+" (builtins.readFile file));
@@ -101,14 +102,25 @@
                 };
               in
               ''
+                wrapProgram $out/bin/godot \
+                  --set tunnelvr_ANDROID_SDK "${final.androidenv.androidPkgs_9_0.androidsdk}/libexec/android-sdk"\
+                  --set tunnelvr_EXPORT_TEMPLATES "${export-templates}/templates" \
+                  --set tunnelvr_DEBUG_KEY "${debugKey}"
+              '';
+          };
+          my-godot = godot.overrideAttrs (oldAttrs: rec {
+            version = godot-source.rev;
+            src = godot-source;
+            preBuild =
+              ''
                 substituteInPlace platform/android/export/export_plugin.cpp \
-                  --replace 'String sdk_path = EditorSettings::get_singleton()->get("export/android/android_sdk_path")' 'String sdk_path = "${final.androidenv.androidPkgs_9_0.androidsdk}/libexec/android-sdk"'
+                  --replace 'String sdk_path = EditorSettings::get_singleton()->get("export/android/android_sdk_path")' 'String sdk_path = std::getenv("tunnelvr_ANDROID_SDK")'
 
                 substituteInPlace platform/android/export/export_plugin.cpp \
-                  --replace 'EditorSettings::get_singleton()->get("export/android/debug_keystore")' '"${debugKey}"'
+                  --replace 'EditorSettings::get_singleton()->get("export/android/debug_keystore")' 'std::getenv("tunnelvr_DEBUG_KEY")'
 
                 substituteInPlace editor/editor_settings.cpp \
-                  --replace 'get_data_dir().plus_file("templates")' '"${export-templates}/templates"'
+                  --replace 'get_data_dir().plus_file("templates")' 'std::getenv("tunnelvr_EXPORT_TEMPLATES")'
               '';
           });
 
