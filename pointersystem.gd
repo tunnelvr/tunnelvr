@@ -1288,23 +1288,24 @@ func buttonreleased_vrgrip():
 				var nextnodepoints = { ropexcnodename:ropexc.transform.xform_inv(gripmenu.gripmenupointertargetpoint) }
 				var dragvecL = ropexc.transform.basis.xform_inv(dragvec)
 				for ropeseq in ropeseqsselected:
-					for j in range(1, len(ropeseq) - 1):
-						var nodename = ropeseq[j]
+					for i in range(1, len(ropeseq) - 1):
+						var nodename = ropeseq[i]
 						prevnodepoints[nodename] = ropexc.nodepoints[nodename]
-						nextnodepoints[nodename] = prevnodepoints[nodename] + dragvecL*(1.0 - j*1.0/(len(ropeseq) - 1))
+						nextnodepoints[nodename] = prevnodepoints[nodename] + dragvecL*(1.0 - i*1.0/(len(ropeseq) - 1))
 				xcdatalist.push_back({ "name":ropexc.get_name(), 
 									   "prevnodepoints":prevnodepoints,
 									   "nextnodepoints":nextnodepoints
 									})
 				
 			elif pointertarget.get_name() == "ProjectXC" and ropexcnode != null:
-				var ropeseqends = Polynets.calcropeseqends(ropeseqs)
 				var nodestoproject = { }
-				for ropeseq in ropeseqs:
+				for j in range(len(ropeseqs)):
+					var ropeseq = ropeseqs[j]
 					var i = ropeseq.find(ropexcnode.get_name())
 					if i > 0 and i < len(ropeseq) - 1:
 						for nodename in ropeseq:
 							nodestoproject[nodename] = 1
+							
 				if len(nodestoproject) != 0:
 					var prevnodepoints = { }
 					var nextnodepoints = { } 
@@ -1326,6 +1327,17 @@ func buttonreleased_vrgrip():
 							print(raycast.get_collider().get_name())
 						prevnodepoints[nodename] = ropexc.nodepoints[nodename]
 						nextnodepoints[nodename] = ropexc.transform.xform_inv(dprojnodepoint)
+
+					for ropeseq in ropeseqs:
+						if prevnodepoints.has(ropeseq[0]) or prevnodepoints.has(ropeseq[-1]):
+							var dagvecL0 = nextnodepoints[ropeseq[0]] - prevnodepoints[ropeseq[0]] if prevnodepoints.has(ropeseq[0]) else Vector3(0,0,0)
+							var dagvecL1 = nextnodepoints[ropeseq[-1]] - prevnodepoints[ropeseq[-1]] if prevnodepoints.has(ropeseq[-1]) else Vector3(0,0,0)
+							for i in range(1, len(ropeseq) - 1):
+								var nodename = ropeseq[i]
+								if not prevnodepoints.has(nodename):
+									prevnodepoints[nodename] = ropexc.nodepoints[nodename]
+									nextnodepoints[nodename] = prevnodepoints[nodename] + lerp(dagvecL0, dagvecL1, (1.0 - i*1.0/(len(ropeseq) - 1)))
+
 					xcdatalist.push_back({ "name":ropexc.get_name(), 
 										   "prevnodepoints":prevnodepoints,
 										   "nextnodepoints":nextnodepoints
