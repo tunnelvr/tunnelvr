@@ -224,7 +224,7 @@ params_cull_mode = 2
 albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
 albedo_texture = ExtResource( 25 )
 uv1_scale = Vector3( 1, 0.05, 1 )
-uv1_offset = Vector3( -0.2, 0.603, 0 )
+uv1_offset = Vector3( -0.2, 0.606, 0 )
 
 [sub_resource type="SpatialMaterial" id=27]
 flags_unshaded = true
@@ -2125,32 +2125,30 @@ material/0 = SubResource( 25 )
 transform = Transform( 1, 0, 0, 0, 1, 0, 5.82077e-11, 0, 1, 0, 0, 0 )
 shape = SubResource( 18 )
 
-[node name="ghost" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
-transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, 0, -0.2, 0 )
-visible = false
+[node name="SpLine" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
+transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 1.16415e-10, 0, 1, 4.65773e-05, -0.2, 0.0138292 )
 collision_layer = 8
 collision_mask = 0
 
-[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/ghost"]
+[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/SpLine"]
 cast_shadow = 0
 mesh = SubResource( 16 )
 material/0 = SubResource( 26 )
 
-[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/ghost"]
+[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/SpLine"]
 shape = SubResource( 18 )
 
-[node name="FloorTex" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
+[node name="DelTube2" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
 transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, 0.25, -0.2, 0 )
-visible = false
 collision_layer = 8
 collision_mask = 0
 
-[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/FloorTex"]
+[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/DelTube2"]
 cast_shadow = 0
 mesh = SubResource( 16 )
 material/0 = SubResource( 27 )
 
-[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/FloorTex"]
+[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/DelTube2"]
 shape = SubResource( 18 )
 
 [node name="toSolid" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]

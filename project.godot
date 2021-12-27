@@ -29,6 +29,21 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://utilities/DRAWING_TYPE.gd"
 }, {
+"base": "OculusTracker",
+"class": "OculusHandTracker",
+"language": "GDScript",
+"path": "res://addons/godot_ovrmobile/example_scenes/oculus_hand_tracker.gd"
+}, {
+"base": "OculusTracker",
+"class": "OculusTouchController",
+"language": "GDScript",
+"path": "res://addons/godot_ovrmobile/example_scenes/oculus_touch_controller.gd"
+}, {
+"base": "ARVRController",
+"class": "OculusTracker",
+"language": "GDScript",
+"path": "res://addons/godot_ovrmobile/example_scenes/oculus_tracker.gd"
+}, {
 "base": "Reference",
 "class": "Polynets",
 "language": "GDScript",
@@ -39,6 +54,9 @@ _global_script_class_icons={
 "Centrelinedata": "",
 "CollisionLayer": "",
 "DRAWING_TYPE": "",
+"OculusHandTracker": "",
+"OculusTouchController": "",
+"OculusTracker": "",
 "Polynets": ""
 }
 
@@ -65,7 +83,7 @@ gdscript/warnings/integer_division=false
 
 [gdnative]
 
-singletons=[  ]
+singletons=[ "res://addons/godot_ovrmobile/godot_ovrmobile.gdnlib" ]
 
 [input]
 

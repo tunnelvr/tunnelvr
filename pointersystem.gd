@@ -291,13 +291,12 @@ func set_handflickmotiongestureposition(lhandflickmotiongestureposition):
 	Tglobal.handflickmotiongestureposition = lhandflickmotiongestureposition
 	if Tglobal.handflickmotiongestureposition == 1:
 		activelaserroot.get_node("LaserSpot").set_surface_material(0, materialsystem.lasermaterialN((1 if activetargetnode != null else 0) + 2))
-		activelaserroot.get_node("LaserSpot").visible = true
 		LaserOrient.get_node("Length/Laser").set_surface_material(0, materialsystem.lasermaterial("laserinair"))
+		setpointertarget(LaserOrient, null, -1.0)
+		activelaserroot.get_node("LaserSpot").visible = true
 	else:
-		if Tglobal.handflickmotiongestureposition == 0:
-			activelaserroot.get_node("LaserSpot").visible = false
 		LaserOrient.get_node("Length/Laser").set_surface_material(0, materialsystem.lasermaterial("laser"))
-
+		setpointertarget(LaserOrient, null, -1.0)
 		
 func panelsendmousemotiontopointertarget():
 	var guipanel = pointertarget
@@ -759,7 +758,7 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 		clearactivetargetnode()
 
 	elif activetargetnode == null and activetargetnodewall == null and Tglobal.handflickmotiongestureposition == 1 and (pointertargettype == "XCtubesector" or pointertargettype == "XCflatshell"):
-		pointertargetofstartofropehang = pointertarget
+		pointertargetofstartofropehang = pointertargetwall
 		var xcdata = { "name":sketchsystem.uniqueXCname("r"), 
 					   "drawingtype":DRAWING_TYPE.DT_ROPEHANG,
 					   "transformpos":Transform(),
