@@ -232,6 +232,7 @@ func setactivetargetwall(newactivetargetwall):
 func _ready():
 	handrightcontroller.connect("button_pressed", self, "_on_button_pressed")
 	handrightcontroller.connect("button_release", self, "_on_button_release")
+	$CubeCornerRayCast.set_as_toplevel(true)
 
 func targettype(target):
 	if not is_instance_valid(target):
@@ -1267,54 +1268,79 @@ func buttonreleased_vrgrip():
 				sketchsystem.actsketchchange(xcdatalist)
 
 		elif activetargetnode != null and activetargetnodewall.drawingtype == DRAWING_TYPE.DT_ROPEHANG:
-			var secondsegmentdrag = (pointertargetofstartofropehang != null and len(activetargetnodewall.nodepoints) == 1)
-			var ropexc = pointertargetofstartofropehang if secondsegmentdrag else activetargetnodewall
+			var ropexcnode = activetargetnode if (pointertargetofstartofropehang == null or len(activetargetnodewall.nodepoints) != 1) else null
+			var ropexc = activetargetnodewall if ropexcnode != null else pointertargetofstartofropehang
 			var dragvec = gripmenu.gripmenupointertargetpoint - activetargetnode.global_transform.origin
-			var targetpointL = ropexc.transform.xform_inv(gripmenu.gripmenupointertargetpoint)
-			var dragvecL = targetpointL - activetargetnode.transform.origin
 			var ropeseqs = Polynets.makeropenodesequences(ropexc.nodepoints, ropexc.onepathpairs, null, true)
+
+			var xcdatalist = [ ]
 			if pointertarget.get_name() == "DragXC":
-				sketchsystem.actsketchchange([{ "name":activetargetnodewall.get_name(), 
-												"prevtransformpos":activetargetnodewall.transform,
-												"transformpos":activetargetnodewall.transform.translated(dragvec)
-											}])
-				clearactivetargetnode()
+				var dragvecL = ropexc.transform.basis.xform_inv(dragvec)
+				xcdatalist.push_back({ "name":ropexc.get_name(), 
+									   "prevtransformpos":ropexc.transform,
+									   "transformpos":ropexc.transform.translated(dragvecL)
+									})
 				
-			elif pointertarget.get_name() == "DistortXC":
-				var ropeseqsselected = Polynets.ropeseqsfindsplitatnode(ropeseqs, activetargetnode.get_name())
-				var prevnodepoints = { activetargetnodename:activetargetnodewall.nodepoints[activetargetnodename] }
-				var nextnodepoints = { activetargetnodename:targetpointL }
+			elif pointertarget.get_name() == "DistortXC" and ropexcnode != null:
+				var ropexcnodename = ropexcnode.get_name()
+				var ropeseqsselected = Polynets.ropeseqsfindsplitatnode(ropeseqs, ropexcnodename)
+				var prevnodepoints = { ropexcnodename:activetargetnodewall.nodepoints[ropexcnodename] }
+				var nextnodepoints = { ropexcnodename:ropexc.transform.xform_inv(gripmenu.gripmenupointertargetpoint) }
+				var dragvecL = ropexc.transform.basis.xform_inv(dragvec)
 				for ropeseq in ropeseqsselected:
 					for j in range(1, len(ropeseq) - 1):
 						var nodename = ropeseq[j]
-						prevnodepoints[nodename] = activetargetnodewall.nodepoints[nodename]
+						prevnodepoints[nodename] = ropexc.nodepoints[nodename]
 						nextnodepoints[nodename] = prevnodepoints[nodename] + dragvecL*(1.0 - j*1.0/(len(ropeseq) - 1))
-				sketchsystem.actsketchchange([{ "name":activetargetnodewall.get_name(), 
-												"prevnodepoints":prevnodepoints,
-												"nextnodepoints":nextnodepoints
-											}])
-				clearactivetargetnode()
+				xcdatalist.push_back({ "name":ropexc.get_name(), 
+									   "prevnodepoints":prevnodepoints,
+									   "nextnodepoints":nextnodepoints
+									})
 				
-			elif pointertarget.get_name() == "ProjectXC":
+			elif pointertarget.get_name() == "ProjectXC" and ropexcnode != null:
 				var ropeseqends = Polynets.calcropeseqends(ropeseqs)
-				var nodestoprojectD = { }
+				var nodestoproject = { }
 				for ropeseq in ropeseqs:
-					if ropeseq.find(nodename) != -1:
-						for n in ropeseq:
-							nodestoproject[n] = 1
-				var nextnodepoints = { } 
-				for n in nodestoprojectD:
-					RayCast activetargetnodename:targetpointL }
-				var prevnodepoints = { }
-				for n in nextnodepoints:
-					prevnodepoints[n] = ropexc.nodepoints[n]
-				# nextnodepoints[nodename] = prevnodepoints[nodename] + dragvecL*(1.0 - j*1.0/(len(ropeseq) - 1))
+					var i = ropeseq.find(ropexcnode.get_name())
+					if i > 0 and i < len(ropeseq) - 1:
+						for nodename in ropeseq:
+							nodestoproject[nodename] = 1
+				if len(nodestoproject) != 0:
+					var prevnodepoints = { }
+					var nextnodepoints = { } 
+					var raycast = $CubeCornerRayCast
+					raycast.clear_exceptions()
+					raycast.collision_mask = CollisionLayer.CLV_MainRayNoNodes
+					var dragvecunit = dragvec.normalized()
+					var dragvecback = dragvecunit*0.1
+					if ropexc.has_node("XCflatshell"):
+						raycast.add_exception(ropexc.get_node("XCflatshell"))
+					for nodename in nodestoproject:
+						var orgnodepoint = ropexc.transform.xform(ropexc.nodepoints[nodename])
+						var dprojnodepoint = orgnodepoint + dragvec
+						raycast.transform.origin = orgnodepoint - dragvecback
+						raycast.cast_to = dprojnodepoint + dragvecunit*handflickmotiongestureposition_shortpos_length - raycast.transform.origin
+						raycast.force_raycast_update()
+						if raycast.is_colliding():
+							dprojnodepoint = raycast.get_collision_point()
+							print(raycast.get_collider().get_name())
+						prevnodepoints[nodename] = ropexc.nodepoints[nodename]
+						nextnodepoints[nodename] = ropexc.transform.xform_inv(dprojnodepoint)
+					xcdatalist.push_back({ "name":ropexc.get_name(), 
+										   "prevnodepoints":prevnodepoints,
+										   "nextnodepoints":nextnodepoints
+										})
+				
+			if len(xcdatalist) != 0:
+				if ropexcnode == null:
+					xcdatalist.push_back({ "name":activetargetnodewall.get_name(), 
+										   "prevnodepoints":activetargetnodewall.nodepoints.duplicate(), 
+										   "nextnodepoints":{}
+										})
+				sketchsystem.actsketchchange(xcdatalist)
+				clearactivetargetnode()
 
 
-				var 
-					print("project face")
-				else:
-					
 				
 		elif is_instance_valid(gripmenu.gripmenupointertargetwall):
 			print("executing ", pointertarget.get_name(), " on ", gripmenu.gripmenupointertargetwall.get_name())

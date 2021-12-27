@@ -1737,7 +1737,7 @@ material/0 = SubResource( 9 )
 [node name="pointersystem" type="Node" parent="Players/PlayerMe"]
 script = ExtResource( 5 )
 
-[node name="RayCast" type="RayCast" parent="Players/PlayerMe/pointersystem"]
+[node name="CubeCornerRayCast" type="RayCast" parent="Players/PlayerMe/pointersystem"]
 
 [node name="toGuiSystem" type="RemoteTransform" parent="Players/PlayerMe"]
 remote_path = NodePath("../../../GuiSystem")

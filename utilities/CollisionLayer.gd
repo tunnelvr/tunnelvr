@@ -20,6 +20,7 @@ enum {
 	CLV_MainRayXC		=0b01000000011000,
 	CLV_MainRayAllNoCentreline \
 						=0b01000001111000,
+	CLV_MainRayNoNodes	=0b00000001110000,
 
 	CLV_PlanRayAll		=0b00000101111000,
 	CLV_PlanRayNoCentreline \
