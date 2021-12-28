@@ -768,9 +768,9 @@ func updatexcpaths():
 	var newmesh = surfaceTool.commit()
 	if pathlines.mesh == null or pathlines.get_surface_material_count() == 0:
 		pathlines.mesh = newmesh
-		assert(pathlines.get_surface_material_count() != 0)
-		var materialsystem = get_node("/root/Spatial/MaterialSystem")
-		pathlines.set_surface_material(0, materialsystem.pathlinematerial("normal"))
+		if pathlines.get_surface_material_count() != 0:
+			var materialsystem = get_node("/root/Spatial/MaterialSystem")
+			pathlines.set_surface_material(0, materialsystem.pathlinematerial("normal"))
 	else:
 		var m = pathlines.get_surface_material(0)
 		pathlines.mesh = newmesh

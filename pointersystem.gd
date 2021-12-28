@@ -66,6 +66,7 @@ const handflickmotiongestureposition_normal = 0
 const handflickmotiongestureposition_shortpos = 1
 var handflickmotiongestureposition_shortpos_length = 0.25
 const handflickmotiongestureposition_gone = 2
+const splineamplificationfactor = 10.0
 
 func clearpointertargetmaterial():
 	if pointertargettype == "XCnode" and pointertarget != null:
@@ -218,8 +219,10 @@ func setactivetargetwall(newactivetargetwall):
 		if not activetargetwall.get_node("XCdrawingplane").visible:
 			sketchsystem.actsketchchange([{"xcvizstates":{activetargetwall.get_name():DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE}}])
 		activetargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").set_surface_material(0, materialsystem.xcdrawingmaterial("active"))
-		assert (activetargetwall.get_node("PathLines").get_surface_material_count() != 0)
-		activetargetwall.get_node("PathLines").set_surface_material(0, materialsystem.pathlinematerial("nodepthtest"))
+		if activetargetwall.get_node("PathLines").get_surface_material_count() != 0:
+			activetargetwall.get_node("PathLines").set_surface_material(0, materialsystem.pathlinematerial("nodepthtest"))
+		else:
+			print("PathLines missing surface material")
 		for xcnode in activetargetwall.get_node("XCnodes").get_children():
 			if xcnode != activetargetnode:
 				xcnode.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial(clearednodematerialtype(xcnode, true, DRAWING_TYPE.DT_XCDRAWING, activetargetwall.nodepointvalence1s)))
@@ -491,8 +494,10 @@ func setpointertarget(laserroot, raycast, pointertargetshortdistance):
 			LaserSelectLine.visible = false
 		if lslfrom != null:
 			LaserSelectLine.transform.origin = GripLaserSpot.transform.origin if GripLaserSpot.visible else pointertargetpoint
-			LaserSelectLine.get_node("Scale").scale.z = LaserSelectLine.transform.origin.distance_to(lslfrom)
-			LaserSelectLine.transform = LaserSelectLine.transform.looking_at(lslfrom, Vector3(0,1,0))
+			var d = LaserSelectLine.transform.origin.distance_to(lslfrom)
+			LaserSelectLine.get_node("Scale").scale.z = max(0.01, d)
+			if not is_zero_approx(d):
+				LaserSelectLine.transform = LaserSelectLine.transform.looking_at(lslfrom, Vector3(0,1,0))
 
 func _on_button_pressed(p_button):
 	var gripbuttonheld = handright.gripbuttonheld
@@ -934,6 +939,10 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 			sketchsystem.actsketchchange([xcdata])
 			setactivetargetnode(pointertargetwall.get_node("XCnodes").get_node(newnodename))
 			if pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
+				var pathlines = pointertargetwall.get_node("PathLines")
+				if pathlines.get_surface_material_count() != 0:
+					var materialsystem = get_node("/root/Spatial/MaterialSystem")
+					pathlines.set_surface_material(0, materialsystem.pathlinematerial("nodepthtest"))
 				pointertargetwall.expandxcdrawingscale(pointertargetpoint)
 				activetargetnodetriggerpulling = true
 				nodetriggerpulledmaxd = 0.0
@@ -1283,8 +1292,8 @@ func buttonreleased_vrgrip():
 				for ropeseq in ropeseqstospline:
 					var a = ropexc.nodepoints[ropeseq[0]]
 					var b = ropexc.nodepoints[ropeseq[-1]]
-					var pre_a = a - (ropexc.nodepoints[ropeseq[1]] - a)*5
-					var post_b = b + (b - ropexc.nodepoints[ropeseq[-2]])*5
+					var pre_a = a - (ropexc.nodepoints[ropeseq[1]] - a)*splineamplificationfactor
+					var post_b = b + (b - ropexc.nodepoints[ropeseq[-2]])*splineamplificationfactor
 					for i in range(1, len(ropeseq) - 1):
 						var weight = i/(len(ropeseq) - 1.0)
 						var nodename = ropeseq[i]
