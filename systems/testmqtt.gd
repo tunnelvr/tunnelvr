@@ -16,7 +16,7 @@ func on_broker_connect():
 
 func _ready():
 	$MQTT.server = "mosquitto.doesliverpool.xyz"
-	$MQTT.server = "10.0.100.1"
+	#$MQTT.server = "10.0.100.1"
 	$MQTT.connect("received_message", self, "received_mqtt")
 	$MQTT.connect("broker_connected", self, "on_broker_connect")
 	$MQTT.connect("broker_disconnected", self, "on_broker_disconnect")
@@ -25,8 +25,10 @@ func _ready():
 	$MQTT.client_id = "my_test_id"
 	
 	randomplayername = possibleusernames[randi()%len(possibleusernames)]
-
+	$MQTT.set_process(false)
+	
 func mqttupdatenetstatus():
+	return
 	var selfSpatial = get_node("/root/Spatial")
 	var playerplatform = selfSpatial.playerMe.playerplatform
 	var ltopicstatus = "tunnelvrv/%s/%s/%s/netstatus" % [$MQTT.client_id, playerplatform, randomplayername]

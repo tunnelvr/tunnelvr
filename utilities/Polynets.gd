@@ -152,7 +152,7 @@ static func makeropenodesequences(nodepoints, onepathpairs, oddropeverts, suppre
 			j1 = Lpathvectorseq[i1][1] if Lpathvectorseq[i1][0] == j1 else Lpathvectorseq[i1][0]
 			if opvisits[j1] != 0:
 				assert (opvisits[j1] == len(ropesequences)+1)
-				assert (false)
+				print("ropehang loop detected")
 				break
 			opvisits[j1] = len(ropesequences)+1
 			assert ((i1 == onepathpairs[j1*2]) or (i1 == onepathpairs[j1*2+1]))

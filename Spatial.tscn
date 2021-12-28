@@ -2286,7 +2286,7 @@ material/0 = SubResource( 248 )
 shape = SubResource( 18 )
 
 [node name="ProjectXC" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
-transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 5.82077e-11, 0, 1, 0.000563573, -0.352818, 0 )
+transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 1.74623e-10, 0, 1, 0.236722, -0.352818, -0.000795364 )
 collision_layer = 8
 collision_mask = 0
 
@@ -3634,7 +3634,6 @@ material/0 = SubResource( 214 )
 [node name="labelmaterials" type="Spatial" parent="MaterialSystem"]
 
 [node name="RopeLabel" type="MeshInstance" parent="MaterialSystem/labelmaterials"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1.93251 )
 layers = 8192
 cast_shadow = 0
 mesh = SubResource( 216 )
