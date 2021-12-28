@@ -585,7 +585,7 @@ func buttonpressed_vrgrip():
 		var xcflatshellmaterialname = activetargetxcflatshell.xcflatshellmaterial
 		materialsystem.updateflatshellmaterial(activetargetxcflatshell, xcflatshellmaterialname, true)
 
-	gripmenu.gripmenuon(LaserOrient.global_transform, pointertargetpoint, pointertargetwall, pointertargettype, activetargettube, activetargettubesectorindex, activetargetwall, activetargetnode, activetargetnodewall, pointertargetofstartofropehang)
+	gripmenu.gripmenuon(LaserOrient.global_transform, pointertargetpoint, pointertargetwall, pointertargettype, pointertarget, activetargettube, activetargettubesectorindex, activetargetwall, activetargetnode, activetargetnodewall, pointertargetofstartofropehang)
 	
 func ropepointtargetUV():
 	var pointertargettube = pointertargetwall
@@ -1266,6 +1266,49 @@ func buttonreleased_vrgrip():
 				xcdatalist[0]["undoact"] = 1
 				sketchsystem.actsketchchange(xcdatalist)
 
+		elif pointertarget.get_name() == "SpLine":
+			var ropexc = activetargetnodewall
+			var ropexcnode = activetargetnode
+			if ropexc == null and gripmenu.gripmenupointertargettype == "XCnode":
+				ropexc = gripmenu.gripmenupointertargetwall
+				ropexcnode = gripmenu.gripmenupointertarget
+			if ropexc != null and ropexcnode != null and ropexc.drawingtype == DRAWING_TYPE.DT_ROPEHANG:
+				var ropeseqs = Polynets.makeropenodesequences(ropexc.nodepoints, ropexc.onepathpairs, null, true)
+				var ropeseqstospline = [ ]
+				for ropeseq in ropeseqs:
+					if ropeseq.find(ropexcnode.get_name()) != -1 and len(ropeseq) > 2:
+						ropeseqstospline.push_back(ropeseq)
+				var prevnodepoints = {  }
+				var nextnodepoints = {  }
+				for ropeseq in ropeseqstospline:
+					var a = ropexc.nodepoints[ropeseq[0]]
+					var b = ropexc.nodepoints[ropeseq[-1]]
+					var pre_a = a - (ropexc.nodepoints[ropeseq[1]] - a)*5
+					var post_b = b + (b - ropexc.nodepoints[ropeseq[-2]])*5
+					for i in range(1, len(ropeseq) - 1):
+						var weight = i/(len(ropeseq) - 1.0)
+						var nodename = ropeseq[i]
+						prevnodepoints[nodename] = ropexc.nodepoints[nodename]
+						nextnodepoints[nodename] = a.cubic_interpolate(b, pre_a, post_b, weight)
+				var xcdata = { "name":ropexc.get_name(), 
+							   "prevnodepoints":prevnodepoints,
+							   "nextnodepoints":nextnodepoints
+							 }
+				if len(ropeseqstospline) == 1:
+					var prevonepathpairs = [ ]
+					var e0 = ropeseqstospline[0][0]
+					var e1 = ropeseqstospline[0][-1]
+					for j in range(0, len(ropexc.onepathpairs), 2):
+						if (ropexc.onepathpairs[j] == e0 and ropexc.onepathpairs[j+1] == e1) or (ropexc.onepathpairs[j] == e1 and ropexc.onepathpairs[j+1] == e0):
+							prevonepathpairs.push_back(ropexc.onepathpairs[j])
+							prevonepathpairs.push_back(ropexc.onepathpairs[j+1])
+					if len(prevonepathpairs) == 2:
+						xcdata["prevonepathpairs"] = prevonepathpairs
+						xcdata["newonepathpairs"] = [ ]
+
+				sketchsystem.actsketchchange([xcdata])
+				clearactivetargetnode()
+
 		elif activetargetnode != null and activetargetnodewall.drawingtype == DRAWING_TYPE.DT_ROPEHANG:
 			var ropexcnode = activetargetnode if (pointertargetofstartofropehang == null or len(activetargetnodewall.nodepoints) != 1) else null
 			var ropexc = activetargetnodewall if ropexcnode != null else pointertargetofstartofropehang
@@ -1355,9 +1398,6 @@ func buttonreleased_vrgrip():
 										   "nextnodepoints":nextnodepoints
 										})
 
-			elif pointertarget.get_name() == "SpLine" and ropexcnode != null:
-				print("Do the SpLine-ing of the selected edge here")
-				
 			if len(xcdatalist) != 0:
 				if ropexcnode == null:
 					xcdatalist.push_back({ "name":activetargetnodewall.get_name(), 

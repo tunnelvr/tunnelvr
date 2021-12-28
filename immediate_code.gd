@@ -7,9 +7,12 @@ extends EditorScript
 
 
 func _run():
-	var p0 = Vector3(0,0,0)
-	var p1 = Vector3(1,0,0)
-	var p2 = Vector3(0,1,0)
-	var f = Vector3(0.2,0.5,-100)
-	var v = Vector3(0,0,-0.2)
-	print(Geometry.ray_intersects_triangle(f, v, p0, p1, p2))
+
+	var a = Vector3(0,0,0)
+	var b = Vector3(2,0,0)
+	var c = Vector3(1,1,0)
+	var pre_a = a - (c-a)*5
+	var post_b = b + (b-c)*5
+	for i in range(11):
+		var weight = i/10.0
+		print(a.cubic_interpolate(b, pre_a, post_b, weight))
