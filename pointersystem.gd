@@ -1323,10 +1323,10 @@ func buttonreleased_vrgrip():
 			var ropexc = activetargetnodewall if ropexcnode != null else pointertargetofstartofropehang
 			var dragvec = gripmenu.gripmenupointertargetpoint - activetargetnode.global_transform.origin
 			var ropeseqs = Polynets.makeropenodesequences(ropexc.nodepoints, ropexc.onepathpairs, null, true)
-			
+			var dragvecL = ropexc.transform.basis.xform_inv(dragvec)
+							
 			var xcdatalist = [ ]
 			if pointertarget.get_name() == "DragXC":
-				var dragvecL = ropexc.transform.basis.xform_inv(dragvec)
 				xcdatalist.push_back({ "name":ropexc.get_name(), 
 									   "prevtransformpos":ropexc.transform,
 									   "transformpos":ropexc.transform.translated(dragvecL)
@@ -1337,7 +1337,6 @@ func buttonreleased_vrgrip():
 				var ropeseqsselected = Polynets.ropeseqsfindsplitatnode(ropeseqs, ropexcnodename)
 				var prevnodepoints = { ropexcnodename:activetargetnodewall.nodepoints[ropexcnodename] }
 				var nextnodepoints = { ropexcnodename:ropexc.transform.xform_inv(gripmenu.gripmenupointertargetpoint) }
-				var dragvecL = ropexc.transform.basis.xform_inv(dragvec)
 				for ropeseq in ropeseqsselected:
 					for i in range(1, len(ropeseq) - 1):
 						var nodename = ropeseq[i]
@@ -1350,7 +1349,6 @@ func buttonreleased_vrgrip():
 				
 			elif pointertarget.get_name() == "ProjectXC" or pointertarget.get_name() == "DistortXC":
 				var nodestoproject = { }
-
 				if ropexcnode != null:
 					for j in range(len(ropeseqs)):
 						var ropeseq = ropeseqs[j]
@@ -1362,7 +1360,6 @@ func buttonreleased_vrgrip():
 					var cuboidfacs = Polynets.cuboidfromropenodesequences(ropexc.nodepoints, ropeseqs)
 					if cuboidfacs != null:
 						var targetpointL = ropexc.transform.xform_inv(activetargetnode.global_transform.origin)
-						var dragvecL = ropexc.transform.basis.xform_inv(dragvec)
 						var cuboidfac = Polynets.findclosestcuboidshellface(targetpointL, dragvecL, ropexc.nodepoints, cuboidfacs[1])
 						for ropeseq in cuboidfac:
 							for nodename in ropeseq:
@@ -1406,6 +1403,45 @@ func buttonreleased_vrgrip():
 										   "prevnodepoints":prevnodepoints,
 										   "nextnodepoints":nextnodepoints
 										})
+			elif pointertarget.get_name() == "CopyRock" and ropexcnode != null:
+				var ropexcnodename = ropexcnode.get_name()
+				var ropeseqsselected = [ ]
+				for ropeseq in ropeseqs:
+					if ropeseq.find(ropexcnodename)	!= -1:
+						ropeseqsselected.push_back(ropeseq)
+				var newropexcnodename = null
+				if len(ropeseqsselected) == 1:
+					var nextnodepoints = { }
+					var newonepathpairs = [ ]
+					var ropeseq = ropeseqsselected[0]
+					var prevnewnodename = null
+					for i in range(len(ropeseq) - (1 if ropeseq[0] == ropeseq[-1] else 0)):
+						var nodename = ropeseq[i]
+						var newnodename = ropexc.newuniquexcnodename("k")
+						if nodename == ropexcnodename:
+							newropexcnodename = newnodename
+						nextnodepoints[newnodename] = ropexc.nodepoints[nodename] + dragvecL
+						if i != 0:
+							newonepathpairs.push_back(prevnewnodename)
+							newonepathpairs.push_back(newnodename)
+						if i == 0 or i == len(ropeseq) - 1:
+							newonepathpairs.push_back(nodename)
+							newonepathpairs.push_back(newnodename)
+						prevnewnodename = newnodename
+					if ropeseq[0] == ropeseq[-1]:
+						newonepathpairs.push_back(newonepathpairs[-1])
+						newonepathpairs.push_back(newonepathpairs[1])
+						if newropexcnodename != null and newonepathpairs[0] != ropexcnodename:
+							newonepathpairs.push_back(ropexcnodename)
+							newonepathpairs.push_back(newropexcnodename)
+
+					xcdatalist.push_back({ "name":ropexc.get_name(), 
+										   "prevnodepoints":{ },
+										   "nextnodepoints":nextnodepoints,
+										   "prevonepathpairs":[ ],
+										   "newonepathpairs":newonepathpairs
+										})
+				
 
 			if len(xcdatalist) != 0:
 				if ropexcnode == null:

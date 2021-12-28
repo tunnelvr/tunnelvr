@@ -567,7 +567,6 @@ func mergexcrpcdata(xcdata):
 				if shortestpathseglengthsq == -1.0 or vlensq < shortestpathseglengthsq:
 					shortestpathseglengthsq = vlensq
 		shortestpathseglength = sqrt(max(0, shortestpathseglengthsq))
-		print("shortestpathseglength ", shortestpathseglength)
 		nodepointvalence1s = { } 
 		for e in nodepointvalences:
 			if nodepointvalences[e] == 1:

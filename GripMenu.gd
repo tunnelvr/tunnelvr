@@ -99,7 +99,8 @@ func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointert
 		else:
 			gmlist.push_back("ProjectXC")
 			gmlist.push_back("SpLine")
-				
+			gmlist.push_back("CopyRock")
+									
 	elif gripmenupointertargettype == "XCdrawing" and gripmenupointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
 		gmlist = ["NewXC", "toPaper"]
 			
