@@ -7,5 +7,9 @@ extends EditorScript
 
 
 func _run():
-	var x = "sdfsdf  #potresesd/   "
-	print(x.split(":", true, 1)[-1].strip_edges().lstrip("#*"))
+	var p0 = Vector3(0,0,0)
+	var p1 = Vector3(1,0,0)
+	var p2 = Vector3(0,1,0)
+	var f = Vector3(0.2,0.5,-100)
+	var v = Vector3(0,0,-0.2)
+	print(Geometry.ray_intersects_triangle(f, v, p0, p1, p2))

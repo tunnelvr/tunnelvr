@@ -1271,7 +1271,7 @@ func buttonreleased_vrgrip():
 			var ropexc = activetargetnodewall if ropexcnode != null else pointertargetofstartofropehang
 			var dragvec = gripmenu.gripmenupointertargetpoint - activetargetnode.global_transform.origin
 			var ropeseqs = Polynets.makeropenodesequences(ropexc.nodepoints, ropexc.onepathpairs, null, true)
-
+			
 			var xcdatalist = [ ]
 			if pointertarget.get_name() == "DragXC":
 				var dragvecL = ropexc.transform.basis.xform_inv(dragvec)
@@ -1296,15 +1296,27 @@ func buttonreleased_vrgrip():
 									   "nextnodepoints":nextnodepoints
 									})
 				
-			elif pointertarget.get_name() == "ProjectXC" and ropexcnode != null:
+			elif pointertarget.get_name() == "ProjectXC" or pointertarget.get_name() == "DistortXC":
 				var nodestoproject = { }
-				for j in range(len(ropeseqs)):
-					var ropeseq = ropeseqs[j]
-					var i = ropeseq.find(ropexcnode.get_name())
-					if i > 0 and i < len(ropeseq) - 1:
-						for nodename in ropeseq:
-							nodestoproject[nodename] = 1
+
+				if ropexcnode != null:
+					for j in range(len(ropeseqs)):
+						var ropeseq = ropeseqs[j]
+						var i = ropeseq.find(ropexcnode.get_name())
+						if i > 0 and i < len(ropeseq) - 1:
+							for nodename in ropeseq:
+								nodestoproject[nodename] = 1
+				else:
+					var cuboidfacs = Polynets.cuboidfromropenodesequences(ropexc.nodepoints, ropeseqs)
+					if cuboidfacs != null:
+						var targetpointL = ropexc.transform.xform_inv(activetargetnode.global_transform.origin)
+						var dragvecL = ropexc.transform.basis.xform_inv(dragvec)
+						var cuboidfac = Polynets.findclosestcuboidshellface(targetpointL, dragvecL, ropexc.nodepoints, cuboidfacs[1])
+						for ropeseq in cuboidfac:
+							for nodename in ropeseq:
+								nodestoproject[nodename] = 1
 							
+				var projectmode = pointertarget.get_name() == "ProjectXC"
 				if len(nodestoproject) != 0:
 					var prevnodepoints = { }
 					var nextnodepoints = { } 
@@ -1318,12 +1330,13 @@ func buttonreleased_vrgrip():
 					for nodename in nodestoproject:
 						var orgnodepoint = ropexc.transform.xform(ropexc.nodepoints[nodename])
 						var dprojnodepoint = orgnodepoint + dragvec
-						raycast.transform.origin = orgnodepoint - dragvecback
-						raycast.cast_to = dprojnodepoint + dragvecunit*handflickmotiongestureposition_shortpos_length - raycast.transform.origin
-						raycast.force_raycast_update()
-						if raycast.is_colliding():
-							dprojnodepoint = raycast.get_collision_point()
-							print(raycast.get_collider().get_name())
+						if projectmode:
+							raycast.transform.origin = orgnodepoint - dragvecback
+							raycast.cast_to = dprojnodepoint + dragvecunit*handflickmotiongestureposition_shortpos_length - raycast.transform.origin
+							raycast.force_raycast_update()
+							if raycast.is_colliding():
+								dprojnodepoint = raycast.get_collision_point()
+								print(raycast.get_collider().get_name())
 						prevnodepoints[nodename] = ropexc.nodepoints[nodename]
 						nextnodepoints[nodename] = ropexc.transform.xform_inv(dprojnodepoint)
 
@@ -1341,6 +1354,9 @@ func buttonreleased_vrgrip():
 										   "prevnodepoints":prevnodepoints,
 										   "nextnodepoints":nextnodepoints
 										})
+
+			elif pointertarget.get_name() == "SpLine" and ropexcnode != null:
+				print("Do the SpLine-ing of the selected edge here")
 				
 			if len(xcdatalist) != 0:
 				if ropexcnode == null:

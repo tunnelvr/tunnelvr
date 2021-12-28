@@ -759,46 +759,88 @@ static func slicerungsatintermediatecuberail(tuberail0, tuberail1, rung0k, rung1
 
 	return tuberailk
 	
+static func makerailcuboidshellmeshface(surfaceTool, nodepoints, cuboidrailfac):
+	var quadrail0 = cuboidrailfac[0]
+	var quadrail1 = cuboidrailfac[1]
+	var railseqrung0 = cuboidrailfac[2]
+	var railseqrung1 = cuboidrailfac[3]
+	var tuberails = initialcuboidrails(nodepoints, quadrail0, quadrail1)
+	var tuberail0 = tuberails[0]
+	var tuberail1 = tuberails[1]
+		
+	if len(railseqrung0) != 0 or len(railseqrung1) != 0:
+		var zi = sidecubeintermedrail(nodepoints, tuberail0, tuberail1, railseqrung0, true)
+		var zi1 = sidecubeintermedrail(nodepoints, tuberail0, tuberail1, railseqrung1, false)
+		var railsequencerung0 = [ ]
+		var railsequencerung1 = [ ]
+		intermediaterailsequence2(zi, zi1, railsequencerung0, railsequencerung1)
+		assert(len(railsequencerung0) == len(railsequencerung1))
+		var tuberailk0 = tuberail0
+		for k2 in range(0, len(railsequencerung0)+2, 2):
+			var tuberailk1
+			if k2 < len(railsequencerung0):
+				tuberailk1 = slicerungsatintermediatecuberail(tuberail0, tuberail1, railsequencerung0[k2], railsequencerung1[k2], railsequencerung0[k2+1], railsequencerung1[k2+1])
+			else:
+				tuberailk1 = tuberail1
+			triangulatetuberails(surfaceTool, tuberailk0, tuberailk1)
+			tuberailk0 = tuberailk1
+	else:
+		triangulatetuberails(surfaceTool, tuberail0, tuberail1)
+
 static func makerailcuboidshellmesh(nodepoints, cuboidrailfacs):
 	var arraymesh = ArrayMesh.new()
 	var surfaceTool = SurfaceTool.new()
 	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
-	var nodepointsum = Vector3(0, 0, 0)
-	for pt in nodepoints.values():
-		nodepointsum += pt
-	var cuboidcentre = nodepointsum/len(nodepoints)
 	for cuboidrailfac in cuboidrailfacs:
-		var quadrail0 = cuboidrailfac[0]
-		var quadrail1 = cuboidrailfac[1]
-		var railseqrung0 = cuboidrailfac[2]
-		var railseqrung1 = cuboidrailfac[3]
-		var tuberails = initialcuboidrails(nodepoints, quadrail0, quadrail1)
-		var tuberail0 = tuberails[0]
-		var tuberail1 = tuberails[1]
-			
-		if len(railseqrung0) != 0 or len(railseqrung1) != 0:
-			var zi = sidecubeintermedrail(nodepoints, tuberail0, tuberail1, railseqrung0, true)
-			var zi1 = sidecubeintermedrail(nodepoints, tuberail0, tuberail1, railseqrung1, false)
-			var railsequencerung0 = [ ]
-			var railsequencerung1 = [ ]
-			intermediaterailsequence2(zi, zi1, railsequencerung0, railsequencerung1)
-			assert(len(railsequencerung0) == len(railsequencerung1))
-			var tuberailk0 = tuberail0
-			for k2 in range(0, len(railsequencerung0)+2, 2):
-				var tuberailk1
-				if k2 < len(railsequencerung0):
-					tuberailk1 = slicerungsatintermediatecuberail(tuberail0, tuberail1, railsequencerung0[k2], railsequencerung1[k2], railsequencerung0[k2+1], railsequencerung1[k2+1])
-				else:
-					tuberailk1 = tuberail1
-				triangulatetuberails(surfaceTool, tuberailk0, tuberailk1)
-				tuberailk0 = tuberailk1
-				
-		else:
-			triangulatetuberails(surfaceTool, tuberail0, tuberail1)
-			
+		makerailcuboidshellmeshface(surfaceTool, nodepoints, cuboidrailfac)
 	surfaceTool.generate_normals()
 	surfaceTool.commit(arraymesh)
 	return arraymesh
+
+static func triangledist(targetpoint, p0, p1, p2):
+	var v1 = p1 - p0
+	var v2 = p2 - p0
+	var v0 = p0 - targetpoint
+#	(v0 + v1*lam + v2*mu) . v1 = 0
+#	(v0 + v1*lam + v2*mu) . v2 = 0
+#	v0v1 + v1v1*lam + v1v2*mu = 0
+#	v0v2 + v1v2*lam + v2v2*mu = 0
+
+
+#	v0.v2*v2.v1/v2.v2 + v1.v2*v2.v1/v2.v2*lam + v2.v1*mu = 0
+#	v0.v2*v2.v1/v2.v2-v0.v1 + (v1.v2*v2.v1/v2.v2-v1.v1)*lam = 0
+	var v0v1 = v0.dot(v1)
+	var v0v2 = v0.dot(v2)
+	var v1v2 = v1.dot(v2)
+	var v1v1 = v1.dot(v1)
+	var v2v2 = v2.dot(v2)
+	var lamnum = -v0v2*v1v2/v2v2 + v0v1
+	var lamden = v1v2*v1v2/v2v2 - v1v1
+#	v0.v2*v2.v1/v2.v2-v0.v1 + (v1.v2*v2.v1/v2.v2-v1.v1)*lam = 0
+
+
+
+static func findclosestcuboidshellface(targetpoint, dragvec, nodepoints, cuboidrailfacs):
+	var closestcuberailfac = [ ]
+	var closestdist = -1.0
+	var vrayfrom = targetpoint + dragvec
+	var vraydir = -dragvec
+	for cuboidrailfac in cuboidrailfacs:
+		var surfaceTool = SurfaceTool.new()
+		surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
+		makerailcuboidshellmeshface(surfaceTool, nodepoints, cuboidrailfac)
+		var sarrays = surfaceTool.commit_to_arrays()
+		var vertices = sarrays[ArrayMesh.ARRAY_VERTEX]
+		print(len(vertices))
+		for i in range(2, len(vertices), 3):
+			var vt = Geometry.ray_intersects_triangle(vrayfrom, vraydir, vertices[i-2], vertices[i-1], vertices[i])
+			if vt != null:
+				var dist = targetpoint.distance_to(vt)
+				if closestdist == -1.0 or dist < closestdist:
+					closestcuberailfac = cuboidrailfac
+					closestdist = dist
+	return closestcuberailfac
+
 
 static func pickpolysindex(polys, xcdrawinglink, js):
 	var pickpolyindex = -1
