@@ -4,6 +4,7 @@ var gripmenupointertargetpoint = Vector3(0,0,0)
 var gripmenulaservector = Vector3(0,0,1)
 var gripmenupointertargetwall = null
 var gripmenupointertargettype = ""
+var gripmenupointertarget = null
 var gripmenuactivetargettubesectorindex = 0
 var gripmenuactivetargetnode = null
 var tubesectormaterialname = ""
@@ -67,9 +68,10 @@ func setgripmenupointer(pointertarget):
 	else:
 		pointertarget.get_node("MeshInstance").get_surface_material(0).albedo_color = Color("#FFCCCC")
 
-func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointertargettype, activetargettube, activetargettubesectorindex, activetargetwall, activetargetnode, activetargetnodewall, pointertargetofstartofropehang):
+func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointertargettype, pointertarget, activetargettube, activetargettubesectorindex, activetargetwall, activetargetnode, activetargetnodewall, pointertargetofstartofropehang):
 	gripmenupointertargetpoint = pointertargetpoint if pointertargetpoint != null else controllertrans.origin
 	gripmenupointertargetwall = pointertargetwall
+	gripmenupointertarget = pointertarget
 	gripmenulaservector = -controllertrans.basis.z
 	gripmenupointertargettype = pointertargettype
 	gripmenuactivetargettubesectorindex = activetargettubesectorindex
@@ -94,7 +96,10 @@ func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointert
 		gmlist = [ "DragXC", "DistortXC" ]
 		if pointertargetofstartofropehang != null and len(activetargetnodewall.nodepoints) == 1:
 			gmlist.push_back("ProjectXC")
-	
+		else:
+			gmlist.push_back("ProjectXC")
+			gmlist.push_back("SpLine")
+				
 	elif gripmenupointertargettype == "XCdrawing" and gripmenupointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
 		gmlist = ["NewXC", "toPaper"]
 			
@@ -145,6 +150,8 @@ func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointert
 		gmlist = ["NewXC", "HideXC"]
 		if pointertargetwall.notubeconnections_so_delxcable():
 			gmlist.push_back("DelXC")
+		if pointertargetwall.drawingtype == DRAWING_TYPE.DT_ROPEHANG:
+			gmlist.push_back("SpLine")
 
 	else:
 		gmlist = ["NewXC", "Undo"]

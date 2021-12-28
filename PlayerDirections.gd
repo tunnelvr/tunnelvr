@@ -149,7 +149,7 @@ func _on_button_pressed(p_button):
 			#	print("clicked turn (touchpad type), disabling non-click snap rotate")
 			#	joyposxrotsnaphysteresis = 2
 
-	elif p_button == BUTTONS.VR_BUTTON_BY:
+	elif not Tglobal.questhandtrackingactive and p_button == BUTTONS.VR_BUTTON_BY:
 		pointersystem.set_handflickmotiongestureposition(pointersystem.handflickmotiongestureposition_shortpos if Tglobal.handflickmotiongestureposition == pointersystem.handflickmotiongestureposition_normal else pointersystem.handflickmotiongestureposition_normal)
 		
 func _on_button_release(p_button):

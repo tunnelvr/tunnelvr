@@ -567,6 +567,7 @@ func mergexcrpcdata(xcdata):
 				if shortestpathseglengthsq == -1.0 or vlensq < shortestpathseglengthsq:
 					shortestpathseglengthsq = vlensq
 		shortestpathseglength = sqrt(max(0, shortestpathseglengthsq))
+		print("shortestpathseglength ", shortestpathseglength)
 		nodepointvalence1s = { } 
 		for e in nodepointvalences:
 			if nodepointvalences[e] == 1:
@@ -700,7 +701,7 @@ func updatelinearropepaths():
 	for nname in nodepoints:
 		if nname[0] == "a":
 			countanchors += 1
-	resetclosewidthsca(1.0 if countanchors < 5 else 0.5)
+	resetclosewidthsca(1.0)
 	var surfaceTool = SurfaceTool.new()
 	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
 	middlenodes = ropepathseqribbons(surfaceTool)
@@ -767,9 +768,9 @@ func updatexcpaths():
 	var newmesh = surfaceTool.commit()
 	if pathlines.mesh == null or pathlines.get_surface_material_count() == 0:
 		pathlines.mesh = newmesh
-		assert(pathlines.get_surface_material_count() != 0)
-		var materialsystem = get_node("/root/Spatial/MaterialSystem")
-		pathlines.set_surface_material(0, materialsystem.pathlinematerial("normal"))
+		if pathlines.get_surface_material_count() != 0:
+			var materialsystem = get_node("/root/Spatial/MaterialSystem")
+			pathlines.set_surface_material(0, materialsystem.pathlinematerial("normal"))
 	else:
 		var m = pathlines.get_surface_material(0)
 		pathlines.mesh = newmesh

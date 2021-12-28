@@ -9,7 +9,7 @@ top_radius = 0.1
 bottom_radius = 0.1
 height = 0.2
 radial_segments = 6
-rings = 1
+rings = 0
 
 [node name="XCnode" type="StaticBody"]
 collision_layer = 8
