@@ -295,11 +295,11 @@ func set_handflickmotiongestureposition(lhandflickmotiongestureposition):
 	if Tglobal.handflickmotiongestureposition == 1:
 		activelaserroot.get_node("LaserSpot").set_surface_material(0, materialsystem.lasermaterialN((1 if activetargetnode != null else 0) + 2))
 		LaserOrient.get_node("Length/Laser").set_surface_material(0, materialsystem.lasermaterial("laserinair"))
-		setpointertarget(LaserOrient, null, -1.0)
+		setpointertarget(activelaserroot, activelaserroot.get_node("RayCast"), handflickmotiongestureposition_shortpos_length)
 		activelaserroot.get_node("LaserSpot").visible = true
 	else:
 		LaserOrient.get_node("Length/Laser").set_surface_material(0, materialsystem.lasermaterial("laser"))
-		setpointertarget(LaserOrient, null, -1.0)
+		setpointertarget(activelaserroot, activelaserroot.get_node("RayCast"), -1.0)
 		
 func panelsendmousemotiontopointertarget():
 	var guipanel = pointertarget
