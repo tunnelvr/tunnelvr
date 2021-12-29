@@ -10,6 +10,7 @@ var verropropehang_out = null
 var threadtoexit = false
 
 var ropehangsinprocess = [ ]
+const ropestretchratiolabel = false
 
 func _exit_tree():
 	finishveropthread()
@@ -57,7 +58,14 @@ func clearallverletactivity():
 
 func setropenodelabel(ropehang, ropenodename, labelstring):
 	var labelgenerator = get_node("/root/Spatial/LabelGenerator")
-	var xcn = ropehang.get_node("../XCnodes").get_node(ropenodename)
+	var ropexc = ropehang.get_parent()
+	var xcn = ropexc.get_node("XCnodes").get_node(ropenodename)
+	var labelparavec = Vector3(0,0,0)
+	for j in range(0, len(ropexc.onepathpairs), 2):
+		if ropexc.onepathpairs[j] == ropenodename:
+			labelparavec = ropexc.nodepoints[ropexc.onepathpairs[j+1]] - ropexc.nodepoints[ropenodename]
+		elif ropexc.onepathpairs[j+1] == ropenodename:
+			labelparavec = ropexc.nodepoints[ropexc.onepathpairs[j]] - ropexc.nodepoints[ropenodename]
 	if not xcn.has_node("RopeLabel"):
 		var materialsystem = get_node("/root/Spatial/MaterialSystem")
 		var ropelabelmaterialnode = materialsystem.get_node("labelmaterials/RopeLabel")
@@ -67,8 +75,9 @@ func setropenodelabel(ropehang, ropenodename, labelstring):
 		noderopelabel.set_surface_material(0, mat)
 		xcn.add_child(noderopelabel)
 	xcn.get_node("RopeLabel").visible = true
-	print(" labelstring ", labelstring)
-	labelgenerator.remainingropelabels.push_back([ropehang.get_parent().get_name(), ropenodename, labelstring])
+	xcn.get_node("RopeLabel").rotation_degrees.y = 180 - rad2deg(Vector2(labelparavec.x, labelparavec.z).angle())
+	print(" labelstring ", labelstring, "  angle: ", xcn.get_node("RopeLabel").rotation_degrees.y)
+	labelgenerator.remainingropelabels.push_back([ropexc.get_name(), ropenodename, labelstring])
 	labelgenerator.restartlabelmakingprocess(null)
 
 func addropehang(ropehang):
@@ -141,8 +150,11 @@ func _process(delta):
 				if (verletmaxvelocity < 0.0002 and verropropehang.prevverletstretch != -1 and abs(verropropehang.prevverletstretch - verletstretch) < 0.01) or \
 						(verropropehang.verletiterations > 10):
 					if len(verropropehang.oddropeverts) == 2:
-						var stretchratio = (verropropehang.totalstretchropeleng - verropropehang.totalropeleng)/verropropehang.totalropeleng
-						setropenodelabel(verropropehang, verropropehang.oddropeverts[-1], "%+.0f%%" % (stretchratio*100))
+						if ropestretchratiolabel:
+							var stretchratio = (verropropehang.totalstretchropeleng - verropropehang.totalropeleng)/verropropehang.totalropeleng
+							setropenodelabel(verropropehang, verropropehang.oddropeverts[-1], "%+.0f%%" % (stretchratio*100))
+						else:
+							setropenodelabel(verropropehang, verropropehang.oddropeverts[0], "%.2fm"%verropropehang.totalstretchropeleng)
 					ropehangsinprocess.erase(verropropehang)
 
 				else:
