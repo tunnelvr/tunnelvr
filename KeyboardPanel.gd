@@ -121,13 +121,12 @@ func _on_button_down(b):
 	if (!ev): return;
 	viewportforvirtualkeyboard.input(ev)
 
-	var viewport_point = b.rect_position + b.rect_size*0.5
-	var local_point2 = viewport_point/($Viewport.size)
+	var kviewport_point = b.rect_position + b.rect_size*0.5
+	var local_point2 = kviewport_point/($Viewport.size)
 	var local_point = Vector3(local_point2.x, -local_point2.y, 0)
 	local_point -= Vector3(0.5, -0.5, 0) # X is about 0 to 1, Y is about 0 to -1.
 	local_point *= get_node("CollisionShape").shape.extents * 2
 	var raycastcollisionpoint = global_transform.xform(local_point)
-	var sketchsystem = get_node("/root/Spatial/SketchSystem")
 	Tglobal.soundsystem.quicksound("ClickSound", raycastcollisionpoint)
 	Tglobal.soundsystem.shortvibrate(false, 0.03, 1.0)
 			
