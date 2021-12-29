@@ -50,10 +50,19 @@ func initplayerappearance_me():
 	#print("cmdline args ", OS.get_cmdline_args())
 
 	
+onready var undergroundenv = load("res://environments/underground_env.tres")
+func togglefog():
+	if undergroundenv.resource_path != "res://environments/fogunderground_env.tres":
+		undergroundenv = load("res://environments/fogunderground_env.tres")
+		undergroundenv.fog_depth_end = $HeadCam.far
+	else:
+		undergroundenv = load("res://environments/underground_env.tres")
+	setheadtorchlight(guipanel3d.get_node("Viewport/GUI/Panel/ButtonHeadtorch").pressed)
+		
 func setheadtorchlight(torchon):
 	if torchon:
 		$HeadCam/HeadtorchLight.visible = true
-		get_node("/root/Spatial/WorldEnvironment").environment = preload("res://environments/underground_env.tres")
+		get_node("/root/Spatial/WorldEnvironment").environment = undergroundenv
 		# waiting for godot 4  https://github.com/godotengine/godot/issues/19438
 		#get_node("/root/Spatial").playerMe.get_node("HeadCam").cull_mask &= 1048575 - 4096
 		get_node("/root/Spatial/WorldEnvironment/DirectionalLight").visible = false

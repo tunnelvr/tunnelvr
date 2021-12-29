@@ -367,6 +367,10 @@ func _on_switchtest(index):
 		setguipanelhide()
 		SwitchTest.selected = 0
 		
+	elif nssel == "Toggle Fog":
+		playerMe.togglefog()
+		SwitchTest.selected = 0
+		
 	elif prevnssel.begins_with("opt:") or nssel.begins_with("opt:"):
 		var n = 0
 		var showall = (nssel == "normal")
