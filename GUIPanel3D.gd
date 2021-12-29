@@ -379,6 +379,7 @@ func _on_switchtest(index):
 				if true or (xcdrawing.drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_GHOSTLY_B) != 0:
 					xcdrawing.get_node("XCdrawingplane").visible = showall
 					n += 1
+		print("Number of floor textures hidden: ", n)
 		if nssel == "opt: all grey":
 			var materialsystem = get_node("/root/Spatial/MaterialSystem")
 			for xctube in sketchsystem.get_node("XCtubes").get_children():
@@ -782,7 +783,6 @@ func _on_resourceoptions_selected(index):
 				xcproperties["xcresource"] = xcselecteddrawing_forrsourcefunctions["xcresource"]
 			if sketchsystem.pointersystem.activetargetnode != null:
 				xcproperties["snodename"] = sketchsystem.pointersystem.activetargetnode.get_name()
-
 			$Viewport/GUI/Panel/EditColorRect/TextEdit.text = JSON.print(xcproperties, "  ", true)
 		else:
 			setpanellabeltext("No XCdrawing selected")

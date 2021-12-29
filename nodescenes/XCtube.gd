@@ -366,7 +366,9 @@ func maketubepolyassociation_andreorder(xcdrawing0, xcdrawing1):
 		reordersecondvalstoavoiddoublelooping(ila)
 		var newxcdrawinglink = [ ]
 		var newxcsectormaterials = [ ]
-		var newxclinkintermediatenodes = null if xclinkintermediatenodes == null else [ ]
+		var newxclinkintermediatenodes = null
+		if xclinkintermediatenodes != null:
+			 newxclinkintermediatenodes = [ ]
 		for i in range(len(ila)):
 			newxcdrawinglink.append(poly0[ila[i][0]])
 			newxcdrawinglink.append(poly1[ila[i][1]])
@@ -1059,7 +1061,7 @@ func removexclinkintermediatenode(j, dv):
 func insertxclinkintermediatenode(j, dv):
 	if xclinkintermediatenodes == null:
 		xclinkintermediatenodes = [ ]
-		for ji in range(len(xcdrawinglink)/2):
+		for _ji in range(len(xcdrawinglink)/2):
 			xclinkintermediatenodes.push_back([])
 	assert(len(xclinkintermediatenodes) == len(xcdrawinglink)/2)
 	var i = 0

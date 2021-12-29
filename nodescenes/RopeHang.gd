@@ -119,7 +119,7 @@ func derivenverts(nodepoints, ropesequences):
 	prev_collideverts = nverts.duplicate()
 	nropeseqLengsMeasured = nropeseqLengs.duplicate()
 	collidenormals = [ ]
-	for i in range(len(nverts)):
+	for _i in range(len(nverts)):
 		collidenormals.push_back(null)
 	totalstretchropeleng = totalropeleng
 	return middlenodes
