@@ -142,10 +142,6 @@ func _on_mouse_entered():
 
 func _create_button(_parent, text, x, y, w = 1, h = 1):
 	var b = _refrence_button.duplicate()
-	if text[0] == "&" and text[-1] == ";":
-		assert ("&#0041;".xml_unescape() == ")")  # https://github.com/godotengine/godot/issues/56298
-		text = ("&#%d;" % ("0x"+text.substr(2, 4)).hex_to_int())
-		text = text.xml_unescape()	
 	b.text = text;
 	
 	if (b.text.length() == 1):
@@ -182,21 +178,21 @@ func _create_keyboard_buttons():
 	_toggle_symbols_button.set_rotation(deg2rad(90.0));
 	_toggle_symbols_button.toggle_mode = true;
 	
-	_shift_button = _create_button(_virtual_keyboard, "&#21E7;", 0, 3, 1, 2);
+	_shift_button = _create_button(_virtual_keyboard, "&#x21E7;".xml_unescape(), 0, 3, 1, 2);
 	_shift_button.toggle_mode = true;
 	
-	_delete_button = _create_button(_virtual_keyboard, "&#232B;", 11, 1, 1, 1); # "&#232B;".xml_unescape()
-	_clear_button = _create_button(_virtual_keyboard, "&#25A1;", 11, 2, 1, 1);
-	_enter_button = _create_button(_virtual_keyboard, "&#23CE;", 11, 3, 1, 2);
+	_delete_button = _create_button(_virtual_keyboard, "&#x232B;".xml_unescape(), 11, 1, 1, 1); # "&#x232B;".xml_unescape()
+	_clear_button = _create_button(_virtual_keyboard, "&#x25A1;".xml_unescape(), 11, 2, 1, 1);
+	_enter_button = _create_button(_virtual_keyboard, "&#x23CE;".xml_unescape(), 11, 3, 1, 2);
 	
 	_space_button = _create_button(_virtual_keyboard, "Space", 2, 4, 6, 1);
 
-	_left_button = _create_button(_virtual_keyboard, "&#2B05;", 8, 4, 1, 1);
-	_up_button = _create_button(_virtual_keyboard, "&#2B06;", 9, 4, 1, 1);
-	_down_button = _create_button(_virtual_keyboard, "&#2B07;", 9, 4, 1, 1);
-	_right_button = _create_button(_virtual_keyboard, "&#27A1;", 10, 4, 1, 1);
+	_left_button = _create_button(_virtual_keyboard, "&#x2B05;".xml_unescape(), 8, 4, 1, 1);
+	_up_button = _create_button(_virtual_keyboard, "&#x2B06;".xml_unescape(), 9, 4, 1, 1);
+	_down_button = _create_button(_virtual_keyboard, "&#x2B07;".xml_unescape(), 9, 4, 1, 1);
+	_right_button = _create_button(_virtual_keyboard, "&#x27A1;".xml_unescape(), 10, 4, 1, 1);
 	
-	_cancel_button = _create_button(_virtual_keyboard, "&#2327;".xml_unescape(), 11, 0, 1, 1);
+	_cancel_button = _create_button(_virtual_keyboard, "&#x2327;".xml_unescape(), 11, 0, 1, 1);
 	_up_button.rect_scale = Vector2(1, 0.5)
 	_down_button.rect_scale = Vector2(1, 0.5)
 	_down_button.rect_position.y += B_SIZE/2
