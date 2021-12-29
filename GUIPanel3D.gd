@@ -774,13 +774,10 @@ func _on_resourceoptions_selected(index):
 		$Viewport/GUI/Panel/ResourceOptions.selected = index
 	var nrosel = $Viewport/GUI/Panel/ResourceOptions.get_item_text(index)
 	print("Select resourceoption: ", nrosel)
-	var xcselecteddrawing = sketchsystem.pointersystem.activetargetnodewall
 	if nrosel == "Print XCproperties":
 		if xcselecteddrawing_forrsourcefunctions != null:
 			var xcproperties = xcselecteddrawing_forrsourcefunctions.additionalproperties.duplicate() if xcselecteddrawing_forrsourcefunctions.additionalproperties != null else {}
 			xcproperties["xcname"] = xcselecteddrawing_forrsourcefunctions.get_name()
-			if xcselecteddrawing_forrsourcefunctions["xcresource"]:
-				xcproperties["xcresource"] = xcselecteddrawing_forrsourcefunctions["xcresource"]
 			if xcselecteddrawing_forrsourcefunctions["xcresource"]:
 				xcproperties["xcresource"] = xcselecteddrawing_forrsourcefunctions["xcresource"]
 			if sketchsystem.pointersystem.activetargetnode != null:
