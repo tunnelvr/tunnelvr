@@ -41,7 +41,7 @@ func verropthread_function(userdata):
 		if lthreadtoexit:
 			break
 		if lverropropehang != null:
-			for i in range(10):
+			for _i in range(10):
 				lverropropehang.verletprojstep()
 				lverropropehang.verletpullstep()
 				lverropropehang.verletpullstep()

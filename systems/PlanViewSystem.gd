@@ -539,7 +539,6 @@ func _process(delta):
 			lastoptionaltxcdata["timestamp"] = txcdata["timestamp"]
 
 			var d = activetargetfloor
-			var drawingplane = d.get_node("XCdrawingplane")
 			var sfac = delta*8
 			if joyposmove != Vector3(0,0,0):
 				txcdata["prevtransformpos"] = d.transform

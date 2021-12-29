@@ -177,7 +177,7 @@ func _process(delta):
 		if workingxccentrelinedrawing != null:
 			for i in range(len(workingxcnodenamelist)):
 				var workingxcnodename = workingxcnodenamelist[i][1]
-				var workingxcnodelabel = workingxcnodenamelist[i][2]
+				#var workingxcnodelabel = workingxcnodenamelist[i][2]
 				var lineimgwidth = numcharsofeachline[i]*monospacefontcharwidth
 				var workingxcnode = workingxccentrelinedrawing.get_node("XCnodes").get_node_or_null(workingxcnodename)
 				if workingxcnode == null:

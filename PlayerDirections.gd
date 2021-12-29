@@ -92,7 +92,7 @@ func _physics_process(delta):
 		joyposstrafe = HandLeft.joypos.x if forebackmovementjoystick == DRAWING_TYPE.JOYPOS_LEFTCONTROLLER else HandRight.joypos.x
 	if snapturnemovementjoystick != DRAWING_TYPE.JOYPOS_DISABLED:
 		if snapturnemovementjoystick == DRAWING_TYPE.JOYPOS_RIGHTCONTROLLER_PADDOWN:
-			joypossnapturn = HandRight.joypos.x*(2 if HandRight.vrpadbuttonheld else 0.2)
+			joypossnapturn = HandRight.joypos.x*(2.0 if HandRight.vrpadbuttonheld else 0.2)
 		else:
 			joypossnapturn = HandLeft.joypos.x if snapturnemovementjoystick == DRAWING_TYPE.JOYPOS_LEFTCONTROLLER else HandRight.joypos.x
 
