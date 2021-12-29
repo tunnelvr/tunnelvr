@@ -1089,7 +1089,7 @@ albedo_color = Color( 1, 0.156863, 0.156863, 0.741176 )
 [sub_resource type="SpatialMaterial" id=242]
 flags_unshaded = true
 params_diffuse_mode = 1
-albedo_color = Color( 0.737255, 0.156863, 1, 1 )
+albedo_color = Color( 0.192157, 0.203922, 1, 1 )
 
 [sub_resource type="QuadMesh" id=168]
 
