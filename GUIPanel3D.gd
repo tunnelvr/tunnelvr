@@ -903,9 +903,6 @@ func _on_resourceoptions_selected(index):
 	elif nrosel == "Apply to flagsign":
 		buttonflagsign_pressed()
 		
-	elif nrosel == "Clear text":
-		$Viewport/GUI/Panel/EditColorRect/TextEdit.text = ""
-
 	Tglobal.soundsystem.quicksound("MenuClick", collision_point)
 	prevnrosel = nrosel
 

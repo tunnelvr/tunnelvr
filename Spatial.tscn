@@ -1977,7 +1977,7 @@ margin_top = 104.487
 margin_right = 360.371
 margin_bottom = 126.487
 text = "--resources"
-items = [ "--resources", null, false, 0, null, "Print XCproperties", null, false, 1, null, "Set XCproperties", null, false, 2, null, "Show/Hide/Load Potree", null, false, 4, null, "Print resource", null, false, 6, null, "Set resource", null, false, 7, null, "Clear text", null, false, 8, null, "Set new file", null, false, 9, null, "Send message", null, false, 8, null, "Apply to flagsign", null, false, 9, null, "Apply to Filetree", null, false, 10, null, "Apply to Cavesave", null, false, 11, null ]
+items = [ "--resources", null, false, 0, null, "Print XCproperties", null, false, 1, null, "Set XCproperties", null, false, 2, null, "Show/Hide/Load Potree", null, false, 4, null, "Print resource", null, false, 6, null, "Set resource", null, false, 7, null, "Set new file", null, false, 9, null, "Send message", null, false, 8, null, "Apply to flagsign", null, false, 9, null, "Apply to Filetree", null, false, 10, null, "Apply to Cavesave", null, false, 11, null ]
 selected = 0
 __meta__ = {
 "_edit_use_anchors_": false
