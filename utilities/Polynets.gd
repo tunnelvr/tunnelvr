@@ -693,7 +693,7 @@ static func cubeintermedrailbasis(i, tuberail0, tuberail1):
 	var pt1 = tuberail1[i][0]
 	var im1 = max(i-1, 0)
 	var ip1 = min(i+1, len(tuberail0)-1)
-	var hpt = (pt0 + pt1)/2
+	#var hpt = (pt0 + pt1)/2
 	var hptP1 = (tuberail0[ip1][0] + tuberail1[ip1][0])/2
 	var hptM1 = (tuberail0[im1][0] + tuberail1[im1][0])/2
 	var avec = pt1 - pt0
@@ -749,9 +749,9 @@ static func slicerungsatintermediatecuberail(tuberail0, tuberail1, rung0k, rung1
 			if ((dpi.z == 0.0 or dpi.z == 1.0) and dpi.x == 0.0 and dpi.y == 0.0):
 				dpp = tuberail0[i][0] if dpi.z == 0.0 else tuberail1[i][0]
 			x = dpi.z
-			var Dqib = cubeintermedrailbasis(i, tuberail0, tuberail1)
-			var Dsp = lerp(tuberail0[i][0], tuberail1[i][0], dpi.z)
-			var Ddpp = Dsp + Dqib.x*dpi.x + Dqib.y*dpi.y
+			#var Dqib = cubeintermedrailbasis(i, tuberail0, tuberail1)
+			#var Dsp = lerp(tuberail0[i][0], tuberail1[i][0], dpi.z)
+			#var Ddpp = Dsp + Dqib.x*dpi.x + Dqib.y*dpi.y
 			assert (dpp.is_equal_approx(dpp))
 			
 		var dpuv = lerp(tuberail0[i][1], tuberail1[i][1], x)
@@ -796,28 +796,6 @@ static func makerailcuboidshellmesh(nodepoints, cuboidrailfacs):
 	surfaceTool.generate_normals()
 	surfaceTool.commit(arraymesh)
 	return arraymesh
-
-static func triangledist(targetpoint, p0, p1, p2):
-	var v1 = p1 - p0
-	var v2 = p2 - p0
-	var v0 = p0 - targetpoint
-#	(v0 + v1*lam + v2*mu) . v1 = 0
-#	(v0 + v1*lam + v2*mu) . v2 = 0
-#	v0v1 + v1v1*lam + v1v2*mu = 0
-#	v0v2 + v1v2*lam + v2v2*mu = 0
-
-
-#	v0.v2*v2.v1/v2.v2 + v1.v2*v2.v1/v2.v2*lam + v2.v1*mu = 0
-#	v0.v2*v2.v1/v2.v2-v0.v1 + (v1.v2*v2.v1/v2.v2-v1.v1)*lam = 0
-	var v0v1 = v0.dot(v1)
-	var v0v2 = v0.dot(v2)
-	var v1v2 = v1.dot(v2)
-	var v1v1 = v1.dot(v1)
-	var v2v2 = v2.dot(v2)
-	var lamnum = -v0v2*v1v2/v2v2 + v0v1
-	var lamden = v1v2*v1v2/v2v2 - v1v1
-#	v0.v2*v2.v1/v2.v2-v0.v1 + (v1.v2*v2.v1/v2.v2-v1.v1)*lam = 0
-
 
 
 static func findclosestcuboidshellface(targetpoint, dragvec, nodepoints, cuboidrailfacs):

@@ -696,10 +696,6 @@ func updatelinearropepaths():
 	if len(onepathpairs) == 0:
 		$PathLines.mesh = null
 		return middlenodes
-	var countanchors = 0
-	for nname in nodepoints:
-		if nname[0] == "a":
-			countanchors += 1
 	resetclosewidthsca(1.0)
 	var surfaceTool = SurfaceTool.new()
 	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)

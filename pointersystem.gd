@@ -631,8 +631,6 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 			(pointertargettype == "none" or pointertargettype == "XCtubesector" or pointertargettype == "XCflatshell"):
 		var newnodepoint = activetargetnodewall.global_transform.xform_inv(pointertargetpoint)
 		var xcdata = null
-		var ropepointuv = null
-		var prevactivetargetnodewall = null
 		var newactivetargetnodeinfo = null
 		if gripbuttonheld:
 			if true or activetargetnode.get_name()[0] == ("k" if pointertargettype == "none" else "a"):
