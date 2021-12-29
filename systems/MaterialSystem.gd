@@ -95,7 +95,7 @@ remote func setfloormaptexture(xcfloorname):
 	floorplanescale = Dfloorplanescale
 	
 # get proper corners from the bits we have trimmed back 
-	var floormeshdiagonal2 = Vector3(floorplanescale.x*floormesh.mesh.size.x/2, -floorplanescale.y*floormesh.mesh.size.y/2, 0.0)
+	#var floormeshdiagonal2 = Vector3(floorplanescale.x*floormesh.mesh.size.x/2, -floorplanescale.y*floormesh.mesh.size.y/2, 0.0)
 	#var floorplane00 = xcfloor.transform.xform(-floormeshdiagonal2)
 	#var floorplane11 = xcfloor.transform.xform(floormeshdiagonal2)
 	var floorplane00 = xcfloor.transform.xform(Vector3(xcfloor.imgtrimleftdown.x, xcfloor.imgtrimrightup.y, 0.0))

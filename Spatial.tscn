@@ -1089,7 +1089,7 @@ albedo_color = Color( 1, 0.156863, 0.156863, 0.741176 )
 [sub_resource type="SpatialMaterial" id=242]
 flags_unshaded = true
 params_diffuse_mode = 1
-albedo_color = Color( 0.737255, 0.156863, 1, 1 )
+albedo_color = Color( 0.192157, 0.203922, 1, 1 )
 
 [sub_resource type="QuadMesh" id=168]
 
@@ -1882,7 +1882,7 @@ margin_top = 235.0
 margin_right = 116.0
 margin_bottom = 262.0
 text = "normal"
-items = [ "normal", null, false, 0, null, "Hide XCs", null, false, 1, null, "opt: all grey", null, false, 2, null, "opt: hide xc", null, false, 3, null, "toggle guardian", null, false, 4, null, "export OBJ", null, false, 7, null, "choke", null, false, 6, null, "swap controllers", null, false, 7, null, "lock controls", null, false, 8, null, "BackfaceCull", null, false, 11, null ]
+items = [ "normal", null, false, 0, null, "Hide XCs", null, false, 1, null, "opt: all grey", null, false, 2, null, "opt: hide xc", null, false, 3, null, "toggle guardian", null, false, 4, null, "export OBJ", null, false, 7, null, "choke", null, false, 6, null, "swap controllers", null, false, 7, null, "lock controls", null, false, 8, null, "BackfaceCull", null, false, 11, null, "Toggle Fog", null, false, 10, null ]
 selected = 0
 __meta__ = {
 "_edit_use_anchors_": false
@@ -1977,7 +1977,7 @@ margin_top = 104.487
 margin_right = 360.371
 margin_bottom = 126.487
 text = "--resources"
-items = [ "--resources", null, false, 0, null, "Print XCproperties", null, false, 1, null, "Set XCproperties", null, false, 2, null, "Show/Hide/Load Potree", null, false, 4, null, "Print resource", null, false, 6, null, "Set resource", null, false, 7, null, "Clear text", null, false, 8, null, "Set new file", null, false, 9, null, "Send message", null, false, 8, null, "Apply to flagsign", null, false, 9, null, "Apply to Filetree", null, false, 10, null, "Apply to Cavesave", null, false, 11, null ]
+items = [ "--resources", null, false, 0, null, "Print XCproperties", null, false, 1, null, "Set XCproperties", null, false, 2, null, "Show/Hide/Load Potree", null, false, 4, null, "Print resource", null, false, 6, null, "Set resource", null, false, 7, null, "Set new file", null, false, 9, null, "Send message", null, false, 8, null, "Apply to flagsign", null, false, 9, null, "Apply to Filetree", null, false, 10, null, "Apply to Cavesave", null, false, 11, null ]
 selected = 0
 __meta__ = {
 "_edit_use_anchors_": false
@@ -3878,6 +3878,7 @@ script = ExtResource( 74 )
 
 [node name="PointSample" type="MeshInstance" parent="PotreeExperiments"]
 transform = Transform( 1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 2.97562, 5.65291e-09, -0.129323 )
+visible = false
 mesh = SubResource( 241 )
 material/0 = ExtResource( 64 )
 

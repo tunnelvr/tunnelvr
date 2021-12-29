@@ -137,7 +137,6 @@ func _physics_process(delta):
 			
 func _on_button_pressed(p_button):
 	var pointersystem = playerMe.get_node("pointersystem")
-	print("DDD p_button ", p_button)
 	if p_button == BUTTONS.VR_MENU and Tglobal.arvrinterfacename == "OVRMobile":
 		pointersystem.buttonpressed_vrby()
 

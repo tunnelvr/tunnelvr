@@ -582,8 +582,8 @@ func checkplanviewinfront(handrightcontroller):
 	var collider_transform = planviewsystem.get_node("PlanView").global_transform
 	return collider_transform.xform_inv(handrightcontroller.global_transform.origin).z > 0
 
-func checkinguipanel(viewport_point):
-	var rectrel = viewport_point - planviewcontrols.rect_position
+func checkinguipanel(lviewport_point):
+	var rectrel = lviewport_point - planviewcontrols.rect_position
 	if rectrel.x > 0 and rectrel.y > 0 and rectrel.x < planviewcontrols.rect_size.x and rectrel.y < planviewcontrols.rect_size.y:
 		return true
 	if fileviewtree.visible:

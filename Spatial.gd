@@ -1,17 +1,10 @@
 extends Spatial
 
-# Stuff to do:
 
-
-# To release, export to the Linux, Windows and Quest2/Android platforms, zip the appropriate dlls and sos together and 
-# Upload to Alex's machine.  To run, go into Ubuntu export Linux/X11 runable, go into /mnt/c/Users/henry/godot/tunnelvr_releases and run:
-# ../Godot_v3.2.3-stable_linux_server.64  --main-pack tunnelvr_v0.5.0.pck
+# To run on nixos, go to directory, do nix develop, then cd .. then godot
 
 # xcdfullsetvisibilitycollision to use CollisionLayers technology instead
 # Treeview to show which are downloaded
-
-# * highlight nodes under pointer system so it's global and simplifies colouring code (active node to be an overlay)
-# * RTC version to work (and would use webXR)
 
 # * godot docs.  assert returns null from the function it's in when you ignore it
 # * check out HDR example https://godotengine.org/asset-library/asset/110
@@ -38,9 +31,6 @@ extends Spatial
 # select program executable path tunnelvr, and launch.  (It records it, but needs the hardware to replay it and get the timings)
 # make a capture, save it, then put quest into profiling mode and open capture with options to set fastest
 
-
-	
-	
 var hostipnumber: String = ""
 export var hostportnumber: int = 4546
 export var udpserverdiscoveryport: int = 4547

@@ -858,7 +858,9 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 			print("dvd ", dvd, "  ", intermediatepointplanelambda) # assert(is_zero_approx(dvd.z)) -- thickness of the disk till we use a plane instead
 			var nodename0 = splinepointplanetube["xcdrawinglink"][intermediatepointplanesectorindex*2]
 			var nodename1 = splinepointplanetube["xcdrawinglink"][intermediatepointplanesectorindex*2+1]
-			var newintermediatepoint = Vector3(dvd.x, dvd.y, intermediatepointplanelambda) if not gripbuttonheld else null
+			var newintermediatepoint = null
+			if not gripbuttonheld:
+				newintermediatepoint = Vector3(dvd.x, dvd.y, intermediatepointplanelambda)
 			if (intermediatepointpicked != null) or (newintermediatepoint != null):
 				var xctdata = { "tubename":intermediatepointplanetubename,
 								"xcname0":splinepointplanetube.xcname0,
@@ -941,7 +943,6 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 			if pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 				var pathlines = pointertargetwall.get_node("PathLines")
 				if pathlines.get_surface_material_count() != 0:
-					var materialsystem = get_node("/root/Spatial/MaterialSystem")
 					pathlines.set_surface_material(0, materialsystem.pathlinematerial("nodepthtest"))
 				pointertargetwall.expandxcdrawingscale(pointertargetpoint)
 				activetargetnodetriggerpulling = true
