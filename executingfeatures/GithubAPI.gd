@@ -45,9 +45,12 @@ func Yinitclient():
 	if ghattributes.get("type") == "githubapi":
 		if httpghapi.get_status() != HTTPClient.STATUS_CONNECTED:
 			var e = httpghapi.connect_to_host(ghattributes["apiurl"], -1, true)
-			while httpghapi.get_status() == HTTPClient.STATUS_CONNECTING or httpghapi.get_status() == HTTPClient.STATUS_RESOLVING:
-				httpghapi.poll()
-				yield(Engine.get_main_loop(), "idle_frame")
+			if e == OK:
+				while httpghapi.get_status() == HTTPClient.STATUS_CONNECTING or httpghapi.get_status() == HTTPClient.STATUS_RESOLVING:
+					httpghapi.poll()
+					yield(Engine.get_main_loop(), "idle_frame")
+			else:
+				print("Connection to host ", ghattributes["apiurl"], " failed err:", e)
 
 func Ylistdircavefilelist():
 	yield(Engine.get_main_loop(), "idle_frame")
@@ -93,8 +96,7 @@ func Yloadcavefile(lghattributes, savegamefilename):
 			return true
 	elif lghattributes.get("type") == "githubapi":
 		assert (lghattributes["name"] == ghattributes["name"])
-		var ghfetcheddatafile = yield(Yfetchfile(savegamefilename+".res"), "completed")
-		if ghfetcheddatafile != null:
+		if yield(Yfetchfile(savegamefilename+".res", ghfetcheddatafile), "completed"):
 			sketchsystem.call_deferred("loadsketchsystemL", ghfetcheddatafile)
 			return true
 		else:
@@ -186,20 +188,20 @@ func Ylistghfiles():
 				print("skipping githubfile ", file_name)
 	return mcfiles
 
-func Yfetchfile(cname):
+func Yfetchfile(cname, lghfetcheddatafile):
 	yield(Yinitclient(), "completed")
 	var rpath = "/repos/%s/%s/contents/%s/%s" % [ ghattributes["owner"], ghattributes["repo"], ghattributes["path"], cname ]
 	var d = yield(Yghapicall(HTTPClient.METHOD_GET, rpath, ""), "completed")
 	if d == null or d.get("type") != "file" or d["encoding"] != "base64":
 		print("Yfetchfile failed ", d)
-		return null
+		return false
 	ghcurrentname = d["name"]
 	ghcurrentsha = d["sha"]
 	var f = File.new()
-	f.open(ghfetcheddatafile, File.WRITE)
+	f.open(lghfetcheddatafile, File.WRITE)
 	f.store_buffer(Marshalls.base64_to_raw(d["content"]))
 	f.close()
-	return ghfetcheddatafile
+	return true
 
 func Ycommitfile(cname, message):
 	yield(Yinitclient(), "completed")
