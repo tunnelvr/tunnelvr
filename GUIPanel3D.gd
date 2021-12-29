@@ -310,15 +310,6 @@ func _on_switchtest(index):
 		$Viewport/GUI/Panel/Label.text = "OBJ exported"
 		SwitchTest.selected = 0
 		
-	elif nssel == "load Wing":
-		var xcdatalist = Centrelinedata.xcdatalistfromwingdata("res://surveyscans/wingform/Wing XYZ geometry.csv")
-		xcdatalist[0]["sketchname"] = "wingfile"
-		Tglobal.printxcdrawingfromdatamessages = false
-		sketchsystem.actsketchchange(xcdatalist)
-		Tglobal.printxcdrawingfromdatamessages = true
-		$Viewport/GUI/Panel/Label.text = "Wing loaded"
-		SwitchTest.selected = 0
-
 	elif nssel == "CL_common_root":
 		for xcdrawingcentreline in get_tree().get_nodes_in_group("gpcentrelinegeo"):
 			if xcdrawingcentreline.additionalproperties == null:
