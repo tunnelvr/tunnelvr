@@ -156,10 +156,6 @@ func _physics_process(delta):
 
 func process_feet_on_floor(delta, playerdirectedwalkmovement):
 	playerbodycentre = HeadCentre.global_transform.origin - Vector3(0, playerheadcentreabovebodycentreheight, 0) + Ddebugvisualoffset
-	var xxx = HeadCentre.global_transform.origin
-	var xxx1 = xxx.y - playerheadcentreabovebodycentreheight	
-	var xxxT = null
-	
 	var playeriscolliding = false
 	var playerheadcolliding = false	
 	var playerstartsfreefall = false
@@ -171,7 +167,6 @@ func process_feet_on_floor(delta, playerdirectedwalkmovement):
 	if len(get_world().direct_space_state.intersect_shape(psqparams, 1)) != 0:
 		stepupdistanceclear = max(playermaxstepupheight*0.01, playerdirectedwalkmovement.y - playermaxstepupheight*0.02)
 		psqparams.transform = Transform(playerbodycapsulebasis, playerbodycentrewithdirectedmotion + Vector3(0, stepupdistanceclear, 0))
-		xxxT = psqparams.transform
 		if len(get_world().direct_space_state.intersect_shape(psqparams, 1)) != 0:
 			stepupdistanceclear = 0.05 # -playerstepdownbump
 			psqparams.transform = Transform(playerbodycapsulebasis, playerbodycentrewithdirectedmotion + Vector3(0, stepupdistanceclear, 0))
@@ -198,9 +193,6 @@ func process_feet_on_floor(delta, playerdirectedwalkmovement):
 	var stepupdistance = 0.0
 	if not playeriscolliding:
 		if stepupdistanceclear > 0:
-			var Dyyy = psqparams.transform
-			var Dyyy1 = Transform(playerbodycapsulebasis, playerbodycentrewithdirectedmotion + Vector3(0, stepupdistanceclear, 0))
-
 			var downcastdistance = stepupdistanceclear + playerstepdownbump
 			var dropcollision = get_world().direct_space_state.cast_motion(psqparams, Vector3(0, -downcastdistance, 0))
 			if len(dropcollision) != 0 and dropcollision[0] != 0.0:
@@ -258,7 +250,7 @@ func endfreefallmode():
 	
 func process_freefall(delta):
 	$PlayerKinematicBody.global_transform.origin = playerbodycentre
-	var Dplayerbodycentre = playerbodycentre
+	#var Dplayerbodycentre = playerbodycentre
 	playerfreefallbodyvelocity.y -= gravityacceleration*delta
 	playerfreefallbodyvelocity *= 1.0 - freefallairdragfactor*delta
 	if playerfreefallbodyvelocity.y < 0.0 and playerbodycentre.y < playernofallbelowY:
@@ -280,7 +272,7 @@ func process_projectontoground(delta, metresdistancecount):
 	playerbodycentre = HeadCentre.global_transform.origin - Vector3(0, playerheadcentreabovebodycentreheight, 0) + Ddebugvisualoffset
 	$PlayerKinematicBody.global_transform.origin = playerbodycentre
 	var Dplayerbodycentre = playerbodycentre
-	for i in range(metresdistancecount):
+	for _i in range(metresdistancecount):
 		var kincol = $PlayerKinematicBody.move_and_collide(Vector3(0, -1, 0))
 		if kincol != null:
 			break
@@ -299,7 +291,7 @@ func process_directedwalkmovement(delta, playerdirectedwalkingvelocity):
 	if playerdirectedwalkingvelocity.dot(playerdirectedwalkmovement) > 0:
 		var playerenlargedbodycentrewithdirectedmotion = playerbodycentre + Vector3(0, directedcollisionstepup, 0) + Vector3(playerdirectedwalkmovement.x, 0, playerdirectedwalkmovement.z)
 		$PlayerEnlargedKinematicBody.global_transform.origin = playerenlargedbodycentrewithdirectedmotion
-		var kinematiccollision = $PlayerEnlargedKinematicBody.move_and_collide(Vector3(0, -playermaxstepupheight, 0))
+		#var kinematiccollision = $PlayerEnlargedKinematicBody.move_and_collide(Vector3(0, -playermaxstepupheight, 0))
 		var bumpup = playermaxstepupheight - (playerenlargedbodycentrewithdirectedmotion.y - $PlayerEnlargedKinematicBody.global_transform.origin.y)
 		return Vector3(playerdirectedwalkmovement.x, bumpup, playerdirectedwalkmovement.z)
 	return Vector3(0,0,0)
