@@ -58,6 +58,7 @@ var nropeseqLengs = [ ]
 var nropeseqLengsMeasured = [ ]
 var nropeseqseglens = [ ]
 var oddropeverts = [ ]
+var anchorropeverts = [ ]
 var totalropeleng = 0
 var totalstretchropeleng = 0
 var ropematerialcolor = null

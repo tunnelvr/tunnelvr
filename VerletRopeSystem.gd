@@ -81,8 +81,8 @@ func setropenodelabel(ropehang, ropenodename, labelstring):
 	labelgenerator.restartlabelmakingprocess(null)
 
 func addropehang(ropehang):
-	if len(ropehang.oddropeverts) == 2:
-		setropenodelabel(ropehang, ropehang.oddropeverts[0], "%.2fm"%ropehang.totalropeleng)
+	if len(ropehang.oddropeverts) == 2 or len(ropehang.anchorropeverts) != 0:
+		setropenodelabel(ropehang, ropehang.oddropeverts[0] if len(ropehang.oddropeverts) != 0 else ropehang.anchorropeverts[0], "%.2fm"%ropehang.totalropeleng)
 	if not ropehangsinprocess.has(ropehang):
 		ropehangsinprocess.push_back(ropehang)
 	ropehang.prevverletstretch = -1.0
@@ -149,12 +149,13 @@ func _process(delta):
 				#print(" verletmaxvelocity ", verletmaxvelocity, " verletstretch ", verletstretch, " g", verropropehang.verletgravity)
 				if (verletmaxvelocity < 0.0002 and verropropehang.prevverletstretch != -1 and abs(verropropehang.prevverletstretch - verletstretch) < 0.01) or \
 						(verropropehang.verletiterations > 10):
-					if len(verropropehang.oddropeverts) == 2:
+					if len(verropropehang.oddropeverts) == 2 or len(verropropehang.anchorropeverts) != 0:
+						var nodename = verropropehang.oddropeverts[-1 if ropestretchratiolabel else 0] if len(verropropehang.oddropeverts) != 0 else verropropehang.anchorropeverts[0]
 						if ropestretchratiolabel:
 							var stretchratio = (verropropehang.totalstretchropeleng - verropropehang.totalropeleng)/verropropehang.totalropeleng
-							setropenodelabel(verropropehang, verropropehang.oddropeverts[-1], "%+.0f%%" % (stretchratio*100))
+							setropenodelabel(verropropehang, nodename, "%+.0f%%" % (stretchratio*100))
 						else:
-							setropenodelabel(verropropehang, verropropehang.oddropeverts[0], "%.2fm"%verropropehang.totalstretchropeleng)
+							setropenodelabel(verropropehang, nodename, "%.2fm"%verropropehang.totalstretchropeleng)
 					ropehangsinprocess.erase(verropropehang)
 
 				else:

@@ -1281,7 +1281,7 @@ func buttonreleased_vrgrip():
 				ropexc = gripmenu.gripmenupointertargetwall
 				ropexcnode = gripmenu.gripmenupointertarget
 			if ropexc != null and ropexcnode != null and ropexc.drawingtype == DRAWING_TYPE.DT_ROPEHANG:
-				var ropeseqs = Polynets.makeropenodesequences(ropexc.nodepoints, ropexc.onepathpairs, null, true)
+				var ropeseqs = Polynets.makeropenodesequences(ropexc.nodepoints, ropexc.onepathpairs, null, null, true)
 				var ropeseqstospline = [ ]
 				for ropeseq in ropeseqs:
 					if ropeseq.find(ropexcnode.get_name()) != -1 and len(ropeseq) > 2:
@@ -1321,7 +1321,7 @@ func buttonreleased_vrgrip():
 			var ropexcnode = activetargetnode if (pointertargetofstartofropehang == null or len(activetargetnodewall.nodepoints) != 1) else null
 			var ropexc = activetargetnodewall if ropexcnode != null else pointertargetofstartofropehang
 			var dragvec = gripmenu.gripmenupointertargetpoint - activetargetnode.global_transform.origin
-			var ropeseqs = Polynets.makeropenodesequences(ropexc.nodepoints, ropexc.onepathpairs, null, true)
+			var ropeseqs = Polynets.makeropenodesequences(ropexc.nodepoints, ropexc.onepathpairs, null, null, true)
 			var dragvecL = ropexc.transform.basis.xform_inv(dragvec)
 							
 			var xcdatalist = [ ]

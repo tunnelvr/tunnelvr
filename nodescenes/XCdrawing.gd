@@ -137,6 +137,8 @@ func makeflaglabels(ptsignroot, ptsigntopy, postrad, flagsigns):
 		labelgenerator.remainingropelabels.push_back([get_name(), xcn.get_name(), cflagmsg])
 		labelgenerator.restartlabelmakingprocess(null)
 
+func sortnodeyfunc(a, b):
+	return nodepoints[a].y > nodepoints[b].y
 
 func setdrawingvisiblecode(ldrawingvisiblecode):
 	var drawingvisiblecode_old = drawingvisiblecode
@@ -153,7 +155,9 @@ func setdrawingvisiblecode(ldrawingvisiblecode):
 	elif drawingtype == DRAWING_TYPE.DT_ROPEHANG:
 		var hidenodeshang = ((drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE) == 0) and (len(onepathpairs) != 0)
 		if hidenodeshang:
-			var ropeseqs = Polynets.makeropenodesequences(nodepoints, onepathpairs, $RopeHang.oddropeverts, true)
+			var ropeseqs = Polynets.makeropenodesequences(nodepoints, onepathpairs, $RopeHang.oddropeverts, $RopeHang.anchorropeverts, true)
+			$RopeHang.oddropeverts.sort_custom(self, "sortnodeyfunc")
+			$RopeHang.anchorropeverts.sort_custom(self, "sortnodeyfunc")
 			var cuboidfacs = Polynets.cuboidfromropenodesequences(nodepoints, ropeseqs)
 			var stalseqax = Polynets.stalfromropenodesequences(nodepoints, ropeseqs) if cuboidfacs == null else null
 			var signseqax = Polynets.signpostfromropenodesequences(nodepoints, ropeseqs, (additionalproperties if additionalproperties != null else {}).get("flagsignlabels", {})) if (cuboidfacs == null and stalseqax == null) else null
@@ -621,7 +625,7 @@ const uvfacy = 0.4
 
 func ropepathseqribbons(surfaceTool):
 	var middlenodes = [ ]
-	var ropesequences = Polynets.makeropenodesequences(nodepoints, onepathpairs, null, false)
+	var ropesequences = Polynets.makeropenodesequences(nodepoints, onepathpairs, null, null, false)
 	for ropeseq in ropesequences:
 		var p0 = nodepoints[ropeseq[0]]
 		var p1 = nodepoints[ropeseq[1]]

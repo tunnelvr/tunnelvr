@@ -98,7 +98,7 @@ static func makexcdpolys(nodepoints, onepathpairs):
 	return [ ]
 
 
-static func makeropenodesequences(nodepoints, onepathpairs, oddropeverts, suppresswallnodeson8):
+static func makeropenodesequences(nodepoints, onepathpairs, oddropeverts, anchorropeverts, suppresswallnodeson8):
 	var Lpathvectorseq = { } 
 	for ii in nodepoints.keys():
 		Lpathvectorseq[ii] = [ ]
@@ -114,10 +114,13 @@ static func makeropenodesequences(nodepoints, onepathpairs, oddropeverts, suppre
 	var breaksequenceatwallnodes = true
 	if oddropeverts != null:
 		oddropeverts.clear()
+		anchorropeverts.clear()
 		for ii in nodepoints.keys():
 			if (len(Lpathvectorseq[ii])%2) == 1:
 				oddropeverts.push_back(ii)
-		breaksequenceatwallnodes = not (suppresswallnodeson8 and len(oddropeverts) == 8)
+			if ii[0] == "a":
+				anchorropeverts.push_back(ii)
+		breaksequenceatwallnodes = not (suppresswallnodeson8 and len(oddropeverts) >= 8)
 		
 	var ropesequences = [ ]
 	for j in range(Npaths):
