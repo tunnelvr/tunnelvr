@@ -290,7 +290,6 @@ func _process(delta):
 		var viewupdownjoy = 0.0
 		var handleftrightjoy = 0.0
 		if Input.is_action_pressed("lh_shift"):
-			var lhkeyvec = Vector2(0, 0)
 			if Input.is_action_pressed("lh_forward"):   viewupdownjoy += 1
 			if Input.is_action_pressed("lh_backward"):  viewupdownjoy += -1
 			if PlayerDirections.snapturnemovementjoystick == DRAWING_TYPE.JOYPOS_DISABLED:

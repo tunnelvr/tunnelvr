@@ -310,15 +310,6 @@ func _on_switchtest(index):
 		$Viewport/GUI/Panel/Label.text = "OBJ exported"
 		SwitchTest.selected = 0
 		
-	elif nssel == "load Wing":
-		var xcdatalist = Centrelinedata.xcdatalistfromwingdata("res://surveyscans/wingform/Wing XYZ geometry.csv")
-		xcdatalist[0]["sketchname"] = "wingfile"
-		Tglobal.printxcdrawingfromdatamessages = false
-		sketchsystem.actsketchchange(xcdatalist)
-		Tglobal.printxcdrawingfromdatamessages = true
-		$Viewport/GUI/Panel/Label.text = "Wing loaded"
-		SwitchTest.selected = 0
-
 	elif nssel == "CL_common_root":
 		for xcdrawingcentreline in get_tree().get_nodes_in_group("gpcentrelinegeo"):
 			if xcdrawingcentreline.additionalproperties == null:
@@ -379,6 +370,7 @@ func _on_switchtest(index):
 				if true or (xcdrawing.drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_GHOSTLY_B) != 0:
 					xcdrawing.get_node("XCdrawingplane").visible = showall
 					n += 1
+		print("Number of floor textures hidden: ", n)
 		if nssel == "opt: all grey":
 			var materialsystem = get_node("/root/Spatial/MaterialSystem")
 			for xctube in sketchsystem.get_node("XCtubes").get_children():
@@ -774,18 +766,14 @@ func _on_resourceoptions_selected(index):
 		$Viewport/GUI/Panel/ResourceOptions.selected = index
 	var nrosel = $Viewport/GUI/Panel/ResourceOptions.get_item_text(index)
 	print("Select resourceoption: ", nrosel)
-	var xcselecteddrawing = sketchsystem.pointersystem.activetargetnodewall
 	if nrosel == "Print XCproperties":
 		if xcselecteddrawing_forrsourcefunctions != null:
 			var xcproperties = xcselecteddrawing_forrsourcefunctions.additionalproperties.duplicate() if xcselecteddrawing_forrsourcefunctions.additionalproperties != null else {}
 			xcproperties["xcname"] = xcselecteddrawing_forrsourcefunctions.get_name()
 			if xcselecteddrawing_forrsourcefunctions["xcresource"]:
 				xcproperties["xcresource"] = xcselecteddrawing_forrsourcefunctions["xcresource"]
-			if xcselecteddrawing_forrsourcefunctions["xcresource"]:
-				xcproperties["xcresource"] = xcselecteddrawing_forrsourcefunctions["xcresource"]
 			if sketchsystem.pointersystem.activetargetnode != null:
 				xcproperties["snodename"] = sketchsystem.pointersystem.activetargetnode.get_name()
-
 			$Viewport/GUI/Panel/EditColorRect/TextEdit.text = JSON.print(xcproperties, "  ", true)
 		else:
 			setpanellabeltext("No XCdrawing selected")

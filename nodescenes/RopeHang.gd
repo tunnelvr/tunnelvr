@@ -58,6 +58,7 @@ var nropeseqLengs = [ ]
 var nropeseqLengsMeasured = [ ]
 var nropeseqseglens = [ ]
 var oddropeverts = [ ]
+var anchorropeverts = [ ]
 var totalropeleng = 0
 var totalstretchropeleng = 0
 var ropematerialcolor = null
@@ -119,7 +120,7 @@ func derivenverts(nodepoints, ropesequences):
 	prev_collideverts = nverts.duplicate()
 	nropeseqLengsMeasured = nropeseqLengs.duplicate()
 	collidenormals = [ ]
-	for i in range(len(nverts)):
+	for _i in range(len(nverts)):
 		collidenormals.push_back(null)
 	totalstretchropeleng = totalropeleng
 	return middlenodes

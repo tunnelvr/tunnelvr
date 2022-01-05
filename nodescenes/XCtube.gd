@@ -220,7 +220,6 @@ func updatetubelinkpaths(sketchsystem):
 		var p1u = xcdrawing1.nodepoints[xcdrawinglink[j+1]]
 		var p1 = xcdrawing1.transform * p1u
 		var vec = p1 - p0
-		var veclen = max(0.01, vec.length())
 		var perp = Vector3(1, 0, 0)
 		if xcdrawing1.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 			perp = vec.cross(xcdrawing1.global_transform.basis.y).normalized()
@@ -335,7 +334,7 @@ func maketubepolyassociation_andreorder(xcdrawing0, xcdrawing1):
 	var ila = [ ]  # [ [il0, il1] ] then [ {"il0", "il1", "j", "il0N", il1N" ] ]
 	var xcdrawinglinkneedsreorder = false
 	var missingjvals = [ ]
-	var il0coincident = true
+	var _il0coincident = true
 	var il1coincident = true
 	var loops1 = 0
 	for j in range(0, len(xcdrawinglink), 2):
@@ -343,7 +342,7 @@ func maketubepolyassociation_andreorder(xcdrawing0, xcdrawing1):
 		var il1 = poly1.find(xcdrawinglink[j+1])
 		if j != 0:
 			if il0 != ila[-1][0]:
-				il0coincident = false
+				_il0coincident = false
 			if il1 != ila[-1][1]:
 				il1coincident = false
 		if il0 != -1 and il1 != -1:
@@ -366,7 +365,9 @@ func maketubepolyassociation_andreorder(xcdrawing0, xcdrawing1):
 		reordersecondvalstoavoiddoublelooping(ila)
 		var newxcdrawinglink = [ ]
 		var newxcsectormaterials = [ ]
-		var newxclinkintermediatenodes = null if xclinkintermediatenodes == null else [ ]
+		var newxclinkintermediatenodes = null
+		if xclinkintermediatenodes != null:
+			 newxclinkintermediatenodes = [ ]
 		for i in range(len(ila)):
 			newxcdrawinglink.append(poly0[ila[i][0]])
 			newxcdrawinglink.append(poly1[ila[i][1]])
@@ -894,7 +895,7 @@ func xctubetransitivechain(sketchsystem, xcdrawing0, nodename0, xcdrawing1, node
 	var xcdrawingi = xcdrawing0
 	var ptseq = [ nodepoint0 ]
 	var excltube = self
-	for k in range(5):
+	for _k in range(5):
 		var xctubei = null
 		var xcnamei1 = null
 		var xcdrawingi1 = null
@@ -1059,7 +1060,7 @@ func removexclinkintermediatenode(j, dv):
 func insertxclinkintermediatenode(j, dv):
 	if xclinkintermediatenodes == null:
 		xclinkintermediatenodes = [ ]
-		for ji in range(len(xcdrawinglink)/2):
+		for _ji in range(len(xcdrawinglink)/2):
 			xclinkintermediatenodes.push_back([])
 	assert(len(xclinkintermediatenodes) == len(xcdrawinglink)/2)
 	var i = 0
