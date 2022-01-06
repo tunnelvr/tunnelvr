@@ -537,6 +537,8 @@ remote func copyacrosstextedit(text):
 		setguipanelvisible(sketchsystem.pointersystem.LaserOrient.global_transform)
 	$Viewport/GUI/Panel/EditColorRect/TextEdit.text = text
 	$Viewport/GUI/Panel/EditColorRect/TextEdit.grab_focus()
+	print("render_target_update_mode ", $Viewport.render_target_update_mode, " ", Viewport.UPDATE_DISABLED)
+	$Viewport.render_target_update_mode = Viewport.UPDATE_WHEN_VISIBLE
 
 func buttonflagsign_pressed():
 	if sketchsystem.pointersystem.activetargetnode != null and sketchsystem.pointersystem.activetargetnodewall != null and \
