@@ -7,4 +7,5 @@ extends EditorScript
 
 
 func _run():
-	print(Vector2(0,0).angle())
+	var a = Vector3(1,2,3)
+	print(a*Vector3(1,-1,1))

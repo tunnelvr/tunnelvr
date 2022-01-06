@@ -120,6 +120,8 @@ func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointert
 		tubesectormaterialname = gripmenupointertargetwall.xcsectormaterials[gripmenuactivetargettubesectorindex]
 		if is_instance_valid(activetargetwall) and len(activetargetwall.nodepoints) == 0:
 			gmlist = ["DoSlice", "SelectXC", "HideXC", "materials"]
+		elif is_instance_valid(activetargetnode) and len(activetargetnodewall.nodepoints) == 1:
+			gmlist = ["DoSlice", "SelectXC", "HideXC", "materials"]
 		elif tubesectormaterialname == "hole" or tubesectormaterialname == "holegap":
 			var joinsfromhole = gripmenupointertargetwall.xcname0.begins_with("Hole;") or gripmenupointertargetwall.xcname1.begins_with("Hole;")
 			gmlist = ["SelectXC", "HideXC", "FixHoleXC"]
