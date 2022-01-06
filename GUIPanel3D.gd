@@ -631,6 +631,7 @@ func setguipanelvisible(controller_global_transform):
 	virtualkeyboard.global_transform = kpaneltrans
 	
 	$Viewport/GUI/Panel/Label.text = ""
+	$Viewport/GUI/Panel/ResourceOptions.selected = 0
 
 	visible = true
 	$CollisionShape.disabled = not visible
