@@ -1904,7 +1904,7 @@ margin_top = 80.0
 margin_right = 366.0
 margin_bottom = 102.0
 text = "1x solid"
-items = [ "1x solid", null, false, 0, null, "10x ghost", null, false, 1, null, "1x ghost", null, false, 2, null, "0.25x solid", null, false, 4, null ]
+items = [ "1x solid", null, false, 0, null, "10x ghost", null, false, 1, null, "1x ghost", null, false, 2, null, "2x ghost", null, false, 4, null, "0.25x solid", null, false, 4, null ]
 selected = 0
 __meta__ = {
 "_edit_use_anchors_": false
