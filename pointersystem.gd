@@ -1572,35 +1572,80 @@ func buttonreleased_vrgrip():
 									{ "tubename":gripmenu.gripmenupointertargetwall.get_name(), "xcname0":gripmenu.gripmenupointertargetwall.xcname0, "xcname1":gripmenu.gripmenupointertargetwall.xcname1 }
 													 ] } ] )
 													
-			elif pointertarget.get_name() == "DoSlice" and is_instance_valid(wasactivetargettube) and is_instance_valid(activetargetwall) and len(activetargetwall.nodepoints) == 0:
+			elif pointertarget.get_name() == "DoSlice" and is_instance_valid(wasactivetargettube):
 				print("doslice ", wasactivetargettube)
-				var xcdrawing = activetargetwall
-				var xcdata = { "name":xcdrawing.get_name(), "prevnodepoints":{}, "nextnodepoints":{}, "prevonepathpairs":[], "newonepathpairs":[] }
-				var xctdatadel = { "tubename":wasactivetargettube.get_name(), 
-								   "xcname0":wasactivetargettube.xcname0,
-								   "xcname1":wasactivetargettube.xcname1,
-								   "prevdrawinglinks":[], "newdrawinglinks":[] }
-				var xctdata0 = { "tubename":"**notset", 
-								 "xcname0":wasactivetargettube.xcname0,
-								 "xcname1":xcdrawing.get_name(),
-								 "prevdrawinglinks":[], "newdrawinglinks":[] }
-				var xctdata1 = { "tubename":"**notset", 
-								 "xcname0":xcdrawing.get_name(),
-								 "xcname1":wasactivetargettube.xcname1,
-								 "prevdrawinglinks":[], "newdrawinglinks":[] }
-				if wasactivetargettube.slicetubetoxcdrawing(xcdrawing, xcdata, xctdatadel, xctdata0, xctdata1) and wasactivetargettube.gettubeshellholes(sketchsystem) == null:
-					clearactivetargetnode()
-					clearpointertarget()
-					var xctdataviz = {"xcvizstates":{ xcdrawing.get_name():DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE }, 
-						"updatetubeshells":[
-							{ "tubename":xctdatadel["tubename"], "xcname0":xctdatadel["xcname0"], "xcname1":xctdatadel["xcname1"] },
-							{ "tubename":xctdata0["tubename"], "xcname0":xctdata0["xcname0"], "xcname1":xctdata0["xcname1"] },
-							{ "tubename":xctdata1["tubename"], "xcname0":xctdata1["xcname0"], "xcname1":xctdata1["xcname1"] } 
-						]}
-					sketchsystem.actsketchchange([xcdata, xctdatadel, xctdata0, xctdata1, xctdataviz])
-					setactivetargetwall(xcdrawing)
-					wasactivetargettube = null
-					activelaserroot.get_node("LaserSpot").visible = false
+				if is_instance_valid(activetargetwall) and len(activetargetwall.nodepoints) == 0:
+					var xcdrawing = activetargetwall
+					var xcdata = { "name":xcdrawing.get_name(), "prevnodepoints":{}, "nextnodepoints":{}, "prevonepathpairs":[], "newonepathpairs":[] }
+					var xctdatadel = { "tubename":wasactivetargettube.get_name(), 
+									   "xcname0":wasactivetargettube.xcname0,
+									   "xcname1":wasactivetargettube.xcname1,
+									   "prevdrawinglinks":[], "newdrawinglinks":[] }
+					var xctdata0 = { "tubename":"**notset", 
+									 "xcname0":wasactivetargettube.xcname0,
+									 "xcname1":xcdrawing.get_name(),
+									 "prevdrawinglinks":[], "newdrawinglinks":[] }
+					var xctdata1 = { "tubename":"**notset", 
+									 "xcname0":xcdrawing.get_name(),
+									 "xcname1":wasactivetargettube.xcname1,
+									 "prevdrawinglinks":[], "newdrawinglinks":[] }
+					if wasactivetargettube.slicetubetoxcdrawing(xcdrawing, xcdata, xctdatadel, xctdata0, xctdata1) and wasactivetargettube.gettubeshellholes(sketchsystem) == null:
+						clearactivetargetnode()
+						clearpointertarget()
+						var xctdataviz = {"xcvizstates":{ xcdrawing.get_name():DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE }, 
+							"updatetubeshells":[
+								{ "tubename":xctdatadel["tubename"], "xcname0":xctdatadel["xcname0"], "xcname1":xctdatadel["xcname1"] },
+								{ "tubename":xctdata0["tubename"], "xcname0":xctdata0["xcname0"], "xcname1":xctdata0["xcname1"] },
+								{ "tubename":xctdata1["tubename"], "xcname0":xctdata1["xcname0"], "xcname1":xctdata1["xcname1"] } 
+							]}
+						sketchsystem.actsketchchange([xcdata, xctdatadel, xctdata0, xctdata1, xctdataviz])
+						setactivetargetwall(xcdrawing)
+						wasactivetargettube = null
+						activelaserroot.get_node("LaserSpot").visible = false
+
+				elif activetargetnode != null and activetargetnodewall != null and len(activetargetnodewall.nodepoints) == 1:
+					var xcdrawing = activetargetnodewall
+					var xctube = wasactivetargettube
+					var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(xctube.xcname0)
+					var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(xctube.xcname1)
+					var npmean0 = xcdrawing0.transform.xform(xcdrawing0.nodepointmean)
+					var npmean1 = xcdrawing1.transform.xform(xcdrawing1.nodepointmean)
+					var npmean = xcdrawing.transform.xform(activetargetnode.transform.origin)
+					var npmean0dot = xcdrawing.transform.basis.z.dot(npmean0 - npmean)
+					var npmean1dot = xcdrawing.transform.basis.z.dot(npmean1 - npmean)
+					if (npmean0dot < 0) == (npmean1dot < 0):
+						var xcdrawingE = xcdrawing0  if abs(npmean0dot) < abs(npmean1dot)  else xcdrawing1
+						var xcdata = { "name":xcdrawing.get_name(), 
+									   "prevnodepoints":activetargetnodewall.nodepoints.duplicate(), 
+									   "nextnodepoints":xcdrawingE.nodepoints.duplicate(), 
+									   "prevonepathpairs":[ ], 
+									   "newonepathpairs":xcdrawingE.onepathpairs.duplicate() }
+						if npmean0dot < 0:
+							xcdata["prevtransformpos"] = xcdrawing.transform
+							xcdata["transformpos"] = Transform(xcdrawing.transform.basis.rotated(Vector3(0,1,0), deg2rad(180)), xcdrawing.transform.origin)
+						var newdrawinglinks = [ ]
+						var jE = 0 if xcdrawingE.get_name() == xctube.xcname0 else 1
+						for j in range(0, len(xctube.xcdrawinglink), 2):
+							if len(newdrawinglinks) == 0 or xctube.xcdrawinglink[j+jE] != newdrawinglinks[-4]:
+								newdrawinglinks.push_back(xctube.xcdrawinglink[j+jE])
+								newdrawinglinks.push_back(xctube.xcdrawinglink[j+jE])
+								newdrawinglinks.push_back(xctube.xcsectormaterials[j/2])
+								newdrawinglinks.push_back(null)
+						var xctdata = { "tubename":"**notset", 
+										"xcname0":xcdrawingE.get_name(),
+										"xcname1":xcdrawing.get_name(),
+										"prevdrawinglinks":[], 
+										"newdrawinglinks":newdrawinglinks }
+						clearactivetargetnode()
+						clearpointertarget()
+						var xctdataviz = {"xcvizstates":{ xcdrawing.get_name():DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE }, 
+							"updatetubeshells":[
+								{ "tubename":xctdata["tubename"], "xcname0":xctdata["xcname0"], "xcname1":xctdata["xcname1"] },
+							]}
+						sketchsystem.actsketchchange([xcdata, xctdata, xctdataviz])
+						setactivetargetwall(xcdrawing)
+						wasactivetargettube = null
+						activelaserroot.get_node("LaserSpot").visible = false
 
 			elif pointertarget.get_name() == "FixHoleXC" and is_instance_valid(wasactivetargettube):
 				print("FixHoleXC ", wasactivetargettube)
