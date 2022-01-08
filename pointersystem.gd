@@ -1396,7 +1396,7 @@ func buttonreleased_vrgrip():
 								var nodename = ropeseq[i]
 								if not prevnodepoints.has(nodename):
 									prevnodepoints[nodename] = ropexc.nodepoints[nodename]
-									nextnodepoints[nodename] = prevnodepoints[nodename] + lerp(dagvecL0, dagvecL1, (1.0 - i*1.0/(len(ropeseq) - 1)))
+									nextnodepoints[nodename] = prevnodepoints[nodename] + lerp(dagvecL0, dagvecL1, i*1.0/(len(ropeseq) - 1))
 
 					xcdatalist.push_back({ "name":ropexc.get_name(), 
 										   "prevnodepoints":prevnodepoints,
