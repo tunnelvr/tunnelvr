@@ -158,11 +158,14 @@ func setdrawingvisiblecode(ldrawingvisiblecode):
 			var ropeseqs = Polynets.makeropenodesequences(nodepoints, onepathpairs, $RopeHang.oddropeverts, $RopeHang.anchorropeverts, true)
 			$RopeHang.oddropeverts.sort_custom(self, "sortnodeyfunc")
 			$RopeHang.anchorropeverts.sort_custom(self, "sortnodeyfunc")
-			var cuboidfacs = Polynets.cuboidfromropenodesequences(nodepoints, ropeseqs)
+			var cuboidfacs = Polynets.cuboidfromropenodesequences(nodepoints, ropeseqs, false)
 			var stalseqax = Polynets.stalfromropenodesequences(nodepoints, ropeseqs) if cuboidfacs == null else null
 			var signseqax = Polynets.signpostfromropenodesequences(nodepoints, ropeseqs, (additionalproperties if additionalproperties != null else {}).get("flagsignlabels", {})) if (cuboidfacs == null and stalseqax == null) else null
 			if cuboidfacs != null:
-				var cuboidshellmesh1 = Polynets.makerailcuboidshellmesh(nodepoints, cuboidfacs)
+				var cuboidshellmesh1 = Polynets.makerailcuboidshellmesh(nodepoints, cuboidfacs, true)
+				if cuboidshellmesh1 == null:
+					cuboidfacs = Polynets.cuboidfromropenodesequences(nodepoints, ropeseqs, true)
+					cuboidshellmesh1 = Polynets.makerailcuboidshellmesh(nodepoints, cuboidfacs, false)
 				updatexcshellmesh(cuboidshellmesh1)
 				
 				$RopeHang.visible = false

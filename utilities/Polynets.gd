@@ -539,7 +539,7 @@ static func calcropeseqends(ropeseqs):
 			ropeseqends[e1] = [ j ]
 	return ropeseqends
 	
-static func cuboidfromropenodesequences(nodepoints, ropeseqs):
+static func cuboidfromropenodesequences(nodepoints, ropeseqs, badinvert):
 	if len(ropeseqs) != 12:
 		return null
 	var ropeseqends = calcropeseqends(ropeseqs)
@@ -560,7 +560,7 @@ static func cuboidfromropenodesequences(nodepoints, ropeseqs):
 	var tcpnN = ((tcpn1 - tcpn0).cross(tcpn2 - tcpn0))
 	print(topnode, nodepoints[topnode])
 	print(" ", tcpn0, tcpn1, tcpn2)
-	if tcpnN.y < 0:
+	if (tcpnN.y < 0) != badinvert:
 		swaparrindexes(ropeseqendsoftopnode, 1, 2)
 
 	var secondseqq = [ ]
@@ -748,14 +748,50 @@ static func makerailcuboidshellmeshface(surfaceTool, nodepoints, cuboidrailfac):
 	else:
 		triangulatetuberails(surfaceTool, tuberail0, tuberail1)
 
-static func makerailcuboidshellmesh(nodepoints, cuboidrailfacs):
+const recuboidbyvalueinversion = false
+static func makerailcuboidshellmesh(nodepoints, cuboidrailfacs, checkcorrectextnormals):
 	var arraymesh = ArrayMesh.new()
 	var surfaceTool = SurfaceTool.new()
 	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
 	for cuboidrailfac in cuboidrailfacs:
 		makerailcuboidshellmeshface(surfaceTool, nodepoints, cuboidrailfac)
 	surfaceTool.generate_normals()
-	surfaceTool.commit(arraymesh)
+	if not checkcorrectextnormals:
+		surfaceTool.commit(arraymesh)
+		return arraymesh
+
+	var ama = surfaceTool.commit_to_arrays()
+	var amaverts = ama[ArrayMesh.ARRAY_VERTEX]
+	var amanorms = ama[ArrayMesh.ARRAY_NORMAL]
+	var imax = 0
+	var ymax = amaverts[0].y
+	var ynmax = amanorms[0].y
+	for i in range(1, len(amaverts)):
+		var y = amaverts[i].y
+		var yn = amanorms[i].y
+		if y > ymax or (y == ymax and abs(yn) > abs(ynmax)):
+			ymax = y
+			ynmax = yn
+			imax = i
+	print("Boulder with highest point normal inverted ", amaverts[imax], amanorms[imax])
+	if ynmax < 0.0:
+		print("Inverting boulder with highest point normal inverted ", amaverts[imax], amanorms[imax])
+		if not recuboidbyvalueinversion:
+			return null
+		var amauvs = ama[ArrayMesh.ARRAY_TEX_UV]
+		for i in range(2, len(amaverts), 3):
+			var a = amaverts[i-1]
+			amaverts[i-1] = amaverts[i]
+			amaverts[i] = a
+			var b = amauvs[i-1]
+			amauvs[i-1] = amauvs[i]
+			amauvs[i] = b
+		for i in range(len(amanorms)):
+			amanorms[i] = -amanorms[i]
+		ama[ArrayMesh.ARRAY_VERTEX] = amaverts
+		ama[ArrayMesh.ARRAY_NORMAL] = amanorms
+		ama[ArrayMesh.ARRAY_TEX_UV] = amauvs
+	arraymesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, ama)
 	return arraymesh
 
 

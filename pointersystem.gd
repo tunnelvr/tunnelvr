@@ -1356,7 +1356,7 @@ func buttonreleased_vrgrip():
 							for nodename in ropeseq:
 								nodestoproject[nodename] = 1
 				else:
-					var cuboidfacs = Polynets.cuboidfromropenodesequences(ropexc.nodepoints, ropeseqs)
+					var cuboidfacs = Polynets.cuboidfromropenodesequences(ropexc.nodepoints, ropeseqs, false)
 					if cuboidfacs != null:
 						var targetpointL = ropexc.transform.xform_inv(activetargetnode.global_transform.origin)
 						var cuboidfac = Polynets.findclosestcuboidshellface(targetpointL, dragvecL, ropexc.nodepoints, cuboidfacs)

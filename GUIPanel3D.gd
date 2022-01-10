@@ -714,7 +714,7 @@ func resources_readycall():
 	var resourcetype = ""
 	for k in GithubAPI.riattributes["resourcedefs"].values():
 		if (k["type"] == "localfiles" and resourcetype == "") or \
-				(k["type"] == "githubapi" and k.get("token")):
+				(false and k["type"] == "githubapi" and k.get("token")):
 			resourcesel = k["name"]
 			resourcetype = k["type"]
 	updateresourceselector(resourcesel)
