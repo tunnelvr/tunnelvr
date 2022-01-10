@@ -712,9 +712,10 @@ func resources_readycall():
 	updateresourceselector("")
 	var resourcesel = ""
 	var resourcetype = ""
+	var disablegithubdefault = OS.has_feature("pc")
 	for k in GithubAPI.riattributes["resourcedefs"].values():
 		if (k["type"] == "localfiles" and resourcetype == "") or \
-				(false and k["type"] == "githubapi" and k.get("token")):
+				(not disablegithubdefault and k["type"] == "githubapi" and k.get("token")):
 			resourcesel = k["name"]
 			resourcetype = k["type"]
 	updateresourceselector(resourcesel)
