@@ -354,7 +354,7 @@ func _on_switchtest(index):
 		for xcdrawing in sketchsystem.get_node("XCdrawings").get_children():
 			if xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING and xcdrawing.drawingvisiblecode != DRAWING_TYPE.VIZ_XCD_HIDE:
 				xcvizstates[xcdrawing.get_name()] = DRAWING_TYPE.VIZ_XCD_HIDE
-		sketchsystem.actsketchchange([{ "xcvizstates":xcvizstates}])
+		sketchsystem.actsketchchange([{ "xcvizstates":xcvizstates }])
 		setguipanelhide()
 		SwitchTest.selected = 0
 		

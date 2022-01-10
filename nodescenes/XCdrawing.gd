@@ -74,7 +74,7 @@ func setxcdrawingvisiblehideL(hidenodes):
 	else:
 		$XCdrawingplane.visible = false
 		$XCdrawingplane/CollisionShape.disabled = true
-	var rnodesvisible = (not hidenodes) or (drawingtype != DRAWING_TYPE.DT_XCDRAWING) or (len(xctubesconn) == 0)
+	var rnodesvisible = (not hidenodes)  # or (drawingtype != DRAWING_TYPE.DT_XCDRAWING) or (len(xctubesconn) == 0)
 	$XCnodes.visible = rnodesvisible
 	$PathLines.visible = rnodesvisible
 	for xcn in $XCnodes.get_children():
