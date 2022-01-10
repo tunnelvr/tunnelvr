@@ -620,45 +620,6 @@ static func triangledistortionmeasure(p0, p1, p2, f0, f1, f2):
 
 
 
-static func makecuboidshellmesh(nodepoints, cuboidfacs):
-	var arraymesh = ArrayMesh.new()
-	var surfaceTool = SurfaceTool.new()
-	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
-	var nodepointsum = Vector3(0, 0, 0)
-	for pt in nodepoints.values():
-		nodepointsum += pt
-	var cuboidcentre = nodepointsum/len(nodepoints)
-	for cuboidfac in cuboidfacs:
-		var ppoly = [ ]
-		for c in cuboidfac:
-			ppoly.push_back(nodepoints[c])
-		var polynormsum = Vector3(0, 0, 0)
-		var polyptsum = Vector3(0, 0, 0)
-		for i in range(len(ppoly)):
-			polynormsum += (ppoly[i] - ppoly[i-1]).cross(ppoly[(i+1)%len(ppoly)] - ppoly[i])
-			polyptsum += ppoly[i]
-		var polycentre = polyptsum/len(ppoly)
-		var polynorm = polynormsum.normalized()
-		if polynorm.dot(polycentre - cuboidcentre) > 0.0:
-			polynorm = -polynorm
-		var polyax0 = polynormsum.cross(ppoly[1] - ppoly[0]).normalized()
-		var polyax1 = polynorm.cross(polyax0)
-		
-		var pv = PoolVector2Array()
-		pv.resize(len(ppoly))
-		for i in range(len(ppoly)):
-			var p = ppoly[i] - ppoly[0]
-			pv[i] = Vector2(p.dot(polyax0), p.dot(polyax1))
-		var pi = Geometry.triangulate_polygon(pv)
-		for u in pi:
-			surfaceTool.add_uv(pv[u])
-			surfaceTool.add_uv2(pv[u])
-			surfaceTool.add_vertex(ppoly[u])
-			
-	surfaceTool.generate_normals()
-	surfaceTool.commit(arraymesh)
-	return arraymesh
-
 static func initialcuboidrails(nodepoints, quadrail0, quadrail1):
 	var ila0N = len(quadrail0) - 1
 	var ila1N = len(quadrail1) - 1

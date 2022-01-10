@@ -162,8 +162,6 @@ func setdrawingvisiblecode(ldrawingvisiblecode):
 			var stalseqax = Polynets.stalfromropenodesequences(nodepoints, ropeseqs) if cuboidfacs == null else null
 			var signseqax = Polynets.signpostfromropenodesequences(nodepoints, ropeseqs, (additionalproperties if additionalproperties != null else {}).get("flagsignlabels", {})) if (cuboidfacs == null and stalseqax == null) else null
 			if cuboidfacs != null:
-				#print("cuboidfacs ", cuboidfacs)
-				#var cuboidshellmesh = Polynets.makecuboidshellmesh(nodepoints, cuboidfacs[0])
 				var cuboidshellmesh1 = Polynets.makerailcuboidshellmesh(nodepoints, cuboidfacs[1])
 				updatexcshellmesh(cuboidshellmesh1)
 				$RopeHang.visible = false
