@@ -539,7 +539,7 @@ static func calcropeseqends(ropeseqs):
 			ropeseqends[e1] = [ j ]
 	return ropeseqends
 	
-static func cuboidfromropenodesequences(nodepoints, ropeseqs): # cube shape detection
+static func cuboidfromropenodesequences(nodepoints, ropeseqs):
 	if len(ropeseqs) != 12:
 		return null
 	var ropeseqends = calcropeseqends(ropeseqs)
@@ -598,16 +598,11 @@ static func cuboidfromropenodesequences(nodepoints, ropeseqs): # cube shape dete
 		assert (len(secondseqq[k]) == 8)
 		assert (k == 0 or secondseqq[k][-1] == secondseqq[k-1][-1])
 
-	var cuboidfacs = [ ]
 	var cuboidrailfacs = [ ]
 	for k in range(3):
-		cuboidfacs.push_back(cuboidfacseq(topnode, ropeseqs, [secondseqq[k][0], secondseqq[k][4], secondseqq[(k+1)%3][2], secondseqq[(k+1)%3][0]]))
-		cuboidfacs.push_back(cuboidfacseq(secondseqq[k][1], ropeseqs, [secondseqq[k][2], secondseqq[(k+2)%3][6], secondseqq[k][6], secondseqq[k][4]]))
-
 		cuboidrailfacs.push_back(cuboidfacrailsseq(topnode, ropeseqs, [secondseqq[k][0], secondseqq[k][4], secondseqq[(k+1)%3][2], secondseqq[(k+1)%3][0]]))
 		cuboidrailfacs.push_back(cuboidfacrailsseq(secondseqq[k][1], ropeseqs, [secondseqq[k][2], secondseqq[(k+2)%3][6], secondseqq[k][6], secondseqq[k][4]]))
-
-	return [cuboidfacs, cuboidrailfacs]
+	return cuboidrailfacs
 	
 static func triangledistortionmeasure(p0, p1, p2, f0, f1, f2):
 	var parea = 0.5*(p1 - p0).cross(p2 - p0).length()
