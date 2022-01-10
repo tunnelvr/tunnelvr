@@ -1330,6 +1330,8 @@ func buttonreleased_vrgrip():
 									   "prevtransformpos":ropexc.transform,
 									   "transformpos":ropexc.transform.translated(dragvecL)
 									})
+			elif pointertarget.get_name() == "SelectXC" and pointertargetofstartofropehang != null:
+				sketchsystem.actsketchchange([{"xcvizstates":{ pointertargetofstartofropehang.get_name():DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE } }])
 				
 			elif pointertarget.get_name() == "DistortXC" and ropexcnode != null:
 				var ropexcnodename = ropexcnode.get_name()
