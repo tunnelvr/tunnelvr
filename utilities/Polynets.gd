@@ -539,7 +539,7 @@ static func calcropeseqends(ropeseqs):
 			ropeseqends[e1] = [ j ]
 	return ropeseqends
 	
-static func cuboidfromropenodesequences(nodepoints, ropeseqs): # cube shape detection
+static func cuboidfromropenodesequences(nodepoints, ropeseqs, badinvert):
 	if len(ropeseqs) != 12:
 		return null
 	var ropeseqends = calcropeseqends(ropeseqs)
@@ -558,7 +558,7 @@ static func cuboidfromropenodesequences(nodepoints, ropeseqs): # cube shape dete
 	var tcpn1 = nodepoints[nextseqnode(topnode, ropeseqs[ropeseqendsoftopnode[1]])]
 	var tcpn2 = nodepoints[nextseqnode(topnode, ropeseqs[ropeseqendsoftopnode[2]])]
 	var tcpnN = ((tcpn1 - tcpn0).cross(tcpn2 - tcpn0))
-	if tcpnN.y < 0:
+	if (tcpnN.y < 0) != badinvert:
 		swaparrindexes(ropeseqendsoftopnode, 1, 2)
 
 	var secondseqq = [ ]
@@ -596,16 +596,11 @@ static func cuboidfromropenodesequences(nodepoints, ropeseqs): # cube shape dete
 		assert (len(secondseqq[k]) == 8)
 		assert (k == 0 or secondseqq[k][-1] == secondseqq[k-1][-1])
 
-	var cuboidfacs = [ ]
 	var cuboidrailfacs = [ ]
 	for k in range(3):
-		cuboidfacs.push_back(cuboidfacseq(topnode, ropeseqs, [secondseqq[k][0], secondseqq[k][4], secondseqq[(k+1)%3][2], secondseqq[(k+1)%3][0]]))
-		cuboidfacs.push_back(cuboidfacseq(secondseqq[k][1], ropeseqs, [secondseqq[k][2], secondseqq[(k+2)%3][6], secondseqq[k][6], secondseqq[k][4]]))
-
 		cuboidrailfacs.push_back(cuboidfacrailsseq(topnode, ropeseqs, [secondseqq[k][0], secondseqq[k][4], secondseqq[(k+1)%3][2], secondseqq[(k+1)%3][0]]))
 		cuboidrailfacs.push_back(cuboidfacrailsseq(secondseqq[k][1], ropeseqs, [secondseqq[k][2], secondseqq[(k+2)%3][6], secondseqq[k][6], secondseqq[k][4]]))
-
-	return [cuboidfacs, cuboidrailfacs]
+	return cuboidrailfacs
 	
 static func triangledistortionmeasure(p0, p1, p2, f0, f1, f2):
 	var parea = 0.5*(p1 - p0).cross(p2 - p0).length()
@@ -617,45 +612,6 @@ static func triangledistortionmeasure(p0, p1, p2, f0, f1, f2):
 
 
 
-
-static func makecuboidshellmesh(nodepoints, cuboidfacs):
-	var arraymesh = ArrayMesh.new()
-	var surfaceTool = SurfaceTool.new()
-	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
-	var nodepointsum = Vector3(0, 0, 0)
-	for pt in nodepoints.values():
-		nodepointsum += pt
-	var cuboidcentre = nodepointsum/len(nodepoints)
-	for cuboidfac in cuboidfacs:
-		var ppoly = [ ]
-		for c in cuboidfac:
-			ppoly.push_back(nodepoints[c])
-		var polynormsum = Vector3(0, 0, 0)
-		var polyptsum = Vector3(0, 0, 0)
-		for i in range(len(ppoly)):
-			polynormsum += (ppoly[i] - ppoly[i-1]).cross(ppoly[(i+1)%len(ppoly)] - ppoly[i])
-			polyptsum += ppoly[i]
-		var polycentre = polyptsum/len(ppoly)
-		var polynorm = polynormsum.normalized()
-		if polynorm.dot(polycentre - cuboidcentre) > 0.0:
-			polynorm = -polynorm
-		var polyax0 = polynormsum.cross(ppoly[1] - ppoly[0]).normalized()
-		var polyax1 = polynorm.cross(polyax0)
-		
-		var pv = PoolVector2Array()
-		pv.resize(len(ppoly))
-		for i in range(len(ppoly)):
-			var p = ppoly[i] - ppoly[0]
-			pv[i] = Vector2(p.dot(polyax0), p.dot(polyax1))
-		var pi = Geometry.triangulate_polygon(pv)
-		for u in pi:
-			surfaceTool.add_uv(pv[u])
-			surfaceTool.add_uv2(pv[u])
-			surfaceTool.add_vertex(ppoly[u])
-			
-	surfaceTool.generate_normals()
-	surfaceTool.commit(arraymesh)
-	return arraymesh
 
 static func initialcuboidrails(nodepoints, quadrail0, quadrail1):
 	var ila0N = len(quadrail0) - 1
@@ -790,14 +746,50 @@ static func makerailcuboidshellmeshface(surfaceTool, nodepoints, cuboidrailfac):
 	else:
 		triangulatetuberails(surfaceTool, tuberail0, tuberail1)
 
-static func makerailcuboidshellmesh(nodepoints, cuboidrailfacs):
+const recuboidbyvalueinversion = false
+static func makerailcuboidshellmesh(nodepoints, cuboidrailfacs, checkcorrectextnormals):
 	var arraymesh = ArrayMesh.new()
 	var surfaceTool = SurfaceTool.new()
 	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
 	for cuboidrailfac in cuboidrailfacs:
 		makerailcuboidshellmeshface(surfaceTool, nodepoints, cuboidrailfac)
 	surfaceTool.generate_normals()
-	surfaceTool.commit(arraymesh)
+	if not checkcorrectextnormals:
+		surfaceTool.commit(arraymesh)
+		return arraymesh
+
+	var ama = surfaceTool.commit_to_arrays()
+	var amaverts = ama[ArrayMesh.ARRAY_VERTEX]
+	var amanorms = ama[ArrayMesh.ARRAY_NORMAL]
+	var imax = 0
+	var ymax = amaverts[0].y
+	var ynmax = amanorms[0].y
+	for i in range(1, len(amaverts)):
+		var y = amaverts[i].y
+		var yn = amanorms[i].y
+		if y > ymax or (y == ymax and abs(yn) > abs(ynmax)):
+			ymax = y
+			ynmax = yn
+			imax = i
+	print("Boulder with highest point normal inverted ", amaverts[imax], amanorms[imax])
+	if ynmax < 0.0:
+		print("Inverting boulder with highest point normal inverted ", amaverts[imax], amanorms[imax])
+		if not recuboidbyvalueinversion:
+			return null
+		var amauvs = ama[ArrayMesh.ARRAY_TEX_UV]
+		for i in range(2, len(amaverts), 3):
+			var a = amaverts[i-1]
+			amaverts[i-1] = amaverts[i]
+			amaverts[i] = a
+			var b = amauvs[i-1]
+			amauvs[i-1] = amauvs[i]
+			amauvs[i] = b
+		for i in range(len(amanorms)):
+			amanorms[i] = -amanorms[i]
+		ama[ArrayMesh.ARRAY_VERTEX] = amaverts
+		ama[ArrayMesh.ARRAY_NORMAL] = amanorms
+		ama[ArrayMesh.ARRAY_TEX_UV] = amauvs
+	arraymesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, ama)
 	return arraymesh
 
 
@@ -812,7 +804,7 @@ static func findclosestcuboidshellface(targetpoint, dragvec, nodepoints, cuboidr
 		makerailcuboidshellmeshface(surfaceTool, nodepoints, cuboidrailfac)
 		var sarrays = surfaceTool.commit_to_arrays()
 		var vertices = sarrays[ArrayMesh.ARRAY_VERTEX]
-		print(len(vertices))
+		print("findclosestcuboidshellface ", len(vertices))
 		for i in range(2, len(vertices), 3):
 			var vt = Geometry.ray_intersects_triangle(vrayfrom, vraydir, vertices[i-2], vertices[i-1], vertices[i])
 			if vt != null:

@@ -354,7 +354,7 @@ func _on_switchtest(index):
 		for xcdrawing in sketchsystem.get_node("XCdrawings").get_children():
 			if xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING and xcdrawing.drawingvisiblecode != DRAWING_TYPE.VIZ_XCD_HIDE:
 				xcvizstates[xcdrawing.get_name()] = DRAWING_TYPE.VIZ_XCD_HIDE
-		sketchsystem.actsketchchange([{ "xcvizstates":xcvizstates}])
+		sketchsystem.actsketchchange([{ "xcvizstates":xcvizstates }])
 		setguipanelhide()
 		SwitchTest.selected = 0
 		
@@ -537,6 +537,8 @@ remote func copyacrosstextedit(text):
 		setguipanelvisible(sketchsystem.pointersystem.LaserOrient.global_transform)
 	$Viewport/GUI/Panel/EditColorRect/TextEdit.text = text
 	$Viewport/GUI/Panel/EditColorRect/TextEdit.grab_focus()
+	print("render_target_update_mode ", $Viewport.render_target_update_mode, " ", Viewport.UPDATE_DISABLED)
+	$Viewport.render_target_update_mode = Viewport.UPDATE_WHEN_VISIBLE
 
 func buttonflagsign_pressed():
 	if sketchsystem.pointersystem.activetargetnode != null and sketchsystem.pointersystem.activetargetnodewall != null and \
@@ -631,6 +633,7 @@ func setguipanelvisible(controller_global_transform):
 	virtualkeyboard.global_transform = kpaneltrans
 	
 	$Viewport/GUI/Panel/Label.text = ""
+	$Viewport/GUI/Panel/ResourceOptions.selected = 0
 
 	visible = true
 	$CollisionShape.disabled = not visible
@@ -709,9 +712,10 @@ func resources_readycall():
 	updateresourceselector("")
 	var resourcesel = ""
 	var resourcetype = ""
+	var disablegithubdefault = OS.has_feature("pc")
 	for k in GithubAPI.riattributes["resourcedefs"].values():
 		if (k["type"] == "localfiles" and resourcetype == "") or \
-				(k["type"] == "githubapi" and k.get("token")):
+				(not disablegithubdefault and k["type"] == "githubapi" and k.get("token")):
 			resourcesel = k["name"]
 			resourcetype = k["type"]
 	updateresourceselector(resourcesel)

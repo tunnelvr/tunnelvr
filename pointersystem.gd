@@ -1330,6 +1330,8 @@ func buttonreleased_vrgrip():
 									   "prevtransformpos":ropexc.transform,
 									   "transformpos":ropexc.transform.translated(dragvecL)
 									})
+			elif pointertarget.get_name() == "SelectXC" and pointertargetofstartofropehang != null:
+				sketchsystem.actsketchchange([{"xcvizstates":{ pointertargetofstartofropehang.get_name():DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE } }])
 				
 			elif pointertarget.get_name() == "DistortXC" and ropexcnode != null:
 				var ropexcnodename = ropexcnode.get_name()
@@ -1356,10 +1358,10 @@ func buttonreleased_vrgrip():
 							for nodename in ropeseq:
 								nodestoproject[nodename] = 1
 				else:
-					var cuboidfacs = Polynets.cuboidfromropenodesequences(ropexc.nodepoints, ropeseqs)
+					var cuboidfacs = Polynets.cuboidfromropenodesequences(ropexc.nodepoints, ropeseqs, false)
 					if cuboidfacs != null:
 						var targetpointL = ropexc.transform.xform_inv(activetargetnode.global_transform.origin)
-						var cuboidfac = Polynets.findclosestcuboidshellface(targetpointL, dragvecL, ropexc.nodepoints, cuboidfacs[1])
+						var cuboidfac = Polynets.findclosestcuboidshellface(targetpointL, dragvecL, ropexc.nodepoints, cuboidfacs)
 						for ropeseq in cuboidfac:
 							for nodename in ropeseq:
 								nodestoproject[nodename] = 1
@@ -1396,7 +1398,7 @@ func buttonreleased_vrgrip():
 								var nodename = ropeseq[i]
 								if not prevnodepoints.has(nodename):
 									prevnodepoints[nodename] = ropexc.nodepoints[nodename]
-									nextnodepoints[nodename] = prevnodepoints[nodename] + lerp(dagvecL0, dagvecL1, (1.0 - i*1.0/(len(ropeseq) - 1)))
+									nextnodepoints[nodename] = prevnodepoints[nodename] + lerp(dagvecL0, dagvecL1, i*1.0/(len(ropeseq) - 1))
 
 					xcdatalist.push_back({ "name":ropexc.get_name(), 
 										   "prevnodepoints":prevnodepoints,
@@ -1480,8 +1482,8 @@ func buttonreleased_vrgrip():
 					if gripmenu.gripmenupointertargetwall == activetargetwall:
 						setactivetargetwall(null)
 				elif gripmenu.gripmenupointertargettype == "XCtubesector":
-					sketchsystem.actsketchchange([{ "xcvizstates":{gripmenu.gripmenupointertargetwall.xcname0:DRAWING_TYPE.VIZ_XCD_HIDE, 
-																   gripmenu.gripmenupointertargetwall.xcname1:DRAWING_TYPE.VIZ_XCD_HIDE}} ])
+					sketchsystem.actsketchchange([{ "xcvizstates":{ gripmenu.gripmenupointertargetwall.xcname0:DRAWING_TYPE.VIZ_XCD_HIDE, 
+																	gripmenu.gripmenupointertargetwall.xcname1:DRAWING_TYPE.VIZ_XCD_HIDE } } ])
 					var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(gripmenu.gripmenupointertargetwall.xcname0)
 					var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(gripmenu.gripmenupointertargetwall.xcname1)
 					if xcdrawing0 == activetargetwall:
@@ -1490,7 +1492,7 @@ func buttonreleased_vrgrip():
 						setactivetargetwall(null)
 				elif gripmenu.gripmenupointertargettype == "XCdrawing" and gripmenu.gripmenupointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING and len(gripmenu.gripmenupointertargetwall.nodepoints) != 0:
 					var xcdrawing = gripmenu.gripmenupointertargetwall
-					sketchsystem.actsketchchange([{ "xcvizstates":{ gripmenu.gripmenupointertargetwall.get_name():DRAWING_TYPE.VIZ_XCD_HIDE}} ])
+					sketchsystem.actsketchchange([{ "xcvizstates":{ gripmenu.gripmenupointertargetwall.get_name():DRAWING_TYPE.VIZ_XCD_HIDE if xcdrawing.xcconnectstoshell() else DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE}} ])
 					if xcdrawing == activetargetwall:
 						setactivetargetwall(null)
 

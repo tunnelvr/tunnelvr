@@ -74,7 +74,7 @@ func setxcdrawingvisiblehideL(hidenodes):
 	else:
 		$XCdrawingplane.visible = false
 		$XCdrawingplane/CollisionShape.disabled = true
-	var rnodesvisible = (not hidenodes) or (drawingtype != DRAWING_TYPE.DT_XCDRAWING) or (len(xctubesconn) == 0)
+	var rnodesvisible = (not hidenodes)  # or (drawingtype != DRAWING_TYPE.DT_XCDRAWING) or (len(xctubesconn) == 0)
 	$XCnodes.visible = rnodesvisible
 	$PathLines.visible = rnodesvisible
 	for xcn in $XCnodes.get_children():
@@ -158,14 +158,16 @@ func setdrawingvisiblecode(ldrawingvisiblecode):
 			var ropeseqs = Polynets.makeropenodesequences(nodepoints, onepathpairs, $RopeHang.oddropeverts, $RopeHang.anchorropeverts, true)
 			$RopeHang.oddropeverts.sort_custom(self, "sortnodeyfunc")
 			$RopeHang.anchorropeverts.sort_custom(self, "sortnodeyfunc")
-			var cuboidfacs = Polynets.cuboidfromropenodesequences(nodepoints, ropeseqs)
+			var cuboidfacs = Polynets.cuboidfromropenodesequences(nodepoints, ropeseqs, false)
 			var stalseqax = Polynets.stalfromropenodesequences(nodepoints, ropeseqs) if cuboidfacs == null else null
 			var signseqax = Polynets.signpostfromropenodesequences(nodepoints, ropeseqs, (additionalproperties if additionalproperties != null else {}).get("flagsignlabels", {})) if (cuboidfacs == null and stalseqax == null) else null
 			if cuboidfacs != null:
-				#print("cuboidfacs ", cuboidfacs)
-				#var cuboidshellmesh = Polynets.makecuboidshellmesh(nodepoints, cuboidfacs[0])
-				var cuboidshellmesh1 = Polynets.makerailcuboidshellmesh(nodepoints, cuboidfacs[1])
+				var cuboidshellmesh1 = Polynets.makerailcuboidshellmesh(nodepoints, cuboidfacs, true)
+				if cuboidshellmesh1 == null:
+					cuboidfacs = Polynets.cuboidfromropenodesequences(nodepoints, ropeseqs, true)
+					cuboidshellmesh1 = Polynets.makerailcuboidshellmesh(nodepoints, cuboidfacs, false)
 				updatexcshellmesh(cuboidshellmesh1)
+				
 				$RopeHang.visible = false
 				$PathLines.visible = false
 				for xcn in $XCnodes.get_children():

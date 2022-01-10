@@ -96,6 +96,7 @@ func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointert
 		gmlist = [ "DragXC", "DistortXC" ]
 		if pointertargetofstartofropehang != null and len(activetargetnodewall.nodepoints) == 1:
 			gmlist.push_back("ProjectXC")
+			gmlist.push_back("SelectXC")
 		else:
 			gmlist.push_back("ProjectXC")
 			gmlist.push_back("SpLine")

@@ -7,5 +7,10 @@ extends EditorScript
 
 
 func _run():
-	var a = Vector3(1,2,3)
-	print(a*Vector3(1,-1,1))
+	var from = Vector3(0.2,1,-0.0001)
+	var dir = Vector3(0,0,1)
+	var a = Vector3(0,0,0)
+	var b = Vector3(2,0,0)
+	var c = Vector3(0,2,0)
+
+	print(Geometry.ray_intersects_triangle(from, dir, a, b, c))
