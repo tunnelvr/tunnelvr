@@ -558,6 +558,8 @@ static func cuboidfromropenodesequences(nodepoints, ropeseqs): # cube shape dete
 	var tcpn1 = nodepoints[nextseqnode(topnode, ropeseqs[ropeseqendsoftopnode[1]])]
 	var tcpn2 = nodepoints[nextseqnode(topnode, ropeseqs[ropeseqendsoftopnode[2]])]
 	var tcpnN = ((tcpn1 - tcpn0).cross(tcpn2 - tcpn0))
+	print(topnode, nodepoints[topnode])
+	print(" ", tcpn0, tcpn1, tcpn2)
 	if tcpnN.y < 0:
 		swaparrindexes(ropeseqendsoftopnode, 1, 2)
 
