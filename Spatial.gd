@@ -89,7 +89,9 @@ func _ready():
 		playerMe.playerplatform = "HTML5"
 		print("warning: untested HTML5 mode")
 		
-	elif checkloadinterface("OVRMobile"):  # ignores enablevr flag on quest platform
+	elif OS.has_feature("Quest"):
+		if not checkloadinterface("OVRMobile"):
+			print("Error: Quest device not able to find OVRMobile interface")
 		ovr_init_config = load("res://addons/godot_ovrmobile/OvrInitConfig.gdns").new()
 		ovr_performance = load("res://addons/godot_ovrmobile/OvrPerformance.gdns").new()
 		ovr_hand_tracking = load("res://addons/godot_ovrmobile/OvrHandTracking.gdns").new();
@@ -105,6 +107,11 @@ func _ready():
 		else:
 			Tglobal.arvrinterface = null
 		playerMe.playerplatform = "Quest"
+
+	elif OS.has_feature("Android"):
+		playerMe.playerplatform = "AndroidPhone"
+		$HeadCam/HeadtorchLight.shadow_enabled = false
+		get_node("../PhoneOverlay").setupphoneoverlaysystem()
 
 	elif not forceopenVR and enablevr and checkloadinterface("Oculus"):
 		print("  Found Oculus Interface.");
@@ -145,7 +152,7 @@ func _ready():
 			Tglobal.arvrinterface = null
 			Tglobal.arvrinterfacename = "none"
 			playerMe.playerplatform = "PC"
-				
+					
 	elif enablevr and false and checkloadinterface("Native mobile"):
 		print("found nativemobile, initializing")
 		if Tglobal.arvrinterface.initialize():
@@ -158,6 +165,8 @@ func _ready():
 
 	else:
 		playerMe.playerplatform = "PC"
+		print("Running phone overlay on PC")
+		$PhoneOverlay.setupphoneoverlaysystem()
 	
 	$PlanViewSystem.transferintorealviewport((not enablevr) and planviewonly)
 	playerMe.initplayerappearance_me()

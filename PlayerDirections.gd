@@ -106,6 +106,9 @@ func _physics_process(delta):
 			if Input.is_action_pressed("lh_left"):      joypossnapturn += -1
 			if Input.is_action_pressed("lh_right"):     joypossnapturn += 1
 
+	if Tglobal.phonethumbmotionposition != null:
+		joyposforeback += -Tglobal.phonethumbmotionposition.y*1.5
+		joyposstrafe += Tglobal.phonethumbmotionposition.x*1.5
 
 	if not Tglobal.questhandtrackingactive and not Tglobal.controlslocked:
 		if abs(joypossnapturn) < 0.4 and joyposxrotsnaphysteresis != 2:

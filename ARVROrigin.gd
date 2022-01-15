@@ -289,17 +289,23 @@ func _process(delta):
 	else:
 		var viewupdownjoy = 0.0
 		var handleftrightjoy = 0.0
+		var duckrise = 0
 		if Input.is_action_pressed("lh_shift"):
 			if Input.is_action_pressed("lh_forward"):   viewupdownjoy += 1
 			if Input.is_action_pressed("lh_backward"):  viewupdownjoy += -1
 			if PlayerDirections.snapturnemovementjoystick == DRAWING_TYPE.JOYPOS_DISABLED:
 				if Input.is_action_pressed("lh_left"):      handleftrightjoy += -1
 				if Input.is_action_pressed("lh_right"):     handleftrightjoy += 1
-			$HeadCam.rotation_degrees.x = clamp($HeadCam.rotation_degrees.x + 90*delta*viewupdownjoy, -89, 89)
 
-			var duckrise = 0
 			if Input.is_action_pressed("lh_duck"):  duckrise += -1
 			if Input.is_action_pressed("lh_rise"):  duckrise += 1
+
+		if Tglobal.phonethumbviewposition != null:
+			viewupdownjoy += -Tglobal.phonethumbviewposition.y
+			$HeadCam.rotation_degrees.y += -90*delta*Tglobal.phonethumbviewposition.x
+		if viewupdownjoy != 0.0:
+			$HeadCam.rotation_degrees.x = clamp($HeadCam.rotation_degrees.x + 90*delta*viewupdownjoy, -89, 89)
+		if duckrise != 0.0:
 			$HeadCam.translation.y = clamp($HeadCam.translation.y + duckrise*delta*1.1, 0.4, 1.8)
 
 		if $HandRight.handstate == HS_INVALID:
