@@ -1761,7 +1761,6 @@ material/0 = SubResource( 11 )
 transform = Transform( -0.999994, 0, 0.00336804, 0, 1, 0, -0.00336804, 0, -0.999994, 5.95264e-10, 2, 6.412 )
 
 [node name="GUIPanel3D" type="StaticBody" parent="GuiSystem"]
-visible = false
 collision_layer = 8
 collision_mask = 0
 script = ExtResource( 14 )
@@ -3928,3 +3927,13 @@ color = Color( 1, 1, 1, 0.145098 )
 visible = false
 scale = Vector2( 0.2, 0.2 )
 color = Color( 0.231373, 0.364706, 0.890196, 0.862745 )
+
+[node name="MenuButton" type="Button" parent="PhoneOverlay"]
+margin_left = 231.0
+margin_top = 564.0
+margin_right = 291.0
+margin_bottom = 584.0
+text = "Menu"
+__meta__ = {
+"_edit_use_anchors_": false
+}

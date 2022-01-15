@@ -77,6 +77,7 @@ func _ready():
 	print("Initializing VR" if enablevr else "VR disabled");
 	playerMe.playeroperatingsystem = OS.get_name()
 
+	$PhoneOverlay.visible = false
 	if OS.has_feature("Server"):
 		print("On server mode, autostart server connection")
 		$GuiSystem/GUIPanel3D.call_deferred("networkstartasserver", false)
@@ -110,8 +111,8 @@ func _ready():
 
 	elif OS.has_feature("Android"):
 		playerMe.playerplatform = "AndroidPhone"
-		$HeadCam/HeadtorchLight.shadow_enabled = false
-		get_node("../PhoneOverlay").setupphoneoverlaysystem()
+		playerMe.get_node("HeadCam/HeadtorchLight").shadow_enabled = false
+		$PhoneOverlay.setupphoneoverlaysystem()
 
 	elif not forceopenVR and enablevr and checkloadinterface("Oculus"):
 		print("  Found Oculus Interface.");
@@ -167,7 +168,8 @@ func _ready():
 		playerMe.playerplatform = "PC"
 		print("Running phone overlay on PC")
 		$PhoneOverlay.setupphoneoverlaysystem()
-	
+
+	$GuiSystem/GUIPanel3D.toplevelcalled_ready(not $PhoneOverlay.visible)
 	$PlanViewSystem.transferintorealviewport((not enablevr) and planviewonly)
 	playerMe.initplayerappearance_me()
 	$SketchSystem.pointersystem = playerMe.get_node("pointersystem")

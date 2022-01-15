@@ -309,7 +309,8 @@ func panelsendmousemotiontopointertarget():
 	guipanel.collision_point = collision_point
 	var collider_transform = guipanel.global_transform
 	var viewport = guipanel.get_node("Viewport")
-	viewport.render_target_update_mode = Viewport.UPDATE_WHEN_VISIBLE
+	if viewport.has_method("set_update_mode"):
+		viewport.set_update_mode(Viewport.UPDATE_WHEN_VISIBLE)
 	if collider_transform.xform_inv(controller_global_transform.origin).z < 0:
 		return
 	var shape_size = guipanel.get_node("CollisionShape").shape.extents * 2
