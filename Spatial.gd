@@ -112,7 +112,7 @@ func _ready():
 	elif OS.has_feature("Android"):
 		playerMe.playerplatform = "AndroidPhone"
 		playerMe.get_node("HeadCam/HeadtorchLight").shadow_enabled = false
-		$PhoneOverlay.setupphoneoverlaysystem()
+		$PhoneOverlay.setupphoneoverlaysystem(true)
 
 	elif not forceopenVR and enablevr and checkloadinterface("Oculus"):
 		print("  Found Oculus Interface.");
@@ -168,7 +168,7 @@ func _ready():
 		playerMe.playerplatform = "PC"
 		if forcephoneoverlay:
 			print("Running phone overlay on PC")
-			$PhoneOverlay.setupphoneoverlaysystem()
+			$PhoneOverlay.setupphoneoverlaysystem(false)
 
 	$GuiSystem/GUIPanel3D.toplevelcalled_ready()
 	$PlanViewSystem.transferintorealviewport()

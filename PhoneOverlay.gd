@@ -6,11 +6,12 @@ onready var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
 
 var fingerdown1pos = null
 var plancameratranslation = Vector2(0,0)
-var plancameraxvec = Vector3(0,0,0); 
-var plancamerayvec = Vector3(0,0,0); 
+var plancameraxvec = Vector3(0,0,0)
+var plancamerayvec = Vector3(0,0,0)
 var plancamerasize = Vector2(0,0)
+var touchscreentype = false
 
-func setupphoneoverlaysystem():
+func setupphoneoverlaysystem(ltouchscreentype):
 	visible = true
 	Tglobal.phoneoverlay = self
 
@@ -21,12 +22,11 @@ func setupphoneoverlaysystem():
 	$MenuButton.connect("pressed", self, "menubuttonpressed")
 	$BackgroundCapture/CollisionShape2D.disabled = false
 	$BackgroundCapture.connect("input_event", self, "backgroundmotioninput")
+	get_node("/root").connect("size_changed", self, "setupoverlaycomponentpositions")
 	setupoverlaycomponentpositions()
-
 
 func setupoverlaycomponentpositions():
 	var n = 16
-	print($ThumbLeft/CollisionShape2D.shape)
 	var screensize = get_node("/root").size
 	thumbarearadius = min(screensize.x, screensize.y)/4.5
 	var thumbareamargin = thumbarearadius/7
@@ -58,8 +58,8 @@ func setupoverlaycomponentpositions():
 	guipanel3dviewport.rect_position = Vector2(screensize.x/2 - orgpanelsize.x*panelscale/2, screensize.y - orgpanelsize.y*panelscale - thumbareamargin)
 	guipanel3dviewport.visible = false
 
-	$MenuButton.rect_position = guipanel3dviewport.rect_position + Vector2(orgpanelsize.x*panelscale/2, orgpanelsize.y*panelscale) - $MenuButton.rect_size*panelscale
-	$MenuButton.rect_scale = Vector2(panelscale, panelscale)
+	$MenuButton.rect_position = guipanel3dviewport.rect_position + Vector2(orgpanelsize.x*panelscale/2, orgpanelsize.y*panelscale) - $MenuButton.rect_size*max(1, panelscale)
+	$MenuButton.rect_scale = Vector2(max(1, panelscale), max(1, panelscale))
 	
 	var planviewviewport = get_node("/root/Spatial/PlanViewSystem/PlanView/Viewport")
 	var planviewviewcontrols = planviewviewport.get_node("PlanGUI/PlanViewControls")
@@ -131,6 +131,11 @@ func backgroundmotioninput(viewport: Object, event: InputEvent, shape_idx: int):
 
 
 	if event is InputEventScreenTouch:
-		print(event.index, " ", event.position, " ", event.pressed)
+		print(event.pressed, "   ", event.index, " ", event.position)
+	if event is InputEventScreenDrag:
+		print(event.index, " ", event.position)
 #InputEventMagnifyGesture
 #InputEventScreenTouch
+
+
+
