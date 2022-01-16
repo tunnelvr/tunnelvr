@@ -170,8 +170,9 @@ func _ready():
 			print("Running phone overlay on PC")
 			$PhoneOverlay.setupphoneoverlaysystem()
 
-	$GuiSystem/GUIPanel3D.toplevelcalled_ready(not $PhoneOverlay.visible)
-	$PlanViewSystem.transferintorealviewport(not $PhoneOverlay.visible)
+	$GuiSystem/GUIPanel3D.toplevelcalled_ready()
+	$PlanViewSystem.transferintorealviewport()
+
 	playerMe.initplayerappearance_me()
 	$SketchSystem.pointersystem = playerMe.get_node("pointersystem")
 	

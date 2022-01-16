@@ -26,7 +26,8 @@ func setupphoneoverlaysystem():
 	$ThumbRight.transform.origin = Vector2(screensize.x - thumbareamargin - thumbarearadius, screensize.y - thumbarearadius - thumbareamargin)
 	$ThumbRight.connect("input_event", self, "thumbmotioninput")
 	$ThumbRight/CollisionShape2D.disabled = false
-
+	$MenuButton.connect("pressed", self, "menubuttonpressed")
+	
 	var thumgapsize = screensize.x - 4*thumbareamargin - 4*thumbarearadius
 
 	var guipanel3dviewport = get_node("/root/Spatial/GuiSystem/GUIPanel3D/Viewport")
@@ -39,9 +40,15 @@ func setupphoneoverlaysystem():
 
 	$MenuButton.rect_position = guipanel3dviewport.rect_position + Vector2(orgpanelsize.x*panelscale/2, orgpanelsize.y*panelscale) - $MenuButton.rect_size*panelscale
 	$MenuButton.rect_scale = Vector2(panelscale, panelscale)
-	$MenuButton.connect("pressed", self, "menubuttonpressed")
 	
-	
+	var planviewviewport = get_node("/root/Spatial/PlanViewSystem/PlanView/Viewport")
+	var planviewviewcontrols = planviewviewport.get_node("PlanGUI/PlanViewControls")
+	var planviewcontrolsscale = screensize.x/planviewviewcontrols.rect_size.x
+	planviewviewport.rect_scale = Vector2(planviewcontrolsscale, planviewcontrolsscale)
+	planviewviewport.rect_position = Vector2(0, 0)
+	planviewviewcontrols.rect_position = Vector2(0, screensize.y/planviewcontrolsscale - planviewviewcontrols.rect_size.y)
+
+
 func menubuttonpressed():
 	var guipanel3dviewport = get_node("/root/Spatial/GuiSystem/GUIPanel3D/Viewport")
 	if guipanel3dviewport.visible:

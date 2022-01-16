@@ -235,15 +235,16 @@ func openlinklistpage(item, llinks):
 	for lk in llinks:
 		addsubitem(item, lk.replace("%20", " "), dirurl + lk)
 
-func transferintorealviewport(establishviewport):
-	if $PlanView.has_node("ViewportReal") and establishviewport:
+func transferintorealviewport():
+	if $PlanView.has_node("ViewportReal") and Tglobal.phoneoverlay == null:
 		var fplangui = $PlanView/Viewport/PlanGUI
 		$PlanView/Viewport.remove_child(fplangui)
 		$PlanView/ViewportReal.add_child(fplangui)
 		$PlanView/Viewport.set_name("ViewportFake")
 		$PlanView/ViewportReal.set_name("Viewport")
 		$PlanView/ProjectionScreen.get_surface_material(0).albedo_texture = $PlanView/Viewport.get_texture()
-
+	else:
+		$PlanView/Viewport.visible = false
 
 func checkboxplantubesvisible_pressed():
 	var pvchange = planviewtodict()
@@ -342,6 +343,7 @@ func actplanviewdict(pvchange):
 			get_node("/root/Spatial/WorldEnvironment/DirectionalLight").visible = true
 			if Tglobal.phoneoverlay != null:
 				$PlanView/Viewport/PlanGUI/Camera.current = true
+				$PlanView/Viewport.visible = true
 			else:
 				get_node("PlanView/CollisionShape").disabled = false
 
@@ -351,6 +353,8 @@ func actplanviewdict(pvchange):
 			get_node("/root/Spatial/WorldEnvironment/DirectionalLight").visible = not get_node("/root/Spatial/GuiSystem/GUIPanel3D/Viewport/GUI/Panel/ButtonHeadtorch").pressed
 			if Tglobal.phoneoverlay != null:
 				$PlanView/Viewport/PlanGUI/Camera.current = false
+				$PlanView/Viewport.visible = false
+
 			
 	var guipanel3d = get_node("/root/Spatial/GuiSystem/GUIPanel3D")
 	guipanel3d.get_node("Viewport/GUI/Panel/ButtonPlanView").pressed = visible

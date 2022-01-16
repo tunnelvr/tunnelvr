@@ -1856,9 +1856,9 @@ __meta__ = {
 
 [node name="ButtonHeadtorch" type="CheckBox" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
 margin_left = 17.0
-margin_top = 127.0
+margin_top = 131.0
 margin_right = 130.0
-margin_bottom = 167.0
+margin_bottom = 155.0
 rect_pivot_offset = Vector2( 138.61, -8.13628 )
 hint_tooltip = "test tooltip"
 pressed = true
@@ -2562,14 +2562,15 @@ collision_layer = 8
 margin_left = 600.0
 margin_right = 640.0
 margin_bottom = 40.0
+mouse_filter = 2
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="PlanGUI" type="Control" parent="PlanViewSystem/PlanView/Viewport"]
-margin_left = 4.27478
-margin_right = 804.275
+margin_right = 800.0
 margin_bottom = 800.0
+mouse_filter = 2
 theme = ExtResource( 47 )
 __meta__ = {
 "_edit_use_anchors_": false

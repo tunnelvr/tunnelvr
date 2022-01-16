@@ -441,10 +441,10 @@ const clientips = [ "Local-network",
 					#"10.0.32.206",
 					"godot.doesliverpool.xyz" ]
 var uniqueinstancestring = ""
-func toplevelcalled_ready(establishviewport):
+func toplevelcalled_ready():
 	uniqueinstancestring = OS.get_unique_id().replace("{", "").split("-")[0].to_upper()+"_"+str(randi())
 	regexacceptableprojectname.compile('(?i)^([a-z0-9.\\-_]+)\\s*$')
-	if has_node("ViewportReal") and establishviewport:
+	if has_node("ViewportReal") and Tglobal.phoneoverlay == null:
 		var fgui = $Viewport/GUI
 		$Viewport.remove_child(fgui)
 		$ViewportReal.add_child(fgui)
@@ -636,11 +636,11 @@ func setguipanelvisible(controller_global_transform):
 	$Viewport/GUI/Panel/Label.text = ""
 	$Viewport/GUI/Panel/ResourceOptions.selected = 0
 
-	if not $Viewport.has_method("set_update_mode"):
-		$Viewport.visible = true
-	if not get_node("/root/Spatial/PhoneOverlay").visible:
+	if Tglobal.phoneoverlay == null:
 		visible = true
 		$CollisionShape.disabled = not visible
+	else:
+		$Viewport.visible = true
 	Tglobal.soundsystem.quicksound("ShowGui", global_transform.origin)
 
 	if Tglobal.connectiontoserveractive:
