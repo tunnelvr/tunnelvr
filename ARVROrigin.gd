@@ -248,6 +248,8 @@ func playerappearancedict():
 var Dleftquesthandcontrollername = "unknown"
 var Drightquesthandcontrollername = "unknown"
 var key_9toggle = false
+var phonethumbviewpositionDown = null
+var headrotdegreesDown = Vector3(0,0,0)
 enum { HS_INVALID=0, HS_HAND=1, HS_TOUCHCONTROLLER=2 }
 func _process(delta):
 	if Tglobal.questhandtracking:
@@ -302,9 +304,18 @@ func _process(delta):
 
 		if Tglobal.phonethumbviewposition != null:
 			viewupdownjoy += -Tglobal.phonethumbviewposition.y
-			$HeadCam.rotation_degrees.y += -90*delta*Tglobal.phonethumbviewposition.x
-		if viewupdownjoy != 0.0:
-			$HeadCam.rotation_degrees.x = clamp($HeadCam.rotation_degrees.x + 90*delta*viewupdownjoy, -89, 89)
+			if phonethumbviewpositionDown == null:
+				phonethumbviewpositionDown = Tglobal.phonethumbviewposition
+				headrotdegreesDown = $HeadCam.rotation_degrees
+			if abs(Tglobal.phonethumbviewposition.x) > 0.9:
+				headrotdegreesDown.y += delta*(60.0 if Tglobal.phonethumbviewposition.x > 0.0 else -60.0)
+			$HeadCam.rotation_degrees.y = headrotdegreesDown.y + 90.0*(Tglobal.phonethumbviewposition.x - phonethumbviewpositionDown.x)
+			$HeadCam.rotation_degrees.x = clamp(headrotdegreesDown.x - 90*(Tglobal.phonethumbviewposition.y - phonethumbviewpositionDown.y), -89, 89)
+			phonethumbviewpositionDown.y = ($HeadCam.rotation_degrees.x - headrotdegreesDown.x)/90 + Tglobal.phonethumbviewposition.y
+		else:
+			phonethumbviewpositionDown = null
+			if viewupdownjoy != 0.0:
+				$HeadCam.rotation_degrees.x = clamp($HeadCam.rotation_degrees.x + 90*delta*viewupdownjoy, -89, 89)
 		if duckrise != 0.0:
 			$HeadCam.translation.y = clamp($HeadCam.translation.y + duckrise*delta*1.1, 0.4, 1.8)
 
