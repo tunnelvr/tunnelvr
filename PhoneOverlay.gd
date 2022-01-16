@@ -4,6 +4,7 @@ extends Control
 var thumbarearadius = 50
 func setupphoneoverlaysystem():
 	visible = true
+	Tglobal.phoneoverlay = self
 	var n = 16
 	print($ThumbLeft/CollisionShape2D.shape)
 	var screensize = get_node("/root").size
@@ -39,7 +40,6 @@ func setupphoneoverlaysystem():
 	$MenuButton.rect_position = guipanel3dviewport.rect_position + Vector2(orgpanelsize.x*panelscale/2, orgpanelsize.y*panelscale) - $MenuButton.rect_size*panelscale
 	$MenuButton.rect_scale = Vector2(panelscale, panelscale)
 	$MenuButton.connect("pressed", self, "menubuttonpressed")
-	
 	
 	
 func menubuttonpressed():

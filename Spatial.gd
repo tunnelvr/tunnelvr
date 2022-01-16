@@ -37,8 +37,8 @@ export var udpserverdiscoveryport: int = 4547
 export var potreeportnumber: int = 8000
 
 export var enablevr: = true
+export var forcephoneoverlay: = false
 export var usewebsockets: = false
-export var planviewonly: = false
 
 var ovr_init_config = null
 var ovr_performance = null
@@ -166,11 +166,12 @@ func _ready():
 
 	else:
 		playerMe.playerplatform = "PC"
-		print("Running phone overlay on PC")
-		$PhoneOverlay.setupphoneoverlaysystem()
+		if forcephoneoverlay:
+			print("Running phone overlay on PC")
+			$PhoneOverlay.setupphoneoverlaysystem()
 
 	$GuiSystem/GUIPanel3D.toplevelcalled_ready(not $PhoneOverlay.visible)
-	$PlanViewSystem.transferintorealviewport((not enablevr) and planviewonly)
+	$PlanViewSystem.transferintorealviewport(not $PhoneOverlay.visible)
 	playerMe.initplayerappearance_me()
 	$SketchSystem.pointersystem = playerMe.get_node("pointersystem")
 	

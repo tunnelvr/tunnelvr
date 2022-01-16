@@ -235,14 +235,8 @@ func openlinklistpage(item, llinks):
 	for lk in llinks:
 		addsubitem(item, lk.replace("%20", " "), dirurl + lk)
 
-func transferintorealviewport(setascurrentcamera):
-	if setascurrentcamera:
-		$PlanView/Viewport/PlanGUI/Camera.current = true
-		$PlanView/Viewport/PlanGUI.remove_child(planviewcontrols)
-		get_node("/root/Spatial").add_child(planviewcontrols)
-		planviewcontrols.rect_position.y = 0
-
-	elif $PlanView.has_node("ViewportReal"):
+func transferintorealviewport(establishviewport):
+	if $PlanView.has_node("ViewportReal") and establishviewport:
 		var fplangui = $PlanView/Viewport/PlanGUI
 		$PlanView/Viewport.remove_child(fplangui)
 		$PlanView/ViewportReal.add_child(fplangui)
@@ -328,7 +322,8 @@ func actplanviewdict(pvchange):
 	if "plancamerasize" in pvchange:
 		$PlanView/Viewport/PlanGUI/Camera.size = pvchange["plancamerasize"]
 		$RealPlanCamera/RealCameraBox.scale = Vector3($PlanView/Viewport/PlanGUI/Camera.size, 1.0, $PlanView/Viewport/PlanGUI/Camera.size)
-		var pixmetres = $PlanView/Viewport.size.x/$PlanView/Viewport/PlanGUI/Camera.size
+		var planscreensize = $PlanView/Viewport.size if Tglobal.phoneoverlay == null else get_node("/root").size
+		var pixmetres = planscreensize.x/$PlanView/Viewport/PlanGUI/Camera.size
 		var metres10 = 1
 		while pixmetres*metres10 < 30 and metres10 < 1000:
 			metres10 *= 10
@@ -342,16 +337,27 @@ func actplanviewdict(pvchange):
 	if visiblechange:
 		visible = pvchange["visible"]
 		if visible:
-			get_node("PlanView/CollisionShape").disabled = false
 			var playerMe = get_node("/root/Spatial").playerMe
 			get_node("/root/Spatial/LabelGenerator").restartlabelmakingprocess(playerMe.get_node("HeadCam").global_transform.origin)
 			get_node("/root/Spatial/WorldEnvironment/DirectionalLight").visible = true
+			if Tglobal.phoneoverlay != null:
+				$PlanView/Viewport/PlanGUI/Camera.current = true
+			else:
+				get_node("PlanView/CollisionShape").disabled = false
+
 		else:
 			$PlanView/CollisionShape.disabled = true
 			$PlanView/Viewport/PlanGUI/PlanViewControls/ColorRectURL.visible = false
 			get_node("/root/Spatial/WorldEnvironment/DirectionalLight").visible = not get_node("/root/Spatial/GuiSystem/GUIPanel3D/Viewport/GUI/Panel/ButtonHeadtorch").pressed
+			if Tglobal.phoneoverlay != null:
+				$PlanView/Viewport/PlanGUI/Camera.current = false
+			
 	var guipanel3d = get_node("/root/Spatial/GuiSystem/GUIPanel3D")
 	guipanel3d.get_node("Viewport/GUI/Panel/ButtonPlanView").pressed = visible
+
+
+
+
 
 	if "planviewactive" in pvchange and (visiblechange or planviewactive != pvchange["planviewactive"]):
 		planviewactive = pvchange["planviewactive"]

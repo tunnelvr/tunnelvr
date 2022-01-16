@@ -426,9 +426,9 @@ func setpointertarget(laserroot, raycast, pointertargetshortdistance):
 		LaserSelectLine.visible = laserselectlinelogicallyvisible
 		
 	pointertargetpoint = newpointertargetpoint
-	if is_instance_valid(pointertarget) and pointertarget == guipanel3d:
+	if is_instance_valid(pointertarget) and pointertarget == guipanel3d and Tglobal.phoneoverlay == null:
 		panelsendmousemotiontopointertarget()
-	if is_instance_valid(pointertarget) and pointertarget == keyboardpanel:
+	if is_instance_valid(pointertarget) and pointertarget == keyboardpanel and Tglobal.phoneoverlay == null:
 		panelsendmousemotiontopointertarget()
 
 	if pointertargetpoint != null:
@@ -1910,7 +1910,7 @@ func _physics_process(delta):
 			LaserOrient.get_node("Length").scale.z = -LaserOrient.get_node("LaserSpot").translation.z
 			LaserOrient.get_node("LaserSpot").visible = false
 			FloorLaserSpot.get_node("FloorSpot").visible = false
-			if planviewsystem.planviewactive:
+			if planviewsystem.planviewactive and Tglobal.phoneoverlay == null:
 				var inguipanelsection = pointerplanviewtarget.processplanviewpointing(planviewcontactpoint, (handrightcontroller.is_button_pressed(BUTTONS.HT_PINCH_INDEX_FINGER) if Tglobal.questhandtrackingactive else handrightcontroller.is_button_pressed(BUTTONS.VR_TRIGGER)) or Input.is_mouse_button_pressed(BUTTON_LEFT))
 				activelaserroot = planviewsystem.get_node("RealPlanCamera/LaserScope/LaserOrient")
 				activelaserroot.get_node("LaserSpot").global_transform.basis = LaserOrient.global_transform.basis
@@ -1938,7 +1938,8 @@ func _physics_process(delta):
 		IntermediatePointView.get_node("IntermediatePointPlane/CollisionShape/MeshInstance").mesh.bottom_radius = newdiscrad
 	if pointerplanviewtarget == null or not planviewsystem.planviewactive:
 		planviewsystem.get_node("RealPlanCamera/LaserScope").visible = false
-		planviewsystem.planviewguipanelreleasemouse()
+		if Tglobal.phoneoverlay == null:
+			planviewsystem.planviewguipanelreleasemouse()
 	
 	if activetargetwallgrabbedtransform != null:
 		sketchsystem.actsketchchange([ targetwalltransformpos(0) ])

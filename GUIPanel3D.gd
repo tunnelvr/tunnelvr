@@ -683,10 +683,10 @@ func _input(event):
 						get_node(textedit.focus_next).grab_focus()
 					else:
 						textedit.release_focus()
-			else:
+			elif Tglobal.phoneoverlay == null:
 				$Viewport.input(event)
 			get_tree().set_input_as_handled()
-		elif event.scancode == KEY_TAB:
+		elif event.scancode == KEY_TAB and Tglobal.phoneoverlay == null:
 			$Viewport.input(event)
 		elif event.pressed:
 			if event.scancode == KEY_L:
