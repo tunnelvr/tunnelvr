@@ -1,4 +1,4 @@
-[gd_scene load_steps=323 format=2]
+[gd_scene load_steps=324 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/underground_env.tres" type="Environment" id=2]
@@ -1629,6 +1629,9 @@ albedo_color = Color( 0.168627, 0.972549, 0.027451, 1 )
 [sub_resource type="CircleShape2D" id=249]
 radius = 80.0
 
+[sub_resource type="RectangleShape2D" id=250]
+extents = Vector2( 500, 500 )
+
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
 enablevr = false
@@ -1868,10 +1871,10 @@ __meta__ = {
 }
 
 [node name="ButtonDoppelganger" type="CheckBox" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 18.407
-margin_top = 156.59
-margin_right = 144.407
-margin_bottom = 184.59
+margin_left = 16.9406
+margin_top = 150.632
+margin_right = 142.941
+margin_bottom = 174.632
 rect_pivot_offset = Vector2( 138.61, -8.13628 )
 hint_tooltip = "test tooltip"
 text = "Doppelganger"
@@ -3929,6 +3932,12 @@ color = Color( 1, 1, 1, 0.145098 )
 visible = false
 scale = Vector2( 0.2, 0.2 )
 color = Color( 0.231373, 0.364706, 0.890196, 0.862745 )
+
+[node name="BackgroundCapture" type="Area2D" parent="PhoneOverlay"]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="PhoneOverlay/BackgroundCapture"]
+shape = SubResource( 250 )
+disabled = true
 
 [node name="MenuButton" type="Button" parent="PhoneOverlay"]
 margin_left = 231.0

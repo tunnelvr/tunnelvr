@@ -635,7 +635,7 @@ func processplanviewpointing(raycastcollisionpoint, controller_trigger):
 			print("pg mouse down ", event.pressed)
 	else:
 		planviewguipanelreleasemouse()
-		var laspt = plancamera.project_position(viewport_point, 0)
+		var laspt = plancamera.project_position(viewport_point, 0.0)
 		planviewsystem.get_node("RealPlanCamera/LaserScope").global_transform.origin = laspt
 		planviewsystem.get_node("RealPlanCamera/LaserScope").visible = true
 		planviewsystem.get_node("RealPlanCamera/LaserScope/LaserOrient/RayCast").force_raycast_update()
