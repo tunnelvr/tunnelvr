@@ -15,10 +15,10 @@ func setupphoneoverlaysystem(ltouchscreentype):
 	visible = true
 	Tglobal.phoneoverlay = self
 
-	$ThumbLeft.connect("input_event", self, "thumbviewinput")	
-	$ThumbLeft/CollisionShape2D.disabled = false
-	$ThumbRight.connect("input_event", self, "thumbmotioninput")
-	$ThumbRight/CollisionShape2D.disabled = false
+	#$ThumbLeft.connect("input_event", self, "thumbviewinput")	
+	#$ThumbLeft/CollisionShape2D.disabled = false
+	#$ThumbRight.connect("input_event", self, "thumbmotioninput")
+	#$ThumbRight/CollisionShape2D.disabled = false
 	$MenuButton.connect("pressed", self, "menubuttonpressed")
 	$BackgroundCapture/CollisionShape2D.disabled = false
 	$BackgroundCapture.connect("input_event", self, "backgroundmotioninput")
@@ -101,16 +101,34 @@ func thumbviewinput(viewport: Object, event: InputEvent, shape_idx: int):
 		$ThumbLeft/ThumbCircle.transform.origin = Tglobal.phonethumbviewposition*thumbarearadius
 
 
+var screentouchplaces = { }
 func backgroundmotioninput(viewport: Object, event: InputEvent, shape_idx: int):
-	if planviewsystem.visible:
-		if event is InputEventMouseButton and event.button_index == 1:
-			if not event.pressed:
-				fingerdown1pos = null
-			if $ThumbLeft.input_pickable and (event.position - $ThumbLeft.position).length() <= thumbarearadius:
-				return
-			if $ThumbRight.input_pickable and (event.position - $ThumbRight.position).length() <= thumbarearadius:
-				return
-			if event.pressed and Tglobal.phonethumbmotionposition == null and Tglobal.phonethumbviewposition == null:
+	if event is InputEventMouseButton:
+		if touchscreentype or event.button_index != 1:
+			return
+		var ievent = event
+		event = InputEventScreenTouch.new()
+		event.pressed = ievent.pressed
+		event.index = 0
+		event.position = ievent.position
+	if event is InputEventMouseMotion:
+		if touchscreentype or (event.button_mask & 1) == 0:
+			return
+		var ievent = event
+		event = InputEventScreenDrag.new()
+		event.index = 0
+		event.position = ievent.position
+
+	if event is InputEventScreenTouch:
+		if event.pressed:
+			if (event.position - $ThumbLeft.position).length() <= thumbarearadius:
+				screentouchplaces[event.index] = -1
+				$ThumbLeft/ThumbCircle.visible = true
+			elif $ThumbRight.input_pickable and (event.position - $ThumbRight.position).length() <= thumbarearadius:
+				screentouchplaces[event.index] = 1
+				$ThumbRight/ThumbCircle.visible = true
+			elif planviewsystem.visible:
+				screentouchplaces[event.index] = 0
 				var plancamera = planviewsystem.get_node("PlanView/Viewport/PlanGUI/Camera")
 				fingerdown1pos = event.position
 				var fingerdown1posPP = plancamera.project_position(fingerdown1pos, 0.0)
@@ -119,24 +137,39 @@ func backgroundmotioninput(viewport: Object, event: InputEvent, shape_idx: int):
 				print("ppp ", plancameraxvec, plancamera.transform.basis.x)
 				plancameratranslation = plancamera.translation
 				plancamerasize = plancamera.size
+			else:
+				return
 
-	if fingerdown1pos != null and event is InputEventMouseMotion:
-		var planviewpositiondict = { }
-		var plancamera = planviewsystem.get_node("PlanView/Viewport/PlanGUI/Camera")
-		var panvec = fingerdown1pos - event.position
-		planviewpositiondict["plancamerapos"] = plancameratranslation + plancameraxvec*panvec.x + plancamerayvec*panvec.y
-		#var zoomfac = 1/(1 + 0.5*delta) if bzoomin else 1 + 0.5*delta
-		#var plancamera = $PlanView/Viewport/PlanGUI/Camera
-		#planviewpositiondict["plancamerasize"] = plancamera.size * zoomfac
-		planviewsystem.sketchsystem.actsketchchange([{"planview":planviewpositiondict}])
+		else:
+			if screentouchplaces.get(event.index) == -1:
+				$ThumbLeft/ThumbCircle.visible = false
+				Tglobal.phonethumbviewposition = null
+			elif screentouchplaces.get(event.index) == 1:
+				$ThumbRight/ThumbCircle.visible = false
+				Tglobal.phonethumbmotionposition = null
+			elif screentouchplaces.get(event.index) == 0:
+				fingerdown1pos = null
+			screentouchplaces.erase(event.index)
+			return
+			
+			
+	if event is InputEventScreenDrag or event is InputEventScreenTouch:
+		if screentouchplaces.get(event.index) == -1:
+			Tglobal.phonethumbviewposition = (event.position - $ThumbLeft.transform.origin)/thumbarearadius
+			$ThumbLeft/ThumbCircle.transform.origin = Tglobal.phonethumbviewposition*thumbarearadius
+		elif screentouchplaces.get(event.index) == 1:
+			Tglobal.phonethumbmotionposition = (event.position - $ThumbRight.transform.origin)/thumbarearadius
+			$ThumbRight/ThumbCircle.transform.origin = Tglobal.phonethumbmotionposition*thumbarearadius
+		elif screentouchplaces.get(event.index) == 0:
+			var planviewpositiondict = { }
+			var plancamera = planviewsystem.get_node("PlanView/Viewport/PlanGUI/Camera")
+			var panvec = fingerdown1pos - event.position
+			planviewpositiondict["plancamerapos"] = plancameratranslation + plancameraxvec*panvec.x + plancamerayvec*panvec.y
+			#var zoomfac = 1/(1 + 0.5*delta) if bzoomin else 1 + 0.5*delta
+			#var plancamera = $PlanView/Viewport/PlanGUI/Camera
+			#planviewpositiondict["plancamerasize"] = plancamera.size * zoomfac
+			planviewsystem.sketchsystem.actsketchchange([{"planview":planviewpositiondict}])
 
-
-	if event is InputEventScreenTouch:
-		print(event.pressed, "   ", event.index, " ", event.position)
-	if event is InputEventScreenDrag:
-		print(event.index, " ", event.position)
-#InputEventMagnifyGesture
-#InputEventScreenTouch
 
 
 
