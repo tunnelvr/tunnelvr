@@ -272,6 +272,7 @@ func _ready():
 
 	$RealPlanCamera.set_as_toplevel(true)
 	planviewcontrols.get_node("ZoomView/ButtonCentre").connect("pressed", self, "buttoncentre_pressed")
+	planviewcontrols.get_node("ViewSlide/ButtonElev").connect("toggled", self, "buttonelev_toggled")
 	planviewcontrols.get_node("ButtonClosePlanView").connect("pressed", self, "buttonclose_pressed")
 	planviewcontrols.get_node("CheckBoxPlanTubesVisible").connect("pressed", self, "checkboxplantubesvisible_pressed")
 	planviewcontrols.get_node("CheckBoxRealTubesVisible").connect("pressed", self, "checkboxrealtubesvisible_pressed")
@@ -309,6 +310,7 @@ func planviewtodict():
 			 "centrelinesvisible":(($PlanView/Viewport/PlanGUI/Camera.cull_mask & CollisionLayer.VL_centrelinestationsplanview) != 0),
 			 "transformpos":$PlanView.global_transform,
 			 "plancamerapos":$PlanView/Viewport/PlanGUI/Camera.translation,
+			 "plancamerarotation":$PlanView/Viewport/PlanGUI/Camera.rotation_degrees,
 			 "plancamerasize":$PlanView/Viewport/PlanGUI/Camera.size,
 			
 			# to abolish
@@ -320,6 +322,8 @@ func planviewtodict():
 func actplanviewdict(pvchange):
 	if "plancamerapos" in pvchange:
 		$PlanView/Viewport/PlanGUI/Camera.translation = pvchange["plancamerapos"]
+	if "plancamerarotation" in pvchange:
+		$PlanView/Viewport/PlanGUI/Camera.rotation_degrees = pvchange["plancamerarotation"]
 	if "plancamerasize" in pvchange:
 		$PlanView/Viewport/PlanGUI/Camera.size = pvchange["plancamerasize"]
 		$RealPlanCamera/RealCameraBox.scale = Vector3($PlanView/Viewport/PlanGUI/Camera.size, 1.0, $PlanView/Viewport/PlanGUI/Camera.size)
@@ -512,7 +516,10 @@ func _process(delta):
 						 (-1 if viewslide.get_node("ButtonZoomDown").is_pressed() else 0) + (1 if viewslide.get_node("ButtonZoomUp").is_pressed() else 0))
 	if joypos != Vector3(0, 0, 0):
 		var plancamera = $PlanView/Viewport/PlanGUI/Camera
-		planviewpositiondict["plancamerapos"] = plancamera.translation + Vector3(joypos.x*plancamera.size/2, joypos.z*5, -joypos.y*plancamera.size/2)*delta
+		planviewpositiondict["plancamerapos"] = plancamera.translation + delta*(\
+					plancamera.transform.basis.x*joypos.x*plancamera.size/2 + \
+					plancamera.transform.basis.y*joypos.y*plancamera.size/2 + \
+					plancamera.transform.basis.z*joypos.z*5)
 	var zoomview = planviewcontrols.get_node("ZoomView")
 	var bzoomin = zoomview.get_node("ButtonZoomIn").is_pressed()
 	var bzoomout = zoomview.get_node("ButtonZoomOut").is_pressed()
@@ -581,6 +588,36 @@ func buttoncentre_pressed():
 	var planviewpositiondict = { "plancamerapos":Vector3(headcam.global_transform.origin.x, $PlanView/Viewport/PlanGUI/Camera.translation.y, headcam.global_transform.origin.z) }
 	sketchsystem.actsketchchange([{"planview":planviewpositiondict}])
 
+var cameraaltitudePlan = 0.0
+var elevrotpoint = null
+var elevcameradist = 0.0
+func buttonelev_toggled(pressed):
+	print("buttonelev_toggled ", pressed)
+	var headcam = get_node("/root/Spatial").playerMe.get_node("HeadCam")
+	var plancamera = get_node("PlanView/Viewport/PlanGUI/Camera")
+	var screensize = get_node("/root").size
+	var plancamerabasisy = Vector3(-sin(deg2rad(plancamera.rotation_degrees.y)), 0.0, -cos(deg2rad(plancamera.rotation_degrees.y)))
+	if pressed:
+		cameraaltitudePlan = $PlanView/Viewport/PlanGUI/Camera.translation.y
+		var elevrotpointy = elevrotpoint.y if elevrotpoint != null else headcam.global_transform.origin.y
+		elevrotpoint = plancamera.project_position(screensize/2, 0.0)
+		elevrotpoint.y = elevrotpointy
+		var pagebottompos = plancamera.project_position(Vector2(screensize.x/2, screensize.y), 0.0)
+		var vpagebottom = pagebottompos - plancamera.global_transform.origin
+		elevcameradist = -plancamera.global_transform.basis.y.dot(vpagebottom)
+		#print("bb should be same ", plancamera.global_transform.basis.y, plancamerabasisy)
+		var planviewpositiondict = { "plancamerapos":elevrotpoint - plancamerabasisy*elevcameradist, 
+									 "plancamerarotation":Vector3(0, plancamera.rotation_degrees.y, 0) }
+		sketchsystem.actsketchchange([{"planview":planviewpositiondict}])
+	else:
+		elevrotpoint = plancamera.translation + plancamerabasisy*elevcameradist
+		var pagetoppos = plancamera.project_position(Vector2(screensize.x/2, 0.0), 0.0)
+		elevcameradist = pagetoppos.y - elevrotpoint.y
+		var planviewpositiondict = { "plancamerapos":Vector3(elevrotpoint.x, pagetoppos.y, elevrotpoint.z), 
+									 "plancamerarotation":Vector3(-90, plancamera.rotation_degrees.y, 0) }
+		sketchsystem.actsketchchange([{"planview":planviewpositiondict}])
+		
+	
 func buttonclose_pressed():
 	sketchsystem.actsketchchange([ {"planview":{"visible":false, "planviewactive":false}}, 
 								   getactivetargetfloorViz("") 

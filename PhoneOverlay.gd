@@ -116,6 +116,7 @@ func backgroundmotioninput(viewport: Object, event: InputEvent, shape_idx: int):
 				var fingerdown1posPP = plancamera.project_position(fingerdown1pos, 0.0)
 				plancameraxvec = plancamera.project_position(fingerdown1pos+Vector2(1,0), 0.0) - fingerdown1posPP; 
 				plancamerayvec = plancamera.project_position(fingerdown1pos+Vector2(0,1), 0.0) - fingerdown1posPP; 
+				print("ppp ", plancameraxvec, plancamera.transform.basis.x)
 				plancameratranslation = plancamera.translation
 				plancamerasize = plancamera.size
 

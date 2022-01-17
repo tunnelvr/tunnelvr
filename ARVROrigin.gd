@@ -303,15 +303,42 @@ func _process(delta):
 			if Input.is_action_pressed("lh_rise"):  duckrise += 1
 
 		if Tglobal.phonethumbviewposition != null:
-			viewupdownjoy += -Tglobal.phonethumbviewposition.y
-			if phonethumbviewpositionDown == null:
-				phonethumbviewpositionDown = Tglobal.phonethumbviewposition
-				headrotdegreesDown = $HeadCam.rotation_degrees
-			if abs(Tglobal.phonethumbviewposition.x) > 0.9:
-				headrotdegreesDown.y += delta*(60.0 if Tglobal.phonethumbviewposition.x > 0.0 else -60.0)
-			$HeadCam.rotation_degrees.y = headrotdegreesDown.y + 90.0*(Tglobal.phonethumbviewposition.x - phonethumbviewpositionDown.x)
-			$HeadCam.rotation_degrees.x = clamp(headrotdegreesDown.x - 90*(Tglobal.phonethumbviewposition.y - phonethumbviewpositionDown.y), -89, 89)
-			phonethumbviewpositionDown.y = ($HeadCam.rotation_degrees.x - headrotdegreesDown.x)/90 + Tglobal.phonethumbviewposition.y
+			if PlanViewSystem.planviewactive:
+				var plancamera = PlanViewSystem.get_node("PlanView/Viewport/PlanGUI/Camera")
+				if phonethumbviewpositionDown == null:
+					phonethumbviewpositionDown = Tglobal.phonethumbviewposition
+					headrotdegreesDown = plancamera.rotation_degrees
+					if plancamera.rotation_degrees.x == 0.0:
+						var plancamerarotationdegreesyD = Vector3(-sin(deg2rad(headrotdegreesDown.y)), 0.0, -cos(deg2rad(headrotdegreesDown.y)))
+						PlanViewSystem.elevrotpoint = plancamera.translation + plancamerarotationdegreesyD*PlanViewSystem.elevcameradist
+					else:
+						PlanViewSystem.elevrotpoint = plancamera.translation - Vector3(0, PlanViewSystem.elevcameradist, 0)
+				if abs(Tglobal.phonethumbviewposition.x) > 0.9:
+					headrotdegreesDown.y += delta*(60.0 if Tglobal.phonethumbviewposition.x > 0.0 else -60.0)
+				var plancamerarotationdegreesy = headrotdegreesDown.y + 90.0*(Tglobal.phonethumbviewposition.x - phonethumbviewpositionDown.x)
+				var planviewpositiondict = { }
+				if plancamera.rotation_degrees.x == 0.0:
+					var plancamerabasisy = Vector3(-sin(deg2rad(plancamerarotationdegreesy)), 0.0, -cos(deg2rad(plancamerarotationdegreesy)))
+					planviewpositiondict["plancamerapos"] = PlanViewSystem.elevrotpoint - plancamerabasisy*PlanViewSystem.elevcameradist
+					planviewpositiondict["plancamerarotation"] = Vector3(0, plancamerarotationdegreesy, 0)
+				else:
+					planviewpositiondict["plancamerapos"] = PlanViewSystem.elevrotpoint + Vector3(0, PlanViewSystem.elevcameradist, 0)
+					planviewpositiondict["plancamerarotation"] = Vector3(-90, plancamerarotationdegreesy, 0)
+					
+				plancamera.translation = planviewpositiondict["plancamerapos"]
+				plancamera.rotation_degrees = planviewpositiondict["plancamerarotation"]
+				
+			else:
+				if phonethumbviewpositionDown == null:
+					phonethumbviewpositionDown = Tglobal.phonethumbviewposition
+					headrotdegreesDown = $HeadCam.rotation_degrees
+				if abs(Tglobal.phonethumbviewposition.x) > 0.9:
+					headrotdegreesDown.y += delta*(60.0 if Tglobal.phonethumbviewposition.x > 0.0 else -60.0)
+				$HeadCam.rotation_degrees.y = headrotdegreesDown.y + 90.0*(Tglobal.phonethumbviewposition.x - phonethumbviewpositionDown.x)
+				$HeadCam.rotation_degrees.x = clamp(headrotdegreesDown.x - 90*(Tglobal.phonethumbviewposition.y - phonethumbviewpositionDown.y), -89, 89)
+				phonethumbviewpositionDown.y = ($HeadCam.rotation_degrees.x - headrotdegreesDown.x)/90 + Tglobal.phonethumbviewposition.y
+
+
 		else:
 			phonethumbviewpositionDown = null
 			if viewupdownjoy != 0.0:

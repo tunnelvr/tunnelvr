@@ -2613,9 +2613,9 @@ __meta__ = {
 }
 
 [node name="LabelViewSlide" type="Label" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ViewSlide"]
-margin_left = -4.9671
+margin_left = 1.16809
 margin_top = 59.3559
-margin_right = 64.0329
+margin_right = 70.1681
 margin_bottom = 81.3559
 text = "ViewSlide"
 __meta__ = {
@@ -2663,31 +2663,38 @@ __meta__ = {
 }
 
 [node name="ButtonZoomDown" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ViewSlide"]
-margin_left = 109.0
-margin_top = 55.0
-margin_right = 128.0
-margin_bottom = 77.0
+margin_left = 110.416
+margin_top = 46.5051
+margin_right = 129.416
+margin_bottom = 68.5051
 text = "v"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="ButtonZoomUp" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ViewSlide"]
-margin_left = 134.471
-margin_top = 55.7491
-margin_right = 153.471
-margin_bottom = 77.7491
+margin_left = 132.111
+margin_top = 46.3104
+margin_right = 151.111
+margin_bottom = 68.3104
 text = "^"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="ButtonElev" type="CheckBox" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ViewSlide"]
+margin_left = 99.5281
+margin_top = 69.3241
+margin_right = 157.528
+margin_bottom = 93.3241
+text = "Elev!!!"
+
 [node name="ZoomView" type="Control" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
 material = SubResource( 75 )
 margin_left = 94.0
-margin_top = 5.0
+margin_top = 3.47192
 margin_right = 186.0
-margin_bottom = 54.0
+margin_bottom = 51.4719
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -2893,10 +2900,10 @@ __meta__ = {
 }
 
 [node name="ButtonMoveLeft" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorMove"]
-margin_left = 9.76519
-margin_top = 66.437
-margin_right = 29.7652
-margin_bottom = 88.437
+margin_left = 9.29333
+margin_top = 64.5492
+margin_right = 29.2933
+margin_bottom = 86.5492
 text = "<"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -2923,29 +2930,29 @@ __meta__ = {
 }
 
 [node name="ButtonMoveDown" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorMove"]
-margin_left = 35.2368
-margin_top = 66.3048
-margin_right = 55.2368
-margin_bottom = 88.3048
+margin_left = 34.2929
+margin_top = 64.889
+margin_right = 54.2929
+margin_bottom = 86.889
 text = "V"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="ButtonMoveRise" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorMove"]
-margin_left = 85.2227
-margin_top = 41.3972
-margin_right = 105.223
-margin_bottom = 63.3972
+margin_left = 81.4472
+margin_top = 40.4534
+margin_right = 101.447
+margin_bottom = 62.4534
 text = "^"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="ButtonMoveFall" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorMove"]
-margin_left = 84.1813
+margin_left = 80.4058
 margin_top = 65.9201
-margin_right = 104.181
+margin_right = 100.406
 margin_bottom = 87.9201
 text = "V"
 __meta__ = {
@@ -3004,8 +3011,10 @@ __meta__ = {
 }
 
 [node name="ButtonClosePlanView" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
-margin_right = 40.0
-margin_bottom = 35.0
+margin_left = 0.943848
+margin_top = 0.943909
+margin_right = 40.9438
+margin_bottom = 35.9439
 hint_tooltip = "Close Plan View
 "
 text = "X"
@@ -3098,10 +3107,10 @@ __meta__ = {
 }
 
 [node name="CheckBoxFileTree" type="CheckBox" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
-margin_left = 18.0794
-margin_top = 77.7401
-margin_right = 109.079
-margin_bottom = 101.74
+margin_left = 12.4161
+margin_top = 77.2682
+margin_right = 103.416
+margin_bottom = 101.268
 text = "Filetree"
 __meta__ = {
 "_edit_use_anchors_": false
