@@ -1,4 +1,4 @@
-[gd_scene load_steps=324 format=2]
+[gd_scene load_steps=323 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/underground_env.tres" type="Environment" id=2]
@@ -1625,9 +1625,6 @@ albedo_color = Color( 0.168627, 0.972549, 0.027451, 1 )
 [sub_resource type="PointMesh" id=241]
 
 [sub_resource type="CubeMesh" id=245]
-
-[sub_resource type="CircleShape2D" id=249]
-radius = 80.0
 
 [sub_resource type="RectangleShape2D" id=250]
 extents = Vector2( 500, 500 )
@@ -3913,12 +3910,8 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ThumbLeft" type="Area2D" parent="PhoneOverlay"]
+[node name="ThumbLeft" type="Node2D" parent="PhoneOverlay"]
 position = Vector2( 90, 500 )
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="PhoneOverlay/ThumbLeft"]
-shape = SubResource( 249 )
-disabled = true
 
 [node name="TouchCircle" type="Polygon2D" parent="PhoneOverlay/ThumbLeft"]
 color = Color( 1, 1, 1, 0.145098 )
@@ -3928,12 +3921,8 @@ visible = false
 scale = Vector2( 0.2, 0.2 )
 color = Color( 0.231373, 0.364706, 0.890196, 0.862745 )
 
-[node name="ThumbRight" type="Area2D" parent="PhoneOverlay"]
+[node name="ThumbRight" type="Node2D" parent="PhoneOverlay"]
 position = Vector2( 920, 500 )
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="PhoneOverlay/ThumbRight"]
-shape = SubResource( 249 )
-disabled = true
 
 [node name="TouchCircle" type="Polygon2D" parent="PhoneOverlay/ThumbRight"]
 color = Color( 1, 1, 1, 0.145098 )

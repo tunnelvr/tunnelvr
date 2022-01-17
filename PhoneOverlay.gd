@@ -15,10 +15,6 @@ func setupphoneoverlaysystem(ltouchscreentype):
 	visible = true
 	Tglobal.phoneoverlay = self
 
-	#$ThumbLeft.connect("input_event", self, "thumbviewinput")	
-	#$ThumbLeft/CollisionShape2D.disabled = false
-	#$ThumbRight.connect("input_event", self, "thumbmotioninput")
-	#$ThumbRight/CollisionShape2D.disabled = false
 	$MenuButton.connect("pressed", self, "menubuttonpressed")
 	$BackgroundCapture/CollisionShape2D.disabled = false
 	$BackgroundCapture.connect("input_event", self, "backgroundmotioninput")
@@ -30,10 +26,6 @@ func setupoverlaycomponentpositions():
 	var screensize = get_node("/root").size
 	thumbarearadius = min(screensize.x, screensize.y)/4.5
 	var thumbareamargin = thumbarearadius/7
-
-	$ThumbLeft/CollisionShape2D.shape.radius = thumbarearadius
-	$ThumbRight/CollisionShape2D.shape.radius = thumbarearadius
-
 	var pts = [ ]
 	for i in range(16):
 		pts.push_back(Vector2(cos(deg2rad(360.0*i/n)), sin(deg2rad(360.0*i/n)))*thumbarearadius); 
@@ -76,29 +68,6 @@ func menubuttonpressed():
 	else:
 		get_node("/root/Spatial/GuiSystem/GUIPanel3D").setguipanelvisible(null)
 
-func thumbmotioninput(viewport: Object, event: InputEvent, shape_idx: int):
-	if event is InputEventMouseButton:
-		if event.button_index == 1:
-			if event.pressed and fingerdown1pos == null:
-				$ThumbRight/ThumbCircle.visible = true
-			else:
-				$ThumbRight/ThumbCircle.visible = false
-				Tglobal.phonethumbmotionposition = null
-	if $ThumbRight/ThumbCircle.visible and (event is InputEventMouseMotion or event is InputEventMouseButton):
-		Tglobal.phonethumbmotionposition = (event.position - $ThumbRight.transform.origin)/thumbarearadius
-		$ThumbRight/ThumbCircle.transform.origin = Tglobal.phonethumbmotionposition*thumbarearadius
-	
-func thumbviewinput(viewport: Object, event: InputEvent, shape_idx: int):
-	if event is InputEventMouseButton:
-		if event.button_index == 1:
-			if event.pressed and fingerdown1pos == null:
-				$ThumbLeft/ThumbCircle.visible = true
-			else:
-				$ThumbLeft/ThumbCircle.visible = false
-				Tglobal.phonethumbviewposition = null
-	if $ThumbLeft/ThumbCircle.visible and (event is InputEventMouseMotion or event is InputEventMouseButton):
-		Tglobal.phonethumbviewposition = (event.position - $ThumbLeft.transform.origin)/thumbarearadius
-		$ThumbLeft/ThumbCircle.transform.origin = Tglobal.phonethumbviewposition*thumbarearadius
 
 
 var screentouchplaces = { }
