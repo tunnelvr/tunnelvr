@@ -609,6 +609,8 @@ func buttonelev_toggled(pressed):
 		var planviewpositiondict = { "plancamerapos":elevrotpoint - plancamerabasisy*elevcameradist, 
 									 "plancamerarotation":Vector3(0, plancamera.rotation_degrees.y, 0) }
 		sketchsystem.actsketchchange([{"planview":planviewpositiondict}])
+		plancamera.environment.fog_depth_begin = elevcameradist	
+		plancamera.environment.fog_depth_end = elevcameradist*2
 	else:
 		elevrotpoint = plancamera.translation + plancamerabasisy*elevcameradist
 		var pagetoppos = plancamera.project_position(Vector2(screensize.x/2, 0.0), 0.0)
@@ -616,7 +618,11 @@ func buttonelev_toggled(pressed):
 		var planviewpositiondict = { "plancamerapos":Vector3(elevrotpoint.x, pagetoppos.y, elevrotpoint.z), 
 									 "plancamerarotation":Vector3(-90, plancamera.rotation_degrees.y, 0) }
 		sketchsystem.actsketchchange([{"planview":planviewpositiondict}])
-		
+		plancamera.environment.fog_depth_begin = elevcameradist*2	
+		plancamera.environment.fog_depth_end = elevcameradist*4
+	plancamera.environment.fog_color = plancamera.environment.background_color
+	plancamera.environment.fog_color = plancamera.environment.background_color
+	plancamera.far = plancamera.environment.fog_depth_end
 	
 func buttonclose_pressed():
 	sketchsystem.actsketchchange([ {"planview":{"visible":false, "planviewactive":false}}, 
