@@ -1383,6 +1383,11 @@ params_cull_mode = 2
 albedo_color = Color( 0.890196, 0.94902, 0.501961, 1 )
 albedo_texture = ExtResource( 54 )
 roughness = 0.91
+emission_enabled = true
+emission = Color( 0.890196, 0.94902, 0.501961, 1 )
+emission_energy = 0.42
+emission_operator = 0
+emission_on_uv2 = false
 
 [sub_resource type="QuadMesh" id=199]
 size = Vector2( 1, 0.2 )
@@ -1393,6 +1398,11 @@ albedo_color = Color( 0.890196, 0.94902, 0.501961, 1 )
 albedo_texture = ExtResource( 54 )
 metallic = 0.12
 roughness = 0.77
+emission_enabled = true
+emission = Color( 0.890196, 0.94902, 0.501961, 1 )
+emission_energy = 0.42
+emission_operator = 0
+emission_on_uv2 = false
 
 [sub_resource type="CapsuleMesh" id=201]
 radius = 0.1
