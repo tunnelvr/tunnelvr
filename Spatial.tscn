@@ -3057,6 +3057,19 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="CheckBoxBackfaceCull" type="CheckBox" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
+anchor_right = 0.015
+anchor_bottom = 0.24
+margin_left = 575.316
+margin_top = 25.5254
+margin_right = 655.316
+margin_bottom = 25.5254
+rect_pivot_offset = Vector2( 100.162, 19.0063 )
+text = "backface cull"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [node name="CheckBoxCentrelinesVisible" type="CheckBox" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
 anchor_right = 0.015
 anchor_bottom = 0.24

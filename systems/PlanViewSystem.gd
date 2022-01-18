@@ -22,6 +22,7 @@ var clearcachebuttontex = null
 var f3dbuttontex = null
 
 var filetreeresourcename = null
+var materialsettobackfacecull = false
 
 func getactivetargetfloorViz(newactivetargetfloorname: String):
 	var xcviz = { "prevxcvizstates":{ }, "xcvizstates":{ } }
@@ -256,6 +257,12 @@ func checkboxrealtubesvisible_pressed():
 	pvchange["realtubesvisible"] = planviewcontrols.get_node("CheckBoxRealTubesVisible").pressed
 	sketchsystem.actsketchchange([{"planview":pvchange}]) 
 
+func checkboxbackfacecull_pressed():
+	var pvchange = planviewtodict()
+	pvchange["backfacecull"] = planviewcontrols.get_node("CheckBoxBackfaceCull").pressed
+	sketchsystem.actsketchchange([{"planview":pvchange}]) 
+	
+
 func checkcentrelinesvisible_pressed():
 	var pvchange = planviewtodict()
 	pvchange["centrelinesvisible"] = planviewcontrols.get_node("CheckBoxCentrelinesVisible").pressed 
@@ -277,6 +284,7 @@ func _ready():
 	planviewcontrols.get_node("CheckBoxPlanTubesVisible").connect("pressed", self, "checkboxplantubesvisible_pressed")
 	planviewcontrols.get_node("CheckBoxRealTubesVisible").connect("pressed", self, "checkboxrealtubesvisible_pressed")
 	planviewcontrols.get_node("CheckBoxCentrelinesVisible").connect("pressed", self, "checkcentrelinesvisible_pressed")
+	planviewcontrols.get_node("CheckBoxBackfaceCull").connect("pressed", self, "checkboxbackfacecull_pressed")
 	planviewcontrols.get_node("FloorMove/FloorStyle").connect("item_selected", self, "floorstyle_itemselected")
 	planviewcontrols.get_node("CheckBoxFileTree").connect("toggled", self, "checkboxfiletree_toggled")
 	call_deferred("clearsetupfileviewtree", true, "http://cave-registry.org.uk/svn/NorthernEngland/")
@@ -312,6 +320,8 @@ func planviewtodict():
 			 "plancamerapos":$PlanView/Viewport/PlanGUI/Camera.translation,
 			 "plancamerarotation":$PlanView/Viewport/PlanGUI/Camera.rotation_degrees,
 			 "plancamerasize":$PlanView/Viewport/PlanGUI/Camera.size,
+			 "backfacecull":materialsettobackfacecull,
+
 			
 			# to abolish
 			 "tubesvisible":(($PlanView/Viewport/PlanGUI/Camera.cull_mask & CollisionLayer.VL_xcshells) != 0),
@@ -407,6 +417,16 @@ func actplanviewdict(pvchange):
 		get_node("PlanView/Viewport/PlanGUI/Camera").cull_mask = plancameracullmask
 		get_node("RealPlanCamera/LaserScope/LaserOrient/RayCast").collision_mask = plancameraraycollisionmask
 			
+	if "backfacecull" in pvchange and materialsettobackfacecull != pvchange["backfacecull"]:
+		var materialsystem = get_node("/root/Spatial/MaterialSystem")
+		materialsettobackfacecull = pvchange["backfacecull"]
+		for tmesh in materialsystem.get_node("tubematerials").get_children():
+			var tmat = tmesh.get_surface_material(0)
+			if tmat is SpatialMaterial:
+				tmat.params_cull_mode = SpatialMaterial.CULL_BACK if materialsettobackfacecull else SpatialMaterial.CULL_DISABLED
+			else:
+				print("cant' change backface cull on material ", tmesh.get_name())
+
 	if "realtubesvisible" in pvchange and Tglobal.hidecavewallstoseefloors != (not pvchange["realtubesvisible"]):
 		planviewcontrols.get_node("CheckBoxRealTubesVisible").pressed = pvchange["realtubesvisible"]
 		Tglobal.hidecavewallstoseefloors = (not pvchange["realtubesvisible"])
