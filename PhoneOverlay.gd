@@ -25,7 +25,8 @@ func setupoverlaycomponentpositions():
 	var pts = [ ]
 	for i in range(16):
 		pts.push_back(Vector2(cos(deg2rad(360.0*i/n)), sin(deg2rad(360.0*i/n)))*thumbarearadius); 
-	$ThumbLeft/TouchCircle.set_polygon(PoolVector2Array(pts))
+	var ptsrect = [ Vector2(thumbarearadius,thumbarearadius), Vector2(thumbarearadius,-thumbarearadius), Vector2(-thumbarearadius,-thumbarearadius), Vector2(-thumbarearadius,thumbarearadius) ]
+	$ThumbLeft/TouchCircle.set_polygon(PoolVector2Array(ptsrect))
 	$ThumbLeft/ThumbCircle.set_polygon(PoolVector2Array(pts))
 	$ThumbLeft.transform.origin = Vector2(thumbareamargin + thumbarearadius, plancamerascreensize.y - thumbarearadius - thumbareamargin)
 	
@@ -149,7 +150,7 @@ func backgroundmotioninput(viewport: Object, event: InputEvent, shape_idx: int):
 
 	if event is InputEventScreenTouch:
 		if event.pressed:
-			if $ThumbLeft.visible and (event.position - $ThumbLeft.position).length() <= thumbarearadius:
+			if $ThumbLeft.visible and abs(event.position.x - $ThumbLeft.position.x) <= thumbarearadius and abs(event.position.y - $ThumbLeft.position.y) <= thumbarearadius:
 				screentouchplaces[event.index] = -1
 				$ThumbLeft/ThumbCircle.visible = true
 			elif $ThumbRight.visible and (event.position - $ThumbRight.position).length() <= thumbarearadius:
