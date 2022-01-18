@@ -2589,7 +2589,7 @@ __meta__ = {
 [node name="Camera" type="Camera" parent="PlanViewSystem/PlanView/Viewport/PlanGUI"]
 transform = Transform( 1, 0, 0, 0, -1.62921e-07, 1, 0, -1, -1.62921e-07, -1, 50, -12 )
 keep_aspect = 0
-cull_mask = 2148421887
+cull_mask = 2147512827
 environment = ExtResource( 20 )
 projection = 1
 fov = 87.5304
@@ -3038,6 +3038,7 @@ margin_top = 49.6852
 margin_right = 522.838
 margin_bottom = 49.6852
 rect_pivot_offset = Vector2( 100.162, 19.0063 )
+pressed = true
 text = "plan tubes"
 __meta__ = {
 "_edit_use_anchors_": false

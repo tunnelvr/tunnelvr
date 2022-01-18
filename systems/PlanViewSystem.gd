@@ -289,6 +289,8 @@ func _ready():
 	planviewcontrols.get_node("CheckBoxFileTree").connect("toggled", self, "checkboxfiletree_toggled")
 	call_deferred("clearsetupfileviewtree", true, "http://cave-registry.org.uk/svn/NorthernEngland/")
 	set_process(visible)
+	assert (planviewcontrols.get_node("CheckBoxPlanTubesVisible").pressed == (($PlanView/Viewport/PlanGUI/Camera.cull_mask & CollisionLayer.VL_xcshells) != 0))
+
 		
 func clearsetupfileviewtree(binit, filetreerootpath):
 	if binit:
@@ -321,13 +323,32 @@ func planviewtodict():
 			 "plancamerarotation":$PlanView/Viewport/PlanGUI/Camera.rotation_degrees,
 			 "plancamerasize":$PlanView/Viewport/PlanGUI/Camera.size,
 			 "backfacecull":materialsettobackfacecull,
-
-			
-			# to abolish
-			 "tubesvisible":(($PlanView/Viewport/PlanGUI/Camera.cull_mask & CollisionLayer.VL_xcshells) != 0),
-
 			}
 
+func setcameracullmasks(bcentrelinesvisible, bplantubesvisible):
+	var plancameracullmask
+	var plancameraraycollisionmask
+	var playermeheadcam = get_node("/root/Spatial").playerMe.get_node("HeadCam")
+	if bcentrelinesvisible:
+		playermeheadcam.cull_mask = CollisionLayer.VLCM_PlayerCamera
+		get_node("/root/Spatial/BodyObjects/LaserOrient/RayCast").collision_mask = CollisionLayer.CLV_MainRayAll
+		plancameracullmask = CollisionLayer.VLCM_PlanViewCamera
+		plancameraraycollisionmask = CollisionLayer.CLV_PlanRayAll
+		prevcamerasizeforupdateplanviewentitysizes = -1
+		var labelgenerator = get_node("/root/Spatial/LabelGenerator")
+		if not labelgenerator.is_processing():
+			labelgenerator.restartlabelmakingprocess(playermeheadcam.global_transform.origin)
+	else:
+		playermeheadcam.cull_mask = CollisionLayer.VLCM_PlayerCameraNoCentreline
+		get_node("/root/Spatial/BodyObjects/LaserOrient/RayCast").collision_mask = CollisionLayer.CLV_MainRayAllNoCentreline
+		plancameraraycollisionmask = CollisionLayer.CLV_PlanRayNoCentreline
+		plancameracullmask = CollisionLayer.VLCM_PlanViewCameraNoCentreline
+	
+	if not bplantubesvisible:
+		plancameracullmask &= CollisionLayer.VLCM_PlanViewCameraNoTube
+		plancameraraycollisionmask &= CollisionLayer.CLV_PlanRayNoTube
+	get_node("PlanView/Viewport/PlanGUI/Camera").cull_mask = plancameracullmask
+	get_node("RealPlanCamera/LaserScope/LaserOrient/RayCast").collision_mask = plancameraraycollisionmask
 
 func actplanviewdict(pvchange):
 	if "plancamerapos" in pvchange:
@@ -374,9 +395,6 @@ func actplanviewdict(pvchange):
 	guipanel3d.get_node("Viewport/GUI/Panel/ButtonPlanView").pressed = visible
 
 
-
-
-
 	if "planviewactive" in pvchange and (visiblechange or planviewactive != pvchange["planviewactive"]):
 		planviewactive = pvchange["planviewactive"]
 		if planviewactive:
@@ -389,37 +407,13 @@ func actplanviewdict(pvchange):
 
 	if "centrelinesvisible" in pvchange:
 		planviewcontrols.get_node("CheckBoxCentrelinesVisible").pressed = pvchange["centrelinesvisible"]
-
-		if "tubesvisible" in pvchange and (not ("plantubesvisible" in pvchange)): # to abolish
-			pvchange["plantubesvisible"] = pvchange["tubesvisible"]
-
-		var plancameracullmask
-		var plancameraraycollisionmask
-		var playermeheadcam = get_node("/root/Spatial").playerMe.get_node("HeadCam")
-		if pvchange["centrelinesvisible"]:
-			playermeheadcam.cull_mask = CollisionLayer.VLCM_PlayerCamera
-			get_node("/root/Spatial/BodyObjects/LaserOrient/RayCast").collision_mask = CollisionLayer.CLV_MainRayAll
-			plancameracullmask = CollisionLayer.VLCM_PlanViewCamera
-			plancameraraycollisionmask = CollisionLayer.CLV_PlanRayAll
-			prevcamerasizeforupdateplanviewentitysizes = -1
-			var labelgenerator = get_node("/root/Spatial/LabelGenerator")
-			if not labelgenerator.is_processing():
-				labelgenerator.restartlabelmakingprocess(playermeheadcam.global_transform.origin)
-		else:
-			playermeheadcam.cull_mask = CollisionLayer.VLCM_PlayerCameraNoCentreline
-			get_node("/root/Spatial/BodyObjects/LaserOrient/RayCast").collision_mask = CollisionLayer.CLV_MainRayAllNoCentreline
-			plancameraraycollisionmask = CollisionLayer.CLV_PlanRayNoCentreline
-			plancameracullmask = CollisionLayer.VLCM_PlanViewCameraNoCentreline
-		
-		if not pvchange["plantubesvisible"]:
-			plancameracullmask &= CollisionLayer.VLCM_PlanViewCameraNoTube
-			plancameraraycollisionmask &= CollisionLayer.CLV_PlanRayNoTube
-		get_node("PlanView/Viewport/PlanGUI/Camera").cull_mask = plancameracullmask
-		get_node("RealPlanCamera/LaserScope/LaserOrient/RayCast").collision_mask = plancameraraycollisionmask
+		planviewcontrols.get_node("CheckBoxPlanTubesVisible").pressed = pvchange["plantubesvisible"]
+		setcameracullmasks(pvchange["centrelinesvisible"], pvchange["plantubesvisible"])
 			
 	if "backfacecull" in pvchange and materialsettobackfacecull != pvchange["backfacecull"]:
 		var materialsystem = get_node("/root/Spatial/MaterialSystem")
 		materialsettobackfacecull = pvchange["backfacecull"]
+		planviewcontrols.get_node("CheckBoxBackfaceCull").pressed = materialsettobackfacecull
 		for tmesh in materialsystem.get_node("tubematerials").get_children():
 			var tmat = tmesh.get_surface_material(0)
 			if tmat is SpatialMaterial:
