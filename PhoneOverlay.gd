@@ -4,11 +4,6 @@ extends Control
 var thumbarearadius = 50
 onready var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
 
-var fingerdown1pos = null
-var plancameratranslation = Vector2(0,0)
-var plancameraxvec = Vector3(0,0,0)
-var plancamerayvec = Vector3(0,0,0)
-var plancamerasize = Vector2(0,0)
 var touchscreentype = false
 
 func setupphoneoverlaysystem(ltouchscreentype):
@@ -66,11 +61,60 @@ func menubuttonpressed():
 	if guipanel3dviewport.visible:
 		get_node("/root/Spatial/GuiSystem/GUIPanel3D").setguipanelhide()
 	else:
-		get_node("/root/Spatial/GuiSystem/GUIPanel3D").setguipanelvisible(null)
+		get_node("/root/Spatial/GuiSystem/GUIPanel3D").setguipanelvisible(null) 
 
 
+var fingerdragpos = null
+var fingerdragangle = 0.0
+var plancameratranslation = Vector2(0,0)
+var plancameraroty = 0.0
+var plancameraxvec = Vector3(0,0,0)
+var plancamerayvec = Vector3(0,0,0)
+var plancamerasize = Vector2(0,0)
 
 var screentouchplaces = { }
+var screentouchplaces0pos = { }
+func updatescreentouchplaces0state():
+	if len(screentouchplaces0pos) == 0:
+		fingerdragpos = null
+		return
+	var plancamera = planviewsystem.get_node("PlanView/Viewport/PlanGUI/Camera")
+	var screentouchplaces0kpos = screentouchplaces0pos.values()
+	if len(screentouchplaces0kpos) == 1:
+		fingerdragpos = screentouchplaces0kpos[0]
+	else:
+		fingerdragpos = (screentouchplaces0kpos[0] + screentouchplaces0kpos[1])*0.5
+		fingerdragangle = rad2deg((screentouchplaces0kpos[1] - screentouchplaces0kpos[0]).angle())
+	var fingerdown1posPP = plancamera.project_position(fingerdragpos, 0.0)
+	plancameraxvec = plancamera.project_position(fingerdragpos+Vector2(1,0), 0.0) - fingerdown1posPP; 
+	plancamerayvec = plancamera.project_position(fingerdragpos+Vector2(0,1), 0.0) - fingerdown1posPP; 
+	print("ppp ", plancameraxvec, plancamera.transform.basis.x)
+	plancameratranslation = plancamera.translation
+	plancameraroty = plancamera.rotation_degrees.y
+	
+	plancamerasize = plancamera.size
+
+func updatescreentouchplaces0drag():
+	var plancamera = planviewsystem.get_node("PlanView/Viewport/PlanGUI/Camera")
+	var planviewpositiondict = { }
+	var screentouchplaces0kpos = screentouchplaces0pos.values()
+	var fingerdragposN = screentouchplaces0kpos[0]
+	var fingerdragangleN = 0.0
+	if len(screentouchplaces0kpos) > 1:
+		fingerdragposN = (screentouchplaces0kpos[0] + screentouchplaces0kpos[1])*0.5
+		fingerdragangleN = rad2deg((screentouchplaces0kpos[1] - screentouchplaces0kpos[0]).angle())
+	var panvec = fingerdragpos - fingerdragposN
+	planviewpositiondict["plancamerapos"] = plancameratranslation + plancameraxvec*panvec.x + plancamerayvec*panvec.y
+	if fingerdragangleN != 0.0:
+		var croty = plancameraroty + fingerdragangleN - fingerdragangle
+		planviewpositiondict["plancamerarotation"] = Vector3(plancamera.rotation_degrees.x, croty, plancamera.rotation_degrees.z)
+	#		 "plancamerasize":$PlanView/Viewport/PlanGUI/Camera.size,
+	#var zoomfac = 1/(1 + 0.5*delta) if bzoomin else 1 + 0.5*delta
+	#var plancamera = $PlanView/Viewport/PlanGUI/Camera
+	#planviewpositiondict["plancamerasize"] = plancamera.size * zoomfac
+	planviewsystem.sketchsystem.actsketchchange([{"planview":planviewpositiondict}])
+
+
 func backgroundmotioninput(viewport: Object, event: InputEvent, shape_idx: int):
 	if event is InputEventMouseButton:
 		if touchscreentype or event.button_index != 1:
@@ -90,22 +134,16 @@ func backgroundmotioninput(viewport: Object, event: InputEvent, shape_idx: int):
 
 	if event is InputEventScreenTouch:
 		if event.pressed:
-			if (event.position - $ThumbLeft.position).length() <= thumbarearadius:
+			if $ThumbLeft.visible and (event.position - $ThumbLeft.position).length() <= thumbarearadius:
 				screentouchplaces[event.index] = -1
 				$ThumbLeft/ThumbCircle.visible = true
-			elif $ThumbRight.input_pickable and (event.position - $ThumbRight.position).length() <= thumbarearadius:
+			elif $ThumbRight.visible and (event.position - $ThumbRight.position).length() <= thumbarearadius:
 				screentouchplaces[event.index] = 1
 				$ThumbRight/ThumbCircle.visible = true
 			elif planviewsystem.visible:
 				screentouchplaces[event.index] = 0
-				var plancamera = planviewsystem.get_node("PlanView/Viewport/PlanGUI/Camera")
-				fingerdown1pos = event.position
-				var fingerdown1posPP = plancamera.project_position(fingerdown1pos, 0.0)
-				plancameraxvec = plancamera.project_position(fingerdown1pos+Vector2(1,0), 0.0) - fingerdown1posPP; 
-				plancamerayvec = plancamera.project_position(fingerdown1pos+Vector2(0,1), 0.0) - fingerdown1posPP; 
-				print("ppp ", plancameraxvec, plancamera.transform.basis.x)
-				plancameratranslation = plancamera.translation
-				plancamerasize = plancamera.size
+				screentouchplaces0pos[event.index] = event.position
+				updatescreentouchplaces0state()
 			else:
 				return
 
@@ -117,7 +155,8 @@ func backgroundmotioninput(viewport: Object, event: InputEvent, shape_idx: int):
 				$ThumbRight/ThumbCircle.visible = false
 				Tglobal.phonethumbmotionposition = null
 			elif screentouchplaces.get(event.index) == 0:
-				fingerdown1pos = null
+				screentouchplaces0pos.erase(event.index)
+				updatescreentouchplaces0state()
 			screentouchplaces.erase(event.index)
 			return
 			
@@ -130,15 +169,7 @@ func backgroundmotioninput(viewport: Object, event: InputEvent, shape_idx: int):
 			Tglobal.phonethumbmotionposition = (event.position - $ThumbRight.transform.origin)/thumbarearadius
 			$ThumbRight/ThumbCircle.transform.origin = Tglobal.phonethumbmotionposition*thumbarearadius
 		elif screentouchplaces.get(event.index) == 0:
-			var planviewpositiondict = { }
-			var plancamera = planviewsystem.get_node("PlanView/Viewport/PlanGUI/Camera")
-			var panvec = fingerdown1pos - event.position
-			planviewpositiondict["plancamerapos"] = plancameratranslation + plancameraxvec*panvec.x + plancamerayvec*panvec.y
-			#var zoomfac = 1/(1 + 0.5*delta) if bzoomin else 1 + 0.5*delta
-			#var plancamera = $PlanView/Viewport/PlanGUI/Camera
-			#planviewpositiondict["plancamerasize"] = plancamera.size * zoomfac
-			planviewsystem.sketchsystem.actsketchchange([{"planview":planviewpositiondict}])
-
-
+			screentouchplaces0pos[event.index] = event.position
+			updatescreentouchplaces0drag()
 
 
