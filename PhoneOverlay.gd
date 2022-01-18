@@ -4,6 +4,7 @@ extends Control
 var thumbarearadius = 50
 onready var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
 
+var plancamerascreensize = Vector2(100,100)
 var touchscreentype = false
 
 func setupphoneoverlaysystem(ltouchscreentype):
@@ -18,31 +19,31 @@ func setupphoneoverlaysystem(ltouchscreentype):
 
 func setupoverlaycomponentpositions():
 	var n = 16
-	var screensize = get_node("/root").size
-	thumbarearadius = min(screensize.x, screensize.y)/4.5
+	plancamerascreensize = get_node("/root").size
+	thumbarearadius = min(plancamerascreensize.x, plancamerascreensize.y)/4.5
 	var thumbareamargin = thumbarearadius/7
 	var pts = [ ]
 	for i in range(16):
 		pts.push_back(Vector2(cos(deg2rad(360.0*i/n)), sin(deg2rad(360.0*i/n)))*thumbarearadius); 
 	$ThumbLeft/TouchCircle.set_polygon(PoolVector2Array(pts))
 	$ThumbLeft/ThumbCircle.set_polygon(PoolVector2Array(pts))
-	$ThumbLeft.transform.origin = Vector2(thumbareamargin + thumbarearadius, screensize.y - thumbarearadius - thumbareamargin)
+	$ThumbLeft.transform.origin = Vector2(thumbareamargin + thumbarearadius, plancamerascreensize.y - thumbarearadius - thumbareamargin)
 	
 	$ThumbRight/TouchCircle.set_polygon(PoolVector2Array(pts))
 	$ThumbRight/ThumbCircle.set_polygon(PoolVector2Array(pts))
-	$ThumbRight.transform.origin = Vector2(screensize.x - thumbareamargin - thumbarearadius, screensize.y - thumbarearadius - thumbareamargin)
+	$ThumbRight.transform.origin = Vector2(plancamerascreensize.x - thumbareamargin - thumbarearadius, plancamerascreensize.y - thumbarearadius - thumbareamargin)
 	
-	$BackgroundCapture/CollisionShape2D.shape.extents = screensize/2
-	$BackgroundCapture.position = screensize/2
+	$BackgroundCapture/CollisionShape2D.shape.extents = plancamerascreensize/2
+	$BackgroundCapture.position = plancamerascreensize/2
 
-	var thumgapsize = screensize.x - 4*thumbareamargin - 4*thumbarearadius
+	var thumgapsize = plancamerascreensize.x - 4*thumbareamargin - 4*thumbarearadius
 
 	var guipanel3dviewport = get_node("/root/Spatial/GuiSystem/GUIPanel3D/Viewport")
 	var orgpanelsize = guipanel3dviewport.get_node("GUI").rect_size
-	var panelscale = min(thumgapsize/orgpanelsize.x, (screensize.y-2*thumbareamargin/orgpanelsize.y))
+	var panelscale = min(thumgapsize/orgpanelsize.x, (plancamerascreensize.y-2*thumbareamargin/orgpanelsize.y))
 
 	guipanel3dviewport.rect_scale = Vector2(panelscale, panelscale)
-	guipanel3dviewport.rect_position = Vector2(screensize.x/2 - orgpanelsize.x*panelscale/2, screensize.y - orgpanelsize.y*panelscale - thumbareamargin)
+	guipanel3dviewport.rect_position = Vector2(plancamerascreensize.x/2 - orgpanelsize.x*panelscale/2, plancamerascreensize.y - orgpanelsize.y*panelscale - thumbareamargin)
 	guipanel3dviewport.visible = false
 
 	$MenuButton.rect_position = guipanel3dviewport.rect_position + Vector2(orgpanelsize.x*panelscale/2, orgpanelsize.y*panelscale) - $MenuButton.rect_size*max(1, panelscale)
@@ -50,10 +51,10 @@ func setupoverlaycomponentpositions():
 	
 	var planviewviewport = get_node("/root/Spatial/PlanViewSystem/PlanView/Viewport")
 	var planviewviewcontrols = planviewviewport.get_node("PlanGUI/PlanViewControls")
-	var planviewcontrolsscale = screensize.x/planviewviewcontrols.rect_size.x
+	var planviewcontrolsscale = plancamerascreensize.x/planviewviewcontrols.rect_size.x
 	planviewviewport.rect_scale = Vector2(planviewcontrolsscale, planviewcontrolsscale)
 	planviewviewport.rect_position = Vector2(0, 0)
-	planviewviewcontrols.rect_position = Vector2(0, screensize.y/planviewcontrolsscale - planviewviewcontrols.rect_size.y)
+	planviewviewcontrols.rect_position = Vector2(0, plancamerascreensize.y/planviewcontrolsscale - planviewviewcontrols.rect_size.y)
 
 
 func menubuttonpressed():
@@ -66,11 +67,13 @@ func menubuttonpressed():
 
 var fingerdragpos = null
 var fingerdragangle = 0.0
+var fingerdraglength = 1.0
 var plancameratranslation = Vector2(0,0)
 var plancameraroty = 0.0
 var plancameraxvec = Vector3(0,0,0)
 var plancamerayvec = Vector3(0,0,0)
-var plancamerasize = Vector2(0,0)
+var plancamerazvec = Vector3(0,0,0)
+var plancamerasize = 1.0
 
 var screentouchplaces = { }
 var screentouchplaces0pos = { }
@@ -84,34 +87,46 @@ func updatescreentouchplaces0state():
 		fingerdragpos = screentouchplaces0kpos[0]
 	else:
 		fingerdragpos = (screentouchplaces0kpos[0] + screentouchplaces0kpos[1])*0.5
-		fingerdragangle = rad2deg((screentouchplaces0kpos[1] - screentouchplaces0kpos[0]).angle())
+		var fingerdragvec = screentouchplaces0kpos[1] - screentouchplaces0kpos[0]
+		fingerdragangle = rad2deg(fingerdragvec.angle())
+		fingerdraglength = fingerdragvec.length()
 	var fingerdown1posPP = plancamera.project_position(fingerdragpos, 0.0)
 	plancameraxvec = plancamera.project_position(fingerdragpos+Vector2(1,0), 0.0) - fingerdown1posPP; 
 	plancamerayvec = plancamera.project_position(fingerdragpos+Vector2(0,1), 0.0) - fingerdown1posPP; 
-	print("ppp ", plancameraxvec, plancamera.transform.basis.x)
+	plancamerazvec = plancameraxvec.length()*(plancamera.project_position(fingerdragpos, 1.0) - fingerdown1posPP)
 	plancameratranslation = plancamera.translation
 	plancameraroty = plancamera.rotation_degrees.y
-	
 	plancamerasize = plancamera.size
 
 func updatescreentouchplaces0drag():
 	var plancamera = planviewsystem.get_node("PlanView/Viewport/PlanGUI/Camera")
 	var planviewpositiondict = { }
 	var screentouchplaces0kpos = screentouchplaces0pos.values()
-	var fingerdragposN = screentouchplaces0kpos[0]
-	var fingerdragangleN = 0.0
-	if len(screentouchplaces0kpos) > 1:
-		fingerdragposN = (screentouchplaces0kpos[0] + screentouchplaces0kpos[1])*0.5
-		fingerdragangleN = rad2deg((screentouchplaces0kpos[1] - screentouchplaces0kpos[0]).angle())
-	var panvec = fingerdragpos - fingerdragposN
-	planviewpositiondict["plancamerapos"] = plancameratranslation + plancameraxvec*panvec.x + plancamerayvec*panvec.y
-	if fingerdragangleN != 0.0:
-		var croty = plancameraroty + fingerdragangleN - fingerdragangle
+	if len(screentouchplaces0kpos) == 1:
+		var panvec = fingerdragpos - screentouchplaces0kpos[0]
+		planviewpositiondict["plancamerapos"] = plancameratranslation + plancameraxvec*panvec.x + plancamerayvec*panvec.y
+	else:
+		var fingerdragposN = (screentouchplaces0kpos[0] + screentouchplaces0kpos[1])*0.5
+		var fingerdragvecN = screentouchplaces0kpos[1] - screentouchplaces0kpos[0]
+		var fingerdragangleN = rad2deg(fingerdragvecN.angle())
+		var fingerdraglengthN = fingerdragvecN.length()
+		var fingerdragangleNdiff = fingerdragangleN - fingerdragangle
+		var croty = plancameraroty + fingerdragangleNdiff
 		planviewpositiondict["plancamerarotation"] = Vector3(plancamera.rotation_degrees.x, croty, plancamera.rotation_degrees.z)
-	#		 "plancamerasize":$PlanView/Viewport/PlanGUI/Camera.size,
-	#var zoomfac = 1/(1 + 0.5*delta) if bzoomin else 1 + 0.5*delta
-	#var plancamera = $PlanView/Viewport/PlanGUI/Camera
-	#planviewpositiondict["plancamerasize"] = plancamera.size * zoomfac
+		var sizefac = fingerdraglength/fingerdraglengthN
+		planviewpositiondict["plancamerasize"] = plancamerasize*sizefac
+		var panvec = fingerdragpos - fingerdragposN
+		var panvecdepthchange = 0.0
+		if plancamera.rotation_degrees.x == 0.0:
+			var veccenN = Vector2(fingerdragposN.x - plancamerascreensize.x/2, -planviewsystem.elevcameradist/plancameraxvec.length())
+			var veccenNrot = veccenN*cos(deg2rad(fingerdragangleNdiff)) + Vector2(veccenN.y, -veccenN.x)*sin(deg2rad(fingerdragangleNdiff)) 
+			panvec += Vector2(veccenN.x - veccenNrot.x, 0.0)
+			panvecdepthchange = veccenNrot.y - veccenN.y
+		else:
+			var veccenN = fingerdragposN - plancamerascreensize/2
+			var veccenNrot = veccenN*cos(deg2rad(fingerdragangleNdiff)) + Vector2(veccenN.y, -veccenN.x)*sin(deg2rad(fingerdragangleNdiff)) 
+			panvec += veccenN - veccenNrot
+		planviewpositiondict["plancamerapos"] = plancameratranslation + plancameraxvec*panvec.x + plancamerayvec*panvec.y + plancamerazvec*panvecdepthchange 
 	planviewsystem.sketchsystem.actsketchchange([{"planview":planviewpositiondict}])
 
 
