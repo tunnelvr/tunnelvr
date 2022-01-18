@@ -316,15 +316,6 @@ func _on_switchtest(index):
 				xcdrawingcentreline.additionalproperties = { "stationnamecommonroot":Centrelinedata.findcommonroot(xcdrawingcentreline.nodepoints) }
 		SwitchTest.selected = 0
 
-	elif nssel == "BackfaceCull":
-		var materialsystem = get_node("/root/Spatial/MaterialSystem")
-		backfaceculldisabled = not backfaceculldisabled
-		materialsystem.setbackfacecull(backfaceculldisabled)
-		if Tglobal.connectiontoserveractive:
-			materialsystem.rpc("setbackfacecull", backfaceculldisabled)
-		SwitchTest.selected = 0
-		setguipanelhide()
-				
 	elif nssel == "toggle guardian":
 		var guardianpolyvisible = not playerMe.get_node("GuardianPoly").visible
 		setguardianstate(guardianpolyvisible)

@@ -1895,7 +1895,7 @@ margin_top = 235.0
 margin_right = 116.0
 margin_bottom = 262.0
 text = "normal"
-items = [ "normal", null, false, 0, null, "Hide XCs", null, false, 1, null, "opt: all grey", null, false, 2, null, "opt: hide xc", null, false, 3, null, "toggle guardian", null, false, 4, null, "export OBJ", null, false, 7, null, "choke", null, false, 6, null, "swap controllers", null, false, 7, null, "lock controls", null, false, 8, null, "BackfaceCull", null, false, 11, null, "Toggle Fog", null, false, 10, null ]
+items = [ "normal", null, false, 0, null, "Hide XCs", null, false, 1, null, "opt: all grey", null, false, 2, null, "opt: hide xc", null, false, 3, null, "toggle guardian", null, false, 4, null, "export OBJ", null, false, 7, null, "choke", null, false, 6, null, "swap controllers", null, false, 7, null, "lock controls", null, false, 8, null, "Toggle Fog", null, false, 10, null ]
 selected = 0
 __meta__ = {
 "_edit_use_anchors_": false
@@ -3958,6 +3958,7 @@ color = Color( 0.231373, 0.364706, 0.890196, 0.862745 )
 [node name="BackgroundCapture" type="Area2D" parent="PhoneOverlay"]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="PhoneOverlay/BackgroundCapture"]
+visible = false
 shape = SubResource( 250 )
 disabled = true
 
