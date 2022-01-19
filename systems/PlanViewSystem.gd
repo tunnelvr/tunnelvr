@@ -4,6 +4,8 @@ var planviewactive = false
 var drawingtype = DRAWING_TYPE.DT_PLANVIEW
 onready var ImageSystem = get_node("/root/Spatial/ImageSystem")
 onready var sketchsystem = get_node("/root/Spatial/SketchSystem")
+onready var selfSpatial = get_node("/root/Spatial")
+
 var activetargetfloor = null
 var activetargetfloortransformpos = null
 var activetargetfloorimgtrim = null
@@ -470,6 +472,9 @@ func updateplanviewentitysizes():
 	var Dt0 = OS.get_ticks_msec()
 	var nodesca = $PlanView/Viewport/PlanGUI/Camera.size/70.0*3.0
 	var labelsca = nodesca*2.0
+	for player in selfSpatial.get_node("Players").get_children():
+		player.get_node("headlocator/locatorline").scale = Vector3(nodesca*3.0, 1, nodesca*3.0)
+
 	get_node("/root/Spatial/LabelGenerator").currentplannodesca = nodesca
 	get_node("/root/Spatial/LabelGenerator").currentplanlabelsca = labelsca
 	var labelrects = [ ]
@@ -502,6 +507,7 @@ func updateplanviewentitysizes():
 	print("rectrecttests final ", rectrecttests, " ms:", OS.get_ticks_msec() - rectrecttestt0)
 	updateplanviewentitysizes_working = false
 	print("updateplanviewent ", OS.get_ticks_msec() - Dt0)
+
 
 var slowviewportframeratecountdown = 1
 var slowviewupdatecentrelinesizeupdaterate = 1.5

@@ -34,6 +34,7 @@ func initplayerappearance_me():
 	print("Head colour ", headcolour, " ", [OS.get_unique_id()])
 	var mat = get_node("HeadCam/csgheadmesh/skullcomponent").material
 	mat.albedo_color = headcolour
+	get_node("headlocator/locatorline").get_surface_material(0).albedo_color = headcolour.lightened(0.5)
 	print(mat.albedo_color)
 	if ovr_guardian_system != null:
 		guardianpoly = ovr_guardian_system.get_boundary_geometry()
@@ -353,6 +354,7 @@ func _process(delta):
 				$HandRight.handstate = HS_TOUCHCONTROLLER if ($HandRight.handstate == HS_HAND) else HS_HAND
 			$HandRight.process_keyboardcontroltracking($HeadCam, Vector2(handleftrightjoy*0.033, 0), playerscale)
 
+	$headlocator.transform.origin = $HeadCam.transform.origin
 	if $HandRight.pointervalid:
 		LaserOrient.transform = global_transform*$HandRight.pointerposearvrorigin
 	else:

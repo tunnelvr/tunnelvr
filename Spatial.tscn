@@ -1,4 +1,4 @@
-[gd_scene load_steps=323 format=2]
+[gd_scene load_steps=325 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/underground_env.tres" type="Environment" id=2]
@@ -99,6 +99,16 @@ flags_unshaded = true
 flags_no_depth_test = true
 flags_do_not_receive_shadows = true
 albedo_color = Color( 0.211765, 0.207843, 0.207843, 0.568627 )
+
+[sub_resource type="CubeMesh" id=251]
+resource_local_to_scene = true
+size = Vector3( 0.1, 50, 0.1 )
+
+[sub_resource type="SpatialMaterial" id=252]
+flags_unshaded = true
+flags_do_not_receive_shadows = true
+params_cull_mode = 2
+albedo_color = Color( 0.956863, 0.835294, 0.0509804, 1 )
 
 [sub_resource type="SphereMesh" id=6]
 radius = 0.02
@@ -1694,6 +1704,15 @@ operation = 2
 radius = 0.08
 height = 0.04
 sides = 16
+
+[node name="headlocator" type="Spatial" parent="Players/PlayerMe"]
+
+[node name="locatorline" type="MeshInstance" parent="Players/PlayerMe/headlocator"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 30, 0 )
+layers = 32768
+cast_shadow = 0
+mesh = SubResource( 251 )
+material/0 = SubResource( 252 )
 
 [node name="HandLeftController" type="ARVRController" parent="Players/PlayerMe"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.2, 1.5, -0.5 )

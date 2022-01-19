@@ -30,7 +30,7 @@ remote func initplayerappearanceJ(playerappearance):
 		get_node("GuardianPoly/floorareamesh").visible = true
 		
 	get_node("HeadCam/csgheadmesh/skullcomponent").material.albedo_color = headcolour
-	get_node("headlocator/locatorline").get_surface_material(0).albedo_color = headcolour
+	get_node("headlocator/locatorline").get_surface_material(0).albedo_color = headcolour.lightened(0.5)
 	if playerplatform == "Quest":
 		get_node("HeadCam/visorline").visible = true
 		get_node("HeadCam/visorline").get_surface_material(0).albedo_color = headcolour
