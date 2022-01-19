@@ -252,19 +252,20 @@ func transferintorealviewport():
 func checkboxplantubesvisible_pressed():
 	var pvchange = planviewtodict()
 	pvchange["plantubesvisible"] = planviewcontrols.get_node("CheckBoxPlanTubesVisible").pressed 
-	sketchsystem.actsketchchange([{"planview":pvchange}]) 
+	actplanviewdict(pvchange) 
 
 func checkboxrealtubesvisible_pressed():
 	var pvchange = planviewtodict()
 	pvchange["realtubesvisible"] = planviewcontrols.get_node("CheckBoxRealTubesVisible").pressed
-	sketchsystem.actsketchchange([{"planview":pvchange}]) 
+	actplanviewdict(pvchange) 
+
 
 
 
 func checkboxbackfacecull_pressed():
 	var pvchange = planviewtodict()
 	pvchange["backfacecull"] = planviewcontrols.get_node("CheckBoxBackfaceCull").pressed
-	sketchsystem.actsketchchange([{"planview":pvchange}]) 
+	actplanviewdict(pvchange) 
 	
 func buttontransmitview_pressed():
 	if planviewcontrols.get_node("ButtonTransmitView").pressed:
@@ -274,7 +275,8 @@ func buttontransmitview_pressed():
 func checkcentrelinesvisible_pressed():
 	var pvchange = planviewtodict()
 	pvchange["centrelinesvisible"] = planviewcontrols.get_node("CheckBoxCentrelinesVisible").pressed 
-	sketchsystem.actsketchchange([{"planview":pvchange}]) 
+	actplanviewdict(pvchange) 
+
 
 		
 func _ready():
@@ -359,7 +361,9 @@ func setcameracullmasks(bcentrelinesvisible, bplantubesvisible):
 	get_node("PlanView/Viewport/PlanGUI/Camera").cull_mask = plancameracullmask
 	get_node("RealPlanCamera/LaserScope/LaserOrient/RayCast").collision_mask = plancameraraycollisionmask
 
-func actplanviewdict(pvchange):
+func actplanviewdict(pvchange, resettransmitbutton=true):
+	if resettransmitbutton:
+		planviewcontrols.get_node("ButtonTransmitView").pressed = false
 	if "plancamerapos" in pvchange:
 		$PlanView/Viewport/PlanGUI/Camera.translation = pvchange["plancamerapos"]
 	if "plancamerarotation" in pvchange:
@@ -398,11 +402,11 @@ func actplanviewdict(pvchange):
 			if Tglobal.phoneoverlay != null:
 				$PlanView/Viewport/PlanGUI/Camera.current = false
 				$PlanView/Viewport.visible = false
-
+			if activetargetfloor != null:
+				sketchsystem.actsketchchange([ getactivetargetfloorViz("") ])
 			
 	var guipanel3d = get_node("/root/Spatial/GuiSystem/GUIPanel3D")
 	guipanel3d.get_node("Viewport/GUI/Panel/ButtonPlanView").pressed = visible
-
 
 	if "planviewactive" in pvchange and (visiblechange or planviewactive != pvchange["planviewactive"]):
 		planviewactive = pvchange["planviewactive"]
@@ -458,7 +462,6 @@ func actplanviewdict(pvchange):
 				for xctubesector in xctube.get_node("XCtubesectors").get_children():
 					xctubesector.visible = true
 				xctube.setxctubepathlinevisibility(sketchsystem)
-
 
 func planviewtransformpos(guidpaneltransform, guidpanelsize):
 	var paneltrans = $PlanView.global_transform
@@ -555,7 +558,7 @@ func _process(delta):
 		var plancamera = $PlanView/Viewport/PlanGUI/Camera
 		planviewpositiondict["plancamerasize"] = plancamera.size * zoomfac
 	if not planviewpositiondict.empty():
-		sketchsystem.actsketchchange([{"planview":planviewpositiondict}])
+		actplanviewdict(planviewpositiondict) 
 
 	if activetargetfloor != null:
 		var floortrim = planviewcontrols.get_node("FloorTrim")
@@ -613,7 +616,7 @@ func _process(delta):
 func buttoncentre_pressed():
 	var headcam = get_node("/root/Spatial").playerMe.get_node("HeadCam")
 	var planviewpositiondict = { "plancamerapos":Vector3(headcam.global_transform.origin.x, $PlanView/Viewport/PlanGUI/Camera.translation.y, headcam.global_transform.origin.z) }
-	sketchsystem.actsketchchange([{"planview":planviewpositiondict}])
+	actplanviewdict(planviewpositiondict) 
 
 var cameraaltitudePlan = 0.0
 var elevrotpoint = null
@@ -635,7 +638,7 @@ func buttonelev_toggled(pressed):
 		#print("bb should be same ", plancamera.global_transform.basis.y, plancamerabasisy)
 		var planviewpositiondict = { "plancamerapos":elevrotpoint - plancamerabasisy*elevcameradist, 
 									 "plancamerarotation":Vector3(0, plancamera.rotation_degrees.y, 0) }
-		sketchsystem.actsketchchange([{"planview":planviewpositiondict}])
+		actplanviewdict(planviewpositiondict) 
 		plancamera.environment.fog_depth_begin = elevcameradist	
 		plancamera.environment.fog_depth_end = elevcameradist*2
 	else:
@@ -644,7 +647,7 @@ func buttonelev_toggled(pressed):
 		elevcameradist = pagetoppos.y - elevrotpoint.y
 		var planviewpositiondict = { "plancamerapos":Vector3(elevrotpoint.x, pagetoppos.y, elevrotpoint.z), 
 									 "plancamerarotation":Vector3(-90, plancamera.rotation_degrees.y, 0) }
-		sketchsystem.actsketchchange([{"planview":planviewpositiondict}])
+		actplanviewdict(planviewpositiondict) 
 		plancamera.environment.fog_depth_begin = elevcameradist*2	
 		plancamera.environment.fog_depth_end = elevcameradist*4
 	plancamera.environment.fog_color = plancamera.environment.background_color
@@ -652,9 +655,11 @@ func buttonelev_toggled(pressed):
 	plancamera.far = plancamera.environment.fog_depth_end
 	
 func buttonclose_pressed():
-	sketchsystem.actsketchchange([ {"planview":{"visible":false, "planviewactive":false}}, 
-								   getactivetargetfloorViz("") 
-								 ])
+	if planviewcontrols.get_node("ButtonTransmitView").pressed:
+		sketchsystem.actsketchchange([ {"planview":{"visible":false, "planviewactive":false}} ])
+	else:
+		actplanviewdict({"visible":false, "planviewactive":false}) 
+
 
 func checkplanviewinfront(handrightcontroller):
 	var planviewsystem = self

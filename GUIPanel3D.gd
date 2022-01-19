@@ -97,7 +97,7 @@ func _on_buttonplanview_pressed():
 		if not Tglobal.controlslocked:
 			guidpaneltransform = null
 		pvchange["transformpos"] = planviewsystem.planviewtransformpos(guidpaneltransform, guidpanelsize)
-		sketchsystem.actsketchchange([{"planview":pvchange}])
+		planviewsystem.actplanviewdict(pvchange)
 		$Viewport/GUI/Panel/Label.text = "Planview on"
 	else:
 		planviewsystem.buttonclose_pressed()
@@ -430,6 +430,7 @@ func _on_textedit_focus_exited():
 const clientips = [ "Local-network",
 					#"192.168.43.193 JulianS9",
 					#"10.0.32.206",
+					"127.0.0.1",
 					"godot.doesliverpool.xyz" ]
 var uniqueinstancestring = ""
 func toplevelcalled_ready():

@@ -559,7 +559,7 @@ func buttonpressed_vrby():
 		else:
 			print("controls locked")
 	elif planviewsystem.visible and (pointerplanviewtarget != null or pointertargettype == "PlanView"):
-		sketchsystem.actsketchchange([{"planview": { "visible":true, "planviewactive":not planviewsystem.planviewactive }} ])
+		planviewsystem.actplanviewdict({ "visible":true, "planviewactive":not planviewsystem.planviewactive })
 	elif guipanel3d.visible:
 		guipanel3d.setguipanelhide()
 	else:
@@ -1765,6 +1765,7 @@ func targetwalltransformpos(optionalrevertcode):
 							"timestamp":OS.get_ticks_msec()*0.001,
 						  }
 			return txcdata
+			
 		elif activetargetwallgrabbed.drawingtype != DRAWING_TYPE.DT_XCDRAWING:
 			var txcdata = { "name":activetargetwallgrabbed.get_name(), 
 							"rpcoptional":(0 if optionalrevertcode else 1),
