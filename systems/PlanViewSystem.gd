@@ -259,11 +259,17 @@ func checkboxrealtubesvisible_pressed():
 	pvchange["realtubesvisible"] = planviewcontrols.get_node("CheckBoxRealTubesVisible").pressed
 	sketchsystem.actsketchchange([{"planview":pvchange}]) 
 
+
+
 func checkboxbackfacecull_pressed():
 	var pvchange = planviewtodict()
 	pvchange["backfacecull"] = planviewcontrols.get_node("CheckBoxBackfaceCull").pressed
 	sketchsystem.actsketchchange([{"planview":pvchange}]) 
 	
+func buttontransmitview_pressed():
+	if planviewcontrols.get_node("ButtonTransmitView").pressed:
+		var pvchange = planviewtodict()
+		sketchsystem.actsketchchange([{"planview":pvchange}]) 
 
 func checkcentrelinesvisible_pressed():
 	var pvchange = planviewtodict()
@@ -287,6 +293,7 @@ func _ready():
 	planviewcontrols.get_node("CheckBoxRealTubesVisible").connect("pressed", self, "checkboxrealtubesvisible_pressed")
 	planviewcontrols.get_node("CheckBoxCentrelinesVisible").connect("pressed", self, "checkcentrelinesvisible_pressed")
 	planviewcontrols.get_node("CheckBoxBackfaceCull").connect("pressed", self, "checkboxbackfacecull_pressed")
+	planviewcontrols.get_node("ButtonTransmitView").connect("pressed", self, "buttontransmitview_pressed")
 	planviewcontrols.get_node("FloorMove/FloorStyle").connect("item_selected", self, "floorstyle_itemselected")
 	planviewcontrols.get_node("CheckBoxFileTree").connect("toggled", self, "checkboxfiletree_toggled")
 	call_deferred("clearsetupfileviewtree", true, "http://cave-registry.org.uk/svn/NorthernEngland/")
