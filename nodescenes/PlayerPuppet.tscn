@@ -54,6 +54,7 @@ size = Vector3( 0.1, 50, 0.1 )
 [sub_resource type="SpatialMaterial" id=10]
 flags_unshaded = true
 flags_do_not_receive_shadows = true
+params_cull_mode = 2
 albedo_color = Color( 0.956863, 0.835294, 0.0509804, 1 )
 
 [sub_resource type="CubeMesh" id=11]
@@ -219,6 +220,7 @@ material/0 = SubResource( 8 )
 
 [node name="locatorline" type="MeshInstance" parent="headlocator"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 30, 0 )
+layers = 4097
 cast_shadow = 0
 mesh = SubResource( 9 )
 material/0 = SubResource( 10 )
