@@ -1017,3 +1017,85 @@ static func intermediaterailsequence2(zi, zi1, railsequencerung0, railsequenceru
 		
 		railsequencerung1.push_back(zi1j0)
 		railsequencerung1.push_back(zi1[i1j+1] if i1j >= 0 and i1j < len(zi1) else Vector3(99,99,99))
+
+class sortquatfuncclass:
+	static func sortquatfunc(a, b):
+		return a.x < b.x or (a.x == b.x and (a.y < b.y or (a.y == b.y and (a.z < b.z or (a.z == b.z and a.w < b.w)))))
+
+static func BlackOutlineMesh(tubeslist, noffset):
+	var tubepoolvectors = [ ]
+	var vertqindexes = [ ]
+	for tube in tubeslist:
+		for k in range(tube.get_node("XCtubesectors").get_child_count()):
+			var tubesector = tube.get_node("XCtubesectors").get_child(k)
+			if tube.xcsectormaterials[k] == "hole":
+				continue
+			var mdt = MeshDataTool.new()
+			#var surfmesh = tubesector.get_node("MeshInstance").mesh.surface_get_arrays(0)
+			mdt.create_from_surface(tubesector.get_node("MeshInstance").mesh, 0)
+			for i in range(mdt.get_face_count()):
+				for j in range(3):
+					var p = mdt.get_vertex(mdt.get_face_vertex(i, j))
+					vertqindexes.push_back(Quat(p.x, p.y, p.z, len(vertqindexes)))
+	vertqindexes.sort_custom(sortquatfuncclass, "sortquatfunc")
+	var dedupverts = [ ]
+	var trirefs = [ ]
+	for q in vertqindexes:
+		var p = Vector3(q.x, q.y, q.z)
+		if len(dedupverts) == 0 or dedupverts[-1] != p:
+			dedupverts.push_back(p)
+		trirefs.push_back(Vector2(q.w, len(dedupverts)-1))
+	trirefs.sort()
+	var triindex = [ ]
+	for t in trirefs:
+		assert (len(triindex) == t.x)
+		triindex.push_back(int(t.y))
+		
+	var arr = []
+	arr.resize(Mesh.ARRAY_MAX)
+	arr[Mesh.ARRAY_VERTEX] = PoolVector3Array(dedupverts)
+	arr[Mesh.ARRAY_INDEX] = PoolIntArray(triindex)
+	var joinedmesh = ArrayMesh.new()
+	joinedmesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+	
+	var cornertrinorms = [ ]
+	var mdt = MeshDataTool.new()
+	mdt.create_from_surface(joinedmesh, 0)
+	for i in range(mdt.get_vertex_count()):
+		var fs = mdt.get_vertex_faces(i)
+		var nsum = Vector3(0, 0, 0)
+		for f in fs:
+			var i0 = mdt.get_face_vertex(f, 0)
+			var i1 = mdt.get_face_vertex(f, 1)
+			var i2 = mdt.get_face_vertex(f, 2)
+			var p
+			var p1
+			var p2
+			if i == i0:
+				p = mdt.get_vertex(i0)
+				p1 = mdt.get_vertex(i1)
+				p2 = mdt.get_vertex(i2)
+			elif i == i1:
+				p = mdt.get_vertex(i1)
+				p1 = mdt.get_vertex(i2)
+				p2 = mdt.get_vertex(i0)
+			else:
+				assert (i == i2)
+				p = mdt.get_vertex(i2)
+				p1 = mdt.get_vertex(i0)
+				p2 = mdt.get_vertex(i1)
+			var n = (p1 - p).cross(p2 - p)
+			nsum += n
+		cornertrinorms.push_back(nsum.normalized())
+
+	if noffset != 0:
+		var offsetverts = [ ]
+		for i in range(mdt.get_vertex_count()):
+			offsetverts.push_back(dedupverts[i] + cornertrinorms[i]*noffset)
+		arr[Mesh.ARRAY_VERTEX] = PoolVector3Array(offsetverts)
+	else:
+		arr[Mesh.ARRAY_NORMAL] = PoolVector3Array(cornertrinorms)
+	var arr_mesh = ArrayMesh.new()
+	arr_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+	return arr_mesh
+			

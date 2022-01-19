@@ -427,12 +427,7 @@ func actplanviewdict(pvchange, resettransmitbutton=true):
 		var materialsystem = get_node("/root/Spatial/MaterialSystem")
 		materialsettobackfacecull = pvchange["backfacecull"]
 		planviewcontrols.get_node("CheckBoxBackfaceCull").pressed = materialsettobackfacecull
-		for tmesh in materialsystem.get_node("tubematerials").get_children():
-			var tmat = tmesh.get_surface_material(0)
-			if tmat is SpatialMaterial:
-				tmat.params_cull_mode = SpatialMaterial.CULL_BACK if materialsettobackfacecull else SpatialMaterial.CULL_DISABLED
-			else:
-				print("cant' change backface cull on material ", tmesh.get_name())
+		materialsystem.setallbackfacecull(SpatialMaterial.CULL_BACK if materialsettobackfacecull else SpatialMaterial.CULL_DISABLED)
 
 	if "realtubesvisible" in pvchange and Tglobal.hidecavewallstoseefloors != (not pvchange["realtubesvisible"]):
 		planviewcontrols.get_node("CheckBoxRealTubesVisible").pressed = pvchange["realtubesvisible"]
@@ -484,6 +479,7 @@ func updateplanviewentitysizes():
 	var labelsca = nodesca*2.0
 	for player in selfSpatial.get_node("Players").get_children():
 		player.get_node("headlocator/locatorline").scale = Vector3(nodesca*3.0, 1, nodesca*3.0)
+	sketchsystem.get_node("tunnelxoutline/MeshInstance").material_override.set_shader_param("noffset", nodesca*0.2)
 
 	get_node("/root/Spatial/LabelGenerator").currentplannodesca = nodesca
 	get_node("/root/Spatial/LabelGenerator").currentplanlabelsca = labelsca
