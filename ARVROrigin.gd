@@ -346,22 +346,18 @@ func _process(delta):
 		if duckrise != 0.0:
 			$HeadCam.translation.y = clamp($HeadCam.translation.y + duckrise*delta*1.1, 0.4, 1.8)
 
-		if $HandRight.handstate == HS_INVALID:
-			$HandRight.handstate = HS_HAND
-		if Input.is_action_just_pressed("ui_key_9"):
-			$HandRight.handstate = HS_TOUCHCONTROLLER if ($HandRight.handstate == HS_HAND) else HS_HAND
-		$HandRight.process_keyboardcontroltracking($HeadCam, Vector2(handleftrightjoy*0.033, 0), playerscale)
+		if not Tglobal.phoneoverlay:
+			if $HandRight.handstate == HS_INVALID:
+				$HandRight.handstate = HS_HAND
+			if Input.is_action_just_pressed("ui_key_9"):
+				$HandRight.handstate = HS_TOUCHCONTROLLER if ($HandRight.handstate == HS_HAND) else HS_HAND
+			$HandRight.process_keyboardcontroltracking($HeadCam, Vector2(handleftrightjoy*0.033, 0), playerscale)
 
 	if $HandRight.pointervalid:
 		LaserOrient.transform = global_transform*$HandRight.pointerposearvrorigin
 	else:
 		LaserOrient.visible = false
 
-
-
-func initkeyboardcontroltrackingnow():
-	#$HandLeft.initkeyboardtracking()
-	$HandRight.initkeyboardtracking()
 	
 func initnormalvrtrackingnow():
 	$HandLeft.initnormalvrtracking($HandLeftController)

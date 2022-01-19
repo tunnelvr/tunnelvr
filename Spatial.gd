@@ -188,7 +188,6 @@ func _ready():
 		$BodyObjects/PlayerDirections.initcontrollersignalconnections()
 			
 	else:
-		playerMe.initkeyboardcontroltrackingnow()
 		print("*** VR not operating")
 	Tglobal.primarycamera_instanceid = $Players/PlayerMe/HeadCam.get_instance_id() 
 		

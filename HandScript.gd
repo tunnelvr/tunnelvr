@@ -292,9 +292,6 @@ func handposeimmediate(boneorientations, dt):
 													   "by":-0.002 if vrbybuttonheld else 0.0 }
 							   })
 
-func initkeyboardtracking():
-	handcontroller = null
-			
 func initnormalvrtracking(lhandcontroller):
 	handcontroller = lhandcontroller
 
