@@ -316,15 +316,6 @@ func _on_switchtest(index):
 				xcdrawingcentreline.additionalproperties = { "stationnamecommonroot":Centrelinedata.findcommonroot(xcdrawingcentreline.nodepoints) }
 		SwitchTest.selected = 0
 
-	elif nssel == "BackfaceCull":
-		var materialsystem = get_node("/root/Spatial/MaterialSystem")
-		backfaceculldisabled = not backfaceculldisabled
-		materialsystem.setbackfacecull(backfaceculldisabled)
-		if Tglobal.connectiontoserveractive:
-			materialsystem.rpc("setbackfacecull", backfaceculldisabled)
-		SwitchTest.selected = 0
-		setguipanelhide()
-				
 	elif nssel == "toggle guardian":
 		var guardianpolyvisible = not playerMe.get_node("GuardianPoly").visible
 		setguardianstate(guardianpolyvisible)
@@ -441,18 +432,18 @@ const clientips = [ "Local-network",
 					#"10.0.32.206",
 					"godot.doesliverpool.xyz" ]
 var uniqueinstancestring = ""
-func _ready():
+func toplevelcalled_ready():
 	uniqueinstancestring = OS.get_unique_id().replace("{", "").split("-")[0].to_upper()+"_"+str(randi())
 	regexacceptableprojectname.compile('(?i)^([a-z0-9.\\-_]+)\\s*$')
-	if has_node("ViewportReal"):
+	if has_node("ViewportReal") and Tglobal.phoneoverlay == null:
 		var fgui = $Viewport/GUI
 		$Viewport.remove_child(fgui)
 		$ViewportReal.add_child(fgui)
 		$Viewport.set_name("ViewportFake")
 		$ViewportReal.set_name("Viewport")
 		$Quad.get_surface_material(0).albedo_texture = $Viewport.get_texture()
+		$Viewport.render_target_update_mode = Viewport.UPDATE_DISABLED
 		
-	$Viewport.render_target_update_mode = Viewport.UPDATE_DISABLED
 	for clientip in clientips:
 		$Viewport/GUI/Panel/Networkstate.add_item(clientip)
 	
@@ -613,30 +604,34 @@ func updateplayerlist():
 	
 
 func setguipanelvisible(controller_global_transform):
-	var paneltrans = Transform()
-	var controllertrans = controller_global_transform
-	var paneldistance = 0.6 if Tglobal.VRoperating else 0.2
-	paneltrans.origin = controllertrans.origin - paneldistance*ARVRServer.world_scale*(controllertrans.basis.z)
-	var lookatpos = controllertrans.origin - 1.6*ARVRServer.world_scale*(controllertrans.basis.z)
-	paneltrans = paneltrans.looking_at(lookatpos, Vector3(0, 1, 0))
-	paneltrans = Transform(paneltrans.basis.scaled(Vector3(ARVRServer.world_scale, ARVRServer.world_scale, ARVRServer.world_scale)), paneltrans.origin)
-	global_transform = paneltrans
+	if controller_global_transform != null:
+		var paneltrans = Transform()
+		var controllertrans = controller_global_transform
+		var paneldistance = 0.6 if Tglobal.VRoperating else 0.2
+		paneltrans.origin = controllertrans.origin - paneldistance*ARVRServer.world_scale*(controllertrans.basis.z)
+		var lookatpos = controllertrans.origin - 1.6*ARVRServer.world_scale*(controllertrans.basis.z)
+		paneltrans = paneltrans.looking_at(lookatpos, Vector3(0, 1, 0))
+		paneltrans = Transform(paneltrans.basis.scaled(Vector3(ARVRServer.world_scale, ARVRServer.world_scale, ARVRServer.world_scale)), paneltrans.origin)
+		global_transform = paneltrans
 
-	var kpaneltrans = paneltrans
-	kpaneltrans.origin = paneltrans.origin - paneltrans.basis.y*($Quad.mesh.size.y/2) - Vector3(0, virtualkeyboard.get_node("Quad").mesh.size.y/2, 0)
-	var klookatpos = 2*kpaneltrans.origin - controllertrans.origin + 0*ARVRServer.world_scale*(controllertrans.basis.z)
-	print(klookatpos)
-	klookatpos += -1.1*ARVRServer.world_scale*(controllertrans.basis.z)
-	print(klookatpos)
-	kpaneltrans = kpaneltrans.looking_at(klookatpos, Vector3(0, 1, 0))
-	kpaneltrans = Transform(kpaneltrans.basis.scaled(Vector3(ARVRServer.world_scale, ARVRServer.world_scale, ARVRServer.world_scale)), kpaneltrans.origin)
-	virtualkeyboard.global_transform = kpaneltrans
+		var kpaneltrans = paneltrans
+		kpaneltrans.origin = paneltrans.origin - paneltrans.basis.y*($Quad.mesh.size.y/2) - Vector3(0, virtualkeyboard.get_node("Quad").mesh.size.y/2, 0)
+		var klookatpos = 2*kpaneltrans.origin - controllertrans.origin + 0*ARVRServer.world_scale*(controllertrans.basis.z)
+		print(klookatpos)
+		klookatpos += -1.1*ARVRServer.world_scale*(controllertrans.basis.z)
+		print(klookatpos)
+		kpaneltrans = kpaneltrans.looking_at(klookatpos, Vector3(0, 1, 0))
+		kpaneltrans = Transform(kpaneltrans.basis.scaled(Vector3(ARVRServer.world_scale, ARVRServer.world_scale, ARVRServer.world_scale)), kpaneltrans.origin)
+		virtualkeyboard.global_transform = kpaneltrans
 	
 	$Viewport/GUI/Panel/Label.text = ""
 	$Viewport/GUI/Panel/ResourceOptions.selected = 0
 
-	visible = true
-	$CollisionShape.disabled = not visible
+	if Tglobal.phoneoverlay == null:
+		visible = true
+		$CollisionShape.disabled = not visible
+	else:
+		$Viewport.visible = true
 	Tglobal.soundsystem.quicksound("ShowGui", global_transform.origin)
 
 	if Tglobal.connectiontoserveractive:
@@ -651,7 +646,11 @@ func setguipanelhide():
 		#if virtualkeyboard.visible:
 		#	_on_textedit_focus_exited()
 		visible = false
-		$Viewport.render_target_update_mode = Viewport.UPDATE_DISABLED
+		if $Viewport.has_method("set_update_mode"):
+			$Viewport.set_update_mode(Viewport.UPDATE_DISABLED)
+		else:
+			$Viewport.visible = false
+			
 		$CollisionShape.disabled = not visible
 		if $Viewport/GUI/Panel/EditColorRect/TextEdit.has_focus():
 			$Viewport/GUI/Panel/EditColorRect/TextEdit.release_focus()
@@ -675,10 +674,10 @@ func _input(event):
 						get_node(textedit.focus_next).grab_focus()
 					else:
 						textedit.release_focus()
-			else:
+			elif Tglobal.phoneoverlay == null:
 				$Viewport.input(event)
 			get_tree().set_input_as_handled()
-		elif event.scancode == KEY_TAB:
+		elif event.scancode == KEY_TAB and Tglobal.phoneoverlay == null:
 			$Viewport.input(event)
 		elif event.pressed:
 			if event.scancode == KEY_L:

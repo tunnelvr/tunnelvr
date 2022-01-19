@@ -1,4 +1,4 @@
-[gd_scene load_steps=321 format=2]
+[gd_scene load_steps=325 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/underground_env.tres" type="Environment" id=2]
@@ -19,7 +19,7 @@
 [ext_resource path="res://ImageSystem.gd" type="Script" id=17]
 [ext_resource path="res://ARVROrigin.gd" type="Script" id=18]
 [ext_resource path="res://sounds/SoundSystem.gd" type="Script" id=19]
-[ext_resource path="res://environments/overheadview_env.tres" type="Environment" id=20]
+[ext_resource path="res://environments/fogoverheadview_env.tres" type="Environment" id=20]
 [ext_resource path="res://sounds/switch6.wav" type="AudioStream" id=21]
 [ext_resource path="res://sounds/switch5.wav" type="AudioStream" id=22]
 [ext_resource path="res://PlayerMotion.gd" type="Script" id=23]
@@ -75,6 +75,7 @@
 [ext_resource path="res://assets/ovrmodels/OculusQuestTouchController_Left_Reactive.gltf" type="PackedScene" id=73]
 [ext_resource path="res://potreework/PotreeExperiments.gd" type="Script" id=74]
 [ext_resource path="res://potreework/ocellcube.material" type="Material" id=75]
+[ext_resource path="res://PhoneOverlay.gd" type="Script" id=76]
 
 [sub_resource type="CubeMesh" id=1]
 size = Vector3( 0.35, 0.01, 0.01 )
@@ -98,6 +99,16 @@ flags_unshaded = true
 flags_no_depth_test = true
 flags_do_not_receive_shadows = true
 albedo_color = Color( 0.211765, 0.207843, 0.207843, 0.568627 )
+
+[sub_resource type="CubeMesh" id=251]
+resource_local_to_scene = true
+size = Vector3( 0.1, 50, 0.1 )
+
+[sub_resource type="SpatialMaterial" id=252]
+flags_unshaded = true
+flags_do_not_receive_shadows = true
+params_cull_mode = 2
+albedo_color = Color( 0.956863, 0.835294, 0.0509804, 1 )
 
 [sub_resource type="SphereMesh" id=6]
 radius = 0.02
@@ -125,234 +136,6 @@ flags_do_not_receive_shadows = true
 albedo_color = Color( 0.341176, 0.411765, 0.976471, 1 )
 metallic = 0.41
 roughness = 0.45
-
-[sub_resource type="DynamicFont" id=12]
-font_data = ExtResource( 40 )
-
-[sub_resource type="BoxShape" id=13]
-extents = Vector3( 0.3, 0.2, 0.01 )
-
-[sub_resource type="QuadMesh" id=14]
-size = Vector2( 0.6, 0.4 )
-
-[sub_resource type="SpatialMaterial" id=15]
-resource_local_to_scene = true
-flags_unshaded = true
-flags_albedo_tex_force_srgb = true
-
-[sub_resource type="QuadMesh" id=16]
-
-[sub_resource type="SpatialMaterial" id=17]
-flags_unshaded = true
-flags_do_not_receive_shadows = true
-params_cull_mode = 2
-albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
-albedo_texture = ExtResource( 25 )
-uv1_scale = Vector3( 1, 0.05, 1 )
-uv1_offset = Vector3( -0.15, 0.003, 0 )
-
-[sub_resource type="BoxShape" id=18]
-extents = Vector3( 0.5, 0.5, 0.02 )
-
-[sub_resource type="SpatialMaterial" id=19]
-flags_unshaded = true
-flags_do_not_receive_shadows = true
-params_cull_mode = 2
-albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
-albedo_texture = ExtResource( 25 )
-uv1_scale = Vector3( 1, 0.05, 1 )
-uv1_offset = Vector3( -0.1, 0.053, 0 )
-
-[sub_resource type="SpatialMaterial" id=20]
-flags_unshaded = true
-flags_do_not_receive_shadows = true
-params_cull_mode = 2
-albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
-albedo_texture = ExtResource( 25 )
-uv1_scale = Vector3( 1, 0.05, 1 )
-uv1_offset = Vector3( -0.2, 0.103, 0 )
-
-[sub_resource type="SpatialMaterial" id=21]
-flags_unshaded = true
-flags_do_not_receive_shadows = true
-params_cull_mode = 2
-albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
-albedo_texture = ExtResource( 25 )
-uv1_scale = Vector3( 1, 0.05, 1 )
-uv1_offset = Vector3( -0.2, 0.353, 0 )
-
-[sub_resource type="SpatialMaterial" id=22]
-flags_unshaded = true
-flags_do_not_receive_shadows = true
-params_cull_mode = 2
-albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
-albedo_texture = ExtResource( 25 )
-uv1_scale = Vector3( 1, 0.05, 1 )
-uv1_offset = Vector3( -0.2, 0.403, 0 )
-
-[sub_resource type="SpatialMaterial" id=23]
-flags_unshaded = true
-flags_do_not_receive_shadows = true
-params_cull_mode = 2
-albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
-albedo_texture = ExtResource( 25 )
-uv1_scale = Vector3( 1, 0.05, 1 )
-uv1_offset = Vector3( -0.2, 0.453, 0 )
-
-[sub_resource type="SpatialMaterial" id=24]
-flags_unshaded = true
-flags_do_not_receive_shadows = true
-params_cull_mode = 2
-albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
-albedo_texture = ExtResource( 25 )
-uv1_scale = Vector3( 1, 0.05, 1 )
-uv1_offset = Vector3( -0.2, 0.503, 0 )
-
-[sub_resource type="SpatialMaterial" id=25]
-flags_unshaded = true
-flags_do_not_receive_shadows = true
-params_cull_mode = 2
-albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
-albedo_texture = ExtResource( 25 )
-uv1_scale = Vector3( 1, 0.05, 1 )
-uv1_offset = Vector3( -0.2, 0.556, 0 )
-
-[sub_resource type="SpatialMaterial" id=26]
-flags_unshaded = true
-flags_do_not_receive_shadows = true
-params_cull_mode = 2
-albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
-albedo_texture = ExtResource( 25 )
-uv1_scale = Vector3( 1, 0.05, 1 )
-uv1_offset = Vector3( -0.2, 0.606, 0 )
-
-[sub_resource type="SpatialMaterial" id=27]
-flags_unshaded = true
-flags_do_not_receive_shadows = true
-params_cull_mode = 2
-albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
-albedo_texture = ExtResource( 25 )
-uv1_scale = Vector3( 1, 0.05, 1 )
-uv1_offset = Vector3( -0.2, 0.553, 0 )
-
-[sub_resource type="SpatialMaterial" id=28]
-flags_unshaded = true
-flags_do_not_receive_shadows = true
-params_cull_mode = 2
-albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
-albedo_texture = ExtResource( 25 )
-uv1_scale = Vector3( 1, 0.05, 1 )
-uv1_offset = Vector3( -0.2, 0.153, 0 )
-
-[sub_resource type="SpatialMaterial" id=29]
-flags_unshaded = true
-flags_do_not_receive_shadows = true
-params_cull_mode = 2
-albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
-albedo_texture = ExtResource( 25 )
-uv1_scale = Vector3( 1, 0.05, 1 )
-uv1_offset = Vector3( -0.2, 0.203, 0 )
-
-[sub_resource type="SpatialMaterial" id=30]
-flags_unshaded = true
-flags_do_not_receive_shadows = true
-params_cull_mode = 2
-albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
-albedo_texture = ExtResource( 25 )
-uv1_scale = Vector3( 1, 0.05, 1 )
-uv1_offset = Vector3( -0.2, 0.253, 0 )
-
-[sub_resource type="SpatialMaterial" id=31]
-flags_unshaded = true
-flags_do_not_receive_shadows = true
-params_cull_mode = 2
-albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
-albedo_texture = ExtResource( 25 )
-uv1_scale = Vector3( 1, 0.05, 1 )
-uv1_offset = Vector3( -0.2, 0.303, 0 )
-
-[sub_resource type="SpatialMaterial" id=32]
-flags_unshaded = true
-flags_do_not_receive_shadows = true
-params_cull_mode = 2
-albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
-albedo_texture = ExtResource( 25 )
-uv1_scale = Vector3( 1, 0.05, 1 )
-uv1_offset = Vector3( -0.2, 0.7, 0 )
-
-[sub_resource type="SpatialMaterial" id=33]
-flags_unshaded = true
-flags_do_not_receive_shadows = true
-params_cull_mode = 2
-albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
-albedo_texture = ExtResource( 25 )
-uv1_scale = Vector3( 1, 0.05, 1 )
-uv1_offset = Vector3( -0.2, 0.75, 0 )
-
-[sub_resource type="SpatialMaterial" id=34]
-flags_unshaded = true
-flags_do_not_receive_shadows = true
-params_cull_mode = 2
-albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
-albedo_texture = ExtResource( 25 )
-uv1_scale = Vector3( 1, 0.05, 1 )
-uv1_offset = Vector3( -0.2, 0.8, 0 )
-
-[sub_resource type="SpatialMaterial" id=35]
-flags_unshaded = true
-flags_do_not_receive_shadows = true
-params_cull_mode = 2
-albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
-albedo_texture = ExtResource( 25 )
-uv1_scale = Vector3( 1, 0.05, 1 )
-uv1_offset = Vector3( -0.2, 0.85, 0 )
-
-[sub_resource type="QuadMesh" id=36]
-
-[sub_resource type="SpatialMaterial" id=37]
-flags_unshaded = true
-flags_do_not_receive_shadows = true
-params_cull_mode = 2
-albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
-albedo_texture = ExtResource( 25 )
-uv1_scale = Vector3( 1, 0.05, 1 )
-uv1_offset = Vector3( -0.2, 0.94, 0 )
-
-[sub_resource type="QuadMesh" id=247]
-
-[sub_resource type="SpatialMaterial" id=248]
-flags_unshaded = true
-flags_do_not_receive_shadows = true
-params_cull_mode = 2
-albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
-albedo_texture = ExtResource( 25 )
-uv1_scale = Vector3( 1, 0.05, 1 )
-uv1_offset = Vector3( -0.15, 0.895, 0 )
-
-[sub_resource type="SpatialMaterial" id=38]
-flags_unshaded = true
-flags_do_not_receive_shadows = true
-params_cull_mode = 2
-albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
-albedo_texture = ExtResource( 25 )
-uv1_scale = Vector3( 1, 0.05, 1 )
-uv1_offset = Vector3( -0.15, 0.155, 0 )
-
-[sub_resource type="DynamicFont" id=40]
-size = 22
-font_data = ExtResource( 40 )
-
-[sub_resource type="StyleBoxFlat" id=39]
-bg_color = Color( 0.0980392, 0.443137, 0.882353, 1 )
-
-[sub_resource type="BoxShape" id=41]
-extents = Vector3( 0.4, 0.2, 0.01 )
-
-[sub_resource type="QuadMesh" id=42]
-size = Vector2( 0.8, 0.4 )
-
-[sub_resource type="SpatialMaterial" id=43]
-flags_unshaded = true
 
 [sub_resource type="CapsuleShape" id=44]
 margin = 0.01
@@ -583,6 +366,234 @@ bottom_radius = 0.02
 height = 0.2
 radial_segments = 6
 rings = 1
+
+[sub_resource type="DynamicFont" id=12]
+font_data = ExtResource( 40 )
+
+[sub_resource type="BoxShape" id=13]
+extents = Vector3( 0.3, 0.2, 0.01 )
+
+[sub_resource type="QuadMesh" id=14]
+size = Vector2( 0.6, 0.4 )
+
+[sub_resource type="SpatialMaterial" id=15]
+resource_local_to_scene = true
+flags_unshaded = true
+flags_albedo_tex_force_srgb = true
+
+[sub_resource type="QuadMesh" id=16]
+
+[sub_resource type="SpatialMaterial" id=17]
+flags_unshaded = true
+flags_do_not_receive_shadows = true
+params_cull_mode = 2
+albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
+albedo_texture = ExtResource( 25 )
+uv1_scale = Vector3( 1, 0.05, 1 )
+uv1_offset = Vector3( -0.15, 0.003, 0 )
+
+[sub_resource type="BoxShape" id=18]
+extents = Vector3( 0.5, 0.5, 0.02 )
+
+[sub_resource type="SpatialMaterial" id=19]
+flags_unshaded = true
+flags_do_not_receive_shadows = true
+params_cull_mode = 2
+albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
+albedo_texture = ExtResource( 25 )
+uv1_scale = Vector3( 1, 0.05, 1 )
+uv1_offset = Vector3( -0.1, 0.053, 0 )
+
+[sub_resource type="SpatialMaterial" id=20]
+flags_unshaded = true
+flags_do_not_receive_shadows = true
+params_cull_mode = 2
+albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
+albedo_texture = ExtResource( 25 )
+uv1_scale = Vector3( 1, 0.05, 1 )
+uv1_offset = Vector3( -0.2, 0.103, 0 )
+
+[sub_resource type="SpatialMaterial" id=21]
+flags_unshaded = true
+flags_do_not_receive_shadows = true
+params_cull_mode = 2
+albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
+albedo_texture = ExtResource( 25 )
+uv1_scale = Vector3( 1, 0.05, 1 )
+uv1_offset = Vector3( -0.2, 0.353, 0 )
+
+[sub_resource type="SpatialMaterial" id=22]
+flags_unshaded = true
+flags_do_not_receive_shadows = true
+params_cull_mode = 2
+albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
+albedo_texture = ExtResource( 25 )
+uv1_scale = Vector3( 1, 0.05, 1 )
+uv1_offset = Vector3( -0.2, 0.403, 0 )
+
+[sub_resource type="SpatialMaterial" id=23]
+flags_unshaded = true
+flags_do_not_receive_shadows = true
+params_cull_mode = 2
+albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
+albedo_texture = ExtResource( 25 )
+uv1_scale = Vector3( 1, 0.05, 1 )
+uv1_offset = Vector3( -0.2, 0.453, 0 )
+
+[sub_resource type="SpatialMaterial" id=24]
+flags_unshaded = true
+flags_do_not_receive_shadows = true
+params_cull_mode = 2
+albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
+albedo_texture = ExtResource( 25 )
+uv1_scale = Vector3( 1, 0.05, 1 )
+uv1_offset = Vector3( -0.2, 0.503, 0 )
+
+[sub_resource type="SpatialMaterial" id=25]
+flags_unshaded = true
+flags_do_not_receive_shadows = true
+params_cull_mode = 2
+albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
+albedo_texture = ExtResource( 25 )
+uv1_scale = Vector3( 1, 0.05, 1 )
+uv1_offset = Vector3( -0.2, 0.556, 0 )
+
+[sub_resource type="SpatialMaterial" id=26]
+flags_unshaded = true
+flags_do_not_receive_shadows = true
+params_cull_mode = 2
+albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
+albedo_texture = ExtResource( 25 )
+uv1_scale = Vector3( 1, 0.05, 1 )
+uv1_offset = Vector3( -0.2, 0.606, 0 )
+
+[sub_resource type="SpatialMaterial" id=27]
+flags_unshaded = true
+flags_do_not_receive_shadows = true
+params_cull_mode = 2
+albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
+albedo_texture = ExtResource( 25 )
+uv1_scale = Vector3( 1, 0.05, 1 )
+uv1_offset = Vector3( -0.2, 0.553, 0 )
+
+[sub_resource type="SpatialMaterial" id=28]
+flags_unshaded = true
+flags_do_not_receive_shadows = true
+params_cull_mode = 2
+albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
+albedo_texture = ExtResource( 25 )
+uv1_scale = Vector3( 1, 0.05, 1 )
+uv1_offset = Vector3( -0.2, 0.153, 0 )
+
+[sub_resource type="SpatialMaterial" id=29]
+flags_unshaded = true
+flags_do_not_receive_shadows = true
+params_cull_mode = 2
+albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
+albedo_texture = ExtResource( 25 )
+uv1_scale = Vector3( 1, 0.05, 1 )
+uv1_offset = Vector3( -0.2, 0.203, 0 )
+
+[sub_resource type="SpatialMaterial" id=30]
+flags_unshaded = true
+flags_do_not_receive_shadows = true
+params_cull_mode = 2
+albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
+albedo_texture = ExtResource( 25 )
+uv1_scale = Vector3( 1, 0.05, 1 )
+uv1_offset = Vector3( -0.2, 0.253, 0 )
+
+[sub_resource type="SpatialMaterial" id=31]
+flags_unshaded = true
+flags_do_not_receive_shadows = true
+params_cull_mode = 2
+albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
+albedo_texture = ExtResource( 25 )
+uv1_scale = Vector3( 1, 0.05, 1 )
+uv1_offset = Vector3( -0.2, 0.303, 0 )
+
+[sub_resource type="SpatialMaterial" id=32]
+flags_unshaded = true
+flags_do_not_receive_shadows = true
+params_cull_mode = 2
+albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
+albedo_texture = ExtResource( 25 )
+uv1_scale = Vector3( 1, 0.05, 1 )
+uv1_offset = Vector3( -0.2, 0.7, 0 )
+
+[sub_resource type="SpatialMaterial" id=33]
+flags_unshaded = true
+flags_do_not_receive_shadows = true
+params_cull_mode = 2
+albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
+albedo_texture = ExtResource( 25 )
+uv1_scale = Vector3( 1, 0.05, 1 )
+uv1_offset = Vector3( -0.2, 0.75, 0 )
+
+[sub_resource type="SpatialMaterial" id=34]
+flags_unshaded = true
+flags_do_not_receive_shadows = true
+params_cull_mode = 2
+albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
+albedo_texture = ExtResource( 25 )
+uv1_scale = Vector3( 1, 0.05, 1 )
+uv1_offset = Vector3( -0.2, 0.8, 0 )
+
+[sub_resource type="SpatialMaterial" id=35]
+flags_unshaded = true
+flags_do_not_receive_shadows = true
+params_cull_mode = 2
+albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
+albedo_texture = ExtResource( 25 )
+uv1_scale = Vector3( 1, 0.05, 1 )
+uv1_offset = Vector3( -0.2, 0.85, 0 )
+
+[sub_resource type="QuadMesh" id=36]
+
+[sub_resource type="SpatialMaterial" id=37]
+flags_unshaded = true
+flags_do_not_receive_shadows = true
+params_cull_mode = 2
+albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
+albedo_texture = ExtResource( 25 )
+uv1_scale = Vector3( 1, 0.05, 1 )
+uv1_offset = Vector3( -0.2, 0.94, 0 )
+
+[sub_resource type="QuadMesh" id=247]
+
+[sub_resource type="SpatialMaterial" id=248]
+flags_unshaded = true
+flags_do_not_receive_shadows = true
+params_cull_mode = 2
+albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
+albedo_texture = ExtResource( 25 )
+uv1_scale = Vector3( 1, 0.05, 1 )
+uv1_offset = Vector3( -0.15, 0.895, 0 )
+
+[sub_resource type="SpatialMaterial" id=38]
+flags_unshaded = true
+flags_do_not_receive_shadows = true
+params_cull_mode = 2
+albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
+albedo_texture = ExtResource( 25 )
+uv1_scale = Vector3( 1, 0.05, 1 )
+uv1_offset = Vector3( -0.15, 0.155, 0 )
+
+[sub_resource type="DynamicFont" id=40]
+size = 22
+font_data = ExtResource( 40 )
+
+[sub_resource type="StyleBoxFlat" id=39]
+bg_color = Color( 0.0980392, 0.443137, 0.882353, 1 )
+
+[sub_resource type="BoxShape" id=41]
+extents = Vector3( 0.4, 0.2, 0.01 )
+
+[sub_resource type="QuadMesh" id=42]
+size = Vector2( 0.8, 0.4 )
+
+[sub_resource type="SpatialMaterial" id=43]
+flags_unshaded = true
 
 [sub_resource type="PlaneMesh" id=91]
 
@@ -1382,6 +1393,11 @@ params_cull_mode = 2
 albedo_color = Color( 0.890196, 0.94902, 0.501961, 1 )
 albedo_texture = ExtResource( 54 )
 roughness = 0.91
+emission_enabled = true
+emission = Color( 0.890196, 0.94902, 0.501961, 1 )
+emission_energy = 0.42
+emission_operator = 0
+emission_on_uv2 = false
 
 [sub_resource type="QuadMesh" id=199]
 size = Vector2( 1, 0.2 )
@@ -1392,6 +1408,11 @@ albedo_color = Color( 0.890196, 0.94902, 0.501961, 1 )
 albedo_texture = ExtResource( 54 )
 metallic = 0.12
 roughness = 0.77
+emission_enabled = true
+emission = Color( 0.890196, 0.94902, 0.501961, 1 )
+emission_energy = 0.42
+emission_operator = 0
+emission_on_uv2 = false
 
 [sub_resource type="CapsuleMesh" id=201]
 radius = 0.1
@@ -1625,9 +1646,13 @@ albedo_color = Color( 0.168627, 0.972549, 0.027451, 1 )
 
 [sub_resource type="CubeMesh" id=245]
 
+[sub_resource type="RectangleShape2D" id=250]
+extents = Vector2( 500, 500 )
+
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
 enablevr = false
+forcephoneoverlay = true
 
 [node name="Players" type="Spatial" parent="."]
 
@@ -1645,7 +1670,6 @@ transform = Transform( 1, 0, 0, 0, 0.939693, 0.34202, 0, -0.34202, 0.939693, 0, 
 light_energy = 1.1
 light_indirect_energy = 7.26
 light_specular = 0.43
-shadow_enabled = true
 shadow_color = Color( 0.0823529, 0.0431373, 0.254902, 1 )
 spot_range = 191.9
 spot_attenuation = 2.07053
@@ -1680,6 +1704,15 @@ operation = 2
 radius = 0.08
 height = 0.04
 sides = 16
+
+[node name="headlocator" type="Spatial" parent="Players/PlayerMe"]
+
+[node name="locatorline" type="MeshInstance" parent="Players/PlayerMe/headlocator"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 30, 0 )
+layers = 4096
+cast_shadow = 0
+mesh = SubResource( 251 )
+material/0 = SubResource( 252 )
 
 [node name="HandLeftController" type="ARVRController" parent="Players/PlayerMe"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.2, 1.5, -0.5 )
@@ -1731,8 +1764,10 @@ mesh = SubResource( 8 )
 material/0 = SubResource( 9 )
 
 [node name="right_hand_model" parent="Players/PlayerMe/HandRight" instance=ExtResource( 71 )]
+visible = false
 
 [node name="OculusQuestTouchController_Right_Reactive" parent="Players/PlayerMe/HandRight" instance=ExtResource( 70 )]
+visible = false
 
 [node name="pointersystem" type="Node" parent="Players/PlayerMe"]
 script = ExtResource( 5 )
@@ -1754,11 +1789,837 @@ transform = Transform( -1.62921e-07, 0, 1, 0, 1, 0, -1, 0, -1.62921e-07, 0, 0.3,
 mesh = SubResource( 10 )
 material/0 = SubResource( 11 )
 
+[node name="BodyObjects" type="Spatial" parent="."]
+
+[node name="Locomotion_WalkInPlace" type="Node" parent="BodyObjects"]
+script = ExtResource( 4 )
+
+[node name="PlayerDirections" type="Node" parent="BodyObjects"]
+script = ExtResource( 41 )
+
+[node name="PlayerMotion" type="Spatial" parent="BodyObjects"]
+script = ExtResource( 23 )
+
+[node name="PlayerKinematicBody" type="KinematicBody" parent="BodyObjects/PlayerMotion"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, -6.412 )
+collision_mask = 38
+input_ray_pickable = false
+
+[node name="PlayerBodyCapsule" type="CollisionShape" parent="BodyObjects/PlayerMotion/PlayerKinematicBody"]
+transform = Transform( 1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0 )
+shape = SubResource( 44 )
+
+[node name="CapsuleShapePreview" type="MeshInstance" parent="BodyObjects/PlayerMotion/PlayerKinematicBody/PlayerBodyCapsule"]
+mesh = SubResource( 45 )
+material/0 = SubResource( 46 )
+
+[node name="HeadCollisionWarning" type="MeshInstance" parent="BodyObjects/PlayerMotion/PlayerKinematicBody/PlayerBodyCapsule/CapsuleShapePreview"]
+transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, 0, 0, -0.0743194 )
+mesh = SubResource( 47 )
+material/0 = SubResource( 48 )
+
+[node name="CollisionWarning" type="MeshInstance" parent="BodyObjects/PlayerMotion/PlayerKinematicBody/PlayerBodyCapsule/CapsuleShapePreview"]
+transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, 0, 0, 0 )
+mesh = SubResource( 47 )
+material/0 = SubResource( 49 )
+
+[node name="FreefallWarning" type="MeshInstance" parent="BodyObjects/PlayerMotion/PlayerKinematicBody/PlayerBodyCapsule/CapsuleShapePreview"]
+transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, 0, 0, 0.0653608 )
+visible = false
+mesh = SubResource( 47 )
+material/0 = SubResource( 50 )
+
+[node name="PlayerEnlargedKinematicBody" type="KinematicBody" parent="BodyObjects/PlayerMotion"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, -6.412 )
+collision_mask = 38
+input_ray_pickable = false
+
+[node name="PlayerBodyCapsule" type="CollisionShape" parent="BodyObjects/PlayerMotion/PlayerEnlargedKinematicBody"]
+transform = Transform( 1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0 )
+shape = SubResource( 51 )
+
+[node name="PlayerHeadKinematicBody" type="KinematicBody" parent="BodyObjects/PlayerMotion"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.55385, -6.3318 )
+collision_mask = 38
+input_ray_pickable = false
+
+[node name="PlayerHeadCapsule" type="CollisionShape" parent="BodyObjects/PlayerMotion/PlayerHeadKinematicBody"]
+shape = SubResource( 52 )
+
+[node name="FloorOriginMarker" type="MeshInstance" parent="BodyObjects/PlayerMotion"]
+transform = Transform( -1.62921e-07, 0, 1, 0, 1, 0, -1, 0, -1.62921e-07, 1.78533, 0, -4.96781 )
+visible = false
+mesh = SubResource( 53 )
+material/0 = SubResource( 54 )
+
+[node name="MotionVectorPreview" type="Spatial" parent="BodyObjects/PlayerMotion"]
+transform = Transform( 1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, -0.0598552, 2.25315, -6.31372 )
+
+[node name="Scale" type="Spatial" parent="BodyObjects/PlayerMotion/MotionVectorPreview"]
+
+[node name="Mesh" type="MeshInstance" parent="BodyObjects/PlayerMotion/MotionVectorPreview/Scale"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.5 )
+mesh = SubResource( 56 )
+material/0 = null
+
+[node name="LaserOrient" type="Spatial" parent="BodyObjects"]
+transform = Transform( 1, -4.60809e-07, 4.60809e-07, 0, 0.707107, 0.707107, -6.51682e-07, -0.707107, 0.707107, 0.199998, 3.5, -6.852 )
+
+[node name="Length" type="Spatial" parent="BodyObjects/LaserOrient"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 50, 0, 0, 0 )
+
+[node name="Laser" type="MeshInstance" parent="BodyObjects/LaserOrient/Length"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.43051e-06, -0.5 )
+cast_shadow = 0
+mesh = SubResource( 57 )
+material/0 = SubResource( 58 )
+
+[node name="RayCast" type="RayCast" parent="BodyObjects/LaserOrient"]
+enabled = true
+cast_to = Vector3( 0, 0, -50 )
+collision_mask = 248
+
+[node name="LaserSpot" type="MeshInstance" parent="BodyObjects/LaserOrient"]
+transform = Transform( 1, 0, 0, 0, 1, -8.9407e-08, 0, 8.9407e-08, 1, 0, -4.76837e-07, -5.476 )
+mesh = SubResource( 60 )
+material/0 = null
+
+[node name="LaserSpike" type="MeshInstance" parent="BodyObjects/LaserOrient/LaserSpot"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0 )
+mesh = SubResource( 62 )
+material/0 = null
+
+[node name="NotificationTorus" type="CSGTorus" parent="BodyObjects/LaserOrient"]
+transform = Transform( 1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, -0.3 )
+visible = false
+inner_radius = 0.002
+outer_radius = 0.01
+sides = 16
+material = SubResource( 63 )
+
+[node name="NotificationCylinder" type="CSGCylinder" parent="BodyObjects/LaserOrient"]
+transform = Transform( 1, 0, 0, 0, -1.31134e-06, -1, 0, 30, -4.37114e-08, 0, 0, -0.4 )
+radius = 0.009
+height = 0.02
+material = SubResource( 64 )
+
+[node name="LaserSelectLine" type="Spatial" parent="BodyObjects"]
+transform = Transform( 1, -4.60809e-07, 4.60809e-07, 0, 0.707107, 0.707107, -6.51682e-07, -0.707107, 0.707107, 0.200002, 3.5, 0.11135 )
+
+[node name="Scale" type="Spatial" parent="BodyObjects/LaserSelectLine"]
+
+[node name="Mesh" type="MeshInstance" parent="BodyObjects/LaserSelectLine/Scale"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.5 )
+mesh = SubResource( 65 )
+material/0 = null
+
+[node name="GripLaserSpot" type="MeshInstance" parent="BodyObjects"]
+transform = Transform( 1, -4.60809e-07, 4.60809e-07, 0, 0.707107, 0.707107, -6.51682e-07, -0.707107, 0.707107, 0.615074, -0.372118, -10.7241 )
+visible = false
+mesh = SubResource( 60 )
+material/0 = SubResource( 66 )
+
+[node name="LaserSpike" type="MeshInstance" parent="BodyObjects/GripLaserSpot"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0 )
+visible = false
+mesh = SubResource( 62 )
+material/0 = null
+
+[node name="FloorLaserSpot" type="Spatial" parent="BodyObjects"]
+transform = Transform( 1, 0, 2.84217e-14, 0, 1, 0, -8.52651e-14, 0, 1, 0, 0, -9.53674e-07 )
+
+[node name="RayCast" type="RayCast" parent="BodyObjects/FloorLaserSpot"]
+cast_to = Vector3( 0, -50, 0 )
+collision_mask = 16
+
+[node name="FloorSpot" type="MeshInstance" parent="BodyObjects/FloorLaserSpot"]
+transform = Transform( 1, -4.60809e-07, 4.60809e-07, 0, 0.707107, 0.707107, -6.51682e-07, -0.707107, 0.707107, 0.615074, -0.372118, -10.7241 )
+visible = false
+mesh = SubResource( 68 )
+material/0 = null
+
+[node name="IntermediatePointView" type="Spatial" parent="BodyObjects"]
+visible = false
+
+[node name="IntermediatePointPlane" type="StaticBody" parent="BodyObjects/IntermediatePointView"]
+transform = Transform( 1, 0, 0, 0, 0.598017, 0.801484, 0, -0.801484, 0.598017, 0, 0, 0 )
+collision_layer = 4096
+collision_mask = 0
+
+[node name="CollisionShape" type="CollisionShape" parent="BodyObjects/IntermediatePointView/IntermediatePointPlane"]
+transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, 0, 0, 0 )
+shape = SubResource( 69 )
+disabled = true
+
+[node name="MeshInstance" type="MeshInstance" parent="BodyObjects/IntermediatePointView/IntermediatePointPlane/CollisionShape"]
+layers = 2
+cast_shadow = 0
+mesh = SubResource( 70 )
+material/0 = SubResource( 71 )
+
+[node name="IntermediatePointPlaneStartingMarker" type="MeshInstance" parent="BodyObjects/IntermediatePointView"]
+transform = Transform( 1, 0, 0, 0, 0.598017, 0.801484, 0, -0.801484, 0.598017, 0, 0, 0 )
+mesh = SubResource( 60 )
+material/0 = SubResource( 66 )
+
+[node name="SketchSystem" type="Spatial" parent="."]
+script = ExtResource( 10 )
+
+[node name="XCdrawings" type="Spatial" parent="SketchSystem"]
+
+[node name="XCtubes" type="Spatial" parent="SketchSystem"]
+
+[node name="PlanViewSystem" type="Spatial" parent="."]
+transform = Transform( 1, 0, 6.51682e-07, 0, 1, 0, -6.51682e-07, 0, 1, -2.08929e-06, 2, -6.412 )
+visible = false
+script = ExtResource( 24 )
+
+[node name="PlanView" type="StaticBody" parent="PlanViewSystem"]
+transform = Transform( 1, 0, 0, 0, 0.819152, 0.573577, 0, -0.573577, 0.819152, -3.5665, 0.449535, -13.3568 )
+collision_layer = 8
+
+[node name="Viewport" type="Control" parent="PlanViewSystem/PlanView"]
+margin_left = 600.0
+margin_right = 640.0
+margin_bottom = 40.0
+mouse_filter = 2
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="PlanGUI" type="Control" parent="PlanViewSystem/PlanView/Viewport"]
+margin_right = 800.0
+margin_bottom = 800.0
+mouse_filter = 2
+theme = ExtResource( 47 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Camera" type="Camera" parent="PlanViewSystem/PlanView/Viewport/PlanGUI"]
+transform = Transform( 1, 0, 0, 0, -1.62921e-07, 1, 0, -1, -1.62921e-07, -1, 50, -12 )
+keep_aspect = 0
+cull_mask = 2147512827
+environment = ExtResource( 20 )
+projection = 1
+fov = 87.5304
+size = 70.0
+far = 200.0
+
+[node name="toRealPlanCamera" type="RemoteTransform" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/Camera"]
+transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, 0, 0, 0 )
+remote_path = NodePath("../../../../../RealPlanCamera")
+update_scale = false
+
+[node name="PlanViewControls" type="Panel" parent="PlanViewSystem/PlanView/Viewport/PlanGUI"]
+margin_top = 700.0
+margin_right = 800.0
+margin_bottom = 800.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ViewSlide" type="Control" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
+material = SubResource( 75 )
+margin_left = 3.0
+margin_top = 4.0
+margin_right = 109.0
+margin_bottom = 98.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="LabelViewSlide" type="Label" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ViewSlide"]
+margin_left = 1.16809
+margin_top = 59.3559
+margin_right = 70.1681
+margin_bottom = 81.3559
+text = "ViewSlide"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ButtonSlideDown" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ViewSlide"]
+margin_left = 39.5289
+margin_top = 32.0375
+margin_right = 62.5289
+margin_bottom = 58.0375
+text = "V"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ButtonSlideLeft" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ViewSlide"]
+margin_left = 6.13216
+margin_top = 32.7526
+margin_right = 36.1322
+margin_bottom = 58.7526
+text = "<<"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ButtonSlideRight" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ViewSlide"]
+margin_left = 64.3129
+margin_top = 30.8554
+margin_right = 94.3129
+margin_bottom = 56.8554
+text = ">>"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ButtonSlideUp" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ViewSlide"]
+margin_left = 42.0594
+margin_top = 2.11311
+margin_right = 65.0594
+margin_bottom = 28.1131
+text = "^"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ButtonZoomDown" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ViewSlide"]
+margin_left = 110.416
+margin_top = 46.5051
+margin_right = 129.416
+margin_bottom = 68.5051
+text = "v"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ButtonZoomUp" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ViewSlide"]
+margin_left = 132.111
+margin_top = 46.3104
+margin_right = 151.111
+margin_bottom = 68.3104
+text = "^"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ButtonElev" type="CheckBox" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ViewSlide"]
+margin_left = 99.5281
+margin_top = 69.3241
+margin_right = 157.528
+margin_bottom = 93.3241
+text = "Elev!!!"
+
+[node name="ZoomView" type="Control" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
+material = SubResource( 75 )
+margin_left = 94.0
+margin_top = 3.47192
+margin_right = 186.0
+margin_bottom = 51.4719
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ZoomView"]
+margin_left = 23.0486
+margin_top = -0.76215
+margin_right = 69.0486
+margin_bottom = 21.2379
+text = "Zoom"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ButtonZoomOut" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ZoomView"]
+margin_left = 5.0
+margin_top = 20.0
+margin_right = 33.0
+margin_bottom = 46.0
+text = "<<"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ButtonCentre" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ZoomView"]
+margin_left = 34.0
+margin_top = 20.0
+margin_right = 57.0
+margin_bottom = 46.0
+text = "O"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ButtonZoomIn" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ZoomView"]
+margin_left = 58.0
+margin_top = 20.0
+margin_right = 86.0
+margin_bottom = 46.0
+text = ">>"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="FloorTrim" type="Control" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
+material = SubResource( 75 )
+margin_left = 179.691
+margin_top = 6.1189
+margin_right = 295.691
+margin_bottom = 101.119
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="LabelFloor" type="Label" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorTrim"]
+margin_left = 5.40929
+margin_top = 6.44543
+margin_right = 42.4093
+margin_bottom = 28.4454
+text = "Floor:"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="LabelTrim" type="Label" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorTrim"]
+margin_left = 9.64716
+margin_top = 70.0133
+margin_right = 46.6472
+margin_bottom = 92.0133
+text = "Trim"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ButtonTrimDownDown" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorTrim"]
+margin_left = 47.1001
+margin_top = 73.3364
+margin_right = 67.1001
+margin_bottom = 95.3364
+text = "V"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ButtonTrimDownUp" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorTrim"]
+margin_left = 47.082
+margin_top = 49.8728
+margin_right = 67.082
+margin_bottom = 71.8728
+text = "^"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ButtonTrimLeftRight" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorTrim"]
+margin_left = 26.4635
+margin_top = 38.7818
+margin_right = 46.4635
+margin_bottom = 60.7818
+text = ">"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ButtonTrimLeftLeft" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorTrim"]
+margin_left = 5.5274
+margin_top = 38.8909
+margin_right = 25.5274
+margin_bottom = 60.8909
+text = "<"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ButtonTrimRightRight" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorTrim"]
+margin_left = 91.2725
+margin_top = 37.2273
+margin_right = 111.272
+margin_bottom = 59.2273
+text = ">"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ButtonTrimRightLeft" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorTrim"]
+margin_left = 69.4454
+margin_top = 37.2273
+margin_right = 89.4454
+margin_bottom = 59.2273
+text = "<"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ButtonTrimUpUp" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorTrim"]
+margin_left = 48.2272
+margin_top = 1.99091
+margin_right = 67.2272
+margin_bottom = 23.9909
+text = "^"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ButtonTrimUpDown" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorTrim"]
+margin_left = 46.8909
+margin_top = 26.0452
+margin_right = 66.8909
+margin_bottom = 48.0452
+text = "V"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="FloorMove" type="Control" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
+material = SubResource( 75 )
+margin_left = 304.0
+margin_top = 7.0
+margin_right = 469.0
+margin_bottom = 97.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="LabelGrow" type="Label" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorMove"]
+margin_left = -11.8988
+margin_top = 1.48016
+margin_right = 33.1012
+margin_bottom = 23.4802
+text = "Grow:"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="LabelMove" type="Label" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorMove"]
+margin_left = -37.6165
+margin_top = 67.2705
+margin_right = 6.38354
+margin_bottom = 89.2705
+text = "Move:"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ButtonShrink" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorMove"]
+margin_left = 35.5136
+margin_top = 2.92346
+margin_right = 63.5136
+margin_bottom = 24.9235
+text = "<<"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ButtonGrow" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorMove"]
+margin_left = 66.8947
+margin_top = 1.50006
+margin_right = 94.8947
+margin_bottom = 23.5001
+text = ">>"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ButtonMoveLeft" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorMove"]
+margin_left = 9.29333
+margin_top = 64.5492
+margin_right = 29.2933
+margin_bottom = 86.5492
+text = "<"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ButtonMoveRight" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorMove"]
+margin_left = 56.0
+margin_top = 65.0
+margin_right = 76.0
+margin_bottom = 87.0
+text = ">"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ButtonMoveUp" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorMove"]
+margin_left = 33.3947
+margin_top = 40.1316
+margin_right = 52.3947
+margin_bottom = 62.1316
+text = "^"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ButtonMoveDown" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorMove"]
+margin_left = 34.2929
+margin_top = 64.889
+margin_right = 54.2929
+margin_bottom = 86.889
+text = "V"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ButtonMoveRise" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorMove"]
+margin_left = 81.4472
+margin_top = 40.4534
+margin_right = 101.447
+margin_bottom = 62.4534
+text = "^"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ButtonMoveFall" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorMove"]
+margin_left = 80.4058
+margin_top = 65.9201
+margin_right = 100.406
+margin_bottom = 87.9201
+text = "V"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="FloorStyle" type="OptionButton" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorMove"]
+margin_left = 221.973
+margin_top = -5.11896
+margin_right = 294.973
+margin_bottom = 18.881
+disabled = true
+text = "normal"
+items = [ "normal", null, false, 0, null, "photo", null, false, 1, null, "ghostly", null, false, 2, null, "hide", null, false, 3, null, "delete", null, false, 4, null ]
+selected = 0
+
+[node name="LabelPaper" type="Label" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorMove"]
+margin_left = 172.0
+margin_top = -5.0
+margin_right = 220.0
+margin_bottom = 17.0
+text = "Paper:"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Scalebar" type="Control" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
+margin_left = 71.0
+margin_top = -36.0
+margin_right = 311.0
+mouse_filter = 2
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="scalerect" type="ColorRect" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/Scalebar"]
+margin_left = 1.68372
+margin_top = 17.3981
+margin_right = 229.684
+margin_bottom = 32.3981
+color = Color( 0.0745098, 0.564706, 0.858824, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="scalelabel" type="Label" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/Scalebar"]
+margin_left = -72.3987
+margin_top = 15.1532
+margin_right = -2.39874
+margin_bottom = 37.1532
+custom_colors/font_color = Color( 0, 0, 0, 1 )
+custom_colors/font_outline_modulate = Color( 0.984314, 0.933333, 0.933333, 1 )
+custom_colors/font_color_shadow = Color( 0.937255, 0.862745, 0.862745, 1 )
+text = "Scale: 1m"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ButtonClosePlanView" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
+margin_left = 0.943848
+margin_top = 0.943909
+margin_right = 40.9438
+margin_bottom = 35.9439
+hint_tooltip = "Close Plan View
+"
+text = "X"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="CheckBoxPlanTubesVisible" type="CheckBox" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
+anchor_right = 0.015
+anchor_bottom = 0.24
+margin_left = 470.838
+margin_top = 49.6852
+margin_right = 522.838
+margin_bottom = 49.6852
+rect_pivot_offset = Vector2( 100.162, 19.0063 )
+pressed = true
+text = "plan tubes"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="CheckBoxRealTubesVisible" type="CheckBox" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
+anchor_right = 0.015
+anchor_bottom = 0.24
+margin_left = 573.981
+margin_top = 46.8828
+margin_right = 653.981
+margin_bottom = 46.8828
+rect_pivot_offset = Vector2( 100.162, 19.0063 )
+pressed = true
+text = "real tubes"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="CheckBoxBackfaceCull" type="CheckBox" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
+anchor_right = 0.015
+anchor_bottom = 0.24
+margin_left = 575.316
+margin_top = 25.5254
+margin_right = 655.316
+margin_bottom = 25.5254
+rect_pivot_offset = Vector2( 100.162, 19.0063 )
+text = "backface cull"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="CheckBoxCentrelinesVisible" type="CheckBox" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
+anchor_right = 0.015
+anchor_bottom = 0.24
+margin_left = 470.796
+margin_top = 27.8946
+margin_right = 558.796
+margin_bottom = 27.8946
+pressed = true
+text = "centrelines"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ImportPhotoMode" type="CheckBox" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
+anchor_right = 0.015
+anchor_bottom = 0.24
+margin_left = 471.918
+margin_top = 68.8644
+margin_right = 559.918
+margin_bottom = 68.8644
+pressed = true
+text = "import photo mode"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ColorRectURL" type="ColorRect" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
+visible = false
+margin_left = 473.0
+margin_top = 30.0
+margin_right = 785.0
+margin_bottom = 94.0
+color = Color( 0.176471, 0.227451, 0.396078, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="LabelXCresource" type="Label" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ColorRectURL"]
+margin_left = -1.0
+margin_top = -1.0
+margin_right = 304.0
+margin_bottom = 58.0
+autowrap = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="FileviewTree" type="Tree" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
+visible = false
+margin_left = 109.0
+margin_top = -244.0
+margin_right = 699.0
+margin_bottom = 93.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="CheckBoxFileTree" type="CheckBox" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
+margin_left = 12.4161
+margin_top = 77.2682
+margin_right = 103.416
+margin_bottom = 101.268
+text = "Filetree"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ViewportReal" type="Viewport" parent="PlanViewSystem/PlanView"]
+size = Vector2( 800, 800 )
+render_target_v_flip = true
+
+[node name="ProjectionScreen" type="MeshInstance" parent="PlanViewSystem/PlanView"]
+transform = Transform( 1, 0, 0, 0, 1, -2.98023e-08, 0, 2.98023e-08, 1, 0, 0, 0 )
+mesh = SubResource( 76 )
+material/0 = SubResource( 77 )
+
+[node name="ImageFrame" type="MeshInstance" parent="PlanViewSystem/PlanView/ProjectionScreen"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.055 )
+mesh = SubResource( 79 )
+material/0 = null
+
+[node name="CollisionShape" type="CollisionShape" parent="PlanViewSystem/PlanView"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.01 )
+shape = SubResource( 80 )
+disabled = true
+
+[node name="RealPlanCamera" type="Spatial" parent="PlanViewSystem"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.999994, 48, -5.588 )
+__meta__ = {
+"_editor_description_": ""
+}
+
+[node name="RealCameraBox" type="MeshInstance" parent="PlanViewSystem/RealPlanCamera"]
+transform = Transform( 70, 0, 0, 0, 1, 0, 0, 0, 70, 0, 0.6, 0 )
+cast_shadow = 0
+mesh = SubResource( 82 )
+material/0 = null
+
+[node name="RealCameraLens" type="MeshInstance" parent="PlanViewSystem/RealPlanCamera/RealCameraBox"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.132259, 0 )
+cast_shadow = 0
+mesh = SubResource( 84 )
+material/0 = null
+
+[node name="LaserScope" type="MeshInstance" parent="PlanViewSystem/RealPlanCamera"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 0 )
+cast_shadow = 0
+mesh = SubResource( 86 )
+material/0 = null
+
+[node name="LaserOrient" type="Spatial" parent="PlanViewSystem/RealPlanCamera/LaserScope"]
+transform = Transform( 1, 0, 0, 0, -1.62921e-07, 1, 0, -1, -1.62921e-07, 0, 0, 0 )
+
+[node name="Length" type="Spatial" parent="PlanViewSystem/RealPlanCamera/LaserScope/LaserOrient"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 60, 0, 0, 0 )
+
+[node name="LaserVertical" type="MeshInstance" parent="PlanViewSystem/RealPlanCamera/LaserScope/LaserOrient/Length"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.5 )
+mesh = SubResource( 88 )
+material/0 = null
+
+[node name="RayCast" type="RayCast" parent="PlanViewSystem/RealPlanCamera/LaserScope/LaserOrient"]
+cast_to = Vector3( 0, 0, -150 )
+collision_mask = 312
+
+[node name="LaserSpot" type="MeshInstance" parent="PlanViewSystem/RealPlanCamera/LaserScope/LaserOrient"]
+transform = Transform( 1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, 0.478879, -49.3258, -0.0697994 )
+mesh = SubResource( 89 )
+material/0 = null
+
+[node name="LaserSpike" type="MeshInstance" parent="PlanViewSystem/RealPlanCamera/LaserScope/LaserOrient/LaserSpot"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0 )
+mesh = SubResource( 90 )
+material/0 = null
+
 [node name="GuiSystem" type="Spatial" parent="."]
 transform = Transform( -0.999994, 0, 0.00336804, 0, 1, 0, -0.00336804, 0, -0.999994, 5.95264e-10, 2, 6.412 )
 
 [node name="GUIPanel3D" type="StaticBody" parent="GuiSystem"]
-visible = false
 collision_layer = 8
 collision_mask = 0
 script = ExtResource( 14 )
@@ -1853,9 +2714,9 @@ __meta__ = {
 
 [node name="ButtonHeadtorch" type="CheckBox" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
 margin_left = 17.0
-margin_top = 127.0
+margin_top = 131.0
 margin_right = 130.0
-margin_bottom = 167.0
+margin_bottom = 155.0
 rect_pivot_offset = Vector2( 138.61, -8.13628 )
 hint_tooltip = "test tooltip"
 pressed = true
@@ -1865,10 +2726,10 @@ __meta__ = {
 }
 
 [node name="ButtonDoppelganger" type="CheckBox" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 18.407
-margin_top = 156.59
-margin_right = 144.407
-margin_bottom = 184.59
+margin_left = 16.9406
+margin_top = 150.632
+margin_right = 142.941
+margin_bottom = 174.632
 rect_pivot_offset = Vector2( 138.61, -8.13628 )
 hint_tooltip = "test tooltip"
 text = "Doppelganger"
@@ -1882,7 +2743,7 @@ margin_top = 235.0
 margin_right = 116.0
 margin_bottom = 262.0
 text = "normal"
-items = [ "normal", null, false, 0, null, "Hide XCs", null, false, 1, null, "opt: all grey", null, false, 2, null, "opt: hide xc", null, false, 3, null, "toggle guardian", null, false, 4, null, "export OBJ", null, false, 7, null, "choke", null, false, 6, null, "swap controllers", null, false, 7, null, "lock controls", null, false, 8, null, "BackfaceCull", null, false, 11, null, "Toggle Fog", null, false, 10, null ]
+items = [ "normal", null, false, 0, null, "Hide XCs", null, false, 1, null, "opt: all grey", null, false, 2, null, "opt: hide xc", null, false, 3, null, "toggle guardian", null, false, 4, null, "export OBJ", null, false, 7, null, "choke", null, false, 6, null, "swap controllers", null, false, 7, null, "lock controls", null, false, 8, null, "Toggle Fog", null, false, 10, null ]
 selected = 0
 __meta__ = {
 "_edit_use_anchors_": false
@@ -2365,808 +3226,6 @@ disabled = true
 cast_shadow = 0
 mesh = SubResource( 42 )
 material/0 = SubResource( 43 )
-
-[node name="BodyObjects" type="Spatial" parent="."]
-
-[node name="Locomotion_WalkInPlace" type="Node" parent="BodyObjects"]
-script = ExtResource( 4 )
-
-[node name="PlayerDirections" type="Node" parent="BodyObjects"]
-script = ExtResource( 41 )
-
-[node name="PlayerMotion" type="Spatial" parent="BodyObjects"]
-script = ExtResource( 23 )
-
-[node name="PlayerKinematicBody" type="KinematicBody" parent="BodyObjects/PlayerMotion"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, -6.412 )
-collision_mask = 38
-input_ray_pickable = false
-
-[node name="PlayerBodyCapsule" type="CollisionShape" parent="BodyObjects/PlayerMotion/PlayerKinematicBody"]
-transform = Transform( 1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0 )
-shape = SubResource( 44 )
-
-[node name="CapsuleShapePreview" type="MeshInstance" parent="BodyObjects/PlayerMotion/PlayerKinematicBody/PlayerBodyCapsule"]
-mesh = SubResource( 45 )
-material/0 = SubResource( 46 )
-
-[node name="HeadCollisionWarning" type="MeshInstance" parent="BodyObjects/PlayerMotion/PlayerKinematicBody/PlayerBodyCapsule/CapsuleShapePreview"]
-transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, 0, 0, -0.0743194 )
-mesh = SubResource( 47 )
-material/0 = SubResource( 48 )
-
-[node name="CollisionWarning" type="MeshInstance" parent="BodyObjects/PlayerMotion/PlayerKinematicBody/PlayerBodyCapsule/CapsuleShapePreview"]
-transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, 0, 0, 0 )
-mesh = SubResource( 47 )
-material/0 = SubResource( 49 )
-
-[node name="FreefallWarning" type="MeshInstance" parent="BodyObjects/PlayerMotion/PlayerKinematicBody/PlayerBodyCapsule/CapsuleShapePreview"]
-transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, 0, 0, 0.0653608 )
-visible = false
-mesh = SubResource( 47 )
-material/0 = SubResource( 50 )
-
-[node name="PlayerEnlargedKinematicBody" type="KinematicBody" parent="BodyObjects/PlayerMotion"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, -6.412 )
-collision_mask = 38
-input_ray_pickable = false
-
-[node name="PlayerBodyCapsule" type="CollisionShape" parent="BodyObjects/PlayerMotion/PlayerEnlargedKinematicBody"]
-transform = Transform( 1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0 )
-shape = SubResource( 51 )
-
-[node name="PlayerHeadKinematicBody" type="KinematicBody" parent="BodyObjects/PlayerMotion"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.55385, -6.3318 )
-collision_mask = 38
-input_ray_pickable = false
-
-[node name="PlayerHeadCapsule" type="CollisionShape" parent="BodyObjects/PlayerMotion/PlayerHeadKinematicBody"]
-shape = SubResource( 52 )
-
-[node name="FloorOriginMarker" type="MeshInstance" parent="BodyObjects/PlayerMotion"]
-transform = Transform( -1.62921e-07, 0, 1, 0, 1, 0, -1, 0, -1.62921e-07, 1.78533, 0, -4.96781 )
-visible = false
-mesh = SubResource( 53 )
-material/0 = SubResource( 54 )
-
-[node name="MotionVectorPreview" type="Spatial" parent="BodyObjects/PlayerMotion"]
-transform = Transform( 1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, -0.0598552, 2.25315, -6.31372 )
-
-[node name="Scale" type="Spatial" parent="BodyObjects/PlayerMotion/MotionVectorPreview"]
-
-[node name="Mesh" type="MeshInstance" parent="BodyObjects/PlayerMotion/MotionVectorPreview/Scale"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.5 )
-mesh = SubResource( 56 )
-material/0 = null
-
-[node name="LaserOrient" type="Spatial" parent="BodyObjects"]
-transform = Transform( 1, -4.60809e-07, 4.60809e-07, 0, 0.707107, 0.707107, -6.51682e-07, -0.707107, 0.707107, 0.199998, 3.5, -6.852 )
-
-[node name="Length" type="Spatial" parent="BodyObjects/LaserOrient"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 50, 0, 0, 0 )
-
-[node name="Laser" type="MeshInstance" parent="BodyObjects/LaserOrient/Length"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.43051e-06, -0.5 )
-cast_shadow = 0
-mesh = SubResource( 57 )
-material/0 = SubResource( 58 )
-
-[node name="RayCast" type="RayCast" parent="BodyObjects/LaserOrient"]
-enabled = true
-cast_to = Vector3( 0, 0, -50 )
-collision_mask = 248
-
-[node name="LaserSpot" type="MeshInstance" parent="BodyObjects/LaserOrient"]
-transform = Transform( 1, 0, 0, 0, 1, -8.9407e-08, 0, 8.9407e-08, 1, 0, -4.76837e-07, -5.476 )
-mesh = SubResource( 60 )
-material/0 = null
-
-[node name="LaserSpike" type="MeshInstance" parent="BodyObjects/LaserOrient/LaserSpot"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0 )
-mesh = SubResource( 62 )
-material/0 = null
-
-[node name="NotificationTorus" type="CSGTorus" parent="BodyObjects/LaserOrient"]
-transform = Transform( 1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, -0.3 )
-visible = false
-inner_radius = 0.002
-outer_radius = 0.01
-sides = 16
-material = SubResource( 63 )
-
-[node name="NotificationCylinder" type="CSGCylinder" parent="BodyObjects/LaserOrient"]
-transform = Transform( 1, 0, 0, 0, -1.31134e-06, -1, 0, 30, -4.37114e-08, 0, 0, -0.4 )
-radius = 0.009
-height = 0.02
-material = SubResource( 64 )
-
-[node name="LaserSelectLine" type="Spatial" parent="BodyObjects"]
-transform = Transform( 1, -4.60809e-07, 4.60809e-07, 0, 0.707107, 0.707107, -6.51682e-07, -0.707107, 0.707107, 0.200002, 3.5, 0.11135 )
-
-[node name="Scale" type="Spatial" parent="BodyObjects/LaserSelectLine"]
-
-[node name="Mesh" type="MeshInstance" parent="BodyObjects/LaserSelectLine/Scale"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.5 )
-mesh = SubResource( 65 )
-material/0 = null
-
-[node name="GripLaserSpot" type="MeshInstance" parent="BodyObjects"]
-transform = Transform( 1, -4.60809e-07, 4.60809e-07, 0, 0.707107, 0.707107, -6.51682e-07, -0.707107, 0.707107, 0.615074, -0.372118, -10.7241 )
-visible = false
-mesh = SubResource( 60 )
-material/0 = SubResource( 66 )
-
-[node name="LaserSpike" type="MeshInstance" parent="BodyObjects/GripLaserSpot"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0 )
-visible = false
-mesh = SubResource( 62 )
-material/0 = null
-
-[node name="FloorLaserSpot" type="Spatial" parent="BodyObjects"]
-transform = Transform( 1, 0, 2.84217e-14, 0, 1, 0, -8.52651e-14, 0, 1, 0, 0, -9.53674e-07 )
-
-[node name="RayCast" type="RayCast" parent="BodyObjects/FloorLaserSpot"]
-cast_to = Vector3( 0, -50, 0 )
-collision_mask = 16
-
-[node name="FloorSpot" type="MeshInstance" parent="BodyObjects/FloorLaserSpot"]
-transform = Transform( 1, -4.60809e-07, 4.60809e-07, 0, 0.707107, 0.707107, -6.51682e-07, -0.707107, 0.707107, 0.615074, -0.372118, -10.7241 )
-visible = false
-mesh = SubResource( 68 )
-material/0 = null
-
-[node name="IntermediatePointView" type="Spatial" parent="BodyObjects"]
-visible = false
-
-[node name="IntermediatePointPlane" type="StaticBody" parent="BodyObjects/IntermediatePointView"]
-transform = Transform( 1, 0, 0, 0, 0.598017, 0.801484, 0, -0.801484, 0.598017, 0, 0, 0 )
-collision_layer = 4096
-collision_mask = 0
-
-[node name="CollisionShape" type="CollisionShape" parent="BodyObjects/IntermediatePointView/IntermediatePointPlane"]
-transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, 0, 0, 0 )
-shape = SubResource( 69 )
-disabled = true
-
-[node name="MeshInstance" type="MeshInstance" parent="BodyObjects/IntermediatePointView/IntermediatePointPlane/CollisionShape"]
-layers = 2
-cast_shadow = 0
-mesh = SubResource( 70 )
-material/0 = SubResource( 71 )
-
-[node name="IntermediatePointPlaneStartingMarker" type="MeshInstance" parent="BodyObjects/IntermediatePointView"]
-transform = Transform( 1, 0, 0, 0, 0.598017, 0.801484, 0, -0.801484, 0.598017, 0, 0, 0 )
-mesh = SubResource( 60 )
-material/0 = SubResource( 66 )
-
-[node name="SketchSystem" type="Spatial" parent="."]
-script = ExtResource( 10 )
-
-[node name="XCdrawings" type="Spatial" parent="SketchSystem"]
-
-[node name="XCtubes" type="Spatial" parent="SketchSystem"]
-
-[node name="PlanViewSystem" type="Spatial" parent="."]
-transform = Transform( 1, 0, 6.51682e-07, 0, 1, 0, -6.51682e-07, 0, 1, -2.08929e-06, 2, -6.412 )
-visible = false
-script = ExtResource( 24 )
-
-[node name="PlanView" type="StaticBody" parent="PlanViewSystem"]
-transform = Transform( 1, 0, 0, 0, 0.819152, 0.573577, 0, -0.573577, 0.819152, -3.5665, 0.449535, -13.3568 )
-collision_layer = 8
-
-[node name="Viewport" type="Control" parent="PlanViewSystem/PlanView"]
-margin_left = 600.0
-margin_right = 640.0
-margin_bottom = 40.0
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="PlanGUI" type="Control" parent="PlanViewSystem/PlanView/Viewport"]
-margin_left = 4.27478
-margin_right = 804.275
-margin_bottom = 800.0
-theme = ExtResource( 47 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="Camera" type="Camera" parent="PlanViewSystem/PlanView/Viewport/PlanGUI"]
-transform = Transform( 1, 0, 0, 0, -1.62921e-07, 1, 0, -1, -1.62921e-07, -1, 50, -12 )
-keep_aspect = 0
-cull_mask = 2148421887
-environment = ExtResource( 20 )
-projection = 1
-fov = 87.5304
-size = 70.0
-far = 200.0
-
-[node name="toRealPlanCamera" type="RemoteTransform" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/Camera"]
-transform = Transform( 1, 0, 0, 0, -1.62921e-07, -1, 0, 1, -1.62921e-07, 0, 0, 0 )
-remote_path = NodePath("../../../../../RealPlanCamera")
-update_scale = false
-
-[node name="PlanViewControls" type="Panel" parent="PlanViewSystem/PlanView/Viewport/PlanGUI"]
-margin_top = 700.0
-margin_right = 800.0
-margin_bottom = 800.0
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="ViewSlide" type="Control" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
-material = SubResource( 75 )
-margin_left = 3.0
-margin_top = 4.0
-margin_right = 109.0
-margin_bottom = 98.0
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="LabelViewSlide" type="Label" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ViewSlide"]
-margin_left = -4.9671
-margin_top = 59.3559
-margin_right = 64.0329
-margin_bottom = 81.3559
-text = "ViewSlide"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="ButtonSlideDown" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ViewSlide"]
-margin_left = 39.5289
-margin_top = 32.0375
-margin_right = 62.5289
-margin_bottom = 58.0375
-text = "V"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="ButtonSlideLeft" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ViewSlide"]
-margin_left = 6.13216
-margin_top = 32.7526
-margin_right = 36.1322
-margin_bottom = 58.7526
-text = "<<"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="ButtonSlideRight" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ViewSlide"]
-margin_left = 64.3129
-margin_top = 30.8554
-margin_right = 94.3129
-margin_bottom = 56.8554
-text = ">>"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="ButtonSlideUp" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ViewSlide"]
-margin_left = 42.0594
-margin_top = 2.11311
-margin_right = 65.0594
-margin_bottom = 28.1131
-text = "^"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="ButtonZoomDown" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ViewSlide"]
-margin_left = 109.0
-margin_top = 55.0
-margin_right = 128.0
-margin_bottom = 77.0
-text = "v"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="ButtonZoomUp" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ViewSlide"]
-margin_left = 134.471
-margin_top = 55.7491
-margin_right = 153.471
-margin_bottom = 77.7491
-text = "^"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="ZoomView" type="Control" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
-material = SubResource( 75 )
-margin_left = 94.0
-margin_top = 5.0
-margin_right = 186.0
-margin_bottom = 54.0
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="Label" type="Label" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ZoomView"]
-margin_left = 23.0486
-margin_top = -0.76215
-margin_right = 69.0486
-margin_bottom = 21.2379
-text = "Zoom"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="ButtonZoomOut" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ZoomView"]
-margin_left = 5.0
-margin_top = 20.0
-margin_right = 33.0
-margin_bottom = 46.0
-text = "<<"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="ButtonCentre" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ZoomView"]
-margin_left = 34.0
-margin_top = 20.0
-margin_right = 57.0
-margin_bottom = 46.0
-text = "O"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="ButtonZoomIn" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ZoomView"]
-margin_left = 58.0
-margin_top = 20.0
-margin_right = 86.0
-margin_bottom = 46.0
-text = ">>"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="FloorTrim" type="Control" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
-material = SubResource( 75 )
-margin_left = 179.691
-margin_top = 6.1189
-margin_right = 295.691
-margin_bottom = 101.119
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="LabelFloor" type="Label" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorTrim"]
-margin_left = 5.40929
-margin_top = 6.44543
-margin_right = 42.4093
-margin_bottom = 28.4454
-text = "Floor:"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="LabelTrim" type="Label" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorTrim"]
-margin_left = 9.64716
-margin_top = 70.0133
-margin_right = 46.6472
-margin_bottom = 92.0133
-text = "Trim"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="ButtonTrimDownDown" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorTrim"]
-margin_left = 47.1001
-margin_top = 73.3364
-margin_right = 67.1001
-margin_bottom = 95.3364
-text = "V"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="ButtonTrimDownUp" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorTrim"]
-margin_left = 47.082
-margin_top = 49.8728
-margin_right = 67.082
-margin_bottom = 71.8728
-text = "^"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="ButtonTrimLeftRight" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorTrim"]
-margin_left = 26.4635
-margin_top = 38.7818
-margin_right = 46.4635
-margin_bottom = 60.7818
-text = ">"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="ButtonTrimLeftLeft" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorTrim"]
-margin_left = 5.5274
-margin_top = 38.8909
-margin_right = 25.5274
-margin_bottom = 60.8909
-text = "<"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="ButtonTrimRightRight" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorTrim"]
-margin_left = 91.2725
-margin_top = 37.2273
-margin_right = 111.272
-margin_bottom = 59.2273
-text = ">"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="ButtonTrimRightLeft" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorTrim"]
-margin_left = 69.4454
-margin_top = 37.2273
-margin_right = 89.4454
-margin_bottom = 59.2273
-text = "<"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="ButtonTrimUpUp" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorTrim"]
-margin_left = 48.2272
-margin_top = 1.99091
-margin_right = 67.2272
-margin_bottom = 23.9909
-text = "^"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="ButtonTrimUpDown" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorTrim"]
-margin_left = 46.8909
-margin_top = 26.0452
-margin_right = 66.8909
-margin_bottom = 48.0452
-text = "V"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="FloorMove" type="Control" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
-material = SubResource( 75 )
-margin_left = 304.0
-margin_top = 7.0
-margin_right = 469.0
-margin_bottom = 97.0
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="LabelGrow" type="Label" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorMove"]
-margin_left = -11.8988
-margin_top = 1.48016
-margin_right = 33.1012
-margin_bottom = 23.4802
-text = "Grow:"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="LabelMove" type="Label" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorMove"]
-margin_left = -37.6165
-margin_top = 67.2705
-margin_right = 6.38354
-margin_bottom = 89.2705
-text = "Move:"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="ButtonShrink" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorMove"]
-margin_left = 35.5136
-margin_top = 2.92346
-margin_right = 63.5136
-margin_bottom = 24.9235
-text = "<<"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="ButtonGrow" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorMove"]
-margin_left = 66.8947
-margin_top = 1.50006
-margin_right = 94.8947
-margin_bottom = 23.5001
-text = ">>"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="ButtonMoveLeft" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorMove"]
-margin_left = 9.76519
-margin_top = 66.437
-margin_right = 29.7652
-margin_bottom = 88.437
-text = "<"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="ButtonMoveRight" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorMove"]
-margin_left = 56.0
-margin_top = 65.0
-margin_right = 76.0
-margin_bottom = 87.0
-text = ">"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="ButtonMoveUp" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorMove"]
-margin_left = 33.3947
-margin_top = 40.1316
-margin_right = 52.3947
-margin_bottom = 62.1316
-text = "^"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="ButtonMoveDown" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorMove"]
-margin_left = 35.2368
-margin_top = 66.3048
-margin_right = 55.2368
-margin_bottom = 88.3048
-text = "V"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="ButtonMoveRise" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorMove"]
-margin_left = 85.2227
-margin_top = 41.3972
-margin_right = 105.223
-margin_bottom = 63.3972
-text = "^"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="ButtonMoveFall" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorMove"]
-margin_left = 84.1813
-margin_top = 65.9201
-margin_right = 104.181
-margin_bottom = 87.9201
-text = "V"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="FloorStyle" type="OptionButton" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorMove"]
-margin_left = 221.973
-margin_top = -5.11896
-margin_right = 294.973
-margin_bottom = 18.881
-disabled = true
-text = "normal"
-items = [ "normal", null, false, 0, null, "photo", null, false, 1, null, "ghostly", null, false, 2, null, "hide", null, false, 3, null, "delete", null, false, 4, null ]
-selected = 0
-
-[node name="LabelPaper" type="Label" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/FloorMove"]
-margin_left = 172.0
-margin_top = -5.0
-margin_right = 220.0
-margin_bottom = 17.0
-text = "Paper:"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="Scalebar" type="Control" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
-margin_left = 71.0
-margin_top = -36.0
-margin_right = 311.0
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="scalerect" type="ColorRect" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/Scalebar"]
-margin_left = 1.68372
-margin_top = 17.3981
-margin_right = 229.684
-margin_bottom = 32.3981
-color = Color( 0.0745098, 0.564706, 0.858824, 1 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="scalelabel" type="Label" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/Scalebar"]
-margin_left = -72.3987
-margin_top = 15.1532
-margin_right = -2.39874
-margin_bottom = 37.1532
-custom_colors/font_color = Color( 0, 0, 0, 1 )
-custom_colors/font_outline_modulate = Color( 0.984314, 0.933333, 0.933333, 1 )
-custom_colors/font_color_shadow = Color( 0.937255, 0.862745, 0.862745, 1 )
-text = "Scale: 1m"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="ButtonClosePlanView" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
-margin_right = 40.0
-margin_bottom = 35.0
-hint_tooltip = "Close Plan View
-"
-text = "X"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="CheckBoxPlanTubesVisible" type="CheckBox" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
-anchor_right = 0.015
-anchor_bottom = 0.24
-margin_left = 470.838
-margin_top = 49.6852
-margin_right = 522.838
-margin_bottom = 49.6852
-rect_pivot_offset = Vector2( 100.162, 19.0063 )
-text = "plan tubes"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="CheckBoxRealTubesVisible" type="CheckBox" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
-anchor_right = 0.015
-anchor_bottom = 0.24
-margin_left = 573.981
-margin_top = 46.8828
-margin_right = 653.981
-margin_bottom = 46.8828
-rect_pivot_offset = Vector2( 100.162, 19.0063 )
-pressed = true
-text = "real tubes"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="CheckBoxCentrelinesVisible" type="CheckBox" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
-anchor_right = 0.015
-anchor_bottom = 0.24
-margin_left = 470.796
-margin_top = 27.8946
-margin_right = 558.796
-margin_bottom = 27.8946
-pressed = true
-text = "centrelines"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="ImportPhotoMode" type="CheckBox" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
-anchor_right = 0.015
-anchor_bottom = 0.24
-margin_left = 471.918
-margin_top = 68.8644
-margin_right = 559.918
-margin_bottom = 68.8644
-pressed = true
-text = "import photo mode"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="ColorRectURL" type="ColorRect" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
-visible = false
-margin_left = 473.0
-margin_top = 30.0
-margin_right = 785.0
-margin_bottom = 94.0
-color = Color( 0.176471, 0.227451, 0.396078, 1 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="LabelXCresource" type="Label" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ColorRectURL"]
-margin_left = -1.0
-margin_top = -1.0
-margin_right = 304.0
-margin_bottom = 58.0
-autowrap = true
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="FileviewTree" type="Tree" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
-visible = false
-margin_left = 109.0
-margin_top = -244.0
-margin_right = 699.0
-margin_bottom = 93.0
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="CheckBoxFileTree" type="CheckBox" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
-margin_left = 18.0794
-margin_top = 77.7401
-margin_right = 109.079
-margin_bottom = 101.74
-text = "Filetree"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="ViewportReal" type="Viewport" parent="PlanViewSystem/PlanView"]
-size = Vector2( 800, 800 )
-render_target_v_flip = true
-
-[node name="ProjectionScreen" type="MeshInstance" parent="PlanViewSystem/PlanView"]
-transform = Transform( 1, 0, 0, 0, 1, -2.98023e-08, 0, 2.98023e-08, 1, 0, 0, 0 )
-mesh = SubResource( 76 )
-material/0 = SubResource( 77 )
-
-[node name="ImageFrame" type="MeshInstance" parent="PlanViewSystem/PlanView/ProjectionScreen"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.055 )
-mesh = SubResource( 79 )
-material/0 = null
-
-[node name="CollisionShape" type="CollisionShape" parent="PlanViewSystem/PlanView"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.01 )
-shape = SubResource( 80 )
-disabled = true
-
-[node name="RealPlanCamera" type="Spatial" parent="PlanViewSystem"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.999994, 48, -5.588 )
-__meta__ = {
-"_editor_description_": ""
-}
-
-[node name="RealCameraBox" type="MeshInstance" parent="PlanViewSystem/RealPlanCamera"]
-transform = Transform( 70, 0, 0, 0, 1, 0, 0, 0, 70, 0, 0.6, 0 )
-cast_shadow = 0
-mesh = SubResource( 82 )
-material/0 = null
-
-[node name="RealCameraLens" type="MeshInstance" parent="PlanViewSystem/RealPlanCamera/RealCameraBox"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.132259, 0 )
-cast_shadow = 0
-mesh = SubResource( 84 )
-material/0 = null
-
-[node name="LaserScope" type="MeshInstance" parent="PlanViewSystem/RealPlanCamera"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 0 )
-cast_shadow = 0
-mesh = SubResource( 86 )
-material/0 = null
-
-[node name="LaserOrient" type="Spatial" parent="PlanViewSystem/RealPlanCamera/LaserScope"]
-transform = Transform( 1, 0, 0, 0, -1.62921e-07, 1, 0, -1, -1.62921e-07, 0, 0, 0 )
-
-[node name="Length" type="Spatial" parent="PlanViewSystem/RealPlanCamera/LaserScope/LaserOrient"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 60, 0, 0, 0 )
-
-[node name="LaserVertical" type="MeshInstance" parent="PlanViewSystem/RealPlanCamera/LaserScope/LaserOrient/Length"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.5 )
-mesh = SubResource( 88 )
-material/0 = null
-
-[node name="RayCast" type="RayCast" parent="PlanViewSystem/RealPlanCamera/LaserScope/LaserOrient"]
-cast_to = Vector3( 0, 0, -150 )
-collision_mask = 312
-
-[node name="LaserSpot" type="MeshInstance" parent="PlanViewSystem/RealPlanCamera/LaserScope/LaserOrient"]
-transform = Transform( 1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, 0.478879, -49.3258, -0.0697994 )
-mesh = SubResource( 89 )
-material/0 = null
-
-[node name="LaserSpike" type="MeshInstance" parent="PlanViewSystem/RealPlanCamera/LaserScope/LaserOrient/LaserSpot"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0 )
-mesh = SubResource( 90 )
-material/0 = null
 
 [node name="MaterialSystem" type="Spatial" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 41.0922, 2.20853, 23.9465 )
@@ -3887,3 +3946,50 @@ visible = false
 cast_shadow = 0
 mesh = SubResource( 245 )
 material/0 = ExtResource( 75 )
+
+[node name="PhoneOverlay" type="Control" parent="."]
+margin_right = 40.0
+margin_bottom = 40.0
+script = ExtResource( 76 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ThumbLeft" type="Node2D" parent="PhoneOverlay"]
+position = Vector2( 90, 500 )
+
+[node name="TouchCircle" type="Polygon2D" parent="PhoneOverlay/ThumbLeft"]
+color = Color( 1, 1, 1, 0.145098 )
+
+[node name="ThumbCircle" type="Polygon2D" parent="PhoneOverlay/ThumbLeft"]
+visible = false
+scale = Vector2( 0.2, 0.2 )
+color = Color( 0.231373, 0.364706, 0.890196, 0.862745 )
+
+[node name="ThumbRight" type="Node2D" parent="PhoneOverlay"]
+position = Vector2( 920, 500 )
+
+[node name="TouchCircle" type="Polygon2D" parent="PhoneOverlay/ThumbRight"]
+color = Color( 1, 1, 1, 0.145098 )
+
+[node name="ThumbCircle" type="Polygon2D" parent="PhoneOverlay/ThumbRight"]
+visible = false
+scale = Vector2( 0.2, 0.2 )
+color = Color( 0.231373, 0.364706, 0.890196, 0.862745 )
+
+[node name="BackgroundCapture" type="Area2D" parent="PhoneOverlay"]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="PhoneOverlay/BackgroundCapture"]
+visible = false
+shape = SubResource( 250 )
+disabled = true
+
+[node name="MenuButton" type="Button" parent="PhoneOverlay"]
+margin_left = 231.0
+margin_top = 564.0
+margin_right = 291.0
+margin_bottom = 584.0
+text = "Menu"
+__meta__ = {
+"_edit_use_anchors_": false
+}

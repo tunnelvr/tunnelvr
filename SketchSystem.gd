@@ -203,6 +203,7 @@ func caveworldreceivechunkingfailed(msg):
 remote func actsketchchangeL(xcdatalist):
 	var playerMe = get_node("/root/Spatial").playerMe
 	var fromremotecall = ("networkIDsource" in xcdatalist[0]) and xcdatalist[0]["networkIDsource"] != playerMe.networkID
+	var planviewtype = false
 	if "caveworldchunk" in xcdatalist[0]:
 		if xcdatalist[0]["caveworldchunk"] == 0:
 			var PlayerDirections = get_node("/root/Spatial/BodyObjects/PlayerDirections")
@@ -230,6 +231,9 @@ remote func actsketchchangeL(xcdatalist):
 		print("Loading caveworldchunk ", caveworldchunkI, " of ",  xcdatalist[0]["caveworldchunkLast"], " size ", len(xcdatalist))
 		get_node("/root/Spatial/BodyObjects/LaserOrient/NotificationCylinder").scale.y = (xcdatalist[0]["caveworldchunkLast"] - caveworldchunkI) + 1
 
+	elif len(xcdatalist) == 1 and "planview" in xcdatalist[0]:
+		planviewtype = true
+		
 	elif caveworldchunkI != -1:
 		if xcdatalist[0]["networkIDsource"] == caveworldchunking_networkIDsource:
 			return caveworldreceivechunkingfailed("non world chunk xcdata received from chunking source")
@@ -461,7 +465,7 @@ remote func actsketchchangeL(xcdatalist):
 		removeXCtube(xctube)
 		xctube.queue_free() 
 
-	if caveworldchunkI != -1:
+	if caveworldchunkI != -1 and not planviewtype:
 		for xcdrawing in xcdrawingstoupdate.values():
 			if xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 				if xcdrawingstoupdatevisiblecodes.has(xcdrawing.get_name()):

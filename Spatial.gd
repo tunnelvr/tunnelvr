@@ -37,8 +37,8 @@ export var udpserverdiscoveryport: int = 4547
 export var potreeportnumber: int = 8000
 
 export var enablevr: = true
+export var forcephoneoverlay: = false
 export var usewebsockets: = false
-export var planviewonly: = false
 
 var ovr_init_config = null
 var ovr_performance = null
@@ -77,6 +77,7 @@ func _ready():
 	print("Initializing VR" if enablevr else "VR disabled");
 	playerMe.playeroperatingsystem = OS.get_name()
 
+	$PhoneOverlay.visible = false
 	if OS.has_feature("Server"):
 		print("On server mode, autostart server connection")
 		$GuiSystem/GUIPanel3D.call_deferred("networkstartasserver", false)
@@ -89,7 +90,9 @@ func _ready():
 		playerMe.playerplatform = "HTML5"
 		print("warning: untested HTML5 mode")
 		
-	elif checkloadinterface("OVRMobile"):  # ignores enablevr flag on quest platform
+	elif OS.has_feature("Quest"):
+		if not checkloadinterface("OVRMobile"):
+			print("Error: Quest device not able to find OVRMobile interface")
 		ovr_init_config = load("res://addons/godot_ovrmobile/OvrInitConfig.gdns").new()
 		ovr_performance = load("res://addons/godot_ovrmobile/OvrPerformance.gdns").new()
 		ovr_hand_tracking = load("res://addons/godot_ovrmobile/OvrHandTracking.gdns").new();
@@ -105,6 +108,11 @@ func _ready():
 		else:
 			Tglobal.arvrinterface = null
 		playerMe.playerplatform = "Quest"
+
+	elif OS.has_feature("Android"):
+		playerMe.playerplatform = "AndroidPhone"
+		playerMe.get_node("HeadCam/HeadtorchLight").shadow_enabled = false
+		$PhoneOverlay.setupphoneoverlaysystem(true)
 
 	elif not forceopenVR and enablevr and checkloadinterface("Oculus"):
 		print("  Found Oculus Interface.");
@@ -145,7 +153,7 @@ func _ready():
 			Tglobal.arvrinterface = null
 			Tglobal.arvrinterfacename = "none"
 			playerMe.playerplatform = "PC"
-				
+					
 	elif enablevr and false and checkloadinterface("Native mobile"):
 		print("found nativemobile, initializing")
 		if Tglobal.arvrinterface.initialize():
@@ -158,8 +166,13 @@ func _ready():
 
 	else:
 		playerMe.playerplatform = "PC"
-	
-	$PlanViewSystem.transferintorealviewport((not enablevr) and planviewonly)
+		if forcephoneoverlay:
+			print("Running phone overlay on PC")
+			$PhoneOverlay.setupphoneoverlaysystem(false)
+
+	$GuiSystem/GUIPanel3D.toplevelcalled_ready()
+	$PlanViewSystem.transferintorealviewport()
+
 	playerMe.initplayerappearance_me()
 	$SketchSystem.pointersystem = playerMe.get_node("pointersystem")
 	
@@ -175,7 +188,6 @@ func _ready():
 		$BodyObjects/PlayerDirections.initcontrollersignalconnections()
 			
 	else:
-		playerMe.initkeyboardcontroltrackingnow()
 		print("*** VR not operating")
 	Tglobal.primarycamera_instanceid = $Players/PlayerMe/HeadCam.get_instance_id() 
 		

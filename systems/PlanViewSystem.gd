@@ -4,6 +4,8 @@ var planviewactive = false
 var drawingtype = DRAWING_TYPE.DT_PLANVIEW
 onready var ImageSystem = get_node("/root/Spatial/ImageSystem")
 onready var sketchsystem = get_node("/root/Spatial/SketchSystem")
+onready var selfSpatial = get_node("/root/Spatial")
+
 var activetargetfloor = null
 var activetargetfloortransformpos = null
 var activetargetfloorimgtrim = null
@@ -22,6 +24,7 @@ var clearcachebuttontex = null
 var f3dbuttontex = null
 
 var filetreeresourcename = null
+var materialsettobackfacecull = false
 
 func getactivetargetfloorViz(newactivetargetfloorname: String):
 	var xcviz = { "prevxcvizstates":{ }, "xcvizstates":{ } }
@@ -235,21 +238,16 @@ func openlinklistpage(item, llinks):
 	for lk in llinks:
 		addsubitem(item, lk.replace("%20", " "), dirurl + lk)
 
-func transferintorealviewport(setascurrentcamera):
-	if setascurrentcamera:
-		$PlanView/Viewport/PlanGUI/Camera.current = true
-		$PlanView/Viewport/PlanGUI.remove_child(planviewcontrols)
-		get_node("/root/Spatial").add_child(planviewcontrols)
-		planviewcontrols.rect_position.y = 0
-
-	elif $PlanView.has_node("ViewportReal"):
+func transferintorealviewport():
+	if $PlanView.has_node("ViewportReal") and Tglobal.phoneoverlay == null:
 		var fplangui = $PlanView/Viewport/PlanGUI
 		$PlanView/Viewport.remove_child(fplangui)
 		$PlanView/ViewportReal.add_child(fplangui)
 		$PlanView/Viewport.set_name("ViewportFake")
 		$PlanView/ViewportReal.set_name("Viewport")
 		$PlanView/ProjectionScreen.get_surface_material(0).albedo_texture = $PlanView/Viewport.get_texture()
-
+	else:
+		$PlanView/Viewport.visible = false
 
 func checkboxplantubesvisible_pressed():
 	var pvchange = planviewtodict()
@@ -260,6 +258,12 @@ func checkboxrealtubesvisible_pressed():
 	var pvchange = planviewtodict()
 	pvchange["realtubesvisible"] = planviewcontrols.get_node("CheckBoxRealTubesVisible").pressed
 	sketchsystem.actsketchchange([{"planview":pvchange}]) 
+
+func checkboxbackfacecull_pressed():
+	var pvchange = planviewtodict()
+	pvchange["backfacecull"] = planviewcontrols.get_node("CheckBoxBackfaceCull").pressed
+	sketchsystem.actsketchchange([{"planview":pvchange}]) 
+	
 
 func checkcentrelinesvisible_pressed():
 	var pvchange = planviewtodict()
@@ -277,14 +281,18 @@ func _ready():
 
 	$RealPlanCamera.set_as_toplevel(true)
 	planviewcontrols.get_node("ZoomView/ButtonCentre").connect("pressed", self, "buttoncentre_pressed")
+	planviewcontrols.get_node("ViewSlide/ButtonElev").connect("toggled", self, "buttonelev_toggled")
 	planviewcontrols.get_node("ButtonClosePlanView").connect("pressed", self, "buttonclose_pressed")
 	planviewcontrols.get_node("CheckBoxPlanTubesVisible").connect("pressed", self, "checkboxplantubesvisible_pressed")
 	planviewcontrols.get_node("CheckBoxRealTubesVisible").connect("pressed", self, "checkboxrealtubesvisible_pressed")
 	planviewcontrols.get_node("CheckBoxCentrelinesVisible").connect("pressed", self, "checkcentrelinesvisible_pressed")
+	planviewcontrols.get_node("CheckBoxBackfaceCull").connect("pressed", self, "checkboxbackfacecull_pressed")
 	planviewcontrols.get_node("FloorMove/FloorStyle").connect("item_selected", self, "floorstyle_itemselected")
 	planviewcontrols.get_node("CheckBoxFileTree").connect("toggled", self, "checkboxfiletree_toggled")
 	call_deferred("clearsetupfileviewtree", true, "http://cave-registry.org.uk/svn/NorthernEngland/")
 	set_process(visible)
+	assert (planviewcontrols.get_node("CheckBoxPlanTubesVisible").pressed == (($PlanView/Viewport/PlanGUI/Camera.cull_mask & CollisionLayer.VL_xcshells) != 0))
+
 		
 func clearsetupfileviewtree(binit, filetreerootpath):
 	if binit:
@@ -314,21 +322,46 @@ func planviewtodict():
 			 "centrelinesvisible":(($PlanView/Viewport/PlanGUI/Camera.cull_mask & CollisionLayer.VL_centrelinestationsplanview) != 0),
 			 "transformpos":$PlanView.global_transform,
 			 "plancamerapos":$PlanView/Viewport/PlanGUI/Camera.translation,
+			 "plancamerarotation":$PlanView/Viewport/PlanGUI/Camera.rotation_degrees,
 			 "plancamerasize":$PlanView/Viewport/PlanGUI/Camera.size,
-			
-			# to abolish
-			 "tubesvisible":(($PlanView/Viewport/PlanGUI/Camera.cull_mask & CollisionLayer.VL_xcshells) != 0),
-
+			 "backfacecull":materialsettobackfacecull,
 			}
 
+func setcameracullmasks(bcentrelinesvisible, bplantubesvisible):
+	var plancameracullmask
+	var plancameraraycollisionmask
+	var playermeheadcam = get_node("/root/Spatial").playerMe.get_node("HeadCam")
+	if bcentrelinesvisible:
+		playermeheadcam.cull_mask = CollisionLayer.VLCM_PlayerCamera
+		get_node("/root/Spatial/BodyObjects/LaserOrient/RayCast").collision_mask = CollisionLayer.CLV_MainRayAll
+		plancameracullmask = CollisionLayer.VLCM_PlanViewCamera
+		plancameraraycollisionmask = CollisionLayer.CLV_PlanRayAll
+		prevcamerasizeforupdateplanviewentitysizes = -1
+		var labelgenerator = get_node("/root/Spatial/LabelGenerator")
+		if not labelgenerator.is_processing():
+			labelgenerator.restartlabelmakingprocess(playermeheadcam.global_transform.origin)
+	else:
+		playermeheadcam.cull_mask = CollisionLayer.VLCM_PlayerCameraNoCentreline
+		get_node("/root/Spatial/BodyObjects/LaserOrient/RayCast").collision_mask = CollisionLayer.CLV_MainRayAllNoCentreline
+		plancameraraycollisionmask = CollisionLayer.CLV_PlanRayNoCentreline
+		plancameracullmask = CollisionLayer.VLCM_PlanViewCameraNoCentreline
+	
+	if not bplantubesvisible:
+		plancameracullmask &= CollisionLayer.VLCM_PlanViewCameraNoTube
+		plancameraraycollisionmask &= CollisionLayer.CLV_PlanRayNoTube
+	get_node("PlanView/Viewport/PlanGUI/Camera").cull_mask = plancameracullmask
+	get_node("RealPlanCamera/LaserScope/LaserOrient/RayCast").collision_mask = plancameraraycollisionmask
 
 func actplanviewdict(pvchange):
 	if "plancamerapos" in pvchange:
 		$PlanView/Viewport/PlanGUI/Camera.translation = pvchange["plancamerapos"]
+	if "plancamerarotation" in pvchange:
+		$PlanView/Viewport/PlanGUI/Camera.rotation_degrees = pvchange["plancamerarotation"]
 	if "plancamerasize" in pvchange:
 		$PlanView/Viewport/PlanGUI/Camera.size = pvchange["plancamerasize"]
 		$RealPlanCamera/RealCameraBox.scale = Vector3($PlanView/Viewport/PlanGUI/Camera.size, 1.0, $PlanView/Viewport/PlanGUI/Camera.size)
-		var pixmetres = $PlanView/Viewport.size.x/$PlanView/Viewport/PlanGUI/Camera.size
+		var planscreensize = $PlanView/Viewport.size if Tglobal.phoneoverlay == null else get_node("/root").size
+		var pixmetres = planscreensize.x/$PlanView/Viewport/PlanGUI/Camera.size
 		var metres10 = 1
 		while pixmetres*metres10 < 30 and metres10 < 1000:
 			metres10 *= 10
@@ -342,16 +375,27 @@ func actplanviewdict(pvchange):
 	if visiblechange:
 		visible = pvchange["visible"]
 		if visible:
-			get_node("PlanView/CollisionShape").disabled = false
 			var playerMe = get_node("/root/Spatial").playerMe
 			get_node("/root/Spatial/LabelGenerator").restartlabelmakingprocess(playerMe.get_node("HeadCam").global_transform.origin)
 			get_node("/root/Spatial/WorldEnvironment/DirectionalLight").visible = true
+			if Tglobal.phoneoverlay != null:
+				$PlanView/Viewport/PlanGUI/Camera.current = true
+				$PlanView/Viewport.visible = true
+			else:
+				get_node("PlanView/CollisionShape").disabled = false
+
 		else:
 			$PlanView/CollisionShape.disabled = true
 			$PlanView/Viewport/PlanGUI/PlanViewControls/ColorRectURL.visible = false
 			get_node("/root/Spatial/WorldEnvironment/DirectionalLight").visible = not get_node("/root/Spatial/GuiSystem/GUIPanel3D/Viewport/GUI/Panel/ButtonHeadtorch").pressed
+			if Tglobal.phoneoverlay != null:
+				$PlanView/Viewport/PlanGUI/Camera.current = false
+				$PlanView/Viewport.visible = false
+
+			
 	var guipanel3d = get_node("/root/Spatial/GuiSystem/GUIPanel3D")
 	guipanel3d.get_node("Viewport/GUI/Panel/ButtonPlanView").pressed = visible
+
 
 	if "planviewactive" in pvchange and (visiblechange or planviewactive != pvchange["planviewactive"]):
 		planviewactive = pvchange["planviewactive"]
@@ -365,34 +409,20 @@ func actplanviewdict(pvchange):
 
 	if "centrelinesvisible" in pvchange:
 		planviewcontrols.get_node("CheckBoxCentrelinesVisible").pressed = pvchange["centrelinesvisible"]
-
-		if "tubesvisible" in pvchange and (not ("plantubesvisible" in pvchange)): # to abolish
-			pvchange["plantubesvisible"] = pvchange["tubesvisible"]
-
-		var plancameracullmask
-		var plancameraraycollisionmask
-		var playermeheadcam = get_node("/root/Spatial").playerMe.get_node("HeadCam")
-		if pvchange["centrelinesvisible"]:
-			playermeheadcam.cull_mask = CollisionLayer.VLCM_PlayerCamera
-			get_node("/root/Spatial/BodyObjects/LaserOrient/RayCast").collision_mask = CollisionLayer.CLV_MainRayAll
-			plancameracullmask = CollisionLayer.VLCM_PlanViewCamera
-			plancameraraycollisionmask = CollisionLayer.CLV_PlanRayAll
-			prevcamerasizeforupdateplanviewentitysizes = -1
-			var labelgenerator = get_node("/root/Spatial/LabelGenerator")
-			if not labelgenerator.is_processing():
-				labelgenerator.restartlabelmakingprocess(playermeheadcam.global_transform.origin)
-		else:
-			playermeheadcam.cull_mask = CollisionLayer.VLCM_PlayerCameraNoCentreline
-			get_node("/root/Spatial/BodyObjects/LaserOrient/RayCast").collision_mask = CollisionLayer.CLV_MainRayAllNoCentreline
-			plancameraraycollisionmask = CollisionLayer.CLV_PlanRayNoCentreline
-			plancameracullmask = CollisionLayer.VLCM_PlanViewCameraNoCentreline
-		
-		if not pvchange["plantubesvisible"]:
-			plancameracullmask &= CollisionLayer.VLCM_PlanViewCameraNoTube
-			plancameraraycollisionmask &= CollisionLayer.CLV_PlanRayNoTube
-		get_node("PlanView/Viewport/PlanGUI/Camera").cull_mask = plancameracullmask
-		get_node("RealPlanCamera/LaserScope/LaserOrient/RayCast").collision_mask = plancameraraycollisionmask
+		planviewcontrols.get_node("CheckBoxPlanTubesVisible").pressed = pvchange["plantubesvisible"]
+		setcameracullmasks(pvchange["centrelinesvisible"], pvchange["plantubesvisible"])
 			
+	if "backfacecull" in pvchange and materialsettobackfacecull != pvchange["backfacecull"]:
+		var materialsystem = get_node("/root/Spatial/MaterialSystem")
+		materialsettobackfacecull = pvchange["backfacecull"]
+		planviewcontrols.get_node("CheckBoxBackfaceCull").pressed = materialsettobackfacecull
+		for tmesh in materialsystem.get_node("tubematerials").get_children():
+			var tmat = tmesh.get_surface_material(0)
+			if tmat is SpatialMaterial:
+				tmat.params_cull_mode = SpatialMaterial.CULL_BACK if materialsettobackfacecull else SpatialMaterial.CULL_DISABLED
+			else:
+				print("cant' change backface cull on material ", tmesh.get_name())
+
 	if "realtubesvisible" in pvchange and Tglobal.hidecavewallstoseefloors != (not pvchange["realtubesvisible"]):
 		planviewcontrols.get_node("CheckBoxRealTubesVisible").pressed = pvchange["realtubesvisible"]
 		Tglobal.hidecavewallstoseefloors = (not pvchange["realtubesvisible"])
@@ -442,6 +472,9 @@ func updateplanviewentitysizes():
 	var Dt0 = OS.get_ticks_msec()
 	var nodesca = $PlanView/Viewport/PlanGUI/Camera.size/70.0*3.0
 	var labelsca = nodesca*2.0
+	for player in selfSpatial.get_node("Players").get_children():
+		player.get_node("headlocator/locatorline").scale = Vector3(nodesca*3.0, 1, nodesca*3.0)
+
 	get_node("/root/Spatial/LabelGenerator").currentplannodesca = nodesca
 	get_node("/root/Spatial/LabelGenerator").currentplanlabelsca = labelsca
 	var labelrects = [ ]
@@ -475,6 +508,7 @@ func updateplanviewentitysizes():
 	updateplanviewentitysizes_working = false
 	print("updateplanviewent ", OS.get_ticks_msec() - Dt0)
 
+
 var slowviewportframeratecountdown = 1
 var slowviewupdatecentrelinesizeupdaterate = 1.5
 var prevcamerasizeforupdateplanviewentitysizes = 0
@@ -502,7 +536,10 @@ func _process(delta):
 						 (-1 if viewslide.get_node("ButtonZoomDown").is_pressed() else 0) + (1 if viewslide.get_node("ButtonZoomUp").is_pressed() else 0))
 	if joypos != Vector3(0, 0, 0):
 		var plancamera = $PlanView/Viewport/PlanGUI/Camera
-		planviewpositiondict["plancamerapos"] = plancamera.translation + Vector3(joypos.x*plancamera.size/2, joypos.z*5, -joypos.y*plancamera.size/2)*delta
+		planviewpositiondict["plancamerapos"] = plancamera.translation + delta*(\
+					plancamera.transform.basis.x*joypos.x*plancamera.size/2 + \
+					plancamera.transform.basis.y*joypos.y*plancamera.size/2 + \
+					plancamera.transform.basis.z*joypos.z*5)
 	var zoomview = planviewcontrols.get_node("ZoomView")
 	var bzoomin = zoomview.get_node("ButtonZoomIn").is_pressed()
 	var bzoomout = zoomview.get_node("ButtonZoomOut").is_pressed()
@@ -571,6 +608,42 @@ func buttoncentre_pressed():
 	var planviewpositiondict = { "plancamerapos":Vector3(headcam.global_transform.origin.x, $PlanView/Viewport/PlanGUI/Camera.translation.y, headcam.global_transform.origin.z) }
 	sketchsystem.actsketchchange([{"planview":planviewpositiondict}])
 
+var cameraaltitudePlan = 0.0
+var elevrotpoint = null
+var elevcameradist = 0.0
+func buttonelev_toggled(pressed):
+	print("buttonelev_toggled ", pressed)
+	var headcam = get_node("/root/Spatial").playerMe.get_node("HeadCam")
+	var plancamera = get_node("PlanView/Viewport/PlanGUI/Camera")
+	var screensize = get_node("/root").size
+	var plancamerabasisy = Vector3(-sin(deg2rad(plancamera.rotation_degrees.y)), 0.0, -cos(deg2rad(plancamera.rotation_degrees.y)))
+	if pressed:
+		cameraaltitudePlan = $PlanView/Viewport/PlanGUI/Camera.translation.y
+		var elevrotpointy = elevrotpoint.y if elevrotpoint != null else headcam.global_transform.origin.y
+		elevrotpoint = plancamera.project_position(screensize/2, 0.0)
+		elevrotpoint.y = elevrotpointy
+		var pagebottompos = plancamera.project_position(Vector2(screensize.x/2, screensize.y), 0.0)
+		var vpagebottom = pagebottompos - plancamera.global_transform.origin
+		elevcameradist = -plancamera.global_transform.basis.y.dot(vpagebottom)
+		#print("bb should be same ", plancamera.global_transform.basis.y, plancamerabasisy)
+		var planviewpositiondict = { "plancamerapos":elevrotpoint - plancamerabasisy*elevcameradist, 
+									 "plancamerarotation":Vector3(0, plancamera.rotation_degrees.y, 0) }
+		sketchsystem.actsketchchange([{"planview":planviewpositiondict}])
+		plancamera.environment.fog_depth_begin = elevcameradist	
+		plancamera.environment.fog_depth_end = elevcameradist*2
+	else:
+		elevrotpoint = plancamera.translation + plancamerabasisy*elevcameradist
+		var pagetoppos = plancamera.project_position(Vector2(screensize.x/2, 0.0), 0.0)
+		elevcameradist = pagetoppos.y - elevrotpoint.y
+		var planviewpositiondict = { "plancamerapos":Vector3(elevrotpoint.x, pagetoppos.y, elevrotpoint.z), 
+									 "plancamerarotation":Vector3(-90, plancamera.rotation_degrees.y, 0) }
+		sketchsystem.actsketchchange([{"planview":planviewpositiondict}])
+		plancamera.environment.fog_depth_begin = elevcameradist*2	
+		plancamera.environment.fog_depth_end = elevcameradist*4
+	plancamera.environment.fog_color = plancamera.environment.background_color
+	plancamera.environment.fog_color = plancamera.environment.background_color
+	plancamera.far = plancamera.environment.fog_depth_end
+	
 func buttonclose_pressed():
 	sketchsystem.actsketchchange([ {"planview":{"visible":false, "planviewactive":false}}, 
 								   getactivetargetfloorViz("") 
@@ -625,7 +698,7 @@ func processplanviewpointing(raycastcollisionpoint, controller_trigger):
 			print("pg mouse down ", event.pressed)
 	else:
 		planviewguipanelreleasemouse()
-		var laspt = plancamera.project_position(viewport_point, 0)
+		var laspt = plancamera.project_position(viewport_point, 0.0)
 		planviewsystem.get_node("RealPlanCamera/LaserScope").global_transform.origin = laspt
 		planviewsystem.get_node("RealPlanCamera/LaserScope").visible = true
 		planviewsystem.get_node("RealPlanCamera/LaserScope/LaserOrient/RayCast").force_raycast_update()

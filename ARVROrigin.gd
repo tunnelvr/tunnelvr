@@ -34,6 +34,7 @@ func initplayerappearance_me():
 	print("Head colour ", headcolour, " ", [OS.get_unique_id()])
 	var mat = get_node("HeadCam/csgheadmesh/skullcomponent").material
 	mat.albedo_color = headcolour
+	get_node("headlocator/locatorline").get_surface_material(0).albedo_color = headcolour.lightened(0.5)
 	print(mat.albedo_color)
 	if ovr_guardian_system != null:
 		guardianpoly = ovr_guardian_system.get_boundary_geometry()
@@ -248,6 +249,8 @@ func playerappearancedict():
 var Dleftquesthandcontrollername = "unknown"
 var Drightquesthandcontrollername = "unknown"
 var key_9toggle = false
+var phonethumbviewpositionDown = null
+var headrotdegreesDown = Vector3(0,0,0)
 enum { HS_INVALID=0, HS_HAND=1, HS_TOUCHCONTROLLER=2 }
 func _process(delta):
 	if Tglobal.questhandtracking:
@@ -289,35 +292,74 @@ func _process(delta):
 	else:
 		var viewupdownjoy = 0.0
 		var handleftrightjoy = 0.0
+		var duckrise = 0
 		if Input.is_action_pressed("lh_shift"):
 			if Input.is_action_pressed("lh_forward"):   viewupdownjoy += 1
 			if Input.is_action_pressed("lh_backward"):  viewupdownjoy += -1
 			if PlayerDirections.snapturnemovementjoystick == DRAWING_TYPE.JOYPOS_DISABLED:
 				if Input.is_action_pressed("lh_left"):      handleftrightjoy += -1
 				if Input.is_action_pressed("lh_right"):     handleftrightjoy += 1
-			$HeadCam.rotation_degrees.x = clamp($HeadCam.rotation_degrees.x + 90*delta*viewupdownjoy, -89, 89)
 
-			var duckrise = 0
 			if Input.is_action_pressed("lh_duck"):  duckrise += -1
 			if Input.is_action_pressed("lh_rise"):  duckrise += 1
+
+		if Tglobal.phonethumbviewposition != null:
+			if PlanViewSystem.planviewactive:
+				var plancamera = PlanViewSystem.get_node("PlanView/Viewport/PlanGUI/Camera")
+				if phonethumbviewpositionDown == null:
+					phonethumbviewpositionDown = Tglobal.phonethumbviewposition
+					headrotdegreesDown = plancamera.rotation_degrees
+					if plancamera.rotation_degrees.x == 0.0:
+						var plancamerarotationdegreesyD = Vector3(-sin(deg2rad(headrotdegreesDown.y)), 0.0, -cos(deg2rad(headrotdegreesDown.y)))
+						PlanViewSystem.elevrotpoint = plancamera.translation + plancamerarotationdegreesyD*PlanViewSystem.elevcameradist
+					else:
+						PlanViewSystem.elevrotpoint = plancamera.translation - Vector3(0, PlanViewSystem.elevcameradist, 0)
+				if abs(Tglobal.phonethumbviewposition.x) > 0.9:
+					headrotdegreesDown.y += delta*(60.0 if Tglobal.phonethumbviewposition.x > 0.0 else -60.0)
+				var plancamerarotationdegreesy = headrotdegreesDown.y + 90.0*(Tglobal.phonethumbviewposition.x - phonethumbviewpositionDown.x)
+				var planviewpositiondict = { }
+				if plancamera.rotation_degrees.x == 0.0:
+					var plancamerabasisy = Vector3(-sin(deg2rad(plancamerarotationdegreesy)), 0.0, -cos(deg2rad(plancamerarotationdegreesy)))
+					planviewpositiondict["plancamerapos"] = PlanViewSystem.elevrotpoint - plancamerabasisy*PlanViewSystem.elevcameradist
+					planviewpositiondict["plancamerarotation"] = Vector3(0, plancamerarotationdegreesy, 0)
+				else:
+					planviewpositiondict["plancamerapos"] = PlanViewSystem.elevrotpoint + Vector3(0, PlanViewSystem.elevcameradist, 0)
+					planviewpositiondict["plancamerarotation"] = Vector3(-90, plancamerarotationdegreesy, 0)
+					
+				plancamera.translation = planviewpositiondict["plancamerapos"]
+				plancamera.rotation_degrees = planviewpositiondict["plancamerarotation"]
+				
+			else:
+				if phonethumbviewpositionDown == null:
+					phonethumbviewpositionDown = Tglobal.phonethumbviewposition
+					headrotdegreesDown = $HeadCam.rotation_degrees
+				if abs(Tglobal.phonethumbviewposition.x) > 0.9:
+					headrotdegreesDown.y += delta*(60.0 if Tglobal.phonethumbviewposition.x > 0.0 else -60.0)
+				$HeadCam.rotation_degrees.y = headrotdegreesDown.y + 90.0*(Tglobal.phonethumbviewposition.x - phonethumbviewpositionDown.x)
+				$HeadCam.rotation_degrees.x = clamp(headrotdegreesDown.x - 90*(Tglobal.phonethumbviewposition.y - phonethumbviewpositionDown.y), -89, 89)
+				phonethumbviewpositionDown.y = ($HeadCam.rotation_degrees.x - headrotdegreesDown.x)/90 + Tglobal.phonethumbviewposition.y
+
+
+		else:
+			phonethumbviewpositionDown = null
+			if viewupdownjoy != 0.0:
+				$HeadCam.rotation_degrees.x = clamp($HeadCam.rotation_degrees.x + 90*delta*viewupdownjoy, -89, 89)
+		if duckrise != 0.0:
 			$HeadCam.translation.y = clamp($HeadCam.translation.y + duckrise*delta*1.1, 0.4, 1.8)
 
-		if $HandRight.handstate == HS_INVALID:
-			$HandRight.handstate = HS_HAND
-		if Input.is_action_just_pressed("ui_key_9"):
-			$HandRight.handstate = HS_TOUCHCONTROLLER if ($HandRight.handstate == HS_HAND) else HS_HAND
-		$HandRight.process_keyboardcontroltracking($HeadCam, Vector2(handleftrightjoy*0.033, 0), playerscale)
+		if not Tglobal.phoneoverlay:
+			if $HandRight.handstate == HS_INVALID:
+				$HandRight.handstate = HS_HAND
+			if Input.is_action_just_pressed("ui_key_9"):
+				$HandRight.handstate = HS_TOUCHCONTROLLER if ($HandRight.handstate == HS_HAND) else HS_HAND
+			$HandRight.process_keyboardcontroltracking($HeadCam, Vector2(handleftrightjoy*0.033, 0), playerscale)
 
+	$headlocator.transform.origin = $HeadCam.transform.origin
 	if $HandRight.pointervalid:
 		LaserOrient.transform = global_transform*$HandRight.pointerposearvrorigin
 	else:
 		LaserOrient.visible = false
 
-
-
-func initkeyboardcontroltrackingnow():
-	#$HandLeft.initkeyboardtracking()
-	$HandRight.initkeyboardtracking()
 	
 func initnormalvrtrackingnow():
 	$HandLeft.initnormalvrtracking($HandLeftController)

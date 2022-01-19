@@ -27,3 +27,6 @@ func _ready():
 	splaystationnoderegex = RegEx.new()
 	splaystationnoderegex.compile(".*[^\\d]$")
 	
+var phoneoverlay = null
+var phonethumbmotionposition = null
+var phonethumbviewposition = null

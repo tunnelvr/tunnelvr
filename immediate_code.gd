@@ -13,4 +13,5 @@ func _run():
 	var b = Vector3(2,0,0)
 	var c = Vector3(0,2,0)
 
-	print(Geometry.ray_intersects_triangle(from, dir, a, b, c))
+	#print(Geometry.ray_intersects_triangle(from, dir, a, b, c))
+	print((-450+360*2) % 360)

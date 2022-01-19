@@ -4,7 +4,7 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-21.11";
     godot-source = {
-      url = "github:godotengine/godot/3.4.2-stable";
+      url = "github:godotengine/godot/3.4-stable";
       flake = false;
     };
     flake-compat-ci.url = "github:hercules-ci/flake-compat-ci";

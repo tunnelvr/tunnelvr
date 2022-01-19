@@ -188,6 +188,14 @@ func Ylistghfiles():
 				print("skipping githubfile ", file_name)
 	return mcfiles
 
+# curl https://api.github.com/repos/goatchurchprime/tunnelvr_cave_data/contents/README.md
+# GET https://api.github.com/repos/:owner/:repo/commits?path=FILE_PATH
+#curl https://api.github.com/repos/goatchurchprime/tunnelvr_cave_data/commits?README.md
+#GET https://api.github.com/repos/:owner/:repo/commits?path=FILE_PATH
+#https://docs.github.com/en/rest/reference/repos#contents
+#https://stackoverflow.com/questions/16700297/using-github-api-to-retrieve-all-versions-of-a-specific-file
+
+
 func Yfetchfile(cname, lghfetcheddatafile):
 	yield(Yinitclient(), "completed")
 	var rpath = "/repos/%s/%s/contents/%s/%s" % [ ghattributes["owner"], ghattributes["repo"], ghattributes["path"], cname ]
