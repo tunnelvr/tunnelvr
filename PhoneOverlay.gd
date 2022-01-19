@@ -128,7 +128,7 @@ func updatescreentouchplaces0drag():
 			var veccenNrot = veccenN*cos(deg2rad(fingerdragangleNdiff)) + Vector2(veccenN.y, -veccenN.x)*sin(deg2rad(fingerdragangleNdiff)) 
 			panvec += veccenN - veccenNrot
 		planviewpositiondict["plancamerapos"] = plancameratranslation + plancameraxvec*panvec.x + plancamerayvec*panvec.y + plancamerazvec*panvecdepthchange 
-	planviewsystem.sketchsystem.actsketchchange([{"planview":planviewpositiondict}])
+	planviewsystem.actplanviewdict(planviewpositiondict)
 
 
 func backgroundmotioninput(viewport: Object, event: InputEvent, shape_idx: int):

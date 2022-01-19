@@ -345,7 +345,7 @@ remote func actsketchchangeL(xcdatalist):
 							
 		elif "planview" in xcdata:
 			var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
-			planviewsystem.actplanviewdict(xcdata["planview"])
+			planviewsystem.actplanviewdict(xcdata["planview"], false)
 														
 		elif "xcvizstates" in xcdata:
 			if Tglobal.printxcdrawingfromdatamessages:

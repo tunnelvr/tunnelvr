@@ -2410,6 +2410,7 @@ margin_left = 1.68372
 margin_top = 17.3981
 margin_right = 229.684
 margin_bottom = 32.3981
+mouse_filter = 2
 color = Color( 0.0745098, 0.564706, 0.858824, 1 )
 __meta__ = {
 "_edit_use_anchors_": false
@@ -2547,6 +2548,14 @@ text = "Filetree"
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="ButtonTransmitView" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
+margin_left = 638.748
+margin_top = 67.1385
+margin_right = 740.748
+margin_bottom = 89.1385
+toggle_mode = true
+text = "Transmit View"
 
 [node name="ViewportReal" type="Viewport" parent="PlanViewSystem/PlanView"]
 size = Vector2( 800, 800 )
