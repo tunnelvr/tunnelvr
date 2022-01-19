@@ -1709,7 +1709,7 @@ sides = 16
 
 [node name="locatorline" type="MeshInstance" parent="Players/PlayerMe/headlocator"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 30, 0 )
-layers = 32768
+layers = 4096
 cast_shadow = 0
 mesh = SubResource( 251 )
 material/0 = SubResource( 252 )
