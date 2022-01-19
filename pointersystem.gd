@@ -1970,7 +1970,7 @@ func _input(event):
 		pass
 
 	elif event is InputEventMouseMotion:
-		if not Tglobal.VRoperating: # or playerMe.arvrinterface.get_tracking_status() == ARVRInterface.ARVR_NOT_TRACKING:
+		if not Tglobal.VRoperating and Tglobal.phoneoverlay == null:
 			handright.process_keyboardcontroltracking(headcam, event.relative*0.005, playerMe.playerscale)
 			
 	elif event is InputEventMouseButton:
@@ -1982,7 +1982,7 @@ func _input(event):
 				buttonpressed_vrtrigger(rightmousebuttonheld)
 			else:
 				buttonreleased_vrtrigger()
-			if not Tglobal.VRoperating:
+			if not Tglobal.VRoperating and Tglobal.phoneoverlay == null:
 				handright.triggerbuttonheld = event.pressed
 				handright.process_handgesturefromcontrol()
 		if event.button_index == BUTTON_RIGHT:
@@ -1990,7 +1990,7 @@ func _input(event):
 				buttonpressed_vrgrip()
 			else:
 				buttonreleased_vrgrip()
-			if not Tglobal.VRoperating:
+			if not Tglobal.VRoperating and Tglobal.phoneoverlay == null:
 				handright.gripbuttonheld = event.pressed
 				handright.process_handgesturefromcontrol()
 				

@@ -1642,7 +1642,6 @@ extents = Vector2( 500, 500 )
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
 enablevr = false
-forcephoneoverlay = true
 
 [node name="Players" type="Spatial" parent="."]
 
@@ -1745,8 +1744,10 @@ mesh = SubResource( 8 )
 material/0 = SubResource( 9 )
 
 [node name="right_hand_model" parent="Players/PlayerMe/HandRight" instance=ExtResource( 71 )]
+visible = false
 
 [node name="OculusQuestTouchController_Right_Reactive" parent="Players/PlayerMe/HandRight" instance=ExtResource( 70 )]
+visible = false
 
 [node name="pointersystem" type="Node" parent="Players/PlayerMe"]
 script = ExtResource( 5 )
