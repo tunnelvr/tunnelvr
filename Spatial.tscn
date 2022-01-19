@@ -127,234 +127,6 @@ albedo_color = Color( 0.341176, 0.411765, 0.976471, 1 )
 metallic = 0.41
 roughness = 0.45
 
-[sub_resource type="DynamicFont" id=12]
-font_data = ExtResource( 40 )
-
-[sub_resource type="BoxShape" id=13]
-extents = Vector3( 0.3, 0.2, 0.01 )
-
-[sub_resource type="QuadMesh" id=14]
-size = Vector2( 0.6, 0.4 )
-
-[sub_resource type="SpatialMaterial" id=15]
-resource_local_to_scene = true
-flags_unshaded = true
-flags_albedo_tex_force_srgb = true
-
-[sub_resource type="QuadMesh" id=16]
-
-[sub_resource type="SpatialMaterial" id=17]
-flags_unshaded = true
-flags_do_not_receive_shadows = true
-params_cull_mode = 2
-albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
-albedo_texture = ExtResource( 25 )
-uv1_scale = Vector3( 1, 0.05, 1 )
-uv1_offset = Vector3( -0.15, 0.003, 0 )
-
-[sub_resource type="BoxShape" id=18]
-extents = Vector3( 0.5, 0.5, 0.02 )
-
-[sub_resource type="SpatialMaterial" id=19]
-flags_unshaded = true
-flags_do_not_receive_shadows = true
-params_cull_mode = 2
-albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
-albedo_texture = ExtResource( 25 )
-uv1_scale = Vector3( 1, 0.05, 1 )
-uv1_offset = Vector3( -0.1, 0.053, 0 )
-
-[sub_resource type="SpatialMaterial" id=20]
-flags_unshaded = true
-flags_do_not_receive_shadows = true
-params_cull_mode = 2
-albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
-albedo_texture = ExtResource( 25 )
-uv1_scale = Vector3( 1, 0.05, 1 )
-uv1_offset = Vector3( -0.2, 0.103, 0 )
-
-[sub_resource type="SpatialMaterial" id=21]
-flags_unshaded = true
-flags_do_not_receive_shadows = true
-params_cull_mode = 2
-albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
-albedo_texture = ExtResource( 25 )
-uv1_scale = Vector3( 1, 0.05, 1 )
-uv1_offset = Vector3( -0.2, 0.353, 0 )
-
-[sub_resource type="SpatialMaterial" id=22]
-flags_unshaded = true
-flags_do_not_receive_shadows = true
-params_cull_mode = 2
-albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
-albedo_texture = ExtResource( 25 )
-uv1_scale = Vector3( 1, 0.05, 1 )
-uv1_offset = Vector3( -0.2, 0.403, 0 )
-
-[sub_resource type="SpatialMaterial" id=23]
-flags_unshaded = true
-flags_do_not_receive_shadows = true
-params_cull_mode = 2
-albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
-albedo_texture = ExtResource( 25 )
-uv1_scale = Vector3( 1, 0.05, 1 )
-uv1_offset = Vector3( -0.2, 0.453, 0 )
-
-[sub_resource type="SpatialMaterial" id=24]
-flags_unshaded = true
-flags_do_not_receive_shadows = true
-params_cull_mode = 2
-albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
-albedo_texture = ExtResource( 25 )
-uv1_scale = Vector3( 1, 0.05, 1 )
-uv1_offset = Vector3( -0.2, 0.503, 0 )
-
-[sub_resource type="SpatialMaterial" id=25]
-flags_unshaded = true
-flags_do_not_receive_shadows = true
-params_cull_mode = 2
-albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
-albedo_texture = ExtResource( 25 )
-uv1_scale = Vector3( 1, 0.05, 1 )
-uv1_offset = Vector3( -0.2, 0.556, 0 )
-
-[sub_resource type="SpatialMaterial" id=26]
-flags_unshaded = true
-flags_do_not_receive_shadows = true
-params_cull_mode = 2
-albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
-albedo_texture = ExtResource( 25 )
-uv1_scale = Vector3( 1, 0.05, 1 )
-uv1_offset = Vector3( -0.2, 0.606, 0 )
-
-[sub_resource type="SpatialMaterial" id=27]
-flags_unshaded = true
-flags_do_not_receive_shadows = true
-params_cull_mode = 2
-albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
-albedo_texture = ExtResource( 25 )
-uv1_scale = Vector3( 1, 0.05, 1 )
-uv1_offset = Vector3( -0.2, 0.553, 0 )
-
-[sub_resource type="SpatialMaterial" id=28]
-flags_unshaded = true
-flags_do_not_receive_shadows = true
-params_cull_mode = 2
-albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
-albedo_texture = ExtResource( 25 )
-uv1_scale = Vector3( 1, 0.05, 1 )
-uv1_offset = Vector3( -0.2, 0.153, 0 )
-
-[sub_resource type="SpatialMaterial" id=29]
-flags_unshaded = true
-flags_do_not_receive_shadows = true
-params_cull_mode = 2
-albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
-albedo_texture = ExtResource( 25 )
-uv1_scale = Vector3( 1, 0.05, 1 )
-uv1_offset = Vector3( -0.2, 0.203, 0 )
-
-[sub_resource type="SpatialMaterial" id=30]
-flags_unshaded = true
-flags_do_not_receive_shadows = true
-params_cull_mode = 2
-albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
-albedo_texture = ExtResource( 25 )
-uv1_scale = Vector3( 1, 0.05, 1 )
-uv1_offset = Vector3( -0.2, 0.253, 0 )
-
-[sub_resource type="SpatialMaterial" id=31]
-flags_unshaded = true
-flags_do_not_receive_shadows = true
-params_cull_mode = 2
-albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
-albedo_texture = ExtResource( 25 )
-uv1_scale = Vector3( 1, 0.05, 1 )
-uv1_offset = Vector3( -0.2, 0.303, 0 )
-
-[sub_resource type="SpatialMaterial" id=32]
-flags_unshaded = true
-flags_do_not_receive_shadows = true
-params_cull_mode = 2
-albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
-albedo_texture = ExtResource( 25 )
-uv1_scale = Vector3( 1, 0.05, 1 )
-uv1_offset = Vector3( -0.2, 0.7, 0 )
-
-[sub_resource type="SpatialMaterial" id=33]
-flags_unshaded = true
-flags_do_not_receive_shadows = true
-params_cull_mode = 2
-albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
-albedo_texture = ExtResource( 25 )
-uv1_scale = Vector3( 1, 0.05, 1 )
-uv1_offset = Vector3( -0.2, 0.75, 0 )
-
-[sub_resource type="SpatialMaterial" id=34]
-flags_unshaded = true
-flags_do_not_receive_shadows = true
-params_cull_mode = 2
-albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
-albedo_texture = ExtResource( 25 )
-uv1_scale = Vector3( 1, 0.05, 1 )
-uv1_offset = Vector3( -0.2, 0.8, 0 )
-
-[sub_resource type="SpatialMaterial" id=35]
-flags_unshaded = true
-flags_do_not_receive_shadows = true
-params_cull_mode = 2
-albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
-albedo_texture = ExtResource( 25 )
-uv1_scale = Vector3( 1, 0.05, 1 )
-uv1_offset = Vector3( -0.2, 0.85, 0 )
-
-[sub_resource type="QuadMesh" id=36]
-
-[sub_resource type="SpatialMaterial" id=37]
-flags_unshaded = true
-flags_do_not_receive_shadows = true
-params_cull_mode = 2
-albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
-albedo_texture = ExtResource( 25 )
-uv1_scale = Vector3( 1, 0.05, 1 )
-uv1_offset = Vector3( -0.2, 0.94, 0 )
-
-[sub_resource type="QuadMesh" id=247]
-
-[sub_resource type="SpatialMaterial" id=248]
-flags_unshaded = true
-flags_do_not_receive_shadows = true
-params_cull_mode = 2
-albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
-albedo_texture = ExtResource( 25 )
-uv1_scale = Vector3( 1, 0.05, 1 )
-uv1_offset = Vector3( -0.15, 0.895, 0 )
-
-[sub_resource type="SpatialMaterial" id=38]
-flags_unshaded = true
-flags_do_not_receive_shadows = true
-params_cull_mode = 2
-albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
-albedo_texture = ExtResource( 25 )
-uv1_scale = Vector3( 1, 0.05, 1 )
-uv1_offset = Vector3( -0.15, 0.155, 0 )
-
-[sub_resource type="DynamicFont" id=40]
-size = 22
-font_data = ExtResource( 40 )
-
-[sub_resource type="StyleBoxFlat" id=39]
-bg_color = Color( 0.0980392, 0.443137, 0.882353, 1 )
-
-[sub_resource type="BoxShape" id=41]
-extents = Vector3( 0.4, 0.2, 0.01 )
-
-[sub_resource type="QuadMesh" id=42]
-size = Vector2( 0.8, 0.4 )
-
-[sub_resource type="SpatialMaterial" id=43]
-flags_unshaded = true
-
 [sub_resource type="CapsuleShape" id=44]
 margin = 0.01
 radius = 0.15
@@ -584,6 +356,234 @@ bottom_radius = 0.02
 height = 0.2
 radial_segments = 6
 rings = 1
+
+[sub_resource type="DynamicFont" id=12]
+font_data = ExtResource( 40 )
+
+[sub_resource type="BoxShape" id=13]
+extents = Vector3( 0.3, 0.2, 0.01 )
+
+[sub_resource type="QuadMesh" id=14]
+size = Vector2( 0.6, 0.4 )
+
+[sub_resource type="SpatialMaterial" id=15]
+resource_local_to_scene = true
+flags_unshaded = true
+flags_albedo_tex_force_srgb = true
+
+[sub_resource type="QuadMesh" id=16]
+
+[sub_resource type="SpatialMaterial" id=17]
+flags_unshaded = true
+flags_do_not_receive_shadows = true
+params_cull_mode = 2
+albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
+albedo_texture = ExtResource( 25 )
+uv1_scale = Vector3( 1, 0.05, 1 )
+uv1_offset = Vector3( -0.15, 0.003, 0 )
+
+[sub_resource type="BoxShape" id=18]
+extents = Vector3( 0.5, 0.5, 0.02 )
+
+[sub_resource type="SpatialMaterial" id=19]
+flags_unshaded = true
+flags_do_not_receive_shadows = true
+params_cull_mode = 2
+albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
+albedo_texture = ExtResource( 25 )
+uv1_scale = Vector3( 1, 0.05, 1 )
+uv1_offset = Vector3( -0.1, 0.053, 0 )
+
+[sub_resource type="SpatialMaterial" id=20]
+flags_unshaded = true
+flags_do_not_receive_shadows = true
+params_cull_mode = 2
+albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
+albedo_texture = ExtResource( 25 )
+uv1_scale = Vector3( 1, 0.05, 1 )
+uv1_offset = Vector3( -0.2, 0.103, 0 )
+
+[sub_resource type="SpatialMaterial" id=21]
+flags_unshaded = true
+flags_do_not_receive_shadows = true
+params_cull_mode = 2
+albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
+albedo_texture = ExtResource( 25 )
+uv1_scale = Vector3( 1, 0.05, 1 )
+uv1_offset = Vector3( -0.2, 0.353, 0 )
+
+[sub_resource type="SpatialMaterial" id=22]
+flags_unshaded = true
+flags_do_not_receive_shadows = true
+params_cull_mode = 2
+albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
+albedo_texture = ExtResource( 25 )
+uv1_scale = Vector3( 1, 0.05, 1 )
+uv1_offset = Vector3( -0.2, 0.403, 0 )
+
+[sub_resource type="SpatialMaterial" id=23]
+flags_unshaded = true
+flags_do_not_receive_shadows = true
+params_cull_mode = 2
+albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
+albedo_texture = ExtResource( 25 )
+uv1_scale = Vector3( 1, 0.05, 1 )
+uv1_offset = Vector3( -0.2, 0.453, 0 )
+
+[sub_resource type="SpatialMaterial" id=24]
+flags_unshaded = true
+flags_do_not_receive_shadows = true
+params_cull_mode = 2
+albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
+albedo_texture = ExtResource( 25 )
+uv1_scale = Vector3( 1, 0.05, 1 )
+uv1_offset = Vector3( -0.2, 0.503, 0 )
+
+[sub_resource type="SpatialMaterial" id=25]
+flags_unshaded = true
+flags_do_not_receive_shadows = true
+params_cull_mode = 2
+albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
+albedo_texture = ExtResource( 25 )
+uv1_scale = Vector3( 1, 0.05, 1 )
+uv1_offset = Vector3( -0.2, 0.556, 0 )
+
+[sub_resource type="SpatialMaterial" id=26]
+flags_unshaded = true
+flags_do_not_receive_shadows = true
+params_cull_mode = 2
+albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
+albedo_texture = ExtResource( 25 )
+uv1_scale = Vector3( 1, 0.05, 1 )
+uv1_offset = Vector3( -0.2, 0.606, 0 )
+
+[sub_resource type="SpatialMaterial" id=27]
+flags_unshaded = true
+flags_do_not_receive_shadows = true
+params_cull_mode = 2
+albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
+albedo_texture = ExtResource( 25 )
+uv1_scale = Vector3( 1, 0.05, 1 )
+uv1_offset = Vector3( -0.2, 0.553, 0 )
+
+[sub_resource type="SpatialMaterial" id=28]
+flags_unshaded = true
+flags_do_not_receive_shadows = true
+params_cull_mode = 2
+albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
+albedo_texture = ExtResource( 25 )
+uv1_scale = Vector3( 1, 0.05, 1 )
+uv1_offset = Vector3( -0.2, 0.153, 0 )
+
+[sub_resource type="SpatialMaterial" id=29]
+flags_unshaded = true
+flags_do_not_receive_shadows = true
+params_cull_mode = 2
+albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
+albedo_texture = ExtResource( 25 )
+uv1_scale = Vector3( 1, 0.05, 1 )
+uv1_offset = Vector3( -0.2, 0.203, 0 )
+
+[sub_resource type="SpatialMaterial" id=30]
+flags_unshaded = true
+flags_do_not_receive_shadows = true
+params_cull_mode = 2
+albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
+albedo_texture = ExtResource( 25 )
+uv1_scale = Vector3( 1, 0.05, 1 )
+uv1_offset = Vector3( -0.2, 0.253, 0 )
+
+[sub_resource type="SpatialMaterial" id=31]
+flags_unshaded = true
+flags_do_not_receive_shadows = true
+params_cull_mode = 2
+albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
+albedo_texture = ExtResource( 25 )
+uv1_scale = Vector3( 1, 0.05, 1 )
+uv1_offset = Vector3( -0.2, 0.303, 0 )
+
+[sub_resource type="SpatialMaterial" id=32]
+flags_unshaded = true
+flags_do_not_receive_shadows = true
+params_cull_mode = 2
+albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
+albedo_texture = ExtResource( 25 )
+uv1_scale = Vector3( 1, 0.05, 1 )
+uv1_offset = Vector3( -0.2, 0.7, 0 )
+
+[sub_resource type="SpatialMaterial" id=33]
+flags_unshaded = true
+flags_do_not_receive_shadows = true
+params_cull_mode = 2
+albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
+albedo_texture = ExtResource( 25 )
+uv1_scale = Vector3( 1, 0.05, 1 )
+uv1_offset = Vector3( -0.2, 0.75, 0 )
+
+[sub_resource type="SpatialMaterial" id=34]
+flags_unshaded = true
+flags_do_not_receive_shadows = true
+params_cull_mode = 2
+albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
+albedo_texture = ExtResource( 25 )
+uv1_scale = Vector3( 1, 0.05, 1 )
+uv1_offset = Vector3( -0.2, 0.8, 0 )
+
+[sub_resource type="SpatialMaterial" id=35]
+flags_unshaded = true
+flags_do_not_receive_shadows = true
+params_cull_mode = 2
+albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
+albedo_texture = ExtResource( 25 )
+uv1_scale = Vector3( 1, 0.05, 1 )
+uv1_offset = Vector3( -0.2, 0.85, 0 )
+
+[sub_resource type="QuadMesh" id=36]
+
+[sub_resource type="SpatialMaterial" id=37]
+flags_unshaded = true
+flags_do_not_receive_shadows = true
+params_cull_mode = 2
+albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
+albedo_texture = ExtResource( 25 )
+uv1_scale = Vector3( 1, 0.05, 1 )
+uv1_offset = Vector3( -0.2, 0.94, 0 )
+
+[sub_resource type="QuadMesh" id=247]
+
+[sub_resource type="SpatialMaterial" id=248]
+flags_unshaded = true
+flags_do_not_receive_shadows = true
+params_cull_mode = 2
+albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
+albedo_texture = ExtResource( 25 )
+uv1_scale = Vector3( 1, 0.05, 1 )
+uv1_offset = Vector3( -0.15, 0.895, 0 )
+
+[sub_resource type="SpatialMaterial" id=38]
+flags_unshaded = true
+flags_do_not_receive_shadows = true
+params_cull_mode = 2
+albedo_color = Color( 0.988235, 0.94902, 0.541176, 1 )
+albedo_texture = ExtResource( 25 )
+uv1_scale = Vector3( 1, 0.05, 1 )
+uv1_offset = Vector3( -0.15, 0.155, 0 )
+
+[sub_resource type="DynamicFont" id=40]
+size = 22
+font_data = ExtResource( 40 )
+
+[sub_resource type="StyleBoxFlat" id=39]
+bg_color = Color( 0.0980392, 0.443137, 0.882353, 1 )
+
+[sub_resource type="BoxShape" id=41]
+extents = Vector3( 0.4, 0.2, 0.01 )
+
+[sub_resource type="QuadMesh" id=42]
+size = Vector2( 0.8, 0.4 )
+
+[sub_resource type="SpatialMaterial" id=43]
+flags_unshaded = true
 
 [sub_resource type="PlaneMesh" id=91]
 
@@ -1642,6 +1642,7 @@ extents = Vector2( 500, 500 )
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
 enablevr = false
+forcephoneoverlay = true
 
 [node name="Players" type="Spatial" parent="."]
 
@@ -1766,617 +1767,6 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.299, 0 )
 transform = Transform( -1.62921e-07, 0, 1, 0, 1, 0, -1, 0, -1.62921e-07, 0, 0.3, 0 )
 mesh = SubResource( 10 )
 material/0 = SubResource( 11 )
-
-[node name="GuiSystem" type="Spatial" parent="."]
-transform = Transform( -0.999994, 0, 0.00336804, 0, 1, 0, -0.00336804, 0, -0.999994, 5.95264e-10, 2, 6.412 )
-
-[node name="GUIPanel3D" type="StaticBody" parent="GuiSystem"]
-collision_layer = 8
-collision_mask = 0
-script = ExtResource( 14 )
-
-[node name="Viewport" type="Control" parent="GuiSystem/GUIPanel3D"]
-margin_right = 40.0
-margin_bottom = 40.0
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="GUI" type="Control" parent="GuiSystem/GUIPanel3D/Viewport"]
-margin_right = 380.0
-margin_bottom = 280.0
-mouse_filter = 1
-theme = ExtResource( 47 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="Panel" type="Panel" parent="GuiSystem/GUIPanel3D/Viewport/GUI"]
-anchor_right = 1.0
-anchor_bottom = 1.0
-rect_pivot_offset = Vector2( 167.043, 64.2911 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="Label" type="Label" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 23.4939
-margin_top = 15.6863
-margin_right = 113.494
-margin_bottom = 37.6863
-text = "GUI Controls"
-
-[node name="ButtonLoad" type="Button" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 22.4949
-margin_top = 43.9439
-margin_right = 79.4949
-margin_bottom = 71.9439
-text = "Load"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="Savegamefilename" type="OptionButton" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 99.0
-margin_top = 44.0
-margin_right = 297.0
-margin_bottom = 71.0
-text = "savegame.res"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="ButtonSave" type="Button" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 318.118
-margin_top = 43.0561
-margin_right = 372.118
-margin_bottom = 71.0561
-rect_pivot_offset = Vector2( 111.073, 28.0005 )
-text = "Save"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="Networkstate" type="OptionButton" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 22.665
-margin_top = 76.9548
-margin_right = 201.665
-margin_bottom = 103.955
-hint_tooltip = "Network state"
-text = "Network Off"
-clip_text = true
-items = [ "Network Off", null, false, 0, null, "Check IPnum", null, false, 1, null, "As Server", null, false, 2, null ]
-selected = 0
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="ButtonPlanView" type="CheckBox" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 17.0
-margin_top = 109.0
-margin_right = 124.0
-margin_bottom = 137.0
-rect_pivot_offset = Vector2( 138.61, -8.13628 )
-hint_tooltip = "test tooltip"
-text = "Plan View"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="ButtonHeadtorch" type="CheckBox" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 17.0
-margin_top = 131.0
-margin_right = 130.0
-margin_bottom = 155.0
-rect_pivot_offset = Vector2( 138.61, -8.13628 )
-hint_tooltip = "test tooltip"
-pressed = true
-text = "Headtorch"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="ButtonDoppelganger" type="CheckBox" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 16.9406
-margin_top = 150.632
-margin_right = 142.941
-margin_bottom = 174.632
-rect_pivot_offset = Vector2( 138.61, -8.13628 )
-hint_tooltip = "test tooltip"
-text = "Doppelganger"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="SwitchTest" type="OptionButton" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 22.0
-margin_top = 235.0
-margin_right = 116.0
-margin_bottom = 262.0
-text = "normal"
-items = [ "normal", null, false, 0, null, "Hide XCs", null, false, 1, null, "opt: all grey", null, false, 2, null, "opt: hide xc", null, false, 3, null, "toggle guardian", null, false, 4, null, "export OBJ", null, false, 7, null, "choke", null, false, 6, null, "swap controllers", null, false, 7, null, "lock controls", null, false, 8, null, "Toggle Fog", null, false, 10, null ]
-selected = 0
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="WorldScaleLabel" type="Label" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 203.0
-margin_top = 80.0
-margin_right = 285.0
-margin_bottom = 102.0
-text = "Avatar size:"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="WorldScale" type="OptionButton" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 288.0
-margin_top = 80.0
-margin_right = 366.0
-margin_bottom = 102.0
-text = "1x solid"
-items = [ "1x solid", null, false, 0, null, "10x ghost", null, false, 1, null, "1x ghost", null, false, 2, null, "2x ghost", null, false, 4, null, "0.25x solid", null, false, 4, null ]
-selected = 0
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="PlayerList" type="OptionButton" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 66.0
-margin_top = 208.0
-margin_right = 143.0
-margin_bottom = 231.0
-text = "server"
-items = [ "server", null, false, 0, null ]
-selected = 0
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="ButtonGoto" type="Button" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 21.0
-margin_top = 204.0
-margin_right = 64.0
-margin_bottom = 232.0
-rect_pivot_offset = Vector2( 111.073, 28.0005 )
-disabled = true
-text = "Goto"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="PlayerInfo" type="Label" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 145.227
-margin_top = 230.796
-margin_right = 374.227
-margin_bottom = 270.796
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="EditColorRect" type="ColorRect" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 153.0
-margin_top = 130.0
-margin_right = 376.0
-margin_bottom = 214.0
-color = Color( 0.133333, 0.6, 0.784314, 1 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="TextEdit" type="TextEdit" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel/EditColorRect"]
-margin_left = 3.0
-margin_top = 3.0
-margin_right = 219.0
-margin_bottom = 82.0
-custom_fonts/font = SubResource( 12 )
-highlight_current_line = true
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="ImageSystemReports" type="Label" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 161.0
-margin_top = 251.0
-margin_right = 376.0
-margin_bottom = 273.0
-text = "image system reports"
-
-[node name="ResourceOptions" type="OptionButton" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 234.371
-margin_top = 104.487
-margin_right = 360.371
-margin_bottom = 126.487
-text = "--resources"
-items = [ "--resources", null, false, 0, null, "Print XCproperties", null, false, 1, null, "Set XCproperties", null, false, 2, null, "Show/Hide/Load Potree", null, false, 4, null, "Print resource", null, false, 6, null, "Set resource", null, false, 7, null, "Set new file", null, false, 9, null, "Send message", null, false, 8, null, "Apply to flagsign", null, false, 9, null, "Apply to Filetree", null, false, 10, null, "Apply to Cavesave", null, false, 11, null ]
-selected = 0
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="ResourceSelector" type="OptionButton" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 126.3
-margin_top = 104.0
-margin_right = 226.3
-margin_bottom = 126.0
-text = "--select"
-items = [ "--select", null, false, 1, null ]
-selected = 0
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="ViewportReal" type="Viewport" parent="GuiSystem/GUIPanel3D"]
-size = Vector2( 380, 280 )
-hdr = false
-usage = 0
-render_target_v_flip = true
-render_target_update_mode = 3
-
-[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GUIPanel3D"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.01 )
-shape = SubResource( 13 )
-disabled = true
-
-[node name="Quad" type="MeshInstance" parent="GuiSystem/GUIPanel3D"]
-cast_shadow = 0
-mesh = SubResource( 14 )
-material/0 = SubResource( 15 )
-
-[node name="GripMenu" type="Spatial" parent="GuiSystem"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.61731 )
-script = ExtResource( 15 )
-
-[node name="WordButtons" type="Spatial" parent="GuiSystem/GripMenu"]
-
-[node name="FixHoleXC" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
-transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 1.33878e-09, 0, 1, -0.247808, -0.372787, 0.0249882 )
-collision_layer = 8
-collision_mask = 0
-
-[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/FixHoleXC"]
-cast_shadow = 0
-mesh = SubResource( 16 )
-material/0 = SubResource( 17 )
-
-[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/FixHoleXC"]
-shape = SubResource( 18 )
-
-[node name="CopyRock" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
-transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 5.23869e-10, 0, 1, -0.000821371, -0.366446, 2.86102e-06 )
-collision_layer = 8
-collision_mask = 0
-
-[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/CopyRock"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 1.74623e-10, 0, 1, 0, 0, 0 )
-cast_shadow = 0
-mesh = SubResource( 16 )
-material/0 = SubResource( 19 )
-
-[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/CopyRock"]
-shape = SubResource( 18 )
-
-[node name="toPaper" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
-transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 1.16415e-10, 0, 1, 0.250038, -0.2, 0.0113497 )
-collision_layer = 8
-collision_mask = 0
-
-[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/toPaper"]
-cast_shadow = 0
-mesh = SubResource( 16 )
-material/0 = SubResource( 20 )
-
-[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/toPaper"]
-shape = SubResource( 18 )
-
-[node name="NewSlice" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
-transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, -0.25, -0.2, 0 )
-visible = false
-collision_layer = 8
-collision_mask = 0
-
-[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/NewSlice"]
-cast_shadow = 0
-mesh = SubResource( 16 )
-material/0 = SubResource( 21 )
-
-[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/NewSlice"]
-shape = SubResource( 18 )
-
-[node name="DoSlice" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
-transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, -0.24945, -0.2, 0 )
-collision_layer = 8
-collision_mask = 0
-
-[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/DoSlice"]
-cast_shadow = 0
-mesh = SubResource( 16 )
-material/0 = SubResource( 22 )
-
-[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/DoSlice"]
-shape = SubResource( 18 )
-
-[node name="DelXC" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
-transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 1.74623e-10, 0, 1, 0.25, -0.2, 0 )
-collision_layer = 8
-collision_mask = 0
-
-[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/DelXC"]
-cast_shadow = 0
-mesh = SubResource( 16 )
-material/0 = SubResource( 23 )
-
-[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/DelXC"]
-shape = SubResource( 18 )
-
-[node name="SelectXC" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
-transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 5.82077e-11, 0, 1, 0.000563573, -0.2, 0 )
-collision_layer = 8
-collision_mask = 0
-
-[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/SelectXC"]
-cast_shadow = 0
-mesh = SubResource( 16 )
-material/0 = SubResource( 24 )
-
-[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/SelectXC"]
-shape = SubResource( 18 )
-
-[node name="DelTube" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
-transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 3.49246e-10, 0, 1, -0.249948, -0.369877, 0.000844002 )
-collision_layer = 8
-collision_mask = 0
-
-[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/DelTube"]
-cast_shadow = 0
-mesh = SubResource( 16 )
-material/0 = SubResource( 25 )
-
-[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/DelTube"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 5.82077e-11, 0, 1, 0, 0, 0 )
-shape = SubResource( 18 )
-
-[node name="SpLine" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
-transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 1.16415e-10, 0, 1, 4.65773e-05, -0.2, 0.0138292 )
-collision_layer = 8
-collision_mask = 0
-
-[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/SpLine"]
-cast_shadow = 0
-mesh = SubResource( 16 )
-material/0 = SubResource( 26 )
-
-[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/SpLine"]
-shape = SubResource( 18 )
-
-[node name="DelTube2" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
-transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, 0.25, -0.2, 0 )
-collision_layer = 8
-collision_mask = 0
-
-[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/DelTube2"]
-cast_shadow = 0
-mesh = SubResource( 16 )
-material/0 = SubResource( 27 )
-
-[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/DelTube2"]
-shape = SubResource( 18 )
-
-[node name="toSolid" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
-transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, -0.25, -0.2, 0 )
-collision_layer = 8
-collision_mask = 0
-
-[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/toSolid"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 1.74623e-10, 0, 1, 1.75462, 0, -0.00118446 )
-visible = false
-cast_shadow = 0
-mesh = SubResource( 16 )
-material/0 = SubResource( 28 )
-
-[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/toSolid"]
-shape = SubResource( 18 )
-
-[node name="HideFloor" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
-transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 2.91038e-10, 0, 1, -0.00721074, -0.2, 0.0277643 )
-collision_layer = 8
-collision_mask = 0
-
-[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/HideFloor"]
-cast_shadow = 0
-mesh = SubResource( 16 )
-material/0 = SubResource( 29 )
-
-[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/HideFloor"]
-shape = SubResource( 18 )
-
-[node name="ShowFloor" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
-transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 3.49246e-10, 0, 1, 0.269588, -0.2, -0.0059557 )
-collision_layer = 8
-collision_mask = 0
-
-[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/ShowFloor"]
-cast_shadow = 0
-mesh = SubResource( 16 )
-material/0 = SubResource( 30 )
-
-[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/ShowFloor"]
-shape = SubResource( 18 )
-
-[node name="DistortXC" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
-transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 1.16415e-10, 0, 1, 0.250126, -0.2, 0.0372858 )
-collision_layer = 8
-collision_mask = 0
-
-[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/DistortXC"]
-cast_shadow = 0
-mesh = SubResource( 16 )
-material/0 = SubResource( 31 )
-
-[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/DistortXC"]
-shape = SubResource( 18 )
-
-[node name="NewXC" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
-transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, -0.25, -0.2, 0 )
-collision_layer = 8
-collision_mask = 0
-
-[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/NewXC"]
-cast_shadow = 0
-mesh = SubResource( 16 )
-material/0 = SubResource( 32 )
-
-[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/NewXC"]
-shape = SubResource( 18 )
-
-[node name="DragXC" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
-transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, -0.25, -0.2, 0 )
-collision_layer = 8
-collision_mask = 0
-
-[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/DragXC"]
-cast_shadow = 0
-mesh = SubResource( 16 )
-material/0 = SubResource( 33 )
-
-[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/DragXC"]
-shape = SubResource( 18 )
-
-[node name="Undo" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
-transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, 0.00435687, -0.34982, -0.00233459 )
-collision_layer = 8
-collision_mask = 0
-
-[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/Undo"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 5.82077e-11, 0, 1, -1.11759e-07, 0, 0.0314913 )
-cast_shadow = 0
-mesh = SubResource( 16 )
-material/0 = SubResource( 34 )
-
-[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/Undo"]
-shape = SubResource( 18 )
-
-[node name="HoleXC" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
-transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, -0.23759, -0.2, 0.0230036 )
-collision_layer = 8
-collision_mask = 0
-
-[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/HoleXC"]
-cast_shadow = 0
-mesh = SubResource( 16 )
-material/0 = SubResource( 35 )
-
-[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/HoleXC"]
-shape = SubResource( 18 )
-
-[node name="HoleXCdisabled" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
-transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 1.16415e-10, 0, 1, -0.23759, -0.2, 0.047121 )
-collision_layer = 8
-collision_mask = 0
-
-[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/HoleXCdisabled"]
-cast_shadow = 0
-mesh = SubResource( 36 )
-material/0 = SubResource( 37 )
-
-[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/HoleXCdisabled"]
-shape = SubResource( 18 )
-
-[node name="HideXC" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
-transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 3.49246e-10, 0, 1, 0.000791224, -0.352818, 0.0675917 )
-collision_layer = 8
-collision_mask = 0
-
-[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/HideXC"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 5.82077e-11, 0, 1, 0, 0, 0 )
-cast_shadow = 0
-mesh = SubResource( 247 )
-material/0 = SubResource( 248 )
-
-[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/HideXC"]
-shape = SubResource( 18 )
-
-[node name="ProjectXC" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
-transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 1.74623e-10, 0, 1, 0.236722, -0.352818, -0.000795364 )
-collision_layer = 8
-collision_mask = 0
-
-[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/ProjectXC"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 1.16415e-10, 0, 1, 0.000675216, 0, 0.0400953 )
-cast_shadow = 0
-mesh = SubResource( 16 )
-material/0 = SubResource( 38 )
-
-[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/ProjectXC"]
-shape = SubResource( 18 )
-
-[node name="MaterialButtons" type="Spatial" parent="GuiSystem/GripMenu"]
-
-[node name="FloorMoveTween" type="Tween" parent="GuiSystem/GripMenu"]
-
-[node name="KeyboardPanel" type="StaticBody" parent="GuiSystem"]
-transform = Transform( 1, -0.00100965, -0.000154894, 0.00100965, 0.95401, 0.299772, -0.000154894, -0.299772, 0.954011, -0.00716471, 0.722797, -2.12725 )
-visible = false
-collision_layer = 8
-collision_mask = 0
-script = ExtResource( 59 )
-
-[node name="Viewport" type="Control" parent="GuiSystem/KeyboardPanel"]
-margin_left = 500.0
-margin_right = 40.0
-margin_bottom = 40.0
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="VirtualKeyboard" type="Panel" parent="GuiSystem/KeyboardPanel/Viewport"]
-margin_right = 576.0
-margin_bottom = 240.0
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="ReferenceButton" type="Button" parent="GuiSystem/KeyboardPanel/Viewport/VirtualKeyboard"]
-margin_right = 41.0
-margin_bottom = 41.0
-focus_mode = 0
-custom_fonts/font = SubResource( 40 )
-custom_styles/hover = SubResource( 39 )
-enabled_focus_mode = 0
-text = "A"
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="Container_Letters" type="Container" parent="GuiSystem/KeyboardPanel/Viewport/VirtualKeyboard"]
-margin_right = 40.0
-margin_bottom = 40.0
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="Container_Symbols" type="Container" parent="GuiSystem/KeyboardPanel/Viewport/VirtualKeyboard"]
-visible = false
-margin_right = 40.0
-margin_bottom = 40.0
-__meta__ = {
-"_edit_use_anchors_": false
-}
-
-[node name="ViewportReal" type="Viewport" parent="GuiSystem/KeyboardPanel"]
-size = Vector2( 576, 240 )
-render_target_v_flip = true
-
-[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/KeyboardPanel"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.01 )
-shape = SubResource( 41 )
-disabled = true
-
-[node name="Quad" type="MeshInstance" parent="GuiSystem/KeyboardPanel"]
-cast_shadow = 0
-mesh = SubResource( 42 )
-material/0 = SubResource( 43 )
 
 [node name="BodyObjects" type="Spatial" parent="."]
 
@@ -3204,6 +2594,617 @@ material/0 = null
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0 )
 mesh = SubResource( 90 )
 material/0 = null
+
+[node name="GuiSystem" type="Spatial" parent="."]
+transform = Transform( -0.999994, 0, 0.00336804, 0, 1, 0, -0.00336804, 0, -0.999994, 5.95264e-10, 2, 6.412 )
+
+[node name="GUIPanel3D" type="StaticBody" parent="GuiSystem"]
+collision_layer = 8
+collision_mask = 0
+script = ExtResource( 14 )
+
+[node name="Viewport" type="Control" parent="GuiSystem/GUIPanel3D"]
+margin_right = 40.0
+margin_bottom = 40.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="GUI" type="Control" parent="GuiSystem/GUIPanel3D/Viewport"]
+margin_right = 380.0
+margin_bottom = 280.0
+mouse_filter = 1
+theme = ExtResource( 47 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Panel" type="Panel" parent="GuiSystem/GUIPanel3D/Viewport/GUI"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+rect_pivot_offset = Vector2( 167.043, 64.2911 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
+margin_left = 23.4939
+margin_top = 15.6863
+margin_right = 113.494
+margin_bottom = 37.6863
+text = "GUI Controls"
+
+[node name="ButtonLoad" type="Button" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
+margin_left = 22.4949
+margin_top = 43.9439
+margin_right = 79.4949
+margin_bottom = 71.9439
+text = "Load"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Savegamefilename" type="OptionButton" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
+margin_left = 99.0
+margin_top = 44.0
+margin_right = 297.0
+margin_bottom = 71.0
+text = "savegame.res"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ButtonSave" type="Button" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
+margin_left = 318.118
+margin_top = 43.0561
+margin_right = 372.118
+margin_bottom = 71.0561
+rect_pivot_offset = Vector2( 111.073, 28.0005 )
+text = "Save"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Networkstate" type="OptionButton" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
+margin_left = 22.665
+margin_top = 76.9548
+margin_right = 201.665
+margin_bottom = 103.955
+hint_tooltip = "Network state"
+text = "Network Off"
+clip_text = true
+items = [ "Network Off", null, false, 0, null, "Check IPnum", null, false, 1, null, "As Server", null, false, 2, null ]
+selected = 0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ButtonPlanView" type="CheckBox" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
+margin_left = 17.0
+margin_top = 109.0
+margin_right = 124.0
+margin_bottom = 137.0
+rect_pivot_offset = Vector2( 138.61, -8.13628 )
+hint_tooltip = "test tooltip"
+text = "Plan View"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ButtonHeadtorch" type="CheckBox" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
+margin_left = 17.0
+margin_top = 131.0
+margin_right = 130.0
+margin_bottom = 155.0
+rect_pivot_offset = Vector2( 138.61, -8.13628 )
+hint_tooltip = "test tooltip"
+pressed = true
+text = "Headtorch"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ButtonDoppelganger" type="CheckBox" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
+margin_left = 16.9406
+margin_top = 150.632
+margin_right = 142.941
+margin_bottom = 174.632
+rect_pivot_offset = Vector2( 138.61, -8.13628 )
+hint_tooltip = "test tooltip"
+text = "Doppelganger"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="SwitchTest" type="OptionButton" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
+margin_left = 22.0
+margin_top = 235.0
+margin_right = 116.0
+margin_bottom = 262.0
+text = "normal"
+items = [ "normal", null, false, 0, null, "Hide XCs", null, false, 1, null, "opt: all grey", null, false, 2, null, "opt: hide xc", null, false, 3, null, "toggle guardian", null, false, 4, null, "export OBJ", null, false, 7, null, "choke", null, false, 6, null, "swap controllers", null, false, 7, null, "lock controls", null, false, 8, null, "Toggle Fog", null, false, 10, null ]
+selected = 0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="WorldScaleLabel" type="Label" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
+margin_left = 203.0
+margin_top = 80.0
+margin_right = 285.0
+margin_bottom = 102.0
+text = "Avatar size:"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="WorldScale" type="OptionButton" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
+margin_left = 288.0
+margin_top = 80.0
+margin_right = 366.0
+margin_bottom = 102.0
+text = "1x solid"
+items = [ "1x solid", null, false, 0, null, "10x ghost", null, false, 1, null, "1x ghost", null, false, 2, null, "2x ghost", null, false, 4, null, "0.25x solid", null, false, 4, null ]
+selected = 0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="PlayerList" type="OptionButton" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
+margin_left = 66.0
+margin_top = 208.0
+margin_right = 143.0
+margin_bottom = 231.0
+text = "server"
+items = [ "server", null, false, 0, null ]
+selected = 0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ButtonGoto" type="Button" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
+margin_left = 21.0
+margin_top = 204.0
+margin_right = 64.0
+margin_bottom = 232.0
+rect_pivot_offset = Vector2( 111.073, 28.0005 )
+disabled = true
+text = "Goto"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="PlayerInfo" type="Label" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
+margin_left = 145.227
+margin_top = 230.796
+margin_right = 374.227
+margin_bottom = 270.796
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="EditColorRect" type="ColorRect" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
+margin_left = 153.0
+margin_top = 130.0
+margin_right = 376.0
+margin_bottom = 214.0
+color = Color( 0.133333, 0.6, 0.784314, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="TextEdit" type="TextEdit" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel/EditColorRect"]
+margin_left = 3.0
+margin_top = 3.0
+margin_right = 219.0
+margin_bottom = 82.0
+custom_fonts/font = SubResource( 12 )
+highlight_current_line = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ImageSystemReports" type="Label" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
+margin_left = 161.0
+margin_top = 251.0
+margin_right = 376.0
+margin_bottom = 273.0
+text = "image system reports"
+
+[node name="ResourceOptions" type="OptionButton" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
+margin_left = 234.371
+margin_top = 104.487
+margin_right = 360.371
+margin_bottom = 126.487
+text = "--resources"
+items = [ "--resources", null, false, 0, null, "Print XCproperties", null, false, 1, null, "Set XCproperties", null, false, 2, null, "Show/Hide/Load Potree", null, false, 4, null, "Print resource", null, false, 6, null, "Set resource", null, false, 7, null, "Set new file", null, false, 9, null, "Send message", null, false, 8, null, "Apply to flagsign", null, false, 9, null, "Apply to Filetree", null, false, 10, null, "Apply to Cavesave", null, false, 11, null ]
+selected = 0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ResourceSelector" type="OptionButton" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
+margin_left = 126.3
+margin_top = 104.0
+margin_right = 226.3
+margin_bottom = 126.0
+text = "--select"
+items = [ "--select", null, false, 1, null ]
+selected = 0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ViewportReal" type="Viewport" parent="GuiSystem/GUIPanel3D"]
+size = Vector2( 380, 280 )
+hdr = false
+usage = 0
+render_target_v_flip = true
+render_target_update_mode = 3
+
+[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GUIPanel3D"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.01 )
+shape = SubResource( 13 )
+disabled = true
+
+[node name="Quad" type="MeshInstance" parent="GuiSystem/GUIPanel3D"]
+cast_shadow = 0
+mesh = SubResource( 14 )
+material/0 = SubResource( 15 )
+
+[node name="GripMenu" type="Spatial" parent="GuiSystem"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.61731 )
+script = ExtResource( 15 )
+
+[node name="WordButtons" type="Spatial" parent="GuiSystem/GripMenu"]
+
+[node name="FixHoleXC" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
+transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 1.33878e-09, 0, 1, -0.247808, -0.372787, 0.0249882 )
+collision_layer = 8
+collision_mask = 0
+
+[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/FixHoleXC"]
+cast_shadow = 0
+mesh = SubResource( 16 )
+material/0 = SubResource( 17 )
+
+[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/FixHoleXC"]
+shape = SubResource( 18 )
+
+[node name="CopyRock" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
+transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 5.23869e-10, 0, 1, -0.000821371, -0.366446, 2.86102e-06 )
+collision_layer = 8
+collision_mask = 0
+
+[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/CopyRock"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 1.74623e-10, 0, 1, 0, 0, 0 )
+cast_shadow = 0
+mesh = SubResource( 16 )
+material/0 = SubResource( 19 )
+
+[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/CopyRock"]
+shape = SubResource( 18 )
+
+[node name="toPaper" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
+transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 1.16415e-10, 0, 1, 0.250038, -0.2, 0.0113497 )
+collision_layer = 8
+collision_mask = 0
+
+[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/toPaper"]
+cast_shadow = 0
+mesh = SubResource( 16 )
+material/0 = SubResource( 20 )
+
+[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/toPaper"]
+shape = SubResource( 18 )
+
+[node name="NewSlice" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
+transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, -0.25, -0.2, 0 )
+visible = false
+collision_layer = 8
+collision_mask = 0
+
+[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/NewSlice"]
+cast_shadow = 0
+mesh = SubResource( 16 )
+material/0 = SubResource( 21 )
+
+[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/NewSlice"]
+shape = SubResource( 18 )
+
+[node name="DoSlice" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
+transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, -0.24945, -0.2, 0 )
+collision_layer = 8
+collision_mask = 0
+
+[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/DoSlice"]
+cast_shadow = 0
+mesh = SubResource( 16 )
+material/0 = SubResource( 22 )
+
+[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/DoSlice"]
+shape = SubResource( 18 )
+
+[node name="DelXC" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
+transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 1.74623e-10, 0, 1, 0.25, -0.2, 0 )
+collision_layer = 8
+collision_mask = 0
+
+[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/DelXC"]
+cast_shadow = 0
+mesh = SubResource( 16 )
+material/0 = SubResource( 23 )
+
+[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/DelXC"]
+shape = SubResource( 18 )
+
+[node name="SelectXC" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
+transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 5.82077e-11, 0, 1, 0.000563573, -0.2, 0 )
+collision_layer = 8
+collision_mask = 0
+
+[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/SelectXC"]
+cast_shadow = 0
+mesh = SubResource( 16 )
+material/0 = SubResource( 24 )
+
+[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/SelectXC"]
+shape = SubResource( 18 )
+
+[node name="DelTube" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
+transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 3.49246e-10, 0, 1, -0.249948, -0.369877, 0.000844002 )
+collision_layer = 8
+collision_mask = 0
+
+[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/DelTube"]
+cast_shadow = 0
+mesh = SubResource( 16 )
+material/0 = SubResource( 25 )
+
+[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/DelTube"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 5.82077e-11, 0, 1, 0, 0, 0 )
+shape = SubResource( 18 )
+
+[node name="SpLine" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
+transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 1.16415e-10, 0, 1, 4.65773e-05, -0.2, 0.0138292 )
+collision_layer = 8
+collision_mask = 0
+
+[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/SpLine"]
+cast_shadow = 0
+mesh = SubResource( 16 )
+material/0 = SubResource( 26 )
+
+[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/SpLine"]
+shape = SubResource( 18 )
+
+[node name="DelTube2" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
+transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, 0.25, -0.2, 0 )
+collision_layer = 8
+collision_mask = 0
+
+[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/DelTube2"]
+cast_shadow = 0
+mesh = SubResource( 16 )
+material/0 = SubResource( 27 )
+
+[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/DelTube2"]
+shape = SubResource( 18 )
+
+[node name="toSolid" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
+transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, -0.25, -0.2, 0 )
+collision_layer = 8
+collision_mask = 0
+
+[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/toSolid"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 1.74623e-10, 0, 1, 1.75462, 0, -0.00118446 )
+visible = false
+cast_shadow = 0
+mesh = SubResource( 16 )
+material/0 = SubResource( 28 )
+
+[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/toSolid"]
+shape = SubResource( 18 )
+
+[node name="HideFloor" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
+transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 2.91038e-10, 0, 1, -0.00721074, -0.2, 0.0277643 )
+collision_layer = 8
+collision_mask = 0
+
+[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/HideFloor"]
+cast_shadow = 0
+mesh = SubResource( 16 )
+material/0 = SubResource( 29 )
+
+[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/HideFloor"]
+shape = SubResource( 18 )
+
+[node name="ShowFloor" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
+transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 3.49246e-10, 0, 1, 0.269588, -0.2, -0.0059557 )
+collision_layer = 8
+collision_mask = 0
+
+[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/ShowFloor"]
+cast_shadow = 0
+mesh = SubResource( 16 )
+material/0 = SubResource( 30 )
+
+[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/ShowFloor"]
+shape = SubResource( 18 )
+
+[node name="DistortXC" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
+transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 1.16415e-10, 0, 1, 0.250126, -0.2, 0.0372858 )
+collision_layer = 8
+collision_mask = 0
+
+[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/DistortXC"]
+cast_shadow = 0
+mesh = SubResource( 16 )
+material/0 = SubResource( 31 )
+
+[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/DistortXC"]
+shape = SubResource( 18 )
+
+[node name="NewXC" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
+transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, -0.25, -0.2, 0 )
+collision_layer = 8
+collision_mask = 0
+
+[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/NewXC"]
+cast_shadow = 0
+mesh = SubResource( 16 )
+material/0 = SubResource( 32 )
+
+[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/NewXC"]
+shape = SubResource( 18 )
+
+[node name="DragXC" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
+transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, -0.25, -0.2, 0 )
+collision_layer = 8
+collision_mask = 0
+
+[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/DragXC"]
+cast_shadow = 0
+mesh = SubResource( 16 )
+material/0 = SubResource( 33 )
+
+[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/DragXC"]
+shape = SubResource( 18 )
+
+[node name="Undo" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
+transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, 0.00435687, -0.34982, -0.00233459 )
+collision_layer = 8
+collision_mask = 0
+
+[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/Undo"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 5.82077e-11, 0, 1, -1.11759e-07, 0, 0.0314913 )
+cast_shadow = 0
+mesh = SubResource( 16 )
+material/0 = SubResource( 34 )
+
+[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/Undo"]
+shape = SubResource( 18 )
+
+[node name="HoleXC" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
+transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 0, 0, 1, -0.23759, -0.2, 0.0230036 )
+collision_layer = 8
+collision_mask = 0
+
+[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/HoleXC"]
+cast_shadow = 0
+mesh = SubResource( 16 )
+material/0 = SubResource( 35 )
+
+[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/HoleXC"]
+shape = SubResource( 18 )
+
+[node name="HoleXCdisabled" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
+transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 1.16415e-10, 0, 1, -0.23759, -0.2, 0.047121 )
+collision_layer = 8
+collision_mask = 0
+
+[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/HoleXCdisabled"]
+cast_shadow = 0
+mesh = SubResource( 36 )
+material/0 = SubResource( 37 )
+
+[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/HoleXCdisabled"]
+shape = SubResource( 18 )
+
+[node name="HideXC" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
+transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 3.49246e-10, 0, 1, 0.000791224, -0.352818, 0.0675917 )
+collision_layer = 8
+collision_mask = 0
+
+[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/HideXC"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 5.82077e-11, 0, 1, 0, 0, 0 )
+cast_shadow = 0
+mesh = SubResource( 247 )
+material/0 = SubResource( 248 )
+
+[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/HideXC"]
+shape = SubResource( 18 )
+
+[node name="ProjectXC" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
+transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 1.74623e-10, 0, 1, 0.236722, -0.352818, -0.000795364 )
+collision_layer = 8
+collision_mask = 0
+
+[node name="MeshInstance" type="MeshInstance" parent="GuiSystem/GripMenu/WordButtons/ProjectXC"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 1.16415e-10, 0, 1, 0.000675216, 0, 0.0400953 )
+cast_shadow = 0
+mesh = SubResource( 16 )
+material/0 = SubResource( 38 )
+
+[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/GripMenu/WordButtons/ProjectXC"]
+shape = SubResource( 18 )
+
+[node name="MaterialButtons" type="Spatial" parent="GuiSystem/GripMenu"]
+
+[node name="FloorMoveTween" type="Tween" parent="GuiSystem/GripMenu"]
+
+[node name="KeyboardPanel" type="StaticBody" parent="GuiSystem"]
+transform = Transform( 1, -0.00100965, -0.000154894, 0.00100965, 0.95401, 0.299772, -0.000154894, -0.299772, 0.954011, -0.00716471, 0.722797, -2.12725 )
+visible = false
+collision_layer = 8
+collision_mask = 0
+script = ExtResource( 59 )
+
+[node name="Viewport" type="Control" parent="GuiSystem/KeyboardPanel"]
+margin_left = 500.0
+margin_right = 40.0
+margin_bottom = 40.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="VirtualKeyboard" type="Panel" parent="GuiSystem/KeyboardPanel/Viewport"]
+margin_right = 576.0
+margin_bottom = 240.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ReferenceButton" type="Button" parent="GuiSystem/KeyboardPanel/Viewport/VirtualKeyboard"]
+margin_right = 41.0
+margin_bottom = 41.0
+focus_mode = 0
+custom_fonts/font = SubResource( 40 )
+custom_styles/hover = SubResource( 39 )
+enabled_focus_mode = 0
+text = "A"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Container_Letters" type="Container" parent="GuiSystem/KeyboardPanel/Viewport/VirtualKeyboard"]
+margin_right = 40.0
+margin_bottom = 40.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Container_Symbols" type="Container" parent="GuiSystem/KeyboardPanel/Viewport/VirtualKeyboard"]
+visible = false
+margin_right = 40.0
+margin_bottom = 40.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ViewportReal" type="Viewport" parent="GuiSystem/KeyboardPanel"]
+size = Vector2( 576, 240 )
+render_target_v_flip = true
+
+[node name="CollisionShape" type="CollisionShape" parent="GuiSystem/KeyboardPanel"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.01 )
+shape = SubResource( 41 )
+disabled = true
+
+[node name="Quad" type="MeshInstance" parent="GuiSystem/KeyboardPanel"]
+cast_shadow = 0
+mesh = SubResource( 42 )
+material/0 = SubResource( 43 )
 
 [node name="MaterialSystem" type="Spatial" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 41.0922, 2.20853, 23.9465 )
