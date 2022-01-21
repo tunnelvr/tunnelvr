@@ -1022,7 +1022,7 @@ class sortquatfuncclass:
 	static func sortquatfunc(a, b):
 		return a.x < b.x or (a.x == b.x and (a.y < b.y or (a.y == b.y and (a.z < b.z or (a.z == b.z and a.w < b.w)))))
 
-static func unifiedclosedmeshwithnormals(tubeslist, noffset):
+static func unifiedclosedmeshwithnormals(tubeslist):
 	var tubepoolvectors = [ ]
 	var vertqindexes = [ ]
 	for tube in tubeslist:
@@ -1088,13 +1088,7 @@ static func unifiedclosedmeshwithnormals(tubeslist, noffset):
 			nsum += n
 		cornertrinorms.push_back(nsum.normalized())
 
-	if noffset != 0:
-		var offsetverts = [ ]
-		for i in range(mdt.get_vertex_count()):
-			offsetverts.push_back(dedupverts[i] + cornertrinorms[i]*noffset)
-		arr[Mesh.ARRAY_VERTEX] = PoolVector3Array(offsetverts)
-	else:
-		arr[Mesh.ARRAY_NORMAL] = PoolVector3Array(cornertrinorms)
+	arr[Mesh.ARRAY_NORMAL] = PoolVector3Array(cornertrinorms)
 	var arr_mesh = ArrayMesh.new()
 	arr_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
 	return arr_mesh
