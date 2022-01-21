@@ -348,8 +348,8 @@ shader = SubResource( 257 )
 shader_param/albedo = Color( 0.968627, 0.956863, 0.866667, 1 )
 shader_param/yhi = 100.0
 shader_param/ylo = 0.0
-shader_param/colorhi = Color( 0.992157, 0.627451, 0.627451, 1 )
-shader_param/colorlo = Color( 0.658824, 0.627451, 1, 1 )
+shader_param/colorhi = Color( 0.992157, 0.976471, 0.627451, 1 )
+shader_param/colorlo = Color( 0.52549, 0.501961, 1, 1 )
 
 [sub_resource type="CanvasItemMaterial" id=75]
 
@@ -2132,51 +2132,70 @@ __meta__ = {
 }
 
 [node name="ButtonSlideDown" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ViewSlide"]
-margin_left = 39.5289
-margin_top = 32.0375
-margin_right = 62.5289
-margin_bottom = 58.0375
+margin_left = 31.0341
+margin_top = 32.5094
+margin_right = 54.0341
+margin_bottom = 58.5094
 text = "V"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="ButtonSlideLeft" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ViewSlide"]
-margin_left = 6.13216
-margin_top = 32.7526
-margin_right = 36.1322
-margin_bottom = 58.7526
+margin_top = 33.0
+margin_right = 28.0
+margin_bottom = 59.0
 text = "<<"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="ButtonSlideRight" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ViewSlide"]
-margin_left = 64.3129
-margin_top = 30.8554
-margin_right = 94.3129
-margin_bottom = 56.8554
+margin_left = 56.6403
+margin_top = 34.3035
+margin_right = 84.6403
+margin_bottom = 60.3035
 text = ">>"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="ButtonSlideUp" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ViewSlide"]
-margin_left = 42.0594
-margin_top = 2.11311
-margin_right = 65.0594
-margin_bottom = 28.1131
+margin_left = 39.6997
+margin_top = 2.58503
+margin_right = 62.6997
+margin_bottom = 28.585
 text = "^"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="ButtonZoomDown" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ViewSlide"]
-margin_left = 110.416
-margin_top = 46.5051
-margin_right = 129.416
-margin_bottom = 68.5051
+margin_left = 113.248
+margin_top = 45.5612
+margin_right = 132.248
+margin_bottom = 67.5612
 text = "v"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ButtonRotLeft" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ViewSlide"]
+margin_left = 92.0561
+margin_top = 46.0562
+margin_right = 112.056
+margin_bottom = 68.0562
+text = "<"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ButtonRotRight" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ViewSlide"]
+margin_left = 152.936
+margin_top = 45.5842
+margin_right = 172.936
+margin_bottom = 67.5842
+text = ">"
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -2192,10 +2211,10 @@ __meta__ = {
 }
 
 [node name="ButtonElev" type="CheckBox" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ViewSlide"]
-margin_left = 99.5281
-margin_top = 69.3241
-margin_right = 157.528
-margin_bottom = 93.3241
+margin_left = 100.0
+margin_top = 69.0
+margin_right = 166.0
+margin_bottom = 93.0
 text = "Elev!!!"
 
 [node name="ZoomView" type="Control" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
@@ -2209,10 +2228,10 @@ __meta__ = {
 }
 
 [node name="Label" type="Label" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ZoomView"]
-margin_left = 23.0486
-margin_top = -0.76215
-margin_right = 69.0486
-margin_bottom = 21.2379
+margin_left = 23.0
+margin_top = -1.0
+margin_right = 69.0
+margin_bottom = 21.0
 text = "Zoom"
 __meta__ = {
 "_edit_use_anchors_": false

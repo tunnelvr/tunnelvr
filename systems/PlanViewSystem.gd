@@ -578,6 +578,18 @@ func _process(delta):
 		var zoomfac = 1/(1 + 0.5*delta) if bzoomin else 1 + 0.5*delta
 		var plancamera = $PlanView/Viewport/PlanGUI/Camera
 		planviewpositiondict["plancamerasize"] = plancamera.size * zoomfac
+
+	var brotleft = viewslide.get_node("ButtonRotLeft").is_pressed()
+	var brotright = viewslide.get_node("ButtonRotRight").is_pressed()
+	if brotleft or brotright:
+		var plancamera = $PlanView/Viewport/PlanGUI/Camera
+		var droty = (-1 if brotleft else 1)*delta*60
+		planviewpositiondict["plancamerarotation"] = plancamera.rotation_degrees + Vector3(0, droty, 0.0)
+		if plancamera.rotation_degrees.x == 0.0:
+			planviewpositiondict["plancamerapos"] = planviewpositiondict.get("plancamerapos",  plancamera.translation) + \
+													(1 - cos(droty))*plancamera.transform.basis.z + \
+													sin(droty)*plancamera.transform.basis.x 
+
 	if not planviewpositiondict.empty():
 		actplanviewdict(planviewpositiondict) 
 
