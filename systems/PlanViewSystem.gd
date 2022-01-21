@@ -494,11 +494,17 @@ func planviewtransformpos(guidpaneltransform, guidpanelsize):
 var updateplanviewentitysizes_working = false
 func updateplanviewentitysizes():
 	var Dt0 = OS.get_ticks_msec()
-	var nodesca = $PlanView/Viewport/PlanGUI/Camera.size/70.0*3.0
+	var plancamera = $PlanView/Viewport/PlanGUI/Camera
+	var nodesca = plancamera.size/70.0*3.0
 	var labelsca = nodesca*2.0
 	for player in selfSpatial.get_node("Players").get_children():
 		player.get_node("headlocator/locatorline").scale = Vector3(nodesca*3.0, 1, nodesca*3.0)
-	sketchsystem.get_node("tunnelxoutline/MeshInstance").material_override.set_shader_param("noffset", nodesca*0.2)
+	var tunnelxoutline = sketchsystem.get_node("tunnelxoutline")
+	if tunnelxoutline.visible:
+		var screensize = get_node("/root").size
+		var plancameraxvec = plancamera.project_position(screensize/2 + Vector2(1, 0), elevcameradist) - plancamera.project_position(screensize/2, elevcameradist)
+		print("plancamera size xvec comparison ", plancameraxvec, " ", plancamera.size)
+		sketchsystem.get_node("tunnelxoutline/blackoutline").material_override.set_shader_param("noffset", nodesca*0.2)
 
 	get_node("/root/Spatial/LabelGenerator").currentplannodesca = nodesca
 	get_node("/root/Spatial/LabelGenerator").currentplanlabelsca = labelsca

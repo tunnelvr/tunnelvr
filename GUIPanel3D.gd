@@ -373,9 +373,17 @@ func _on_switchtest(index):
 			sketchsystem.get_node("XCdrawings").visible = true
 	
 		if nssel == "opt: tunnelx":
-			sketchsystem.get_node("tunnelxoutline/MeshInstance").mesh = Polynets.BlackOutlineMesh(sketchsystem.get_node("XCtubes").get_children(), 0.0)
-			sketchsystem.get_node("tunnelxoutline").visible = true
-			materialsystem.setallmaterialtowhite(Color.antiquewhite)
+			var tunnelxoutline = sketchsystem.get_node("tunnelxoutline")
+			var unifiedclosedmesh = Polynets.unifiedclosedmeshwithnormals(sketchsystem.get_node("XCtubes").get_children(), 0.0)
+			tunnelxoutline.get_node("blackoutline").mesh = unifiedclosedmesh
+			tunnelxoutline.get_node("whiteinfill").mesh = unifiedclosedmesh
+			tunnelxoutline.visible = true
+			sketchsystem.get_node("XCtubes").visible = false
+
+		elif prevnssel == "opt: tunnelx":
+			sketchsystem.get_node("tunnelxoutline").visible = false
+			sketchsystem.get_node("XCtubes").visible = true
+			
 	prevnssel = nssel
 
 

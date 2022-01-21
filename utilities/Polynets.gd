@@ -1022,7 +1022,7 @@ class sortquatfuncclass:
 	static func sortquatfunc(a, b):
 		return a.x < b.x or (a.x == b.x and (a.y < b.y or (a.y == b.y and (a.z < b.z or (a.z == b.z and a.w < b.w)))))
 
-static func BlackOutlineMesh(tubeslist, noffset):
+static func unifiedclosedmeshwithnormals(tubeslist, noffset):
 	var tubepoolvectors = [ ]
 	var vertqindexes = [ ]
 	for tube in tubeslist:
