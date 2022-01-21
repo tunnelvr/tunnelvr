@@ -625,20 +625,30 @@ func _process(delta):
 
 	
 func buttoncentre_pressed():
+	var plancamera = get_node("PlanView/Viewport/PlanGUI/Camera")
 	var headcam = get_node("/root/Spatial").playerMe.get_node("HeadCam")
-	var planviewpositiondict = { "plancamerapos":Vector3(headcam.global_transform.origin.x, $PlanView/Viewport/PlanGUI/Camera.translation.y, headcam.global_transform.origin.z) }
+	var lelevrotpoint = headcam.global_transform.origin
+	var cameradistvec = plancamera.translation - lelevrotpoint
+	var lelevcameradist = plancamera.transform.basis.z.dot(cameradistvec)
+	lelevcameradist = clamp(5, 60, lelevcameradist)
+	var planviewpositiondict = { "plancamerapos":lelevrotpoint + plancamera.transform.basis.z*lelevcameradist, 
+								 "plancameraelevrotpoint":lelevrotpoint, 
+								 "plancameraelevcameradist":lelevcameradist,
+								 "plancamerafogdepthbegin":lelevcameradist*2, 
+								 "plancamerafogdepthend":lelevcameradist*4 
+							   }
 	actplanviewdict(planviewpositiondict) 
 
 
 var elevrotpoint = Vector3(0,0,0)
-var elevcameradist = 0.0
-func buttonelev_toggled(pressed):
-	print("buttonelev_toggled ", pressed)
+var elevcameradist = 50.0
+func buttonelev_toggled(makeelevmode):
+	print("buttonelev_toggled ", makeelevmode)
 	var headcam = get_node("/root/Spatial").playerMe.get_node("HeadCam")
 	var plancamera = get_node("PlanView/Viewport/PlanGUI/Camera")
 	var screensize = get_node("/root").size
 	var plancamerabasisy = Vector3(-sin(deg2rad(plancamera.rotation_degrees.y)), 0.0, -cos(deg2rad(plancamera.rotation_degrees.y)))
-	if pressed:
+	if makeelevmode:
 		var elevrotpointy = elevrotpoint.y if elevrotpoint != null else headcam.global_transform.origin.y
 		var lelevrotpoint = plancamera.project_position(screensize/2, 0.0)
 		lelevrotpoint.y = elevrotpointy
