@@ -48,7 +48,7 @@ func setupoverlaycomponentpositions():
 	guipanel3dviewport.visible = false
 
 	$MenuButton.rect_position = guipanel3dviewport.rect_position + Vector2(orgpanelsize.x*panelscale/2, orgpanelsize.y*panelscale) - $MenuButton.rect_size*max(1, panelscale)
-	$MenuButton.rect_scale = Vector2(max(1, panelscale), max(1, panelscale))
+	$MenuButton.rect_scale = Vector2(max(1.5, panelscale), max(1.5, panelscale))
 	
 	var planviewviewport = get_node("/root/Spatial/PlanViewSystem/PlanView/Viewport")
 	var planviewviewcontrols = planviewviewport.get_node("PlanGUI/PlanViewControls")
