@@ -288,7 +288,6 @@ func exportSTL():
 	$Viewport/GUI/Panel/Label.text = "Cave exported"
 
 var prevnssel = "normal"
-var backfaceculldisabled = true
 func _on_switchtest(index):
 	var SwitchTest = $Viewport/GUI/Panel/SwitchTest
 	var nssel = SwitchTest.get_item_text(index)
@@ -354,16 +353,17 @@ func _on_switchtest(index):
 		SwitchTest.selected = 0
 		
 	elif prevnssel.begins_with("opt:") or nssel.begins_with("opt:"):
+		var materialsystem = get_node("/root/Spatial/MaterialSystem")
 		var n = 0
 		var showall = (nssel == "normal")
-		for xcdrawing in sketchsystem.get_node("XCdrawings").get_children():
-			if xcdrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
-				if true or (xcdrawing.drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_GHOSTLY_B) != 0:
-					xcdrawing.get_node("XCdrawingplane").visible = showall
-					n += 1
-		print("Number of floor textures hidden: ", n)
+		if nssel != "opt: tunnelx":
+			for xcdrawing in sketchsystem.get_node("XCdrawings").get_children():
+				if xcdrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
+					if true or (xcdrawing.drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_GHOSTLY_B) != 0:
+						xcdrawing.get_node("XCdrawingplane").visible = showall
+						n += 1
+			print("Number of floor textures hidden: ", n)
 		if nssel == "opt: all grey":
-			var materialsystem = get_node("/root/Spatial/MaterialSystem")
 			for xctube in sketchsystem.get_node("XCtubes").get_children():
 				for xctubesector in xctube.get_node("XCtubesectors").get_children():
 					materialsystem.updatetubesectormaterial(xctubesector, "flatgrey", false)
@@ -372,8 +372,24 @@ func _on_switchtest(index):
 		elif nssel == "normal":
 			sketchsystem.get_node("XCdrawings").visible = true
 	
+		if nssel == "opt: tunnelx":
+			var tunnelxoutline = sketchsystem.get_node("tunnelxoutline")
+			var unifiedclosedmesh = Polynets.unifiedclosedmeshwithnormals(sketchsystem.get_node("XCtubes").get_children())
+			var unifiedclosedmeshaabb = unifiedclosedmesh.get_aabb()
+			tunnelxoutline.get_node("blackoutline").mesh = unifiedclosedmesh
+			tunnelxoutline.get_node("whiteinfill").mesh = unifiedclosedmesh
+			tunnelxoutline.get_node("whiteinfill").material_override.set_shader_param("ylo", unifiedclosedmeshaabb.position.y)
+			tunnelxoutline.get_node("whiteinfill").material_override.set_shader_param("yhi", unifiedclosedmeshaabb.position.y + unifiedclosedmeshaabb.size.y)
+			tunnelxoutline.visible = true
+			sketchsystem.get_node("XCtubes").visible = false
+
+		elif prevnssel == "opt: tunnelx":
+			sketchsystem.get_node("tunnelxoutline").visible = false
+			sketchsystem.get_node("XCtubes").visible = true
+
+		setguipanelhide()
+				
 	prevnssel = nssel
-	
 
 
 func _on_buttonrecord_down():

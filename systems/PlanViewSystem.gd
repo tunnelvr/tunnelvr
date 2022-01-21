@@ -324,15 +324,20 @@ func clearsetupfileviewtree(binit, filetreerootpath):
 	
 			
 func planviewtodict():
+	var plancamera = $PlanView/Viewport/PlanGUI/Camera
 	return { "visible":visible,
 			 "planviewactive":planviewactive, 
 			 "plantubesvisible":(($PlanView/Viewport/PlanGUI/Camera.cull_mask & CollisionLayer.VL_xcshells) != 0),
 			 "realtubesvisible":(not Tglobal.hidecavewallstoseefloors),
 			 "centrelinesvisible":(($PlanView/Viewport/PlanGUI/Camera.cull_mask & CollisionLayer.VL_centrelinestationsplanview) != 0),
 			 "transformpos":$PlanView.global_transform,
-			 "plancamerapos":$PlanView/Viewport/PlanGUI/Camera.translation,
-			 "plancamerarotation":$PlanView/Viewport/PlanGUI/Camera.rotation_degrees,
-			 "plancamerasize":$PlanView/Viewport/PlanGUI/Camera.size,
+			 "plancamerapos":plancamera.translation,
+			 "plancameraelevrotpoint":elevrotpoint,
+			 "plancameraelevcameradist":elevcameradist,
+			 "plancamerafogdepthbegin":plancamera.environment.fog_depth_begin, 
+			 "plancamerafogdepthend":plancamera.environment.fog_depth_end, 
+			 "plancamerarotation":plancamera.rotation_degrees,
+			 "plancamerasize":plancamera.size,
 			 "backfacecull":materialsettobackfacecull,
 			}
 
@@ -362,12 +367,22 @@ func setcameracullmasks(bcentrelinesvisible, bplantubesvisible):
 	get_node("RealPlanCamera/LaserScope/LaserOrient/RayCast").collision_mask = plancameraraycollisionmask
 
 func actplanviewdict(pvchange, resettransmitbutton=true):
+	var plancamera = $PlanView/Viewport/PlanGUI/Camera
 	if resettransmitbutton:
 		planviewcontrols.get_node("ButtonTransmitView").pressed = false
 	if "plancamerapos" in pvchange:
-		$PlanView/Viewport/PlanGUI/Camera.translation = pvchange["plancamerapos"]
+		plancamera.translation = pvchange["plancamerapos"]
 	if "plancamerarotation" in pvchange:
-		$PlanView/Viewport/PlanGUI/Camera.rotation_degrees = pvchange["plancamerarotation"]
+		plancamera.rotation_degrees = pvchange["plancamerarotation"]
+	if "plancameraelevrotpoint" in pvchange and "plancameraelevcameradist" in pvchange:
+		elevrotpoint = pvchange["plancameraelevrotpoint"]
+		elevcameradist = pvchange["plancameraelevcameradist"]
+	if "plancamerafogdepthbegin" in pvchange and "plancamerafogdepthend" in pvchange:
+		plancamera.environment.fog_depth_begin = pvchange["plancamerafogdepthbegin"]	
+		plancamera.environment.fog_depth_end = pvchange["plancamerafogdepthend"]
+		plancamera.environment.fog_color = plancamera.environment.background_color
+		plancamera.environment.fog_color = plancamera.environment.background_color
+		plancamera.far = plancamera.environment.fog_depth_end
 	if "plancamerasize" in pvchange:
 		$PlanView/Viewport/PlanGUI/Camera.size = pvchange["plancamerasize"]
 		$RealPlanCamera/RealCameraBox.scale = Vector3($PlanView/Viewport/PlanGUI/Camera.size, 1.0, $PlanView/Viewport/PlanGUI/Camera.size)
@@ -392,6 +407,8 @@ func actplanviewdict(pvchange, resettransmitbutton=true):
 			if Tglobal.phoneoverlay != null:
 				$PlanView/Viewport/PlanGUI/Camera.current = true
 				$PlanView/Viewport.visible = true
+				Tglobal.phoneoverlay.get_node("ThumbLeft").visible = false
+				Tglobal.phoneoverlay.get_node("ThumbRight").visible = false
 			else:
 				get_node("PlanView/CollisionShape").disabled = false
 
@@ -402,6 +419,8 @@ func actplanviewdict(pvchange, resettransmitbutton=true):
 			if Tglobal.phoneoverlay != null:
 				$PlanView/Viewport/PlanGUI/Camera.current = false
 				$PlanView/Viewport.visible = false
+				Tglobal.phoneoverlay.get_node("ThumbLeft").visible = true
+				Tglobal.phoneoverlay.get_node("ThumbRight").visible = true
 			if activetargetfloor != null:
 				sketchsystem.actsketchchange([ getactivetargetfloorViz("") ])
 			
@@ -427,12 +446,7 @@ func actplanviewdict(pvchange, resettransmitbutton=true):
 		var materialsystem = get_node("/root/Spatial/MaterialSystem")
 		materialsettobackfacecull = pvchange["backfacecull"]
 		planviewcontrols.get_node("CheckBoxBackfaceCull").pressed = materialsettobackfacecull
-		for tmesh in materialsystem.get_node("tubematerials").get_children():
-			var tmat = tmesh.get_surface_material(0)
-			if tmat is SpatialMaterial:
-				tmat.params_cull_mode = SpatialMaterial.CULL_BACK if materialsettobackfacecull else SpatialMaterial.CULL_DISABLED
-			else:
-				print("cant' change backface cull on material ", tmesh.get_name())
+		materialsystem.setallbackfacecull(SpatialMaterial.CULL_BACK if materialsettobackfacecull else SpatialMaterial.CULL_DISABLED)
 
 	if "realtubesvisible" in pvchange and Tglobal.hidecavewallstoseefloors != (not pvchange["realtubesvisible"]):
 		planviewcontrols.get_node("CheckBoxRealTubesVisible").pressed = pvchange["realtubesvisible"]
@@ -480,10 +494,17 @@ func planviewtransformpos(guidpaneltransform, guidpanelsize):
 var updateplanviewentitysizes_working = false
 func updateplanviewentitysizes():
 	var Dt0 = OS.get_ticks_msec()
-	var nodesca = $PlanView/Viewport/PlanGUI/Camera.size/70.0*3.0
+	var plancamera = $PlanView/Viewport/PlanGUI/Camera
+	var nodesca = plancamera.size/70.0*3.0
 	var labelsca = nodesca*2.0
 	for player in selfSpatial.get_node("Players").get_children():
 		player.get_node("headlocator/locatorline").scale = Vector3(nodesca*3.0, 1, nodesca*3.0)
+	var tunnelxoutline = sketchsystem.get_node("tunnelxoutline")
+	if tunnelxoutline.visible:
+		var screensize = get_node("/root").size
+		var plancameraxvec = plancamera.project_position(screensize/2 + Vector2(1, 0), elevcameradist) - plancamera.project_position(screensize/2, elevcameradist)
+		print("plancamera size xvec comparison ", plancameraxvec, " ", plancamera.size, "  ", plancameraxvec/plancamera.size)
+		sketchsystem.get_node("tunnelxoutline/blackoutline").material_override.set_shader_param("noffset", nodesca*0.2)
 
 	get_node("/root/Spatial/LabelGenerator").currentplannodesca = nodesca
 	get_node("/root/Spatial/LabelGenerator").currentplanlabelsca = labelsca
@@ -557,6 +578,18 @@ func _process(delta):
 		var zoomfac = 1/(1 + 0.5*delta) if bzoomin else 1 + 0.5*delta
 		var plancamera = $PlanView/Viewport/PlanGUI/Camera
 		planviewpositiondict["plancamerasize"] = plancamera.size * zoomfac
+
+	var brotleft = viewslide.get_node("ButtonRotLeft").is_pressed()
+	var brotright = viewslide.get_node("ButtonRotRight").is_pressed()
+	if brotleft or brotright:
+		var plancamera = $PlanView/Viewport/PlanGUI/Camera
+		var droty = (-1 if brotleft else 1)*delta*60
+		planviewpositiondict["plancamerarotation"] = plancamera.rotation_degrees + Vector3(0, droty, 0.0)
+		if plancamera.rotation_degrees.x == 0.0:
+			planviewpositiondict["plancamerapos"] = planviewpositiondict.get("plancamerapos",  plancamera.translation) + \
+													(1 - cos(droty))*plancamera.transform.basis.z + \
+													sin(droty)*plancamera.transform.basis.x 
+
 	if not planviewpositiondict.empty():
 		actplanviewdict(planviewpositiondict) 
 
@@ -614,45 +647,59 @@ func _process(delta):
 
 	
 func buttoncentre_pressed():
+	var plancamera = get_node("PlanView/Viewport/PlanGUI/Camera")
 	var headcam = get_node("/root/Spatial").playerMe.get_node("HeadCam")
-	var planviewpositiondict = { "plancamerapos":Vector3(headcam.global_transform.origin.x, $PlanView/Viewport/PlanGUI/Camera.translation.y, headcam.global_transform.origin.z) }
+	var lelevrotpoint = headcam.global_transform.origin
+	var cameradistvec = plancamera.translation - lelevrotpoint
+	var lelevcameradist = plancamera.transform.basis.z.dot(cameradistvec)
+	lelevcameradist = clamp(5, 60, lelevcameradist)
+	var planviewpositiondict = { "plancamerapos":lelevrotpoint + plancamera.transform.basis.z*lelevcameradist, 
+								 "plancameraelevrotpoint":lelevrotpoint, 
+								 "plancameraelevcameradist":lelevcameradist,
+								 "plancamerafogdepthbegin":lelevcameradist*2, 
+								 "plancamerafogdepthend":lelevcameradist*4 
+							   }
 	actplanviewdict(planviewpositiondict) 
 
-var cameraaltitudePlan = 0.0
-var elevrotpoint = null
-var elevcameradist = 0.0
-func buttonelev_toggled(pressed):
-	print("buttonelev_toggled ", pressed)
+
+var elevrotpoint = Vector3(0,0,0)
+var elevcameradist = 50.0
+func buttonelev_toggled(makeelevmode):
+	print("buttonelev_toggled ", makeelevmode)
 	var headcam = get_node("/root/Spatial").playerMe.get_node("HeadCam")
 	var plancamera = get_node("PlanView/Viewport/PlanGUI/Camera")
 	var screensize = get_node("/root").size
 	var plancamerabasisy = Vector3(-sin(deg2rad(plancamera.rotation_degrees.y)), 0.0, -cos(deg2rad(plancamera.rotation_degrees.y)))
-	if pressed:
-		cameraaltitudePlan = $PlanView/Viewport/PlanGUI/Camera.translation.y
+	if makeelevmode:
 		var elevrotpointy = elevrotpoint.y if elevrotpoint != null else headcam.global_transform.origin.y
-		elevrotpoint = plancamera.project_position(screensize/2, 0.0)
-		elevrotpoint.y = elevrotpointy
+		var lelevrotpoint = plancamera.project_position(screensize/2, 0.0)
+		lelevrotpoint.y = elevrotpointy
 		var pagebottompos = plancamera.project_position(Vector2(screensize.x/2, screensize.y), 0.0)
 		var vpagebottom = pagebottompos - plancamera.global_transform.origin
-		elevcameradist = -plancamera.global_transform.basis.y.dot(vpagebottom)
+		var lelevcameradist = -plancamera.global_transform.basis.y.dot(vpagebottom)
 		#print("bb should be same ", plancamera.global_transform.basis.y, plancamerabasisy)
 		var planviewpositiondict = { "plancamerapos":elevrotpoint - plancamerabasisy*elevcameradist, 
-									 "plancamerarotation":Vector3(0, plancamera.rotation_degrees.y, 0) }
+									 "plancamerarotation":Vector3(0, plancamera.rotation_degrees.y, 0),
+									 "plancameraelevrotpoint":lelevrotpoint, 
+									 "plancameraelevcameradist":lelevcameradist,
+									 "plancamerafogdepthbegin":lelevcameradist, 
+									 "plancamerafogdepthend":lelevcameradist*2, 
+								   }
 		actplanviewdict(planviewpositiondict) 
-		plancamera.environment.fog_depth_begin = elevcameradist	
-		plancamera.environment.fog_depth_end = elevcameradist*2
+
 	else:
-		elevrotpoint = plancamera.translation + plancamerabasisy*elevcameradist
+		var lelevrotpoint = plancamera.translation + plancamerabasisy*elevcameradist
 		var pagetoppos = plancamera.project_position(Vector2(screensize.x/2, 0.0), 0.0)
-		elevcameradist = pagetoppos.y - elevrotpoint.y
+		var lelevcameradist = pagetoppos.y - elevrotpoint.y
 		var planviewpositiondict = { "plancamerapos":Vector3(elevrotpoint.x, pagetoppos.y, elevrotpoint.z), 
-									 "plancamerarotation":Vector3(-90, plancamera.rotation_degrees.y, 0) }
+									 "plancamerarotation":Vector3(-90, plancamera.rotation_degrees.y, 0), 
+									 "plancameraelevrotpoint":lelevrotpoint, 
+									 "plancameraelevcameradist":lelevcameradist,
+									 "plancamerafogdepthbegin":lelevcameradist*2, 
+									 "plancamerafogdepthend":lelevcameradist*4, 
+								 }
 		actplanviewdict(planviewpositiondict) 
-		plancamera.environment.fog_depth_begin = elevcameradist*2	
-		plancamera.environment.fog_depth_end = elevcameradist*4
-	plancamera.environment.fog_color = plancamera.environment.background_color
-	plancamera.environment.fog_color = plancamera.environment.background_color
-	plancamera.far = plancamera.environment.fog_depth_end
+
 	
 func buttonclose_pressed():
 	if planviewcontrols.get_node("ButtonTransmitView").pressed:
