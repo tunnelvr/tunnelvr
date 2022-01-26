@@ -859,7 +859,6 @@ func makexctubeshell(xcdrawings):
 	
 	var arraymesh = ArrayMesh.new()
 	var surfaceTool = SurfaceTool.new()
-	#surfaceTool.set_material(Material.new())
 	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
 	for j in polyindexes:
 		var poly = polys[j]

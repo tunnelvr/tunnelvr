@@ -431,6 +431,8 @@ func _on_textedit_focus_entered():
 	print("text edit focus entered")
 	virtualkeyboard.visible = true
 	Tglobal.virtualkeyboardactive = true
+	virtualkeyboard.viewportforvirtualkeyboard = $Viewport
+
 	virtualkeyboard.get_node("CollisionShape").disabled = not virtualkeyboard.visible
 	#$Viewport.render_target_update_mode = Viewport.UPDATE_ALWAYS
 
