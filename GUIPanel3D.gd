@@ -342,8 +342,13 @@ func _on_switchtest(index):
 		Tglobal.soundsystem.quicksound("MenuClick", collision_point)
 		var xcvizstates = { }
 		for xcdrawing in sketchsystem.get_node("XCdrawings").get_children():
-			if xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING and xcdrawing.drawingvisiblecode != DRAWING_TYPE.VIZ_XCD_HIDE:
-				xcvizstates[xcdrawing.get_name()] = DRAWING_TYPE.VIZ_XCD_HIDE
+			if xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
+				if xcdrawing.xcconnectstoshell():
+					if xcdrawing.drawingvisiblecode != DRAWING_TYPE.VIZ_XCD_HIDE:
+						xcvizstates[xcdrawing.get_name()] = DRAWING_TYPE.VIZ_XCD_HIDE
+				else:
+					if xcdrawing.drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_HIDE:
+						xcvizstates[xcdrawing.get_name()] = DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE
 		sketchsystem.actsketchchange([{ "xcvizstates":xcvizstates }])
 		setguipanelhide()
 		SwitchTest.selected = 0
