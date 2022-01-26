@@ -647,6 +647,10 @@ func sketchdicttochunks(sketchdatadict):
 	var xctubesDmaphalfstaged = { }
 	for j in range(len(xcdrawingsD)):
 		var xcdrawingD = xcdrawingsD[j]
+		var Dp = xcdrawingD["transformpos"].origin
+		if is_nan(Dp.x) or is_nan(Dp.y) or is_nan(Dp.z):
+			print("Resetting transformpos drawing because of nans", xcdrawingD)
+			xcdrawingD["transformpos"] = Transform()
 		if (len(xcdatachunkL) > 50  and j < len(xcdrawingsD) - 10) or nnodesL > 180:
 			xcdatachunkL = [ { "caveworldchunk":len(xcdatachunks) } ]
 			xcdatachunks.push_back(xcdatachunkL)
