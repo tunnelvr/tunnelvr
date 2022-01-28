@@ -306,13 +306,19 @@ func maketubepolyassociation_andreorder(xcdrawing0, xcdrawing1):
 		return [[], [], []]
 
 	var tubevec = xcdrawing1.transform.xform(xcdrawing1.nodepointmean) - xcdrawing0.transform.xform(xcdrawing0.nodepointmean)
-	var tubevecdot0 = xcdrawing0.global_transform.basis.z.dot(tubevec)
-	var tubevecdot1 = xcdrawing1.global_transform.basis.z.dot(tubevec)
+	var xcdrawing0basisz = xcdrawing0.transform.basis.z
+	var xcdrawing1basisz = xcdrawing1.transform.basis.z
+	var tubevecdot0 = xcdrawing0basisz.dot(tubevec)
+	var tubevecdot1 = xcdrawing1basisz.dot(tubevec)
 	var polyinvert0 = (tubevecdot0 <= 0) == (pickedpolyindex0 != len(polys0) - 1)
 	var polyinvert1 = (tubevecdot1 <= 0) == (pickedpolyindex1 != len(polys1) - 1)
-	#var tubenormdot = xcdrawing0.global_transform.basis.z.dot(xcdrawing1.global_transform.basis.z)
-	#if not ((tubenormdot < 0) != (polyinvert0 != polyinvert1)):
+	#var tubenormdot = xcdrawing0basisz.dot(xcdrawing1basisz)
+	#if ((tubenormdot < 0) == (polyinvert0 == polyinvert1)) and not polys0islinearpath and not polys1islinearpath:
 	#	print("invert problem?")
+
+	if xcname0 == "s5" and xcname1 == "s2":
+		print("work to do debugging this one; it looks like it wraps twice")
+
 	var poly0 = polys0[pickedpolyindex0].duplicate()
 	var poly1 = polys1[pickedpolyindex1].duplicate()
 	if polyinvert0:
