@@ -184,12 +184,12 @@ static func ropeseqsfindsplitatnode(ropeseqs, nodename):
 	return ropeseqssplit
 	
 
-static func triangulatepolygon(poly):
+static func triangulateguardianpolygon(poly):
 	var surfaceTool = SurfaceTool.new()
 	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var pv = PoolVector2Array()
 	for p in poly:
-		pv.append(Vector2(p.x, p.y))
+		pv.append(Vector2(p.x, p.z))
 	var pi = Geometry.triangulate_polygon(pv)
 	for u in pi:
 		surfaceTool.add_uv(Vector2(poly[u].x, poly[u].z))

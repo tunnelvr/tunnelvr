@@ -41,7 +41,7 @@ func initplayerappearance_me():
 	else:
 		guardianpoly = PoolVector3Array([Vector3(1,0,1), Vector3(1,0,-1), Vector3(-1,0,-1), Vector3(-1,0,1)])
 	if guardianpoly != null:
-		get_node("GuardianPoly/floorareamesh").mesh = Polynets.triangulatepolygon(guardianpoly)
+		get_node("GuardianPoly/floorareamesh").mesh = Polynets.triangulateguardianpolygon(guardianpoly)
 		get_node("GuardianPoly/floorareamesh").set_surface_material(0, get_node("/root/Spatial/MaterialSystem").xcdrawingmaterial("guardianpoly"))
 		get_node("GuardianPoly/floorareamesh").visible = true
 	executingfeaturesavailable = get_node("/root/Spatial/ExecutingFeatures").find_executingfeaturesavailable()
