@@ -871,7 +871,8 @@ func makexctubeshell(xcdrawings):
 			var uvp = Vector2(nodepoints[poly[u]].x, nodepoints[poly[u]].y)
 			surfaceTool.add_uv(uvp)
 			surfaceTool.add_uv2(uvp)
-			surfaceTool.add_vertex($XCnodes.get_node(poly[u]).transform.origin)
+			#surfaceTool.add_vertex($XCnodes.get_node(poly[u]).transform.origin)
+			surfaceTool.add_vertex(nodepoints[poly[u]])
 	surfaceTool.generate_normals()
 	surfaceTool.commit(arraymesh)
 	return arraymesh
