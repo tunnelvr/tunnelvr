@@ -25,7 +25,7 @@ remote func initplayerappearanceJ(playerappearance):
 	puppetsetheadtorchlight(playerappearance.get("torchon", false))
 	var guardianpoly = playerappearance.get("guardianpoly", null)
 	if guardianpoly != null:
-		get_node("GuardianPoly/floorareamesh").mesh = Polynets.triangulatepolygon(guardianpoly)
+		get_node("GuardianPoly/floorareamesh").mesh = Polynets.triangulateguardianpolygon(guardianpoly)
 		get_node("GuardianPoly/floorareamesh").set_surface_material(0, get_node("/root/Spatial/MaterialSystem").xcdrawingmaterial("guardianpoly"))
 		get_node("GuardianPoly/floorareamesh").visible = true
 		

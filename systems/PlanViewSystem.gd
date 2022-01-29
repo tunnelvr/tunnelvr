@@ -59,10 +59,6 @@ func floorstyle_itemselected(floorstyleid):
 						 "xcvizstates":{ activetargetfloor.get_name():newdrawingcode } }
 		sketchsystem.actsketchchange([floorviz])
 
-func defaultimgtrim():
-	return { "imgwidth":10, 
-			 "imgtrimleftdown":Vector2(-5, -5),
-			 "imgtrimrightup":Vector2(5, 5) }
 
 var photolayerimport = 0
 func fetchbuttonpressed(item, column, idx):
@@ -104,27 +100,30 @@ func fetchbuttonpressed(item, column, idx):
 		
 	print("url to fetch: ", url)
 	if imgregex.search(fname):
-		var pt0 = $RealPlanCamera.global_transform.origin - Vector3(0,100,0)
-		for xcdrawing in sketchsystem.get_node("XCdrawings").get_children():
-			if xcdrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
-				var floory = xcdrawing.global_transform.origin.y
-				if pt0.y <= floory:
-					pt0.y = floory + 0.1
+		var transformpos = Transform(Vector3(1,0,0), Vector3(0,0,-1), Vector3(0,1,0), selfSpatial.playerMe.transform.origin + Vector3(0, 0.1, 0))
 		if planviewcontrols.get_node("ImportPhotoMode").pressed:
-			pt0.z += photolayerimport*0.1
-			photolayerimport += 1
-		
+			var MotionVectorPreview = selfSpatial.get_node("BodyObjects/PlayerMotion/MotionVectorPreview")
+			var controllertrans = MotionVectorPreview.global_transform if MotionVectorPreview.visible else selfSpatial.playerMe.get_node("HeadCam").global_transform 
+			var paneltrans = Transform()
+			var paneldistance = 5.6 if Tglobal.VRoperating else 3.8
+			paneltrans.origin = controllertrans.origin - paneldistance*ARVRServer.world_scale*(controllertrans.basis.z)
+			var lookatpos = controllertrans.origin - 2*paneldistance*ARVRServer.world_scale*(controllertrans.basis.z)
+			paneltrans = paneltrans.looking_at(lookatpos, Vector3(0, 1, 0))
+			paneltrans = Transform(paneltrans.basis.scaled(Vector3(ARVRServer.world_scale, ARVRServer.world_scale, ARVRServer.world_scale)), paneltrans.origin)
+			transformpos = paneltrans
 		var sname = sketchsystem.uniqueXCdrawingPapername(url)
-		var transformpos = Transform(Vector3(1,0,0), Vector3(0,0,-1), Vector3(0,1,0), pt0)
-		if planviewcontrols.get_node("ImportPhotoMode").pressed:
-			transformpos = Transform(Vector3(1,0,0), Vector3(0,1,0), Vector3(0,0,1), pt0)
-			
+		var defaultimgtrim = { "imgwidth":10*0.2, 
+							   "imgtrimleftdown":Vector2(-5, -5)*0.2,
+							   "imgtrimrightup":Vector2(5, 5)*0.2 }
 		activetargetfloorimgtrim = { "name":sname, 
 									 "drawingtype":DRAWING_TYPE.DT_FLOORTEXTURE,
 									 "xcresource":url,
-									 "imgtrim":defaultimgtrim(),
+									 "imgtrim":defaultimgtrim,
 									 "transformpos":transformpos
 								   }
+
+
+
 		var floorviz = getactivetargetfloorViz(sname)
 		if planviewcontrols.get_node("ImportPhotoMode").pressed:
 			floorviz["xcvizstates"][sname] = (DRAWING_TYPE.VIZ_XCD_FLOOR_NORMAL | DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE_B | DRAWING_TYPE.VIZ_XCD_FLOOR_GHOSTLY_B)
@@ -344,7 +343,7 @@ func planviewtodict():
 func setcameracullmasks(bcentrelinesvisible, bplantubesvisible):
 	var plancameracullmask
 	var plancameraraycollisionmask
-	var playermeheadcam = get_node("/root/Spatial").playerMe.get_node("HeadCam")
+	var playermeheadcam = selfSpatial.playerMe.get_node("HeadCam")
 	if bcentrelinesvisible:
 		playermeheadcam.cull_mask = CollisionLayer.VLCM_PlayerCamera
 		get_node("/root/Spatial/BodyObjects/LaserOrient/RayCast").collision_mask = CollisionLayer.CLV_MainRayAll

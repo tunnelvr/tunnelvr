@@ -27,7 +27,7 @@ var current_viewport_mousedown = false
 var collision_point = Vector3(0, 0, 0)
 var viewport_point = Vector2(0, 0)
 
-onready var viewportforvirtualkeyboard = get_node("/root/Spatial/GuiSystem/GUIPanel3D/Viewport")
+var viewportforvirtualkeyboard = null
 
 
 signal enter_pressed;

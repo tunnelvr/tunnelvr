@@ -429,7 +429,6 @@ func mergexcrpcdata(xcdata):
 	if "transformpos" in xcdata:
 		set_transform(xcdata["transformpos"])
 
-
 	if drawingtype == DRAWING_TYPE.DT_CENTRELINE:
 		print("Centreline now being merged: ", get_name())
 
@@ -825,9 +824,6 @@ func updatexcpaths_centreline(pathlines, mlinewidth):
 		pathlines.mesh = newmesh
 		pathlines.set_surface_material(0, m)
 
-
-
-
 func makexctubeshell(xcdrawings):
 	var polys = Polynets.makexcdpolys(nodepoints, onepathpairs)
 	if len(polys) <= 2:
@@ -843,37 +839,40 @@ func makexctubeshell(xcdrawings):
 				forepolyindexes.append(polyindex)
 			else:
 				backpolyindexes.append(polyindex)
-	
-	var polypartial = null
-	if forepolyindexes == [ len(polys)-1 ]:
+	var outerwholepolycase = [ len(polys)-1 ]
+	var polypartial
+	var breverseorient
+	if forepolyindexes == outerwholepolycase:
 		polypartial = backpolyindexes
-	elif backpolyindexes == [ len(polys)-1 ]:
+		breverseorient = true
+	elif backpolyindexes == outerwholepolycase:
 		polypartial = forepolyindexes
+		breverseorient = false
 	else:
 		return null
 	
-	var polyindexes = [ ]
+	var filledpolyindexes = [ ]
 	for i in range(len(polys)-1):
 		if not polypartial.has(i):
-			polyindexes.append(i)
+			filledpolyindexes.append(i)
 	
 	var arraymesh = ArrayMesh.new()
 	var surfaceTool = SurfaceTool.new()
-	#surfaceTool.set_material(Material.new())
 	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
-	for j in polyindexes:
+	for j in filledpolyindexes:
 		var poly = polys[j]
-		var pv = PoolVector2Array()
-		for i in range(len(poly)):
-			var p = poly[i]
-			pv.append(Vector2(nodepoints[p].x, nodepoints[p].y))
-		var pi = Geometry.triangulate_polygon(pv)
+		var pv = [ ]
+		for p in poly:
+			pv.push_back(Vector2(nodepoints[p].x, nodepoints[p].y))
+		var pi = Geometry.triangulate_polygon(PoolVector2Array(pv))
+		if breverseorient:
+			pi.invert()
 		for u in pi:
-			#surfaceTool.add_vertex($XCnodes.get_node(poly[u]).global_transform.origin)
 			var uvp = Vector2(nodepoints[poly[u]].x, nodepoints[poly[u]].y)
 			surfaceTool.add_uv(uvp)
 			surfaceTool.add_uv2(uvp)
-			surfaceTool.add_vertex($XCnodes.get_node(poly[u]).transform.origin)
+			#surfaceTool.add_vertex($XCnodes.get_node(poly[u]).transform.origin)
+			surfaceTool.add_vertex(nodepoints[poly[u]])
 	surfaceTool.generate_normals()
 	surfaceTool.commit(arraymesh)
 	return arraymesh
