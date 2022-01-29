@@ -239,10 +239,10 @@ func setdrawingvisiblecode(ldrawingvisiblecode):
 		var mat = $XCdrawingplane/CollisionShape/MeshInstance.get_surface_material(0)
 		if (drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_FUNDAMENTALMATERIAL_MASK) != (drawingvisiblecode_old & DRAWING_TYPE.VIZ_XCD_FLOOR_FUNDAMENTALMATERIAL_MASK):
 			var fmatname = "xcdrawingmaterials/floorbordered"
-			if ((drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_GHOSTLY_B) != 0):
-				fmatname = "xcdrawingmaterials/floorborderedghostly"
-			elif ((drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE_B) != 0):
+			if ((drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE_B) != 0):
 				fmatname = "xcdrawingmaterials/floorborderedunshaded"
+			elif ((drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_GHOSTLY_B) != 0):
+				fmatname = "xcdrawingmaterials/floorborderedghostly"
 			var fnewmat = get_node("/root/Spatial/MaterialSystem").get_node(fmatname).get_surface_material(0).duplicate()
 			fnewmat.set_shader_param("texture_albedo", mat.get_shader_param("texture_albedo"))
 			mat = fnewmat
