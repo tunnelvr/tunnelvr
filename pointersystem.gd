@@ -1690,10 +1690,11 @@ func buttonreleased_vrgrip():
 		sketchsystem.actsketchchange([planviewsystem.getactivetargetfloorViz("")])
 		
 	elif pointertargettype == "XCnode" and gripmenu.gripmenupointertargettype == "XCnode" and (pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING or pointertargetwall.drawingtype == DRAWING_TYPE.DT_ROPEHANG):
-		var ds = DRAWING_TYPE.VIZ_XCD_HIDE  if (pointertargetwall.drawingtype == DRAWING_TYPE.DT_ROPEHANG or pointertargetwall.xcconnectstoshell()) else DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE
 		var updatexcshells = [ pointertargetwall.get_name() ]
 		var updatetubeshells = pointertargetwall.updatetubeshellsconn()
-		sketchsystem.actsketchchange([{ "xcvizstates":{ pointertargetwall.get_name():ds }, "updatetubeshells":updatetubeshells, "updatexcshells":updatexcshells }])
+		sketchsystem.actsketchchange([{ "xcvizstates":{}, "updatetubeshells":updatetubeshells, "updatexcshells":updatexcshells }])
+		var ds = DRAWING_TYPE.VIZ_XCD_HIDE  if (pointertargetwall.drawingtype == DRAWING_TYPE.DT_ROPEHANG or pointertargetwall.xcconnectstoshell()) else DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE
+		sketchsystem.actsketchchange([{ "xcvizstates":{ pointertargetwall.get_name():ds }}])
 		if pointertargetwall == activetargetwall:
 			setactivetargetwall(null)
 		if ds == DRAWING_TYPE.VIZ_XCD_HIDE:
