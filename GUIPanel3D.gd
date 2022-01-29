@@ -356,6 +356,59 @@ func _on_switchtest(index):
 	elif nssel == "Toggle Fog":
 		playerMe.togglefog()
 		SwitchTest.selected = 0
+
+	elif nssel == "Huge Spiral":
+		var xcrad = 1.5
+		var Nxcnodes = 6
+		var spiralrad = 8.0
+		var spiralradshrink = 2.0
+		var spiralangstep = 27.0
+		var spiralzfac = 3.0/360
+		var Nxcplanes = 273
+
+		var conepathpairs = [ ]
+		var cnodepoints = { }
+		for i in range(Nxcnodes):
+			var d = 360.0*i/Nxcnodes
+			cnodepoints["n%d" % i] = Vector3(cos(deg2rad(d))*xcrad, sin(deg2rad(d))*xcrad, 0.0)
+			conepathpairs.push_back("n%d" % i)
+			conepathpairs.push_back("n%d" % ((i+1)%Nxcnodes))
+		var tnewdrawinglinks = [ "n0", "n0", "pebbles", null ]
+		tnewdrawinglinks.append_array([ "n3", "n3", "simpledirt", null ])
+
+		var prevxcname = null
+		for j in range(Nxcplanes):
+			var ang = j*spiralangstep
+			var lspiralrad = spiralrad - spiralradshrink*j/Nxcplanes
+			var pt0 = playerMe.global_transform.origin + Vector3(cos(deg2rad(ang))*lspiralrad, ang*spiralzfac + xcrad, sin(deg2rad(ang))*lspiralrad)
+			var xcdata = { "name":sketchsystem.uniqueXCname("s"), 
+						   "drawingtype":DRAWING_TYPE.DT_XCDRAWING,
+						   "drawingvisiblecode":DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE,
+						   "transformpos":Transform(Basis().rotated(Vector3(0,-1,0), deg2rad(ang)), pt0), 
+						   "nodepoints":cnodepoints, 
+						   "onepathpairs":conepathpairs }
+
+			var xcviz = { "xcvizstates": { xcdata["name"]:DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE } }
+			sketchsystem.actsketchchange([ xcdata, xcviz ])
+			if prevxcname != null:
+				var xctdata = { "tubename":"**notset", 
+								 "xcname0":prevxcname,
+								 "xcname1":xcdata["name"],
+								 "prevdrawinglinks":[], 
+								 "newdrawinglinks":tnewdrawinglinks }
+				var finishedplanedrawingtype =  DRAWING_TYPE.VIZ_XCD_HIDE
+				#var finishedplanedrawingtype =  DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE
+				#var finishedplanedrawingtype = DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE
+				var xctdataviz = {"xcvizstates":{ prevxcname:finishedplanedrawingtype }, 
+							"updatetubeshells":[
+								{ "tubename":xctdata["tubename"], "xcname0":xctdata["xcname0"], "xcname1":xctdata["xcname1"] } 
+							] }
+				sketchsystem.actsketchchange([xctdata, xctdataviz])
+
+			prevxcname = xcdata["name"]
+			yield(get_tree().create_timer(0.05), "timeout")
+			
+		SwitchTest.selected = 0
 		
 	elif prevnssel.begins_with("opt:") or nssel.begins_with("opt:"):
 		var materialsystem = get_node("/root/Spatial/MaterialSystem")
