@@ -1306,13 +1306,15 @@ void vertex() {
 
 void fragment() {
 	vec2 base_uv = UV;
-	vec4 albedo_tex = texture(texture_albedo,base_uv);
+	vec4 albedo_tex = texture(texture_albedo, base_uv);
+	if (albedo_tex.a == 0.0) 
+		discard;
 	ALBEDO = albedo.rgb * albedo_tex.rgb;
 	if (uv_borderwidth != 0.0) {
 		float uvfromedge = min(min(uvorg.x, 1.0 - uvorg.x), min(uvorg.y, 1.0 - uvorg.y));
 		float lambda = max(uv_borderwidth - uvfromedge, 0.0)/uv_borderwidth;
 		ALBEDO = mix(ALBEDO, albedo_border.rgb, lambda);
-	}
+	} 
 	METALLIC = metallic;
 	ROUGHNESS = roughness;
 	SPECULAR = specular;
@@ -1352,6 +1354,8 @@ void vertex() {
 void fragment() {
 	vec2 base_uv = UV;
 	vec4 albedo_tex = texture(texture_albedo,base_uv);
+	if (albedo_tex.a == 0.0) 
+		discard;
 	ALBEDO = albedo.rgb * albedo_tex.rgb;
 	ALPHA = albedo.a;
 	if (uv_borderwidth != 0.0) {
