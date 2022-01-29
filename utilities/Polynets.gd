@@ -1022,21 +1022,29 @@ class sortquatfuncclass:
 	static func sortquatfunc(a, b):
 		return a.x < b.x or (a.x == b.x and (a.y < b.y or (a.y == b.y and (a.z < b.z or (a.z == b.z and a.w < b.w)))))
 
-static func unifiedclosedmeshwithnormals(tubeslist):
+static func unifiedclosedmeshwithnormals(tubeslist, drawingslist):
 	var tubepoolvectors = [ ]
 	var vertqindexes = [ ]
+
 	for tube in tubeslist:
 		for k in range(tube.get_node("XCtubesectors").get_child_count()):
 			var tubesector = tube.get_node("XCtubesectors").get_child(k)
-			if tube.xcsectormaterials[k] == "hole":
-				continue
-			var mdt = MeshDataTool.new()
-			#var surfmesh = tubesector.get_node("MeshInstance").mesh.surface_get_arrays(0)
-			mdt.create_from_surface(tubesector.get_node("MeshInstance").mesh, 0)
-			for i in range(mdt.get_face_count()):
-				for j in range(3):
-					var p = mdt.get_vertex(mdt.get_face_vertex(i, j))
+			if tube.xcsectormaterials[k] != "hole":
+				var surfmesharray = tubesector.get_node("MeshInstance").mesh.surface_get_arrays(0)
+				var surfverts = surfmesharray[ArrayMesh.ARRAY_VERTEX]
+				assert (surfmesharray[ArrayMesh.ARRAY_INDEX] == null)
+				for p in surfverts:
 					vertqindexes.push_back(Quat(p.x, p.y, p.z, len(vertqindexes)))
+
+	for xcdrawing in drawingslist:
+		if xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING and xcdrawing.has_node("XCflatshell") and xcdrawing.xcflatshellmaterial != "hole":
+			var surfmesharray = xcdrawing.get_node("XCflatshell/MeshInstance").mesh.surface_get_arrays(0)
+			var surfverts = surfmesharray[ArrayMesh.ARRAY_VERTEX]
+			assert (surfmesharray[ArrayMesh.ARRAY_INDEX] == null)
+			for lp in surfverts:
+				var p = xcdrawing.transform.xform(lp)
+				vertqindexes.push_back(Quat(p.x, p.y, p.z, len(vertqindexes)))
+					
 	vertqindexes.sort_custom(sortquatfuncclass, "sortquatfunc")
 	var dedupverts = [ ]
 	var trirefs = [ ]

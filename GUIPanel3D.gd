@@ -379,7 +379,7 @@ func _on_switchtest(index):
 	
 		if nssel == "opt: tunnelx":
 			var tunnelxoutline = sketchsystem.get_node("tunnelxoutline")
-			var unifiedclosedmesh = Polynets.unifiedclosedmeshwithnormals(sketchsystem.get_node("XCtubes").get_children())
+			var unifiedclosedmesh = Polynets.unifiedclosedmeshwithnormals(sketchsystem.get_node("XCtubes").get_children(), sketchsystem.get_node("XCdrawings").get_children())
 			var unifiedclosedmeshaabb = unifiedclosedmesh.get_aabb()
 			tunnelxoutline.get_node("blackoutline").mesh = unifiedclosedmesh
 			tunnelxoutline.get_node("whiteinfill").mesh = unifiedclosedmesh
@@ -387,10 +387,16 @@ func _on_switchtest(index):
 			tunnelxoutline.get_node("whiteinfill").material_override.set_shader_param("yhi", unifiedclosedmeshaabb.position.y + unifiedclosedmeshaabb.size.y)
 			tunnelxoutline.visible = true
 			sketchsystem.get_node("XCtubes").visible = false
-
+			for xcdrawing in sketchsystem.get_node("XCdrawings").get_children():
+				if xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING and xcdrawing.has_node("XCflatshell") and xcdrawing.xcflatshellmaterial != "hole":
+					xcdrawing.get_node("XCflatshell").visible = false
+				
 		elif prevnssel == "opt: tunnelx":
 			sketchsystem.get_node("tunnelxoutline").visible = false
 			sketchsystem.get_node("XCtubes").visible = true
+			for xcdrawing in sketchsystem.get_node("XCdrawings").get_children():
+				if xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING and xcdrawing.has_node("XCflatshell") and xcdrawing.xcflatshellmaterial != "hole":
+					xcdrawing.get_node("XCflatshell").visible = true
 
 		setguipanelhide()
 				
