@@ -1025,7 +1025,8 @@ class sortquatfuncclass:
 static func unifiedclosedmeshwithnormals(tubeslist, drawingslist):
 	var tubepoolvectors = [ ]
 	var vertqindexes = [ ]
-
+	var ntriangles = 0
+	var nsurfaces = 0
 	for tube in tubeslist:
 		for k in range(tube.get_node("XCtubesectors").get_child_count()):
 			var tubesector = tube.get_node("XCtubesectors").get_child(k)
@@ -1035,16 +1036,22 @@ static func unifiedclosedmeshwithnormals(tubeslist, drawingslist):
 				assert (surfmesharray[ArrayMesh.ARRAY_INDEX] == null)
 				for p in surfverts:
 					vertqindexes.push_back(Quat(p.x, p.y, p.z, len(vertqindexes)))
+				ntriangles += len(surfverts)/3
+				nsurfaces += 1
 
 	for xcdrawing in drawingslist:
 		if xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING and xcdrawing.has_node("XCflatshell") and xcdrawing.xcflatshellmaterial != "hole":
 			var surfmesharray = xcdrawing.get_node("XCflatshell/MeshInstance").mesh.surface_get_arrays(0)
-			var surfverts = surfmesharray[ArrayMesh.ARRAY_VERTEX]
-			assert (surfmesharray[ArrayMesh.ARRAY_INDEX] == null)
-			for lp in surfverts:
-				var p = xcdrawing.transform.xform(lp)
-				vertqindexes.push_back(Quat(p.x, p.y, p.z, len(vertqindexes)))
-					
+			if len(surfmesharray) != 0:
+				var surfverts = surfmesharray[ArrayMesh.ARRAY_VERTEX]
+				assert (surfmesharray[ArrayMesh.ARRAY_INDEX] == null)
+				for lp in surfverts:
+					var p = xcdrawing.transform.xform(lp)
+					vertqindexes.push_back(Quat(p.x, p.y, p.z, len(vertqindexes)))
+				ntriangles += len(surfverts)/3
+				nsurfaces += 1
+	print("Number of triangles: ", ntriangles, " number of surfaces: ", nsurfaces)
+
 	vertqindexes.sort_custom(sortquatfuncclass, "sortquatfunc")
 	var dedupverts = [ ]
 	var trirefs = [ ]
