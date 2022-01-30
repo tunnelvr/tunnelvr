@@ -359,12 +359,19 @@ func _on_switchtest(index):
 
 	elif nssel == "Huge Spiral":
 		var xcrad = 1.5
-		var Nxcnodes = 6
+		var Nxcnodes = 23
 		var spiralrad = 8.0
 		var spiralradshrink = 2.0
-		var spiralangstep = 27.0
-		var spiralzfac = 3.0/360
-		var Nxcplanes = 273
+		var spiralangstep = 11.0
+		var spiralzfac = 2.5/360
+		var Nxcplanes = 373
+
+		xcrad = 0.3
+		spiralrad = 1.5
+		spiralradshrink = 1.0
+		spiralangstep = 11.0
+		spiralzfac = 0.35/360
+
 
 		var conepathpairs = [ ]
 		var cnodepoints = { }
@@ -373,14 +380,17 @@ func _on_switchtest(index):
 			cnodepoints["n%d" % i] = Vector3(cos(deg2rad(d))*xcrad, sin(deg2rad(d))*xcrad, 0.0)
 			conepathpairs.push_back("n%d" % i)
 			conepathpairs.push_back("n%d" % ((i+1)%Nxcnodes))
-		var tnewdrawinglinks = [ "n0", "n0", "pebbles", null ]
-		tnewdrawinglinks.append_array([ "n3", "n3", "simpledirt", null ])
+		var tubemats = [ "pebbles", "simpledirt", "bluewater", "calcite" ]
+		var tnewdrawinglinks = [ ]
+		var tubesectorstep = 5
+		for i in range(0, Nxcnodes, tubesectorstep):
+			tnewdrawinglinks.append_array([ "n%d"%i, "n%d"%i, tubemats[(i/tubesectorstep)%len(tubemats)], null ])
 
 		var prevxcname = null
 		for j in range(Nxcplanes):
 			var ang = j*spiralangstep
 			var lspiralrad = spiralrad - spiralradshrink*j/Nxcplanes
-			var pt0 = playerMe.global_transform.origin + Vector3(cos(deg2rad(ang))*lspiralrad, ang*spiralzfac + xcrad, sin(deg2rad(ang))*lspiralrad)
+			var pt0 = playerMe.get_node("HeadCam").global_transform.origin + Vector3(cos(deg2rad(ang))*lspiralrad, ang*spiralzfac + xcrad + 0.2, sin(deg2rad(ang))*lspiralrad)
 			var xcdata = { "name":sketchsystem.uniqueXCname("s"), 
 						   "drawingtype":DRAWING_TYPE.DT_XCDRAWING,
 						   "drawingvisiblecode":DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE,
@@ -395,18 +405,23 @@ func _on_switchtest(index):
 								 "xcname0":prevxcname,
 								 "xcname1":xcdata["name"],
 								 "prevdrawinglinks":[], 
-								 "newdrawinglinks":tnewdrawinglinks }
-				var finishedplanedrawingtype =  DRAWING_TYPE.VIZ_XCD_HIDE
-				#var finishedplanedrawingtype =  DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE
+								 "newdrawinglinks":tnewdrawinglinks.duplicate() }
+				#var finishedplanedrawingtype =  DRAWING_TYPE.VIZ_XCD_HIDE
+				var finishedplanedrawingtype =  DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE
 				#var finishedplanedrawingtype = DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE
-				var xctdataviz = {"xcvizstates":{ prevxcname:finishedplanedrawingtype }, 
-							"updatetubeshells":[
-								{ "tubename":xctdata["tubename"], "xcname0":xctdata["xcname0"], "xcname1":xctdata["xcname1"] } 
-							] }
-				sketchsystem.actsketchchange([xctdata, xctdataviz])
-
+				var xctdataviz = { "xcvizstates":{ prevxcname:finishedplanedrawingtype }, 
+								   "updatetubeshells":[
+									{ "tubename":xctdata["tubename"], "xcname0":xctdata["xcname0"], "xcname1":xctdata["xcname1"] } 
+								] }
+				sketchsystem.actsketchchange([ xctdata, xctdataviz ])
+				
+				var matrot0 = tnewdrawinglinks[2]
+				for i in range(2, len(tnewdrawinglinks)-4, 4):
+					tnewdrawinglinks[i] = tnewdrawinglinks[i+4]
+				tnewdrawinglinks[-2] = matrot0
+				
 			prevxcname = xcdata["name"]
-			yield(get_tree().create_timer(0.05), "timeout")
+			yield(get_tree().create_timer(0.04), "timeout")
 			
 		SwitchTest.selected = 0
 		
