@@ -365,6 +365,22 @@ func setcameracullmasks(bcentrelinesvisible, bplantubesvisible):
 	get_node("PlanView/Viewport/PlanGUI/Camera").cull_mask = plancameracullmask
 	get_node("RealPlanCamera/LaserScope/LaserOrient/RayCast").collision_mask = plancameraraycollisionmask
 
+func settunnelxoutlineshadervalues():
+	var tunnelxoutline = sketchsystem.get_node("tunnelxoutline")
+	var plancamera = $PlanView/Viewport/PlanGUI/Camera
+	var blackoutline = tunnelxoutline.get_node("blackoutline")
+	var whiteinfill = tunnelxoutline.get_node("whiteinfill")
+	print("whiteinfill far ", plancamera.far)
+	var camerafar = plancamera.far*0.9
+	var cameranear = plancamera.near + min(1, camerafar/10)
+	var wounddistancefactor = 1/(cameranear/camerafar)
+	whiteinfill.material_override.set_shader_param("camerafar", camerafar)
+	whiteinfill.material_override.set_shader_param("fogcolor", plancamera.environment.background_color)
+	whiteinfill.material_override.set_shader_param("wounddistancefactor", wounddistancefactor)
+	blackoutline.material_override.set_shader_param("camerafar", camerafar)
+	blackoutline.material_override.set_shader_param("wounddistancefactor", wounddistancefactor)
+	blackoutline.material_override.set_shader_param("fogcolor", plancamera.environment.background_color)
+
 func actplanviewdict(pvchange, resettransmitbutton=true):
 	var plancamera = $PlanView/Viewport/PlanGUI/Camera
 	if resettransmitbutton:
@@ -382,6 +398,7 @@ func actplanviewdict(pvchange, resettransmitbutton=true):
 		plancamera.environment.fog_color = plancamera.environment.background_color
 		plancamera.environment.fog_color = plancamera.environment.background_color
 		plancamera.far = plancamera.environment.fog_depth_end
+		settunnelxoutlineshadervalues()
 	if "plancamerasize" in pvchange:
 		$PlanView/Viewport/PlanGUI/Camera.size = pvchange["plancamerasize"]
 		$RealPlanCamera/RealCameraBox.scale = Vector3($PlanView/Viewport/PlanGUI/Camera.size, 1.0, $PlanView/Viewport/PlanGUI/Camera.size)

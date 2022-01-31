@@ -454,13 +454,7 @@ func _on_switchtest(index):
 
 			blackoutline.mesh = unifiedclosedmesh
 			whiteinfill.mesh = unifiedclosedmesh
-			#get_node("/root/Spatial/PlanViewSystem").set
-
-			print("whiteinfill far ", plancamera.far)
-			whiteinfill.material_override.set_shader_param("camerafar", plancamera.far)
-			whiteinfill.material_override.set_shader_param("fogcolor", plancamera.environment.background_color)
-			blackoutline.material_override.set_shader_param("camerafar", plancamera.far)
-			blackoutline.material_override.set_shader_param("fogcolor", plancamera.environment.background_color)
+			get_node("/root/Spatial/PlanViewSystem").settunnelxoutlineshadervalues()
 			tunnelxoutline.visible = true
 			sketchsystem.get_node("XCtubes").visible = false
 			for xcdrawing in sketchsystem.get_node("XCdrawings").get_children():

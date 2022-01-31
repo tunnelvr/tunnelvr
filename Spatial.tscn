@@ -284,19 +284,22 @@ render_mode blend_mix,depth_draw_opaque,cull_back,diffuse_burley,specular_schlic
 uniform vec4 albedo : hint_color;
 uniform float noffset = 0.1;
 uniform vec4 fogcolor : hint_color; 
+uniform vec4 woundcolor : hint_color; 
 
 uniform float camerafar = 100.0;
-varying float yforcolor; 
+uniform float wounddistancefactor = 10.0; 
+varying float cameraplandistancefactor; 
 
 void vertex() {
 	vec3 dvec = VERTEX - CAMERA_MATRIX[3].xyz; 
 	float dvcam = -dot(CAMERA_MATRIX[2].xyz, dvec); 
-	yforcolor = 1.0 - (dvcam/camerafar); 
+	cameraplandistancefactor = dvcam/camerafar; 
 	VERTEX += NORMAL*noffset;
 }
 
 void fragment() {
-	ALBEDO = mix(fogcolor.rgb, albedo.rgb, yforcolor*5.0); 
+	ALBEDO = mix(albedo.rgb, fogcolor.rgb, clamp((cameraplandistancefactor-0.8)*5.0, 0.0, 1.0)); 
+	ALBEDO = mix(woundcolor.rgb, ALBEDO, clamp(cameraplandistancefactor*wounddistancefactor, 0.0, 1.0)); 
 }
 "
 
@@ -305,7 +308,9 @@ shader = SubResource( 255 )
 shader_param/albedo = Color( 0.0156863, 0, 0, 1 )
 shader_param/noffset = 0.1
 shader_param/fogcolor = Color( 0.780392, 0.886275, 0.996078, 1 )
+shader_param/woundcolor = Color( 0.988235, 0.0156863, 0.0156863, 1 )
 shader_param/camerafar = 100.0
+shader_param/wounddistancefactor = 10.0
 
 [sub_resource type="ArrayMesh" id=254]
 
@@ -317,27 +322,25 @@ render_mode blend_mix,depth_draw_opaque,cull_back,diffuse_burley,specular_schlic
 uniform vec4 albedo : hint_color;
 
 uniform float camerafar = 100.0; 
+uniform float wounddistancefactor = 10.0; 
 
 uniform vec4 colorhi : hint_color;
 uniform vec4 colorlo : hint_color; 
 uniform vec4 fogcolor : hint_color; 
 uniform vec4 woundcolor : hint_color; 
 
-varying float yforcolor; 
+varying float cameraplandistancefactor; 
 
 void vertex() {
-	//yforcolor = clamp((VERTEX.y - ylo)/(yhi - ylo), 0.0, 1.0); 
 	vec3 dvec = VERTEX - CAMERA_MATRIX[3].xyz; 
 	float dvcam = -dot(CAMERA_MATRIX[2].xyz, dvec); 
-	yforcolor = 1.0 - (dvcam/camerafar); 
+	cameraplandistancefactor = dvcam/camerafar; 
 }
 
 void fragment() {
-	ALBEDO = mix(colorlo.rgb, colorhi.rgb, yforcolor);  
-	if (yforcolor < 0.2)
-		ALBEDO = mix(fogcolor.rgb, ALBEDO, yforcolor*5.0); 
-	if (yforcolor > 0.95)
-		ALBEDO = woundcolor.rgb; 
+	ALBEDO = mix(colorhi.rgb, colorlo.rgb, clamp(cameraplandistancefactor, 0.0, 1.0));  
+	ALBEDO = mix(ALBEDO, fogcolor.rgb, clamp((cameraplandistancefactor-0.8)*5.0, 0.0, 1.0)); 
+	ALBEDO = mix(woundcolor.rgb, ALBEDO, clamp(cameraplandistancefactor*wounddistancefactor, 0.0, 1.0)); 
 	METALLIC = 0.0;
 	ROUGHNESS = 1.0;
 	SPECULAR = 0.5;
@@ -348,7 +351,8 @@ void fragment() {
 shader = SubResource( 257 )
 shader_param/albedo = Color( 0.968627, 0.956863, 0.866667, 1 )
 shader_param/camerafar = 100.0
-shader_param/colorhi = Color( 0.992157, 0.694118, 0.627451, 1 )
+shader_param/wounddistancefactor = 10.0
+shader_param/colorhi = Color( 0.984314, 0.819608, 0.784314, 1 )
 shader_param/colorlo = Color( 0.631373, 0.615686, 0.984314, 1 )
 shader_param/fogcolor = Color( 0.780392, 0.886275, 0.996078, 1 )
 shader_param/woundcolor = Color( 0.988235, 0.0156863, 0.0156863, 1 )
