@@ -406,7 +406,7 @@ func actplanviewdict(pvchange, resettransmitbutton=true):
 			if Tglobal.phoneoverlay != null:
 				$PlanView/Viewport/PlanGUI/Camera.current = true
 				$PlanView/Viewport.visible = true
-				Tglobal.phoneoverlay.get_node("ThumbLeft").visible = false
+				#Tglobal.phoneoverlay.get_node("ThumbLeft").visible = false
 				Tglobal.phoneoverlay.get_node("ThumbRight").visible = false
 			else:
 				get_node("PlanView/CollisionShape").disabled = false
