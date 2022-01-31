@@ -319,7 +319,6 @@ code = "// NOTE: Shader automatically converted from Godot Engine 3.4.stable's S
 
 shader_type spatial;
 render_mode blend_mix,depth_draw_opaque,cull_back,diffuse_burley,specular_schlick_ggx,unshaded,shadows_disabled;
-uniform vec4 albedo : hint_color;
 
 uniform float camerafar = 100.0; 
 uniform float wounddistancefactor = 10.0; 
@@ -328,17 +327,21 @@ uniform vec4 colorhi : hint_color;
 uniform vec4 colorlo : hint_color; 
 uniform vec4 fogcolor : hint_color; 
 uniform vec4 woundcolor : hint_color; 
+uniform vec4 faceupbrightcolor : hint_color;
 
 varying float cameraplandistancefactor; 
+varying float normalfaceupfactor; 
 
 void vertex() {
 	vec3 dvec = VERTEX - CAMERA_MATRIX[3].xyz; 
 	float dvcam = -dot(CAMERA_MATRIX[2].xyz, dvec); 
 	cameraplandistancefactor = dvcam/camerafar; 
+	normalfaceupfactor = clamp((1.0 - NORMAL.y)*0.2, 0.0, 1.0); 
 }
 
 void fragment() {
 	ALBEDO = mix(colorhi.rgb, colorlo.rgb, clamp(cameraplandistancefactor, 0.0, 1.0));  
+	ALBEDO = mix(ALBEDO, faceupbrightcolor.rgb, normalfaceupfactor); 
 	ALBEDO = mix(ALBEDO, fogcolor.rgb, clamp((cameraplandistancefactor-0.8)*5.0, 0.0, 1.0)); 
 	ALBEDO = mix(woundcolor.rgb, ALBEDO, clamp(cameraplandistancefactor*wounddistancefactor, 0.0, 1.0)); 
 	METALLIC = 0.0;
@@ -349,13 +352,13 @@ void fragment() {
 
 [sub_resource type="ShaderMaterial" id=258]
 shader = SubResource( 257 )
-shader_param/albedo = Color( 0.968627, 0.956863, 0.866667, 1 )
 shader_param/camerafar = 100.0
 shader_param/wounddistancefactor = 10.0
-shader_param/colorhi = Color( 0.984314, 0.819608, 0.784314, 1 )
-shader_param/colorlo = Color( 0.631373, 0.615686, 0.984314, 1 )
+shader_param/colorhi = Color( 1, 0.631373, 0.631373, 1 )
+shader_param/colorlo = Color( 0.615686, 0.623529, 1, 1 )
 shader_param/fogcolor = Color( 0.780392, 0.886275, 0.996078, 1 )
 shader_param/woundcolor = Color( 0.988235, 0.0156863, 0.0156863, 1 )
+shader_param/faceupbrightcolor = null
 
 [sub_resource type="CanvasItemMaterial" id=75]
 
@@ -2068,6 +2071,7 @@ cast_shadow = 0
 mesh = SubResource( 254 )
 
 [node name="whiteinfill" type="MeshInstance" parent="SketchSystem/tunnelxoutline"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0370045, 0.0221257, -0.00879288 )
 layers = 4097
 material_override = SubResource( 258 )
 cast_shadow = 0
