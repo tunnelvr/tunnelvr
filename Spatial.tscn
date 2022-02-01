@@ -354,11 +354,11 @@ void fragment() {
 shader = SubResource( 257 )
 shader_param/camerafar = 100.0
 shader_param/wounddistancefactor = 10.0
-shader_param/colorhi = Color( 1, 0.631373, 0.631373, 1 )
-shader_param/colorlo = Color( 0.615686, 0.623529, 1, 1 )
+shader_param/colorhi = Color( 0.494118, 0.992157, 0.545098, 1 )
+shader_param/colorlo = Color( 0.419608, 0.427451, 1, 1 )
 shader_param/fogcolor = Color( 0.780392, 0.886275, 0.996078, 1 )
-shader_param/woundcolor = Color( 0.988235, 0.0156863, 0.0156863, 1 )
-shader_param/faceupbrightcolor = null
+shader_param/woundcolor = Color( 0.992157, 0.478431, 0.141176, 1 )
+shader_param/faceupbrightcolor = Color( 0.827451, 1, 0.807843, 1 )
 
 [sub_resource type="CanvasItemMaterial" id=75]
 
@@ -2071,7 +2071,6 @@ cast_shadow = 0
 mesh = SubResource( 254 )
 
 [node name="whiteinfill" type="MeshInstance" parent="SketchSystem/tunnelxoutline"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0370045, 0.0221257, -0.00879288 )
 layers = 4097
 material_override = SubResource( 258 )
 cast_shadow = 0
@@ -4128,6 +4127,24 @@ margin_top = 564.0
 margin_right = 291.0
 margin_bottom = 584.0
 text = "Menu"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="DepthInfo" type="ColorRect" parent="PhoneOverlay"]
+visible = false
+margin_left = 50.0
+margin_top = 50.0
+margin_right = 300.0
+margin_bottom = 77.0
+mouse_filter = 2
+color = Color( 0.0470588, 0.168627, 0.054902, 1 )
+
+[node name="Fields" type="Label" parent="PhoneOverlay/DepthInfo"]
+margin_top = 4.0
+margin_right = 282.0
+margin_bottom = 24.0
+text = "dsfsdf"
 __meta__ = {
 "_edit_use_anchors_": false
 }

@@ -370,10 +370,9 @@ func settunnelxoutlineshadervalues():
 	var plancamera = $PlanView/Viewport/PlanGUI/Camera
 	var blackoutline = tunnelxoutline.get_node("blackoutline")
 	var whiteinfill = tunnelxoutline.get_node("whiteinfill")
-	print("whiteinfill far ", plancamera.far)
 	var camerafar = plancamera.far*0.9
 	var cameranear = plancamera.near + min(1, camerafar/10)
-	var wounddistancefactor = 1/(cameranear/camerafar)
+	var wounddistancefactor = 1.0/(cameranear/camerafar)
 	whiteinfill.material_override.set_shader_param("camerafar", camerafar)
 	whiteinfill.material_override.set_shader_param("fogcolor", plancamera.environment.background_color)
 	whiteinfill.material_override.set_shader_param("wounddistancefactor", wounddistancefactor)
@@ -395,7 +394,6 @@ func actplanviewdict(pvchange, resettransmitbutton=true):
 	if "plancamerafogdepthbegin" in pvchange and "plancamerafogdepthend" in pvchange:
 		plancamera.environment.fog_depth_begin = pvchange["plancamerafogdepthbegin"]	
 		plancamera.environment.fog_depth_end = pvchange["plancamerafogdepthend"]
-		plancamera.environment.fog_color = plancamera.environment.background_color
 		plancamera.environment.fog_color = plancamera.environment.background_color
 		plancamera.far = plancamera.environment.fog_depth_end
 		settunnelxoutlineshadervalues()

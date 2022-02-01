@@ -49,6 +49,7 @@ func setupoverlaycomponentpositions():
 
 	$MenuButton.rect_position = guipanel3dviewport.rect_position + Vector2(orgpanelsize.x*panelscale/2, orgpanelsize.y*panelscale) - $MenuButton.rect_size*max(1, panelscale)
 	$MenuButton.rect_scale = Vector2(max(1.5, panelscale), max(1.5, panelscale))
+	$DepthInfo.rect_scale = Vector2(max(1.5, panelscale), max(1.5, panelscale))
 	
 	var planviewviewport = get_node("/root/Spatial/PlanViewSystem/PlanView/Viewport")
 	var planviewviewcontrols = planviewviewport.get_node("PlanGUI/PlanViewControls")
@@ -75,22 +76,69 @@ var plancameraxvec = Vector3(0,0,0)
 var plancamerayvec = Vector3(0,0,0)
 var plancamerazvec = Vector3(0,0,0)
 var plancamerasize = 1.0
+var finger3vector = Vector2(0, 0)
+var finger3a0 = 0.0
+var finger3a1 = 0.0
+var finger3a2 = 0.0
+var finger3elevdist = 0.0
+var finger3camerafar = 0.0
 
 var screentouchplaces = { }
 var screentouchplaces0pos = { }
+var screentouchposindex0 = 0
+var screentouchposindex1 = 0
+var screentouchposindex2 = 0
 func updatescreentouchplaces0state():
 	if len(screentouchplaces0pos) == 0:
 		fingerdragpos = null
 		return
 	var plancamera = planviewsystem.get_node("PlanView/Viewport/PlanGUI/Camera")
-	var screentouchplaces0kpos = screentouchplaces0pos.values()
-	if len(screentouchplaces0kpos) == 1:
-		fingerdragpos = screentouchplaces0kpos[0]
-	else:
-		fingerdragpos = (screentouchplaces0kpos[0] + screentouchplaces0kpos[1])*0.5
-		var fingerdragvec = screentouchplaces0kpos[1] - screentouchplaces0kpos[0]
+	var screentouchplaces0keys = screentouchplaces0pos.keys()
+	if len(screentouchplaces0pos) == 1:
+		screentouchposindex0 = screentouchplaces0keys[0]
+		fingerdragpos = screentouchplaces0pos[screentouchposindex0]
+	elif len(screentouchplaces0pos) == 2:
+		screentouchposindex0 = screentouchplaces0keys[0]
+		screentouchposindex1 = screentouchplaces0keys[1]
+		var screentouchplaces0kpos0 = screentouchplaces0pos[screentouchposindex0]
+		var screentouchplaces0kpos1 = screentouchplaces0pos[screentouchposindex1]
+		fingerdragpos = (screentouchplaces0kpos0 + screentouchplaces0kpos1)*0.5
+		var fingerdragvec = screentouchplaces0kpos1 - screentouchplaces0kpos0
 		fingerdragangle = rad2deg(fingerdragvec.angle())
 		fingerdraglength = fingerdragvec.length()
+	elif len(screentouchplaces0pos) == 3:
+		var sk = screentouchplaces0keys
+		var sp = screentouchplaces0pos
+		var sum3 = sp[sk[0]] + sp[sk[1]] + sp[sk[2]]
+		var md = [ Vector2(((sp[sk[1]] + sp[sk[2]])/2 - sp[sk[0]]).length(), 0), Vector2(((sp[sk[0]] + sp[sk[2]])/2 - sp[sk[1]]).length(), 1), Vector2(((sp[sk[0]] + sp[sk[1]])/2 - sp[sk[2]]).length(), 2) ]
+		md.sort()
+		var mk = int(md[0][1])
+		var p1 = sp[sk[mk]]
+		var mk0 = (0 if mk != 0 else 1)
+		var p0 = sp[sk[mk0]]
+		if (p0.x - p1.x) - (p0.y - p1.y) > 0:
+			mk0 = 3 - mk - mk0
+		var mk2 = 3 - mk - mk0
+		screentouchposindex0 = screentouchplaces0keys[mk0]
+		screentouchposindex1 = screentouchplaces0keys[mk]
+		screentouchposindex2 = screentouchplaces0keys[mk2]
+		if plancamera.rotation_degrees.x == 0.0:
+			$DepthInfo/Fields.text = "::Elev: %.2f, Far: %.2f" % [ planviewsystem.elevcameradist, plancamera.far ]
+		else:
+			$DepthInfo/Fields.text = "::Zhi: %.2f, Zlo: %.2f, Mid: %.2f" % [ plancamera.transform.origin.y, plancamera.transform.origin.y - plancamera.far, plancamera.transform.origin.y - planviewsystem.elevcameradist ]
+		var screentouchplaces0kpos0 = screentouchplaces0pos[screentouchposindex0]
+		var screentouchplaces0kpos1 = screentouchplaces0pos[screentouchposindex1]
+		var screentouchplaces0kpos2 = screentouchplaces0pos[screentouchposindex2]
+		finger3vector = (screentouchplaces0kpos2 - screentouchplaces0kpos0).normalized()
+		finger3a0 = finger3vector.dot(screentouchplaces0kpos0)
+		finger3a1 = finger3vector.dot(screentouchplaces0kpos1)
+		finger3a2 = finger3vector.dot(screentouchplaces0kpos2)
+		finger3elevdist = planviewsystem.elevcameradist
+		finger3camerafar = plancamera.far
+		print(" %.3f %.3f %.3f" % [finger3a0, finger3a1, finger3a2], finger3vector)
+
+	$DepthInfo.visible = (len(screentouchplaces0pos) == 3)
+
 	var fingerdown1posPP = plancamera.project_position(fingerdragpos, 0.0)
 	plancameraxvec = plancamera.project_position(fingerdragpos+Vector2(1,0), 0.0) - fingerdown1posPP; 
 	plancamerayvec = plancamera.project_position(fingerdragpos+Vector2(0,1), 0.0) - fingerdown1posPP; 
@@ -102,13 +150,15 @@ func updatescreentouchplaces0state():
 func updatescreentouchplaces0drag():
 	var plancamera = planviewsystem.get_node("PlanView/Viewport/PlanGUI/Camera")
 	var planviewpositiondict = { }
-	var screentouchplaces0kpos = screentouchplaces0pos.values()
-	if len(screentouchplaces0kpos) == 1:
-		var panvec = fingerdragpos - screentouchplaces0kpos[0]
+	if len(screentouchplaces0pos) == 1:
+		var panvec = fingerdragpos - screentouchplaces0pos[screentouchposindex0]
 		planviewpositiondict["plancamerapos"] = plancameratranslation + plancameraxvec*panvec.x + plancamerayvec*panvec.y
-	else:
-		var fingerdragposN = (screentouchplaces0kpos[0] + screentouchplaces0kpos[1])*0.5
-		var fingerdragvecN = screentouchplaces0kpos[1] - screentouchplaces0kpos[0]
+
+	elif len(screentouchplaces0pos) == 2:
+		var screentouchplaces0kpos0 = screentouchplaces0pos[screentouchposindex0]
+		var screentouchplaces0kpos1 = screentouchplaces0pos[screentouchposindex1]
+		var fingerdragposN = (screentouchplaces0kpos0 + screentouchplaces0kpos1)*0.5
+		var fingerdragvecN = screentouchplaces0kpos1 - screentouchplaces0kpos0
 		var fingerdragangleN = rad2deg(fingerdragvecN.angle())
 		var fingerdraglengthN = fingerdragvecN.length()
 		var fingerdragangleNdiff = fingerdragangleN - fingerdragangle
@@ -128,7 +178,36 @@ func updatescreentouchplaces0drag():
 			var veccenNrot = veccenN*cos(deg2rad(fingerdragangleNdiff)) + Vector2(veccenN.y, -veccenN.x)*sin(deg2rad(fingerdragangleNdiff)) 
 			panvec += veccenN - veccenNrot
 		planviewpositiondict["plancamerapos"] = plancameratranslation + plancameraxvec*panvec.x + plancamerayvec*panvec.y + plancamerazvec*panvecdepthchange 
-	planviewsystem.actplanviewdict(planviewpositiondict)
+
+	elif len(screentouchplaces0pos) == 3:
+		var screentouchplaces0kpos0 = screentouchplaces0pos[screentouchposindex0]
+		var screentouchplaces0kpos1 = screentouchplaces0pos[screentouchposindex1]
+		var screentouchplaces0kpos2 = screentouchplaces0pos[screentouchposindex2]
+		var lfinger3a0 = finger3vector.dot(screentouchplaces0kpos0)
+		var lfinger3a1 = finger3vector.dot(screentouchplaces0kpos1)
+		var lfinger3a2 = finger3vector.dot(screentouchplaces0kpos2)
+		var finger3elevrat = finger3elevdist/finger3camerafar
+		var finger3a1rat = clamp((finger3a1 - finger3a0)/(finger3a2 - finger3a0), 0.05, 0.95)
+		var lfinger3a1rat = clamp((lfinger3a1 - lfinger3a0)/(lfinger3a2 - lfinger3a0), 0.05, 0.95)
+
+		var lplancamerafar = finger3camerafar * (lfinger3a2 - lfinger3a0)/(finger3a2 - finger3a0)
+		var lfinger3elevrat = finger3elevrat*finger3camerafar/lplancamerafar
+		var finger3pixratio = finger3camerafar/(finger3a2 - lfinger3a0) 
+		var plancameradepthchange = finger3pixratio*(lfinger3a0 - finger3a0)
+
+		planviewpositiondict["plancamerapos"] = plancameratranslation - plancameradepthchange*plancamera.transform.basis.z
+		planviewpositiondict["plancameraelevcameradist"] = lfinger3a1rat*lplancamerafar
+		planviewpositiondict["plancameraelevrotpoint"] = planviewpositiondict["plancamerapos"] + planviewpositiondict["plancameraelevcameradist"]*plancamera.transform.basis.z
+		planviewpositiondict["plancamerafogdepthend"] = lplancamerafar
+		planviewpositiondict["plancamerafogdepthbegin"] = (lplancamerafar + finger3elevdist)/2
+		
+	if len(planviewpositiondict) != 0:
+		planviewsystem.actplanviewdict(planviewpositiondict)
+		if len(screentouchplaces0pos) == 3:
+			if plancamera.rotation_degrees.x == 0.0:
+				$DepthInfo/Fields.text = "Elev: %.2f, Far: %.2f" % [ planviewsystem.elevcameradist, plancamera.far ]
+			else:
+				$DepthInfo/Fields.text = "Zhi: %.2f, Mid: %.2f, Zlo: %.2f" % [ plancamera.transform.origin.y, plancamera.transform.origin.y - planviewsystem.elevcameradist, plancamera.transform.origin.y - plancamera.far ]
 
 
 func backgroundmotioninput(viewport: Object, event: InputEvent, shape_idx: int):
