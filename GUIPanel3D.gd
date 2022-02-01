@@ -448,11 +448,13 @@ func _on_switchtest(index):
 		if nssel == "opt: tunnelx":
 			var tunnelxoutline = sketchsystem.get_node("tunnelxoutline")
 			var unifiedclosedmesh = Polynets.unifiedclosedmeshwithnormals(sketchsystem.get_node("XCtubes").get_children(), sketchsystem.get_node("XCdrawings").get_children())
-			var unifiedclosedmeshaabb = unifiedclosedmesh.get_aabb()
-			tunnelxoutline.get_node("blackoutline").mesh = unifiedclosedmesh
-			tunnelxoutline.get_node("whiteinfill").mesh = unifiedclosedmesh
-			tunnelxoutline.get_node("whiteinfill").material_override.set_shader_param("ylo", unifiedclosedmeshaabb.position.y)
-			tunnelxoutline.get_node("whiteinfill").material_override.set_shader_param("yhi", unifiedclosedmeshaabb.position.y + unifiedclosedmeshaabb.size.y)
+			var blackoutline = tunnelxoutline.get_node("blackoutline")
+			var whiteinfill = tunnelxoutline.get_node("whiteinfill")
+			var plancamera = get_node("/root/Spatial/PlanViewSystem/PlanView/Viewport/PlanGUI/Camera")
+
+			blackoutline.mesh = unifiedclosedmesh
+			whiteinfill.mesh = unifiedclosedmesh
+			get_node("/root/Spatial/PlanViewSystem").settunnelxoutlineshadervalues()
 			tunnelxoutline.visible = true
 			sketchsystem.get_node("XCtubes").visible = false
 			for xcdrawing in sketchsystem.get_node("XCdrawings").get_children():
