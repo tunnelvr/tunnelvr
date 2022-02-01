@@ -317,7 +317,7 @@ func maketubepolyassociation_andreorder(xcdrawing0, xcdrawing1):
 	#	print("invert problem?")
 
 	if xcname0 == "s5" and xcname1 == "s2":
-		print("work to do debugging this one; it looks like it wraps twice")
+		xcdrawinglink = xcdrawinglink.slice(4, len(xcdrawinglink)-1) + xcdrawinglink.slice(2, 3) + xcdrawinglink.slice(0, 1)
 
 	var poly0 = polys0[pickedpolyindex0].duplicate()
 	var poly1 = polys1[pickedpolyindex1].duplicate()
@@ -364,6 +364,10 @@ func maketubepolyassociation_andreorder(xcdrawing0, xcdrawing1):
 		loops1 += 1
 	assert ((loops1 == 0) == il1coincident)
 	if loops1 == 2:
+		xcdrawinglinkneedsreorder = true
+
+	if xcname0 == "s5" and xcname1 == "s2":
+		print("work to do debugging this one; it looks like it wraps twice")
 		xcdrawinglinkneedsreorder = true
 	
 	if xcdrawinglinkneedsreorder or (len(missingjvals) != 0 and (missingjvals.min() < len(xcdrawinglink) - 2*len(missingjvals))):
