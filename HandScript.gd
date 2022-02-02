@@ -138,6 +138,7 @@ func addfingerpinchbutton(bname):
 	fingerpinchbutton.get_node("MeshInstance").set_surface_material(0, fingerpinchbutton.get_node("MeshInstance").get_surface_material(0).duplicate())
 	boneattachment.add_child(fingerpinchbutton)
 	fingerpinchbutton.set_name(bname)
+	fingerpinchbutton.visible = false
 	return fingerpinchbutton
 	
 func initovrhandtracking(lovr_hand_tracking, lhandcontroller):
