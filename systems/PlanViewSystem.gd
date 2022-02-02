@@ -511,6 +511,7 @@ func updateplanviewentitysizes():
 	var plancamera = $PlanView/Viewport/PlanGUI/Camera
 	var nodesca = plancamera.size/70.0*3.0
 	var labelsca = nodesca*2.0
+	var vertexyinvert = -1.0 if Tglobal.phoneoverlay != null else 1.0
 	for player in selfSpatial.get_node("Players").get_children():
 		player.get_node("headlocator/locatorline").scale = Vector3(nodesca*3.0, 1, nodesca*3.0)
 	var tunnelxoutline = sketchsystem.get_node("tunnelxoutline")
@@ -531,7 +532,7 @@ func updateplanviewentitysizes():
 			xcn.get_node("CollisionShape").scale = Vector3(nodesca, nodesca, nodesca)
 			var stationlabel = xcn.get_node("StationLabel")
 			stationlabel.get_surface_material(0).set_shader_param("vertex_scale", labelsca)
-			#var labelcentre = stationlabel.global_transform.origin + stationlabel.get_surface_material(0).get_shader_param("vertex_offset")
+			stationlabel.get_surface_material(0).set_shader_param("vertexyinvert", vertexyinvert)
 			var xcnrect = Rect2(-(xcn.transform.origin.x + 0.15), -xcn.transform.origin.z, stationlabel.mesh.size.x*labelsca, stationlabel.mesh.size.y*labelsca)
 			var xcnrect_overlapping = false
 			for r in labelrects:
