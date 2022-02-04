@@ -113,6 +113,10 @@ func _ready():
 		playerMe.playerplatform = "AndroidPhone"
 		playerMe.get_node("HeadCam/HeadtorchLight").shadow_enabled = false
 		$PhoneOverlay.setupphoneoverlaysystem(true)
+		print("Engine.target_fps ", Engine.target_fps)
+		print("Engine.iterations_per_second ", Engine.iterations_per_second)
+		Engine.target_fps = 30
+
 
 	elif not forceopenVR and enablevr and checkloadinterface("Oculus"):
 		print("  Found Oculus Interface.");

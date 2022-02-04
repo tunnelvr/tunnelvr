@@ -855,7 +855,9 @@ func makexctubeshell(xcdrawings):
 	for i in range(len(polys)-1):
 		if not polypartial.has(i):
 			filledpolyindexes.append(i)
-	
+	if len(filledpolyindexes) == 0:
+		return null
+		
 	var arraymesh = ArrayMesh.new()
 	var surfaceTool = SurfaceTool.new()
 	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
@@ -885,7 +887,10 @@ func updatexcshellmesh(xctubeshellmesh):
 			xcflatshell.get_node("CollisionShape").shape = ConcavePolygonShape.new()
 			add_child(xcflatshell)
 		$XCflatshell/MeshInstance.mesh = xctubeshellmesh
-		$XCflatshell/CollisionShape.shape.set_faces(xctubeshellmesh.get_faces())
+		var tfaces = xctubeshellmesh.get_faces()
+		if len(tfaces) == 0:
+			print("No faces for shell!")
+		$XCflatshell/CollisionShape.shape.set_faces(tfaces)
 		get_node("/root/Spatial/MaterialSystem").updateflatshellmaterial(self, xcflatshellmaterial, false)
 	else:
 		if has_node("XCflatshell"):

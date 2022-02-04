@@ -272,8 +272,8 @@ func fa(a, b):
 	return a[0] < b[0] or (a[0] == b[0] and a[1] < b[1])
 
 func reordersecondvalstoavoiddoublelooping(ila):
-	var im1 = len(ila)-1
 	for i in range(len(ila)):
+		var im1 = len(ila)-1 if i == 0 else i-1
 		if ila[i][1] != ila[im1][1]:
 			var i1 = i
 			while i1 < len(ila) - 1 and ila[i1+1][0] == ila[i][0]:
@@ -284,7 +284,20 @@ func reordersecondvalstoavoiddoublelooping(ila):
 				for j in range(i, i1):
 					ila[j] = ila[j+1]
 				ila[i1] = ilai
-		im1 = i
+
+func detectdualconicalproblemwarning(ila, lenpoly1):
+	for i in range(len(ila)):
+		if i == 0 or ila[i][0] != ila[i-1][0]:
+			var i1 = i
+			while i1 < len(ila) - 1 and ila[i1+1][0] == ila[i][0]:
+				i1 += 1
+			if i != i1:
+				var ila1N = ila[i1][1] - ila[i][1]
+				if ila1N < 0:
+					ila1N += lenpoly1
+				if ila1N > lenpoly1/2:
+					return true
+	return false			
 
 func maketubepolyassociation_andreorder(xcdrawing0, xcdrawing1):
 	assert ((xcdrawing0.get_name() == xcname0) and (xcdrawing1.get_name() == xcname1))
@@ -315,9 +328,6 @@ func maketubepolyassociation_andreorder(xcdrawing0, xcdrawing1):
 	#var tubenormdot = xcdrawing0basisz.dot(xcdrawing1basisz)
 	#if ((tubenormdot < 0) == (polyinvert0 == polyinvert1)) and not polys0islinearpath and not polys1islinearpath:
 	#	print("invert problem?")
-
-	if xcname0 == "s5" and xcname1 == "s2":
-		print("work to do debugging this one; it looks like it wraps twice")
 
 	var poly0 = polys0[pickedpolyindex0].duplicate()
 	var poly1 = polys1[pickedpolyindex1].duplicate()
@@ -369,6 +379,8 @@ func maketubepolyassociation_andreorder(xcdrawing0, xcdrawing1):
 	if xcdrawinglinkneedsreorder or (len(missingjvals) != 0 and (missingjvals.min() < len(xcdrawinglink) - 2*len(missingjvals))):
 		ila.sort_custom(self, "fa")
 		reordersecondvalstoavoiddoublelooping(ila)
+		if detectdualconicalproblemwarning(ila, len(poly1)):
+			print("dualconicalproblemwarning on tube: ", get_name())
 		var newxcdrawinglink = [ ]
 		var newxcsectormaterials = [ ]
 		var newxclinkintermediatenodes = null
@@ -393,6 +405,10 @@ func maketubepolyassociation_andreorder(xcdrawing0, xcdrawing1):
 		if xclinkintermediatenodes != null:
 			var sketchsystem = get_node("/root/Spatial/SketchSystem")
 			updatetubelinkpaths(sketchsystem)
+
+	else:
+		if detectdualconicalproblemwarning(ila, len(poly1)):
+			print("dualconicalproblemwarning on tube: ", get_name())
 
 	var ilaM = [ ]  #  [ {"il0", "il0N",  "il1", "il1N",    "i", "i1" ] ]
 	var sum0N = 0

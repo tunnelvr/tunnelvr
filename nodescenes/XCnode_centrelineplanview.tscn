@@ -35,11 +35,13 @@ uniform vec3 uv1_offset;
 uniform vec3 uv2_scale;
 uniform vec3 uv2_offset;
 uniform vec3 vertex_offset;
-uniform float vertex_scale;
+uniform float vertexyinvert = 1.0;
+uniform float vertex_scale = 1.0;
 
 void vertex() {
 	UV=UV*uv1_scale.xy+uv1_offset.xy;
 	MODELVIEW_MATRIX = INV_CAMERA_MATRIX * mat4(CAMERA_MATRIX[0],CAMERA_MATRIX[1],CAMERA_MATRIX[2],WORLD_MATRIX[3]);
+	VERTEX.y *= vertexyinvert; 
 	VERTEX = (VERTEX + vertex_offset)*vertex_scale;
 }
 
@@ -67,6 +69,7 @@ shader_param/uv1_offset = Vector3( 0, 0, 0 )
 shader_param/uv2_scale = Vector3( 1, 1, 1 )
 shader_param/uv2_offset = Vector3( 0, 0, 0 )
 shader_param/vertex_offset = Vector3( -1.05, 0.15, 0 )
+shader_param/vertexyinvert = 1.0
 shader_param/vertex_scale = 1.0
 shader_param/texture_albedo = ExtResource( 1 )
 

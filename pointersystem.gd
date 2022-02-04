@@ -290,6 +290,7 @@ func clearpointertarget():
 	pointertargettype = "none"
 	pointertargetwall = null
 
+var prevnotificationtorusvisible = false
 func set_handflickmotiongestureposition(lhandflickmotiongestureposition):
 	Tglobal.handflickmotiongestureposition = lhandflickmotiongestureposition
 	if Tglobal.handflickmotiongestureposition == 1:
@@ -297,11 +298,15 @@ func set_handflickmotiongestureposition(lhandflickmotiongestureposition):
 		LaserOrient.get_node("Length/Laser").set_surface_material(0, materialsystem.lasermaterial("laserinair"))
 		setpointertarget(activelaserroot, activelaserroot.get_node("RayCast"), handflickmotiongestureposition_shortpos_length)
 		activelaserroot.get_node("LaserSpot").visible = true
+		prevnotificationtorusvisible = LaserOrient.get_node("NotificationTorus").visible
 	else:
 		LaserOrient.get_node("Length/Laser").set_surface_material(0, materialsystem.lasermaterial("laser"))
 		activelaserroot.get_node("LaserSpot").visible = false
 		setpointertarget(activelaserroot, null, -1.0)
-		
+		if prevnotificationtorusvisible and LaserOrient.get_node("NotificationTorus").visible:
+			LaserOrient.get_node("NotificationTorus").visible = false
+			prevnotificationtorusvisible = false
+			
 func panelsendmousemotiontopointertarget():
 	var guipanel = pointertarget
 	var controller_trigger = (handrightcontroller.is_button_pressed(BUTTONS.HT_PINCH_INDEX_FINGER) if Tglobal.questhandtrackingactive else handrightcontroller.is_button_pressed(BUTTONS.VR_TRIGGER)) or Input.is_mouse_button_pressed(BUTTON_LEFT)

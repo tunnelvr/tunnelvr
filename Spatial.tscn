@@ -120,6 +120,9 @@ rings = 4
 albedo_color = Color( 0.984314, 0.0705882, 0.0705882, 1 )
 metallic = 0.46
 roughness = 0.28
+distance_fade_mode = 3
+distance_fade_min_distance = 0.0
+distance_fade_max_distance = 10.0
 
 [sub_resource type="CubeMesh" id=8]
 size = Vector3( 0.05, 0.01, 0.05 )
@@ -1745,7 +1748,6 @@ extents = Vector2( 500, 500 )
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
 enablevr = false
-forcephoneoverlay = true
 
 [node name="Players" type="Spatial" parent="."]
 
