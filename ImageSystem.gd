@@ -157,7 +157,7 @@ func _process(delta):
 			getshortimagename(nonimagepage["url"], true, 
 							  (10 if nonimagepage.has("byteOffset") else 20), 
 							  nonimagepage)
-		if not File.new().file_exists(nonimagepage["fetchednonimagedataobjectfile"]):
+		if not File.new().file_exists(nonimagepage["fetchednonimagedataobjectfile"]) or nonimagepage.get("donotusecache"):
 			if not Directory.new().dir_exists(nonimagedir):
 				var err = Directory.new().make_dir(nonimagedir)
 				print("Making directory ", nonimagedir, " err code: ", err)
@@ -277,7 +277,7 @@ func _process(delta):
 							llinks.push_back(lk)
 
 			else:
-				for m in listregex.search_all(htmltext):
+				for m in listregex.search_all(htmltext):   # svnfiles type bydefault
 					var lk = m.get_string(1)
 					if not lk.begins_with("."):
 						lk = lk.replace("&amp;", "&")
@@ -305,7 +305,7 @@ func _process(delta):
 
 
 func fetchunrolltree(fileviewtree, item, url, filetreeresource):
-	var nonimagedataobject = { "url":url, "tree":fileviewtree, "item":item }
+	var nonimagedataobject = { "url":url, "tree":fileviewtree, "item":item, "donotusecache":true }
 	if filetreeresource != null:
 		nonimagedataobject["filetreeresource"] = filetreeresource
 		if filetreeresource.get("type") == "caddyfiles":
