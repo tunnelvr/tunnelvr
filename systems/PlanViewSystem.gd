@@ -340,6 +340,13 @@ func planviewtodict():
 			 "backfacecull":materialsettobackfacecull,
 			}
 
+func planviewcameratodict():
+	var plancamera = $PlanView/Viewport/PlanGUI/Camera
+	return { "visible":visible,
+			 "plancameratrans":plancamera.transform,
+			 "plancamerasize":plancamera.size
+			}
+
 func setcameracullmasks(bcentrelinesvisible, bplantubesvisible):
 	var plancameracullmask
 	var plancameraraycollisionmask

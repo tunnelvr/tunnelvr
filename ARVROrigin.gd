@@ -236,6 +236,7 @@ func playerpositiondict():
 func playerappearancedict():
 	return { "playerplatform":playerplatform, 
 			 "playeroperatingsystem":playeroperatingsystem,
+			 "playeruimode":"phoneoverlay" if Tglobal.phoneoverlay != null else "normal", 
 			 "playerheadcolour":get_node("HeadCam/csgheadmesh/skullcomponent").material.albedo_color, 
 			 "torchon":get_node("HeadCam/HeadtorchLight").visible, 
 			 "guardianpoly":guardianpoly, 
