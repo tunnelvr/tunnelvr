@@ -247,6 +247,8 @@ func transferintorealviewport():
 		$PlanView/ProjectionScreen.get_surface_material(0).albedo_texture = $PlanView/Viewport.get_texture()
 	else:
 		$PlanView/Viewport.visible = false
+		$PlanView.visible = false
+		$RealPlanCamera.visible = false
 
 func checkboxplantubesvisible_pressed():
 	var pvchange = planviewtodict()
