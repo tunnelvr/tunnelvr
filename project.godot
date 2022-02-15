@@ -157,7 +157,7 @@ ui_key_9={
 
 3d_render/layer_1="default"
 3d_render/layer_2="uioverlays"
-3d_render/layer_3="floortextures"
+3d_render/layer_3="playercamera"
 3d_render/layer_4="xcdrawingnodes"
 3d_render/layer_5="xcdrawinglines"
 3d_render/layer_6="xctubelines"
@@ -173,6 +173,7 @@ ui_key_9={
 3d_render/layer_16="centrelinestationlabelplanview"
 3d_render/layer_17="centrelinedrawinglines"
 3d_render/layer_18="centrelinedrawinglinesplanview"
+3d_render/layer_19="plancamera"
 3d_physics/layer_1="Player"
 3d_physics/layer_2="Environment"
 3d_physics/layer_3="Objects"

@@ -31,7 +31,7 @@ enum {
 enum {
 	VL_default							= 0b00000000000000000001,
 	VL_uioverlays						= 0b00000000000000000010,
-	VL_floortextures					= 0b00000000000000000100,
+	VL_playercamera						= 0b00000000000000000100,
 	VL_xcdrawingnodes					= 0b00000000000000001000,
 	VL_xcdrawinglines					= 0b00000000000000010000,
 	VL_xctubelines						= 0b00000000000000100000,
@@ -47,11 +47,12 @@ enum {
 	VL_centrelinestationslabelplanview	= 0b00001000000000000000,
 	VL_centrelinedrawinglines			= 0b00010000000000000000,
 	VL_centrelinedrawinglinesplanview	= 0b00100000000000000000,
+	VL_plancamera						= 0b01000000000000000000,
 	
-	VLCM_PlanViewCamera 				= 0b00101111110111111011,
-	VLCM_PlanViewCameraNoTube			= 0b00101101110001001011
-	VLCM_PlanViewCameraNoCentreline		= 0b00000111000111111011,
+	VLCM_PlanViewCamera 				= 0b01101111110111111011,
+	VLCM_PlanViewCameraNoTube			= 0b01101101110001001011
+	VLCM_PlanViewCameraNoCentreline		= 0b01000111000111111011,
 
-	VLCM_PlayerCamera					= 0b00010111101111111111,
-	VLCM_PlayerCameraNoCentreline		= 0b00000111000110111111,
+	VLCM_PlayerCamera					= 0b00110111101111111111,
+	VLCM_PlayerCameraNoCentreline		= 0b00100111000110111111,
 }
