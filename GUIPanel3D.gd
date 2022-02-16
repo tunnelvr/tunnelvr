@@ -856,8 +856,13 @@ func _on_resourceoptions_buttondown_setavailablefunctions():
 	if potreeexperiments.rootnode == null:
 		$Viewport/GUI/Panel/ResourceOptions.set_item_text(showhigloadpotreeid, "Load Potree")
 		$Viewport/GUI/Panel/ResourceOptions.set_item_disabled(showhigloadpotreeid, (centrelineselected_forresourcefunction == null or centrelineselected_forresourcefunction.additionalproperties == null or centrelineselected_forresourcefunction.additionalproperties.get("potreeurlmetadata") == null))
+	elif not potreeexperiments.visible:
+		$Viewport/GUI/Panel/ResourceOptions.set_item_text(showhigloadpotreeid, "Show Potree")
+	elif centrelineselected_forresourcefunction == null or centrelineselected_forresourcefunction.additionalproperties == null or centrelineselected_forresourcefunction.additionalproperties.get("potreeurlmetadata") != potreeexperiments.potreeurlmetadata:
+		$Viewport/GUI/Panel/ResourceOptions.set_item_text(showhigloadpotreeid, "Remove Potree")
 	else:
-		$Viewport/GUI/Panel/ResourceOptions.set_item_text(showhigloadpotreeid, "Show Potree" if not potreeexperiments.visible else "Hide Potree")
+		$Viewport/GUI/Panel/ResourceOptions.set_item_text(showhigloadpotreeid, "Hide Potree")
+
 	$Viewport/GUI/Panel/ResourceOptions.set_item_disabled(resourceoptionlookup["Print XCproperties"], xcselecteddrawing_forrsourcefunctions == null)
 	$Viewport/GUI/Panel/ResourceOptions.set_item_disabled(resourceoptionlookup["Set XCproperties"], xcselecteddrawing_forrsourcefunctions == null)
 	$Viewport/GUI/Panel/ResourceOptions.set_item_disabled(resourceoptionlookup["Set new file"], regexacceptableprojectname.search(mtext) == null)

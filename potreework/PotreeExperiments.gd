@@ -12,6 +12,8 @@ var nodestopointload = [ ]
 var nodespointloaded = [ ]
 var rootnode = null
 
+var potreeurlmetadata = null
+
 onready var ImageSystem = get_node("/root/Spatial/ImageSystem")
 
 
@@ -100,15 +102,14 @@ const coloctcellpointsloading = Color("#36e418e6")
 
 func LoadPotree():
 	assert (rootnode == null)
-	var urlmetadata = null
 	var xcdrawingcentreline = null
 	for lxcdrawingcentreline in get_tree().get_nodes_in_group("gpcentrelinegeo"):
 		if lxcdrawingcentreline.additionalproperties != null and lxcdrawingcentreline.additionalproperties.has("potreeurlmetadata"):
 			xcdrawingcentreline = lxcdrawingcentreline
-			urlmetadata = xcdrawingcentreline.additionalproperties["potreeurlmetadata"]
-	if urlmetadata == null:
+			potreeurlmetadata = xcdrawingcentreline.additionalproperties["potreeurlmetadata"]
+	if potreeurlmetadata == null:
 		return
-	var nonimagedataobject = { "url":urlmetadata, "callbackobject":self, "callbacksignal":"updatepotreepriorities_fetchsignal" }
+	var nonimagedataobject = { "url":potreeurlmetadata, "callbackobject":self, "callbacksignal":"updatepotreepriorities_fetchsignal" }
 	ImageSystem.fetchrequesturl(nonimagedataobject)
 	var fmetadataF = yield(self, "updatepotreepriorities_fetchsignal")
 	if fmetadataF == null:
@@ -121,7 +122,7 @@ func LoadPotree():
 	rootnode.name = "hroot"
 	var bboffseta = xcdrawingcentreline.additionalproperties["svxp0"]  if xcdrawingcentreline != null and xcdrawingcentreline.additionalproperties != null and xcdrawingcentreline.additionalproperties.has("svxp0")  else [0,0,0]
 	var bboffset = Vector3(bboffseta[0], bboffseta[1], bboffseta[2])
-	rootnode.constructpotreerootnode(metadata, urlmetadata, bboffset)
+	rootnode.constructpotreerootnode(metadata, potreeurlmetadata, bboffset)
 	if xcdrawingcentreline != null:
 		transform = xcdrawingcentreline.transform
 	add_child(rootnode)
@@ -192,10 +193,6 @@ func Yupdatepotreeprioritiesfull():
 	return res
 
 func updatepotreeprioritiesLoop():
-
-
-
-
 	while true:
 		if queuekillpotree or rootnode == null:
 			if rootnode != null:
