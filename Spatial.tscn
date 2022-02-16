@@ -2934,7 +2934,6 @@ margin_top = 204.0
 margin_right = 64.0
 margin_bottom = 232.0
 rect_pivot_offset = Vector2( 111.073, 28.0005 )
-disabled = true
 text = "Goto"
 __meta__ = {
 "_edit_use_anchors_": false

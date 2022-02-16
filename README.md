@@ -112,6 +112,11 @@ For either hand:
 * DeleteXC
 * DeleteTube
 
+* DoSlice - Splits or extends a tube.  
+To split a tube create an empty XC that crosses the tube, then Grip click on the tube and select DoSlice to split it into two tubes with an XC in the plane of the empty one.
+To extend a tube create an empty XC beyond the end of the tube, then create a single node in it.  With that node selected Grip-click the tube and select DoSlice.
+
+
 ## Geometric principle
 
 The cave is made from a series of cross sections connected by one or several lines 
