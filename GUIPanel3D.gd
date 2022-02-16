@@ -882,6 +882,10 @@ func _on_resourceoptions_selected(index):
 				xcproperties["xcresource"] = xcselecteddrawing_forrsourcefunctions["xcresource"]
 			if sketchsystem.pointersystem.activetargetnode != null:
 				xcproperties["snodename"] = sketchsystem.pointersystem.activetargetnode.get_name()
+			var xcpos = xcselecteddrawing_forrsourcefunctions.translation
+			var xcrot = xcselecteddrawing_forrsourcefunctions.rotation_degrees
+			xcproperties["position"] = [xcpos.x, xcpos.y, xcpos.z]
+			xcproperties["rotation"] = [xcrot.x, xcrot.y, xcrot.z]
 			$Viewport/GUI/Panel/EditColorRect/TextEdit.text = JSON.print(xcproperties, "  ", true)
 		else:
 			setpanellabeltext("No XCdrawing selected")
@@ -898,8 +902,23 @@ func _on_resourceoptions_selected(index):
 					jresource.erase("xcresource")
 				if jresource.has("snodename"):
 					jresource.erase("snodename")
+				var dnode = Spatial.new()
+				dnode.transform = xcselecteddrawing_forrsourcefunctions.transform
+				if jresource.has("position") and typeof(jresource["position"]) == TYPE_ARRAY and len(jresource["position"]) == 3:
+					dnode.translation = Vector3(float(jresource["position"][0]), float(jresource["position"][1]), float(jresource["position"][2]))
+					jresource.erase("position")
+				if jresource.has("rotation") and typeof(jresource["rotation"]) == TYPE_ARRAY and len(jresource["rotation"]) == 3:
+					dnode.rotation_degrees = Vector3(float(jresource["rotation"][0]), float(jresource["rotation"][1]), float(jresource["rotation"][2]))
+					jresource.erase("rotation")
 				xcselecteddrawing_forrsourcefunctions.additionalproperties = jresource
+				var xcdata = { "name":xcselecteddrawing_forrsourcefunctions.get_name(), 
+							   "prevtransformpos":xcselecteddrawing_forrsourcefunctions.transform,
+							   "transformpos":dnode.transform
+							 }
+				sketchsystem.actsketchchange([xcdata])
+				sketchsystem.pointersystem.clearactivetargetnode()
 				setpanellabeltext("XCdrawing properties updated")
+				
 			else:
 				setpanellabeltext("Bad JSON format")
 		else:
