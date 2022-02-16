@@ -329,6 +329,7 @@ const pointeranglechange = cos(deg2rad(1.2))
 const pointerpositionchange = 0.015
 const dtmin = 0.05
 const dtmax = 0.8  # remotetimegap_dtmax?
+
 var prevpositiondict = null
 func transformwithinrange(trans0, trans1, poschange, cosangchange):
 	var distorigin = trans0.origin.distance_to(trans1.origin)
@@ -364,7 +365,21 @@ func filter_playerhand_bandwidth(prevhand, hand):
 		prevhand["valid"] = hand["valid"]
 		return false
 	return true
-		
+
+func filter_playerplancamera_bandwidth(prevplanviewcamera, planviewcamera):
+	if transformwithinrange(prevplanviewcamera["plancameratrans"], planviewcamera["plancameratrans"], headpositionchange, headanglechange):
+		planviewcamera.erase("plancameratrans")
+	else:
+		prevplanviewcamera["plancameratrans"] = planviewcamera["plancameratrans"]
+	if abs(prevplanviewcamera["plancamerasize"] - planviewcamera["plancamerasize"]) < headpositionchange:
+		planviewcamera.erase("plancamerasize")
+	else:
+		prevplanviewcamera["plancamerasize"] = planviewcamera["plancamerasize"]
+	if len(planviewcamera) == 1 and prevplanviewcamera["visible"] == planviewcamera["visible"]:
+		return true
+	prevplanviewcamera["visible"] = planviewcamera["visible"]
+	return false
+	
 func filter_playerposition_bandwidth(positiondict):
 	if prevpositiondict == null:
 		prevpositiondict = positiondict.duplicate(true)
@@ -407,6 +422,10 @@ func filter_playerposition_bandwidth(positiondict):
 	if filter_playerhand_bandwidth(prevpositiondict["handright"], positiondict["handright"]):
 		positiondict.erase("handright")
 		
+	if positiondict.has("planviewcamera"):
+		if filter_playerplancamera_bandwidth(prevpositiondict["planviewcamera"], positiondict["planviewcamera"]):
+			positiondict.erase("planviewcamera")
+		
 	if not positiondict.has("puppetbody") and not positiondict.has("planview") and \
 	   not positiondict.has("handleft") and not positiondict.has("handright"):
 		return null
@@ -419,6 +438,8 @@ func process_shareplayerposition():
 	var doppelganger = playerMe.doppelganger
 	if is_instance_valid(playerMe.doppelganger) or Tglobal.morethanoneplayer:
 		var positiondict = playerMe.playerpositiondict()
+		if Tglobal.phoneoverlay != null:
+			positiondict["planviewcamera"] = planviewsystem.planviewcameratodict()
 		positiondict = filter_playerposition_bandwidth(positiondict)
 		if positiondict != null:
 			if Tglobal.morethanoneplayer and Tglobal.connectiontoserveractive:

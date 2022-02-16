@@ -1748,6 +1748,7 @@ extents = Vector2( 500, 500 )
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
 enablevr = false
+forcephoneoverlay = true
 
 [node name="Players" type="Spatial" parent="."]
 
@@ -1804,7 +1805,14 @@ sides = 16
 
 [node name="locatorline" type="MeshInstance" parent="Players/PlayerMe/headlocator"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 30, 0 )
-layers = 4096
+layers = 4
+cast_shadow = 0
+mesh = SubResource( 251 )
+material/0 = SubResource( 252 )
+
+[node name="planviewlocatorline" type="MeshInstance" parent="Players/PlayerMe/headlocator"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 30, 0 )
+layers = 262144
 cast_shadow = 0
 mesh = SubResource( 251 )
 material/0 = SubResource( 252 )
@@ -2108,7 +2116,7 @@ __meta__ = {
 [node name="Camera" type="Camera" parent="PlanViewSystem/PlanView/Viewport/PlanGUI"]
 transform = Transform( 1, 0, 0, 0, -1.62921e-07, 1, 0, -1, -1.62921e-07, -1, 50, -12 )
 keep_aspect = 0
-cull_mask = 2147512827
+cull_mask = 2147774971
 environment = ExtResource( 20 )
 projection = 1
 fov = 87.5304

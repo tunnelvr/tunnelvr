@@ -247,6 +247,8 @@ func transferintorealviewport():
 		$PlanView/ProjectionScreen.get_surface_material(0).albedo_texture = $PlanView/Viewport.get_texture()
 	else:
 		$PlanView/Viewport.visible = false
+		$PlanView.visible = false
+		$RealPlanCamera.visible = false
 
 func checkboxplantubesvisible_pressed():
 	var pvchange = planviewtodict()
@@ -338,6 +340,13 @@ func planviewtodict():
 			 "plancamerarotation":plancamera.rotation_degrees,
 			 "plancamerasize":plancamera.size,
 			 "backfacecull":materialsettobackfacecull,
+			}
+
+func planviewcameratodict():
+	var plancamera = $PlanView/Viewport/PlanGUI/Camera
+	return { "visible":visible,
+			 "plancameratrans":plancamera.transform,
+			 "plancamerasize":plancamera.size
 			}
 
 func setcameracullmasks(bcentrelinesvisible, bplantubesvisible):
@@ -505,6 +514,19 @@ func planviewtransformpos(guidpaneltransform, guidpanelsize):
 		paneltrans = paneltrans.looking_at(lookatpos, Vector3(0, 1, 0))
 	return paneltrans
 
+
+func updateplanviewlocatorlines():
+	var plancamera = $PlanView/Viewport/PlanGUI/Camera
+	var nodesca = plancamera.size/70.0*3.0
+	var labelsca = nodesca*2.0
+	for player in selfSpatial.get_node("Players").get_children():
+		var planviewlocatorline = player.get_node("headlocator/planviewlocatorline")
+		planviewlocatorline.scale = Vector3(nodesca*3.0, 1, nodesca*3.0)
+		if plancamera.rotation_degrees.x == 0.0:
+			planviewlocatorline.translation.y = 3.0 + planviewlocatorline.mesh.size.y/2
+		else:
+			planviewlocatorline.translation.y = max(3.0 + planviewlocatorline.mesh.size.y/2, plancamera.translation.y - 5.0 + planviewlocatorline.mesh.size.y/2 - player.get_node("headlocator").global_transform.origin.y)
+
 var updateplanviewentitysizes_working = false
 func updateplanviewentitysizes():
 	var Dt0 = OS.get_ticks_msec()
@@ -512,8 +534,7 @@ func updateplanviewentitysizes():
 	var nodesca = plancamera.size/70.0*3.0
 	var labelsca = nodesca*2.0
 	var vertexyinvert = -1.0 if Tglobal.phoneoverlay != null else 1.0
-	for player in selfSpatial.get_node("Players").get_children():
-		player.get_node("headlocator/locatorline").scale = Vector3(nodesca*3.0, 1, nodesca*3.0)
+		
 	var tunnelxoutline = sketchsystem.get_node("tunnelxoutline")
 	if tunnelxoutline.visible:
 		var screensize = get_node("/root").size
@@ -569,6 +590,7 @@ func _process(delta):
 	if visible:
 		slowviewupdatecentrelinesizeupdaterate -= delta
 		if slowviewupdatecentrelinesizeupdaterate < 0 or prevcamerasizeforupdateplanviewentitysizes == -1:
+			updateplanviewlocatorlines()
 			if prevcamerasizeforupdateplanviewentitysizes != $PlanView/Viewport/PlanGUI/Camera.size and not updateplanviewentitysizes_working:
 				prevcamerasizeforupdateplanviewentitysizes = $PlanView/Viewport/PlanGUI/Camera.size
 				updateplanviewentitysizes_working = true

@@ -4,11 +4,14 @@ var networkID = 0
 var playerplatform = ""
 var playertunnelvrversion = ""
 var playeroperatingsystem = ""
+var playeruimode = ""
 var executingfeaturesavailable = [ ]
 var playermqttid = ""
 
 var puppetpositionstack = [ ]         # [ { "timestamp", "Ltimestamp", "playertransform", "headcamtransform" } ] 
 var puppetpointerpositionstack = [ ]  # [ { "timestamp", "Ltimestamp", "orient", "length", "spotvisible" } ] 
+var puppetplanviewcameraactive = false
+var puppetplanviewcamerastack = [ ]   # [ { "timestamp", "Ltimestamp", "plancameratrans", "plancamerasize" } ] 
 
 const gogglescoloursolid = Color("#1b3082")
 const gogglescolourghostly = Color("#1b7682")
@@ -20,6 +23,7 @@ remote func initplayerappearanceJ(playerappearance):
 	playertunnelvrversion = playerappearance.get("tunnelvrversion", "unknown")
 	executingfeaturesavailable = playerappearance.get("executingfeaturesavailable", [ ])
 	playeroperatingsystem = playerappearance.get("playeroperatingsystem", "unknown")
+	playeruimode = playerappearance.get("playeruimode", "normal")
 	playermqttid = playerappearance.get("playermqttid", "")
 
 	puppetsetheadtorchlight(playerappearance.get("torchon", false))
@@ -65,6 +69,7 @@ remote func setavatarposition(positiondict):
 			global_transform = positiondict["puppetbody"]["playertransform"]
 			$HeadCam.transform = positiondict["puppetbody"]["headcamtransform"]
 			$headlocator.transform.origin = $HeadCam.transform.origin
+			$headlocator.visible = true
 			visible = true
 			Tglobal.soundsystem.quicksound("PlayerArrive", global_transform.origin)
 	if guipanel3d.visible and guipanel3d.netlinkstatstimer < 0.0 and guipanel3d.selectedplayernetworkid == networkID:
@@ -120,6 +125,15 @@ remote func setavatarposition(positiondict):
 		while len(puppetpointerpositionstack) > maxstacklength:
 			puppetpointerpositionstack.pop_front()
 		puppetpointerpositionstack.push_back(puppetpointerposition)
+
+	if positiondict.has("planviewcamera"):
+		var puppetplanviewcamera = positiondict["planviewcamera"]
+		puppetplanviewcamera["timestamp"] = positiondict["timestamp"]
+		puppetplanviewcamera["Ltimestamp"] = Ltimestamp
+		while len(puppetplanviewcamerastack) > maxstacklength:
+			puppetplanviewcamerastack.pop_front()
+		puppetplanviewcamerastack.push_back(puppetplanviewcamera)
+		puppetplanviewcameraactive = (playeruimode == "phoneoverlay") and puppetplanviewcamera["visible"]
 
 	if positiondict.has("handleft"):
 		var handleftposition = positiondict["handleft"]
@@ -185,8 +199,11 @@ remote func puppeteyestate(eyesopen):
 	$HeadCam/csgheadmesh/lefteye.visible = eyesopen
 	
 func _process(delta):
-	process_puppetpositionstack(delta)
-	process_puppetpointerpositionstack(delta)
+	if puppetplanviewcameraactive:
+		process_puppetplanviewcamerastack(delta)
+	else:
+		process_puppetpositionstack(delta)
+		process_puppetpointerpositionstack(delta)
 	# process_handpositionstack done per hand because system is also used to make gestures from controllers
 
 var prevfootstepcount = 0
@@ -203,6 +220,7 @@ func process_puppetpositionstack(delta):
 		if pp.has("headcamtransform"):
 			$HeadCam.transform = Transform(pp["headcamtransform"].basis.scaled(Vector3(playerscale, playerscale, playerscale)), pp["headcamtransform"].origin)
 			$headlocator.transform.origin = $HeadCam.transform.origin
+			$headlocator.visible = true
 		puppetpositionstack.pop_front()
 		
 	else:
@@ -218,12 +236,30 @@ func process_puppetpositionstack(delta):
 			$HeadCam.transform = Transform(pp["headcamtransform"].basis.slerp(pp1["headcamtransform"].basis, lam).scaled(Vector3(playerscale, playerscale, playerscale)), 
 										   lerp(pp["headcamtransform"].origin, pp1["headcamtransform"].origin, lam))
 			$headlocator.transform.origin = $HeadCam.transform.origin
+			$headlocator.visible = true
 		if pp1.has("footstepcount") and pp1["footstepcount"] != prevfootstepcount:
 			Tglobal.soundsystem.quicksound("TapSound", $HeadCam.global_transform.origin - Vector3(0, 1.5, 0))
 			prevfootstepcount = pp1["footstepcount"]
 			if (prevfootstepcount%100) == 101:
 				print("prevfootstepcountss  ", prevfootstepcount, " ", var2str(transform))
 				
+func process_puppetplanviewcamerastack(delta):
+	var t = OS.get_ticks_msec()*0.001
+	while len(puppetplanviewcamerastack) >= 2 and puppetplanviewcamerastack[1]["Ltimestamp"] <= t:
+		puppetplanviewcamerastack.pop_front()
+	if len(puppetplanviewcamerastack) == 0 or t < puppetplanviewcamerastack[0]["Ltimestamp"]:
+		return
+	var pp = puppetplanviewcamerastack[0]
+	if pp.has("plancameratrans") and pp.has("plancamerasize"):
+		var playermeposition = get_parent().get_parent().playerMe.get_node("HeadCam").global_transform.origin
+		var relcameraposition = pp["plancameratrans"].origin - playermeposition
+		var plancameraviewvec = -pp["plancameratrans"].basis.z
+		var reldistplacement = pp["plancamerasize"]/3.0
+		var relcamerapositionZ = relcameraposition + plancameraviewvec*(-reldistplacement - plancameraviewvec.dot(relcameraposition))
+		transform = Transform(Basis(), playermeposition)
+		$HeadCam.transform = Transform(pp["plancameratrans"].basis, relcamerapositionZ)
+		$headlocator.visible = false
+					
 func process_puppetpointerpositionstack(delta):
 	var t = OS.get_ticks_msec()*0.001
 	while len(puppetpointerpositionstack) >= 2 and puppetpointerpositionstack[1]["Ltimestamp"] <= t:

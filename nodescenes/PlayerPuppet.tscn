@@ -220,7 +220,14 @@ material/0 = SubResource( 8 )
 
 [node name="locatorline" type="MeshInstance" parent="headlocator"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 30, 0 )
-layers = 4097
+layers = 4
+cast_shadow = 0
+mesh = SubResource( 9 )
+material/0 = SubResource( 10 )
+
+[node name="planviewlocatorline" type="MeshInstance" parent="headlocator"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 30, 0 )
+layers = 262144
 cast_shadow = 0
 mesh = SubResource( 9 )
 material/0 = SubResource( 10 )
@@ -250,6 +257,7 @@ visible = false
 
 [node name="LaserOrient" type="Spatial" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.411951, 0.678362, 0 )
+visible = false
 
 [node name="Length" type="Spatial" parent="LaserOrient"]
 
