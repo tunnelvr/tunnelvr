@@ -472,6 +472,9 @@ remote func actsketchchangeL(xcdatalist):
 					xcdrawing.setdrawingvisiblecode(xcdrawingstoupdatevisiblecodes[xcdrawing.get_name()])
 				else:
 					xcdrawing.setdrawingvisiblecode(xcdrawingstoupdatevisiblecodes.get(xcdrawing.get_name(), DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE if len(xcdrawing.xctubesconn) == 0 else DRAWING_TYPE.VIZ_XCD_HIDE))
+			elif xcdrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
+				if xcdrawingstoupdatevisiblecodes.has(xcdrawing.get_name()):
+					xcdrawing.setdrawingvisiblecode(xcdrawingstoupdatevisiblecodes[xcdrawing.get_name()])
 			#elif xcdrawing.drawingtype == DRAWING_TYPE.DT_ROPEHANG:
 			#	xcdrawing.setdrawingvisiblecode(DRAWING_TYPE.VIZ_XCD_HIDE)
 		for xctube in xctubestoupdate.values():

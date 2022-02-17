@@ -856,8 +856,13 @@ func _on_resourceoptions_buttondown_setavailablefunctions():
 	if potreeexperiments.rootnode == null:
 		$Viewport/GUI/Panel/ResourceOptions.set_item_text(showhigloadpotreeid, "Load Potree")
 		$Viewport/GUI/Panel/ResourceOptions.set_item_disabled(showhigloadpotreeid, (centrelineselected_forresourcefunction == null or centrelineselected_forresourcefunction.additionalproperties == null or centrelineselected_forresourcefunction.additionalproperties.get("potreeurlmetadata") == null))
+	elif not potreeexperiments.visible:
+		$Viewport/GUI/Panel/ResourceOptions.set_item_text(showhigloadpotreeid, "Show Potree")
+	elif centrelineselected_forresourcefunction == null or centrelineselected_forresourcefunction.additionalproperties == null or centrelineselected_forresourcefunction.additionalproperties.get("potreeurlmetadata") != potreeexperiments.potreeurlmetadata:
+		$Viewport/GUI/Panel/ResourceOptions.set_item_text(showhigloadpotreeid, "Remove Potree")
 	else:
-		$Viewport/GUI/Panel/ResourceOptions.set_item_text(showhigloadpotreeid, "Show Potree" if not potreeexperiments.visible else "Hide Potree")
+		$Viewport/GUI/Panel/ResourceOptions.set_item_text(showhigloadpotreeid, "Hide Potree")
+
 	$Viewport/GUI/Panel/ResourceOptions.set_item_disabled(resourceoptionlookup["Print XCproperties"], xcselecteddrawing_forrsourcefunctions == null)
 	$Viewport/GUI/Panel/ResourceOptions.set_item_disabled(resourceoptionlookup["Set XCproperties"], xcselecteddrawing_forrsourcefunctions == null)
 	$Viewport/GUI/Panel/ResourceOptions.set_item_disabled(resourceoptionlookup["Set new file"], regexacceptableprojectname.search(mtext) == null)
@@ -877,6 +882,10 @@ func _on_resourceoptions_selected(index):
 				xcproperties["xcresource"] = xcselecteddrawing_forrsourcefunctions["xcresource"]
 			if sketchsystem.pointersystem.activetargetnode != null:
 				xcproperties["snodename"] = sketchsystem.pointersystem.activetargetnode.get_name()
+			var xcpos = xcselecteddrawing_forrsourcefunctions.translation
+			var xcrot = xcselecteddrawing_forrsourcefunctions.rotation_degrees
+			xcproperties["position"] = [xcpos.x, xcpos.y, xcpos.z]
+			xcproperties["rotation"] = [xcrot.x, xcrot.y, xcrot.z]
 			$Viewport/GUI/Panel/EditColorRect/TextEdit.text = JSON.print(xcproperties, "  ", true)
 		else:
 			setpanellabeltext("No XCdrawing selected")
@@ -893,8 +902,23 @@ func _on_resourceoptions_selected(index):
 					jresource.erase("xcresource")
 				if jresource.has("snodename"):
 					jresource.erase("snodename")
+				var dnode = Spatial.new()
+				dnode.transform = xcselecteddrawing_forrsourcefunctions.transform
+				if jresource.has("position") and typeof(jresource["position"]) == TYPE_ARRAY and len(jresource["position"]) == 3:
+					dnode.translation = Vector3(float(jresource["position"][0]), float(jresource["position"][1]), float(jresource["position"][2]))
+					jresource.erase("position")
+				if jresource.has("rotation") and typeof(jresource["rotation"]) == TYPE_ARRAY and len(jresource["rotation"]) == 3:
+					dnode.rotation_degrees = Vector3(float(jresource["rotation"][0]), float(jresource["rotation"][1]), float(jresource["rotation"][2]))
+					jresource.erase("rotation")
 				xcselecteddrawing_forrsourcefunctions.additionalproperties = jresource
+				var xcdata = { "name":xcselecteddrawing_forrsourcefunctions.get_name(), 
+							   "prevtransformpos":xcselecteddrawing_forrsourcefunctions.transform,
+							   "transformpos":dnode.transform
+							 }
+				sketchsystem.actsketchchange([xcdata])
+				sketchsystem.pointersystem.clearactivetargetnode()
 				setpanellabeltext("XCdrawing properties updated")
+				
 			else:
 				setpanellabeltext("Bad JSON format")
 		else:

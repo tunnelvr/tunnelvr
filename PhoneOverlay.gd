@@ -92,7 +92,7 @@ func updatescreentouchplaces0state():
 	if len(screentouchplaces0pos) == 0:
 		fingerdragpos = null
 		return
-	var plancamera = planviewsystem.get_node("PlanView/Viewport/PlanGUI/Camera")
+	var plancamera = planviewsystem.plancamera
 	var screentouchplaces0keys = screentouchplaces0pos.keys()
 	if len(screentouchplaces0pos) == 1:
 		screentouchposindex0 = screentouchplaces0keys[0]
@@ -148,7 +148,7 @@ func updatescreentouchplaces0state():
 	plancamerasize = plancamera.size
 
 func updatescreentouchplaces0drag():
-	var plancamera = planviewsystem.get_node("PlanView/Viewport/PlanGUI/Camera")
+	var plancamera = planviewsystem.plancamera
 	var planviewpositiondict = { }
 	if len(screentouchplaces0pos) == 1:
 		var panvec = fingerdragpos - screentouchplaces0pos[screentouchposindex0]

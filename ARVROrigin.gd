@@ -306,7 +306,7 @@ func _process(delta):
 
 		if Tglobal.phonethumbviewposition != null:
 			if PlanViewSystem.planviewactive:
-				var plancamera = PlanViewSystem.get_node("PlanView/Viewport/PlanGUI/Camera")
+				var plancamera = PlanViewSystem.plancamera
 				if phonethumbviewpositionDown == null:
 					phonethumbviewpositionDown = Tglobal.phonethumbviewposition
 					headrotdegreesDown = plancamera.rotation_degrees

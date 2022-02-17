@@ -5,15 +5,18 @@ var drawingtype = DRAWING_TYPE.DT_PLANVIEW
 onready var ImageSystem = get_node("/root/Spatial/ImageSystem")
 onready var sketchsystem = get_node("/root/Spatial/SketchSystem")
 onready var selfSpatial = get_node("/root/Spatial")
-
+	
 var activetargetfloor = null
 var activetargetfloortransformpos = null
 var activetargetfloorimgtrim = null
 
 var buttonidxtoitem = { }
 var buttonidxloaded = [ ]
+
 onready var fileviewtree = $PlanView/Viewport/PlanGUI/PlanViewControls/FileviewTree
 onready var planviewcontrols = $PlanView/Viewport/PlanGUI/PlanViewControls
+onready var plancamera = $PlanView/Viewport/PlanGUI/Camera
+
 var imgregex = RegEx.new()
 var listregex = RegEx.new()
 var f3dregex = RegEx.new()
@@ -325,7 +328,6 @@ func clearsetupfileviewtree(binit, filetreerootpath):
 	
 			
 func planviewtodict():
-	var plancamera = $PlanView/Viewport/PlanGUI/Camera
 	return { "visible":visible,
 			 "planviewactive":planviewactive, 
 			 "plantubesvisible":(($PlanView/Viewport/PlanGUI/Camera.cull_mask & CollisionLayer.VL_xcshells) != 0),
@@ -343,7 +345,6 @@ func planviewtodict():
 			}
 
 func planviewcameratodict():
-	var plancamera = $PlanView/Viewport/PlanGUI/Camera
 	return { "visible":visible,
 			 "plancameratrans":plancamera.transform,
 			 "plancamerasize":plancamera.size
@@ -376,7 +377,6 @@ func setcameracullmasks(bcentrelinesvisible, bplantubesvisible):
 
 func settunnelxoutlineshadervalues():
 	var tunnelxoutline = sketchsystem.get_node("tunnelxoutline")
-	var plancamera = $PlanView/Viewport/PlanGUI/Camera
 	var blackoutline = tunnelxoutline.get_node("blackoutline")
 	var whiteinfill = tunnelxoutline.get_node("whiteinfill")
 	var camerafar = plancamera.far*0.9
@@ -390,7 +390,6 @@ func settunnelxoutlineshadervalues():
 	blackoutline.material_override.set_shader_param("fogcolor", plancamera.environment.background_color)
 
 func actplanviewdict(pvchange, resettransmitbutton=true):
-	var plancamera = $PlanView/Viewport/PlanGUI/Camera
 	if resettransmitbutton:
 		planviewcontrols.get_node("ButtonTransmitView").pressed = false
 	if "plancamerapos" in pvchange:
@@ -516,7 +515,6 @@ func planviewtransformpos(guidpaneltransform, guidpanelsize):
 
 
 func updateplanviewlocatorlines():
-	var plancamera = $PlanView/Viewport/PlanGUI/Camera
 	var nodesca = plancamera.size/70.0*3.0
 	var labelsca = nodesca*2.0
 	for player in selfSpatial.get_node("Players").get_children():
@@ -530,7 +528,6 @@ func updateplanviewlocatorlines():
 var updateplanviewentitysizes_working = false
 func updateplanviewentitysizes():
 	var Dt0 = OS.get_ticks_msec()
-	var plancamera = $PlanView/Viewport/PlanGUI/Camera
 	var nodesca = plancamera.size/70.0*3.0
 	var labelsca = nodesca*2.0
 	var vertexyinvert = -1.0 if Tglobal.phoneoverlay != null else 1.0
@@ -603,7 +600,6 @@ func _process(delta):
 						 (-1 if viewslide.get_node("ButtonSlideDown").is_pressed() else 0) + (1 if viewslide.get_node("ButtonSlideUp").is_pressed() else 0),
 						 (-1 if viewslide.get_node("ButtonZoomDown").is_pressed() else 0) + (1 if viewslide.get_node("ButtonZoomUp").is_pressed() else 0))
 	if joypos != Vector3(0, 0, 0):
-		var plancamera = $PlanView/Viewport/PlanGUI/Camera
 		planviewpositiondict["plancamerapos"] = plancamera.translation + delta*(\
 					plancamera.transform.basis.x*joypos.x*plancamera.size/2 + \
 					plancamera.transform.basis.y*joypos.y*plancamera.size/2 + \
@@ -613,13 +609,11 @@ func _process(delta):
 	var bzoomout = zoomview.get_node("ButtonZoomOut").is_pressed()
 	if bzoomin or bzoomout:
 		var zoomfac = 1/(1 + 0.5*delta) if bzoomin else 1 + 0.5*delta
-		var plancamera = $PlanView/Viewport/PlanGUI/Camera
 		planviewpositiondict["plancamerasize"] = plancamera.size * zoomfac
 
 	var brotleft = viewslide.get_node("ButtonRotLeft").is_pressed()
 	var brotright = viewslide.get_node("ButtonRotRight").is_pressed()
 	if brotleft or brotright:
-		var plancamera = $PlanView/Viewport/PlanGUI/Camera
 		var droty = (-1 if brotleft else 1)*delta*60
 		planviewpositiondict["plancamerarotation"] = plancamera.rotation_degrees + Vector3(0, droty, 0.0)
 		if plancamera.rotation_degrees.x == 0.0:
@@ -684,7 +678,6 @@ func _process(delta):
 
 	
 func buttoncentre_pressed():
-	var plancamera = get_node("PlanView/Viewport/PlanGUI/Camera")
 	var headcam = get_node("/root/Spatial").playerMe.get_node("HeadCam")
 	var lelevrotpoint = headcam.global_transform.origin
 	var cameradistvec = plancamera.translation - lelevrotpoint
@@ -704,7 +697,6 @@ var elevcameradist = 50.0
 func buttonelev_toggled(makeelevmode):
 	print("buttonelev_toggled ", makeelevmode)
 	var headcam = get_node("/root/Spatial").playerMe.get_node("HeadCam")
-	var plancamera = get_node("PlanView/Viewport/PlanGUI/Camera")
 	var screensize = get_node("/root").size
 	var plancamerabasisy = Vector3(-sin(deg2rad(plancamera.rotation_degrees.y)), 0.0, -cos(deg2rad(plancamera.rotation_degrees.y)))
 	if makeelevmode:
@@ -768,7 +760,6 @@ var viewport_point = Vector2(0,0)
 var raycastcollisionpointC = Vector3(0,0,0)
 func processplanviewpointing(raycastcollisionpoint, controller_trigger):
 	var planviewsystem = self
-	var plancamera = planviewsystem.get_node("PlanView/Viewport/PlanGUI/Camera")
 	var collider_transform = planviewsystem.get_node("PlanView").global_transform
 	var shape_size = planviewsystem.get_node("PlanView/CollisionShape").shape.extents * 2
 	var collider_scale = collider_transform.basis.get_scale()
