@@ -4,7 +4,7 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-21.11";
     godot-source = {
-      url = "github:godotengine/godot/3.4-stable";
+      url = "github:godotengine/godot/3.4.2-stable";
       flake = false;
     };
     flake-compat-ci.url = "github:hercules-ci/flake-compat-ci";
@@ -82,7 +82,7 @@
                 # can parse it using regex in order to construct the link to
                 # download the export templates from.
                 version = rec {
-                  # Fully constructed string, example: "3.4".
+                  # Fully constructed string, example: "3.4.2".
                   string = "${major + "." + minor + (final.lib.optionalString (patch != "") "." + patch)}";
                   file = "${godot-source}/version.py";
                   major = toString (builtins.match ".+major = ([0-9]+).+" (builtins.readFile file));
@@ -97,12 +97,12 @@
                 '';
                 export-templates = final.fetchzip {
                   url = "https://downloads.tuxfamily.org/godotengine/${version.string}/Godot_v${version.string}-${version.status}_export_templates.tpz";
-                  sha256 = "sha256-3trC1ocgIVNWN19k6LUnZ6NhDTme+aT7RVL2XmkXzr0=";
+                  sha256 = "sha256-OMSB/CRbO7F/uLsVKX2ZiaHxHsCQD2Y0IKzbkWLPm/M=";
                   # postFetch is necessary because the downloaded file has a
                   # .tpz extension, meaning `fetchzip` cannot otherwise extract
                   # it properly. Additionally, the game engine expects the
                   # template path to be in a folder by the name of the current
-                  # version + status, like '3.4-stable/templates' for example,
+                  # version + status, like '3.4.2-stable/templates' for example,
                   # so we accomplish that here.
                   postFetch = ''
                     unzip $downloadedFile -d ./
