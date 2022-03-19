@@ -240,7 +240,6 @@ emission_operator = 0
 emission_on_uv2 = false
 
 [sub_resource type="CubeMesh" id=65]
-material = SubResource( 55 )
 size = Vector3( 0.01, 0.01, 1 )
 
 [sub_resource type="SpatialMaterial" id=66]
@@ -2013,7 +2012,7 @@ transform = Transform( 1, -4.60809e-07, 4.60809e-07, 0, 0.707107, 0.707107, -6.5
 [node name="Mesh" type="MeshInstance" parent="BodyObjects/LaserSelectLine/Scale"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.5 )
 mesh = SubResource( 65 )
-material/0 = null
+material/0 = SubResource( 55 )
 
 [node name="GripLaserSpot" type="MeshInstance" parent="BodyObjects"]
 transform = Transform( 1, -4.60809e-07, 4.60809e-07, 0, 0.707107, 0.707107, -6.51682e-07, -0.707107, 0.707107, 0.615074, -0.372118, -10.7241 )
@@ -2888,7 +2887,7 @@ margin_top = 235.0
 margin_right = 116.0
 margin_bottom = 262.0
 text = "normal"
-items = [ "normal", null, false, 0, null, "Hide XCs", null, false, 1, null, "opt: all grey", null, false, 2, null, "opt: hide xc", null, false, 3, null, "toggle guardian", null, false, 4, null, "export OBJ", null, false, 7, null, "choke", null, false, 6, null, "swap controllers", null, false, 7, null, "lock controls", null, false, 8, null, "Toggle Fog", null, false, 10, null, "opt: tunnelx", null, false, 10, null, "Huge Spiral", null, false, 11, null ]
+items = [ "normal", null, false, 0, null, "Hide XCs", null, false, 1, null, "opt: all grey", null, false, 2, null, "opt: hide xc", null, false, 3, null, "toggle guardian", null, false, 4, null, "export OBJ", null, false, 7, null, "choke", null, false, 6, null, "swap controllers", null, false, 7, null, "lock controls", null, false, 8, null, "Toggle Fog", null, false, 10, null, "opt: tunnelx", null, false, 10, null, "Huge Spiral", null, true, 11, null ]
 selected = 0
 __meta__ = {
 "_edit_use_anchors_": false
@@ -3264,7 +3263,7 @@ material/0 = SubResource( 35 )
 shape = SubResource( 18 )
 
 [node name="HoleXCdisabled" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
-transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 1.16415e-10, 0, 1, -0.23759, -0.2, 0.047121 )
+transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 2.32831e-10, 0, 1, -0.237645, -0.2, 0.0308437 )
 collision_layer = 8
 collision_mask = 0
 
@@ -3277,7 +3276,7 @@ material/0 = SubResource( 37 )
 shape = SubResource( 18 )
 
 [node name="HideXC" type="StaticBody" parent="GuiSystem/GripMenu/WordButtons"]
-transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 3.49246e-10, 0, 1, 0.000791224, -0.352818, 0.0675917 )
+transform = Transform( 0.2, 0, 0, 0, 0.15, 0, 4.65661e-10, 0, 1, 0.000669042, -0.352818, 0.0313148 )
 collision_layer = 8
 collision_mask = 0
 

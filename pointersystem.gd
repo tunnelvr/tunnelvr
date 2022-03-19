@@ -16,7 +16,10 @@ onready var LaserOrient = get_node("/root/Spatial/BodyObjects/LaserOrient")
 onready var LaserSelectLine = get_node("/root/Spatial/BodyObjects/LaserSelectLine") 
 onready var FloorLaserSpot = get_node("/root/Spatial/BodyObjects/FloorLaserSpot")
 onready var GripLaserSpot = get_node("/root/Spatial/BodyObjects/GripLaserSpot")
-		
+
+onready var LaseSelectLinegoodcolour = LaserSelectLine.get_node("Scale/Mesh").get_surface_material(0).albedo_color
+onready var LaseSelectLinebadcolour = Color(0.30, 0.08, 0.08, 1)
+
 var viewport_point = null
 
 onready var activelaserroot = LaserOrient
@@ -26,7 +29,7 @@ var pointertargettype = "none"
 var pointertargetwall = null
 var pointertargetpoint = Vector3(0, 0, 0)
 var gripbuttonpressused = false
-var laserselectlinelogicallyvisible = false
+var laserselectlinelogicalvisibilitystate = 0
 var joyposcumulative = Vector2(0, 0)
 var pointertargetofstartofropehang = null
 
@@ -405,31 +408,53 @@ func setpointertarget(laserroot, raycast, pointertargetshortdistance):
 												  (pointertargettype == "none" and pointertargetshortdistance != -1.0)
 		laserroot.get_node("LaserSpot").set_surface_material(0, materialsystem.lasermaterialN((1 if activetargetnode != null else 0) + (2 if pointertarget == null else 0)))
 			
-		if activetargetnode != null and pointertargetwall != null:
-			laserselectlinelogicallyvisible = false
-			if activetargetnodewall.drawingtype == DRAWING_TYPE.DT_CENTRELINE:
-				laserselectlinelogicallyvisible = pointertargetwall != null and pointertargettype == "XCdrawing" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE
-			elif activetargetnodewall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
+		var llaserselectlinelogicalvisibilitystate = 0
+		if activetargetnodewall != null and activetargetnodewall.drawingtype == DRAWING_TYPE.DT_CENTRELINE:
+			var clconnectcode = activetargetnodewall.xccentrelineconnectstofloor(sketchsystem.get_node("XCdrawings"))
+			if pointertargetwall != null:
+				if pointertargettype == "XCdrawing" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE and clconnectcode != 2:
+					llaserselectlinelogicalvisibilitystate = 1
+				elif pointertargettype == "XCnode" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_CENTRELINE and clconnectcode != 1:
+					llaserselectlinelogicalvisibilitystate = 1
+				else:
+					llaserselectlinelogicalvisibilitystate = 2
+			elif Tglobal.handflickmotiongestureposition == 1:
+				llaserselectlinelogicalvisibilitystate = 1 if clconnectcode == 0 else 2
+			
+		elif activetargetnode != null and pointertargetwall != null:
+			llaserselectlinelogicalvisibilitystate = 0
+
+			if activetargetnodewall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 				if pointertargettype == "XCnode":
-					laserselectlinelogicallyvisible = (pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING) and (pointertarget != activetargetnode)
-				elif pointertargettype == "XCdrawing" and pointertargetwall == activetargetnodewall:
-					laserselectlinelogicallyvisible = true
+					if pointertarget != activetargetnode:
+						llaserselectlinelogicalvisibilitystate = 1 if (pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING) else 2
+				elif pointertargettype == "XCdrawing":
+					if activetargetnodewall == pointertargetwall:
+						llaserselectlinelogicalvisibilitystate = 1
+					else:
+						llaserselectlinelogicalvisibilitystate = 2
+
 			elif activetargetnodewall.drawingtype == DRAWING_TYPE.DT_ROPEHANG:
 				if pointertargettype == "XCnode":
-					laserselectlinelogicallyvisible = (pointertargetwall.drawingtype == DRAWING_TYPE.DT_ROPEHANG) and (pointertarget != activetargetnode)
+					if pointertarget != activetargetnode:
+						llaserselectlinelogicalvisibilitystate = 1 if (pointertargetwall == activetargetwall) else 2
 				elif pointertargettype == "XCdrawing":
-					laserselectlinelogicallyvisible = false
+					llaserselectlinelogicalvisibilitystate = 2
 				elif Tglobal.handflickmotiongestureposition == 1:
-					laserselectlinelogicallyvisible = (pointertargettype == "none" or pointertargettype == "XCtubesector" or pointertargettype == "XCflatshell")
+					llaserselectlinelogicalvisibilitystate = 1 if (pointertargettype == "none" or pointertargettype == "XCtubesector" or pointertargettype == "XCflatshell") else 2
+
+			elif activetargetnodewall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
+				llaserselectlinelogicalvisibilitystate = 1 if (pointertargettype == "XCdrawing" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE) else 2
+			
 		elif pointertargettype == "IntermediatePointView":
-			laserselectlinelogicallyvisible = true
+			llaserselectlinelogicalvisibilitystate = 1
 		elif activetargetnodewall != null and activetargetnodewall.drawingtype == DRAWING_TYPE.DT_ROPEHANG:
-			laserselectlinelogicallyvisible = (pointertargettype == "none" and Tglobal.handflickmotiongestureposition == 1)
-		elif activetargetnodewall != null and activetargetnodewall.drawingtype == DRAWING_TYPE.DT_CENTRELINE:
-			laserselectlinelogicallyvisible = (len(activetargetnodewall.xctubesconn) == 0 and pointertargettype == "none" and Tglobal.handflickmotiongestureposition == 1)
-		else:
-			laserselectlinelogicallyvisible = false
-		LaserSelectLine.visible = laserselectlinelogicallyvisible
+			llaserselectlinelogicalvisibilitystate = 1 if ((pointertargettype == "none" and Tglobal.handflickmotiongestureposition == 1)) else 2
+			
+		laserselectlinelogicalvisibilitystate = llaserselectlinelogicalvisibilitystate
+		print("llaserselectlinelogicalvisibilitystate ", llaserselectlinelogicalvisibilitystate, " ", laserselectlinelogicalvisibilitystate)
+		LaserSelectLine.visible = (llaserselectlinelogicalvisibilitystate != 0)
+		LaserSelectLine.get_node("Scale/Mesh").get_surface_material(0).albedo_color = LaseSelectLinegoodcolour if laserselectlinelogicalvisibilitystate == 1 else LaseSelectLinebadcolour
 		
 	pointertargetpoint = newpointertargetpoint
 	if is_instance_valid(pointertarget) and pointertarget == guipanel3d and Tglobal.phoneoverlay == null:
@@ -488,7 +513,7 @@ func setpointertarget(laserroot, raycast, pointertargetshortdistance):
 		else:
 			LaserSelectLine.visible = false
 		
-	elif laserselectlinelogicallyvisible:
+	elif laserselectlinelogicalvisibilitystate != 0:
 		LaserSelectLine.visible = not activetargetnodetriggerpulling
 		var lslfrom = null
 		if pointertarget != null and activetargetnode != null:
