@@ -886,6 +886,13 @@ func _on_resourceoptions_selected(index):
 			var xcrot = xcselecteddrawing_forrsourcefunctions.rotation_degrees
 			xcproperties["position"] = [xcpos.x, xcpos.y, xcpos.z]
 			xcproperties["rotation"] = [xcrot.x, xcrot.y, xcrot.z]
+			var xcdrawingtype = xcselecteddrawing_forrsourcefunctions.drawingtype
+			if xcdrawingtype != DRAWING_TYPE.DT_XCDRAWING:
+				xcproperties["drawingtype"] = "CENTRELINE" if xcdrawingtype == DRAWING_TYPE.DT_CENTRELINE else ("TEXTURE" if xcdrawingtype == DRAWING_TYPE.DT_FLOORTEXTURE else "ROPEHANG")
+			if xcdrawingtype == DRAWING_TYPE.DT_CENTRELINE:
+				var clconnectcode = xcselecteddrawing_forrsourcefunctions.xccentrelineconnectstofloor(sketchsystem.get_node("XCdrawings"))
+				xcproperties["centrelineconnection"] = "anchored" if clconnectcode == 1 else ("incoming for mapping" if clconnectcode == 2 else "free") 
+			DRAWING_TYPE.DT_XCDRAWING # DT_CENTRELINE, DT_ROPEHANG, DT_FLOORTEXTURE
 			$Viewport/GUI/Panel/EditColorRect/TextEdit.text = JSON.print(xcproperties, "  ", true)
 		else:
 			setpanellabeltext("No XCdrawing selected")
@@ -902,6 +909,10 @@ func _on_resourceoptions_selected(index):
 					jresource.erase("xcresource")
 				if jresource.has("snodename"):
 					jresource.erase("snodename")
+				if jresource.has("drawingtype"):
+					jresource.erase("drawingtype")
+				if jresource.has("centrelineconnection"):
+					jresource.erase("centrelineconnection")
 				var dnode = Spatial.new()
 				dnode.transform = xcselecteddrawing_forrsourcefunctions.transform
 				if jresource.has("position") and typeof(jresource["position"]) == TYPE_ARRAY and len(jresource["position"]) == 3:
