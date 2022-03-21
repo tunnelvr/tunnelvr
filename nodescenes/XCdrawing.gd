@@ -124,7 +124,7 @@ func xccentrelineconnectstofloor(xcdrawings):
 			var Dxcdrawingincomingcentreline = xcdrawings.get_node(xctube.xcname0)
 			assert (Dxcdrawingincomingcentreline.drawingtype == DRAWING_TYPE.DT_CENTRELINE)
 	assert ((nfloorconnections == 0) or (ncentrelineconnections == 0))
-	return 1 if (nfloorconnections != 0) else 2 if (ncentrelineconnections != 0) else 0
+	return 1 if (nfloorconnections != 0) else (2 if (ncentrelineconnections != 0) else 0)
 
 func makeflaglabels(ptsignroot, ptsigntopy, postrad, flagsigns):
 	var labelgenerator = get_node("/root/Spatial/LabelGenerator")

@@ -836,8 +836,7 @@ static func pickpolysindex(polys, xcdrawinglink, js):
 			
 	return pickpolyindex
 
-const linewidth = 0.02
-static func addarrowmesh(surfaceTool, p0, p1, aperp, intermediatepts):
+static func addarrowmesh(surfaceTool, p0, p1, aperp, linewidth, intermediatepts):
 	var p0m = p0
 	var p0mleft = p0m - linewidth*aperp
 	var p0mright = p0m + linewidth*aperp

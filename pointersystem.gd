@@ -411,6 +411,7 @@ func setpointertarget(laserroot, raycast, pointertargetshortdistance):
 		var llaserselectlinelogicalvisibilitystate = 0
 		if activetargetnodewall != null and activetargetnodewall.drawingtype == DRAWING_TYPE.DT_CENTRELINE:
 			var clconnectcode = activetargetnodewall.xccentrelineconnectstofloor(sketchsystem.get_node("XCdrawings"))
+			print("clconnectcode ", clconnectcode)
 			if pointertargetwall != null:
 				if pointertargettype == "XCdrawing" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE and clconnectcode != 2:
 					llaserselectlinelogicalvisibilitystate = 1
@@ -452,7 +453,6 @@ func setpointertarget(laserroot, raycast, pointertargetshortdistance):
 			llaserselectlinelogicalvisibilitystate = 1 if ((pointertargettype == "none" and Tglobal.handflickmotiongestureposition == 1)) else 2
 			
 		laserselectlinelogicalvisibilitystate = llaserselectlinelogicalvisibilitystate
-		print("llaserselectlinelogicalvisibilitystate ", llaserselectlinelogicalvisibilitystate, " ", laserselectlinelogicalvisibilitystate)
 		LaserSelectLine.visible = (llaserselectlinelogicalvisibilitystate != 0)
 		LaserSelectLine.get_node("Scale/Mesh").get_surface_material(0).albedo_color = LaseSelectLinegoodcolour if laserselectlinelogicalvisibilitystate == 1 else LaseSelectLinebadcolour
 		
@@ -687,8 +687,10 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 			if newactivetargetnodeinfo != null:
 				setactivetargetnode(newactivetargetnodeinfo[0].get_node("XCnodes").get_node(newactivetargetnodeinfo[1]))
 
-	elif Tglobal.handflickmotiongestureposition == 1 and activetargetnodewall != null and activetargetnodewall.drawingtype == DRAWING_TYPE.DT_CENTRELINE and \
-			len(activetargetnodewall.xctubesconn) == 0 and gripbuttonheld:
+	elif activetargetnodewall != null and activetargetnodewall.drawingtype == DRAWING_TYPE.DT_CENTRELINE \
+			and activetargetnodewall.xccentrelineconnectstofloor(sketchsystem.get_node("XCdrawings")) != 1 \
+			and gripbuttonheld and Tglobal.handflickmotiongestureposition == 1:
+
 		var tvec = pointertargetpoint - activetargetnode.global_transform.origin
 		var transformpos = activetargetnodewall.transform
 		transformpos.origin += tvec
@@ -707,8 +709,6 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 
 	elif pointertarget.has_method("jump_up"):
 		pointertarget.jump_up()
-
-	# grip click moves node on xcwall
 
 	elif gripbuttonheld and activetargetnode != null and pointertargettype == "XCdrawing" and pointertargetwall == activetargetnodewall:
 		var movetopoint = activetargetnodewall.global_transform.xform_inv(pointertargetpoint)
@@ -1015,7 +1015,8 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 				xctdata["prevdrawinglinks"] = [ nodename0_station, reppapernodename, xctube.xcsectormaterials[j], null ]
 			else:
 				xctdata["prevdrawinglinks"] = [ ]
-		sketchsystem.actsketchchange([xcndata, xctdata])
+		var xctupdate = { "xcvizstates":{ }, "updatetubeshells":[{"tubename":xctube.get_name() if xctube != null else "**notset", "xcname0":xcname0_centreline, "xcname1":xcname1_floor }] }
+		sketchsystem.actsketchchange([xcndata, xctdata, xctupdate])
 		if xctube == null:
 			xctube = sketchsystem.findxctube(xcname0_centreline, xcname1_floor)
 		if len(xctube.xcdrawinglink) != 0:
@@ -1023,6 +1024,35 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 			if floormovedata != null:
 				sketchsystem.actsketchchange(floormovedata)
 		clearactivetargetnode()
+
+	elif activetargetnode != null and activetargetnodewall.drawingtype == DRAWING_TYPE.DT_CENTRELINE \
+			and pointertargettype == "XCnode" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_CENTRELINE and activetargetnodewall != pointertargetwall \
+			and activetargetnodewall.xccentrelineconnectstofloor(sketchsystem.get_node("XCdrawings")) != 1 and pointertargetwall.xccentrelineconnectstofloor(sketchsystem.get_node("XCdrawings")) != 2:
+
+		var xcname0_centreline = activetargetnodewall.get_name()
+		var nodename0_station = activetargetnode.get_name()
+		var xcname1_centreline = pointertargetwall.get_name()
+		var nodename1_station = pointertarget.get_name()
+		var xctube = sketchsystem.findxctube(xcname0_centreline, xcname1_centreline)
+		var xctdata = { "xcname0": xcname0_centreline, "xcname1":xcname1_centreline }
+		xctdata["newdrawinglinks"] = [ nodename0_station, nodename1_station, "centrelinenodemapping", null ]
+		xctdata["prevdrawinglinks"] = [ ]
+		if xctube != null:
+			xctdata["tubename"] = xctube.get_name()
+			var j = xctube.linkspresentindex(nodename0_station, null)
+			if j != -1:
+				var repcentrenodename = xctube.xcdrawinglink[j*2+1]
+				xctdata["prevdrawinglinks"] = [ nodename0_station, repcentrenodename, xctube.xcsectormaterials[j], null ]
+				if nodename1_station == repcentrenodename:
+					xctdata["newdrawinglinks"] = [ ]
+		else:
+			xctdata["tubename"] = "**notset"
+
+		var xctupdate = { "xcvizstates":{ }, "updatetubeshells":[{"tubename":xctube.get_name() if xctube != null else "**notset", "xcname0":xcname0_centreline, "xcname1":xcname1_centreline }] }
+		sketchsystem.actsketchchange([xctdata, xctupdate])
+			
+		clearactivetargetnode()
+
 
 	elif pointertargettype == "XCdrawing" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
 		if planviewsystem.planviewactive:
@@ -1127,7 +1157,7 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 						xctdata["newdrawinglinks"] = [ ]
 						
 				if applytubeconnection:
-					var xctdatalist = [xctdata]
+					var xctdatalist = [ xctdata ]
 					#if pointertargetwall.drawingvisiblecode != DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE and activetargetnodewall.drawingvisiblecode != DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE:
 					xctdatalist.push_back({ "xcvizstates":{ }, "updatetubeshells":[{"tubename":xctube.get_name() if xctube != null else "**notset", "xcname0": xcname0, "xcname1":xcname1 }] })
 					sketchsystem.actsketchchange(xctdatalist)

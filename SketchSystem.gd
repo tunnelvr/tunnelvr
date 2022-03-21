@@ -304,11 +304,9 @@ remote func actsketchchangeL(xcdatalist):
 				if xcdrawing0 == null or xcdrawing1 == null:
 					print("bad tube  ", (xcdata["xcname0"] if xcdrawing0 == null else ""), " ", (xcdata["xcname1"] if xcdrawing1 == null else ""))
 					continue
-				xcdata["m0"] = 1 if xcdrawing1.drawingtype == DRAWING_TYPE.DT_CENTRELINE else 0
-				if xcdata["m0"] == 0:
-					xctube = newXCtube(xcdrawing0, xcdrawing1)
-				else:
-					xctube = newXCtube(xcdrawing1, xcdrawing0)
+				assert (not (xcdrawing0.drawingtype != DRAWING_TYPE.DT_CENTRELINE and xcdrawing1.drawingtype == DRAWING_TYPE.DT_CENTRELINE))
+				xcdata["m0"] = 0
+				xctube = newXCtube(xcdrawing0, xcdrawing1)
 				if xcdrawing0.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 					xctube.makeplaneintersectionaxisvec(xcdrawing0, xcdrawing1)
 			else:
@@ -375,7 +373,6 @@ remote func actsketchchangeL(xcdatalist):
 			if "updatetubeshells" in xcdata:
 				for xct in xcdata["updatetubeshells"]:
 					var xctube = findxctube(xct["xcname0"], xct["xcname1"])
-					#var xctube = $XCtubes.get_node_or_null(xct["xctubename"])
 					if xctube != null:
 						xctube.updatetubeshell($XCdrawings)
 			if "updatexcshells" in xcdata:
@@ -454,7 +451,10 @@ remote func actsketchchangeL(xcdatalist):
 	var badtubeswithnoconnections = [ ]
 	for xctube in xctubestoupdate.values():
 		if $XCdrawings.get_node(xctube.xcname0).drawingtype == DRAWING_TYPE.DT_CENTRELINE:
-			xctube.updatetubepositionlinks(self)
+			if $XCdrawings.get_node(xctube.xcname1).drawingtype == DRAWING_TYPE.DT_CENTRELINE:
+				xctube.updatecentrelineassociationlinks(self)
+			else:
+				xctube.updatefloorcentrelinepositionlinks(self)
 		else:
 			if not xctube.updatetubelinkpaths(self):
 				badtubeswithnoconnections.push_back(xctube)
@@ -478,9 +478,8 @@ remote func actsketchchangeL(xcdatalist):
 			#elif xcdrawing.drawingtype == DRAWING_TYPE.DT_ROPEHANG:
 			#	xcdrawing.setdrawingvisiblecode(DRAWING_TYPE.VIZ_XCD_HIDE)
 		for xctube in xctubestoupdate.values():
-			if $XCdrawings.get_node(xctube.xcname0).drawingtype == DRAWING_TYPE.DT_XCDRAWING:
-				xctube.updatetubeshell($XCdrawings)
-				xctube.setxctubepathlinevisibility(self)
+			xctube.updatetubeshell($XCdrawings)
+			xctube.setxctubepathlinevisibility(self)
 				
 		if xcdatalist[0]["caveworldchunk"] == xcdatalist[0]["caveworldchunkLast"]:
 			for xcdrawing in $XCdrawings.get_children():
@@ -906,9 +905,10 @@ func newXCuniquedrawingPaperN(xcresource, sname, drawingtype):
 	return xcdrawing
 
 func newXCtube(xcdrawing0, xcdrawing1):
-	assert ((xcdrawing0.drawingtype == DRAWING_TYPE.DT_XCDRAWING and xcdrawing1.drawingtype == DRAWING_TYPE.DT_XCDRAWING) or
-			(xcdrawing0.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE and xcdrawing1.drawingtype == DRAWING_TYPE.DT_XCDRAWING) or
-			(xcdrawing0.drawingtype == DRAWING_TYPE.DT_CENTRELINE and xcdrawing1.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE))
+	assert ((xcdrawing0.drawingtype == DRAWING_TYPE.DT_XCDRAWING and xcdrawing1.drawingtype == DRAWING_TYPE.DT_XCDRAWING) or \
+			# (xcdrawing0.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE and xcdrawing1.drawingtype == DRAWING_TYPE.DT_XCDRAWING) or # What's this case for??? \
+			(xcdrawing0.drawingtype == DRAWING_TYPE.DT_CENTRELINE and xcdrawing1.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE) or \
+			(xcdrawing0.drawingtype == DRAWING_TYPE.DT_CENTRELINE and xcdrawing1.drawingtype == DRAWING_TYPE.DT_CENTRELINE))
 		
 	var xctube = XCtube.instance()
 	xctube.xcname0 = xcdrawing0.get_name()
