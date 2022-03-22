@@ -48,11 +48,11 @@ enum {
 	VL_centrelinedrawinglines			= 0b00010000000000000000,
 	VL_centrelinedrawinglinesplanview	= 0b00100000000000000000,
 	VL_plancamera						= 0b01000000000000000000,
-	
+#											09876543210987654321	
 	VLCM_PlanViewCamera 				= 0b01101111110111111011,
 	VLCM_PlanViewCameraNoTube			= 0b01101101110001001011
 	VLCM_PlanViewCameraNoCentreline		= 0b01000111000111111011,
 
-	VLCM_PlayerCamera					= 0b00110111101111111111,
-	VLCM_PlayerCameraNoCentreline		= 0b00100111000110111111,
+	VLCM_PlayerCamera					= 0b00010111101111111111,
+	VLCM_PlayerCameraNoCentreline		= 0b00000111000110111111,
 }
