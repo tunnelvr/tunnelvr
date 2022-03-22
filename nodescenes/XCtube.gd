@@ -206,6 +206,7 @@ func updatecentrelineassociationlinks(sketchsystem):
 	var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(xcname1)
 	assert(xcdrawing0.drawingtype == DRAWING_TYPE.DT_CENTRELINE and xcdrawing1.drawingtype == DRAWING_TYPE.DT_CENTRELINE)
 	assert ((len(xcdrawinglink)%2) == 0)
+	var sperp = Vector3(0, 0, 0)
 	for j in range(0, len(xcdrawinglink), 2):
 		var p0 = xcdrawing0.transform * xcdrawing0.nodepoints[xcdrawinglink[j]]
 		var p1 = xcdrawing1.transform * xcdrawing1.nodepoints[xcdrawinglink[j+1]]
@@ -213,8 +214,27 @@ func updatecentrelineassociationlinks(sketchsystem):
 		var perp = vec.cross(Vector3(0, 1, 0)).normalized()
 		if perp == Vector3(0, 0, 0):
 			perp = Vector3(1, 0, 0)
+		sperp += perp
 		Polynets.addarrowmesh(surfaceTool, p0, p1, perp, tubelinklinewidth*2, [])
 		Polynets.addarrowmesh(surfaceTool, p0, p1, vec.cross(perp).normalized(), tubelinklinewidth*2, [])
+
+	var nodepointsmap = Centrelinedata.centrelinenodeassociation(xcdrawing1.nodepoints, xcdrawing0.nodepoints, xcdrawinglink)
+	var fperp = sperp.normalized() * tubelinklinewidth
+	for nodefromname in nodepointsmap:
+		var nodetoname = nodepointsmap[nodefromname]
+		var p1 = xcdrawing1.transform * xcdrawing1.nodepoints[nodefromname]
+		var p0 = xcdrawing0.transform * xcdrawing0.nodepoints[nodetoname]
+		var p0left = p0 - fperp
+		var p0right = p0 + fperp
+		var p1left = p1 - fperp
+		var p1right = p1 + fperp
+		surfaceTool.add_vertex(p0left)
+		surfaceTool.add_vertex(p1left)
+		surfaceTool.add_vertex(p0right)
+		surfaceTool.add_vertex(p0right)
+		surfaceTool.add_vertex(p1left)
+		surfaceTool.add_vertex(p1right)
+		
 	surfaceTool.generate_normals()
 	$PathLines.mesh = surfaceTool.commit()
 	$PathLines.set_surface_material(0, get_node("/root/Spatial/MaterialSystem").pathlinematerial("centrelineassociation"))

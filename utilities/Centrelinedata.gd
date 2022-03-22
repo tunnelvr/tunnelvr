@@ -204,3 +204,35 @@ static func findcommonroot(nodepoints):
 		commonroot = ""
 	print("stationlabels common root: ", commonroot)
 	return commonroot
+
+static func centrelinenodeassociation(nodepointsfrom, nodepointsto, backlinklist):
+	var nodetoname0 = backlinklist[0]
+	var nodefromname0 = backlinklist[1]
+	var nodetoname0commas = [ -1 ]
+	while len(nodetoname0commas) == 1 or nodetoname0commas[-1] != -1:
+		nodetoname0commas.push_back(nodetoname0.find(",", nodetoname0commas[-1]+1))
+	nodetoname0commas.pop_back()
+	var nodefromname0commas = [ -1 ]
+	while len(nodefromname0commas) == 1 or nodefromname0commas[-1] != -1:
+		nodefromname0commas.push_back(nodefromname0.find(",", nodefromname0commas[-1]+1))
+	nodefromname0commas.pop_back()
+	while len(nodetoname0commas) > 1 and len(nodefromname0commas) > 1 and nodetoname0.right(nodetoname0commas[-1]+1) == nodefromname0.right(nodefromname0commas[-1]+1):
+		nodetoname0commas.pop_back()
+		nodefromname0commas.pop_back()
+	var nodetohead = nodetoname0.left(nodetoname0commas[-1]+1)
+	var nodefromhead = nodefromname0.left(nodefromname0commas[-1]+1)
+
+	var nodepointsmap = { }
+	var nnonsplaynodes = 0
+	for nodefromname in nodepointsfrom:
+		var issplaynode = Tglobal.splaystationnoderegex != null and Tglobal.splaystationnoderegex.search(nodefromname)
+		if not issplaynode:
+			nnonsplaynodes += 1
+			if nodefromname.begins_with(nodefromhead):
+				var nodetoname = nodetohead + nodefromname.right(len(nodefromhead))
+				if nodepointsto.has(nodetoname):
+					nodepointsmap[nodefromname] = nodetoname
+	assert (nodepointsmap.get(nodefromname0) == nodetoname0)
+	print("centrelinenodeassociation matches ", len(nodepointsmap), " of ", nnonsplaynodes, " nodes")
+	return nodepointsmap
+	
