@@ -732,7 +732,7 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 					xctubec = xctube
 			if xctubec != null:
 				var floormovedata = xctubec.centrelineconnectionfloortransformpos(sketchsystem)
-				if floormovedata != null:
+				if len(floormovedata) != 0:
 					sketchsystem.actsketchchange(floormovedata)
 
 		clearactivetargetnode()
@@ -1022,7 +1022,7 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 			xctube = sketchsystem.findxctube(xcname0_centreline, xcname1_floor)
 		if len(xctube.xcdrawinglink) != 0:
 			var floormovedata = xctube.centrelineconnectionfloortransformpos(sketchsystem)
-			if floormovedata != null:
+			if len(floormovedata) != 0:
 				sketchsystem.actsketchchange(floormovedata)
 		clearactivetargetnode()
 

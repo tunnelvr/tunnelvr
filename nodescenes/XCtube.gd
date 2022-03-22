@@ -129,8 +129,8 @@ func centrelineconnectionfloortransformpos(sketchsystem):
 	var xcdrawingCentreline = sketchsystem.get_node("XCdrawings").get_node(xcname0)
 	var xcdrawingFloor = sketchsystem.get_node("XCdrawings").get_node(xcname1)
 	assert (xcdrawingCentreline.drawingtype == DRAWING_TYPE.DT_CENTRELINE and xcdrawingFloor.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE)
-	var xcdatalist = null
-	var bsingledrag = len(xcdrawinglink) == 2
+	var xcdatalist = [ ]
+	var bsingledrag = (len(xcdrawinglink) == 2)
 	var opn0 = xcdrawingCentreline.get_node("XCnodes").get_node(xcdrawinglink[-2 if bsingledrag else -4])
 	var xcn0 = xcdrawingFloor.get_node("XCnodes").get_node(xcdrawinglink[-1 if bsingledrag else -3])
 	if bsingledrag:

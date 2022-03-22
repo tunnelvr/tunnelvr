@@ -67,6 +67,8 @@ func sketchsystemtodict(stripruntimedataforsaving):
 			print("Discarding hidden floortexture on save ", xcdrawing.get_name())
 		elif xcdrawing.drawingtype == DRAWING_TYPE.DT_ROPEHANG and len(xcdrawing.nodepoints) == 0 and stripruntimedataforsaving:
 			print("Discarding empty ropehang on save ", xcdrawing.get_name())
+		elif xcdrawing.drawingtype == DRAWING_TYPE.DT_CENTRELINE and len(xcdrawing.nodepoints) == 0 and stripruntimedataforsaving:
+			print("Discarding empty centreline on save ", xcdrawing.get_name())
 		else:
 			xcdrawingsData.append(xcdrawing.exportxcrpcdata(stripruntimedataforsaving))
 	var xctubesData = [ ]
@@ -320,7 +322,7 @@ remote func actsketchchangeL(xcdatalist):
 					continue
 				assert (not (xcdrawing0.drawingtype != DRAWING_TYPE.DT_CENTRELINE and xcdrawing1.drawingtype == DRAWING_TYPE.DT_CENTRELINE))
 				xcdata["m0"] = 0
-				xctube = newXCtube(xcdrawing0, xcdrawing1)
+				xctube = newXCtube(xcdata["tubename"], xcdrawing0, xcdrawing1)
 				if xcdrawing0.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 					xctube.makeplaneintersectionaxisvec(xcdrawing0, xcdrawing1)
 			else:
@@ -918,7 +920,7 @@ func newXCuniquedrawingPaperN(xcresource, sname, drawingtype):
 
 	return xcdrawing
 
-func newXCtube(xcdrawing0, xcdrawing1):
+func newXCtube(tubename, xcdrawing0, xcdrawing1):
 	assert ((xcdrawing0.drawingtype == DRAWING_TYPE.DT_XCDRAWING and xcdrawing1.drawingtype == DRAWING_TYPE.DT_XCDRAWING) or \
 			# (xcdrawing0.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE and xcdrawing1.drawingtype == DRAWING_TYPE.DT_XCDRAWING) or # What's this case for??? \
 			(xcdrawing0.drawingtype == DRAWING_TYPE.DT_CENTRELINE and xcdrawing1.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE) or \
@@ -927,7 +929,7 @@ func newXCtube(xcdrawing0, xcdrawing1):
 	var xctube = XCtube.instance()
 	xctube.xcname0 = xcdrawing0.get_name()
 	xctube.xcname1 = xcdrawing1.get_name()
-	xctube.set_name("XCtube_"+xctube.xcname0+"_"+xctube.xcname1)
+	xctube.set_name(tubename)
 	xcdrawing0.xctubesconn.append(xctube)
 	xcdrawing1.xctubesconn.append(xctube)
 	assert (not $XCtubes.has_node(xctube.get_name()))

@@ -846,11 +846,20 @@ func _on_resourceoptions_buttondown_setavailablefunctions():
 		var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
 		if planviewsystem.planviewactive and planviewsystem.activetargetfloor != null:
 			xcselecteddrawing_forrsourcefunctions = planviewsystem.activetargetfloor
+
+	var xcdrawingcentrelines = get_tree().get_nodes_in_group("gpcentrelinegeo")
+	var bcentrelinedistortenable = false
 	if xcselecteddrawing_forrsourcefunctions != null and xcselecteddrawing_forrsourcefunctions.drawingtype == DRAWING_TYPE.DT_CENTRELINE:
 		centrelineselected_forresourcefunction = xcselecteddrawing_forrsourcefunctions
+		var clconnectnode = centrelineselected_forresourcefunction.xccentrelineconnectstofloor(sketchsystem.get_node("XCdrawings"))
+		if clconnectnode == 2:
+			if len(centrelineselected_forresourcefunction.xctubesconn) + 1 == len(xcdrawingcentrelines):
+				bcentrelinedistortenable = true
+	elif len(xcdrawingcentrelines) == 1:
+		centrelineselected_forresourcefunction = xcdrawingcentrelines[0]
 	else:
-		var xcdrawingcentrelines = get_tree().get_nodes_in_group("gpcentrelinegeo")
-		centrelineselected_forresourcefunction = (xcdrawingcentrelines[0] if len(xcdrawingcentrelines) != 0 else null)
+		centrelineselected_forresourcefunction = null
+	$Viewport/GUI/Panel/ResourceOptions.set_item_disabled(resourceoptionlookup["Centreline distort"], not bcentrelinedistortenable)
 
 	var mtext = $Viewport/GUI/Panel/EditColorRect/TextEdit.text.strip_edges()
 	var potreeexperiments = selfSpatial.get_node("PotreeExperiments")
@@ -1035,9 +1044,21 @@ func _on_resourceoptions_selected(index):
 	elif nrosel == "Apply to flagsign":
 		buttonflagsign_pressed()
 		
+	elif nrosel == "Centreline distort":
+		var xcdatalist = Centrelinedata.centrelinepassagedistort(centrelineselected_forresourcefunction, sketchsystem)
+		sketchsystem.pointersystem.clearactivetargetnode()
+		sketchsystem.actsketchchange(xcdatalist)
+		var floormovedata = [ ]
+		for xctubec in centrelineselected_forresourcefunction.xctubesconn:
+			var xcdrawingFloor = sketchsystem.get_node("XCdrawings").get_node(xctubec.xcname1)
+			if len(xctubec.xcdrawinglink) != 0 and xcdrawingFloor.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
+				floormovedata.append_array(xctubec.centrelineconnectionfloortransformpos(sketchsystem))
+		if len(floormovedata) != 0:
+			sketchsystem.actsketchchange(floormovedata)
+		setguipanelhide()
+				
 	Tglobal.soundsystem.quicksound("MenuClick", collision_point)
 	prevnrosel = nrosel
-
 
 func Yupdatecavefilelist():
 	var savegamefilenameoptionbutton = $Viewport/GUI/Panel/Savegamefilename
