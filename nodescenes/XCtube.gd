@@ -707,7 +707,8 @@ func FixtubeholeXCs(sketchsystem):
 									   "xcname1":xcname1new,
 									   "prevdrawinglinks":[ ],
 									   "newdrawinglinks":drawinglinks })
-			updatetubeshells.push_back({"tubename":"**notset", "xcname0":xcname0new, "xcname1":xcname1new})
+			sketchsystem.setnewtubename(xctdatatubenew[-1])
+			updatetubeshells.push_back({"tubename":xctdatatubenew[-1]["tubename"], "xcname0":xcname0new, "xcname1":xcname1new})
 
 		xctdatadrawingdel.push_back({ "name":xcdrawingorgname, 
 									  "prevnodepoints":xcdrawing.nodepoints.duplicate(),

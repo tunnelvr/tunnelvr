@@ -406,6 +406,7 @@ func _on_switchtest(index):
 								 "xcname1":xcdata["name"],
 								 "prevdrawinglinks":[], 
 								 "newdrawinglinks":tnewdrawinglinks.duplicate() }
+				sketchsystem.setnewtubename(xctdata)
 				#var finishedplanedrawingtype =  DRAWING_TYPE.VIZ_XCD_HIDE
 				var finishedplanedrawingtype =  DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE
 				#var finishedplanedrawingtype = DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE
@@ -413,6 +414,7 @@ func _on_switchtest(index):
 								   "updatetubeshells":[
 									{ "tubename":xctdata["tubename"], "xcname0":xctdata["xcname0"], "xcname1":xctdata["xcname1"] } 
 								] }
+								
 				sketchsystem.actsketchchange([ xctdata, xctdataviz ])
 				
 				var matrot0 = tnewdrawinglinks[2]

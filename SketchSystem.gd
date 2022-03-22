@@ -41,7 +41,22 @@ func findxctube(xcname0, xcname1):
 				return xctube
 	return null
 	
-
+func setnewtubename(xctdata):
+	assert (not xctdata.has("tubename") or xctdata["tubename"] == "**notset")
+	var xcdrawing0 = get_node("XCdrawings").get_node_or_null(xctdata["xcname0"])
+	var xcdrawing1 = get_node("XCdrawings").get_node_or_null(xctdata["xcname1"])
+	var tubenameprefix = "Unknown_"
+	if xcdrawing0 == null or xcdrawing1 == null or xcdrawing0.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
+		tubenameprefix = "XCtube_"
+	elif xcdrawing0.drawingtype == DRAWING_TYPE.DT_CENTRELINE:
+		if xcdrawing1.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
+			tubenameprefix = "Floorpos_"
+		elif xcdrawing1.drawingtype == DRAWING_TYPE.DT_CENTRELINE:
+			tubenameprefix = "CAssoc_"
+	xctdata["tubename"] = tubenameprefix+xctdata["xcname0"]+"_"+xctdata["xcname1"]
+	if Tglobal.printxcdrawingfromdatamessages:
+		print("new tube name ", xctdata["tubename"])
+		
 	
 func sketchsystemtodict(stripruntimedataforsaving):
 	var xcdrawingsData = [ ]
@@ -295,8 +310,7 @@ remote func actsketchchangeL(xcdatalist):
 		elif "tubename" in xcdata:
 			if Tglobal.printxcdrawingfromdatamessages:
 				print("update tube ", xcdata["tubename"])
-			if xcdata["tubename"] == "**notset":
-				xcdata["tubename"] = "XCtube_"+xcdata["xcname0"]+"_"+xcdata["xcname1"]
+			assert (xcdata.has("tubename") and xcdata["tubename"] != "**notset")
 			var xctube = findxctube(xcdata["xcname0"], xcdata["xcname1"])
 			if xctube == null:
 				var xcdrawing0 = get_node("XCdrawings").get_node(xcdata["xcname0"])

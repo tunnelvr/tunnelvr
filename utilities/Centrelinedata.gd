@@ -169,15 +169,16 @@ static func sketchdatadictlistfromcentreline(centrelinefile, perfectoverlayavoid
 				#xcvizstates[sname] = DRAWING_TYPE.VIZ_XCD_HIDE
 
 				if prevsname != null:
-					var xctdata = { "tubename":"**notset", 
+					var xctdata = { "tubename":"**notset",
 									"xcname0":prevsname, 
 									"xcname1":sname,
 									"xcdrawinglink":hextubepairs.duplicate(),
 									"xcsectormaterials":xcsectormaterials.duplicate()
 								  }
+					xctdata["tubename"] = "hextube_"+prevsname+"_"+sname
 					xctubes.push_back(xctdata)
-					#updatetubeshells.push_back({ "tubename":xctdata["tubename"], "xcname0":xctdata["xcname0"], "xcname1":xctdata["xcname1"] })
 				prevsname = sname
+
 
 	#xcdrawinglist.push_back({ "xcvizstates":xcvizstates, "updatetubeshells":updatetubeshells })
 	return { "xcdrawings":xcdrawings, "xctubes":xctubes }

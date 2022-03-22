@@ -1005,6 +1005,7 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 			xctdata["tubename"] = "**notset"
 			xctdata["prevdrawinglinks"] = [ ]
 			xctdata["newdrawinglinks"] = [ nodename0_station, newnodename, "floorcentrelineposition", null ]
+			sketchsystem.setnewtubename(xctdata)
 		else:
 			xctdata["tubename"] = xctube.get_name()
 			xctdata["newdrawinglinks"] = [ nodename0_station, newnodename, "floorcentrelineposition", null ]
@@ -1015,7 +1016,7 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 				xctdata["prevdrawinglinks"] = [ nodename0_station, reppapernodename, xctube.xcsectormaterials[j], null ]
 			else:
 				xctdata["prevdrawinglinks"] = [ ]
-		var xctupdate = { "xcvizstates":{ }, "updatetubeshells":[{"tubename":xctube.get_name() if xctube != null else "**notset", "xcname0":xcname0_centreline, "xcname1":xcname1_floor }] }
+		var xctupdate = { "xcvizstates":{ }, "updatetubeshells":[{"tubename":xctdata["tubename"], "xcname0":xcname0_centreline, "xcname1":xcname1_floor }] }
 		sketchsystem.actsketchchange([xcndata, xctdata, xctupdate])
 		if xctube == null:
 			xctube = sketchsystem.findxctube(xcname0_centreline, xcname1_floor)
@@ -1047,8 +1048,9 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 					xctdata["newdrawinglinks"] = [ ]
 		else:
 			xctdata["tubename"] = "**notset"
+			sketchsystem.setnewtubename(xctdata)
 
-		var xctupdate = { "xcvizstates":{ }, "updatetubeshells":[{"tubename":xctube.get_name() if xctube != null else "**notset", "xcname0":xcname0_centreline, "xcname1":xcname1_centreline }] }
+		var xctupdate = { "xcvizstates":{ }, "updatetubeshells":[{"tubename":xctdata["tubename"], "xcname0":xcname0_centreline, "xcname1":xcname1_centreline }] }
 		sketchsystem.actsketchchange([xctdata, xctupdate])
 			
 		clearactivetargetnode()
@@ -1136,6 +1138,7 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 				var xctdata = { "xcname0": xcname0, "xcname1":xcname1 }
 				if xctube == null:
 					xctdata["tubename"] = "**notset"
+					sketchsystem.setnewtubename(xctdata)
 					xctdata["prevdrawinglinks"] = [ ]
 					xctdata["newdrawinglinks"] = [ nodename0, nodename1, "simpledirt", null ]
 				else:
@@ -1159,7 +1162,7 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 				if applytubeconnection:
 					var xctdatalist = [ xctdata ]
 					#if pointertargetwall.drawingvisiblecode != DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE and activetargetnodewall.drawingvisiblecode != DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE:
-					xctdatalist.push_back({ "xcvizstates":{ }, "updatetubeshells":[{"tubename":xctube.get_name() if xctube != null else "**notset", "xcname0": xcname0, "xcname1":xcname1 }] })
+					xctdatalist.push_back({ "xcvizstates":{ }, "updatetubeshells":[{"tubename":xctdata["tubename"], "xcname0": xcname0, "xcname1":xcname1 }] })
 					sketchsystem.actsketchchange(xctdatalist)
 
 			else:
@@ -1649,10 +1652,12 @@ func buttonreleased_vrgrip():
 									 "xcname0":wasactivetargettube.xcname0,
 									 "xcname1":xcdrawing.get_name(),
 									 "prevdrawinglinks":[], "newdrawinglinks":[] }
+					sketchsystem.setnewtubename(xctdata0)
 					var xctdata1 = { "tubename":"**notset", 
 									 "xcname0":xcdrawing.get_name(),
 									 "xcname1":wasactivetargettube.xcname1,
 									 "prevdrawinglinks":[], "newdrawinglinks":[] }
+					sketchsystem.setnewtubename(xctdata1)
 					if wasactivetargettube.slicetubetoxcdrawing(xcdrawing, xcdata, xctdatadel, xctdata0, xctdata1) and wasactivetargettube.gettubeshellholes(sketchsystem) == null:
 						clearactivetargetnode()
 						clearpointertarget()
@@ -1700,6 +1705,7 @@ func buttonreleased_vrgrip():
 										"xcname1":xcdrawing.get_name(),
 										"prevdrawinglinks":[], 
 										"newdrawinglinks":newdrawinglinks }
+						sketchsystem.setnewtubename(xctdata)
 						clearactivetargetnode()
 						clearpointertarget()
 						var xctdataviz = {"xcvizstates":{ xcdrawing.get_name():DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE }, 
