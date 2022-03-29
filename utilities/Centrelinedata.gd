@@ -169,14 +169,14 @@ static func sketchdatadictlistfromcentreline(centrelinefile, perfectoverlayavoid
 				#xcvizstates[sname] = DRAWING_TYPE.VIZ_XCD_HIDE
 
 				if prevsname != null:
-					var xctdata = { "tubename":"**notset", 
+					var xctdata = { "tubename":"**notset",
 									"xcname0":prevsname, 
 									"xcname1":sname,
 									"xcdrawinglink":hextubepairs.duplicate(),
 									"xcsectormaterials":xcsectormaterials.duplicate()
 								  }
+					xctdata["tubename"] = "hextube_"+prevsname+"_"+sname
 					xctubes.push_back(xctdata)
-					#updatetubeshells.push_back({ "tubename":xctdata["tubename"], "xcname0":xctdata["xcname0"], "xcname1":xctdata["xcname1"] })
 				prevsname = sname
 
 	#xcdrawinglist.push_back({ "xcvizstates":xcvizstates, "updatetubeshells":updatetubeshells })
@@ -203,3 +203,157 @@ static func findcommonroot(nodepoints):
 		commonroot = ""
 	print("stationlabels common root: ", commonroot)
 	return commonroot
+
+static func centrelinenodeassociation(nodepointsfrom, nodepointsto, backlinklist):
+	var nodetoname0 = backlinklist[0]
+	var nodefromname0 = backlinklist[1]
+	var nodetoname0commas = [ -1 ]
+	while len(nodetoname0commas) == 1 or nodetoname0commas[-1] != -1:
+		nodetoname0commas.push_back(nodetoname0.find(",", nodetoname0commas[-1]+1))
+	nodetoname0commas.pop_back()
+	var nodefromname0commas = [ -1 ]
+	while len(nodefromname0commas) == 1 or nodefromname0commas[-1] != -1:
+		nodefromname0commas.push_back(nodefromname0.find(",", nodefromname0commas[-1]+1))
+	nodefromname0commas.pop_back()
+	while len(nodetoname0commas) > 1 and len(nodefromname0commas) > 1 and nodetoname0.right(nodetoname0commas[-1]+1) == nodefromname0.right(nodefromname0commas[-1]+1):
+		nodetoname0commas.pop_back()
+		nodefromname0commas.pop_back()
+	var nodetohead = nodetoname0.left(nodetoname0commas[-1]+1)
+	var nodefromhead = nodefromname0.left(nodefromname0commas[-1]+1)
+
+	var nodepointsmap = { }
+	var nnonsplaynodes = 0
+	for nodefromname in nodepointsfrom:
+		var issplaynode = Tglobal.splaystationnoderegex != null and Tglobal.splaystationnoderegex.search(nodefromname)
+		if not issplaynode:
+			nnonsplaynodes += 1
+			if nodefromname.begins_with(nodefromhead):
+				var nodetoname = nodetohead + nodefromname.right(len(nodefromhead))
+				if nodepointsto.has(nodetoname):
+					nodepointsmap[nodefromname] = nodetoname
+	assert (nodepointsmap.get(nodefromname0) == nodetoname0)
+	print("centrelinenodeassociation matches ", len(nodepointsmap), " of ", nnonsplaynodes, " nodes")
+	return nodepointsmap
+	
+
+static func xcdrawingsforcentreline(centrelinefrom, sketchsystem):
+	var xcdrawingsc = [ ]
+	var xcdrawings = sketchsystem.get_node("XCdrawings")
+	for xcdrawing in xcdrawings.get_children():
+		if xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING or xcdrawing.drawingtype == DRAWING_TYPE.DT_ROPEHANG:
+			xcdrawingsc.push_back(xcdrawing)
+	return xcdrawingsc
+
+static func xcconnectedtubes(xcdrawingsc):
+	var xctubenames = [ ]
+	for xcdrawing in xcdrawingsc:
+		for xctube in xcdrawing.xctubesconn:
+			xctubenames.append(xctube.get_name())
+	return xctubenames
+	
+static func xcanchorsforcentreline(centrelinefrom, sketchsystem):
+	var xcdrawingfloor = [ ]
+	var xcdrawings = sketchsystem.get_node("XCdrawings")
+	for xcanchortube in centrelinefrom.xctubesconn:
+		var xcanchordrawing = xcdrawings.get_node(xcanchortube.xcname1 if xcanchortube.xcname0 == centrelinefrom.get_name() else xcanchortube.xcname0)
+		if xcanchordrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
+			xcdrawingfloor.push_back(xcanchordrawing)
+	return xcdrawingfloor
+
+static func centrelinepassagedistort(centrelineto, sketchsystem):
+	var xcdrawings = sketchsystem.get_node("XCdrawings")
+	var clconnectnodeto = centrelineto.xccentrelineconnectstofloor(xcdrawings)
+	assert (clconnectnodeto == 2)
+	var xcdatalistA = [ ]
+	for xcctube in centrelineto.xctubesconn:
+		var centrelinefrom = xcdrawings.get_node(xcctube.xcname1 if xcctube.xcname0 == centrelineto.get_name() else xcctube.xcname0)
+		assert (centrelinefrom.drawingtype == DRAWING_TYPE.DT_CENTRELINE)
+		var clconnectnodefrom = centrelinefrom.xccentrelineconnectstofloor(sketchsystem.get_node("XCdrawings"))
+		assert (clconnectnodefrom != 2)
+		var nodepointsmap = centrelinenodeassociation(centrelinefrom.nodepoints, centrelineto.nodepoints, xcctube.xcdrawinglink)
+
+		var sumtranslation = Vector3(0, 0, 0)
+		for nodefromname in nodepointsmap:
+			var nodetoname = nodepointsmap[nodefromname]
+			var pto = centrelineto.transform * centrelineto.nodepoints[nodetoname]
+			var pfrom = centrelinefrom.transform * centrelinefrom.nodepoints[nodefromname]
+			sumtranslation += (pto - pfrom)
+		var avgtranslation = sumtranslation * (1.0/len(nodepointsmap))
+		
+		var xcdatalist = [ ]
+		var xcdrawingsc = xcdrawingsforcentreline(centrelinefrom, sketchsystem)
+		for xcdrawing in xcdrawingsc:
+			var txcdata = { "name":xcdrawing.get_name(), 
+							"prevtransformpos":xcdrawing.transform, 
+							"transformpos":Transform(xcdrawing.transform.basis, xcdrawing.transform.origin + avgtranslation) }
+			xcdatalist.append(txcdata)
+
+		var updatetubeshells = [ ]
+		var xctubenames = xcconnectedtubes(xcdrawingsc)
+		xctubenames.sort()
+		var prevxctubename = ""
+		var xctubes = sketchsystem.get_node("XCtubes")
+		for xctubename in xctubenames:
+			if xctubename != prevxctubename:
+				var xctube = xctubes.get_node(xctubename)
+				updatetubeshells.push_back({ "tubename":xctubename, "xcname0":xctube.xcname0, "xcname1":xctube.xcname1 })
+				prevxctubename = xctubename
+		xcdatalist.append({"xcvizstates":{ }, "updatetubeshells":updatetubeshells, "updatexcshells":[] })
+		xcdatalistA.append_array(xcdatalist)
+
+		var xcdataanchortubes = [ ]
+		for xcanchortube in centrelinefrom.xctubesconn:
+			if xcanchortube.xcname0 == centrelinefrom.get_name() and xcdrawings.get_node(xcanchortube.xcname1).drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
+				var prevdrawinglinks = [ ]
+				var mappeddrawinglinks = [ ]
+				for j in range(0, len(xcanchortube.xcdrawinglink), 2):
+					prevdrawinglinks.push_back(xcanchortube.xcdrawinglink[j])
+					prevdrawinglinks.push_back(xcanchortube.xcdrawinglink[j+1])
+					prevdrawinglinks.push_back(xcanchortube.xcsectormaterials[j/2])
+					prevdrawinglinks.push_back(null)
+					mappeddrawinglinks.push_back(nodepointsmap[xcanchortube.xcdrawinglink[j]])
+					mappeddrawinglinks.push_back(xcanchortube.xcdrawinglink[j+1])
+					mappeddrawinglinks.push_back(xcanchortube.xcsectormaterials[j/2])
+					mappeddrawinglinks.push_back(null)
+					
+				var xcdataanchortubeorg = { "tubename":xcanchortube.get_name(), 
+											"xcname0":centrelinefrom.get_name(), 
+											"xcname1":xcanchortube.xcname1, 
+											"prevdrawinglinks":prevdrawinglinks,
+											"newdrawinglinks":[ ] }
+				var xcdataanchortubenew = { "tubename":"**notset", 
+											"xcname0":centrelineto.get_name(), 
+											"xcname1":xcanchortube.xcname1, 
+											"prevdrawinglinks":[ ],
+											"newdrawinglinks":mappeddrawinglinks }
+				sketchsystem.setnewtubename(xcdataanchortubenew)
+				xcdataanchortubes.push_back(xcdataanchortubeorg)
+				xcdataanchortubes.push_back(xcdataanchortubenew)
+
+				xcdataanchortubes.push_back({"xcvizstates":{ }, "updatetubeshells":[ 
+									{ "tubename":xcdataanchortubenew["tubename"], 
+									  "xcname0":xcdataanchortubenew["xcname0"], 
+									  "xcname1":xcdataanchortubenew["xcname1"] 
+									} ] })
+		xcdatalistA.append_array(xcdataanchortubes)
+		
+		var prevcdrawinglinks = [ ]
+		for j in range(0, len(xcctube.xcdrawinglink), 2):
+			prevcdrawinglinks.push_back(xcctube.xcdrawinglink[j])
+			prevcdrawinglinks.push_back(xcctube.xcdrawinglink[j+1])
+			prevcdrawinglinks.push_back(xcctube.xcsectormaterials[j/2])
+			prevcdrawinglinks.push_back(null)
+		xcdatalistA.append({ "tubename":xcctube.get_name(), 
+							 "xcname0":xcctube.xcname0, 
+							 "xcname1":xcctube.xcname1, 
+							 "prevdrawinglinks":prevcdrawinglinks, 
+							 "newdrawinglinks":[ ] })
+
+		xcdatalistA.append({ "name":centrelinefrom.get_name(), 
+							 "prevnodepoints":centrelinefrom.nodepoints.duplicate(),
+							 "nextnodepoints":{ }, 
+							 "prevonepathpairs":centrelinefrom.onepathpairs.duplicate(),
+							 "newonepathpairs": [ ] })
+
+	return xcdatalistA
+	
