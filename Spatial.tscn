@@ -1,4 +1,4 @@
-[gd_scene load_steps=332 format=2]
+[gd_scene load_steps=333 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/underground_env.tres" type="Environment" id=2]
@@ -76,6 +76,7 @@
 [ext_resource path="res://potreework/PotreeExperiments.gd" type="Script" id=74]
 [ext_resource path="res://potreework/ocellcube.material" type="Material" id=75]
 [ext_resource path="res://PhoneOverlay.gd" type="Script" id=76]
+[ext_resource path="res://lightweighttextures/spikyrocks/spikyrocks.tres" type="Material" id=77]
 
 [sub_resource type="CubeMesh" id=1]
 size = Vector3( 0.35, 0.01, 0.01 )
@@ -3467,10 +3468,25 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0547581, 0, -3.42955 )
 mesh = SubResource( 93 )
 material/0 = SubResource( 113 )
 
-[node name="mediumrock" type="MeshInstance" parent="MaterialSystem/tubematerials"]
+[node name="Dmediumrock" type="MeshInstance" parent="MaterialSystem/tubematerials"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 8.62362, 0, 0.00012207 )
 mesh = SubResource( 114 )
 material/0 = SubResource( 115 )
+
+[node name="highlight" type="MeshInstance" parent="MaterialSystem/tubematerials/Dmediumrock"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.14453 )
+mesh = SubResource( 114 )
+material/0 = SubResource( 116 )
+
+[node name="name" type="MeshInstance" parent="MaterialSystem/tubematerials/Dmediumrock"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.011858, 0, -3.42955 )
+mesh = SubResource( 93 )
+material/0 = SubResource( 117 )
+
+[node name="mediumrock" type="MeshInstance" parent="MaterialSystem/tubematerials"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 8.62362, 0.790627, 0.00012207 )
+mesh = SubResource( 114 )
+material/0 = ExtResource( 77 )
 
 [node name="highlight" type="MeshInstance" parent="MaterialSystem/tubematerials/mediumrock"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.14453 )
