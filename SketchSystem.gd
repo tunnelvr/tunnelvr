@@ -41,7 +41,22 @@ func findxctube(xcname0, xcname1):
 				return xctube
 	return null
 	
-
+func setnewtubename(xctdata):
+	assert (not xctdata.has("tubename") or xctdata["tubename"] == "**notset")
+	var xcdrawing0 = get_node("XCdrawings").get_node_or_null(xctdata["xcname0"])
+	var xcdrawing1 = get_node("XCdrawings").get_node_or_null(xctdata["xcname1"])
+	var tubenameprefix = "Unknown_"
+	if xcdrawing0 == null or xcdrawing1 == null or xcdrawing0.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
+		tubenameprefix = "XCtube_"
+	elif xcdrawing0.drawingtype == DRAWING_TYPE.DT_CENTRELINE:
+		if xcdrawing1.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
+			tubenameprefix = "Floorpos_"
+		elif xcdrawing1.drawingtype == DRAWING_TYPE.DT_CENTRELINE:
+			tubenameprefix = "CAssoc_"
+	xctdata["tubename"] = tubenameprefix+xctdata["xcname0"]+"_"+xctdata["xcname1"]
+	if Tglobal.printxcdrawingfromdatamessages:
+		print("new tube name ", xctdata["tubename"])
+		
 	
 func sketchsystemtodict(stripruntimedataforsaving):
 	var xcdrawingsData = [ ]
@@ -52,6 +67,8 @@ func sketchsystemtodict(stripruntimedataforsaving):
 			print("Discarding hidden floortexture on save ", xcdrawing.get_name())
 		elif xcdrawing.drawingtype == DRAWING_TYPE.DT_ROPEHANG and len(xcdrawing.nodepoints) == 0 and stripruntimedataforsaving:
 			print("Discarding empty ropehang on save ", xcdrawing.get_name())
+		elif xcdrawing.drawingtype == DRAWING_TYPE.DT_CENTRELINE and len(xcdrawing.nodepoints) == 0 and stripruntimedataforsaving:
+			print("Discarding empty centreline on save ", xcdrawing.get_name())
 		else:
 			xcdrawingsData.append(xcdrawing.exportxcrpcdata(stripruntimedataforsaving))
 	var xctubesData = [ ]
@@ -295,8 +312,7 @@ remote func actsketchchangeL(xcdatalist):
 		elif "tubename" in xcdata:
 			if Tglobal.printxcdrawingfromdatamessages:
 				print("update tube ", xcdata["tubename"])
-			if xcdata["tubename"] == "**notset":
-				xcdata["tubename"] = "XCtube_"+xcdata["xcname0"]+"_"+xcdata["xcname1"]
+			assert (xcdata.has("tubename") and xcdata["tubename"] != "**notset")
 			var xctube = findxctube(xcdata["xcname0"], xcdata["xcname1"])
 			if xctube == null:
 				var xcdrawing0 = get_node("XCdrawings").get_node(xcdata["xcname0"])
@@ -304,11 +320,9 @@ remote func actsketchchangeL(xcdatalist):
 				if xcdrawing0 == null or xcdrawing1 == null:
 					print("bad tube  ", (xcdata["xcname0"] if xcdrawing0 == null else ""), " ", (xcdata["xcname1"] if xcdrawing1 == null else ""))
 					continue
-				xcdata["m0"] = 1 if xcdrawing1.drawingtype == DRAWING_TYPE.DT_CENTRELINE else 0
-				if xcdata["m0"] == 0:
-					xctube = newXCtube(xcdrawing0, xcdrawing1)
-				else:
-					xctube = newXCtube(xcdrawing1, xcdrawing0)
+				assert (not (xcdrawing0.drawingtype != DRAWING_TYPE.DT_CENTRELINE and xcdrawing1.drawingtype == DRAWING_TYPE.DT_CENTRELINE))
+				xcdata["m0"] = 0
+				xctube = newXCtube(xcdata["tubename"], xcdrawing0, xcdrawing1)
 				if xcdrawing0.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 					xctube.makeplaneintersectionaxisvec(xcdrawing0, xcdrawing1)
 			else:
@@ -375,7 +389,6 @@ remote func actsketchchangeL(xcdatalist):
 			if "updatetubeshells" in xcdata:
 				for xct in xcdata["updatetubeshells"]:
 					var xctube = findxctube(xct["xcname0"], xct["xcname1"])
-					#var xctube = $XCtubes.get_node_or_null(xct["xctubename"])
 					if xctube != null:
 						xctube.updatetubeshell($XCdrawings)
 			if "updatexcshells" in xcdata:
@@ -454,7 +467,10 @@ remote func actsketchchangeL(xcdatalist):
 	var badtubeswithnoconnections = [ ]
 	for xctube in xctubestoupdate.values():
 		if $XCdrawings.get_node(xctube.xcname0).drawingtype == DRAWING_TYPE.DT_CENTRELINE:
-			xctube.updatetubepositionlinks(self)
+			if $XCdrawings.get_node(xctube.xcname1).drawingtype == DRAWING_TYPE.DT_CENTRELINE:
+				xctube.updatecentrelineassociationlinks(self)
+			else:
+				xctube.updatefloorcentrelinepositionlinks(self)
 		else:
 			if not xctube.updatetubelinkpaths(self):
 				badtubeswithnoconnections.push_back(xctube)
@@ -478,9 +494,8 @@ remote func actsketchchangeL(xcdatalist):
 			#elif xcdrawing.drawingtype == DRAWING_TYPE.DT_ROPEHANG:
 			#	xcdrawing.setdrawingvisiblecode(DRAWING_TYPE.VIZ_XCD_HIDE)
 		for xctube in xctubestoupdate.values():
-			if $XCdrawings.get_node(xctube.xcname0).drawingtype == DRAWING_TYPE.DT_XCDRAWING:
-				xctube.updatetubeshell($XCdrawings)
-				xctube.setxctubepathlinevisibility(self)
+			xctube.updatetubeshell($XCdrawings)
+			xctube.setxctubepathlinevisibility(self)
 				
 		if xcdatalist[0]["caveworldchunk"] == xcdatalist[0]["caveworldchunkLast"]:
 			for xcdrawing in $XCdrawings.get_children():
@@ -905,15 +920,16 @@ func newXCuniquedrawingPaperN(xcresource, sname, drawingtype):
 
 	return xcdrawing
 
-func newXCtube(xcdrawing0, xcdrawing1):
-	assert ((xcdrawing0.drawingtype == DRAWING_TYPE.DT_XCDRAWING and xcdrawing1.drawingtype == DRAWING_TYPE.DT_XCDRAWING) or
-			(xcdrawing0.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE and xcdrawing1.drawingtype == DRAWING_TYPE.DT_XCDRAWING) or
-			(xcdrawing0.drawingtype == DRAWING_TYPE.DT_CENTRELINE and xcdrawing1.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE))
+func newXCtube(tubename, xcdrawing0, xcdrawing1):
+	assert ((xcdrawing0.drawingtype == DRAWING_TYPE.DT_XCDRAWING and xcdrawing1.drawingtype == DRAWING_TYPE.DT_XCDRAWING) or \
+			# (xcdrawing0.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE and xcdrawing1.drawingtype == DRAWING_TYPE.DT_XCDRAWING) or # What's this case for??? \
+			(xcdrawing0.drawingtype == DRAWING_TYPE.DT_CENTRELINE and xcdrawing1.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE) or \
+			(xcdrawing0.drawingtype == DRAWING_TYPE.DT_CENTRELINE and xcdrawing1.drawingtype == DRAWING_TYPE.DT_CENTRELINE))
 		
 	var xctube = XCtube.instance()
 	xctube.xcname0 = xcdrawing0.get_name()
 	xctube.xcname1 = xcdrawing1.get_name()
-	xctube.set_name("XCtube_"+xctube.xcname0+"_"+xctube.xcname1)
+	xctube.set_name(tubename)
 	xcdrawing0.xctubesconn.append(xctube)
 	xcdrawing1.xctubesconn.append(xctube)
 	assert (not $XCtubes.has_node(xctube.get_name()))

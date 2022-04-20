@@ -194,7 +194,7 @@ func Ylistghfiles():
 #GET https://api.github.com/repos/:owner/:repo/commits?path=FILE_PATH
 #https://docs.github.com/en/rest/reference/repos#contents
 #https://stackoverflow.com/questions/16700297/using-github-api-to-retrieve-all-versions-of-a-specific-file
-
+# new github apikey "token": instructions at https://github.com/settings/tokens
 
 func Yfetchfile(cname, lghfetcheddatafile):
 	yield(Yinitclient(), "completed")

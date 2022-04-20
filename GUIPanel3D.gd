@@ -406,6 +406,7 @@ func _on_switchtest(index):
 								 "xcname1":xcdata["name"],
 								 "prevdrawinglinks":[], 
 								 "newdrawinglinks":tnewdrawinglinks.duplicate() }
+				sketchsystem.setnewtubename(xctdata)
 				#var finishedplanedrawingtype =  DRAWING_TYPE.VIZ_XCD_HIDE
 				var finishedplanedrawingtype =  DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE
 				#var finishedplanedrawingtype = DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE
@@ -413,6 +414,7 @@ func _on_switchtest(index):
 								   "updatetubeshells":[
 									{ "tubename":xctdata["tubename"], "xcname0":xctdata["xcname0"], "xcname1":xctdata["xcname1"] } 
 								] }
+								
 				sketchsystem.actsketchchange([ xctdata, xctdataviz ])
 				
 				var matrot0 = tnewdrawinglinks[2]
@@ -844,11 +846,20 @@ func _on_resourceoptions_buttondown_setavailablefunctions():
 		var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
 		if planviewsystem.planviewactive and planviewsystem.activetargetfloor != null:
 			xcselecteddrawing_forrsourcefunctions = planviewsystem.activetargetfloor
+
+	var xcdrawingcentrelines = get_tree().get_nodes_in_group("gpcentrelinegeo")
+	var bcentrelinedistortenable = false
 	if xcselecteddrawing_forrsourcefunctions != null and xcselecteddrawing_forrsourcefunctions.drawingtype == DRAWING_TYPE.DT_CENTRELINE:
 		centrelineselected_forresourcefunction = xcselecteddrawing_forrsourcefunctions
+		var clconnectnode = centrelineselected_forresourcefunction.xccentrelineconnectstofloor(sketchsystem.get_node("XCdrawings"))
+		if clconnectnode == 2:
+			if len(centrelineselected_forresourcefunction.xctubesconn) + 1 == len(xcdrawingcentrelines):
+				bcentrelinedistortenable = true
+	elif len(xcdrawingcentrelines) == 1:
+		centrelineselected_forresourcefunction = xcdrawingcentrelines[0]
 	else:
-		var xcdrawingcentrelines = get_tree().get_nodes_in_group("gpcentrelinegeo")
-		centrelineselected_forresourcefunction = (xcdrawingcentrelines[0] if len(xcdrawingcentrelines) != 0 else null)
+		centrelineselected_forresourcefunction = null
+	$Viewport/GUI/Panel/ResourceOptions.set_item_disabled(resourceoptionlookup["Centreline distort"], not bcentrelinedistortenable)
 
 	var mtext = $Viewport/GUI/Panel/EditColorRect/TextEdit.text.strip_edges()
 	var potreeexperiments = selfSpatial.get_node("PotreeExperiments")
@@ -886,6 +897,13 @@ func _on_resourceoptions_selected(index):
 			var xcrot = xcselecteddrawing_forrsourcefunctions.rotation_degrees
 			xcproperties["position"] = [xcpos.x, xcpos.y, xcpos.z]
 			xcproperties["rotation"] = [xcrot.x, xcrot.y, xcrot.z]
+			var xcdrawingtype = xcselecteddrawing_forrsourcefunctions.drawingtype
+			if xcdrawingtype != DRAWING_TYPE.DT_XCDRAWING:
+				xcproperties["drawingtype"] = "CENTRELINE" if xcdrawingtype == DRAWING_TYPE.DT_CENTRELINE else ("TEXTURE" if xcdrawingtype == DRAWING_TYPE.DT_FLOORTEXTURE else "ROPEHANG")
+			if xcdrawingtype == DRAWING_TYPE.DT_CENTRELINE:
+				var clconnectcode = xcselecteddrawing_forrsourcefunctions.xccentrelineconnectstofloor(sketchsystem.get_node("XCdrawings"))
+				xcproperties["centrelineconnection"] = "anchored" if clconnectcode == 1 else ("incoming for mapping" if clconnectcode == 2 else "free") 
+			DRAWING_TYPE.DT_XCDRAWING # DT_CENTRELINE, DT_ROPEHANG, DT_FLOORTEXTURE
 			$Viewport/GUI/Panel/EditColorRect/TextEdit.text = JSON.print(xcproperties, "  ", true)
 		else:
 			setpanellabeltext("No XCdrawing selected")
@@ -902,6 +920,10 @@ func _on_resourceoptions_selected(index):
 					jresource.erase("xcresource")
 				if jresource.has("snodename"):
 					jresource.erase("snodename")
+				if jresource.has("drawingtype"):
+					jresource.erase("drawingtype")
+				if jresource.has("centrelineconnection"):
+					jresource.erase("centrelineconnection")
 				var dnode = Spatial.new()
 				dnode.transform = xcselecteddrawing_forrsourcefunctions.transform
 				if jresource.has("position") and typeof(jresource["position"]) == TYPE_ARRAY and len(jresource["position"]) == 3:
@@ -1022,9 +1044,21 @@ func _on_resourceoptions_selected(index):
 	elif nrosel == "Apply to flagsign":
 		buttonflagsign_pressed()
 		
+	elif nrosel == "Centreline distort":
+		var xcdatalist = Centrelinedata.centrelinepassagedistort(centrelineselected_forresourcefunction, sketchsystem)
+		sketchsystem.pointersystem.clearactivetargetnode()
+		sketchsystem.actsketchchange(xcdatalist)
+		var floormovedata = [ ]
+		for xctubec in centrelineselected_forresourcefunction.xctubesconn:
+			var xcdrawingFloor = sketchsystem.get_node("XCdrawings").get_node(xctubec.xcname1)
+			if len(xctubec.xcdrawinglink) != 0 and xcdrawingFloor.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
+				floormovedata.append_array(xctubec.centrelineconnectionfloortransformpos(sketchsystem))
+		if len(floormovedata) != 0:
+			sketchsystem.actsketchchange(floormovedata)
+		setguipanelhide()
+				
 	Tglobal.soundsystem.quicksound("MenuClick", collision_point)
 	prevnrosel = nrosel
-
 
 func Yupdatecavefilelist():
 	var savegamefilenameoptionbutton = $Viewport/GUI/Panel/Savegamefilename

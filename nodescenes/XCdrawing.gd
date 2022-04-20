@@ -7,7 +7,7 @@ const XCnode_knot = preload("res://nodescenes/XCnode_knot.tscn")
 var xcresource = ""     # source file
 var nodepoints = { }    # { nodename:Vector3 } in local coordinate system
 var onepathpairs = [ ]  # [ Anodename0, Anodename1, Bnodename0, Bnodename1, ... ]
-var drawingtype = DRAWING_TYPE.DT_XCDRAWING # DT_CENTRELINE, DT_ROPEHANG
+var drawingtype = DRAWING_TYPE.DT_XCDRAWING # DT_CENTRELINE, DT_ROPEHANG, DT_FLOORTEXTURE
 var drawingvisiblecode = DRAWING_TYPE.VIZ_XCD_HIDE
 var ropehangdetectedtype = DRAWING_TYPE.RH_NORMAL
 
@@ -106,6 +106,25 @@ func xcconnectstoshell():
 		if xctubeconn.get_node("XCtubesectors").get_child_count() != 0:
 			return true
 	return false
+
+func xccentrelineconnectstofloor(xcdrawings):
+	assert (drawingtype == DRAWING_TYPE.DT_CENTRELINE)
+	var nfloorconnections = 0
+	var ncentrelineconnections = 0
+	for xctube in xctubesconn:
+		if xctube.xcname0 == get_name():
+			var xcdrawing1 = xcdrawings.get_node(xctube.xcname1)
+			if xcdrawing1.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
+				nfloorconnections += 1
+			elif xcdrawing1.drawingtype == DRAWING_TYPE.DT_CENTRELINE:
+				ncentrelineconnections += 1
+			else:
+				assert (false)
+		else:
+			var Dxcdrawingincomingcentreline = xcdrawings.get_node(xctube.xcname0)
+			assert (Dxcdrawingincomingcentreline.drawingtype == DRAWING_TYPE.DT_CENTRELINE)
+	assert ((nfloorconnections == 0) or (ncentrelineconnections == 0))
+	return 1 if (nfloorconnections != 0) else (2 if (ncentrelineconnections != 0) else 0)
 
 func makeflaglabels(ptsignroot, ptsigntopy, postrad, flagsigns):
 	var labelgenerator = get_node("/root/Spatial/LabelGenerator")

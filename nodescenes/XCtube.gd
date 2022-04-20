@@ -129,8 +129,8 @@ func centrelineconnectionfloortransformpos(sketchsystem):
 	var xcdrawingCentreline = sketchsystem.get_node("XCdrawings").get_node(xcname0)
 	var xcdrawingFloor = sketchsystem.get_node("XCdrawings").get_node(xcname1)
 	assert (xcdrawingCentreline.drawingtype == DRAWING_TYPE.DT_CENTRELINE and xcdrawingFloor.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE)
-	var xcdatalist = null
-	var bsingledrag = len(xcdrawinglink) == 2
+	var xcdatalist = [ ]
+	var bsingledrag = (len(xcdrawinglink) == 2)
 	var opn0 = xcdrawingCentreline.get_node("XCnodes").get_node(xcdrawinglink[-2 if bsingledrag else -4])
 	var xcn0 = xcdrawingFloor.get_node("XCnodes").get_node(xcdrawinglink[-1 if bsingledrag else -3])
 	if bsingledrag:
@@ -181,7 +181,8 @@ func decodeintermediatenodenamelinkindex(inodename):
 func decodeintermediatenodenamenodeindex(inodename):
 	return int(inodename.split("i")[1])
 
-func updatetubepositionlinks(sketchsystem):
+var tubelinklinewidth = 0.02
+func updatefloorcentrelinepositionlinks(sketchsystem):
 	var surfaceTool = SurfaceTool.new()
 	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(xcname0)
@@ -191,10 +192,52 @@ func updatetubepositionlinks(sketchsystem):
 	for j in range(0, len(xcdrawinglink), 2):
 		var p0 = xcdrawing0.transform * xcdrawing0.nodepoints[xcdrawinglink[j]]
 		var p1 = xcdrawing1.transform * xcdrawing1.nodepoints[xcdrawinglink[j+1]]
-		Polynets.addarrowmesh(surfaceTool, p0, p1, xcdrawing1.global_transform.basis.x, [])
+		Polynets.addarrowmesh(surfaceTool, p0, p1, xcdrawing1.global_transform.basis.x, tubelinklinewidth, [])
 	surfaceTool.generate_normals()
 	$PathLines.mesh = surfaceTool.commit()
-	$PathLines.set_surface_material(0, get_node("/root/Spatial/MaterialSystem").pathlinematerial("normal"))
+	$PathLines.set_surface_material(0, get_node("/root/Spatial/MaterialSystem").pathlinematerial("floorposition"))
+	$PathLines.layers = CollisionLayer.VL_xctubeposlines
+	$PathLines.visible = true
+
+func updatecentrelineassociationlinks(sketchsystem):
+	var surfaceTool = SurfaceTool.new()
+	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(xcname0)
+	var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(xcname1)
+	assert(xcdrawing0.drawingtype == DRAWING_TYPE.DT_CENTRELINE and xcdrawing1.drawingtype == DRAWING_TYPE.DT_CENTRELINE)
+	assert ((len(xcdrawinglink)%2) == 0)
+	var sperp = Vector3(0, 0, 0)
+	for j in range(0, len(xcdrawinglink), 2):
+		var p0 = xcdrawing0.transform * xcdrawing0.nodepoints[xcdrawinglink[j]]
+		var p1 = xcdrawing1.transform * xcdrawing1.nodepoints[xcdrawinglink[j+1]]
+		var vec = p1 - p0
+		var perp = vec.cross(Vector3(0, 1, 0)).normalized()
+		if perp == Vector3(0, 0, 0):
+			perp = Vector3(1, 0, 0)
+		sperp += perp
+		Polynets.addarrowmesh(surfaceTool, p0, p1, perp, tubelinklinewidth*2, [])
+		Polynets.addarrowmesh(surfaceTool, p0, p1, vec.cross(perp).normalized(), tubelinklinewidth*2, [])
+
+	var nodepointsmap = Centrelinedata.centrelinenodeassociation(xcdrawing1.nodepoints, xcdrawing0.nodepoints, xcdrawinglink)
+	var fperp = sperp.normalized() * tubelinklinewidth
+	for nodefromname in nodepointsmap:
+		var nodetoname = nodepointsmap[nodefromname]
+		var p1 = xcdrawing1.transform * xcdrawing1.nodepoints[nodefromname]
+		var p0 = xcdrawing0.transform * xcdrawing0.nodepoints[nodetoname]
+		var p0left = p0 - fperp
+		var p0right = p0 + fperp
+		var p1left = p1 - fperp
+		var p1right = p1 + fperp
+		surfaceTool.add_vertex(p0left)
+		surfaceTool.add_vertex(p1left)
+		surfaceTool.add_vertex(p0right)
+		surfaceTool.add_vertex(p0right)
+		surfaceTool.add_vertex(p1left)
+		surfaceTool.add_vertex(p1right)
+		
+	surfaceTool.generate_normals()
+	$PathLines.mesh = surfaceTool.commit()
+	$PathLines.set_surface_material(0, get_node("/root/Spatial/MaterialSystem").pathlinematerial("centrelineassociation"))
 	$PathLines.layers = CollisionLayer.VL_xctubeposlines
 	$PathLines.visible = true
 
@@ -248,7 +291,7 @@ func updatetubelinkpaths(sketchsystem):
 				break
 			$PathLines.get_node(imnodename).queue_free()
 			im += 1
-		Polynets.addarrowmesh(surfaceTool, p0, p1, perp, intermediatepts)
+		Polynets.addarrowmesh(surfaceTool, p0, p1, perp, tubelinklinewidth, intermediatepts)
 			
 	var jbm = len(xcdrawinglink) 
 	while $PathLines.has_node(encodeintermediatenodename(jbm, 0)):
@@ -684,7 +727,8 @@ func FixtubeholeXCs(sketchsystem):
 									   "xcname1":xcname1new,
 									   "prevdrawinglinks":[ ],
 									   "newdrawinglinks":drawinglinks })
-			updatetubeshells.push_back({"tubename":"**notset", "xcname0":xcname0new, "xcname1":xcname1new})
+			sketchsystem.setnewtubename(xctdatatubenew[-1])
+			updatetubeshells.push_back({"tubename":xctdatatubenew[-1]["tubename"], "xcname0":xcname0new, "xcname1":xcname1new})
 
 		xctdatadrawingdel.push_back({ "name":xcdrawingorgname, 
 									  "prevnodepoints":xcdrawing.nodepoints.duplicate(),
@@ -778,6 +822,12 @@ func slicerungsatintermediatetuberail(tuberail0, tuberail1, rung0k, rung1k):
 
 
 func updatetubeshell(xcdrawings):
+	var xcdrawing0 = xcdrawings.get_node(xcname0)
+	var xcdrawing1 = xcdrawings.get_node(xcname1)
+	if xcdrawing0.drawingtype != DRAWING_TYPE.DT_XCDRAWING or xcdrawing1.drawingtype != DRAWING_TYPE.DT_XCDRAWING:
+		print("skipping updatetubeshell on ", get_name())
+		return
+	
 	if $XCtubesectors.get_child_count() != 0:
 		var xctubesectors_old = $XCtubesectors
 		xctubesectors_old.set_name("XCtubesectors_old")
@@ -788,8 +838,6 @@ func updatetubeshell(xcdrawings):
 		xctubesectors_new.set_name("XCtubesectors")
 		add_child(xctubesectors_new)
 		
-	var xcdrawing0 = xcdrawings.get_node(xcname0)
-	var xcdrawing1 = xcdrawings.get_node(xcname1)
 	var mtpa = maketubepolyassociation_andreorder(xcdrawing0, xcdrawing1)
 	var poly0 = mtpa[0]
 	var poly1 = mtpa[1]
