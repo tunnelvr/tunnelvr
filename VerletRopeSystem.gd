@@ -11,6 +11,7 @@ var threadtoexit = false
 
 var ropehangsinprocess = [ ]
 const ropestretchratiolabel = false
+var hangingroperad = 0.05; 
 
 func _exit_tree():
 	finishveropthread()
@@ -90,6 +91,17 @@ func addropehang(ropehang):
 	#print("addropehang ", ropehang.get_parent().get_name())
 	set_process(true)
 	
+func update_hangingroperad(sketchsystem, lhangingroperad):
+	if hangingroperad != lhangingroperad:
+		hangingroperad = lhangingroperad
+		print("updating hangingroperad", hangingroperad)
+		for xcdrawing in sketchsystem.get_node("XCdrawings").get_children():
+			var ropehang = xcdrawing.get_node_or_null("RopeHang")
+			if ropehang != null and ropehang.visible and len(ropehang.oddropeverts) <= 2:
+				if not ropehangsinprocess.has(ropehang):
+					ropehangsinprocess.push_back(ropehang)
+				set_process(true)
+	
 func reportstretch(verropropehang):
 	var labelgenerator = get_node("/root/Spatial/LabelGenerator")
 	for oddnode in $RopeHang.oddropeverts:
@@ -141,7 +153,7 @@ func _process(delta):
 			verropthreadoperating = false
 			if verropropehang.get_parent().drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_HIDE and verropropehang.get_parent().get_node("XCnodes").get_child_count() != 0:
 				verropropehang.verletiterations += 1
-				verropropehang.updatehangingropeMDT_Verlet()
+				verropropehang.updatehangingropeMDT_Verlet(hangingroperad)
 				var verletstretch = verropropehang.verletstretch()
 				var verletmaxvelocity = verropropehang.verletmaxvelocity()
 				if verropropehang.verletiterations == 5:

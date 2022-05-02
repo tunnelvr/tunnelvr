@@ -2,7 +2,6 @@ extends Spatial
 
 const uvfacx = 0.2
 const uvfacy = 0.4
-var hangingroperad = 0.05
 const ropeseglen = 0.25
 
 func genrpsquareAM(verts, uvs, normals, p, vtexv, valong, hv, rad):
@@ -152,7 +151,7 @@ func derivenverts(nodepoints, ropesequences):
 	totalstretchropeleng = totalropeleng
 	return middlenodes
 	
-func updatehangingropepathsArrayMesh_Verlet(nodepoints, ropesequences):
+func updatehangingropepathsArrayMesh_Verlet(nodepoints, ropesequences, hangingroperad):
 	var middlenodes = derivenverts(nodepoints, ropesequences)
 	#print("nropeseqLengs ", nropeseqLengs)
 	
@@ -185,7 +184,7 @@ func updatehangingropepathsArrayMesh_Verlet(nodepoints, ropesequences):
 	return middlenodes
 
 
-func updatehangingropeMDT_Verlet():
+func updatehangingropeMDT_Verlet(hangingroperad):
 	var mdt = MeshDataTool.new()
 	mdt.create_from_surface($RopeMesh.mesh, 0)
 

@@ -217,7 +217,7 @@ func setdrawingvisiblecode(ldrawingvisiblecode):
 				ropehangdetectedtype = DRAWING_TYPE.RH_FLAGSIGN
 
 			elif len($RopeHang.oddropeverts) <= 2:
-				var middlenodes = $RopeHang.updatehangingropepathsArrayMesh_Verlet(nodepoints, ropeseqs)
+				var middlenodes = $RopeHang.updatehangingropepathsArrayMesh_Verlet(nodepoints, ropeseqs, get_node("/root/Spatial/VerletRopeSystem").hangingroperad)
 				for xcn in $XCnodes.get_children():
 					xcn.visible = ((xcn.get_name()[0] == "a") or (middlenodes.find(xcn.get_name()) == -1))
 					xcn.get_node("CollisionShape").disabled = not xcn.visible
