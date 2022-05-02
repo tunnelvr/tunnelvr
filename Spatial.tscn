@@ -285,7 +285,7 @@ shader_type spatial;
 render_mode blend_mix,depth_draw_opaque,cull_back,diffuse_burley,specular_schlick_ggx,unshaded,shadows_disabled;
 
 uniform vec4 albedo : hint_color;
-uniform float noffset = 0.1;
+uniform float normaloffsetdistance = 0.1;
 uniform vec4 fogcolor : hint_color; 
 uniform vec4 woundcolor : hint_color; 
 
@@ -297,7 +297,7 @@ void vertex() {
 	vec3 dvec = VERTEX - CAMERA_MATRIX[3].xyz; 
 	float dvcam = -dot(CAMERA_MATRIX[2].xyz, dvec); 
 	cameraplandistancefactor = dvcam/camerafar; 
-	VERTEX += NORMAL*noffset;
+	VERTEX += NORMAL*normaloffsetdistance;
 }
 
 void fragment() {
@@ -309,7 +309,7 @@ void fragment() {
 [sub_resource type="ShaderMaterial" id=256]
 shader = SubResource( 255 )
 shader_param/albedo = Color( 0.0156863, 0, 0, 1 )
-shader_param/noffset = 0.1
+shader_param/normaloffsetdistance = 0.1
 shader_param/fogcolor = Color( 0.780392, 0.886275, 0.996078, 1 )
 shader_param/woundcolor = Color( 0.988235, 0.0156863, 0.0156863, 1 )
 shader_param/camerafar = 100.0
@@ -1765,6 +1765,7 @@ extents = Vector2( 500, 500 )
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
 enablevr = false
+forcephoneoverlay = true
 
 [node name="Players" type="Spatial" parent="."]
 
@@ -2089,6 +2090,7 @@ script = ExtResource( 10 )
 [node name="XCtubes" type="Spatial" parent="SketchSystem"]
 
 [node name="tunnelxoutline" type="Spatial" parent="SketchSystem"]
+visible = false
 
 [node name="blackoutline" type="MeshInstance" parent="SketchSystem/tunnelxoutline"]
 layers = 4097
