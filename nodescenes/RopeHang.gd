@@ -2,7 +2,7 @@ extends Spatial
 
 const uvfacx = 0.2
 const uvfacy = 0.4
-const roperad = 0.02
+var hangingroperad = 0.05
 const ropeseglen = 0.25
 
 func genrpsquareAM(verts, uvs, normals, p, vtexv, valong, hv, rad):
@@ -167,7 +167,7 @@ func updatehangingropepathsArrayMesh_Verlet(nodepoints, ropesequences):
 			rpts.push_back(nverts[i])
 		var rvec = rpts[-1] - rpts[0]
 		var hangperpvec = Vector3(1,0,0) if Vector2(rvec.x, rvec.z).length() < 0.01 else Vector3(rvec.z, 0, -rvec.x).normalized()
-		ropeseqtubesurfaceArrayMesh(verts, uvs, normals, indices, rpts, hangperpvec, roperad)
+		ropeseqtubesurfaceArrayMesh(verts, uvs, normals, indices, rpts, hangperpvec, hangingroperad)
 
 	var arr = []
 	arr.resize(Mesh.ARRAY_MAX)
@@ -196,7 +196,7 @@ func updatehangingropeMDT_Verlet():
 			rpts.push_back(nverts[i])
 		var rvec = rpts[-1] - rpts[0]
 		var hangperpvec = Vector3(1,0,0) if Vector2(rvec.x, rvec.z).length() < 0.01 else Vector3(rvec.z, 0, -rvec.x).normalized()
-		ropeseqtubesurfaceMDT(mdt, inoff, rpts, hangperpvec, roperad)
+		ropeseqtubesurfaceMDT(mdt, inoff, rpts, hangperpvec, hangingroperad)
 		inoff += len(rpts)*cN
 
 	$RopeMesh.mesh.surface_remove(0)
