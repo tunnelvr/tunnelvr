@@ -1200,10 +1200,6 @@ func buttonpressed_vrpad(gripbuttonheld, joypos):
 			pointertargetwall.get_node("XCdrawingplane").scale.y = max(1, pointertargetwall.get_node("XCdrawingplane").scale.y + dy)
 			pointertargetwall.updateformetresquaresscaletexture()
 				
-	elif pointertargettype == "XCnode":
-		if pointertargetwall.drawingtype == DRAWING_TYPE.DT_ROPEHANG and pointertargetwall.drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_HIDE: 
-			pointertargetwall.get_node("RopeHang").iteratehangingrope_Verlet()
-			
 	elif pointertargettype == "PlanView" or pointerplanviewtarget != null:
 		if planviewsystem.planviewactive:
 			if planviewsystem.fileviewtree.visible:

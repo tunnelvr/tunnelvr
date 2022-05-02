@@ -141,7 +141,7 @@ func _process(delta):
 			verropthreadoperating = false
 			if verropropehang.get_parent().drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_HIDE and verropropehang.get_parent().get_node("XCnodes").get_child_count() != 0:
 				verropropehang.verletiterations += 1
-				verropropehang.updatehangingrope_Verlet()
+				verropropehang.updatehangingropeMDT_Verlet()
 				var verletstretch = verropropehang.verletstretch()
 				var verletmaxvelocity = verropropehang.verletmaxvelocity()
 				if verropropehang.verletiterations == 5:
