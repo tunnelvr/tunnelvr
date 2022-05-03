@@ -6,6 +6,7 @@
 [ext_resource path="res://lightweighttextures/spikyrocks/spikyrocks_depth.png" type="Texture" id=4]
 
 [resource]
+params_cull_mode = 2
 albedo_texture = ExtResource( 1 )
 metallic = 2.0
 metallic_texture = ExtResource( 2 )
