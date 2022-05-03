@@ -469,7 +469,7 @@ func _on_switchtest(index):
 			for xcdrawing in sketchsystem.get_node("XCdrawings").get_children():
 				if xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING and xcdrawing.has_node("XCflatshell") and xcdrawing.xcflatshellmaterial != "hole":
 					xcdrawing.get_node("XCflatshell").visible = true
-			get_node("/root/Spatial/VerletRopeSystem").update_hangingroperad(sketchsystem, 0.05)
+			get_node("/root/Spatial/VerletRopeSystem").update_hangingroperad(sketchsystem, -1.0)
 
 		setguipanelhide()
 				

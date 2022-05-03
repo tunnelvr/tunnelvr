@@ -11,7 +11,8 @@ var threadtoexit = false
 
 var ropehangsinprocess = [ ]
 const ropestretchratiolabel = false
-var hangingroperad = 0.05; 
+const default_hangingroperad = 0.02; 
+var hangingroperad = default_hangingroperad; 
 
 func _exit_tree():
 	finishveropthread()
@@ -92,6 +93,8 @@ func addropehang(ropehang):
 	set_process(true)
 	
 func update_hangingroperad(sketchsystem, lhangingroperad):
+	if lhangingroperad == -1.0:
+		lhangingroperad = default_hangingroperad
 	if hangingroperad != lhangingroperad:
 		hangingroperad = lhangingroperad
 		print("updating hangingroperad", hangingroperad)
