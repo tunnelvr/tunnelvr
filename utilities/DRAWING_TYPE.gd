@@ -25,7 +25,8 @@ enum { VIZ_XCD_HIDE 				= 0
 enum { RH_NORMAL = 0,
 	   RH_STAL = 1,
 	   RH_BOULDER = 2,
-	   RH_FLAGSIGN = 3
+	   RH_FLAGSIGN = 3, 
+	   RH_WATERLEVEL = 4
 	 }
 
 enum { FS_NORMAL = 0,

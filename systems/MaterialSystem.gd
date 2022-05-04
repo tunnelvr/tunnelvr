@@ -66,7 +66,6 @@ func adjustmaterialtotorchlight(torchon):
 	$xcdrawingmaterials/highlight.get_surface_material(0).albedo_color.a = 0.33 if torchon else 0.43
 	$tubematerials/hole.get_surface_material(0).albedo_color.a = 0.11 if torchon else 0.18
 
-
 func setallbackfacecull(cull_mode):
 	for tmesh in get_node("tubematerials").get_children():
 		var tmat = tmesh.get_surface_material(0)
@@ -74,7 +73,6 @@ func setallbackfacecull(cull_mode):
 			tmat.params_cull_mode = cull_mode
 		else:
 			print("cant' change backface cull on material ", tmesh.get_name())
-
 
 remote func setfloormaptexture(xcfloorname):
 	var xcdrawings = get_node("/root/Spatial/SketchSystem/XCdrawings")

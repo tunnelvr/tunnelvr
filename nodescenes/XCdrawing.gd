@@ -180,6 +180,7 @@ func setdrawingvisiblecode(ldrawingvisiblecode):
 			var cuboidfacs = Polynets.cuboidfromropenodesequences(nodepoints, ropeseqs, false)
 			var stalseqax = Polynets.stalfromropenodesequences(nodepoints, ropeseqs) if cuboidfacs == null else null
 			var signseqax = Polynets.signpostfromropenodesequences(nodepoints, ropeseqs, (additionalproperties if additionalproperties != null else {}).get("flagsignlabels", {})) if (cuboidfacs == null and stalseqax == null) else null
+			var waterflowlevelvectors = Polynets.waterlevelsfromropesequences(nodepoints, ropeseqs)
 			if cuboidfacs != null:
 				var cuboidshellmesh1 = Polynets.makerailcuboidshellmesh(nodepoints, cuboidfacs, true)
 				if cuboidshellmesh1 == null:
@@ -215,6 +216,17 @@ func setdrawingvisiblecode(ldrawingvisiblecode):
 					xcn.visible = (signseqax[3].find(xcn.get_name()) != -1)
 					xcn.get_node("CollisionShape").disabled = not xcn.visible
 				ropehangdetectedtype = DRAWING_TYPE.RH_FLAGSIGN
+
+			elif waterflowlevelvectors != null:
+				print("waterlevels ", waterflowlevelvectors)
+				var waterlevelmesh = Polynets.drawwaterlevelmesh(waterflowlevelvectors, nodepoints)
+				updatexcshellmesh(waterlevelmesh)
+				$RopeHang.visible = false
+				$PathLines.visible = false
+				for xcn in $XCnodes.get_children():
+					xcn.visible = waterflowlevelvectors.has(xcn.get_name())
+					xcn.get_node("CollisionShape").disabled = not xcn.visible
+				ropehangdetectedtype = DRAWING_TYPE.RH_WATERLEVEL
 
 			elif len($RopeHang.oddropeverts) <= 2:
 				var middlenodes = $RopeHang.updatehangingropepathsArrayMesh_Verlet(nodepoints, ropeseqs, get_node("/root/Spatial/VerletRopeSystem").hangingroperad)
