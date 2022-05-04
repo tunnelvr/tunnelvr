@@ -159,6 +159,7 @@ func makeflaglabels(ptsignroot, ptsigntopy, postrad, flagsigns):
 func sortnodeyfunc(a, b):
 	return nodepoints[a].y > nodepoints[b].y
 
+
 func setdrawingvisiblecode(ldrawingvisiblecode):
 	var drawingvisiblecode_old = drawingvisiblecode
 	drawingvisiblecode = ldrawingvisiblecode
@@ -220,8 +221,9 @@ func setdrawingvisiblecode(ldrawingvisiblecode):
 			elif waterflowlevelvectors != null:
 				print("waterlevels ", waterflowlevelvectors)
 				var waterlevelmesh = Polynets.drawwaterlevelmesh(waterflowlevelvectors, nodepoints)
-				updatexcshellmesh(waterlevelmesh)
-				$RopeHang.visible = false
+				$RopeHang.visible = true
+				$RopeHang/RopeMesh.mesh = waterlevelmesh
+				$RopeHang/RopeMesh.set_surface_material(0, get_node("/root/Spatial/MaterialSystem").pathlinematerial("watermaterial"))
 				$PathLines.visible = false
 				for xcn in $XCnodes.get_children():
 					xcn.visible = waterflowlevelvectors.has(xcn.get_name())

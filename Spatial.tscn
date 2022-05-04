@@ -1,4 +1,4 @@
-[gd_scene load_steps=334 format=2]
+[gd_scene load_steps=335 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/underground_env.tres" type="Environment" id=2]
@@ -1527,6 +1527,8 @@ emission = Color( 0.890196, 0.94902, 0.501961, 1 )
 emission_energy = 0.42
 emission_operator = 0
 emission_on_uv2 = false
+
+[sub_resource type="PlaneMesh" id=261]
 
 [sub_resource type="CapsuleMesh" id=201]
 radius = 0.1
@@ -3832,6 +3834,22 @@ material/0 = SubResource( 198 )
 transform = Transform( 1, 0, 0, 0, -1.62921e-07, 1, 0, -1, -1.62921e-07, 1.07032, 0.0395899, 0.188023 )
 mesh = SubResource( 199 )
 material/0 = SubResource( 200 )
+
+[node name="watermaterial" type="MeshInstance" parent="MaterialSystem/pathlines"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 23.4276, 0, -1.04259 )
+mesh = SubResource( 261 )
+skeleton = NodePath("../../tubematerials")
+material/0 = ExtResource( 3 )
+
+[node name="highlight" type="MeshInstance" parent="MaterialSystem/pathlines/watermaterial"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2.08184 )
+mesh = SubResource( 136 )
+material/0 = SubResource( 137 )
+
+[node name="name" type="MeshInstance" parent="MaterialSystem/pathlines/watermaterial"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0610771, 0, -3.42955 )
+mesh = SubResource( 138 )
+material/0 = SubResource( 139 )
 
 [node name="handmaterials" type="Spatial" parent="MaterialSystem"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -3.78539, 0, 1.47726 )
