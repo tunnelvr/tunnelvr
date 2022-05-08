@@ -220,7 +220,7 @@ func setdrawingvisiblecode(ldrawingvisiblecode):
 
 			elif waterflowlevelvectors != null:
 				print("waterlevels ", waterflowlevelvectors)
-				var waterlevelmesh = Polynets.drawwaterlevelmesh(waterflowlevelvectors, nodepoints)
+				var waterlevelmesh = get_node("/root/Spatial/WaterLevelSystem").drawwaterlevelmesh(waterflowlevelvectors, nodepoints)
 				$RopeHang.visible = true
 				$RopeHang/RopeMesh.mesh = waterlevelmesh
 				$RopeHang/RopeMesh.set_surface_material(0, get_node("/root/Spatial/MaterialSystem").pathlinematerial("watermaterial"))

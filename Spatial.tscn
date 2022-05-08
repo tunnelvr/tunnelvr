@@ -1,4 +1,4 @@
-[gd_scene load_steps=331 format=2]
+[gd_scene load_steps=332 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/underground_env.tres" type="Environment" id=2]
@@ -78,6 +78,7 @@
 [ext_resource path="res://PhoneOverlay.gd" type="Script" id=76]
 [ext_resource path="res://lightweighttextures/spikyrocks/spikyrocks.tres" type="Material" id=77]
 [ext_resource path="res://lightweighttextures/spikyrocks/spikyrocks_albedo.png" type="Texture" id=78]
+[ext_resource path="res://systems/WaterLevelSystem.gd" type="Script" id=79]
 
 [sub_resource type="CubeMesh" id=1]
 size = Vector3( 0.35, 0.01, 0.01 )
@@ -3974,6 +3975,12 @@ script = ExtResource( 65 )
 script = ExtResource( 30 )
 
 [node name="RayCast" type="RayCast" parent="VerletRopeSystem"]
+collision_mask = 48
+
+[node name="WaterLevelSystem" type="Node" parent="."]
+script = ExtResource( 79 )
+
+[node name="RayCast" type="RayCast" parent="WaterLevelSystem"]
 collision_mask = 48
 
 [node name="underfloor" type="StaticBody" parent="."]
