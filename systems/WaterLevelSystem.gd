@@ -105,7 +105,11 @@ func sequenceapplyendcapjoins(facseqs, endcap):
 		var j1 = seqmatches[1][2]
 		endcap.remove(max(j0, j1))
 		endcap.remove(min(j0, j1))
-		var seq = facseqs[i0] + facseqs[i1]
+		var seq = facseqs[i0]
+		if i0 != i1:
+			seq += facseqs[i1]
+		else:
+			seq.push_back(seq[0])
 		facseqs.remove(max(i0, i1))
 		facseqs.remove(min(i0, i1))
 		facseqs.push_back(seq)
@@ -125,10 +129,13 @@ func addwaterleveltube(surfaceTool, xcdrawing0, xcdrawing1, xctube, yval):
 	sequenceapplyendcapjoins(facseqs, endcap1)
 
 	var poly = facseqs[0]
+	if poly[-1] == poly[0]:
+		poly.remove(len(poly)-1)
 	var pi = Geometry.triangulate_polygon(PoolVector2Array(poly))
 	for u in pi:
 		surfaceTool.add_uv(poly[u])
 		surfaceTool.add_vertex(Vector3(poly[u].x, yval, poly[u].y))
+	return (len(pi) != 0)
 
 
 func drawwaterlevelmesh(sketchsystem, waterflowlevelvectors, nodepoints):
@@ -144,6 +151,7 @@ func drawwaterlevelmesh(sketchsystem, waterflowlevelvectors, nodepoints):
 		raycast.cast_to = Vector3(0, -10, 0)
 		raycast.force_raycast_update()
 		var watertube = raycast.get_collider()
+		var waterleveladded = false
 		if watertube != null:
 			var nodepath = watertube.get_path()
 			var w2 = nodepath.get_name(2)
@@ -153,9 +161,9 @@ func drawwaterlevelmesh(sketchsystem, waterflowlevelvectors, nodepoints):
 				var xctube = xctubes.get_node(tubename)
 				var xcdrawing0 = xcdrawings.get_node(xctube.xcname0)
 				var xcdrawing1 = xcdrawings.get_node(xctube.xcname1)
-				addwaterleveltube(surfaceTool, xcdrawing0, xcdrawing1, xctube, cpt.y)
-				continue
-		addwaterlevelfan(surfaceTool, cpt, -Vector2(waterflowlevelvectors[nodename].x, waterflowlevelvectors[nodename].z)*4)
+				waterleveladded = addwaterleveltube(surfaceTool, xcdrawing0, xcdrawing1, xctube, cpt.y)
+		if not waterleveladded:
+			addwaterlevelfan(surfaceTool, cpt, -Vector2(waterflowlevelvectors[nodename].x, waterflowlevelvectors[nodename].z)*1.2)
 
 	surfaceTool.generate_normals()
 	surfaceTool.generate_tangents()
