@@ -193,3 +193,41 @@ func castwaterflowtubes(sketchsystem, waterflowlevelvectors, nodepoints, failedw
 			failedwaterflowlevelvectors[nodename] = waterflowlevelvectors[nodename]
 	return waterleveltubes
 	
+func neighbourtubes(xcdrawings, xctubes, tubename):
+	var ntubes = [ ]
+	var xctube = xctubes.get_node(tubename)
+	var xcdrawing0 = xcdrawings.get_node(xctube.xcname0)
+	var xcdrawing1 = xcdrawings.get_node(xctube.xcname1)
+	for xctubec in xcdrawing0.xctubesconn:
+		if xctubec != xctube:
+			ntubes.push_back(xctubec)
+	for xctubec in xcdrawing1.xctubesconn:
+		if xctubec != xctube:
+			ntubes.push_back(xctubec)
+	return ntubes
+	
+	
+func extendwaterleveltubes(sketchsystem, waterleveltubes):
+	return waterleveltubes
+	"""	var xctubes = sketchsystem.get_node("XCtubes")
+	var xcdrawings = sketchsystem.get_node("XCdrawings")
+	var tubetubedists = { }
+	var tubepairs = [ ]	
+	var i0tubepairs = 0
+	for tubename in waterleveltubes:
+		tubetubedists[tubename] = { tubename: 0 }
+		for ntube in neighbourtubes(xcdrawings, xctubes, tubename):
+			tubepairs.push_back(tubename)
+			tubepairs.push_back(ntube.get_name())
+	while i0tubepairs < len(tubepairs):
+# keep going
+		var tn0 = tubepairs[i0tubepairs]
+		var tn1 = tubepairs[i0tubepairs+1]
+		i0tubepairs += 2
+		if not tubetubedists.has(tn0):
+			tubetubedists
+		if i0tubepairs > 100:
+			break
+	var waterleveltubesExt = { }
+	"""
+	
