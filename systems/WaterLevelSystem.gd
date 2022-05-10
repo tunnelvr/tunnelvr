@@ -88,17 +88,22 @@ func sequenceslicededgesdict(facseqdict):
 				seqs.push_back(kseq)
 	return seqs
 		
+func sortafunc(a, b):
+	return a[0] < b[0]
+		
 func sequenceapplyendcapjoins(facseqs, endcap):
 	var seqmatches = [ ]
 	for i in range(len(facseqs)):
 		var facseq = facseqs[i]
 		for j in range(len(endcap)):
-			if facseq[-1].is_equal_approx(endcap[j]):
+			var dvback = facseq[-1] - endcap[j]
+			var dvfront = facseq[0] - endcap[j]
+			if facseq[-1].is_equal_approx(endcap[j]) or (abs(dvback.x) < 0.002 and abs(dvback.y) < 0.002):
 				seqmatches.push_back([-1,i,j])
-			if facseq[0].is_equal_approx(endcap[j]):
+			if facseq[0].is_equal_approx(endcap[j]) or (abs(dvfront.x) < 0.002 and abs(dvfront.y) < 0.002):
 				seqmatches.push_back([0,i,j])
-	seqmatches.sort()
-	if len(seqmatches) == 2:
+	seqmatches.sort_custom(self, "sortafunc")
+	if len(seqmatches) == 2 and seqmatches[0][0] == -1 and seqmatches[1][0] == 0:
 		var i0 = seqmatches[0][1]
 		var i1 = seqmatches[1][1]
 		var j0 = seqmatches[0][2]
@@ -128,15 +133,15 @@ func addwaterleveltube(surfaceTool, xcdrawing0, xcdrawing1, xctube, yval):
 	sequenceapplyendcapjoins(facseqs, endcap0)
 	sequenceapplyendcapjoins(facseqs, endcap1)
 
-	var poly = facseqs[0]
-	if poly[-1] == poly[0]:
+	if len(facseqs) == 1 and facseqs[0][0] == facseqs[0][-1]:
+		var poly = facseqs[0]
 		poly.remove(len(poly)-1)
-	var pi = Geometry.triangulate_polygon(PoolVector2Array(poly))
-	for u in pi:
-		surfaceTool.add_uv(poly[u])
-		surfaceTool.add_vertex(Vector3(poly[u].x, yval, poly[u].y))
-	return (len(pi) != 0)
-
+		var pi = Geometry.triangulate_polygon(PoolVector2Array(poly))
+		for u in pi:
+			surfaceTool.add_uv(poly[u])
+			surfaceTool.add_vertex(Vector3(poly[u].x, yval, poly[u].y))
+		return true
+	return false
 
 func drawwaterlevelmesh(sketchsystem, waterflowlevelvectors, nodepoints):
 	var raycast = $RayCast
