@@ -139,38 +139,57 @@ func addwaterleveltube(surfaceTool, xcdrawing0, xcdrawing1, xctube, yval):
 		var pi = Geometry.triangulate_polygon(PoolVector2Array(poly))
 		for u in pi:
 			surfaceTool.add_uv(poly[u])
+			surfaceTool.add_normal(Vector3(0,1,0))
 			surfaceTool.add_vertex(Vector3(poly[u].x, yval, poly[u].y))
 		return true
 	return false
 
-func drawwaterlevelmesh(sketchsystem, waterflowlevelvectors, nodepoints):
-	var raycast = $RayCast
+
+
+func drawwaterlevelmesh(sketchsystem, waterleveltubes, failedwaterflowlevelvectors, nodepoints):
 	var xctubes = sketchsystem.get_node("XCtubes")
 	var xcdrawings = sketchsystem.get_node("XCdrawings")
 	var arraymesh = ArrayMesh.new()
 	var surfaceTool = SurfaceTool.new()
 	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for tubename in waterleveltubes:
+		var xctube = xctubes.get_node(tubename)
+		var xcdrawing0 = xcdrawings.get_node(xctube.xcname0)
+		var xcdrawing1 = xcdrawings.get_node(xctube.xcname1)
+		addwaterleveltube(surfaceTool, xcdrawing0, xcdrawing1, xctube, waterleveltubes[tubename].y)
+
+	for nodename in failedwaterflowlevelvectors:
+		var cpt = nodepoints[nodename]
+		var flv = failedwaterflowlevelvectors[nodename]
+		addwaterlevelfan(surfaceTool, cpt, -Vector2(flv.x, flv.z)*1.2)
+
+	surfaceTool.generate_normals()
+	surfaceTool.generate_tangents()
+	surfaceTool.commit(arraymesh)
+	return arraymesh
+
+func castwaterflowtubes(sketchsystem, waterflowlevelvectors, nodepoints, failedwaterflowlevelvectors):
+	var waterleveltubes = { }
+	var raycast = $RayCast
+	var xctubes = sketchsystem.get_node("XCtubes")
+	var xcdrawings = sketchsystem.get_node("XCdrawings")
 	for nodename in waterflowlevelvectors:
 		var cpt = nodepoints[nodename]
 		raycast.transform.origin = cpt
 		raycast.cast_to = Vector3(0, -10, 0)
 		raycast.force_raycast_update()
 		var watertube = raycast.get_collider()
-		var waterleveladded = false
 		if watertube != null:
 			var nodepath = watertube.get_path()
 			var w2 = nodepath.get_name(2)
 			var w3 = nodepath.get_name(3)
 			if w2 == "SketchSystem" and w3 == "XCtubes":
 				var tubename = nodepath.get_name(4)
-				var xctube = xctubes.get_node(tubename)
-				var xcdrawing0 = xcdrawings.get_node(xctube.xcname0)
-				var xcdrawing1 = xcdrawings.get_node(xctube.xcname1)
-				waterleveladded = addwaterleveltube(surfaceTool, xcdrawing0, xcdrawing1, xctube, cpt.y)
-		if not waterleveladded:
-			addwaterlevelfan(surfaceTool, cpt, -Vector2(waterflowlevelvectors[nodename].x, waterflowlevelvectors[nodename].z)*1.2)
-
-	surfaceTool.generate_normals()
-	surfaceTool.generate_tangents()
-	surfaceTool.commit(arraymesh)
-	return arraymesh
+				var fv = waterflowlevelvectors[nodename]
+				waterleveltubes[tubename] = Vector3(fv.x, cpt.y, fv.z)
+			else:
+				watertube = null
+		if watertube == null:
+			failedwaterflowlevelvectors[nodename] = waterflowlevelvectors[nodename]
+	return waterleveltubes
+	

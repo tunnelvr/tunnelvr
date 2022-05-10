@@ -211,7 +211,10 @@ func setdrawingvisiblecode(ldrawingvisiblecode):
 			elif waterflowlevelvectors != null:
 				print("waterlevels ", waterflowlevelvectors)
 				var sketchsystem = get_node("/root/Spatial/SketchSystem")
-				var waterlevelmesh = get_node("/root/Spatial/WaterLevelSystem").drawwaterlevelmesh(sketchsystem, waterflowlevelvectors, nodepoints)
+				var waterlevelsystem = get_node("/root/Spatial/WaterLevelSystem")
+				var failedwaterflowlevelvectors = { }
+				var waterleveltubes = waterlevelsystem.castwaterflowtubes(sketchsystem, waterflowlevelvectors, nodepoints, failedwaterflowlevelvectors)
+				var waterlevelmesh = waterlevelsystem.drawwaterlevelmesh(sketchsystem, waterleveltubes, failedwaterflowlevelvectors, nodepoints)
 				$RopeHang.visible = true
 				$RopeHang/RopeMesh.mesh = waterlevelmesh
 				$RopeHang/RopeMesh.set_surface_material(0, get_node("/root/Spatial/MaterialSystem").pathlinematerial("watermaterial"))
