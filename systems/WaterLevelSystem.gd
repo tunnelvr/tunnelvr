@@ -3,19 +3,29 @@ extends Node
 var waterlevelropequeue = [ ]
 var waterlevelqueueprocessing = false
 
+var tubestowaterlevelropes = { }
+
 func _ready():
 	$RayCast.collision_mask = CollisionLayer.CL_CaveWall
 
-# also keep track of the ropehangs that will need updating as we change the tube
+func checkupdatewaterlevelintube(tubename):
+	if tubestowaterlevelropes.has(tubename):
+		var waterlevelrope = tubestowaterlevelropes[tubename]
+		for ltube in tubestowaterlevelropes.keys():
+			if tubestowaterlevelropes[ltube] == waterlevelrope:
+				tubestowaterlevelropes.erase(ltube)
+		addtowaterlevelropeque(waterlevelrope)
 
 func addtowaterlevelropeque(waterlevelrope):
 	if waterlevelrope != null:
-		waterlevelropequeue.push_back(waterlevelrope)
+		if waterlevelropequeue.find(waterlevelrope) == -1:
+			waterlevelropequeue.push_back(waterlevelrope)
 	if waterlevelqueueprocessing:
 		return
 	waterlevelqueueprocessing = true
 	var sketchsystem = get_node("/root/Spatial/SketchSystem")
 	var xcdrawings = sketchsystem.get_node("XCdrawings")
+	yield(get_tree().create_timer(0.25), "timeout")
 	while len(waterlevelropequeue) != 0:
 		if not Tglobal.notisloadingcavechunks:
 			yield(get_tree().create_timer(0.1), "timeout")
@@ -48,11 +58,12 @@ func makewaterlevelmeshfull(xcdrawing, ropeseqs, sketchsystem, waterflowlevelvec
 			failedwaterflowlevelvectors[nodename] = waterflowlevelvectors[nodename]
 	var tubeintervalnodepairs = extendwaterleveltubesnodes(waterleveltubes, xcdrawing.nodepoints, ropeseqs, nodestotubes, failedwaterflowlevelvectors)
 	extendwaterleveltubesintermediate(sketchsystem, waterleveltubes, tubeintervalnodepairs)
+	for tubename in waterleveltubes:
+		tubestowaterlevelropes[tubename] = xcdrawing.get_name()
 	return drawwaterlevelmesh(sketchsystem, waterleveltubes, failedwaterflowlevelvectors, xcdrawing.nodepoints)
 
 func makewaterlevelmeshsimple(xcdrawing, sketchsystem, waterflowlevelvectors):
 	return drawwaterlevelmesh(sketchsystem, {}, waterflowlevelvectors, xcdrawing.nodepoints)
-
 
 func addwaterlevelfan(surfaceTool, cpt, ffv):
 	var vf = -Vector2(ffv.x, ffv.z)*1.2

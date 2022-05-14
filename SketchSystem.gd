@@ -15,6 +15,7 @@ var actsketchchangeundostack = [ ]
 const defaultfloordrawing = "http://cave-registry.org.uk/svn/NorthernEngland/rawscans/LambTrap/LambTrap-drawnup-1.png"
 
 var pointersystem = null
+onready var waterlevelsystem = get_node("/root/Spatial/WaterLevelSystem")
 
 func _ready():
 	var floordrawingimg = defaultfloordrawing
@@ -391,6 +392,7 @@ remote func actsketchchangeL(xcdatalist):
 					var xctube = findxctube(xct["xcname0"], xct["xcname1"])
 					if xctube != null:
 						xctube.updatetubeshell($XCdrawings)
+						waterlevelsystem.checkupdatewaterlevelintube(xctube.get_name())
 			if "updatexcshells" in xcdata:
 				for xcdrawingname in xcdata["updatexcshells"]:
 					var xcdrawing = $XCdrawings.get_node_or_null(xcdrawingname)
