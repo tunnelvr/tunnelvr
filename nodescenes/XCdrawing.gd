@@ -212,22 +212,12 @@ func setdrawingvisiblecode(ldrawingvisiblecode):
 				print("waterlevels ", waterflowlevelvectors)
 				var sketchsystem = get_node("/root/Spatial/SketchSystem")
 				var waterlevelsystem = get_node("/root/Spatial/WaterLevelSystem")
-				var failedwaterflowlevelvectors = { }
-				var nodestotubes = { }
-				var waterleveltubes = { }
-				for nodename in waterflowlevelvectors:
-					var cpt = nodepoints[nodename]
-					var tubename = waterlevelsystem.castraytotubename(cpt)
-					if tubename != null:
-						nodestotubes[nodename] = tubename
-						waterleveltubes[tubename] = cpt
-					else:
-						failedwaterflowlevelvectors[nodename] = waterflowlevelvectors[nodename]
-				var tubeintervalnodepairs = waterlevelsystem.extendwaterleveltubesnodes(waterleveltubes, nodepoints, ropeseqs, nodestotubes, failedwaterflowlevelvectors)
-				waterlevelsystem.extendwaterleveltubesintermediate(sketchsystem, waterleveltubes, tubeintervalnodepairs)
-				var waterlevelmesh = waterlevelsystem.drawwaterlevelmesh(sketchsystem, waterleveltubes, failedwaterflowlevelvectors, nodepoints)
 				$RopeHang.visible = true
-				$RopeHang/RopeMesh.mesh = waterlevelmesh
+				if Tglobal.notisloadingcavechunks:
+					$RopeHang/RopeMesh.mesh = waterlevelsystem.makewaterlevelmeshfull(self, ropeseqs, sketchsystem, waterflowlevelvectors)
+				else:
+					$RopeHang/RopeMesh.mesh = waterlevelsystem.makewaterlevelmeshsimple(self, sketchsystem, waterflowlevelvectors)
+					waterlevelsystem.addtowaterlevelropeque(get_name())
 				$RopeHang/RopeMesh.set_surface_material(0, get_node("/root/Spatial/MaterialSystem").pathlinematerial("watermaterial"))
 				$PathLines.visible = false
 				for xcn in $XCnodes.get_children():

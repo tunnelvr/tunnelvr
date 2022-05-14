@@ -4,7 +4,7 @@ const tunnelvrversion = "v0.7.8"
 
 var connectiontoserveractive = false
 var morethanoneplayer = false
-var printxcdrawingfromdatamessages = true
+var notisloadingcavechunks = true
 
 var arvrinterfacename = "none"  # OVRMobile, Oculus, OpenVR
 var arvrinterface = null

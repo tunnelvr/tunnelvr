@@ -1,8 +1,58 @@
 extends Node
 
+var waterlevelropequeue = [ ]
+var waterlevelqueueprocessing = false
 
 func _ready():
 	$RayCast.collision_mask = CollisionLayer.CL_CaveWall
+
+# also keep track of the ropehangs that will need updating as we change the tube
+
+func addtowaterlevelropeque(waterlevelrope):
+	if waterlevelrope != null:
+		waterlevelropequeue.push_back(waterlevelrope)
+	if waterlevelqueueprocessing:
+		return
+	waterlevelqueueprocessing = true
+	var sketchsystem = get_node("/root/Spatial/SketchSystem")
+	var xcdrawings = sketchsystem.get_node("XCdrawings")
+	while len(waterlevelropequeue) != 0:
+		if not Tglobal.notisloadingcavechunks:
+			yield(get_tree().create_timer(0.1), "timeout")
+			continue
+		var xcname = waterlevelropequeue.pop_back()
+		var xcdrawing = xcdrawings.get_node_or_null(xcname)
+		if xcdrawing == null:
+			continue
+		var ropehang = xcdrawing.get_node_or_null("RopeHang")
+		if ropehang == null:
+			continue
+		var ropeseqs = Polynets.makeropenodesequences(xcdrawing.nodepoints, xcdrawing.onepathpairs, ropehang.oddropeverts, ropehang.anchorropeverts, true)
+		var waterflowlevelvectors = Polynets.waterlevelsfromropesequences(xcdrawing.nodepoints, ropeseqs)
+		if waterflowlevelvectors != null:
+			ropehang.get_node("RopeMesh").mesh = makewaterlevelmeshfull(xcdrawing, ropeseqs, sketchsystem, waterflowlevelvectors)
+		yield(get_tree().create_timer(0.1), "timeout")
+	waterlevelqueueprocessing = false
+
+func makewaterlevelmeshfull(xcdrawing, ropeseqs, sketchsystem, waterflowlevelvectors):
+	var failedwaterflowlevelvectors = { }
+	var nodestotubes = { }
+	var waterleveltubes = { }
+	for nodename in waterflowlevelvectors:
+		var cpt = xcdrawing.nodepoints[nodename]
+		var tubename = castraytotubename(cpt)
+		if tubename != null:
+			nodestotubes[nodename] = tubename
+			waterleveltubes[tubename] = cpt
+		else:
+			failedwaterflowlevelvectors[nodename] = waterflowlevelvectors[nodename]
+	var tubeintervalnodepairs = extendwaterleveltubesnodes(waterleveltubes, xcdrawing.nodepoints, ropeseqs, nodestotubes, failedwaterflowlevelvectors)
+	extendwaterleveltubesintermediate(sketchsystem, waterleveltubes, tubeintervalnodepairs)
+	return drawwaterlevelmesh(sketchsystem, waterleveltubes, failedwaterflowlevelvectors, xcdrawing.nodepoints)
+
+func makewaterlevelmeshsimple(xcdrawing, sketchsystem, waterflowlevelvectors):
+	return drawwaterlevelmesh(sketchsystem, {}, waterflowlevelvectors, xcdrawing.nodepoints)
+
 
 func addwaterlevelfan(surfaceTool, cpt, ffv):
 	var vf = -Vector2(ffv.x, ffv.z)*1.2
