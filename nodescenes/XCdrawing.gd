@@ -159,6 +159,7 @@ func makeflaglabels(ptsignroot, ptsigntopy, postrad, flagsigns):
 func sortnodeyfunc(a, b):
 	return nodepoints[a].y > nodepoints[b].y
 
+
 func setdrawingvisiblecode(ldrawingvisiblecode):
 	var drawingvisiblecode_old = drawingvisiblecode
 	drawingvisiblecode = ldrawingvisiblecode
@@ -180,6 +181,7 @@ func setdrawingvisiblecode(ldrawingvisiblecode):
 			var cuboidfacs = Polynets.cuboidfromropenodesequences(nodepoints, ropeseqs, false)
 			var stalseqax = Polynets.stalfromropenodesequences(nodepoints, ropeseqs) if cuboidfacs == null else null
 			var signseqax = Polynets.signpostfromropenodesequences(nodepoints, ropeseqs, (additionalproperties if additionalproperties != null else {}).get("flagsignlabels", {})) if (cuboidfacs == null and stalseqax == null) else null
+			var waterflowlevelvectors = Polynets.waterlevelsfromropesequences(nodepoints, ropeseqs)
 			if cuboidfacs != null:
 				var cuboidshellmesh1 = Polynets.makerailcuboidshellmesh(nodepoints, cuboidfacs, true)
 				if cuboidshellmesh1 == null:
@@ -194,16 +196,6 @@ func setdrawingvisiblecode(ldrawingvisiblecode):
 					xcn.get_node("CollisionShape").disabled = not xcn.visible
 				ropehangdetectedtype = DRAWING_TYPE.RH_BOULDER
 									#
-			elif stalseqax != null:
-				var stalshellmesh = Polynets.makestalshellmesh(stalseqax[0], stalseqax[1], stalseqax[2])
-				updatexcshellmesh(stalshellmesh)
-				$RopeHang.visible = false
-				$PathLines.visible = false
-				for xcn in $XCnodes.get_children():
-					xcn.visible = (stalseqax[3].find(xcn.get_name()) != -1)
-					xcn.get_node("CollisionShape").disabled = not xcn.visible
-				ropehangdetectedtype = DRAWING_TYPE.RH_STAL
-
 			elif signseqax != null:
 				print("signseqax ", signseqax)
 				var signshellmesh = Polynets.makesignpostshellmesh(self, signseqax[0], signseqax[1], 0.041)
@@ -215,6 +207,33 @@ func setdrawingvisiblecode(ldrawingvisiblecode):
 					xcn.visible = (signseqax[3].find(xcn.get_name()) != -1)
 					xcn.get_node("CollisionShape").disabled = not xcn.visible
 				ropehangdetectedtype = DRAWING_TYPE.RH_FLAGSIGN
+
+			elif waterflowlevelvectors != null:
+				print("waterlevels ", waterflowlevelvectors)
+				var sketchsystem = get_node("/root/Spatial/SketchSystem")
+				var waterlevelsystem = get_node("/root/Spatial/WaterLevelSystem")
+				$RopeHang.visible = true
+				if Tglobal.notisloadingcavechunks:
+					$RopeHang/RopeMesh.mesh = waterlevelsystem.makewaterlevelmeshfull(self, ropeseqs, sketchsystem, waterflowlevelvectors)
+				else:
+					$RopeHang/RopeMesh.mesh = waterlevelsystem.makewaterlevelmeshsimple(self, sketchsystem, waterflowlevelvectors)
+					waterlevelsystem.addtowaterlevelropeque(get_name())
+				$RopeHang/RopeMesh.set_surface_material(0, get_node("/root/Spatial/MaterialSystem").pathlinematerial("watermaterial"))
+				$PathLines.visible = false
+				for xcn in $XCnodes.get_children():
+					xcn.visible = waterflowlevelvectors.has(xcn.get_name())
+					xcn.get_node("CollisionShape").disabled = not xcn.visible
+				ropehangdetectedtype = DRAWING_TYPE.RH_WATERLEVEL
+
+			elif stalseqax != null:   # to abolish
+				var stalshellmesh = Polynets.makestalshellmesh(stalseqax[0], stalseqax[1], stalseqax[2])
+				updatexcshellmesh(stalshellmesh)
+				$RopeHang.visible = false
+				$PathLines.visible = false
+				for xcn in $XCnodes.get_children():
+					xcn.visible = (stalseqax[3].find(xcn.get_name()) != -1)
+					xcn.get_node("CollisionShape").disabled = not xcn.visible
+				ropehangdetectedtype = DRAWING_TYPE.RH_STAL
 
 			elif len($RopeHang.oddropeverts) <= 2:
 				var middlenodes = $RopeHang.updatehangingropepathsArrayMesh_Verlet(nodepoints, ropeseqs, get_node("/root/Spatial/VerletRopeSystem").hangingroperad)

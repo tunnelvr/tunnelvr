@@ -1107,3 +1107,16 @@ static func unifiedclosedmeshwithnormals(tubeslist, drawingslist):
 	arr_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
 	return arr_mesh
 			
+
+static func waterlevelsfromropesequences(nodepoints, ropeseqs):
+	var waterflowlevelvectors = { }
+	for ropeseq in ropeseqs:
+		if len(ropeseq) == 4 and ropeseq[0] == ropeseq[3]:
+			if ropeseq[1][0] != "a" and ropeseq[2][0] != "a":
+				var tailpoint = (nodepoints[ropeseq[1]] + nodepoints[ropeseq[2]])*0.5
+				var watervector = nodepoints[ropeseq[0]] - tailpoint
+				waterflowlevelvectors[ropeseq[0]] = watervector
+			else:
+				return null
+	return null if len(waterflowlevelvectors) == 0 else waterflowlevelvectors
+

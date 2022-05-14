@@ -31,6 +31,22 @@ extends Spatial
 # select program executable path tunnelvr, and launch.  (It records it, but needs the hardware to replay it and get the timings)
 # make a capture, save it, then put quest into profiling mode and open capture with options to set fastest
 
+# to work on
+# waterlevel - more intermediate points
+# waterlevel - track the dict between tubes and ropes in the system 
+# waterlevel - delay operating it until tubes have all loaded (put in a later process operation)
+
+# why does making one xc totally change the file so it can't be diffed?
+# shared world; the laser of the other guy is now not visible
+# planview stealing
+# animation of moving the floor or planview to the new place.
+# hide tubes should hide water and boulders as well
+# make image system work in parallel with up to 4 images
+
+# networking, keyboard operation, planview, 
+
+
+
 var hostipnumber: String = ""
 export var hostportnumber: int = 4546
 export var udpserverdiscoveryport: int = 4547

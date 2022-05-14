@@ -15,6 +15,7 @@ var actsketchchangeundostack = [ ]
 const defaultfloordrawing = "http://cave-registry.org.uk/svn/NorthernEngland/rawscans/LambTrap/LambTrap-drawnup-1.png"
 
 var pointersystem = null
+onready var waterlevelsystem = get_node("/root/Spatial/WaterLevelSystem")
 
 func _ready():
 	var floordrawingimg = defaultfloordrawing
@@ -54,7 +55,7 @@ func setnewtubename(xctdata):
 		elif xcdrawing1.drawingtype == DRAWING_TYPE.DT_CENTRELINE:
 			tubenameprefix = "CAssoc_"
 	xctdata["tubename"] = tubenameprefix+xctdata["xcname0"]+"_"+xctdata["xcname1"]
-	if Tglobal.printxcdrawingfromdatamessages:
+	if Tglobal.notisloadingcavechunks:
 		print("new tube name ", xctdata["tubename"])
 		
 	
@@ -224,7 +225,7 @@ remote func actsketchchangeL(xcdatalist):
 	if "caveworldchunk" in xcdatalist[0]:
 		if xcdatalist[0]["caveworldchunk"] == 0:
 			var PlayerDirections = get_node("/root/Spatial/BodyObjects/PlayerDirections")
-			Tglobal.printxcdrawingfromdatamessages = false
+			Tglobal.notisloadingcavechunks = false
 			if xcdatalist[0]["sketchname"] != "importing_the_centreline__do_not_clear":
 				clearentirecaveworld()
 			else:
@@ -310,7 +311,7 @@ remote func actsketchchangeL(xcdatalist):
 		if "caveworldchunk" in xcdata:
 			pass
 		elif "tubename" in xcdata:
-			if Tglobal.printxcdrawingfromdatamessages:
+			if Tglobal.notisloadingcavechunks:
 				print("update tube ", xcdata["tubename"])
 			assert (xcdata.has("tubename") and xcdata["tubename"] != "**notset")
 			var xctube = findxctube(xcdata["xcname0"], xcdata["xcname1"])
@@ -362,7 +363,7 @@ remote func actsketchchangeL(xcdatalist):
 			planviewsystem.actplanviewdict(xcdata["planview"], false)
 														
 		elif "xcvizstates" in xcdata:
-			if Tglobal.printxcdrawingfromdatamessages:
+			if Tglobal.notisloadingcavechunks:
 				print("update vizstate ")
 			for xcdrawingname in xcdata["xcvizstates"]:
 				var xcdrawing = $XCdrawings.get_node_or_null(xcdrawingname)
@@ -391,6 +392,7 @@ remote func actsketchchangeL(xcdatalist):
 					var xctube = findxctube(xct["xcname0"], xct["xcname1"])
 					if xctube != null:
 						xctube.updatetubeshell($XCdrawings)
+						waterlevelsystem.checkupdatewaterlevelintube(xctube.get_name())
 			if "updatexcshells" in xcdata:
 				for xcdrawingname in xcdata["updatexcshells"]:
 					var xcdrawing = $XCdrawings.get_node_or_null(xcdrawingname)
@@ -506,7 +508,7 @@ remote func actsketchchangeL(xcdatalist):
 			caveworldchunking_networkIDsource = -1
 			var xcdatalistReceivedDuringChunkingL = xcdatalistReceivedDuringChunking
 			xcdatalistReceivedDuringChunking = null
-			Tglobal.printxcdrawingfromdatamessages = true
+			Tglobal.notisloadingcavechunks = true
 			var PlayerDirections = get_node("/root/Spatial/BodyObjects/PlayerDirections")
 			get_node("/root/Spatial/BodyObjects/LaserOrient/NotificationCylinder").visible = false
 			if PlayerDirections.forceontogroundtimedown > 0:
@@ -569,7 +571,7 @@ remote func sendoverridingxctubesdata(xctubesrejected, playeridtoupdate):
 func xcdrawingfromdata(xcdata, fromremotecall):
 	var xcdrawing = $XCdrawings.get_node_or_null(xcdata["name"])
 	if xcdrawing == null:
-		if Tglobal.printxcdrawingfromdatamessages:
+		if Tglobal.notisloadingcavechunks:
 			print("New xcdrawing ", xcdata.get("name"), " type: ", xcdata.get("drawingtype"))
 		if not ("drawingtype" in xcdata):
 			print("BAD new xcdrawingfromdata missing drawingtype ", xcdata)
@@ -582,7 +584,7 @@ func xcdrawingfromdata(xcdata, fromremotecall):
 			if xcdata["drawingtype"] == DRAWING_TYPE.DT_CENTRELINE and xcdata.has("xcresource"):
 				xcdrawing.xcresource = xcdata["xcresource"]
 				
-	elif Tglobal.printxcdrawingfromdatamessages and not (xcdata.get("rpcoptional", 0) == 1):
+	elif Tglobal.notisloadingcavechunks and not (xcdata.get("rpcoptional", 0) == 1):
 		print("update xcdrawing ", xcdata.get("name"), " ", xcdrawing.xcchangesequence)
 
 	if not (xcdata.get("rpcoptional", 0) == 1):
