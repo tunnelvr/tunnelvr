@@ -4,12 +4,17 @@ extends Node
 func _ready():
 	$RayCast.collision_mask = CollisionLayer.CL_CaveWall
 
-func addwaterlevelfan(surfaceTool, cpt, vf):
+func addwaterlevelfan(surfaceTool, cpt, ffv):
+	var vf = -Vector2(ffv.x, ffv.z)*1.2
+	var sectordeg = 45
+	if vf == Vector2(0,0):
+		vf = Vector2(0.3, 0)
+		sectordeg = 180
 	var vfperp = Vector2(vf.y, -vf.x)
 	var prevvv = null
 	var prevpr = null
 	for i in range(11):
-		var a = deg2rad((i - 5)/5.0*45)
+		var a = deg2rad((i - 5)/5.0*sectordeg)
 		var vv = cos(a)*vf - sin(a)*vfperp
 		var pr = cpt + Vector3(vv.x, 0, vv.y)
 		if i != 0:
@@ -113,10 +118,11 @@ func sequenceapplyendcapjoins(facseqs, endcap):
 		var seq = facseqs[i0]
 		if i0 != i1:
 			seq += facseqs[i1]
+			facseqs.remove(max(i0, i1))
+			facseqs.remove(min(i0, i1))
 		else:
 			seq.push_back(seq[0])
-		facseqs.remove(max(i0, i1))
-		facseqs.remove(min(i0, i1))
+			facseqs.remove(i0)
 		facseqs.push_back(seq)
 		
 		
@@ -159,40 +165,27 @@ func drawwaterlevelmesh(sketchsystem, waterleveltubes, failedwaterflowlevelvecto
 		addwaterleveltube(surfaceTool, xcdrawing0, xcdrawing1, xctube, waterleveltubes[tubename].y)
 
 	for nodename in failedwaterflowlevelvectors:
-		var cpt = nodepoints[nodename]
-		var flv = failedwaterflowlevelvectors[nodename]
-		addwaterlevelfan(surfaceTool, cpt, -Vector2(flv.x, flv.z)*1.2)
+		addwaterlevelfan(surfaceTool, nodepoints[nodename], failedwaterflowlevelvectors[nodename])
 
 	surfaceTool.generate_normals()
 	surfaceTool.generate_tangents()
 	surfaceTool.commit(arraymesh)
 	return arraymesh
 
-func castwaterflowtubes(sketchsystem, waterflowlevelvectors, nodepoints, failedwaterflowlevelvectors):
-	var waterleveltubes = { }
-	var raycast = $RayCast
-	var xctubes = sketchsystem.get_node("XCtubes")
-	var xcdrawings = sketchsystem.get_node("XCdrawings")
-	for nodename in waterflowlevelvectors:
-		var cpt = nodepoints[nodename]
-		raycast.transform.origin = cpt
-		raycast.cast_to = Vector3(0, -10, 0)
-		raycast.force_raycast_update()
-		var watertube = raycast.get_collider()
-		if watertube != null:
-			var nodepath = watertube.get_path()
-			var w2 = nodepath.get_name(2)
-			var w3 = nodepath.get_name(3)
-			if w2 == "SketchSystem" and w3 == "XCtubes":
-				var tubename = nodepath.get_name(4)
-				var fv = waterflowlevelvectors[nodename]
-				waterleveltubes[tubename] = Vector3(fv.x, cpt.y, fv.z)
-			else:
-				watertube = null
-		if watertube == null:
-			failedwaterflowlevelvectors[nodename] = waterflowlevelvectors[nodename]
-	return waterleveltubes
-	
+
+func castraytotubename(cpt):
+	$RayCast.transform.origin = cpt
+	$RayCast.cast_to = Vector3(0, -10, 0)
+	$RayCast.force_raycast_update()
+	var xctube = $RayCast.get_collider()
+	if xctube != null:
+		var nodepath = xctube.get_path()
+		var w2 = nodepath.get_name(2)
+		var w3 = nodepath.get_name(3)
+		if w2 == "SketchSystem" and w3 == "XCtubes":
+			return nodepath.get_name(4)
+	return null
+		
 func neighbourtubes(xcdrawings, xctubes, tubename):
 	var ntubes = [ ]
 	var xctube = xctubes.get_node(tubename)
@@ -206,28 +199,50 @@ func neighbourtubes(xcdrawings, xctubes, tubename):
 			ntubes.push_back(xctubec)
 	return ntubes
 	
+func extendwaterleveltubesintermediate(waterleveltubes, tubeintervalnodepairs):
+	pass
 	
-func extendwaterleveltubes(sketchsystem, waterleveltubes):
-	return waterleveltubes
-	"""	var xctubes = sketchsystem.get_node("XCtubes")
-	var xcdrawings = sketchsystem.get_node("XCdrawings")
-	var tubetubedists = { }
-	var tubepairs = [ ]	
-	var i0tubepairs = 0
-	for tubename in waterleveltubes:
-		tubetubedists[tubename] = { tubename: 0 }
-		for ntube in neighbourtubes(xcdrawings, xctubes, tubename):
-			tubepairs.push_back(tubename)
-			tubepairs.push_back(ntube.get_name())
-	while i0tubepairs < len(tubepairs):
-# keep going
-		var tn0 = tubepairs[i0tubepairs]
-		var tn1 = tubepairs[i0tubepairs+1]
-		i0tubepairs += 2
-		if not tubetubedists.has(tn0):
-			tubetubedists
-		if i0tubepairs > 100:
-			break
-	var waterleveltubesExt = { }
-	"""
-	
+func extendwaterleveltubesnodes(waterleveltubes, nodepoints, ropeseqs, nodestotubes, failedwaterflowlevelvectors):
+	var tubeintervalnodepairs = [ ]
+	for ropeseq in ropeseqs:
+		if len(ropeseq) == 4 and ropeseq[0] == ropeseq[3]:
+			continue
+		var tubenameQ0 = nodestotubes.get(ropeseq[0])
+		var tubenameQ1 = nodestotubes.get(ropeseq[-1])
+		if tubenameQ0 == null and tubenameQ1 == null:
+			for i in range(len(ropeseq)):
+				failedwaterflowlevelvectors[ropeseq[i]] = Vector3(0,0,0)
+			continue
+		var cptQ0 = nodepoints[ropeseq[0]]
+		var cptQ1 = nodepoints[ropeseq[-1]]
+		if tubenameQ0 == null:
+			tubenameQ0 = castraytotubename(cptQ0)
+			cptQ0.y = cptQ1.y
+			if tubenameQ0 != null:
+				nodestotubes[ropeseq[0]] = tubenameQ0
+				waterleveltubes[tubenameQ0] = cptQ0
+		if tubenameQ1 == null:
+			tubenameQ1 = castraytotubename(cptQ1)
+			cptQ1.y = cptQ0.y
+			if tubenameQ1 != null:
+				nodestotubes[ropeseq[-1]] = tubenameQ1
+				waterleveltubes[tubenameQ1] = cptQ1
+		var tubename0 = tubenameQ0
+		for i in range(1, len(ropeseq)):
+			var tubename1 = tubenameQ1
+			if i < len(ropeseq) - 1:
+				var nodename1 = ropeseq[i]
+				var cpt1 = nodepoints[nodename1]
+				tubename1 = castraytotubename(cpt1)
+				if tubename1 != null:
+					var lam = i*1.0/len(ropeseqs)
+					cpt1.y = lerp(cptQ0.y, cptQ1.y, lam)
+					if not waterleveltubes.has(tubename1):
+						waterleveltubes[tubename1] = cpt1
+				else:
+					failedwaterflowlevelvectors[nodename1] = Vector3(0,0,0)
+			if tubename0 != null and tubename1 != null:
+				tubeintervalnodepairs.push_back(ropeseq[i-1])
+				tubeintervalnodepairs.push_back(ropeseq[i])
+			tubename0 = tubename1
+	return tubeintervalnodepairs
