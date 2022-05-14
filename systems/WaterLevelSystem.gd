@@ -169,6 +169,8 @@ func sequenceapplyendcapjoins(facseqs, endcap):
 			if facseq[0].is_equal_approx(endcap[j]) or (abs(dvfront.x) < 0.002 and abs(dvfront.y) < 0.002):
 				seqmatches.push_back([0,i,j])
 	seqmatches.sort_custom(self, "sortafunc")
+	if len(seqmatches) == 4:
+		print("four way seqmatches in waterlevel needs to be coded")
 	if len(seqmatches) == 2 and seqmatches[0][0] == -1 and seqmatches[1][0] == 0:
 		var i0 = seqmatches[0][1]
 		var i1 = seqmatches[1][1]
