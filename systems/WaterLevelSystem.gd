@@ -158,14 +158,18 @@ func drawwaterlevelmesh(sketchsystem, waterleveltubes, failedwaterflowlevelvecto
 	var arraymesh = ArrayMesh.new()
 	var surfaceTool = SurfaceTool.new()
 	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var failedwaterflowleveltubes = { }
 	for tubename in waterleveltubes:
 		var xctube = xctubes.get_node(tubename)
 		var xcdrawing0 = xcdrawings.get_node(xctube.xcname0)
 		var xcdrawing1 = xcdrawings.get_node(xctube.xcname1)
-		addwaterleveltube(surfaceTool, xcdrawing0, xcdrawing1, xctube, waterleveltubes[tubename].y)
+		if not addwaterleveltube(surfaceTool, xcdrawing0, xcdrawing1, xctube, waterleveltubes[tubename].y):
+			failedwaterflowleveltubes[tubename] = waterleveltubes[tubename]
 
 	for nodename in failedwaterflowlevelvectors:
 		addwaterlevelfan(surfaceTool, nodepoints[nodename], failedwaterflowlevelvectors[nodename])
+	for tubename in failedwaterflowleveltubes:
+		addwaterlevelfan(surfaceTool, failedwaterflowleveltubes[tubename], Vector3(0,0,0))
 
 	surfaceTool.generate_normals()
 	surfaceTool.generate_tangents()
@@ -270,7 +274,8 @@ func extendwaterleveltubesnodes(waterleveltubes, nodepoints, ropeseqs, nodestotu
 		var tubenameQ1 = nodestotubes.get(ropeseq[-1])
 		if tubenameQ0 == null and tubenameQ1 == null:
 			for i in range(len(ropeseq)):
-				failedwaterflowlevelvectors[ropeseq[i]] = Vector3(0,0,0)
+				if not failedwaterflowlevelvectors.has(ropeseq[i]):
+					failedwaterflowlevelvectors[ropeseq[i]] = Vector3(0,0,0)
 			continue
 		var cptQ0 = nodepoints[ropeseq[0]]
 		var cptQ1 = nodepoints[ropeseq[-1]]
