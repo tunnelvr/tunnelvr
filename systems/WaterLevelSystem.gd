@@ -199,8 +199,67 @@ func neighbourtubes(xcdrawings, xctubes, tubename):
 			ntubes.push_back(xctubec)
 	return ntubes
 	
-func extendwaterleveltubesintermediate(waterleveltubes, tubeintervalnodepairs):
-	pass
+
+const maxnumberofintermediatetubestobridge = 15
+func extendwaterleveltubesintermediate(sketchsystem, waterleveltubes, tubeintervalnodepairs):
+	var xctubes = sketchsystem.get_node("XCtubes")
+	var xcdrawings = sketchsystem.get_node("XCdrawings")
+	for i in range(0, len(tubeintervalnodepairs), 2):
+		var tubenameP0 = tubeintervalnodepairs[i]
+		var tubenameP1 = tubeintervalnodepairs[i+1]
+		var xctube0 = xctubes.get_node_or_null(tubenameP0)
+		var xctube1 = xctubes.get_node_or_null(tubenameP1)
+		if xctube0 == null or xctube1 == null:
+			continue
+		var midtubes = [ ]
+		var midtubespoints = [ ]
+		var xct0xcdrawing0 = xcdrawings.get_node(xctube0.xcname0)
+		var xct0xcdrawing1 = xcdrawings.get_node(xctube0.xcname1)
+		var xct1xcdrawing0 = xcdrawings.get_node(xctube1.xcname0)
+		var xct1xcdrawing1 = xcdrawings.get_node(xctube1.xcname1)
+		var xct0xcdm0 = xct0xcdrawing0.transform.xform(xct0xcdrawing0.nodepointmean)
+		var xct0xcdm1 = xct0xcdrawing1.transform.xform(xct0xcdrawing1.nodepointmean)
+		var xct1xcdm0 = xct1xcdrawing0.transform.xform(xct1xcdrawing0.nodepointmean)
+		var xct1xcdm1 = xct1xcdrawing1.transform.xform(xct1xcdrawing1.nodepointmean)
+		var xct0mid = (xct0xcdm0 + xct0xcdm1)*0.5
+		var xct1mid = (xct1xcdm0 + xct1xcdm1)*0.5
+		for j in range(maxnumberofintermediatetubestobridge):
+			var vaimdirection = xct1mid - xct0mid
+			var xct0direction01dot = vaimdirection.dot(xct0xcdm1 - xct0xcdm0)
+			var bxct0direction01 = (xct0direction01dot > 0)
+			var xct0xcdrawingToCross = xct0xcdrawing1 if bxct0direction01 else xct0xcdrawing0
+			var xctube0prev = xctube0
+			xctube0 = null
+			for lxctube0 in xct0xcdrawingToCross.xctubesconn:
+				if lxctube0 == xctube0prev:
+					continue
+				var lxct0xcdrawing0 = xcdrawings.get_node(lxctube0.xcname0)
+				var lxct0xcdrawing1 = xcdrawings.get_node(lxctube0.xcname1)
+				var lxct0xcdm0 = lxct0xcdrawing0.transform.xform(lxct0xcdrawing0.nodepointmean)
+				var lxct0xcdm1 = lxct0xcdrawing1.transform.xform(lxct0xcdrawing1.nodepointmean)
+				var lxct0mid = (lxct0xcdm0 + lxct0xcdm1)*0.5
+				if xctube0 != null:
+					print("xctube y-junction ", lxctube0.get_name(), " ", xct1mid.distance_to(lxct0mid), "  ", xctube0.get_name(), " ", xct1mid.distance_to(xct0mid))
+				if xctube0 == null or xct1mid.distance_to(lxct0mid) < xct1mid.distance_to(xct0mid):
+					xctube0 = lxctube0
+					xct0xcdrawing0 = lxct0xcdrawing0
+					xct0xcdrawing1 = lxct0xcdrawing1
+					xct0xcdm0 = lxct0xcdm0
+					xct0xcdm1 = lxct0xcdm1
+					xct0mid = lxct0mid
+			if xctube0 == null:
+				midtubes.clear()
+				break
+			if xctube0 == xctube1:
+				break
+			midtubes.push_back(xctube0.get_name())
+			midtubespoints.push_back(xct0mid)				
+		if len(midtubes) != 0:
+			for j in range(len(midtubes)):
+				if not waterleveltubes.has(midtubes[j]):
+					var mpt = midtubespoints[j]
+					mpt.y = lerp(waterleveltubes[tubenameP0].y, waterleveltubes[tubenameP1].y, (j+1)/(len(midtubes)+1))
+					waterleveltubes[midtubes[j]] = mpt
 	
 func extendwaterleveltubesnodes(waterleveltubes, nodepoints, ropeseqs, nodestotubes, failedwaterflowlevelvectors):
 	var tubeintervalnodepairs = [ ]
@@ -242,7 +301,7 @@ func extendwaterleveltubesnodes(waterleveltubes, nodepoints, ropeseqs, nodestotu
 				else:
 					failedwaterflowlevelvectors[nodename1] = Vector3(0,0,0)
 			if tubename0 != null and tubename1 != null:
-				tubeintervalnodepairs.push_back(ropeseq[i-1])
-				tubeintervalnodepairs.push_back(ropeseq[i])
+				tubeintervalnodepairs.push_back(tubename0)
+				tubeintervalnodepairs.push_back(tubename1)
 			tubename0 = tubename1
 	return tubeintervalnodepairs

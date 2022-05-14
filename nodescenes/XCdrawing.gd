@@ -224,7 +224,7 @@ func setdrawingvisiblecode(ldrawingvisiblecode):
 					else:
 						failedwaterflowlevelvectors[nodename] = waterflowlevelvectors[nodename]
 				var tubeintervalnodepairs = waterlevelsystem.extendwaterleveltubesnodes(waterleveltubes, nodepoints, ropeseqs, nodestotubes, failedwaterflowlevelvectors)
-				waterlevelsystem.extendwaterleveltubesintermediate(waterleveltubes, tubeintervalnodepairs)
+				waterlevelsystem.extendwaterleveltubesintermediate(sketchsystem, waterleveltubes, tubeintervalnodepairs)
 				var waterlevelmesh = waterlevelsystem.drawwaterlevelmesh(sketchsystem, waterleveltubes, failedwaterflowlevelvectors, nodepoints)
 				$RopeHang.visible = true
 				$RopeHang/RopeMesh.mesh = waterlevelmesh
