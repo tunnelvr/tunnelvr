@@ -2,11 +2,26 @@ extends Spatial
 
 #var d = "/home/julian/data/pointclouds/potreetests/outdir/"
 # PotreeConverter --source xxx.laz --outdir outdir --attributes position_cartesian --method poisson
-# wine executables-impure/PotreeConverter_2.1_x64_windows/PotreeConverter.exe --source Downloads/aidancloud.laz --outdir junk/aidan/ --attributes position_cartesian --method poisson
+
+# nix-shell -p wine64  # 64 bit error means to need to delete ~/.wine
+# wine64 executables-impure/PotreeConverter_2.1_x64_windows/PotreeConverter.exe --source Downloads/aidancloud.laz --outdir junk/aidan/ --attributes position_cartesian --method poisson
+
 # May need to load and export from CloudCompare (can be tricky)
 # Then need to be uploaded to godot.doesliverpool.xyz 
 # Files will need to be put in: 
 #   /var/lib/private/tunnelvr/.local/share/godot/app_userdata/tunnelvr_v0.7/caddywebserver/
+
+#nix-shell -p wine64
+  # 64 bit error means to need to delete ~/.wine
+#The laz file bounding boxes from the app are bad.  Need to load and save into cloud compare.
+#Load and save back to a copy using CloudCompare (Optimal resolution option okay)
+# wine64 ~/executables-impure/PotreeConverter_2.1_x64_windows/PotreeConverter.exe --source point_cloud_may17cc.laz --outdir potreeconverted --attributes position_cartesian --method poisson
+#increases size by 50% to have colour:
+# wine64 ~/executables-impure/PotreeConverter_2.1_x64_windows/PotreeConverter.exe --source point_cloud_may17cc.laz --outdir potreeconverted --attributes position_cartesian --attributes rgb --method poisson
+# nix-shell -p caddy
+# caddy file-server -browse -root /home/julian/data/3dmodels/aidanhouse/potreeconverted -listen 0.0.0.0:8000
+
+
 
 var potreethreadmutex = Mutex.new()
 var potreethreadsemaphore = Semaphore.new()
@@ -15,7 +30,9 @@ var threadtoexit = false
 var nodestoload = [ ]
 var nodestopointload = [ ]
 var nodespointloaded = [ ]
+
 var rootnode = null
+var defaultpotreeurlmetadata = null
 
 var potreeurlmetadata = null
 
@@ -23,6 +40,8 @@ onready var ImageSystem = get_node("/root/Spatial/ImageSystem")
 
 
 func _ready():
+	defaultpotreeurlmetadata = "http://localhost:8000/metadata.json"
+
 	var st = SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_POINTS)
 	for i in range(4):
@@ -113,7 +132,12 @@ func LoadPotree():
 			xcdrawingcentreline = lxcdrawingcentreline
 			potreeurlmetadata = xcdrawingcentreline.additionalproperties["potreeurlmetadata"]
 	if potreeurlmetadata == null:
-		return
+		if not defaultpotreeurlmetadata:
+			print("No potree url found")
+			return
+		potreeurlmetadata = defaultpotreeurlmetadata
+	print("Loading ", potreeurlmetadata)
+	
 	var nonimagedataobject = { "url":potreeurlmetadata, "callbackobject":self, "callbacksignal":"updatepotreepriorities_fetchsignal" }
 	ImageSystem.fetchrequesturl(nonimagedataobject)
 	var fmetadataF = yield(self, "updatepotreepriorities_fetchsignal")
