@@ -488,7 +488,30 @@ func _on_buttonplay_pressed():
 	Tglobal.soundsystem.playmyvoicerecording()
 	$Viewport/GUI/Panel/Label.text = "Play voice"
 	
+func showlidarmodel(pressed):
+	var lidarmodel = get_node("/root/Spatial/Lidarmodel")
+	lidarmodel.visible = pressed
+	if lidarmodel.visible and lidarmodel.get_child_count() == 0:
+		var dirname = "res://assets/iphonelidarmodels"
+		var dir = Directory.new()
+		var glbfiles = [ ]
+		if dir.open(dirname) == OK:
+			dir.list_dir_begin()
+			while true:
+				var file_name = dir.get_next()
+				if file_name == "":  break
+				if not dir.current_is_dir() and file_name.ends_with(".glb"):
+					glbfiles.push_back(dirname+"/"+file_name)
+		if len(glbfiles) != 0:
+			print(glbfiles)
+			glbfiles.sort()
+			lidarmodel.add_child(load(glbfiles[0]).instance())
+
+
 func makechoke(pressed):
+	showlidarmodel(pressed)
+	return
+	
 	var Nboulders = 50
 	var boulderclutter = get_node("/root/Spatial/BoulderClutter")
 	if pressed:

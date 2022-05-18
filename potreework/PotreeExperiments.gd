@@ -2,6 +2,11 @@ extends Spatial
 
 #var d = "/home/julian/data/pointclouds/potreetests/outdir/"
 # PotreeConverter --source xxx.laz --outdir outdir --attributes position_cartesian --method poisson
+# wine executables-impure/PotreeConverter_2.1_x64_windows/PotreeConverter.exe --source Downloads/aidancloud.laz --outdir junk/aidan/ --attributes position_cartesian --method poisson
+# May need to load and export from CloudCompare (can be tricky)
+# Then need to be uploaded to godot.doesliverpool.xyz 
+# Files will need to be put in: 
+#   /var/lib/private/tunnelvr/.local/share/godot/app_userdata/tunnelvr_v0.7/caddywebserver/
 
 var potreethreadmutex = Mutex.new()
 var potreethreadsemaphore = Semaphore.new()

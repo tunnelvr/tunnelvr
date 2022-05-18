@@ -131,12 +131,13 @@ func _physics_process(delta):
 				playerdirectedwalkingvelocity = Vector3(HeadCam.global_transform.basis.z.x, 0, HeadCam.global_transform.basis.z.z).normalized()*walkspeed*playerMe.playerwalkscale
 
 	elif not Tglobal.questhandtrackingactive and not Tglobal.controlslocked and (abs(joyposforeback) > 0.2 or abs(joyposstrafe) > 0.2):
+		var housahedronslowerfactor = 1.0 # 0.5
 		if playerdirectedflight: 
-			playerdirectedflightvelocity = (-HeadCam.global_transform.basis.z*joyposforeback + HeadCam.global_transform.basis.x*joyposstrafe)*flyspeed*playerMe.playerscale
+			playerdirectedflightvelocity = (-HeadCam.global_transform.basis.z*joyposforeback + HeadCam.global_transform.basis.x*joyposstrafe)*flyspeed*playerMe.playerscale*housahedronslowerfactor
 		else:
 			var dir = Vector3(HeadCam.global_transform.basis.z.x, 0, HeadCam.global_transform.basis.z.z).normalized()
 			var perpdir = Vector3(dir.z, 0, -dir.x)
-			playerdirectedwalkingvelocity = (-dir*joyposforeback + perpdir*joyposstrafe)*walkspeed*playerMe.playerwalkscale
+			playerdirectedwalkingvelocity = (-dir*joyposforeback + perpdir*joyposstrafe)*walkspeed*playerMe.playerwalkscale*housahedronslowerfactor
 			
 func _on_button_pressed(p_button):
 	var pointersystem = playerMe.get_node("pointersystem")

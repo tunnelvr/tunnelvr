@@ -4170,3 +4170,7 @@ text = "dsfsdf"
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="Lidarmodel" type="Spatial" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 13, 2.5, -6 )
+visible = false
