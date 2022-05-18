@@ -104,8 +104,8 @@ func getpotreeurl():
 
 
 var Cpointsizevisibilitycutoff = 15.0
-const maxvisiblepoints = 300000
-const minvisiblepoints = 150000
+var maxvisiblepoints = 500000
+var minvisiblepoints = 200000
 var pointsizefactor = 150.0
 const updatepotreeprioritiesworkingtimeout = 4.0
 signal updatepotreepriorities_fetchsignal(f)
@@ -152,7 +152,7 @@ func LoadPotree():
 	var bboffset = Vector3(bboffseta[0], bboffseta[1], bboffseta[2])
 	rootnode.constructpotreerootnode(metadata, potreeurlmetadata, bboffset)
 	if rootnode.attributes_rgb_prebytes != -1:
-		pointsizefactor = 500
+		pointsizefactor = 400
 	if xcdrawingcentreline != null:
 		transform = xcdrawingcentreline.transform
 	add_child(rootnode)
@@ -318,3 +318,64 @@ func Dcorrectvisibilitymask():
 		scanningnode = rootnode.successornode(scanningnode, false)
 		print("Dcorrectvisibilitymask runn")
 	
+
+func laserplanfitting(Glaserorient, laserlength):
+	var rayradius = 0.15
+	var laserorient = transform.inverse()*Glaserorient
+	var aabbsegmentfrom = laserorient.origin
+	var aabbsegmentto = laserorient.origin - laserorient.basis.z*laserlength
+	var segintersectingboxestoscan = [ ]
+
+	var scanningnode = rootnode
+	while scanningnode != null:
+		if scanningnode.name[0] == "h" or scanningnode.pointmaterial == null:
+			scanningnode = rootnode.successornode(scanningnode, true)
+		else:
+			assert (scanningnode.mesh != null)
+			var boxcentre = scanningnode.ocellorigin
+			var boxextents = scanningnode.ocellsize/2 + Vector3(rayradius, rayradius, rayradius)
+			var boxminmax = AABB(boxcentre - boxextents, boxextents*2)
+			var segintersects = boxminmax.intersects_segment(aabbsegmentfrom, aabbsegmentto)
+			if segintersects:
+				segintersectingboxestoscan.push_back(scanningnode)
+			scanningnode = rootnode.successornode(scanningnode, not segintersects)
+
+	print("Nboxestoscan for potree collision ", len(segintersectingboxestoscan))
+	var lammin = -1.0
+	for lscanningnode in segintersectingboxestoscan:
+		var relsegfrom = laserorient.origin - lscanningnode.ocellorigin
+		var relsegvector = -laserorient.basis.z
+		var surfacearrays = lscanningnode.mesh.surface_get_arrays(0)
+		var surfacepoints = surfacearrays[Mesh.ARRAY_VERTEX]
+		for p in surfacepoints:
+			var vp = p - relsegfrom
+			var lam = vp.dot(relsegvector)
+			if lam > 0.0 and (lam < lammin or lammin == -1):
+				var vpradial = vp - relsegvector*lam
+				var vpradiallen = vpradial.length()
+				if vpradiallen < rayradius:
+					lammin = lam
+				
+	if lammin == -1:
+		return null
+
+	var potreecontactpoint = laserorient.origin - lammin*laserorient.basis.z
+	var potreewallpoints = [ ]
+	var Nscan2s = 0
+	for lscanningnode in segintersectingboxestoscan:
+		var boxradius = (lscanningnode.ocellsize/2).length()
+		if potreecontactpoint.distance_to(lscanningnode.ocellorigin) < rayradius + boxradius:
+			var relsegfrom = potreecontactpoint - lscanningnode.ocellorigin
+			Nscan2s += 1
+			var surfacearrays = lscanningnode.mesh.surface_get_arrays(0)
+			var surfacepoints = surfacearrays[Mesh.ARRAY_VERTEX]
+			for p in surfacepoints:
+				var vp = p - relsegfrom
+				if vp.length() < rayradius:
+					potreewallpoints.push_back(vp)
+			
+	print("Nscan2s ", Nscan2s, " wallpoints ", len(potreewallpoints))
+	var planefittrans = Transform(laserorient.basis, potreecontactpoint)
+	return transform*planefittrans
+
+

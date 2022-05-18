@@ -188,6 +188,8 @@ func constructpotreerootnode(lmetadata, lurlmetadata, bboffset):
 		attributes_rgb_prebytes = attributes_rgb_offset - 12
 		attributes_postbytes = attributes_size - (attributes_rgb_offset + 6)
 		colormixweight = 0.8
+		Tglobal.housahedronmode = true
+		print("Entering housahedronmode")
 	
 	hierarchybyteOffset = 0
 	hierarchybyteSize = metadata["hierarchy"]["firstChunkSize"]
@@ -196,9 +198,10 @@ func constructpotreerootnode(lmetadata, lurlmetadata, bboffset):
 	mdmin -= bboffset
 	mdmax -= bboffset
 
-	transform.origin = (mdmax+mdmin)/2
+	ocellorigin = (mdmax + mdmin)/2
 	spacing = metadata["spacing"]
 	ocellsize = mdmax - mdmin
+	transform.origin = ocellorigin
 
 	Dboxmin = mdmin
 	Dboxmax = mdmax

@@ -14,6 +14,7 @@ var controlslocked = false
 var virtualkeyboardactive = false
 var questhandtracking = false
 var questhandtrackingactive = false
+var housahedronmode = false
 
 var handflickmotiongestureposition = 0
 var soundsystem = null

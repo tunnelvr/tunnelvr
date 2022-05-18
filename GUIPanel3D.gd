@@ -975,30 +975,33 @@ func _on_resourceoptions_selected(index):
 
 	elif nrosel.count("Potree"):
 		var potreeexperiments = selfSpatial.get_node("PotreeExperiments")
+		var labeltext = ""
 		if nrosel == "Load Potree":
 			potreeexperiments.visible = true
 			if potreeexperiments.rootnode == null:
 				potreeexperiments.LoadPotree()
-				setpanellabeltext("Potree started")
+				labeltext = "Potree started"
 			else:
-				setpanellabeltext("Potree already there")
+				labeltext = "Potree already there"
 		elif nrosel == "Remove Potree":
 			potreeexperiments.visible = false
 			if potreeexperiments.rootnode != null:
-				setpanellabeltext("Removing Potree")
+				labeltext = "Removing Potree"
 				potreeexperiments.queuekillpotree = true
 			else:
-				setpanellabeltext("Potree not there")
+				labeltext = "Potree not there"
 		elif nrosel == "Show Potree":
 			if potreeexperiments.rootnode != null:
 				potreeexperiments.visible = true
-				setpanellabeltext("Potree shown")
+				labeltext = "Potree shown"
 			else:
-				setpanellabeltext("Potree not there")
+				labeltext = "Potree not there"
 		elif nrosel == "Hide Potree":
 			potreeexperiments.visible = false
-			setpanellabeltext("Potree hidden")
-		#setguipanelhide()
+			labeltext = "Potree hidden"
+		setpanellabeltext(labeltext)
+		if labeltext == "Potree started" or labeltext == "Potree hidden":
+			setguipanelhide()
 	
 	elif nrosel == "Print resource":
 		var resourcename = $Viewport/GUI/Panel/ResourceSelector.get_item_text($Viewport/GUI/Panel/ResourceSelector.selected)

@@ -17,6 +17,7 @@ var pointmaterial = null
 var visibleincamera = false
 var visibleincameratimestamp = 0
 var ocellsize = Vector3(0,0,0)
+var ocellorigin = Vector3(0,0,0)
 var timestampatinvisibility = 0
 
 var Dboxmin = Vector3(0,0,0)
@@ -58,7 +59,6 @@ func Yloadoctcellpoints(foctreeF, pointsizefactor, roottransforminverse, rootnod
 	var childIndex = int(name)
 	if ocellcentre.distance_to((Dboxmin+Dboxmax)/2) > 0.9:
 		print("moved centre ", ocellcentre, ((Dboxmin+Dboxmax)/2))
-	#var boxminmax = AABB(boxmin, boxmax-boxmin).grow(boxpointepsilon)
 	var Dboxminmax = AABB(ocellcentre - ocellsize/2, ocellsize).grow(boxpointepsilon)
 
 	var st = SurfaceTool.new()
@@ -160,7 +160,8 @@ func constructpotreenode(parentnode, childIndex, Droottransforminverse):
 	transform.origin = Vector3(ocellsize.x/2 if childIndex & 0b0100 else -ocellsize.x/2, 
 							   ocellsize.y/2 if childIndex & 0b0010 else -ocellsize.y/2, 
 							   ocellsize.z/2 if childIndex & 0b0001 else -ocellsize.z/2)
-
+	ocellorigin = parentnode.ocellorigin + transform.origin
+	
 	createChildAABB(parentnode, childIndex)
 	name = "c%d" % childIndex
 	var kcen = Droottransforminverse*parentnode.global_transform.origin + transform.origin

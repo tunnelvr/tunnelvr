@@ -1264,12 +1264,20 @@ func buttonreleased_vrgrip():
 		pass  # the trigger was pulled during the grip operation
 	
 	elif pointertargettype == "GripMenuItem":
-				
 		if pointertarget.get_name() == "NewXC":
 			var pt0 = gripmenu.gripmenupointertargetpoint
 			var eyept0vec = pt0 - headcam.global_transform.origin
 			var newxcvertplane = true
-			if gripmenu.gripmenupointertargettype == "XCtubesector":
+
+			var potreeplanefittrans = null
+			if Tglobal.housahedronmode:
+				var potreeexperiments = get_node("/root/Spatial/PotreeExperiments")
+				if potreeexperiments.visible:
+					potreeplanefittrans = potreeexperiments.laserplanfitting(gripmenu.gripmenulaserorient, gripmenu.gripmenulaserorient.origin.distance_to(gripmenu.gripmenupointertargetpoint))
+			if potreeplanefittrans != null:
+				pt0 = potreeplanefittrans.origin
+				eyept0vec = -potreeplanefittrans.basis.z
+			elif gripmenu.gripmenupointertargettype == "XCtubesector":
 				var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(gripmenu.gripmenupointertargetwall.xcname0)
 				var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(gripmenu.gripmenupointertargetwall.xcname1)
 				var tubevec = xcdrawing1.global_transform.origin - xcdrawing0.global_transform.origin
@@ -1297,8 +1305,9 @@ func buttonreleased_vrgrip():
 				assert (gripmenu.gripmenupointertargettype == "none" or gripmenu.gripmenupointertargettype == "unknown")
 				eyept0vec = gripmenu.gripmenulaservector
 				pt0 = headcam.global_transform.origin + eyept0vec.normalized()*2.9
+				
 			if pt0 != null:
-				var drawingwallangle = Vector2(eyept0vec.x, eyept0vec.z).angle() + deg2rad(90)					
+				var drawingwallangle = Vector2(eyept0vec.x, eyept0vec.z).angle() + deg2rad(90)
 				var xcdata = { "name":sketchsystem.uniqueXCname("s"), 
 							   "drawingtype":DRAWING_TYPE.DT_XCDRAWING,
 							   "transformpos":Transform(Basis().rotated(Vector3(0,-1,0), drawingwallangle), pt0) }
