@@ -97,13 +97,18 @@ func Yloadoctcellpoints(foctreeF, pointsizefactor, roottransforminverse, rootnod
 		
 	numPointsCarriedDown = 0
 	if treedepth >= 1:
-		var parentpoints = get_parent().mesh.surface_get_arrays(0)[Mesh.PRIMITIVE_POINTS]
-		for p in parentpoints:
+		var parentsurfacearrays = get_parent().mesh.surface_get_arrays(0)
+		var parentpoints = parentsurfacearrays[Mesh.ARRAY_VERTEX]
+		var parentcolors = parentsurfacearrays[Mesh.ARRAY_COLOR] if rootnode.attributes_rgb_prebytes != -1 else null
+		for i in range(len(parentpoints)):
+			var p = parentpoints[i]
 			var pocellindex = (4 if p.x > 0.0 else 0) + \
 							  (2 if p.y > 0.0 else 0) + \
 							  (1 if p.z > 0.0 else 0) 
 			if pocellindex == childIndex:
 				var rp = p - relativeocellcentre
+				if parentcolors != null:
+					st.add_color(parentcolors[i])
 				st.add_vertex(rp)
 				if ((Nloadcellpointsperframe+numPointsCarriedDown) % Nloadcellpointsperframe) == 0:
 					var dt = OS.get_ticks_msec() - t0
