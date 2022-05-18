@@ -327,6 +327,12 @@ func _on_switchtest(index):
 		makechoke(true)
 		setguipanelhide()
 
+	elif nssel == "toggle gltf":
+		$Viewport/GUI/Panel/Label.text = "toggle gltf"
+		togglegltf()
+		setguipanelhide()
+
+
 	elif nssel == "swap controllers":
 		playerMe.swapcontrollers()
 		$Viewport/GUI/Panel/Label.text = "Controllers swapped"
@@ -488,6 +494,26 @@ func _on_buttonplay_pressed():
 	Tglobal.soundsystem.playmyvoicerecording()
 	$Viewport/GUI/Panel/Label.text = "Play voice"
 	
+func togglegltf():
+	var lidarmodel = get_node("/root/Spatial/Lidarmodel")
+	lidarmodel.visible = not lidarmodel.visible
+	if lidarmodel.visible and lidarmodel.get_child_count() == 0:
+		var dirname = "res://assets/iphonelidarmodels"
+		var dir = Directory.new()
+		var glbfiles = [ ]
+		if dir.open(dirname) == OK:
+			dir.list_dir_begin()
+			while true:
+				var file_name = dir.get_next()
+				if file_name == "":  break
+				if not dir.current_is_dir() and file_name.ends_with(".glb"):
+					glbfiles.push_back(dirname+"/"+file_name)
+		if len(glbfiles) != 0:
+			print(glbfiles)
+			glbfiles.sort()
+			lidarmodel.add_child(load(glbfiles[0]).instance())
+
+
 func makechoke(pressed):
 	var Nboulders = 50
 	var boulderclutter = get_node("/root/Spatial/BoulderClutter")
@@ -867,7 +893,7 @@ func _on_resourceoptions_buttondown_setavailablefunctions():
 	var showhigloadpotreeid = resourceoptionlookup["Show/Hide/Load Potree"]
 	if potreeexperiments.rootnode == null:
 		$Viewport/GUI/Panel/ResourceOptions.set_item_text(showhigloadpotreeid, "Load Potree")
-		$Viewport/GUI/Panel/ResourceOptions.set_item_disabled(showhigloadpotreeid, (centrelineselected_forresourcefunction == null or centrelineselected_forresourcefunction.additionalproperties == null or centrelineselected_forresourcefunction.additionalproperties.get("potreeurlmetadata") == null))
+		$Viewport/GUI/Panel/ResourceOptions.set_item_disabled(showhigloadpotreeid, (centrelineselected_forresourcefunction == null or centrelineselected_forresourcefunction.additionalproperties == null or centrelineselected_forresourcefunction.additionalproperties.get("potreeurlmetadata") == null) and not potreeexperiments.defaultpotreeurlmetadata)
 	elif not potreeexperiments.visible:
 		$Viewport/GUI/Panel/ResourceOptions.set_item_text(showhigloadpotreeid, "Show Potree")
 	elif centrelineselected_forresourcefunction == null or centrelineselected_forresourcefunction.additionalproperties == null or centrelineselected_forresourcefunction.additionalproperties.get("potreeurlmetadata") != potreeexperiments.potreeurlmetadata:

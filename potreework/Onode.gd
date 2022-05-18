@@ -49,7 +49,10 @@ func on_camera_exited(camera):
 		visibleincameratimestamp = OS.get_ticks_msec()*0.001
 		
 const Nloadcellpointsperframe = 3000
-func Yloadoctcellpoints(foctreeF, mdscale, mdoffset, pointsizefactor, roottransforminverse, highlightplaneperp, highlightplanedot, screendimensionsscreendoorfac):
+func Yloadoctcellpoints(foctreeF, pointsizefactor, roottransforminverse, rootnode):
+	var mdscale = rootnode.mdscale
+	var mdoffset = rootnode.mdoffset
+
 	var ocellcentre = roottransforminverse*global_transform.origin
 	var relativeocellcentre = transform.origin
 	var childIndex = int(name)
@@ -68,6 +71,17 @@ func Yloadoctcellpoints(foctreeF, mdscale, mdoffset, pointsizefactor, roottransf
 		var v0 = foctreeF.get_32()
 		var v1 = foctreeF.get_32()
 		var v2 = foctreeF.get_32()
+		if rootnode.attributes_rgb_prebytes != -1:
+			if rootnode.attributes_rgb_prebytes != 0:
+				foctreeF.get_buffer(rootnode.attributes_rgb_prebytes)
+			var r = foctreeF.get_16()
+			var g = foctreeF.get_16()
+			var b = foctreeF.get_16()
+			var col = Color(r/65535.0, g/65535.0, b/65535.0)
+			st.add_color(col)
+		if rootnode.attributes_postbytes != 0:
+			foctreeF.get_buffer(rootnode.attributes_postbytes)
+
 		var p = Vector3(v0*mdscale.x + mdoffset.x, 
 						v1*mdscale.y + mdoffset.y, 
 						v2*mdscale.z + mdoffset.z)
@@ -83,13 +97,18 @@ func Yloadoctcellpoints(foctreeF, mdscale, mdoffset, pointsizefactor, roottransf
 		
 	numPointsCarriedDown = 0
 	if treedepth >= 1:
-		var parentpoints = get_parent().mesh.surface_get_arrays(0)[Mesh.PRIMITIVE_POINTS]
-		for p in parentpoints:
+		var parentsurfacearrays = get_parent().mesh.surface_get_arrays(0)
+		var parentpoints = parentsurfacearrays[Mesh.ARRAY_VERTEX]
+		var parentcolors = parentsurfacearrays[Mesh.ARRAY_COLOR] if rootnode.attributes_rgb_prebytes != -1 else null
+		for i in range(len(parentpoints)):
+			var p = parentpoints[i]
 			var pocellindex = (4 if p.x > 0.0 else 0) + \
 							  (2 if p.y > 0.0 else 0) + \
 							  (1 if p.z > 0.0 else 0) 
 			if pocellindex == childIndex:
 				var rp = p - relativeocellcentre
+				if parentcolors != null:
+					st.add_color(parentcolors[i])
 				st.add_vertex(rp)
 				if ((Nloadcellpointsperframe+numPointsCarriedDown) % Nloadcellpointsperframe) == 0:
 					var dt = OS.get_ticks_msec() - t0
@@ -120,9 +139,10 @@ func Yloadoctcellpoints(foctreeF, mdscale, mdoffset, pointsizefactor, roottransf
 	pointmaterial.set_shader_param("ocellcentre", ocellcentre)
 	pointmaterial.set_shader_param("ocellmask", ocellmask)
 	pointmaterial.set_shader_param("roottransforminverse", roottransforminverse)
-	pointmaterial.set_shader_param("highlightplaneperp", highlightplaneperp)
-	pointmaterial.set_shader_param("highlightplanedot", highlightplanedot)
-	pointmaterial.set_shader_param("screendimensionsscreendoorfac", screendimensionsscreendoorfac)
+	pointmaterial.set_shader_param("highlightplaneperp", rootnode.highlightplaneperp)
+	pointmaterial.set_shader_param("highlightplanedot", rootnode.highlightplanedot)
+	pointmaterial.set_shader_param("screendimensionsscreendoorfac", rootnode.screendimensionsscreendoorfac)
+	pointmaterial.set_shader_param("colormixweight", rootnode.colormixweight)
 
 	set_surface_material(0, pointmaterial)
 	dt = OS.get_ticks_msec() - t0

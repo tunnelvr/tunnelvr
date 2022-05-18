@@ -3,6 +3,26 @@ extends Spatial
 #var d = "/home/julian/data/pointclouds/potreetests/outdir/"
 # PotreeConverter --source xxx.laz --outdir outdir --attributes position_cartesian --method poisson
 
+# nix-shell -p wine64  # 64 bit error means to need to delete ~/.wine
+# wine64 executables-impure/PotreeConverter_2.1_x64_windows/PotreeConverter.exe --source Downloads/aidancloud.laz --outdir junk/aidan/ --attributes position_cartesian --method poisson
+
+# May need to load and export from CloudCompare (can be tricky)
+# Then need to be uploaded to godot.doesliverpool.xyz 
+# Files will need to be put in: 
+#   /var/lib/private/tunnelvr/.local/share/godot/app_userdata/tunnelvr_v0.7/caddywebserver/
+
+#nix-shell -p wine64
+  # 64 bit error means to need to delete ~/.wine
+#The laz file bounding boxes from the app are bad.  Need to load and save into cloud compare.
+#Load and save back to a copy using CloudCompare (Optimal resolution option okay)
+# wine64 ~/executables-impure/PotreeConverter_2.1_x64_windows/PotreeConverter.exe --source point_cloud_may17cc.laz --outdir potreeconverted --attributes position_cartesian --method poisson
+#increases size by 50% to have colour:
+# wine64 ~/executables-impure/PotreeConverter_2.1_x64_windows/PotreeConverter.exe --source point_cloud_may17cc.laz --outdir potreeconverted --attributes position_cartesian --attributes rgb --method poisson
+# nix-shell -p caddy
+# caddy file-server -browse -root /home/julian/data/3dmodels/aidanhouse/potreeconverted -listen 0.0.0.0:8000
+
+
+
 var potreethreadmutex = Mutex.new()
 var potreethreadsemaphore = Semaphore.new()
 var potreethread = null
@@ -10,14 +30,17 @@ var threadtoexit = false
 var nodestoload = [ ]
 var nodestopointload = [ ]
 var nodespointloaded = [ ]
+
 var rootnode = null
+var defaultpotreeurlmetadata = null
 
 var potreeurlmetadata = null
 
 onready var ImageSystem = get_node("/root/Spatial/ImageSystem")
 
-
 func _ready():
+	defaultpotreeurlmetadata = "http://localhost:8000/potreeconverted3/metadata.json"
+
 	var st = SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_POINTS)
 	for i in range(4):
@@ -83,7 +106,7 @@ func getpotreeurl():
 var Cpointsizevisibilitycutoff = 15.0
 const maxvisiblepoints = 300000
 const minvisiblepoints = 150000
-const pointsizefactor = 150.0
+var pointsizefactor = 150.0
 const updatepotreeprioritiesworkingtimeout = 4.0
 signal updatepotreepriorities_fetchsignal(f)
 
@@ -108,7 +131,12 @@ func LoadPotree():
 			xcdrawingcentreline = lxcdrawingcentreline
 			potreeurlmetadata = xcdrawingcentreline.additionalproperties["potreeurlmetadata"]
 	if potreeurlmetadata == null:
-		return
+		if not defaultpotreeurlmetadata:
+			print("No potree url found")
+			return
+		potreeurlmetadata = defaultpotreeurlmetadata
+	print("Loading ", potreeurlmetadata)
+	
 	var nonimagedataobject = { "url":potreeurlmetadata, "callbackobject":self, "callbacksignal":"updatepotreepriorities_fetchsignal" }
 	ImageSystem.fetchrequesturl(nonimagedataobject)
 	var fmetadataF = yield(self, "updatepotreepriorities_fetchsignal")
@@ -123,6 +151,8 @@ func LoadPotree():
 	var bboffseta = xcdrawingcentreline.additionalproperties["svxp0"]  if xcdrawingcentreline != null and xcdrawingcentreline.additionalproperties != null and xcdrawingcentreline.additionalproperties.has("svxp0")  else [0,0,0]
 	var bboffset = Vector3(bboffseta[0], bboffseta[1], bboffseta[2])
 	rootnode.constructpotreerootnode(metadata, potreeurlmetadata, bboffset)
+	if rootnode.attributes_rgb_prebytes != -1:
+		pointsizefactor = 500
 	if xcdrawingcentreline != null:
 		transform = xcdrawingcentreline.transform
 	add_child(rootnode)
@@ -231,7 +261,7 @@ func updatepotreeprioritiesLoop():
 						var roottransforminverse = rootnode.get_parent().global_transform.inverse()
 						var tp0 = OS.get_ticks_msec()
 						matloadingcube.albedo_color = coloctcellpointsloading
-						yield(nnode.Yloadoctcellpoints(foctreeF, rootnode.mdscale, rootnode.mdoffset, pointsizefactor, roottransforminverse, rootnode.highlightplaneperp, rootnode.highlightplanedot, rootnode.screendimensionsscreendoorfac), "completed")
+						yield(nnode.Yloadoctcellpoints(foctreeF, pointsizefactor, roottransforminverse, rootnode), "completed")
 						var dt = OS.get_ticks_msec() - tp0
 						if dt > 100:
 							print("    Warning: long loadoctcellpoints ", nnode.get_path(), " of ", dt, " msecs", " numPoints:", nnode.numPoints, " carrieddown:", nnode.numPointsCarriedDown)
