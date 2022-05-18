@@ -3,10 +3,7 @@ extends "res://potreework/Onode.gd"
 var metadata = null
 var mdscale = Vector3(1,1,1)
 var mdoffset = Vector3(0,0,0)
-var pointsizefactor = 150.0
-
-# pip install rangehttpserver
-# python -m RangeHTTPServer (after editing site-packages/RangeHTTPServer/__main__.py line: SimpleHTTPServer.test(HandlerClass=RangeRequestHandler, bind="0.0.0.0")
+var colormixweight = 1.0
 
 var highlightplaneperp = Vector3(1,0,0)
 var highlightplanedot = 0.0
@@ -28,6 +25,9 @@ var processingnodeReturnedFileHandle = null
 var urlmetadata = ""
 var urlhierarchy = ""
 var urloctree = ""
+
+var attributes_rgb_prebytes = -1
+var attributes_postbytes = 0
 
 onready var ImageSystem = get_node("/root/Spatial/ImageSystem")
 
@@ -168,8 +168,27 @@ func constructpotreerootnode(lmetadata, lurlmetadata, bboffset):
 	mdoffset -= bboffset
 
 	mdscale = Vector3(metadata["scale"][0], metadata["scale"][1], metadata["scale"][2])
-	assert(len(metadata["attributes"]) == 1)
-
+	var attributes_position_offset = -1
+	var attributes_rgb_offset = -1
+	var attributes_size = 0
+	for attribute in metadata["attributes"]:
+		if attribute["name"] == "position":
+			attributes_position_offset = attributes_size
+			assert (attribute["size"] == 12)
+		elif attribute["name"] == "rgb":
+			attributes_rgb_offset = attributes_size
+			assert (attribute["size"] == 6)
+		attributes_size += attribute.size
+	assert (attributes_position_offset == 0)
+	if attributes_rgb_offset == -1:
+		attributes_rgb_prebytes = -1
+		attributes_postbytes = attributes_size - 12
+		colormixweight = 0.0
+	else:
+		attributes_rgb_prebytes = attributes_rgb_offset - 12
+		attributes_postbytes = attributes_size - (attributes_rgb_offset + 6)
+		colormixweight = 0.8
+	
 	hierarchybyteOffset = 0
 	hierarchybyteSize = metadata["hierarchy"]["firstChunkSize"]
 	var mdmin = Vector3(metadata["boundingBox"]["min"][0], metadata["boundingBox"]["min"][1], metadata["boundingBox"]["min"][2])

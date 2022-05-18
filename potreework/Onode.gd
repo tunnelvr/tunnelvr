@@ -49,7 +49,10 @@ func on_camera_exited(camera):
 		visibleincameratimestamp = OS.get_ticks_msec()*0.001
 		
 const Nloadcellpointsperframe = 3000
-func Yloadoctcellpoints(foctreeF, mdscale, mdoffset, pointsizefactor, roottransforminverse, highlightplaneperp, highlightplanedot, screendimensionsscreendoorfac):
+func Yloadoctcellpoints(foctreeF, pointsizefactor, roottransforminverse, rootnode):
+	var mdscale = rootnode.mdscale
+	var mdoffset = rootnode.mdoffset
+
 	var ocellcentre = roottransforminverse*global_transform.origin
 	var relativeocellcentre = transform.origin
 	var childIndex = int(name)
@@ -68,6 +71,17 @@ func Yloadoctcellpoints(foctreeF, mdscale, mdoffset, pointsizefactor, roottransf
 		var v0 = foctreeF.get_32()
 		var v1 = foctreeF.get_32()
 		var v2 = foctreeF.get_32()
+		if rootnode.attributes_rgb_prebytes != -1:
+			if rootnode.attributes_rgb_prebytes != 0:
+				foctreeF.get_buffer(rootnode.attributes_rgb_prebytes)
+			var r = foctreeF.get_16()
+			var g = foctreeF.get_16()
+			var b = foctreeF.get_16()
+			var col = Color(r/65535.0, g/65535.0, b/65535.0)
+			st.add_color(col)
+		if rootnode.attributes_postbytes != 0:
+			foctreeF.get_buffer(rootnode.attributes_postbytes)
+
 		var p = Vector3(v0*mdscale.x + mdoffset.x, 
 						v1*mdscale.y + mdoffset.y, 
 						v2*mdscale.z + mdoffset.z)
@@ -120,9 +134,10 @@ func Yloadoctcellpoints(foctreeF, mdscale, mdoffset, pointsizefactor, roottransf
 	pointmaterial.set_shader_param("ocellcentre", ocellcentre)
 	pointmaterial.set_shader_param("ocellmask", ocellmask)
 	pointmaterial.set_shader_param("roottransforminverse", roottransforminverse)
-	pointmaterial.set_shader_param("highlightplaneperp", highlightplaneperp)
-	pointmaterial.set_shader_param("highlightplanedot", highlightplanedot)
-	pointmaterial.set_shader_param("screendimensionsscreendoorfac", screendimensionsscreendoorfac)
+	pointmaterial.set_shader_param("highlightplaneperp", rootnode.highlightplaneperp)
+	pointmaterial.set_shader_param("highlightplanedot", rootnode.highlightplanedot)
+	pointmaterial.set_shader_param("screendimensionsscreendoorfac", rootnode.screendimensionsscreendoorfac)
+	pointmaterial.set_shader_param("colormixweight", rootnode.colormixweight)
 
 	set_surface_material(0, pointmaterial)
 	dt = OS.get_ticks_msec() - t0

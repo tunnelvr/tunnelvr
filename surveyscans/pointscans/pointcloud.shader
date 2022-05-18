@@ -8,6 +8,7 @@ uniform mat4 roottransforminverse = mat4(1.0);
 uniform vec3 ocellcentre = vec3(0,0,0);
 uniform int ocellmask = 0;
 uniform vec2 screendimensionsscreendoorfac = vec2(240, 135); // screen dimensions/
+uniform float colormixweight = 0.5; 
 
 const vec3 closecol = vec3(1,0,0);
 const vec3 farcol = vec3(0,0,1);
@@ -49,7 +50,8 @@ void vertex() {
 	// 1/(fardisttaper + fardist) - 1/(fardisttaper) =  -fardist/(fardisttaper*((fardisttaper + fardist))) = 
 	//float mixval = distcamera/fardist;
 	float mixval = (1.0/(distcamera + fardisttaper) - 1.0/fardisttaper)*fardisttaperfac;
-	COLOR.rgb = mix(closecol, farcol, mixval);
+	vec3 distancecolor = mix(closecol, farcol, mixval);
+	COLOR.rgb = mix(distancecolor, COLOR.rgb, colormixweight);
 	
 	float fadeoutfac = (POINT_SIZE-8.0)/16.0;
 	bordercol = mix(bordercolor, vec3(1.0, 1.0, 1.0), clamp(1.0 - fadeoutfac, 0.0, 1.0));

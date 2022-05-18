@@ -892,7 +892,6 @@ func _on_resourceoptions_buttondown_setavailablefunctions():
 	var potreeexperiments = selfSpatial.get_node("PotreeExperiments")
 	var showhigloadpotreeid = resourceoptionlookup["Show/Hide/Load Potree"]
 	if potreeexperiments.rootnode == null:
-		potreeexperiments.defaultpotreeurlmetadata = "http://localhost:8000/metadata.json"
 		$Viewport/GUI/Panel/ResourceOptions.set_item_text(showhigloadpotreeid, "Load Potree")
 		$Viewport/GUI/Panel/ResourceOptions.set_item_disabled(showhigloadpotreeid, (centrelineselected_forresourcefunction == null or centrelineselected_forresourcefunction.additionalproperties == null or centrelineselected_forresourcefunction.additionalproperties.get("potreeurlmetadata") == null) and not potreeexperiments.defaultpotreeurlmetadata)
 	elif not potreeexperiments.visible:

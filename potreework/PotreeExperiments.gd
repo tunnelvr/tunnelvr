@@ -38,9 +38,8 @@ var potreeurlmetadata = null
 
 onready var ImageSystem = get_node("/root/Spatial/ImageSystem")
 
-
 func _ready():
-	defaultpotreeurlmetadata = "http://localhost:8000/metadata.json"
+	defaultpotreeurlmetadata = "http://localhost:8000/potreeconverted3/metadata.json"
 
 	var st = SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_POINTS)
@@ -107,7 +106,7 @@ func getpotreeurl():
 var Cpointsizevisibilitycutoff = 15.0
 const maxvisiblepoints = 300000
 const minvisiblepoints = 150000
-const pointsizefactor = 150.0
+var pointsizefactor = 150.0
 const updatepotreeprioritiesworkingtimeout = 4.0
 signal updatepotreepriorities_fetchsignal(f)
 
@@ -152,6 +151,8 @@ func LoadPotree():
 	var bboffseta = xcdrawingcentreline.additionalproperties["svxp0"]  if xcdrawingcentreline != null and xcdrawingcentreline.additionalproperties != null and xcdrawingcentreline.additionalproperties.has("svxp0")  else [0,0,0]
 	var bboffset = Vector3(bboffseta[0], bboffseta[1], bboffseta[2])
 	rootnode.constructpotreerootnode(metadata, potreeurlmetadata, bboffset)
+	if rootnode.attributes_rgb_prebytes != -1:
+		pointsizefactor = 500
 	if xcdrawingcentreline != null:
 		transform = xcdrawingcentreline.transform
 	add_child(rootnode)
@@ -260,7 +261,7 @@ func updatepotreeprioritiesLoop():
 						var roottransforminverse = rootnode.get_parent().global_transform.inverse()
 						var tp0 = OS.get_ticks_msec()
 						matloadingcube.albedo_color = coloctcellpointsloading
-						yield(nnode.Yloadoctcellpoints(foctreeF, rootnode.mdscale, rootnode.mdoffset, pointsizefactor, roottransforminverse, rootnode.highlightplaneperp, rootnode.highlightplanedot, rootnode.screendimensionsscreendoorfac), "completed")
+						yield(nnode.Yloadoctcellpoints(foctreeF, pointsizefactor, roottransforminverse, rootnode), "completed")
 						var dt = OS.get_ticks_msec() - tp0
 						if dt > 100:
 							print("    Warning: long loadoctcellpoints ", nnode.get_path(), " of ", dt, " msecs", " numPoints:", nnode.numPoints, " carrieddown:", nnode.numPointsCarriedDown)
