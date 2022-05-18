@@ -327,6 +327,12 @@ func _on_switchtest(index):
 		makechoke(true)
 		setguipanelhide()
 
+	elif nssel == "toggle gltf":
+		$Viewport/GUI/Panel/Label.text = "toggle gltf"
+		togglegltf()
+		setguipanelhide()
+
+
 	elif nssel == "swap controllers":
 		playerMe.swapcontrollers()
 		$Viewport/GUI/Panel/Label.text = "Controllers swapped"
@@ -488,9 +494,9 @@ func _on_buttonplay_pressed():
 	Tglobal.soundsystem.playmyvoicerecording()
 	$Viewport/GUI/Panel/Label.text = "Play voice"
 	
-func showlidarmodel(pressed):
+func togglegltf():
 	var lidarmodel = get_node("/root/Spatial/Lidarmodel")
-	lidarmodel.visible = pressed
+	lidarmodel.visible = not lidarmodel.visible
 	if lidarmodel.visible and lidarmodel.get_child_count() == 0:
 		var dirname = "res://assets/iphonelidarmodels"
 		var dir = Directory.new()
@@ -509,9 +515,6 @@ func showlidarmodel(pressed):
 
 
 func makechoke(pressed):
-	showlidarmodel(pressed)
-	return
-	
 	var Nboulders = 50
 	var boulderclutter = get_node("/root/Spatial/BoulderClutter")
 	if pressed:
