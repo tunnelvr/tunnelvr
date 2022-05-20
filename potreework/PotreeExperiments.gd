@@ -52,9 +52,6 @@ func _ready():
 	$PointSample.mesh = pointmesh	
 	var pointmaterial =	$PointSample.get_surface_material(0)
 	yield(get_tree().create_timer(5.0), "timeout")
-	var screendimensionsscreendoorfac = OS.get_screen_size()/8.0; 
-	pointmaterial.set_shader_param("screendimensionsscreendoorfac", screendimensionsscreendoorfac)
-	print("*** screendimensionsscreendoorfac ", screendimensionsscreendoorfac)
 			
 func potreethread_function(userdata):
 	print("potreethread_function started")
@@ -324,7 +321,7 @@ func laserplanfitting(Glaserorient, laserlength):
 	var raywallfilterradius = rayradius*0.6
 	var floorfilterdepth = rayradius*0.4
 		
-	var laserelev = rad2deg(atan2(Glaserorient.basis.z.y, Vector2(Glaserorient.basis.z.x, Glaserorient.basis.z.z).length()))
+	var laserelev = rad2deg(-atan2(Glaserorient.basis.z.y, Vector2(Glaserorient.basis.z.x, Glaserorient.basis.z.z).length()))
 	var laserorient = transform.inverse()*Glaserorient
 	
 	print("Glaserorient  ", Glaserorient.basis.z, " ", laserorient.basis.z)
@@ -401,7 +398,7 @@ func laserplanfitting(Glaserorient, laserlength):
 						potreewallFpoints.push_back(fGvp)
 					
 					
-	if abs(laserelev) > 75.0:
+	if abs(laserelev) > 70.0:
 		if npotreefloorzs > nrayradiuspoints*0.6:
 			var bheight = sumpotreefloorzs/npotreefloorzs
 			var planepoint = Gpotreecontactpoint + Vector3(0, bheight, 0)

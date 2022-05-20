@@ -7,7 +7,6 @@ uniform float highlightplanedot = 0.0;
 uniform mat4 roottransforminverse = mat4(1.0); 
 uniform vec3 ocellcentre = vec3(0,0,0);
 uniform int ocellmask = 0;
-uniform vec2 screendimensionsscreendoorfac = vec2(240, 135); // screen dimensions/
 uniform float colormixweight = 0.5; 
 
 const vec3 closecol = vec3(1,0,0);
@@ -23,6 +22,7 @@ const float sizebumpdist = 0.25;
 const vec3 bordercolor = vec3(0.1, 0.1, 0.2);
 const float edgeborder = 0.5 - 0.05; 
 const float closenessdist = 0.8;
+
 
 varying vec3 emissioncol;
 varying vec3 bordercol; 
@@ -57,7 +57,7 @@ void vertex() {
 	bordercol = mix(bordercolor, vec3(1.0, 1.0, 1.0), clamp(1.0 - fadeoutfac, 0.0, 1.0));
 	edgebord = edgeborder*clamp((fadeoutfac+1.0)/2.0, 0.3, 1.0); 
 	
-	closenessfrac = distcamera/closenessdist;
+	closenessfrac = 1.0 - distcamera/closenessdist;
 }
 
 void fragment() {
@@ -65,25 +65,13 @@ void fragment() {
 	EMISSION = emissioncol;
 	float squarecentredist = max(abs(POINT_COORD.x-0.5), abs(POINT_COORD.y-0.5)); 
 	
-	//ALBEDO *= mix(vec3(1.0, 1.0, 1.0), bordercolor, squarecentredist);
-
-	//if (squarecentredist > edgebord)
-	//	ALBEDO *= bordercol;
-		
-	// circular points
 	float rsq = (POINT_COORD.x-0.5)*(POINT_COORD.x-0.5) + (POINT_COORD.y-0.5)*(POINT_COORD.y-0.5);
-
 	if (rsq > 0.25+point_scale*0.002) 
 		discard;
-	else
-		ALBEDO *= mix(vec3(1.0, 1.0, 1.0), bordercolor, rsq*3.0);
-	
-	if 	(closenessfrac < 1.0) {
-		//if ((fract(SCREEN_UV.x*screendimensionsscreendoorfac.x) > closenessfrac) || 
-		//	(fract(SCREEN_UV.y*screendimensionsscreendoorfac.y) > closenessfrac))
-		//		discard; 
 
-		if ((abs(POINT_COORD.x*2.0-1.0)<1.0-closenessfrac) || (abs(POINT_COORD.y*2.0-1.0)<1.0-closenessfrac))
+	ALBEDO *= mix(vec3(1.0, 1.0, 1.0), bordercolor, rsq*3.0);
+	if (closenessfrac > 0.0) {
+		if ((abs(POINT_COORD.x*2.0-1.0) < closenessfrac) || (abs(POINT_COORD.y*2.0-1.0) < closenessfrac))
 			discard; 
 	}
 }

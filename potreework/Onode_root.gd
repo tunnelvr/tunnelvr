@@ -7,7 +7,6 @@ var colormixweight = 1.0
 
 var highlightplaneperp = Vector3(1,0,0)
 var highlightplanedot = 0.0
-var screendimensionsscreendoorfac = Vector2(100,100)
 	
 var primarycameraorigin = Vector3(0,0,0)
 var pointsizevisibilitycutoff = 15.0
@@ -39,7 +38,6 @@ func sethighlightplane(lhighlightplaneperp, lhighlightplanedot):
 		if node.pointmaterial != null:
 			node.pointmaterial.set_shader_param("highlightplaneperp", highlightplaneperp)
 			node.pointmaterial.set_shader_param("highlightplanedot", highlightplanedot)
-			node.pointmaterial.set_shader_param("screendimensionsscreendoorfac", screendimensionsscreendoorfac)
 		node = successornode(node, not node.visible)
 	
 func successornode(node, skip):
@@ -153,7 +151,6 @@ func garbagecollectionsweep():
 		
 func constructpotreerootnode(lmetadata, lurlmetadata, bboffset):
 	assert (name == "hroot")
-	screendimensionsscreendoorfac = OS.get_screen_size()/8.0; 
 	metadata = lmetadata
 	visibleincamera = true
 	visible = false

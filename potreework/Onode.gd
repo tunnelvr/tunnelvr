@@ -141,7 +141,6 @@ func Yloadoctcellpoints(foctreeF, pointsizefactor, roottransforminverse, rootnod
 	pointmaterial.set_shader_param("roottransforminverse", roottransforminverse)
 	pointmaterial.set_shader_param("highlightplaneperp", rootnode.highlightplaneperp)
 	pointmaterial.set_shader_param("highlightplanedot", rootnode.highlightplanedot)
-	pointmaterial.set_shader_param("screendimensionsscreendoorfac", rootnode.screendimensionsscreendoorfac)
 	pointmaterial.set_shader_param("colormixweight", rootnode.colormixweight)
 
 	set_surface_material(0, pointmaterial)
