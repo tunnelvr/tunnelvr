@@ -31,6 +31,10 @@ var imagethreadloadedflags = Texture.FLAG_MIPMAPS|Texture.FLAG_REPEAT # |Texture
 
 onready var imagesystemreportslabel = get_node("/root/Spatial/GuiSystem/GUIPanel3D/Viewport/GUI/Panel/ImageSystemReports")
 
+# to convert PDFs nix-shell -p imagemagick and ghostscript, then 
+# convert firstfloorplan.pdf -density 600 -geometry 200% -trim -background white -alpha remove -alpha off firstfloorplan.png
+# density is still blurry because resizing is happening after rendering, so I had to use Gimp to load and export at a higher resolution
+
 func imageloadingthread_function(userdata):
 	print("imageloadingthread_function started")
 	while true:

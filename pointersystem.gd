@@ -1273,7 +1273,8 @@ func buttonreleased_vrgrip():
 			if Tglobal.housahedronmode:
 				var potreeexperiments = get_node("/root/Spatial/PotreeExperiments")
 				if potreeexperiments.visible:
-					potreeplanefittrans = potreeexperiments.laserplanfitting(gripmenu.gripmenulaserorient, gripmenu.gripmenulaserorient.origin.distance_to(gripmenu.gripmenupointertargetpoint))
+					var laserlength = gripmenu.gripmenulaserorient.origin.distance_to(gripmenu.gripmenupointertargetpoint)
+					potreeplanefittrans = potreeexperiments.laserplanfitting(gripmenu.gripmenulaserorient, laserlength if not is_zero_approx(laserlength) else 50)
 			if potreeplanefittrans != null:
 				pt0 = potreeplanefittrans.origin
 				eyept0vec = -potreeplanefittrans.basis.z

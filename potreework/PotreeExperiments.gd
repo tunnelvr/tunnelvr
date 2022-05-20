@@ -322,6 +322,9 @@ func Dcorrectvisibilitymask():
 func laserplanfitting(Glaserorient, laserlength):
 	var rayradius = 0.15
 	var laserorient = transform.inverse()*Glaserorient
+	
+	print("Glaserorient  ", Glaserorient.basis.z, " ", laserorient.basis.z)
+	
 	var aabbsegmentfrom = laserorient.origin
 	var aabbsegmentto = laserorient.origin - laserorient.basis.z*laserlength
 	var segintersectingboxestoscan = [ ]
@@ -359,8 +362,14 @@ func laserplanfitting(Glaserorient, laserlength):
 	if lammin == -1:
 		return null
 
+	var hvec = Vector3(-Glaserorient.basis.z.x, 0.0, -Glaserorient.basis.z.z).normalized()
+	var hvecperp = Vector3(hvec.z, 0.0, -hvec.x)
+	
 	var potreecontactpoint = laserorient.origin - lammin*laserorient.basis.z
+	var Gpotreecontactpoint = transform.xform(potreecontactpoint)
+	
 	var potreewallpoints = [ ]
+	var potreewallFpoints = [ ]
 	var Nscan2s = 0
 	for lscanningnode in segintersectingboxestoscan:
 		var boxradius = (lscanningnode.ocellsize/2).length()
@@ -368,14 +377,61 @@ func laserplanfitting(Glaserorient, laserlength):
 			var relsegfrom = potreecontactpoint - lscanningnode.ocellorigin
 			Nscan2s += 1
 			var surfacearrays = lscanningnode.mesh.surface_get_arrays(0)
-			var surfacepoints = surfacearrays[Mesh.ARRAY_VERTEX]
+			var surfacepoints = surfacearrays[Mesh.ARRAY_VERTEX]  # will contain duplicates from lower boxes if we don't filter out by the visibility mask
 			for p in surfacepoints:
+				var Gvp = transform.xform(p + lscanningnode.ocellorigin) - Gpotreecontactpoint
 				var vp = p - relsegfrom
-				if vp.length() < rayradius:
-					potreewallpoints.push_back(vp)
-			
+				assert (is_equal_approx(vp.length(), Gvp.length()))
+				if Gvp.length() < rayradius:
+					#var Gvp = transform.basis.xform(vp)
+					potreewallpoints.push_back(Gvp)
+					potreewallFpoints.push_back(Vector2(hvecperp.dot(Gvp), hvec.dot(Gvp)))
+
+	var Sx = 0.0
+	var Sx2 = 0.0
+	var Sy = 0.0
+	var Sxy = 0.0
+	var n = len(potreewallFpoints)
+	for fp in potreewallFpoints:
+		Sx += fp.x
+		Sx2 += fp.x*fp.x
+		Sy += fp.y
+		Sxy += fp.x*fp.y
+	var d = n*Sx2 - Sx*Sx
+	if d == 0:
+		return null
+		
+	var a = (n*Sxy - Sx*Sy)/d
+	var b = (Sy*Sx2 - Sx*Sxy)/d
+	print("aa  ", a, " ", b, " ", n)
+	
+	a = 0
+	b = 0
+	
+
+	var planepoint = Gpotreecontactpoint + b*hvec
+	var planeang = atan(a)
+	var planebasis = Glaserorient.basis.rotated(Vector3(0,1,0), planeang)
+
+	var Dnewhvec = Vector3(-planebasis.z.x, 0.0, -planebasis.z.z).normalized()
+	var Dnewhvecperp = Vector3(Dnewhvec.z, 0.0, -Dnewhvec.x)
+	var Dhd = [ ]
+	var Dhpd = [ ]
+	for Dp in potreewallpoints:
+		Dhd.push_back(Dnewhvec.dot(Dp))
+		Dhpd.push_back(Dnewhvecperp.dot(Dp))
+	Dhd.sort()
+	Dhpd.sort()
+	print("hd ", Dhd[0], ",", Dhd[-1], " sidehd ", Dhpd[0], ",", Dhpd[-1])
+
+# finish summing these up, then do a second time with a narrow band around the points
+# then return this wall straight out
+# we can also scan along a continuum and set a range size for the wall
+#	hvec = 
+#	var orientedwallpoints
+	
 	print("Nscan2s ", Nscan2s, " wallpoints ", len(potreewallpoints))
-	var planefittrans = Transform(laserorient.basis, potreecontactpoint)
+	var planefittrans = Transform(planebasis, planepoint)
 	return transform*planefittrans
 
 
