@@ -15,10 +15,10 @@ const float fardist = 30.0;
 const float fardisttaper = 20.0;
 const float fardisttaperfac = -(fardisttaper*((fardisttaper + fardist)))/fardist;
 
-const vec3 highlightcol = vec3(1,1,0);
-const vec3 highlightcol2 = vec3(0,1,1);
-const float highlightdist = 0.5;
-const float sizebumpdist = 0.25;
+uniform vec3 highlightcol = vec3(1,1,0);
+uniform vec3 highlightcol2 = vec3(0,1,1);
+uniform float highlightdist = 0.5;
+
 const vec3 bordercolor = vec3(0.1, 0.1, 0.2);
 const float edgeborder = 0.5 - 0.05; 
 const float closenessdist = 0.8;
@@ -32,12 +32,15 @@ varying float closenessfrac;
 void vertex() {
 	float distcamera = length(CAMERA_MATRIX[3].xyz - VERTEX); 
 	POINT_SIZE = point_scale/distcamera;
+
 	vec4 sv = roottransforminverse*vec4(VERTEX, 1.0); 
 	int ocellindex = (sv.x > ocellcentre.x ? 16 : 1) * 
 					 (sv.y > ocellcentre.y ? 4 : 1) * 
 					 (sv.z > ocellcentre.z ? 2 : 1); 
-	if (((ocellmask / ocellindex) % 2) != 0)
+	if (((ocellmask / ocellindex) % 2) != 0) {
 		POINT_SIZE = 0.0;
+		// should return here but causes points to blip purple if these other values aren't set
+	}
 
 	NORMAL = CAMERA_MATRIX[2].xyz;
 
@@ -45,10 +48,6 @@ void vertex() {
 	float emissionfac = clamp(1.0 - abs(distplane)/highlightdist, 0.0, 1.0);
 	emissioncol = (distplane > 0.0 ? highlightcol : highlightcol2)*emissionfac;
 	
-	// distcamera : [ 0, fardist ]
-	// 1/(distcamera + fardisttaper)  : [ 1/(fardisttaper),  1/(fardisttaper + fardist) ]
-	// 1/(fardisttaper + fardist) - 1/(fardisttaper) =  -fardist/(fardisttaper*((fardisttaper + fardist))) = 
-	//float mixval = distcamera/fardist;
 	float mixval = (1.0/(distcamera + fardisttaper) - 1.0/fardisttaper)*fardisttaperfac;
 	vec3 distancecolor = mix(closecol, farcol, mixval);
 	COLOR.rgb = mix(distancecolor, COLOR.rgb, colormixweight);

@@ -3,7 +3,6 @@ extends "res://potreework/Onode.gd"
 var metadata = null
 var mdscale = Vector3(1,1,1)
 var mdoffset = Vector3(0,0,0)
-var colormixweight = 1.0
 
 var highlightplaneperp = Vector3(1,0,0)
 var highlightplanedot = 0.0
@@ -180,13 +179,11 @@ func constructpotreerootnode(lmetadata, lurlmetadata, bboffset):
 	if attributes_rgb_offset == -1:
 		attributes_rgb_prebytes = -1
 		attributes_postbytes = attributes_size - 12
-		colormixweight = 0.0
 	else:
 		attributes_rgb_prebytes = attributes_rgb_offset - 12
 		attributes_postbytes = attributes_size - (attributes_rgb_offset + 6)
-		colormixweight = 0.8
 		Tglobal.housahedronmode = true
-		print("Entering housahedronmode")
+		print("Setting housahedronmode")
 	
 	hierarchybyteOffset = 0
 	hierarchybyteSize = metadata["hierarchy"]["firstChunkSize"]

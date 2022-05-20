@@ -198,7 +198,8 @@ func setactivetargetwall(newactivetargetwall):
 	print("setactivetargetwall ", newactivetargetwall.get_name() if newactivetargetwall != null else "null")
 	if activetargetwall != null and activetargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		activetargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").set_surface_material(0, materialsystem.xcdrawingmaterial("normal"))
-		activetargetwall.get_node("PathLines").set_surface_material(0, materialsystem.pathlinematerial("normal"))
+		if activetargetwall.get_node("PathLines").get_surface_material_count() != 0: 
+			activetargetwall.get_node("PathLines").set_surface_material(0, materialsystem.pathlinematerial("normal"))
 		for xcnode in activetargetwall.get_node("XCnodes").get_children():
 			xcnode.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("selected" if xcnode == activetargetnode else clearednodematerialtype(xcnode, false, DRAWING_TYPE.DT_XCDRAWING, activetargetwall.nodepointvalence1s)))
 	

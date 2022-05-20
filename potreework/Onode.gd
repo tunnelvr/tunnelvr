@@ -141,7 +141,16 @@ func Yloadoctcellpoints(foctreeF, pointsizefactor, roottransforminverse, rootnod
 	pointmaterial.set_shader_param("roottransforminverse", roottransforminverse)
 	pointmaterial.set_shader_param("highlightplaneperp", rootnode.highlightplaneperp)
 	pointmaterial.set_shader_param("highlightplanedot", rootnode.highlightplanedot)
-	pointmaterial.set_shader_param("colormixweight", rootnode.colormixweight)
+
+	var colormixweight = 0.0
+	if rootnode.attributes_rgb_prebytes != -1:
+		colormixweight = 0.8 if Tglobal.housahedronmode else 0.5
+	pointmaterial.set_shader_param("colormixweight", colormixweight)
+
+	if Tglobal.housahedronmode:
+		pointmaterial.set_shader_param("highlightdist", 0.15)
+		pointmaterial.set_shader_param("highlightcol", Vector3(0,0.8,0.8))
+		pointmaterial.set_shader_param("highlightcol2", Vector3(0,0.8,0.8))
 
 	set_surface_material(0, pointmaterial)
 	dt = OS.get_ticks_msec() - t0
