@@ -1274,10 +1274,13 @@ func buttonreleased_vrgrip():
 				var potreeexperiments = get_node("/root/Spatial/PotreeExperiments")
 				if potreeexperiments.visible:
 					var laserlength = gripmenu.gripmenulaserorient.origin.distance_to(gripmenu.gripmenupointertargetpoint)
-					potreeplanefittrans = potreeexperiments.laserplanfitting(gripmenu.gripmenulaserorient, laserlength if not is_zero_approx(laserlength) else 50)
+					var Glaserlength = min(15, laserlength if not is_zero_approx(laserlength) else 50)
+					potreeplanefittrans = potreeexperiments.laserplanfitting(gripmenu.gripmenulaserorient, Glaserlength)
 			if potreeplanefittrans != null:
 				pt0 = potreeplanefittrans.origin
 				eyept0vec = -potreeplanefittrans.basis.z
+				if eyept0vec.x == 0 and eyept0vec.z == 0:
+					newxcvertplane = false
 			elif gripmenu.gripmenupointertargettype == "XCtubesector":
 				var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(gripmenu.gripmenupointertargetwall.xcname0)
 				var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(gripmenu.gripmenupointertargetwall.xcname1)

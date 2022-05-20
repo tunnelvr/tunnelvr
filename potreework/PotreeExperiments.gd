@@ -321,6 +321,10 @@ func Dcorrectvisibilitymask():
 
 func laserplanfitting(Glaserorient, laserlength):
 	var rayradius = 0.15
+	var raywallfilterradius = rayradius*0.6
+	var floorfilterdepth = rayradius*0.4
+		
+	var laserelev = rad2deg(atan2(Glaserorient.basis.z.y, Vector2(Glaserorient.basis.z.x, Glaserorient.basis.z.z).length()))
 	var laserorient = transform.inverse()*Glaserorient
 	
 	print("Glaserorient  ", Glaserorient.basis.z, " ", laserorient.basis.z)
@@ -371,6 +375,9 @@ func laserplanfitting(Glaserorient, laserlength):
 	var potreewallpoints = [ ]
 	var potreewallFpoints = [ ]
 	var Nscan2s = 0
+	var nrayradiuspoints = 0
+	var sumpotreefloorzs = 0.0
+	var npotreefloorzs = 0
 	for lscanningnode in segintersectingboxestoscan:
 		var boxradius = (lscanningnode.ocellsize/2).length()
 		if potreecontactpoint.distance_to(lscanningnode.ocellorigin) < rayradius + boxradius:
@@ -379,13 +386,26 @@ func laserplanfitting(Glaserorient, laserlength):
 			var surfacearrays = lscanningnode.mesh.surface_get_arrays(0)
 			var surfacepoints = surfacearrays[Mesh.ARRAY_VERTEX]  # will contain duplicates from lower boxes if we don't filter out by the visibility mask
 			for p in surfacepoints:
-				var Gvp = transform.xform(p + lscanningnode.ocellorigin) - Gpotreecontactpoint
 				var vp = p - relsegfrom
+				var Gvp = transform.xform(p + lscanningnode.ocellorigin) - Gpotreecontactpoint
+				#     var Gvp = transform.basis.xform(vp)
 				assert (is_equal_approx(vp.length(), Gvp.length()))
 				if Gvp.length() < rayradius:
-					#var Gvp = transform.basis.xform(vp)
-					potreewallpoints.push_back(Gvp)
-					potreewallFpoints.push_back(Vector2(hvecperp.dot(Gvp), hvec.dot(Gvp)))
+					nrayradiuspoints += 1
+					if abs(Gvp.y) < floorfilterdepth:
+						sumpotreefloorzs += Gvp.y
+						npotreefloorzs += 1
+					var fGvp = Vector2(hvecperp.dot(Gvp), hvec.dot(Gvp))
+					if abs(fGvp.y) < raywallfilterradius:
+						potreewallpoints.push_back(Gvp)
+						potreewallFpoints.push_back(fGvp)
+					
+					
+	if abs(laserelev) > 75.0:
+		if npotreefloorzs > nrayradiuspoints*0.6:
+			var bheight = sumpotreefloorzs/npotreefloorzs
+			var planepoint = Gpotreecontactpoint + Vector3(0, bheight, 0)
+			return Transform(Vector3(1,0,0), Vector3(0,0,-1), Vector3(0,1,0), planepoint)
 
 	var Sx = 0.0
 	var Sx2 = 0.0
@@ -403,15 +423,11 @@ func laserplanfitting(Glaserorient, laserlength):
 		
 	var a = (n*Sxy - Sx*Sy)/d
 	var b = (Sy*Sx2 - Sx*Sxy)/d
-	print("aa  ", a, " ", b, " ", n)
 	
-	a = 0
-	b = 0
-	
-
-	var planepoint = Gpotreecontactpoint + b*hvec
 	var planeang = atan(a)
-	var planebasis = Glaserorient.basis.rotated(Vector3(0,1,0), planeang)
+	print("aa  ", a, " ", b, " ", n, "points out of ", nrayradiuspoints, " planeang ", rad2deg(planeang))
+	var planepoint = Gpotreecontactpoint + b*hvec
+	var planebasis = Glaserorient.basis.rotated(Vector3(0,-1,0), planeang)
 
 	var Dnewhvec = Vector3(-planebasis.z.x, 0.0, -planebasis.z.z).normalized()
 	var Dnewhvecperp = Vector3(Dnewhvec.z, 0.0, -Dnewhvec.x)
@@ -432,6 +448,6 @@ func laserplanfitting(Glaserorient, laserlength):
 	
 	print("Nscan2s ", Nscan2s, " wallpoints ", len(potreewallpoints))
 	var planefittrans = Transform(planebasis, planepoint)
-	return transform*planefittrans
+	return planefittrans
 
 
