@@ -887,8 +887,10 @@ func _on_resourceoptions_buttondown_setavailablefunctions():
 		$Viewport/GUI/Panel/ResourceOptions.set_item_text(printxcpropertiesid, "Print Centreline")
 		$Viewport/GUI/Panel/ResourceOptions.set_item_text(setxcpropertiesid, "Set Centreline")
 	else:
-		$Viewport/GUI/Panel/ResourceOptions.set_item_text(printxcpropertiesid, resourceoptionlookup[printxcpropertiesid])
-		$Viewport/GUI/Panel/ResourceOptions.set_item_text(setxcpropertiesid, resourceoptionlookup[setxcpropertiesid])
+		$Viewport/GUI/Panel/ResourceOptions.set_item_text(printxcpropertiesid, "Print XCproperties")
+		$Viewport/GUI/Panel/ResourceOptions.set_item_text(setxcpropertiesid, "Set XCproperties")
+	$Viewport/GUI/Panel/ResourceOptions.set_item_disabled(printxcpropertiesid, (xcselecteddrawing_forrsourcefunctions == null))
+	$Viewport/GUI/Panel/ResourceOptions.set_item_disabled(setxcpropertiesid, (xcselecteddrawing_forrsourcefunctions == null))
 
 	var bcentrelinedistortenable = false
 	if xcselecteddrawing_forrsourcefunctions != null and xcselecteddrawing_forrsourcefunctions.drawingtype == DRAWING_TYPE.DT_CENTRELINE:
@@ -947,9 +949,11 @@ func _on_resourceoptions_selected(index):
 			
 	if (nrosel == "Set XCproperties" or nrosel == "Set Centreline"):
 		var jresource = parse_json($Viewport/GUI/Panel/EditColorRect/TextEdit.text)
+		var labeltext = ""
 		if jresource != null and jresource.has("xcname"):
 			xcselecteddrawing_forrsourcefunctions = sketchsystem.get_node("XCdrawings").get_node_or_null(jresource["xcname"])
 			jresource.erase("xcname")
+		var bcreatingnewcentreline = false
 		if is_instance_valid(xcselecteddrawing_forrsourcefunctions):
 			var xcdrawingtype = xcselecteddrawing_forrsourcefunctions.drawingtype
 			if jresource != null:
@@ -962,12 +966,25 @@ func _on_resourceoptions_selected(index):
 					jresource.erase("centrelineconnection")
 				if jresource.has("drawingtype"):
 					var ldrawingtype = "CENTRELINE" if xcdrawingtype == DRAWING_TYPE.DT_CENTRELINE else ("TEXTURE" if xcdrawingtype == DRAWING_TYPE.DT_FLOORTEXTURE else "ROPEHANG")
-					if jresource["drawingtype"] != ldrawingtype:
-						setpanellabeltext("Cannot change drawing type")
+					if jresource["drawingtype"] == "CENTRELINE" and ldrawingtype == "ROPEHANG":
+						if len(get_tree().get_nodes_in_group("gpcentrelinegeo")) == 0:
+							labeltext = "Changing ropehang into centreline"
+							bcreatingnewcentreline = true
+						else:
+							labeltext = "Already have a centreline"
+							jresource = null
+					elif jresource["drawingtype"] != ldrawingtype:
+						labeltext = "Cannot change drawing type"
 						jresource = null
+					else:
+						jresource.erase("drawingtype")
 				elif xcdrawingtype != DRAWING_TYPE.DT_XCDRAWING:
-					setpanellabeltext("Cannot change drawing type")
+					labeltext = "Cannot change drawing type"
 					jresource = null
+				else:
+					jresource.erase("drawingtype")
+			else:
+				labeltext = "Bad JSON format"
 			if jresource != null:
 				var dnode = Spatial.new()
 				dnode.transform = xcselecteddrawing_forrsourcefunctions.transform
@@ -977,19 +994,24 @@ func _on_resourceoptions_selected(index):
 				if jresource.has("rotation") and typeof(jresource["rotation"]) == TYPE_ARRAY and len(jresource["rotation"]) == 3:
 					dnode.rotation_degrees = Vector3(float(jresource["rotation"][0]), float(jresource["rotation"][1]), float(jresource["rotation"][2]))
 					jresource.erase("rotation")
-				xcselecteddrawing_forrsourcefunctions.additionalproperties = jresource
 				var xcdata = { "name":xcselecteddrawing_forrsourcefunctions.get_name(), 
 							   "prevtransformpos":xcselecteddrawing_forrsourcefunctions.transform,
 							   "transformpos":dnode.transform
 							 }
+				if bcreatingnewcentreline:
+					xcdata["drawingtype"] = DRAWING_TYPE.DT_CENTRELINE
+					xcdata["name"] = xcselecteddrawing_forrsourcefunctions.get_name() + "_centreline"
+					xcdata["nodepoints"] = xcselecteddrawing_forrsourcefunctions.nodepoints.duplicate()
+					xcdata["onepathpairs"] = xcselecteddrawing_forrsourcefunctions.onepathpairs.duplicate()
+				if len(jresource) != 0:
+					xcdata["additionalproperties"] = jresource
 				sketchsystem.actsketchchange([xcdata])
 				sketchsystem.pointersystem.clearactivetargetnode()
-				setpanellabeltext("XCdrawing properties updated")
-				
-			else:
-				setpanellabeltext("Bad JSON format")
+				if labeltext == "":
+					labeltext = "XCdrawing properties updated"
 		else:
-			setpanellabeltext("No XCdrawing selected")
+			labeltext = "No XCdrawing selected"
+		setpanellabeltext(labeltext)
 
 	elif nrosel.count("Potree"):
 		var potreeexperiments = selfSpatial.get_node("PotreeExperiments")
