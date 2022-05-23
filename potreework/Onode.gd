@@ -158,7 +158,6 @@ func Yloadoctcellpoints(foctreeF, pointsizefactor, roottransforminverse, rootnod
 		print("Excessive Yloadoctcellpoints_E time ", dt)
 
 
-
 func constructpotreenode(parentnode, childIndex, Droottransforminverse):
 	spacing = parentnode.spacing/spacingdivider
 	powdiv2 = parentnode.powdiv2/2.0
