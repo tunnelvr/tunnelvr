@@ -867,14 +867,29 @@ func _on_resourceoptions_buttondown_setavailablefunctions():
 	if not (nrosel in ["--resources"]):
 		$Viewport/GUI/Panel/ResourceOptions.selected = 0
 
-	xcselecteddrawing_forrsourcefunctions = sketchsystem.pointersystem.activetargetnodewall if sketchsystem.pointersystem.activetargetnodewall != null else sketchsystem.pointersystem.activetargetwall
-	print("xcselecteddrawing_forrsourcefunctions ", xcselecteddrawing_forrsourcefunctions)
-	if xcselecteddrawing_forrsourcefunctions == null:
+	var xcdrawingcentrelines = get_tree().get_nodes_in_group("gpcentrelinegeo")
+	if sketchsystem.pointersystem.activetargetnodewall != null:
+		xcselecteddrawing_forrsourcefunctions = sketchsystem.pointersystem.activetargetnodewall
+	elif sketchsystem.pointersystem.activetargetwall != null:
+		xcselecteddrawing_forrsourcefunctions = sketchsystem.pointersystem.activetargetwall
+	else:
 		var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
 		if planviewsystem.planviewactive and planviewsystem.activetargetfloor != null:
 			xcselecteddrawing_forrsourcefunctions = planviewsystem.activetargetfloor
+		elif len(xcdrawingcentrelines) == 1:
+			xcselecteddrawing_forrsourcefunctions = xcdrawingcentrelines[0]
+		else:
+			xcselecteddrawing_forrsourcefunctions = null
+	var printxcpropertiesid = resourceoptionlookup["Print XCproperties"]
+	var setxcpropertiesid = resourceoptionlookup["Set XCproperties"]
+	print("xcselecteddrawing_forrsourcefunctions ", xcselecteddrawing_forrsourcefunctions)
+	if xcselecteddrawing_forrsourcefunctions != null and xcselecteddrawing_forrsourcefunctions.drawingtype == DRAWING_TYPE.DT_CENTRELINE:
+		$Viewport/GUI/Panel/ResourceOptions.set_item_text(printxcpropertiesid, "Print Centreline")
+		$Viewport/GUI/Panel/ResourceOptions.set_item_text(setxcpropertiesid, "Set Centreline")
+	else:
+		$Viewport/GUI/Panel/ResourceOptions.set_item_text(printxcpropertiesid, resourceoptionlookup[printxcpropertiesid])
+		$Viewport/GUI/Panel/ResourceOptions.set_item_text(setxcpropertiesid, resourceoptionlookup[setxcpropertiesid])
 
-	var xcdrawingcentrelines = get_tree().get_nodes_in_group("gpcentrelinegeo")
 	var bcentrelinedistortenable = false
 	if xcselecteddrawing_forrsourcefunctions != null and xcselecteddrawing_forrsourcefunctions.drawingtype == DRAWING_TYPE.DT_CENTRELINE:
 		centrelineselected_forresourcefunction = xcselecteddrawing_forrsourcefunctions
@@ -901,8 +916,6 @@ func _on_resourceoptions_buttondown_setavailablefunctions():
 	else:
 		$Viewport/GUI/Panel/ResourceOptions.set_item_text(showhigloadpotreeid, "Hide Potree")
 
-	$Viewport/GUI/Panel/ResourceOptions.set_item_disabled(resourceoptionlookup["Print XCproperties"], xcselecteddrawing_forrsourcefunctions == null)
-	$Viewport/GUI/Panel/ResourceOptions.set_item_disabled(resourceoptionlookup["Set XCproperties"], xcselecteddrawing_forrsourcefunctions == null)
 	$Viewport/GUI/Panel/ResourceOptions.set_item_disabled(resourceoptionlookup["Set new file"], regexacceptableprojectname.search(mtext) == null)
 	$Viewport/GUI/Panel/ResourceOptions.set_item_disabled(resourceoptionlookup["Send message"], not Tglobal.connectiontoserveractive)
 	$Viewport/GUI/Panel/ResourceOptions.set_item_disabled(resourceoptionlookup["Apply to flagsign"], not (sketchsystem.pointersystem.activetargetnode != null and sketchsystem.pointersystem.activetargetnodewall != null and sketchsystem.pointersystem.activetargetnodewall.drawingtype == DRAWING_TYPE.DT_ROPEHANG))
@@ -912,45 +925,50 @@ func _on_resourceoptions_selected(index):
 		$Viewport/GUI/Panel/ResourceOptions.selected = index
 	var nrosel = $Viewport/GUI/Panel/ResourceOptions.get_item_text(index)
 	print("Select resourceoption: ", nrosel)
-	if nrosel == "Print XCproperties":
-		if xcselecteddrawing_forrsourcefunctions != null:
-			var xcproperties = xcselecteddrawing_forrsourcefunctions.additionalproperties.duplicate() if xcselecteddrawing_forrsourcefunctions.additionalproperties != null else {}
-			xcproperties["xcname"] = xcselecteddrawing_forrsourcefunctions.get_name()
-			if xcselecteddrawing_forrsourcefunctions["xcresource"]:
-				xcproperties["xcresource"] = xcselecteddrawing_forrsourcefunctions["xcresource"]
-			if sketchsystem.pointersystem.activetargetnode != null:
-				xcproperties["snodename"] = sketchsystem.pointersystem.activetargetnode.get_name()
-			var xcpos = xcselecteddrawing_forrsourcefunctions.translation
-			var xcrot = xcselecteddrawing_forrsourcefunctions.rotation_degrees
-			xcproperties["position"] = [xcpos.x, xcpos.y, xcpos.z]
-			xcproperties["rotation"] = [xcrot.x, xcrot.y, xcrot.z]
-			var xcdrawingtype = xcselecteddrawing_forrsourcefunctions.drawingtype
-			if xcdrawingtype != DRAWING_TYPE.DT_XCDRAWING:
-				xcproperties["drawingtype"] = "CENTRELINE" if xcdrawingtype == DRAWING_TYPE.DT_CENTRELINE else ("TEXTURE" if xcdrawingtype == DRAWING_TYPE.DT_FLOORTEXTURE else "ROPEHANG")
-			if xcdrawingtype == DRAWING_TYPE.DT_CENTRELINE:
-				var clconnectcode = xcselecteddrawing_forrsourcefunctions.xccentrelineconnectstofloor(sketchsystem.get_node("XCdrawings"))
-				xcproperties["centrelineconnection"] = "anchored" if clconnectcode == 1 else ("incoming for mapping" if clconnectcode == 2 else "free") 
-			DRAWING_TYPE.DT_XCDRAWING # DT_CENTRELINE, DT_ROPEHANG, DT_FLOORTEXTURE
-			$Viewport/GUI/Panel/EditColorRect/TextEdit.text = JSON.print(xcproperties, "  ", true)
-		else:
-			setpanellabeltext("No XCdrawing selected")
+	if (nrosel == "Print XCproperties" or nrosel == "Print Centreline") and is_instance_valid(xcselecteddrawing_forrsourcefunctions):
+		var xcproperties = xcselecteddrawing_forrsourcefunctions.additionalproperties.duplicate() if xcselecteddrawing_forrsourcefunctions.additionalproperties != null else {}
+		xcproperties["xcname"] = xcselecteddrawing_forrsourcefunctions.get_name()
+		if xcselecteddrawing_forrsourcefunctions["xcresource"]:
+			xcproperties["xcresource"] = xcselecteddrawing_forrsourcefunctions["xcresource"]
+		if sketchsystem.pointersystem.activetargetnode != null:
+			xcproperties["snodename"] = sketchsystem.pointersystem.activetargetnode.get_name()
+		var xcpos = xcselecteddrawing_forrsourcefunctions.translation
+		var xcrot = xcselecteddrawing_forrsourcefunctions.rotation_degrees
+		xcproperties["position"] = [xcpos.x, xcpos.y, xcpos.z]
+		xcproperties["rotation"] = [xcrot.x, xcrot.y, xcrot.z]
+		var xcdrawingtype = xcselecteddrawing_forrsourcefunctions.drawingtype
+		if xcdrawingtype != DRAWING_TYPE.DT_XCDRAWING:
+			xcproperties["drawingtype"] = "CENTRELINE" if xcdrawingtype == DRAWING_TYPE.DT_CENTRELINE else ("TEXTURE" if xcdrawingtype == DRAWING_TYPE.DT_FLOORTEXTURE else "ROPEHANG")
+		if xcdrawingtype == DRAWING_TYPE.DT_CENTRELINE:
+			var clconnectcode = xcselecteddrawing_forrsourcefunctions.xccentrelineconnectstofloor(sketchsystem.get_node("XCdrawings"))
+			xcproperties["centrelineconnection"] = "anchored" if clconnectcode == 1 else ("incoming for mapping" if clconnectcode == 2 else "free") 
+		DRAWING_TYPE.DT_XCDRAWING # DT_CENTRELINE, DT_ROPEHANG, DT_FLOORTEXTURE
+		$Viewport/GUI/Panel/EditColorRect/TextEdit.text = JSON.print(xcproperties, "  ", true)
 			
-	if nrosel == "Set XCproperties":
+	if (nrosel == "Set XCproperties" or nrosel == "Set Centreline"):
 		var jresource = parse_json($Viewport/GUI/Panel/EditColorRect/TextEdit.text)
 		if jresource != null and jresource.has("xcname"):
 			xcselecteddrawing_forrsourcefunctions = sketchsystem.get_node("XCdrawings").get_node_or_null(jresource["xcname"])
 			jresource.erase("xcname")
-		if xcselecteddrawing_forrsourcefunctions != null:
+		if is_instance_valid(xcselecteddrawing_forrsourcefunctions):
+			var xcdrawingtype = xcselecteddrawing_forrsourcefunctions.drawingtype
 			if jresource != null:
 				if jresource.has("xcresource"):
 					xcselecteddrawing_forrsourcefunctions.xcresource = jresource["xcresource"]
 					jresource.erase("xcresource")
 				if jresource.has("snodename"):
 					jresource.erase("snodename")
-				if jresource.has("drawingtype"):
-					jresource.erase("drawingtype")
 				if jresource.has("centrelineconnection"):
 					jresource.erase("centrelineconnection")
+				if jresource.has("drawingtype"):
+					var ldrawingtype = "CENTRELINE" if xcdrawingtype == DRAWING_TYPE.DT_CENTRELINE else ("TEXTURE" if xcdrawingtype == DRAWING_TYPE.DT_FLOORTEXTURE else "ROPEHANG")
+					if jresource["drawingtype"] != ldrawingtype:
+						setpanellabeltext("Cannot change drawing type")
+						jresource = null
+				elif xcdrawingtype != DRAWING_TYPE.DT_XCDRAWING:
+					setpanellabeltext("Cannot change drawing type")
+					jresource = null
+			if jresource != null:
 				var dnode = Spatial.new()
 				dnode.transform = xcselecteddrawing_forrsourcefunctions.transform
 				if jresource.has("position") and typeof(jresource["position"]) == TYPE_ARRAY and len(jresource["position"]) == 3:
