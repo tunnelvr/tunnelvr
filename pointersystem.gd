@@ -1317,7 +1317,11 @@ func buttonreleased_vrgrip():
 							   "drawingtype":DRAWING_TYPE.DT_XCDRAWING,
 							   "transformpos":Transform(Basis().rotated(Vector3(0,-1,0), drawingwallangle), pt0) }
 				if not newxcvertplane:
-					xcdata["transformpos"] = Transform(Vector3(1,0,0), Vector3(0,0,-1), Vector3(0,1,0), pt0)
+					if eyept0vec.y < 0.0:
+						xcdata["transformpos"] = Transform(Vector3(1,0,0), Vector3(0,0,-1), Vector3(0,1,0), pt0)
+					else:
+						xcdata["transformpos"] = Transform(Vector3(1,0,0), Vector3(0,0,1), Vector3(0,-1,0), pt0)
+					
 				var xcviz = { "xcvizstates": { xcdata["name"]:DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE } }
 				sketchsystem.actsketchchange([xcdata, xcviz])
 				clearactivetargetnode()

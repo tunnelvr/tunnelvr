@@ -37,7 +37,18 @@ func sethighlightplane(lhighlightplaneperp, lhighlightplanedot):
 		if node.pointmaterial != null:
 			node.pointmaterial.set_shader_param("highlightplaneperp", highlightplaneperp)
 			node.pointmaterial.set_shader_param("highlightplanedot", highlightplanedot)
+			if Tglobal.housahedronmode:
+				node.pointmaterial.set_shader_param("highlightdist", 0.15)
+				node.pointmaterial.set_shader_param("highlightcol", Vector3(0.8,0.0,0.8))
+				node.pointmaterial.set_shader_param("highlightcol2", Vector3(0.8,0.0,0.8))
+			else:
+				node.pointmaterial.set_shader_param("highlightdist", 0.5)
+				node.pointmaterial.set_shader_param("highlightcol", Vector3(1,1,0))
+				node.pointmaterial.set_shader_param("highlightcol2", Vector3(0,1,1))
 		node = successornode(node, not node.visible)
+
+
+
 	
 func successornode(node, skip):
 	if not skip and node.get_child_count() > 1:

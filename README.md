@@ -171,6 +171,8 @@ It is possible to convert a ROPEHANG type into a CENTRELINE type XCdrawing if on
 by changing the drawingtype parameter and clicking "Set XCproperties".  This is provided to 
 make it convenient to create this object in a pointcloud world for aligning 2D drawings and 
 associating potree geometry and the housahedron setting.
+The potree transform is taken from the centreline transform, so you need to make sure 
+that rotation=[-90,0,0] to account for Z-vector up in its format
 
 # Running on a server
 

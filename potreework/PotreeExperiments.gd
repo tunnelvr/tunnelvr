@@ -139,8 +139,10 @@ func LoadPotree():
 	var fmetadataF = yield(self, "updatepotreepriorities_fetchsignal")
 	if fmetadataF == null:
 		return
-	var metadata = parse_json(fmetadataF.get_as_text())
+	var smetadata = fmetadataF.get_as_text()
+	var metadata = parse_json(smetadata)
 	if metadata == null:
+		print("json bad ", smetadata)
 		return
 	rootnode = MeshInstance.new()
 	rootnode.set_script(load("res://potreework/Onode_root.gd"))
@@ -398,11 +400,14 @@ func laserplanfitting(Glaserorient, laserlength):
 						potreewallFpoints.push_back(fGvp)
 					
 					
-	if abs(laserelev) > 70.0:
+	if abs(laserelev) > 60.0:
 		if npotreefloorzs > nrayradiuspoints*0.6:
 			var bheight = sumpotreefloorzs/npotreefloorzs
 			var planepoint = Gpotreecontactpoint + Vector3(0, bheight, 0)
-			return Transform(Vector3(1,0,0), Vector3(0,0,-1), Vector3(0,1,0), planepoint)
+			if laserelev < 0.0:
+				return Transform(Vector3(1,0,0), Vector3(0,0,-1), Vector3(0,1,0), planepoint)
+			else:
+				return Transform(Vector3(1,0,0), Vector3(0,0,1), Vector3(0,-1,0), planepoint)
 
 	var Sx = 0.0
 	var Sx2 = 0.0

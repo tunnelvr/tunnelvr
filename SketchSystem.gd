@@ -226,6 +226,7 @@ remote func actsketchchangeL(xcdatalist):
 		if xcdatalist[0]["caveworldchunk"] == 0:
 			var PlayerDirections = get_node("/root/Spatial/BodyObjects/PlayerDirections")
 			Tglobal.notisloadingcavechunks = false
+			Tglobal.housahedronmode = false
 			if xcdatalist[0]["sketchname"] != "importing_the_centreline__do_not_clear":
 				clearentirecaveworld()
 			else:

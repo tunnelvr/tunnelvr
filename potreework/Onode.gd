@@ -149,8 +149,8 @@ func Yloadoctcellpoints(foctreeF, pointsizefactor, roottransforminverse, rootnod
 
 	if Tglobal.housahedronmode:
 		pointmaterial.set_shader_param("highlightdist", 0.15)
-		pointmaterial.set_shader_param("highlightcol", Vector3(0,0.8,0.8))
-		pointmaterial.set_shader_param("highlightcol2", Vector3(0,0.8,0.8))
+		pointmaterial.set_shader_param("highlightcol", Vector3(0.8,0.0,0.8))
+		pointmaterial.set_shader_param("highlightcol2", Vector3(0.8,0.0,0.8))
 
 	set_surface_material(0, pointmaterial)
 	dt = OS.get_ticks_msec() - t0
@@ -207,7 +207,7 @@ func loadnodedefinition(fhierarchy):
 		byteOffset = fhierarchy.get_64()
 		byteSize = fhierarchy.get_64()
 		name[0] = ("n" if ntype == 0 else  "l")
-		assert ((ntype == 1) == (childMask == 0))
+		assert ((ntype == 0) or (childMask == 0))
 
 
 const Nhierarchyframe = 30
