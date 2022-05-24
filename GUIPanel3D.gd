@@ -11,6 +11,8 @@ onready var selfSpatial = get_node("/root/Spatial")
 onready var virtualkeyboard = get_node("/root/Spatial/GuiSystem/KeyboardPanel")
 
 var regexacceptableprojectname = RegEx.new()
+var regexjsontripleflattener = RegEx.new()
+
 
 # ln -s /home/julian/data/NorthernEngland/PeakDistrict/tunnelvrdata/cavefiles /home/julian/.local/share/godot/app_userdata/tunnelvr_v0.6/cavefiles
 var cavefilesdir = "user://cavefiles/"
@@ -564,6 +566,7 @@ var uniqueinstancestring = ""
 func toplevelcalled_ready():
 	uniqueinstancestring = OS.get_unique_id().replace("{", "").split("-")[0].to_upper()+"_"+str(randi())
 	regexacceptableprojectname.compile('(?i)^([a-z0-9.\\-_]+)\\s*$')
+	regexjsontripleflattener.compile('\\[\\s*([^,]+),\\s*([^,]+),\\s*(\\S+)\\s*]')
 	if has_node("ViewportReal") and Tglobal.phoneoverlay == null:
 		var fgui = $Viewport/GUI
 		$Viewport.remove_child(fgui)
@@ -922,6 +925,8 @@ func _on_resourceoptions_buttondown_setavailablefunctions():
 	$Viewport/GUI/Panel/ResourceOptions.set_item_disabled(resourceoptionlookup["Send message"], not Tglobal.connectiontoserveractive)
 	$Viewport/GUI/Panel/ResourceOptions.set_item_disabled(resourceoptionlookup["Apply to flagsign"], not (sketchsystem.pointersystem.activetargetnode != null and sketchsystem.pointersystem.activetargetnodewall != null and sketchsystem.pointersystem.activetargetnodewall.drawingtype == DRAWING_TYPE.DT_ROPEHANG))
 
+
+
 func _on_resourceoptions_selected(index):
 	if $Viewport/GUI/Panel/ResourceOptions.selected != index:
 		$Viewport/GUI/Panel/ResourceOptions.selected = index
@@ -944,8 +949,10 @@ func _on_resourceoptions_selected(index):
 		if xcdrawingtype == DRAWING_TYPE.DT_CENTRELINE:
 			var clconnectcode = xcselecteddrawing_forrsourcefunctions.xccentrelineconnectstofloor(sketchsystem.get_node("XCdrawings"))
 			xcproperties["centrelineconnection"] = "anchored" if clconnectcode == 1 else ("incoming for mapping" if clconnectcode == 2 else "free") 
-		DRAWING_TYPE.DT_XCDRAWING # DT_CENTRELINE, DT_ROPEHANG, DT_FLOORTEXTURE
-		$Viewport/GUI/Panel/EditColorRect/TextEdit.text = JSON.print(xcproperties, "  ", true)
+
+		var sxcproperties = JSON.print(xcproperties, "  ", true)
+		sxcproperties = regexjsontripleflattener.sub(sxcproperties, "[$1, $2, $3]", true)
+		$Viewport/GUI/Panel/EditColorRect/TextEdit.text = sxcproperties
 			
 	if (nrosel == "Set XCproperties" or nrosel == "Set Centreline"):
 		var jresource = parse_json($Viewport/GUI/Panel/EditColorRect/TextEdit.text)
@@ -968,7 +975,7 @@ func _on_resourceoptions_selected(index):
 					var ldrawingtype = "CENTRELINE" if xcdrawingtype == DRAWING_TYPE.DT_CENTRELINE else ("TEXTURE" if xcdrawingtype == DRAWING_TYPE.DT_FLOORTEXTURE else "ROPEHANG")
 					if jresource["drawingtype"] == "CENTRELINE" and ldrawingtype == "ROPEHANG":
 						if len(get_tree().get_nodes_in_group("gpcentrelinegeo")) == 0:
-							labeltext = "Changing ropehang into centreline"
+							labeltext = "Creating centreline from ropehang"
 							bcreatingnewcentreline = true
 						else:
 							labeltext = "Already have a centreline"
