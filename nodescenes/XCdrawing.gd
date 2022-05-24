@@ -246,8 +246,8 @@ func setdrawingvisiblecode(ldrawingvisiblecode):
 						xcn.get_node("RopeLabel").visible = false
 				$RopeHang.visible = true
 				$PathLines.visible = false
-				get_node("/root/Spatial/VerletRopeSystem").addropehang($RopeHang)
 				ropehangdetectedtype = DRAWING_TYPE.RH_NORMAL
+				get_node("/root/Spatial/VerletRopeSystem").addropehang($RopeHang)
 
 			else:
 				print("Not an identified rope shape type, unhiding nodeshang")

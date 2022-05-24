@@ -86,6 +86,7 @@ func addropehang(ropehang):
 	if len(ropehang.oddropeverts) == 2 or len(ropehang.anchorropeverts) != 0:
 		setropenodelabel(ropehang, ropehang.oddropeverts[0] if len(ropehang.oddropeverts) != 0 else ropehang.anchorropeverts[0], "%.2fm"%ropehang.totalropeleng)
 	if not ropehangsinprocess.has(ropehang):
+		assert (ropehang.get_parent().ropehangdetectedtype == DRAWING_TYPE.RH_NORMAL)
 		ropehangsinprocess.push_back(ropehang)
 	ropehang.prevverletstretch = -1.0
 	ropehang.verletiterations = 0
@@ -100,7 +101,7 @@ func update_hangingroperad(sketchsystem, lhangingroperad):
 		print("updating hangingroperad", hangingroperad)
 		for xcdrawing in sketchsystem.get_node("XCdrawings").get_children():
 			var ropehang = xcdrawing.get_node_or_null("RopeHang")
-			if ropehang != null and ropehang.visible and len(ropehang.oddropeverts) <= 2:
+			if ropehang != null and ropehang.visible and xcdrawing.ropehangdetectedtype == DRAWING_TYPE.RH_NORMAL:
 				if not ropehangsinprocess.has(ropehang):
 					ropehangsinprocess.push_back(ropehang)
 				set_process(true)
@@ -150,6 +151,7 @@ func _process(delta):
 	else:
 		verropthreadmutex.lock()
 		var verropropehang = verropropehang_out
+		assert (verropropehang.get_parent().ropehangdetectedtype == DRAWING_TYPE.RH_NORMAL)
 		verropropehang_out = null
 		verropthreadmutex.unlock()
 		if verropropehang != null:
