@@ -1582,7 +1582,7 @@ func buttonreleased_vrgrip():
 
 			elif pointertarget.get_name() == "DelXC":
 				var xcdrawing = gripmenu.gripmenupointertargetwall
-				if (xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING) or (xcdrawing.drawingtype == DRAWING_TYPE.DT_ROPEHANG):
+				if (xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING) or (xcdrawing.drawingtype == DRAWING_TYPE.DT_ROPEHANG) or (xcdrawing.drawingtype == DRAWING_TYPE.DT_CENTRELINE):
 					if xcdrawing.notubeconnections_so_delxcable():
 						if activetargetnodewall == xcdrawing:
 							clearactivetargetnode()

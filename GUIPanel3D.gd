@@ -926,7 +926,6 @@ func _on_resourceoptions_buttondown_setavailablefunctions():
 	$Viewport/GUI/Panel/ResourceOptions.set_item_disabled(resourceoptionlookup["Apply to flagsign"], not (sketchsystem.pointersystem.activetargetnode != null and sketchsystem.pointersystem.activetargetnodewall != null and sketchsystem.pointersystem.activetargetnodewall.drawingtype == DRAWING_TYPE.DT_ROPEHANG))
 
 
-
 func _on_resourceoptions_selected(index):
 	if $Viewport/GUI/Panel/ResourceOptions.selected != index:
 		$Viewport/GUI/Panel/ResourceOptions.selected = index
