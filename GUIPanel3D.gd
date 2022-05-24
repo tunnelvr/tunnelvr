@@ -949,7 +949,12 @@ func _on_resourceoptions_selected(index):
 		if xcdrawingtype == DRAWING_TYPE.DT_CENTRELINE:
 			var clconnectcode = xcselecteddrawing_forrsourcefunctions.xccentrelineconnectstofloor(sketchsystem.get_node("XCdrawings"))
 			xcproperties["centrelineconnection"] = "anchored" if clconnectcode == 1 else ("incoming for mapping" if clconnectcode == 2 else "free") 
-
+			if not xcproperties.has("potreeurlmetadata"):
+				xcproperties["potreeurlmetadata"] = ""
+			if not xcproperties.has("geometrymode"):
+				xcproperties["geometrymode"] = "tunnelvr"
+			if not xcproperties.has("splaystationnoderegex"):
+				xcproperties["splaystationnoderegex"] = ".*[^\\d]$"
 		var sxcproperties = JSON.print(xcproperties, "  ", true)
 		sxcproperties = regexjsontripleflattener.sub(sxcproperties, "[$1, $2, $3]", true)
 		$Viewport/GUI/Panel/EditColorRect/TextEdit.text = sxcproperties
@@ -971,6 +976,10 @@ func _on_resourceoptions_selected(index):
 					jresource.erase("snodename")
 				if jresource.has("centrelineconnection"):
 					jresource.erase("centrelineconnection")
+				if jresource.has("potreeurlmetadata") and jresource["potreeurlmetadata"] == "":
+					jresource.erase("potreeurlmetadata")
+				if jresource.has("geometrymode") and jresource["geometrymode"] == "tunnelvr":
+					jresource.erase("geometrymode")
 				if jresource.has("drawingtype"):
 					var ldrawingtype = "CENTRELINE" if xcdrawingtype == DRAWING_TYPE.DT_CENTRELINE else ("TEXTURE" if xcdrawingtype == DRAWING_TYPE.DT_FLOORTEXTURE else "ROPEHANG")
 					if jresource["drawingtype"] == "CENTRELINE" and ldrawingtype == "ROPEHANG":
