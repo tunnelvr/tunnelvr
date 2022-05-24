@@ -32,15 +32,11 @@ var nodestopointload = [ ]
 var nodespointloaded = [ ]
 
 var rootnode = null
-var defaultpotreeurlmetadata = null
-
 var potreeurlmetadata = null
 
 onready var ImageSystem = get_node("/root/Spatial/ImageSystem")
 
 func _ready():
-	defaultpotreeurlmetadata = "http://localhost:8000/potreeconverted3/metadata.json"
-
 	var st = SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_POINTS)
 	for i in range(4):
@@ -128,10 +124,8 @@ func LoadPotree():
 			xcdrawingcentreline = lxcdrawingcentreline
 			potreeurlmetadata = xcdrawingcentreline.additionalproperties["potreeurlmetadata"]
 	if potreeurlmetadata == null:
-		if not defaultpotreeurlmetadata:
-			print("No potree url found")
-			return
-		potreeurlmetadata = defaultpotreeurlmetadata
+		print("No potree url found")
+		return
 	print("Loading ", potreeurlmetadata)
 	
 	var nonimagedataobject = { "url":potreeurlmetadata, "callbackobject":self, "callbacksignal":"updatepotreepriorities_fetchsignal" }
