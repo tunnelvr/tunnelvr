@@ -632,7 +632,13 @@ func mergexcrpcdata(xcdata):
 			labelgenerator.addnodestolabeltask(self)
 			var playermeheadcam = get_node("/root/Spatial").playerMe.get_node("HeadCam")
 			labelgenerator.restartlabelmakingprocess(playermeheadcam.global_transform.origin)
-		
+			
+		if "additionalproperties" in xcdata:
+			Tglobal.housahedronmode = (additionalproperties.get("geometrymode", "tunnelvr") == "housahedron")
+			Tglobal.splaystationnoderegex.compile(additionalproperties.get("splaystationnoderegex", ".*[^\\d]$"))
+			print("Setting housahedron mode ", Tglobal.housahedronmode)
+			# should go through and update, or ask for a restart!
+			
 	# this is was calling twice, also from xcdrawingstoupdate
 	#elif drawingtype != DRAWING_TYPE.DT_ROPEHANG:
 	#	updatexcpaths()

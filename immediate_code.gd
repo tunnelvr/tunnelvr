@@ -8,11 +8,9 @@ extends EditorScript
 
 func _run():
 	var m = RegEx.new()
-	m.compile('\\[\\s*([^,]+),\\s*([^,]+),\\s*(\\S+)\\s*]')
-	print(m.sub(j, "[$1, $2, $3]", true))
-
-	var x = { "a":"b", "c":[1,2,3], "d":[-1e6,10,-99], "f":"hithere" }
-	var j = JSON.print(x, "  ", true)
-	# ([^,],)\s*([^,],)\s*(\S+)\s*\]
-	print(j)
-
+	var merr = m.compile('\\[\\s*([^,]+),\\s*([^,]+),\\k*(\\S+)\\s*')
+	print(merr, " ", m)
+	print(m.search("jjj"))
+	m.compile("\\S+")
+	print(m.search("jjj"))
+	

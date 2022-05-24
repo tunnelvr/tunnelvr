@@ -182,8 +182,6 @@ func constructpotreerootnode(lmetadata, lurlmetadata, bboffset):
 	else:
 		attributes_rgb_prebytes = attributes_rgb_offset - 12
 		attributes_postbytes = attributes_size - (attributes_rgb_offset + 6)
-		Tglobal.housahedronmode = true
-		print("Setting housahedronmode")
 	
 	hierarchybyteOffset = 0
 	hierarchybyteSize = metadata["hierarchy"]["firstChunkSize"]
