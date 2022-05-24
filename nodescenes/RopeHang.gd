@@ -264,8 +264,8 @@ func verletstretch():
 	for i in range(len(nropeseqLengs)):
 		L += nropeseqLengs[i]
 		totalstretchropeleng += nropeseqLengsMeasured[i]
-	return totalstretchropeleng/L
-
+	return totalstretchropeleng/L   # can't explain how division by zeros are getting into here
+	
 func verletmaxvelocity():
 	var maxvel = 0.0
 	for i in range(nodenamesAnchorN, len(nverts)):
