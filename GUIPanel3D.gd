@@ -982,7 +982,7 @@ func _on_resourceoptions_selected(index):
 					jresource.erase("geometrymode")
 				if jresource.has("drawingtype"):
 					var ldrawingtype = "CENTRELINE" if xcdrawingtype == DRAWING_TYPE.DT_CENTRELINE else ("TEXTURE" if xcdrawingtype == DRAWING_TYPE.DT_FLOORTEXTURE else "ROPEHANG")
-					if jresource["drawingtype"] == "CENTRELINE" and ldrawingtype == "ROPEHANG":
+					if (jresource["drawingtype"] == "CENTRELINE" or jresource["drawingtype"] == "CENTERLINE") and ldrawingtype == "ROPEHANG":
 						if len(get_tree().get_nodes_in_group("gpcentrelinegeo")) == 0:
 							labeltext = "Creating centreline from ropehang"
 							bcreatingnewcentreline = true
