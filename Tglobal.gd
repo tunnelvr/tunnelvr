@@ -22,11 +22,15 @@ var hidecavewallstoseefloors = false
 
 var primarycamera_instanceid = 0
 
+var phoneoverlay = null
+var phonethumbmotionposition = null
+var phonethumbviewposition = null
+
+# facts lifted from the attributes of the centreline
+var housahedronmode = false
 var splaystationnoderegex = null
 func _ready():
 	splaystationnoderegex = RegEx.new()
 	splaystationnoderegex.compile(".*[^\\d]$")
+
 	
-var phoneoverlay = null
-var phonethumbmotionposition = null
-var phonethumbviewposition = null

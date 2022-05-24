@@ -32,15 +32,11 @@ var nodestopointload = [ ]
 var nodespointloaded = [ ]
 
 var rootnode = null
-var defaultpotreeurlmetadata = null
-
 var potreeurlmetadata = null
 
 onready var ImageSystem = get_node("/root/Spatial/ImageSystem")
 
 func _ready():
-	defaultpotreeurlmetadata = "http://localhost:8000/potreeconverted3/metadata.json"
-
 	var st = SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_POINTS)
 	for i in range(4):
@@ -52,9 +48,6 @@ func _ready():
 	$PointSample.mesh = pointmesh	
 	var pointmaterial =	$PointSample.get_surface_material(0)
 	yield(get_tree().create_timer(5.0), "timeout")
-	var screendimensionsscreendoorfac = OS.get_screen_size()/8.0; 
-	pointmaterial.set_shader_param("screendimensionsscreendoorfac", screendimensionsscreendoorfac)
-	print("*** screendimensionsscreendoorfac ", screendimensionsscreendoorfac)
 			
 func potreethread_function(userdata):
 	print("potreethread_function started")
@@ -104,8 +97,8 @@ func getpotreeurl():
 
 
 var Cpointsizevisibilitycutoff = 15.0
-const maxvisiblepoints = 300000
-const minvisiblepoints = 150000
+var maxvisiblepoints = 500000
+var minvisiblepoints = 200000
 var pointsizefactor = 150.0
 const updatepotreeprioritiesworkingtimeout = 4.0
 signal updatepotreepriorities_fetchsignal(f)
@@ -131,10 +124,8 @@ func LoadPotree():
 			xcdrawingcentreline = lxcdrawingcentreline
 			potreeurlmetadata = xcdrawingcentreline.additionalproperties["potreeurlmetadata"]
 	if potreeurlmetadata == null:
-		if not defaultpotreeurlmetadata:
-			print("No potree url found")
-			return
-		potreeurlmetadata = defaultpotreeurlmetadata
+		print("No potree url found")
+		return
 	print("Loading ", potreeurlmetadata)
 	
 	var nonimagedataobject = { "url":potreeurlmetadata, "callbackobject":self, "callbacksignal":"updatepotreepriorities_fetchsignal" }
@@ -142,8 +133,10 @@ func LoadPotree():
 	var fmetadataF = yield(self, "updatepotreepriorities_fetchsignal")
 	if fmetadataF == null:
 		return
-	var metadata = parse_json(fmetadataF.get_as_text())
+	var smetadata = fmetadataF.get_as_text()
+	var metadata = parse_json(smetadata)
 	if metadata == null:
+		print("json bad ", smetadata)
 		return
 	rootnode = MeshInstance.new()
 	rootnode.set_script(load("res://potreework/Onode_root.gd"))
@@ -152,7 +145,7 @@ func LoadPotree():
 	var bboffset = Vector3(bboffseta[0], bboffseta[1], bboffseta[2])
 	rootnode.constructpotreerootnode(metadata, potreeurlmetadata, bboffset)
 	if rootnode.attributes_rgb_prebytes != -1:
-		pointsizefactor = 500
+		pointsizefactor = 400
 	if xcdrawingcentreline != null:
 		transform = xcdrawingcentreline.transform
 	add_child(rootnode)
@@ -318,3 +311,139 @@ func Dcorrectvisibilitymask():
 		scanningnode = rootnode.successornode(scanningnode, false)
 		print("Dcorrectvisibilitymask runn")
 	
+
+func laserplanfitting(Glaserorient, laserlength):
+	var rayradius = 0.15
+	var raywallfilterradius = rayradius*0.6
+	var floorfilterdepth = rayradius*0.4
+		
+	var laserelev = rad2deg(-atan2(Glaserorient.basis.z.y, Vector2(Glaserorient.basis.z.x, Glaserorient.basis.z.z).length()))
+	var laserorient = transform.inverse()*Glaserorient
+	
+	print("Glaserorient  ", Glaserorient.basis.z, " ", laserorient.basis.z)
+	
+	var aabbsegmentfrom = laserorient.origin
+	var aabbsegmentto = laserorient.origin - laserorient.basis.z*laserlength
+	var segintersectingboxestoscan = [ ]
+
+	var scanningnode = rootnode
+	while scanningnode != null:
+		if scanningnode.name[0] == "h" or scanningnode.pointmaterial == null:
+			scanningnode = rootnode.successornode(scanningnode, true)
+		else:
+			assert (scanningnode.mesh != null)
+			var boxcentre = scanningnode.ocellorigin
+			var boxextents = scanningnode.ocellsize/2 + Vector3(rayradius, rayradius, rayradius)
+			var boxminmax = AABB(boxcentre - boxextents, boxextents*2)
+			var segintersects = boxminmax.intersects_segment(aabbsegmentfrom, aabbsegmentto)
+			if segintersects:
+				segintersectingboxestoscan.push_back(scanningnode)
+			scanningnode = rootnode.successornode(scanningnode, not segintersects)
+
+	print("Nboxestoscan for potree collision ", len(segintersectingboxestoscan))
+	var lammin = -1.0
+	for lscanningnode in segintersectingboxestoscan:
+		var relsegfrom = laserorient.origin - lscanningnode.ocellorigin
+		var relsegvector = -laserorient.basis.z
+		var surfacearrays = lscanningnode.mesh.surface_get_arrays(0)
+		var surfacepoints = surfacearrays[Mesh.ARRAY_VERTEX]
+		for p in surfacepoints:
+			var vp = p - relsegfrom
+			var lam = vp.dot(relsegvector)
+			if lam > 0.0 and (lam < lammin or lammin == -1):
+				var vpradial = vp - relsegvector*lam
+				var vpradiallen = vpradial.length()
+				if vpradiallen < rayradius:
+					lammin = lam
+				
+	if lammin == -1:
+		return null
+
+	var hvec = Vector3(-Glaserorient.basis.z.x, 0.0, -Glaserorient.basis.z.z).normalized()
+	var hvecperp = Vector3(hvec.z, 0.0, -hvec.x)
+	
+	var potreecontactpoint = laserorient.origin - lammin*laserorient.basis.z
+	var Gpotreecontactpoint = transform.xform(potreecontactpoint)
+	
+	var potreewallpoints = [ ]
+	var potreewallFpoints = [ ]
+	var Nscan2s = 0
+	var nrayradiuspoints = 0
+	var sumpotreefloorzs = 0.0
+	var npotreefloorzs = 0
+	for lscanningnode in segintersectingboxestoscan:
+		var boxradius = (lscanningnode.ocellsize/2).length()
+		if potreecontactpoint.distance_to(lscanningnode.ocellorigin) < rayradius + boxradius:
+			var relsegfrom = potreecontactpoint - lscanningnode.ocellorigin
+			Nscan2s += 1
+			var surfacearrays = lscanningnode.mesh.surface_get_arrays(0)
+			var surfacepoints = surfacearrays[Mesh.ARRAY_VERTEX]  # will contain duplicates from lower boxes if we don't filter out by the visibility mask
+			for p in surfacepoints:
+				var vp = p - relsegfrom
+				var Gvp = transform.xform(p + lscanningnode.ocellorigin) - Gpotreecontactpoint
+				#     var Gvp = transform.basis.xform(vp)
+				assert (is_equal_approx(vp.length(), Gvp.length()))
+				if Gvp.length() < rayradius:
+					nrayradiuspoints += 1
+					if abs(Gvp.y) < floorfilterdepth:
+						sumpotreefloorzs += Gvp.y
+						npotreefloorzs += 1
+					var fGvp = Vector2(hvecperp.dot(Gvp), hvec.dot(Gvp))
+					if abs(fGvp.y) < raywallfilterradius:
+						potreewallpoints.push_back(Gvp)
+						potreewallFpoints.push_back(fGvp)
+					
+					
+	if abs(laserelev) > 60.0:
+		if npotreefloorzs > nrayradiuspoints*0.6:
+			var bheight = sumpotreefloorzs/npotreefloorzs
+			var planepoint = Gpotreecontactpoint + Vector3(0, bheight, 0)
+			if laserelev < 0.0:
+				return Transform(Vector3(1,0,0), Vector3(0,0,-1), Vector3(0,1,0), planepoint)
+			else:
+				return Transform(Vector3(1,0,0), Vector3(0,0,1), Vector3(0,-1,0), planepoint)
+
+	var Sx = 0.0
+	var Sx2 = 0.0
+	var Sy = 0.0
+	var Sxy = 0.0
+	var n = len(potreewallFpoints)
+	for fp in potreewallFpoints:
+		Sx += fp.x
+		Sx2 += fp.x*fp.x
+		Sy += fp.y
+		Sxy += fp.x*fp.y
+	var d = n*Sx2 - Sx*Sx
+	if d == 0:
+		return null
+		
+	var a = (n*Sxy - Sx*Sy)/d
+	var b = (Sy*Sx2 - Sx*Sxy)/d
+	
+	var planeang = atan(a)
+	print("aa  ", a, " ", b, " ", n, "points out of ", nrayradiuspoints, " planeang ", rad2deg(planeang))
+	var planepoint = Gpotreecontactpoint + b*hvec
+	var planebasis = Glaserorient.basis.rotated(Vector3(0,-1,0), planeang)
+
+	var Dnewhvec = Vector3(-planebasis.z.x, 0.0, -planebasis.z.z).normalized()
+	var Dnewhvecperp = Vector3(Dnewhvec.z, 0.0, -Dnewhvec.x)
+	var Dhd = [ ]
+	var Dhpd = [ ]
+	for Dp in potreewallpoints:
+		Dhd.push_back(Dnewhvec.dot(Dp))
+		Dhpd.push_back(Dnewhvecperp.dot(Dp))
+	Dhd.sort()
+	Dhpd.sort()
+	print("hd ", Dhd[0], ",", Dhd[-1], " sidehd ", Dhpd[0], ",", Dhpd[-1])
+
+# finish summing these up, then do a second time with a narrow band around the points
+# then return this wall straight out
+# we can also scan along a continuum and set a range size for the wall
+#	hvec = 
+#	var orientedwallpoints
+	
+	print("Nscan2s ", Nscan2s, " wallpoints ", len(potreewallpoints))
+	var planefittrans = Transform(planebasis, planepoint)
+	return planefittrans
+
+

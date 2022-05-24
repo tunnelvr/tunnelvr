@@ -102,6 +102,8 @@ func setxcdrawingvisibleL():
 
 
 func xcconnectstoshell():
+	if has_node("XCflatshell"):
+		return true
 	for xctubeconn in xctubesconn:
 		if xctubeconn.get_node("XCtubesectors").get_child_count() != 0:
 			return true
@@ -630,7 +632,13 @@ func mergexcrpcdata(xcdata):
 			labelgenerator.addnodestolabeltask(self)
 			var playermeheadcam = get_node("/root/Spatial").playerMe.get_node("HeadCam")
 			labelgenerator.restartlabelmakingprocess(playermeheadcam.global_transform.origin)
-		
+			
+		if "additionalproperties" in xcdata:
+			Tglobal.housahedronmode = (additionalproperties.get("geometrymode", "tunnelvr") == "housahedron")
+			Tglobal.splaystationnoderegex.compile(additionalproperties.get("splaystationnoderegex", ".*[^\\d]$"))
+			print("Setting housahedron mode ", Tglobal.housahedronmode)
+			# should go through and update, or ask for a restart!
+			
 	# this is was calling twice, also from xcdrawingstoupdate
 	#elif drawingtype != DRAWING_TYPE.DT_ROPEHANG:
 	#	updatexcpaths()
@@ -766,7 +774,7 @@ func updatexcpaths():
 	if len(onepathpairs) == 0:
 		pathlines.mesh = null
 		return
-	resetclosewidthsca(1.0)
+	resetclosewidthsca(0.5 if Tglobal.housahedronmode else 1.0)
 	var llinewidth = linewidth*closewidthsca
 	
 	var surfaceTool = SurfaceTool.new()
@@ -862,8 +870,34 @@ func updatexcpaths_centreline(pathlines, mlinewidth):
 		pathlines.mesh = newmesh
 		pathlines.set_surface_material(0, m)
 
+
+func fillpolysmesh(filledpolys, breverseorient):
+	var arraymesh = ArrayMesh.new()
+	var surfaceTool = SurfaceTool.new()
+	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for i in range(len(filledpolys)):
+		var poly = filledpolys[i]
+		var pv = [ ]
+		for p in poly:
+			pv.push_back(Vector2(nodepoints[p].x, nodepoints[p].y))
+		var pi = Geometry.triangulate_polygon(PoolVector2Array(pv))
+		if breverseorient:
+			pi.invert()
+		for u in pi:
+			var uvp = Vector2(nodepoints[poly[u]].x, nodepoints[poly[u]].y)
+			surfaceTool.add_uv(uvp)
+			surfaceTool.add_uv2(uvp)
+			#surfaceTool.add_vertex($XCnodes.get_node(poly[u]).transform.origin)
+			surfaceTool.add_vertex(nodepoints[poly[u]])
+	surfaceTool.generate_normals()
+	surfaceTool.commit(arraymesh)
+	return arraymesh
+
+
 func makexctubeshell(xcdrawings):
 	var polys = Polynets.makexcdpolys(nodepoints, onepathpairs)
+	if Tglobal.housahedronmode and len(xctubesconn) == 0 and len(polys) >= 2:
+		return fillpolysmesh([polys[-1]], true)
 	if len(polys) <= 2:
 		return null
 	var forepolyindexes = [ ]
@@ -889,33 +923,13 @@ func makexctubeshell(xcdrawings):
 	else:
 		return null
 	
-	var filledpolyindexes = [ ]
+	var filledpolys = [ ]
 	for i in range(len(polys)-1):
 		if not polypartial.has(i):
-			filledpolyindexes.append(i)
-	if len(filledpolyindexes) == 0:
-		return null
-		
-	var arraymesh = ArrayMesh.new()
-	var surfaceTool = SurfaceTool.new()
-	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
-	for j in filledpolyindexes:
-		var poly = polys[j]
-		var pv = [ ]
-		for p in poly:
-			pv.push_back(Vector2(nodepoints[p].x, nodepoints[p].y))
-		var pi = Geometry.triangulate_polygon(PoolVector2Array(pv))
-		if breverseorient:
-			pi.invert()
-		for u in pi:
-			var uvp = Vector2(nodepoints[poly[u]].x, nodepoints[poly[u]].y)
-			surfaceTool.add_uv(uvp)
-			surfaceTool.add_uv2(uvp)
-			#surfaceTool.add_vertex($XCnodes.get_node(poly[u]).transform.origin)
-			surfaceTool.add_vertex(nodepoints[poly[u]])
-	surfaceTool.generate_normals()
-	surfaceTool.commit(arraymesh)
-	return arraymesh
+			filledpolys.push_back(polys[i])
+	if len(filledpolys) != 0:
+		return fillpolysmesh(filledpolys, breverseorient)
+	return null
 	
 func updatexcshellmesh(xctubeshellmesh):
 	if xctubeshellmesh != null:

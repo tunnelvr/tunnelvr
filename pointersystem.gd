@@ -198,7 +198,8 @@ func setactivetargetwall(newactivetargetwall):
 	print("setactivetargetwall ", newactivetargetwall.get_name() if newactivetargetwall != null else "null")
 	if activetargetwall != null and activetargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		activetargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").set_surface_material(0, materialsystem.xcdrawingmaterial("normal"))
-		activetargetwall.get_node("PathLines").set_surface_material(0, materialsystem.pathlinematerial("normal"))
+		if activetargetwall.get_node("PathLines").get_surface_material_count() != 0: 
+			activetargetwall.get_node("PathLines").set_surface_material(0, materialsystem.pathlinematerial("normal"))
 		for xcnode in activetargetwall.get_node("XCnodes").get_children():
 			xcnode.get_node("CollisionShape/MeshInstance").set_surface_material(0, materialsystem.nodematerial("selected" if xcnode == activetargetnode else clearednodematerialtype(xcnode, false, DRAWING_TYPE.DT_XCDRAWING, activetargetwall.nodepointvalence1s)))
 	
@@ -1264,12 +1265,24 @@ func buttonreleased_vrgrip():
 		pass  # the trigger was pulled during the grip operation
 	
 	elif pointertargettype == "GripMenuItem":
-				
 		if pointertarget.get_name() == "NewXC":
 			var pt0 = gripmenu.gripmenupointertargetpoint
 			var eyept0vec = pt0 - headcam.global_transform.origin
 			var newxcvertplane = true
-			if gripmenu.gripmenupointertargettype == "XCtubesector":
+
+			var potreeplanefittrans = null
+			if Tglobal.housahedronmode:
+				var potreeexperiments = get_node("/root/Spatial/PotreeExperiments")
+				if potreeexperiments.visible:
+					var laserlength = gripmenu.gripmenulaserorient.origin.distance_to(gripmenu.gripmenupointertargetpoint)
+					var Glaserlength = min(15, laserlength if not is_zero_approx(laserlength) else 50)
+					potreeplanefittrans = potreeexperiments.laserplanfitting(gripmenu.gripmenulaserorient, Glaserlength)
+			if potreeplanefittrans != null:
+				pt0 = potreeplanefittrans.origin
+				eyept0vec = -potreeplanefittrans.basis.z
+				if eyept0vec.x == 0 and eyept0vec.z == 0:
+					newxcvertplane = false
+			elif gripmenu.gripmenupointertargettype == "XCtubesector":
 				var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(gripmenu.gripmenupointertargetwall.xcname0)
 				var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(gripmenu.gripmenupointertargetwall.xcname1)
 				var tubevec = xcdrawing1.global_transform.origin - xcdrawing0.global_transform.origin
@@ -1297,13 +1310,18 @@ func buttonreleased_vrgrip():
 				assert (gripmenu.gripmenupointertargettype == "none" or gripmenu.gripmenupointertargettype == "unknown")
 				eyept0vec = gripmenu.gripmenulaservector
 				pt0 = headcam.global_transform.origin + eyept0vec.normalized()*2.9
+				
 			if pt0 != null:
-				var drawingwallangle = Vector2(eyept0vec.x, eyept0vec.z).angle() + deg2rad(90)					
+				var drawingwallangle = Vector2(eyept0vec.x, eyept0vec.z).angle() + deg2rad(90)
 				var xcdata = { "name":sketchsystem.uniqueXCname("s"), 
 							   "drawingtype":DRAWING_TYPE.DT_XCDRAWING,
 							   "transformpos":Transform(Basis().rotated(Vector3(0,-1,0), drawingwallangle), pt0) }
 				if not newxcvertplane:
-					xcdata["transformpos"] = Transform(Vector3(1,0,0), Vector3(0,0,-1), Vector3(0,1,0), pt0)
+					if eyept0vec.y < 0.0:
+						xcdata["transformpos"] = Transform(Vector3(1,0,0), Vector3(0,0,-1), Vector3(0,1,0), pt0)
+					else:
+						xcdata["transformpos"] = Transform(Vector3(1,0,0), Vector3(0,0,1), Vector3(0,-1,0), pt0)
+					
 				var xcviz = { "xcvizstates": { xcdata["name"]:DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE } }
 				sketchsystem.actsketchchange([xcdata, xcviz])
 				clearactivetargetnode()
@@ -1564,7 +1582,7 @@ func buttonreleased_vrgrip():
 
 			elif pointertarget.get_name() == "DelXC":
 				var xcdrawing = gripmenu.gripmenupointertargetwall
-				if (xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING) or (xcdrawing.drawingtype == DRAWING_TYPE.DT_ROPEHANG):
+				if (xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING) or (xcdrawing.drawingtype == DRAWING_TYPE.DT_ROPEHANG) or (xcdrawing.drawingtype == DRAWING_TYPE.DT_CENTRELINE):
 					if xcdrawing.notubeconnections_so_delxcable():
 						if activetargetnodewall == xcdrawing:
 							clearactivetargetnode()

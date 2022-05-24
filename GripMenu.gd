@@ -2,6 +2,7 @@ extends Spatial
 
 var gripmenupointertargetpoint = Vector3(0,0,0)
 var gripmenulaservector = Vector3(0,0,1)
+var gripmenulaserorient = Transform()
 var gripmenupointertargetwall = null
 var gripmenupointertargettype = ""
 var gripmenupointertarget = null
@@ -73,6 +74,7 @@ func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointert
 	gripmenupointertargetwall = pointertargetwall
 	gripmenupointertarget = pointertarget
 	gripmenulaservector = -controllertrans.basis.z
+	gripmenulaserorient = controllertrans
 	gripmenupointertargettype = pointertargettype
 	gripmenuactivetargettubesectorindex = activetargettubesectorindex
 	gripmenuactivetargetnode = activetargetnode

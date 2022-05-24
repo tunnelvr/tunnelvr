@@ -17,6 +17,7 @@ var pointmaterial = null
 var visibleincamera = false
 var visibleincameratimestamp = 0
 var ocellsize = Vector3(0,0,0)
+var ocellorigin = Vector3(0,0,0)
 var timestampatinvisibility = 0
 
 var Dboxmin = Vector3(0,0,0)
@@ -58,7 +59,6 @@ func Yloadoctcellpoints(foctreeF, pointsizefactor, roottransforminverse, rootnod
 	var childIndex = int(name)
 	if ocellcentre.distance_to((Dboxmin+Dboxmax)/2) > 0.9:
 		print("moved centre ", ocellcentre, ((Dboxmin+Dboxmax)/2))
-	#var boxminmax = AABB(boxmin, boxmax-boxmin).grow(boxpointepsilon)
 	var Dboxminmax = AABB(ocellcentre - ocellsize/2, ocellsize).grow(boxpointepsilon)
 
 	var st = SurfaceTool.new()
@@ -141,14 +141,21 @@ func Yloadoctcellpoints(foctreeF, pointsizefactor, roottransforminverse, rootnod
 	pointmaterial.set_shader_param("roottransforminverse", roottransforminverse)
 	pointmaterial.set_shader_param("highlightplaneperp", rootnode.highlightplaneperp)
 	pointmaterial.set_shader_param("highlightplanedot", rootnode.highlightplanedot)
-	pointmaterial.set_shader_param("screendimensionsscreendoorfac", rootnode.screendimensionsscreendoorfac)
-	pointmaterial.set_shader_param("colormixweight", rootnode.colormixweight)
+
+	var colormixweight = 0.0
+	if rootnode.attributes_rgb_prebytes != -1:
+		colormixweight = 0.8 if Tglobal.housahedronmode else 0.5
+	pointmaterial.set_shader_param("colormixweight", colormixweight)
+
+	if Tglobal.housahedronmode:
+		pointmaterial.set_shader_param("highlightdist", 0.15)
+		pointmaterial.set_shader_param("highlightcol", Vector3(0.8,0.0,0.8))
+		pointmaterial.set_shader_param("highlightcol2", Vector3(0.8,0.0,0.8))
 
 	set_surface_material(0, pointmaterial)
 	dt = OS.get_ticks_msec() - t0
 	if dt > 20:
 		print("Excessive Yloadoctcellpoints_E time ", dt)
-
 
 
 func constructpotreenode(parentnode, childIndex, Droottransforminverse):
@@ -160,7 +167,8 @@ func constructpotreenode(parentnode, childIndex, Droottransforminverse):
 	transform.origin = Vector3(ocellsize.x/2 if childIndex & 0b0100 else -ocellsize.x/2, 
 							   ocellsize.y/2 if childIndex & 0b0010 else -ocellsize.y/2, 
 							   ocellsize.z/2 if childIndex & 0b0001 else -ocellsize.z/2)
-
+	ocellorigin = parentnode.ocellorigin + transform.origin
+	
 	createChildAABB(parentnode, childIndex)
 	name = "c%d" % childIndex
 	var kcen = Droottransforminverse*parentnode.global_transform.origin + transform.origin
@@ -199,7 +207,7 @@ func loadnodedefinition(fhierarchy):
 		byteOffset = fhierarchy.get_64()
 		byteSize = fhierarchy.get_64()
 		name[0] = ("n" if ntype == 0 else  "l")
-		assert ((ntype == 1) == (childMask == 0))
+		assert ((ntype == 0) or (childMask == 0))
 
 
 const Nhierarchyframe = 30

@@ -226,6 +226,7 @@ remote func actsketchchangeL(xcdatalist):
 		if xcdatalist[0]["caveworldchunk"] == 0:
 			var PlayerDirections = get_node("/root/Spatial/BodyObjects/PlayerDirections")
 			Tglobal.notisloadingcavechunks = false
+			Tglobal.housahedronmode = false
 			if xcdatalist[0]["sketchname"] != "importing_the_centreline__do_not_clear":
 				clearentirecaveworld()
 			else:
@@ -415,6 +416,11 @@ remote func actsketchchangeL(xcdatalist):
 			if xcdrawing == null:
 				xcdrawingsrejected.append(xcdata["name"])
 				print("rejecting XC drawing from data", xcdata)
+
+			elif xcdrawing.drawingtype == DRAWING_TYPE.DT_CENTRELINE and len(xcdrawing.nodepoints) == 0 and len(xcdata.get("prevnodepoints", [])) != 0:
+				print("immediate deletion of centreline xcdrawing case; not waiting for file save")
+				xcdrawing.queue_free()
+
 			elif "nodepoints" in xcdata or "nextnodepoints" in xcdata or "onepathpairs" in xcdata or "newonepathpairs" in xcdata:
 				if xcdata.has("drawingvisiblecode") and xcdrawing.drawingtype == DRAWING_TYPE.DT_ROPEHANG:
 					xcdrawing.drawingvisiblecode = xcdata["drawingvisiblecode"]
@@ -615,7 +621,7 @@ func xcdrawingfromdata(xcdata, fromremotecall):
 		var potreeexperiments = get_node("/root/Spatial/PotreeExperiments")
 		if potreeexperiments != null and potreeexperiments.visible:
 			potreeexperiments.sethighlightplane(xcdrawing.transform)
-		
+
 	return xcdrawing
 
 var playeroriginXCSorter = Vector3(0, 0, 0)

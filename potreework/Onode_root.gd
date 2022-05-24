@@ -3,11 +3,9 @@ extends "res://potreework/Onode.gd"
 var metadata = null
 var mdscale = Vector3(1,1,1)
 var mdoffset = Vector3(0,0,0)
-var colormixweight = 1.0
 
 var highlightplaneperp = Vector3(1,0,0)
 var highlightplanedot = 0.0
-var screendimensionsscreendoorfac = Vector2(100,100)
 	
 var primarycameraorigin = Vector3(0,0,0)
 var pointsizevisibilitycutoff = 15.0
@@ -39,8 +37,18 @@ func sethighlightplane(lhighlightplaneperp, lhighlightplanedot):
 		if node.pointmaterial != null:
 			node.pointmaterial.set_shader_param("highlightplaneperp", highlightplaneperp)
 			node.pointmaterial.set_shader_param("highlightplanedot", highlightplanedot)
-			node.pointmaterial.set_shader_param("screendimensionsscreendoorfac", screendimensionsscreendoorfac)
+			if Tglobal.housahedronmode:
+				node.pointmaterial.set_shader_param("highlightdist", 0.15)
+				node.pointmaterial.set_shader_param("highlightcol", Vector3(0.8,0.0,0.8))
+				node.pointmaterial.set_shader_param("highlightcol2", Vector3(0.8,0.0,0.8))
+			else:
+				node.pointmaterial.set_shader_param("highlightdist", 0.5)
+				node.pointmaterial.set_shader_param("highlightcol", Vector3(1,1,0))
+				node.pointmaterial.set_shader_param("highlightcol2", Vector3(0,1,1))
 		node = successornode(node, not node.visible)
+
+
+
 	
 func successornode(node, skip):
 	if not skip and node.get_child_count() > 1:
@@ -153,7 +161,6 @@ func garbagecollectionsweep():
 		
 func constructpotreerootnode(lmetadata, lurlmetadata, bboffset):
 	assert (name == "hroot")
-	screendimensionsscreendoorfac = OS.get_screen_size()/8.0; 
 	metadata = lmetadata
 	visibleincamera = true
 	visible = false
@@ -183,11 +190,9 @@ func constructpotreerootnode(lmetadata, lurlmetadata, bboffset):
 	if attributes_rgb_offset == -1:
 		attributes_rgb_prebytes = -1
 		attributes_postbytes = attributes_size - 12
-		colormixweight = 0.0
 	else:
 		attributes_rgb_prebytes = attributes_rgb_offset - 12
 		attributes_postbytes = attributes_size - (attributes_rgb_offset + 6)
-		colormixweight = 0.8
 	
 	hierarchybyteOffset = 0
 	hierarchybyteSize = metadata["hierarchy"]["firstChunkSize"]
@@ -196,9 +201,10 @@ func constructpotreerootnode(lmetadata, lurlmetadata, bboffset):
 	mdmin -= bboffset
 	mdmax -= bboffset
 
-	transform.origin = (mdmax+mdmin)/2
+	ocellorigin = (mdmax + mdmin)/2
 	spacing = metadata["spacing"]
 	ocellsize = mdmax - mdmin
+	transform.origin = ocellorigin
 
 	Dboxmin = mdmin
 	Dboxmax = mdmax

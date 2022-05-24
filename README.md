@@ -6,17 +6,6 @@
 [Cachix badge]: https://img.shields.io/badge/cachix--tunnelvr-blue.svg
 [Cachix link]: https://tunnelvr.cachix.org 
 
-# Using the Nix Binary Cache
-
-Add the following to your NixOS configuration, often in
-`/etc/nixos/configuration.nix` for example.
-
-```bash
-nix.binaryCachePublicKeys = [ "tunnelvr.cachix.org-1:IZUIF+ytsd6o+5F0wi45s83mHI+aQaFSoHJ3zHrc2G0=" ];
-nix.binaryCaches = [ "https://tunnelvr.cachix.org" ];
-nix.trustedBinaryCaches = [ "https://tunnelvr.cachix.org" ];
-```
-
 # Introduction 
 
 **TunnelVR** is a follow-on from [TunnelX](https://github.com/CaveSurveying/tunnelx) -- a long-running 
@@ -50,6 +39,17 @@ Scan project directory for tunnelvr and then open it.
 Download the godot_ovrmobile asset if you are deploying to the Oculus Quest
 
 Hit the "Play" button on the top right
+
+## Using the Nix Binary Cache
+
+Add the following to your NixOS configuration, often in
+`/etc/nixos/configuration.nix` for example.
+
+```bash
+nix.binaryCachePublicKeys = [ "tunnelvr.cachix.org-1:IZUIF+ytsd6o+5F0wi45s83mHI+aQaFSoHJ3zHrc2G0=" ];
+nix.binaryCaches = [ "https://tunnelvr.cachix.org" ];
+nix.trustedBinaryCaches = [ "https://tunnelvr.cachix.org" ];
+```
 
 # Controls
 
@@ -142,7 +142,7 @@ exactly like a normal cross section, except that it is tied to the hole.
 
 In rope drawing mode you have a short laser with a blue spherical cursor.  If 
 you push this into a wall and pull the trigger it starts a network of rope nodes 
-you can draw into space.  
+you can draw into space.
 
 If the rope network as zero or two odd connected nodes, then it's a rope and 
 simulates dangling down under gravity.
@@ -156,6 +156,23 @@ in processed [survex 3d format](https://survex.com/docs.html).  It requires one 
 execute `python` and `dump3d` from a command line to convert this into the geometry format that TunnelVR needs.
 
 ![Screenshot](screenshot.png)
+
+## Hidden parameters
+
+If you have an XC selected (or none selected and a centreline exists), the 
+--resources dropdown in the GUI pane allows you to "Print XCproperties" or 
+"Print Centreline" to see and control the hidden parameters.  These are 
+
+* **potreeurlmetadata** -- url link to the metadata.json of a [potree](http://potree.org) file.
+* **geometrymode** -- "tunnelvr" for normal, or "housahedron" for new house drawing thing
+* **splaystationnoderegex** -- regex to identify splay stations from the normal survey stations
+
+It is possible to convert a ROPEHANG type into a CENTRELINE type XCdrawing if one does not exist 
+by changing the drawingtype parameter and clicking "Set XCproperties".  This is provided to 
+make it convenient to create this object in a pointcloud world for aligning 2D drawings and 
+associating potree geometry and the housahedron setting.
+The potree transform is taken from the centreline transform, so you need to make sure 
+that rotation=[-90,0,0] to account for Z-vector up in its format
 
 # Running on a server
 

@@ -4091,7 +4091,7 @@ transform = Transform( 0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 0, 0 )
 script = ExtResource( 62 )
 
 [node name="PotreeExperiments" type="Spatial" parent="."]
-transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 2, 0 )
+transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 3.59151, 0 )
 script = ExtResource( 74 )
 
 [node name="PointSample" type="MeshInstance" parent="PotreeExperiments"]
