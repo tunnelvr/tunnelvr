@@ -18,6 +18,7 @@ var pointersystem = null
 onready var waterlevelsystem = get_node("/root/Spatial/WaterLevelSystem")
 
 func _ready():
+	return
 	var floordrawingimg = defaultfloordrawing
 	#floordrawingimg = "res://surveyscans/greenland/ushapedcave.png"
 	floordrawingimg = defaultfloordrawing

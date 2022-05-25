@@ -18,7 +18,6 @@ var imagefetchingcountdowntime = 0.15
 var fetcheddrawing = null
 
 var fetchednonimagedataobject = null
-#var httprequest = null
 
 var fetcheddrawingfile = null
 
@@ -249,7 +248,7 @@ func _process(delta):
 				if not Directory.new().dir_exists(imgdir):
 					var err = Directory.new().make_dir(imgdir)
 					print("Making directory ", imgdir, " err code: ", err)
-				print("making httprequest ", paperdrawing.xcresource)
+				print("making httpclient ", paperdrawing.xcresource)
 				operatingrequest = { "httpclient":HTTPClient.new(), 
 									 "paperdrawing":paperdrawing, 
 									 "objectname":paperdrawing.get_name(), 
