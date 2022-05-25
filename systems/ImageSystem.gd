@@ -1,10 +1,5 @@
 extends Node
 
-#const defaultfloordrawing = "http://cave-registry.org.uk/svn/NorthernEngland/ThreeCountiesArea/rawscans/Ireby/DukeStResurvey-drawnup-p3.jpg"
-#const defaultfloordrawingres = "res://surveyscans/DukeStResurvey-drawnup-p3.jpg"
-const defaultfloordrawing = "http://cave-registry.org.uk/svn/NorthernEngland/rawscans/LambTrap/LambTrap-drawnup-1.png"
-const defaultfloordrawingres = "res://surveyscans/LambTrap-drawnup-1.png"
-
 var imgdir = "user://northernimages/"
 var nonimagedir = "user://nonimagewebpages/"
 var listregex = RegEx.new()
@@ -51,7 +46,9 @@ func imageloadingthread_function(userdata):
 		var t0 = OS.get_ticks_msec()
 		var limageloadingthreadloadedimage
 		if limageloadingthreaddrawingfile.begins_with("res://"):
-			limageloadingthreadloadedimage = ResourceLoader.load(limageloadingthreaddrawingfile)
+			#limageloadingthreadloadedimage = ResourceLoader.load(limageloadingthreaddrawingfile)
+			limageloadingthreadloadedimage = Image.new()
+			limageloadingthreadloadedimage.load(limageloadingthreaddrawingfile)
 		else:
 			limageloadingthreadloadedimage = Image.new()
 			limageloadingthreadloadedimage.load(limageloadingthreaddrawingfile)
@@ -60,6 +57,7 @@ func imageloadingthread_function(userdata):
 			print("thread loading ", limageloadingthreaddrawingfile, " took ", dt, " msecs")
 		var limageloadingthreadloadedimagetexture = ImageTexture.new()
 		limageloadingthreadloadedimagetexture.create_from_image(limageloadingthreadloadedimage, imagethreadloadedflags)
+
 		imageloadingthreadmutex.lock()
 		imageloadingthreadloadedimagetexture = limageloadingthreadloadedimagetexture
 		imageloadingthreadmutex.unlock()
@@ -241,9 +239,6 @@ func _process(delta):
 			fetchreporttype = "res"
 		elif paperdrawing.xcresource.begins_with("http"):
 			fetcheddrawingfile = imgdir+getshortimagename(paperdrawing.xcresource, true, 12)
-			if paperdrawing.xcresource == defaultfloordrawing:
-				fetcheddrawingfile = defaultfloordrawingres
-				print("fetching default drawing file ", fetcheddrawingfile)
 			if not File.new().file_exists(fetcheddrawingfile):
 				if not Directory.new().dir_exists(imgdir):
 					var err = Directory.new().make_dir(imgdir)
@@ -258,6 +253,7 @@ func _process(delta):
 				print("using cached image ", fetcheddrawingfile)
 				fetcheddrawing = paperdrawing
 				fetchreporttype = "cache"
+			
 		else:
 			fetcheddrawingfile = "res://guimaterials/imagefilefailure.png"
 			fetchreporttype = "fail"
@@ -275,7 +271,7 @@ func _process(delta):
 
 	elif fetcheddrawing != null:
 		imageloadingthreadmutex.lock()
-		assert(imageloadingthreaddrawingfile == null)
+		assert (imageloadingthreaddrawingfile == null)
 		var papertexture = imageloadingthreadloadedimagetexture
 		imageloadingthreadloadedimagetexture = null
 		imageloadingthreadmutex.unlock()
@@ -292,8 +288,9 @@ func _process(delta):
 					fetcheddrawing.applytrimmedpaperuvscale()
 					
 			else:
-				print(fetcheddrawingfile, "   has zero width, deleting")
-				Directory.new().remove(fetcheddrawingfile)
+				print(fetcheddrawingfile, "   has zero width, deleting if user://")
+				if fetcheddrawingfile.begins_with("user://"):
+					Directory.new().remove(fetcheddrawingfile)
 			fetcheddrawing = null
 		pt = "paptex"
 
