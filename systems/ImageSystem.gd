@@ -44,20 +44,17 @@ func imageloadingthread_function(userdata):
 		if limageloadingthreaddrawingfile == null:
 			break
 		var t0 = OS.get_ticks_msec()
-		var limageloadingthreadloadedimage
-		if limageloadingthreaddrawingfile.begins_with("res://"):
-			#limageloadingthreadloadedimage = ResourceLoader.load(limageloadingthreaddrawingfile)
-			limageloadingthreadloadedimage = Image.new()
-			limageloadingthreadloadedimage.load(limageloadingthreaddrawingfile)
-		else:
-			limageloadingthreadloadedimage = Image.new()
-			limageloadingthreadloadedimage.load(limageloadingthreaddrawingfile)
-		var dt = OS.get_ticks_msec() - t0
-		if dt > 100:
-			print("thread loading ", limageloadingthreaddrawingfile, " took ", dt, " msecs")
 		var limageloadingthreadloadedimagetexture = ImageTexture.new()
-		limageloadingthreadloadedimagetexture.create_from_image(limageloadingthreadloadedimage, imagethreadloadedflags)
-
+		if not limageloadingthreaddrawingfile.begins_with("res://"):
+			var limageloadingthreadloadedimage = Image.new()
+			limageloadingthreadloadedimage.load(limageloadingthreaddrawingfile)
+			var dt = OS.get_ticks_msec() - t0
+			if dt > 100:
+				print("thread loading ", limageloadingthreaddrawingfile, " took ", dt, " msecs")
+			limageloadingthreadloadedimagetexture = ImageTexture.new()
+			limageloadingthreadloadedimagetexture.create_from_image(limageloadingthreadloadedimage, imagethreadloadedflags)
+		else:
+			limageloadingthreadloadedimagetexture = ResourceLoader.load(limageloadingthreaddrawingfile)
 		imageloadingthreadmutex.lock()
 		imageloadingthreadloadedimagetexture = limageloadingthreadloadedimagetexture
 		imageloadingthreadmutex.unlock()
@@ -234,8 +231,6 @@ func _process(delta):
 		if paperdrawing.xcresource.begins_with("res://"):
 			fetcheddrawingfile = paperdrawing.xcresource
 			fetcheddrawing = paperdrawing
-			if not File.new().file_exists(fetcheddrawingfile):
-				fetcheddrawingfile = "res://guimaterials/imagefilefailure.png"
 			fetchreporttype = "res"
 		elif paperdrawing.xcresource.begins_with("http"):
 			fetcheddrawingfile = imgdir+getshortimagename(paperdrawing.xcresource, true, 12)

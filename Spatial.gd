@@ -219,7 +219,7 @@ func _ready():
 	print("Granted permissions: ", perm)
 
 	#if true:
-	$SketchSystem.loadsketchsystemL("res://surveyscans/smallirebysave.res")
+	$SketchSystem.loadsketchsystemL("res://surveyscans/loneoak.res")
 
 	playerMe.global_transform.origin.y += 5
 	$GuiSystem/GUIPanel3D.updateplayerlist()
