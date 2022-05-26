@@ -11,25 +11,11 @@ const savesketchasjsonlines = true
 
 var actsketchchangeundostack = [ ]
 
-#const defaultfloordrawing = "http://cave-registry.org.uk/svn/NorthernEngland/ThreeCountiesArea/rawscans/Ireby/DukeStResurvey-drawnup-p3.jpg"
-const defaultfloordrawing = "http://cave-registry.org.uk/svn/NorthernEngland/rawscans/LambTrap/LambTrap-drawnup-1.png"
-
 var pointersystem = null
 onready var waterlevelsystem = get_node("/root/Spatial/WaterLevelSystem")
 
 func _ready():
-	var floordrawingimg = defaultfloordrawing
-	#floordrawingimg = "res://surveyscans/greenland/ushapedcave.png"
-	floordrawingimg = defaultfloordrawing
-	var sname = uniqueXCdrawingPapername(floordrawingimg)
-	var floordrawing = newXCuniquedrawingPaperN(floordrawingimg, sname, DRAWING_TYPE.DT_FLOORTEXTURE)
-	floordrawing.transform = Transform(Vector3(1,0,0), Vector3(0,0,-1), Vector3(0,1,0), Vector3(0,0,0))
-	floordrawing.imgwidth = 50
-	floordrawing.imgtrimleftdown = Vector2(-25, -25)
-	floordrawing.imgtrimrightup = Vector2(25, 25)
-	#floordrawing.get_node("XCdrawingplane").scale = Vector3(50, 50, 1)
-	get_node("/root/Spatial/ImageSystem").fetchpaperdrawing(floordrawing)
-		
+	return
 
 func findxctube(xcname0, xcname1):
 	var xcdrawing0 = get_node("XCdrawings").get_node_or_null(xcname0)

@@ -1,24 +1,19 @@
 extends Node
 
-#const defaultfloordrawing = "http://cave-registry.org.uk/svn/NorthernEngland/ThreeCountiesArea/rawscans/Ireby/DukeStResurvey-drawnup-p3.jpg"
-#const defaultfloordrawingres = "res://surveyscans/DukeStResurvey-drawnup-p3.jpg"
-const defaultfloordrawing = "http://cave-registry.org.uk/svn/NorthernEngland/rawscans/LambTrap/LambTrap-drawnup-1.png"
-const defaultfloordrawingres = "res://surveyscans/LambTrap-drawnup-1.png"
-
 var imgdir = "user://northernimages/"
 var nonimagedir = "user://nonimagewebpages/"
 var listregex = RegEx.new()
 
 var paperdrawinglist = [ ]
 var nonimagepageslist = [ ]
+var operatingrequest = null
 
 var imagefetchingcountdowntimer = 0.0
 var imagefetchingcountdowntime = 0.15
 var fetcheddrawing = null
 
 var fetchednonimagedataobject = null
-var httprequest = null
-var httprequestduration = 0.0
+
 var fetcheddrawingfile = null
 
 var imageloadingthreadmutex = Mutex.new()
@@ -31,6 +26,7 @@ var imagethreadloadedflags = Texture.FLAG_MIPMAPS|Texture.FLAG_REPEAT # |Texture
 
 onready var imagesystemreportslabel = get_node("/root/Spatial/GuiSystem/GUIPanel3D/Viewport/GUI/Panel/ImageSystemReports")
 
+var regexurl = RegEx.new()
 # to convert PDFs nix-shell -p imagemagick and ghostscript, then 
 # convert firstfloorplan.pdf -density 600 -geometry 200% -trim -background white -alpha remove -alpha off firstfloorplan.png
 # density is still blurry because resizing is happening after rendering, so I had to use Gimp to load and export at a higher resolution
@@ -48,17 +44,17 @@ func imageloadingthread_function(userdata):
 		if limageloadingthreaddrawingfile == null:
 			break
 		var t0 = OS.get_ticks_msec()
-		var limageloadingthreadloadedimage
-		if limageloadingthreaddrawingfile.begins_with("res://"):
-			limageloadingthreadloadedimage = ResourceLoader.load(limageloadingthreaddrawingfile)
-		else:
-			limageloadingthreadloadedimage = Image.new()
-			limageloadingthreadloadedimage.load(limageloadingthreaddrawingfile)
-		var dt = OS.get_ticks_msec() - t0
-		if dt > 100:
-			print("thread loading ", limageloadingthreaddrawingfile, " took ", dt, " msecs")
 		var limageloadingthreadloadedimagetexture = ImageTexture.new()
-		limageloadingthreadloadedimagetexture.create_from_image(limageloadingthreadloadedimage, imagethreadloadedflags)
+		if not limageloadingthreaddrawingfile.begins_with("res://"):
+			var limageloadingthreadloadedimage = Image.new()
+			limageloadingthreadloadedimage.load(limageloadingthreaddrawingfile)
+			var dt = OS.get_ticks_msec() - t0
+			if dt > 100:
+				print("thread loading ", limageloadingthreaddrawingfile, " took ", dt, " msecs")
+			limageloadingthreadloadedimagetexture = ImageTexture.new()
+			limageloadingthreadloadedimagetexture.create_from_image(limageloadingthreadloadedimage, imagethreadloadedflags)
+		else:
+			limageloadingthreadloadedimagetexture = ResourceLoader.load(limageloadingthreaddrawingfile)
 		imageloadingthreadmutex.lock()
 		imageloadingthreadloadedimagetexture = limageloadingthreadloadedimagetexture
 		imageloadingthreadmutex.unlock()
@@ -73,29 +69,78 @@ func _exit_tree():
 func _ready():
 	imageloadingthread.start(self, "imageloadingthread_function")
 	listregex.compile('<li><a href="([^"]*)">')
-	
+	regexurl.compile("^(https?)://([^/:]*)(:\\d+)?(/.*)")
+
 func clearallimageloadingactivity():
 	fetcheddrawing = null
 	paperdrawinglist.clear()
 
-func _http_request_completed(result, response_code, headers, body, httprequestdataobject):
-	#print("_http_request_completed ", len(body), " bytes", headers)
-	httprequestdataobject["httprequest"].queue_free()
-	if response_code == 200 or response_code == 206:
-		if "paperdrawing" in httprequestdataobject:
-			fetcheddrawing = httprequestdataobject["paperdrawing"]
+func http_request_poll():
+	var httpclient = operatingrequest["httpclient"]
+	httpclient.poll()
+	var httpclientstatus = httpclient.get_status()
+	if httpclientstatus == HTTPClient.STATUS_DISCONNECTED:
+		var urlcomponents = regexurl.search(operatingrequest["url"])
+		if urlcomponents:
+			var port = int(urlcomponents.strings[3])
+			var e = httpclient.connect_to_host(urlcomponents.strings[2], (port if port else -1), urlcomponents.strings[1] == "https")
+			if e != OK:
+				print("not okay connect_to_host ", e)
+				httpclient = null
 		else:
-			fetchednonimagedataobject = httprequestdataobject
-	else:
-		print("http response code bad ", response_code, " for ", httprequestdataobject)
-		if "paperdrawing" in httprequestdataobject:
-			fetcheddrawing = httprequestdataobject["paperdrawing"]
+			print("bad urlcomponents ", operatingrequest["url"])
+			httpclient = null
+	elif httpclientstatus == HTTPClient.STATUS_RESOLVING or httpclientstatus == HTTPClient.STATUS_CONNECTING:
+		return
+	elif httpclientstatus == HTTPClient.STATUS_CANT_RESOLVE or httpclientstatus == HTTPClient.STATUS_CANT_CONNECT or httpclientstatus == HTTPClient.STATUS_CONNECTION_ERROR:
+		print("bad httpclientstatus ", httpclientstatus)
+		httpclient = null
+	elif httpclientstatus == HTTPClient.STATUS_CONNECTED and not operatingrequest.has("partbody"):
+		var urlcomponents = regexurl.search(operatingrequest["url"])
+		var err = httpclient.request(HTTPClient.METHOD_GET, urlcomponents.strings[4], PoolStringArray(operatingrequest.get("headers", []))) 
+		if err == OK:
+			operatingrequest["partbody"] = PoolByteArray()
+			return
+		print("bad httpclient.request ", err)
+		httpclient = null
+	elif httpclientstatus == HTTPClient.STATUS_REQUESTING:
+		return
+	elif httpclientstatus == HTTPClient.STATUS_BODY:
+		var chunk = httpclient.read_response_body_chunk()
+		if chunk.size() != 0:
+			operatingrequest["partbody"] = operatingrequest["partbody"] + chunk
+			print("Chunk size ", chunk.size(), " ", len(operatingrequest["partbody"]))
+	elif httpclientstatus == HTTPClient.STATUS_CONNECTED and operatingrequest.has("partbody"):
+		var response_code = httpclient.get_response_code()
+		if response_code == 200 or response_code == 206:
+			var fout = File.new()
+			var fname = operatingrequest["fetchednonimagedataobjectfile"] if operatingrequest.has("fetchednonimagedataobjectfile") else operatingrequest["fetcheddrawingfile"]
+			fout.open(fname, File.WRITE)
+			print("storing ", len(operatingrequest["partbody"]), " bytes to ", fname)
+			fout.store_buffer(operatingrequest["partbody"])
+			fout.close()
+			operatingrequest.erase("partbody")
+			if "paperdrawing" in operatingrequest:
+				fetcheddrawing = operatingrequest["paperdrawing"]
+			else:
+				fetchednonimagedataobject = operatingrequest
+			operatingrequest.erase("httpclient")
+			operatingrequest = null
+			return
+		else:
+			operatingrequest.erase("partbody")
+			print("http response code bad ", response_code, " for ", operatingrequest)
+			httpclient = null
+			
+	if httpclient == null:
+		if "paperdrawing" in operatingrequest:
+			fetcheddrawing = operatingrequest["paperdrawing"]
 			fetcheddrawingfile = "res://guimaterials/imagefilefailure.png"
 		else:
-			fetchednonimagedataobject = httprequestdataobject
-			fetchednonimagedataobject["bad_response_code"] = response_code
-	httprequest = null
-	
+			fetchednonimagedataobject = operatingrequest
+		operatingrequest.erase("httpclient")
+		operatingrequest = null
+		
 func correctdefaultimgtrimtofull(d):
 	var imgheight = d.imgwidth*d.imgheightwidthratio
 	d.imgtrimleftdown = Vector2(-d.imgwidth*0.5, -imgheight*0.5)
@@ -147,6 +192,9 @@ func getshortimagename(xcresource, withextension, md5nameleng, nonimagepage={}):
 
 var nFrame = 0
 func _process(delta):
+	if operatingrequest != null and operatingrequest.has("httpclient"):
+		http_request_poll()
+	
 	nFrame += 1
 	if imagefetchingcountdowntimer > 0.0:
 		imagefetchingcountdowntimer -= delta
@@ -155,7 +203,7 @@ func _process(delta):
 	
 	var t0 = OS.get_ticks_msec()
 	var pt = ""
-	if fetcheddrawing == null and fetchednonimagedataobject == null and httprequest == null and len(nonimagepageslist) > 0:
+	if fetcheddrawing == null and fetchednonimagedataobject == null and operatingrequest == null and len(nonimagepageslist) > 0:
 		var nonimagepage = nonimagepageslist.pop_front()
 		nonimagepage["fetchednonimagedataobjectfile"] = nonimagedir + \
 			getshortimagename(nonimagepage["url"], true, 
@@ -165,57 +213,46 @@ func _process(delta):
 			if not Directory.new().dir_exists(nonimagedir):
 				var err = Directory.new().make_dir(nonimagedir)
 				print("Making directory ", nonimagedir, " err code: ", err)
-			httprequest = HTTPRequest.new()
-			var headers = nonimagepage.get("headers", [])
-			add_child(httprequest)
-			nonimagepage["httprequest"] = httprequest
-			httprequest.connect("request_completed", self, "_http_request_completed", [nonimagepage])
-			httprequest.download_file = nonimagepage["fetchednonimagedataobjectfile"]
+			operatingrequest = nonimagepage
+			operatingrequest["httpclient"] = HTTPClient.new()
+			var headers = operatingrequest.get("headers", [])
 			if nonimagepage.has("byteOffset"):
 				headers.push_back("Range: bytes=%d-%d" % [nonimagepage["byteOffset"], nonimagepage["byteOffset"]+nonimagepage["byteSize"]-1])
-			print("makinghttprequest ", nonimagepage["fetchednonimagedataobjectfile"], nonimagepage.get("byteOffset"))
-			httprequest.request(nonimagepage["url"], headers)
-			httprequestduration = 0.0
+			operatingrequest["headers"] = headers
 			imagesystemreportslabel.text = "%d-%s" % [len(nonimagepageslist), "nonimage"]
 
 		else:
 			fetchednonimagedataobject = nonimagepage
 		pt = var2str({"url":nonimagepage["url"], "byteOffset":nonimagepage.get("byteOffset")})
 		
-	if fetcheddrawing == null and fetchednonimagedataobject == null and httprequest == null and len(paperdrawinglist) > 0:
+	if fetcheddrawing == null and fetchednonimagedataobject == null and operatingrequest == null and len(paperdrawinglist) > 0:
 		var paperdrawing = paperdrawinglist.pop_back()
 		var fetchreporttype = ""
 		if paperdrawing.xcresource.begins_with("res://"):
 			fetcheddrawingfile = paperdrawing.xcresource
 			fetcheddrawing = paperdrawing
-			if not File.new().file_exists(fetcheddrawingfile):
-				fetcheddrawingfile = "res://guimaterials/imagefilefailure.png"
 			fetchreporttype = "res"
 		elif paperdrawing.xcresource.begins_with("http"):
 			fetcheddrawingfile = imgdir+getshortimagename(paperdrawing.xcresource, true, 12)
-			if paperdrawing.xcresource == defaultfloordrawing:
-				fetcheddrawingfile = defaultfloordrawingres
-				print("fetching default drawing file ", fetcheddrawingfile)
 			if not File.new().file_exists(fetcheddrawingfile):
 				if not Directory.new().dir_exists(imgdir):
 					var err = Directory.new().make_dir(imgdir)
 					print("Making directory ", imgdir, " err code: ", err)
-				print("making httprequest ", paperdrawing.xcresource)
-				httprequest = HTTPRequest.new()
-				add_child(httprequest)
-				httprequest.connect("request_completed", self, "_http_request_completed", [{"httprequest":httprequest, "paperdrawing":paperdrawing, "objectname":paperdrawing.get_name()}])
-				httprequest.download_file = fetcheddrawingfile
-				httprequest.request(paperdrawing.xcresource)
-				httprequestduration = 0.0
-				fetchreporttype = "request"
+				print("making httpclient ", paperdrawing.xcresource)
+				operatingrequest = { "httpclient":HTTPClient.new(), 
+									 "paperdrawing":paperdrawing, 
+									 "objectname":paperdrawing.get_name(), 
+									 "fetcheddrawingfile":fetcheddrawingfile, 
+									 "url":paperdrawing.xcresource }
 			else:
 				print("using cached image ", fetcheddrawingfile)
 				fetcheddrawing = paperdrawing
 				fetchreporttype = "cache"
+			
 		else:
 			fetcheddrawingfile = "res://guimaterials/imagefilefailure.png"
 			fetchreporttype = "fail"
-		pt = var2str(httprequest)
+		pt = var2str(operatingrequest)
 		imagesystemreportslabel.text = "%d-%s" % [len(paperdrawinglist), fetchreporttype]
 
 	elif fetcheddrawing != null and not imageloadingthreadoperating:
@@ -229,7 +266,7 @@ func _process(delta):
 
 	elif fetcheddrawing != null:
 		imageloadingthreadmutex.lock()
-		assert(imageloadingthreaddrawingfile == null)
+		assert (imageloadingthreaddrawingfile == null)
 		var papertexture = imageloadingthreadloadedimagetexture
 		imageloadingthreadloadedimagetexture = null
 		imageloadingthreadmutex.unlock()
@@ -246,8 +283,9 @@ func _process(delta):
 					fetcheddrawing.applytrimmedpaperuvscale()
 					
 			else:
-				print(fetcheddrawingfile, "   has zero width, deleting")
-				Directory.new().remove(fetcheddrawingfile)
+				print(fetcheddrawingfile, "   has zero width, deleting if user://")
+				if fetcheddrawingfile.begins_with("user://"):
+					Directory.new().remove(fetcheddrawingfile)
 			fetcheddrawing = null
 		pt = "paptex"
 
@@ -298,9 +336,9 @@ func _process(delta):
 		
 		fetchednonimagedataobject = null
 
-	elif httprequest != null:
-		httprequestduration += delta
-
+	elif operatingrequest != null:
+		pass
+		
 	else:
 		set_process(false)
 	var dt = OS.get_ticks_msec() - t0
