@@ -215,7 +215,8 @@ func loadnodedefinition(fhierarchy):
 		byteSize = fhierarchy.get_64()
 		name[0] = ("n" if ntype == 0 else  "l")
 		assert ((ntype == 0) or (childMask == 0))
-
+	if numPoints == 0:
+		print("zero numPoints case ", get_path())
 
 const Nhierarchyframe = 30
 func Yloadhierarchychunk(fhierarchyF, Droottransforminverse):

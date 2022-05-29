@@ -397,9 +397,9 @@ func setpointertarget(laserroot, raycast, pointertargetshortdistance):
 			Tglobal.soundsystem.quicksound("PopSound", newpointertargetpoint)
 			Tglobal.soundsystem.shortvibrate(false, 0.03, 1.0)
 		
-		if activetargetwall == null and pointertargettype == "XCdrawing" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING and len(pointertargetwall.nodepoints) == 0 and activetargetnode == null:
-			print("setting blank wall active")
-			setactivetargetwall(pointertargetwall)
+		#if activetargetwall == null and pointertargettype == "XCdrawing" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING and len(pointertargetwall.nodepoints) == 0 and activetargetnode == null:
+		#	print("setting blank wall active")
+		#	setactivetargetwall(pointertargetwall)
 		
 		laserroot.get_node("LaserSpot").visible = (pointertargettype == "XCdrawing") or \
 												  (pointertargettype == "XCtubesector") or \
@@ -1558,6 +1558,7 @@ func buttonreleased_vrgrip():
 						sketchsystem.actsketchchange([{ "xcvizstates":{ gripmenu.gripmenupointertargetwall.get_name():DRAWING_TYPE.VIZ_XCD_HIDE }, "updatetubeshells":updatetubeshells, "updatexcshells":updatexcshells }])
 					if gripmenu.gripmenupointertargetwall == activetargetwall:
 						setactivetargetwall(null)
+						
 				elif gripmenu.gripmenupointertargettype == "XCtubesector":
 					sketchsystem.actsketchchange([{ "xcvizstates":{ gripmenu.gripmenupointertargetwall.xcname0:DRAWING_TYPE.VIZ_XCD_HIDE, 
 																	gripmenu.gripmenupointertargetwall.xcname1:DRAWING_TYPE.VIZ_XCD_HIDE } } ])
@@ -1594,8 +1595,9 @@ func buttonreleased_vrgrip():
 						var xcv = { "xcvizstates":{ xcname:DRAWING_TYPE.VIZ_XCD_HIDE }, 
 									"updatexcshells":[xcname] }
 						sketchsystem.actsketchchange([xcdata, xcv])
+						setactivetargetwall(null)
 					else:
-						print("not deleted xc nodes")
+						print("not deleted xc nodes due to connecting tubes")
 				
 				
 			elif pointertarget.get_name() == "DelTube":

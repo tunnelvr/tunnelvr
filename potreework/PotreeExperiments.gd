@@ -282,21 +282,25 @@ func updatepotreeprioritiesLoop():
 									   "callbacksignal":"updatepotreepriorities_fetchsignal", 
 									   "byteOffset":hnode.hierarchybyteOffset, 
 									   "byteSize":hnode.hierarchybyteSize }
+			hnode.Dloadedstate = "fetching"
 			ImageSystem.fetchrequesturl(nonimagedataobject)
 			var fhierarchyF = yield(self, "updatepotreepriorities_fetchsignal")
-			# assert ((urlhierarchy.substr(0, 4) != "http") or (fhierarchyF.get_len() == processingnode.hierarchybyteSize))
-			matloadingcube.albedo_color = colhierarchyloading
-			var nodesh = yield(hnode.Yloadhierarchychunk(fhierarchyF, rootnode.get_parent().global_transform.inverse()), "completed")
-			$LoadingCube.visible = false
-			for node in nodesh:
-				if node.name[0] != "h":
-					rootnode.otreecellscount += 1
+			if rootnode.urloctree.substr(0, 4) != "http" or fhierarchyF.get_len() == hnode.hierarchybyteSize:
+				matloadingcube.albedo_color = colhierarchyloading
+				hnode.Dloadedstate = "loadinghierarchychunk"
+				var nodesh = yield(hnode.Yloadhierarchychunk(fhierarchyF, rootnode.get_parent().global_transform.inverse()), "completed")
+				$LoadingCube.visible = false
+				for node in nodesh:
+					if node.name[0] != "h":
+						rootnode.otreecellscount += 1
+				hnode.Dloadedstate = "hierarchychunkloaded"
+			else:
+				hnode.Dloadedstate = "failedfetching"
+				print("hierarchy nodesize bytes fail ", fhierarchyF.get_len(), " ", hnode.byteSize)
 
 		var tremaining = ticksms_tonextupdatepriorities - OS.get_ticks_msec()
 		if tremaining > 5:
 			yield(get_tree().create_timer(tremaining*0.001), "timeout")
-
-
 
 
 func Dcorrectvisibilitymask():
