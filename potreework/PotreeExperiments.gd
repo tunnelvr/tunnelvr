@@ -37,17 +37,16 @@ var potreeurlmetadata = null
 onready var ImageSystem = get_node("/root/Spatial/ImageSystem")
 
 func _ready():
-	var st = SurfaceTool.new()
-	st.begin(Mesh.PRIMITIVE_POINTS)
-	for i in range(4):
-		for j in range(4):
-			for k in range(4):
-				st.add_vertex((Vector3(i,j,k)*0.333333-Vector3(0.5,0.5,0.5))*2)
-	var pointmesh = Mesh.new()
-	st.commit(pointmesh)
-	$PointSample.mesh = pointmesh	
-	var pointmaterial =	$PointSample.get_surface_material(0)
-	yield(get_tree().create_timer(5.0), "timeout")
+	if $PointSampleTest.visible:
+		var st = SurfaceTool.new()
+		st.begin(Mesh.PRIMITIVE_POINTS)
+		for i in range(4):
+			for j in range(4):
+				for k in range(4):
+					st.add_vertex((Vector3(i,j,k)*0.333333-Vector3(0.5,0.5,0.5))*2)
+		var pointmesh = Mesh.new()
+		st.commit(pointmesh)
+		$PointSampleTest.mesh = pointmesh	
 			
 func potreethread_function(userdata):
 	print("potreethread_function started")
@@ -76,7 +75,10 @@ func _exit_tree():
 
 func sethighlightplane(planetransform):
 	if rootnode != null:
-		rootnode.sethighlightplane(planetransform.basis.z, planetransform.basis.z.dot(planetransform.origin))
+		if planetransform != null:
+			rootnode.sethighlightplaneR(planetransform.basis.z, planetransform.basis.z.dot(planetransform.origin))
+		else:
+			rootnode.sethighlightplaneR(Vector3(0,0,0), 0.0)
 
 func getpotreeurl():
 	var selfSpatial = get_node("/root/Spatial")

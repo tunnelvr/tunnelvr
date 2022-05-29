@@ -813,6 +813,8 @@ func _input(event):
 			$Viewport.input(event)
 		elif event.pressed:
 			if event.scancode == KEY_L:
+				$Viewport/GUI/Panel/Savegamefilename.selected = 7
+				print("auto loading ", $Viewport/GUI/Panel/Savegamefilename.get_item_text(7))
 				_on_buttonload_pressed()
 			elif event.scancode == KEY_G:
 				$Viewport/GUI/Panel/ButtonDoppelganger.pressed = not $Viewport/GUI/Panel/ButtonDoppelganger.pressed

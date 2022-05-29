@@ -4,7 +4,8 @@ onready var sketchsystem = get_node("/root/Spatial/SketchSystem")
 onready var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
 onready var materialsystem = get_node("/root/Spatial/MaterialSystem")
 onready var gripmenu = get_node("/root/Spatial/GuiSystem/GripMenu")
-
+onready var potreeexperiments = get_node("/root/Spatial/PotreeExperiments")
+		
 onready var playerMe = get_parent()
 onready var headcam = playerMe.get_node('HeadCam')
 onready var handright = playerMe.get_node("HandRight")
@@ -211,11 +212,9 @@ func setactivetargetwall(newactivetargetwall):
 
 	if activetargetwall != null and activetargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		print("newactivetargetwall ", activetargetwall, " nodes ", activetargetwall.get_node("XCnodes").get_child_count())
-		var potreeexperiments = get_node("/root/Spatial/PotreeExperiments")
-		if potreeexperiments != null and potreeexperiments.visible:
-			potreeexperiments.sethighlightplane(activetargetwall.transform)
-
+		potreeexperiments.sethighlightplane(activetargetwall.transform)
 	else:
+		potreeexperiments.sethighlightplane(null)
 		print("newactivetargetwall notdrawing ", activetargetwall)
 	
 	LaserOrient.get_node("RayCast").collision_mask = raynormalcollisionmask()
@@ -1272,7 +1271,6 @@ func buttonreleased_vrgrip():
 
 			var potreeplanefittrans = null
 			if Tglobal.housahedronmode:
-				var potreeexperiments = get_node("/root/Spatial/PotreeExperiments")
 				if potreeexperiments.visible:
 					var laserlength = gripmenu.gripmenulaserorient.origin.distance_to(gripmenu.gripmenupointertargetpoint)
 					var Glaserlength = min(15, laserlength if not is_zero_approx(laserlength) else 50)

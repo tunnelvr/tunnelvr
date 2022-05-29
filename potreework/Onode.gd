@@ -140,8 +140,10 @@ func Yloadoctcellpoints(foctreeF, pointsizefactor, roottransforminverse, rootnod
 	pointmaterial.set_shader_param("ocellcentre", ocellcentre)
 	pointmaterial.set_shader_param("ocellmask", ocellmask)
 	pointmaterial.set_shader_param("roottransforminverse", roottransforminverse)
-	pointmaterial.set_shader_param("highlightplaneperp", rootnode.highlightplaneperp)
-	pointmaterial.set_shader_param("highlightplanedot", rootnode.highlightplanedot)
+			
+	pointmaterial.set_shader_param("highlightdist", rootnode.highlightdist)
+	pointmaterial.set_shader_param("highlightcol", rootnode.highlightcol)
+	pointmaterial.set_shader_param("highlightcol2", rootnode.highlightcol2)
 
 	var colormixweight = 0.0
 	if rootnode.attributes_rgb_prebytes != -1:
@@ -152,6 +154,10 @@ func Yloadoctcellpoints(foctreeF, pointsizefactor, roottransforminverse, rootnod
 		pointmaterial.set_shader_param("highlightdist", 0.15)
 		pointmaterial.set_shader_param("highlightcol", Vector3(0.8,0.0,0.8))
 		pointmaterial.set_shader_param("highlightcol2", Vector3(0.8,0.0,0.8))
+
+	pointmaterial.set_shader_param("highlightplaneperp", rootnode.highlightplaneperp)
+	pointmaterial.set_shader_param("highlightplanedot", rootnode.highlightplanedot)
+	pointmaterial.set_shader_param("slicedisappearthickness", rootnode.slicedisappearthickness)
 
 	set_surface_material(0, pointmaterial)
 	dt = OS.get_ticks_msec() - t0
