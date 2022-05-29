@@ -22,6 +22,7 @@ var timestampatinvisibility = 0
 
 var Dboxmin = Vector3(0,0,0)
 var Dboxmax = Vector3(0,0,0)
+var Dloadedstate = "notloaded"
 
 const boxpointepsilon = 0.6
 const spacingdivider = 1.55

@@ -16,7 +16,7 @@ extends Spatial
 # https://learn.unity.com/tutorial/unit-5-hand-presence-and-interaction?uv=2018.4&courseId=5d955b5dedbc2a319caab9a0#5d96924dedbc2a6236bc1191
 # https://www.youtube.com/watch?v=gpQePH-Ffbw
 
-# * VR leads@skydeas1  and @brainonsilicon in Leeds (can do a trip there)
+# * VR leads@skydeas1 and @brainonsilicon in Leeds (can do a trip there)
 
 # * Need to ask to improve the documentation on https://docs.godotengine.org/en/latest/classes/class_meshinstance.html#class-meshinstance-method-set-surface-material
 # *   See also https://godotengine.org/qa/3488/how-to-generate-a-mesh-with-multiple-materials

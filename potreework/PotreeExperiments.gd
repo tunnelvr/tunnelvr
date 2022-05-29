@@ -240,7 +240,8 @@ func updatepotreeprioritiesLoop():
 			var nnode = res["pointcloudnodestoshow"].pop_front()
 			if not nnode.visible:
 				if nnode.pointmaterial == null:
-					var nonimagedataobject = { "url":rootnode.urloctree, "callbackobject":self, 
+					var nonimagedataobject = { "url":rootnode.urloctree, 
+											   "callbackobject":self, 
 											   "callbacksignal":"updatepotreepriorities_fetchsignal", 
 											   "byteOffset":nnode.byteOffset, 
 											   "byteSize":nnode.byteSize }
@@ -248,17 +249,21 @@ func updatepotreeprioritiesLoop():
 					$LoadingCube.global_transform.origin = nnode.global_transform.origin
 					matloadingcube.albedo_color = coloctcellpointsfetching
 					$LoadingCube.visible = true
+					nnode.Dloadedstate = "fetching"
 					ImageSystem.fetchrequesturl(nonimagedataobject)
 					var foctreeF = yield(self, "updatepotreepriorities_fetchsignal")
 					if rootnode.urloctree.substr(0, 4) != "http" or foctreeF.get_len() == nnode.byteSize:
 						var roottransforminverse = rootnode.get_parent().global_transform.inverse()
 						var tp0 = OS.get_ticks_msec()
 						matloadingcube.albedo_color = coloctcellpointsloading
+						nnode.Dloadedstate = "pointsloading"
 						yield(nnode.Yloadoctcellpoints(foctreeF, pointsizefactor, roottransforminverse, rootnode), "completed")
 						var dt = OS.get_ticks_msec() - tp0
 						if dt > 100:
 							print("    Warning: long loadoctcellpoints ", nnode.get_path(), " of ", dt, " msecs", " numPoints:", nnode.numPoints, " carrieddown:", nnode.numPointsCarriedDown)
+						nnode.Dloadedstate = "pointsloaded"
 					else:
+						nnode.Dloadedstate = "failedfetching"
 						print("foctree nodesize bytes fail ", foctreeF.get_len(), " ", nnode.byteSize)
 					$LoadingCube.visible = false
 				if not nnode.visible and nnode.pointmaterial != null:
