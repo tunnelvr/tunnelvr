@@ -1633,6 +1633,28 @@ func buttonreleased_vrgrip():
 											}])
 				clearactivetargetnode()
 				
+			elif pointertarget.get_name() == "ProjectXC" and activetargetnodewall != null and activetargetnodewall.drawingtype == DRAWING_TYPE.DT_XCDRAWING and gripmenu.gripmenupointertargetwall != null and gripmenu.gripmenupointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
+				if len(gripmenu.gripmenupointertargetwall.nodepoints) == 0:
+					var nextnodepoints = { }
+					for nodename in activetargetnodewall.nodepoints:
+						var pt = activetargetnodewall.transform.xform(activetargetnodewall.nodepoints[nodename])
+						var pto = pt - gripmenu.gripmenupointertargetwall.transform.origin
+						var ptox = gripmenu.gripmenupointertargetwall.transform.basis.x.dot(pto)
+						var ptoy = gripmenu.gripmenupointertargetwall.transform.basis.y.dot(pto)
+						nextnodepoints[nodename] = Vector3(ptox, ptoy, 0.0)
+					sketchsystem.actsketchchange([{ "name":gripmenu.gripmenupointertargetwall.get_name(), 
+													"prevnodepoints":{ },
+													"nextnodepoints":nextnodepoints, 
+													"prevonepathpairs":[ ], 
+													"newonepathpairs":activetargetnodewall.onepathpairs.duplicate()
+												}])
+					clearactivetargetnode()
+					
+				else:
+					print("not projecting to xcdrawing that isn't empty")
+
+				
+				
 			elif pointertarget.get_name() == "HoleXC":
 				var xcsectormaterial = gripmenu.gripmenupointertargetwall.xcsectormaterials[gripmenu.gripmenuactivetargettubesectorindex]
 				if xcsectormaterial == "hole":
@@ -1730,6 +1752,7 @@ func buttonreleased_vrgrip():
 						setactivetargetwall(xcdrawing)
 						wasactivetargettube = null
 						activelaserroot.get_node("LaserSpot").visible = false
+
 
 			elif pointertarget.get_name() == "FixHoleXC" and is_instance_valid(wasactivetargettube):
 				print("FixHoleXC ", wasactivetargettube)

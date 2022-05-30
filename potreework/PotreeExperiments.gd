@@ -21,8 +21,6 @@ extends Spatial
 # nix-shell -p caddy
 # caddy file-server -browse -root /home/julian/data/3dmodels/aidanhouse/potreeconverted -listen 0.0.0.0:8000
 
-
-
 var potreethreadmutex = Mutex.new()
 var potreethreadsemaphore = Semaphore.new()
 var potreethread = null
@@ -108,7 +106,6 @@ signal updatepotreepriorities_fetchsignal(f)
 
 const timems_fornextupdatepriorities = 3500
 
-
 var queuekillpotree = false
 
 onready var matloadingcube = $LoadingCube.get_surface_material(0)
@@ -117,6 +114,7 @@ const colhierarchyfetching = Color("#901fe51f")
 const colhierarchyloading = Color("#361fe51f")
 const coloctcellpointsfetching = Color("#80e418e6")
 const coloctcellpointsloading = Color("#36e418e6")
+
 
 func LoadPotree():
 	assert (rootnode == null)
@@ -130,6 +128,11 @@ func LoadPotree():
 		return
 	print("Loading ", potreeurlmetadata)
 	
+	var selfSpatial = get_node("/root/Spatial")
+	if potreeurlmetadata.begins_with("http://localhost") and selfSpatial.hostipnumber != "":
+		potreeurlmetadata = potreeurlmetadata.replace("localhost", selfSpatial.hostipnumber)
+		print("now setting ", potreeurlmetadata)
+		
 	var nonimagedataobject = { "url":potreeurlmetadata, "callbackobject":self, "callbacksignal":"updatepotreepriorities_fetchsignal" }
 	ImageSystem.fetchrequesturl(nonimagedataobject)
 	var fmetadataF = yield(self, "updatepotreepriorities_fetchsignal")
@@ -269,7 +272,11 @@ func updatepotreeprioritiesLoop():
 						print("foctree nodesize bytes fail ", foctreeF.get_len(), " ", nnode.byteSize)
 					$LoadingCube.visible = false
 				if not nnode.visible and nnode.pointmaterial != null:
+					nnode.pointmaterial.set_shader_param("highlightplaneperp", rootnode.highlightplaneperp)
+					nnode.pointmaterial.set_shader_param("highlightplanedot", rootnode.highlightplanedot)
+					nnode.pointmaterial.set_shader_param("slicedisappearthickness", rootnode.slicedisappearthickness)
 					rootnode.uppernodevisibilitymask(nnode, true)
+					
 		
 			
 		while visible and len(res["hierarchynodestoload"]) != 0 and OS.get_ticks_msec() < ticksms_tonextupdatepriorities:

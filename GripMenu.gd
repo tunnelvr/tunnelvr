@@ -111,6 +111,8 @@ func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointert
 		gmlist = ["HideXC" if len(pointertargetwall.nodepoints) != 0  else "" ]
 		if (gripmenuactivetargetnode != null) and (activetargetwall == pointertargetwall):
 			gmlist.push_back("DragXC")
+		elif Tglobal.housahedronmode and (gripmenuactivetargetnode != null) and (pointertargetwall != null) and (activetargetwall != pointertargetwall) and len(pointertargetwall.nodepoints) == 0:
+			gmlist.push_back("ProjectXC")
 		else:
 			gmlist.push_back("NewXC")
 		if pointertargetwall.notubeconnections_so_delxcable():
