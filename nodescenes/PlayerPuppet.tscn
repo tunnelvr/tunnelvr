@@ -194,6 +194,7 @@ material/0 = SubResource( 4 )
 [node name="headtorchon" type="MeshInstance" parent="HeadCam/headtorchcone"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.01, 0 )
 visible = false
+cast_shadow = 0
 mesh = SubResource( 5 )
 material/0 = SubResource( 6 )
 
