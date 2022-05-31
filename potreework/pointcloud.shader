@@ -46,14 +46,14 @@ void vertex() {
 					 (sv.y > ocellcentre.y ? 4 : 1) * 
 					 (sv.z > ocellcentre.z ? 2 : 1); 
 	if (((ocellmask / ocellindex) % 2) != 0) {
-		POINT_SIZE = 0.0;
+		POINT_SIZE = -1.0;
 		// should be able to return here but causes points to blip purple if these other values aren't set
 	}
 
 	if (slicedisappearthickness != 0.0) {
 		float distplane = dot(VERTEX, highlightplaneperp) - highlightplanedot; 
 		if (abs(distplane) >= slicedisappearthickness) {
-			POINT_SIZE = 0.0;
+			POINT_SIZE = -1.0;
 		}
 		float emissionfac = clamp(1.0 - abs(distplane)/highlightdist, 0.0, 1.0);
 		emissioncol = (distplane > 0.0 ? highlightcol : highlightcol2)*emissionfac;

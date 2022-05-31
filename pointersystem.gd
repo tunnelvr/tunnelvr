@@ -1634,7 +1634,10 @@ func buttonreleased_vrgrip():
 				clearactivetargetnode()
 				
 			elif pointertarget.get_name() == "ProjectXC" and activetargetnodewall != null and activetargetnodewall.drawingtype == DRAWING_TYPE.DT_XCDRAWING and gripmenu.gripmenupointertargetwall != null and gripmenu.gripmenupointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
-				if len(gripmenu.gripmenupointertargetwall.nodepoints) == 0:
+				var sourcesurfacetype = "floor" if activetargetnodewall.transform.basis.z.y < -0.8 else "ceiling" if activetargetnodewall.transform.basis.z.y > 0.8 else "wall" 
+				var destsurfacetype = "floor" if gripmenu.gripmenupointertargetwall.transform.basis.z.y < -0.8 else "ceiling" if gripmenu.gripmenupointertargetwall.transform.basis.z.y > 0.8 else "wall"
+				if len(gripmenu.gripmenupointertargetwall.nodepoints) == 0 and ((sourcesurfacetype == "wall") == (destsurfacetype == "wall")):
+					clearactivetargetnode()
 					var nextnodepoints = { }
 					for nodename in activetargetnodewall.nodepoints:
 						var pt = activetargetnodewall.transform.xform(activetargetnodewall.nodepoints[nodename])
@@ -1642,13 +1645,33 @@ func buttonreleased_vrgrip():
 						var ptox = gripmenu.gripmenupointertargetwall.transform.basis.x.dot(pto)
 						var ptoy = gripmenu.gripmenupointertargetwall.transform.basis.y.dot(pto)
 						nextnodepoints[nodename] = Vector3(ptox, ptoy, 0.0)
-					sketchsystem.actsketchchange([{ "name":gripmenu.gripmenupointertargetwall.get_name(), 
-													"prevnodepoints":{ },
-													"nextnodepoints":nextnodepoints, 
-													"prevonepathpairs":[ ], 
-													"newonepathpairs":activetargetnodewall.onepathpairs.duplicate()
-												}])
+					var xcdatalist = [{ "name":gripmenu.gripmenupointertargetwall.get_name(), 
+										"prevnodepoints":{ },
+										"nextnodepoints":nextnodepoints, 
+										"prevonepathpairs":[ ], 
+										"newonepathpairs":activetargetnodewall.onepathpairs.duplicate()
+									 }]
+					if (sourcesurfacetype != "wall") and (destsurfacetype != "wall"):
+						if sourcesurfacetype == destsurfacetype:
+							if activetargetnodewall.notubeconnections_so_delxcable():
+								xcdatalist.push_back({ "name":activetargetnodewall.get_name(), 
+													   "prevnodepoints":activetargetnodewall.nodepoints.duplicate(),
+													   "nextnodepoints":{ }, 
+													   "prevonepathpairs":activetargetnodewall.onepathpairs.duplicate(),
+													   "newonepathpairs": [ ]
+													 })
+								xcdatalist.push_back({ "xcvizstates":{ activetargetnodewall.get_name():DRAWING_TYPE.VIZ_XCD_HIDE } })
+					else:
+						for j in range(0, len(activetargetnodewall.onepathpairs), 2):
+							var pt0 = activetargetnodewall.nodepoints[activetargetnodewall.onepathpairs[j]]
+							var pt1 = activetargetnodewall.nodepoints[activetargetnodewall.onepathpairs[j+1]]
+							print("make a panel between ", pt0, pt1)
+					#xcdatalist.push_back({ "xcvizstates":{  }, "updatexcshells":[gripmenu.gripmenupointertargetwall.get_name()] })
+
+							
 					clearactivetargetnode()
+					sketchsystem.actsketchchange(xcdatalist)
+
 					
 				else:
 					print("not projecting to xcdrawing that isn't empty")
