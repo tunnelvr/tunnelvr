@@ -1636,8 +1636,8 @@ func buttonreleased_vrgrip():
 			elif pointertarget.get_name() == "ProjectXC" and activetargetnodewall != null and activetargetnodewall.drawingtype == DRAWING_TYPE.DT_XCDRAWING and gripmenu.gripmenupointertargetwall != null and gripmenu.gripmenupointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 				var sourcexc = activetargetnodewall
 				var destxc = gripmenu.gripmenupointertargetwall
-				var sourcesurfacetype = "floor" if sourcexc.transform.basis.z.y < -0.8 else "ceiling" if sourcexc.transform.basis.z.y > 0.8 else "wall" 
-				var destsurfacetype = "floor" if destxc.transform.basis.z.y < -0.8 else "ceiling" if destxc.transform.basis.z.y > 0.8 else "wall"
+				var sourcesurfacetype = "ceiling" if sourcexc.transform.basis.z.y < -0.8 else "floor" if sourcexc.transform.basis.z.y > 0.8 else "wall" 
+				var destsurfacetype = "ceiling" if destxc.transform.basis.z.y < -0.8 else "floor" if destxc.transform.basis.z.y > 0.8 else "wall"
 				if len(destxc.nodepoints) == 0 and ((sourcesurfacetype == "wall") == (destsurfacetype == "wall")):
 					var nextnodepoints = { }
 					for nodename in sourcexc.nodepoints:
@@ -1652,6 +1652,8 @@ func buttonreleased_vrgrip():
 										"prevonepathpairs":[ ], 
 										"newonepathpairs":sourcexc.onepathpairs.duplicate()
 									 }]
+					var xcv = { "xcvizstates":{ destxc.get_name():DRAWING_TYPE.VIZ_XCD_HIDE }, "updatexcshells":[ destxc.get_name() ] }
+					xcv["xcvizstates"][sourcexc.get_name()] = DRAWING_TYPE.VIZ_XCD_HIDE
 					if (sourcesurfacetype != "wall") and (destsurfacetype != "wall"):
 						if sourcesurfacetype == destsurfacetype:
 							if sourcexc.notubeconnections_so_delxcable():
@@ -1661,19 +1663,39 @@ func buttonreleased_vrgrip():
 													   "prevonepathpairs":sourcexc.onepathpairs.duplicate(),
 													   "newonepathpairs": [ ]
 													 })
-								xcdatalist.push_back({ "xcvizstates":{ sourcexc.get_name():DRAWING_TYPE.VIZ_XCD_HIDE } })
-					else:
-						for j in range(0, len(sourcexc.onepathpairs), 2):
-							var c0 = sourcexc.transform.xform(sourcexc.nodepoints[sourcexc.onepathpairs[j]])
-							var c1 = sourcexc.transform.xform(sourcexc.nodepoints[sourcexc.onepathpairs[j+1]])
-							var ptcen = (c0+c1)*0.5
-							print("make a panel between ", c0, c1)
-							var drawingwallangle = Vector2(c1.x-c0.x, c1.z-c0.z).angle() + deg2rad(90)
-							var xcdata = { "name":sketchsystem.uniqueXCname("s"), 
-										   "drawingtype":DRAWING_TYPE.DT_XCDRAWING,
-										   "transformpos":Transform(Basis().rotated(Vector3(0,-1,0), drawingwallangle), ptcen) }
-							xcdatalist.push_back(xcdata)
+						elif Tglobal.housahedronmode:
+							var sourcepolys = Polynets.makexcdpolys(sourcexc.nodepoints, sourcexc.onepathpairs)
+							if len(sourcepolys) == 2:
+								var sourcepoly = sourcepolys[-1]
+								for i in range(len(sourcepoly)):
+									var nl = sourcepoly[i]
+									var nr = sourcepoly[(i+1)%len(sourcepoly)]
+									var pttl = sourcexc.transform.xform(sourcexc.nodepoints[nl])
+									var pttr = sourcexc.transform.xform(sourcexc.nodepoints[nr])
+									var ptbl = destxc.transform.xform(nextnodepoints[nl])
+									var ptbr = destxc.transform.xform(nextnodepoints[nr])
+									var ptcen = (pttl + pttr + ptbl + ptbr)*0.25
+									var drawingwallangle = Vector2(pttr.x-pttl.x, pttr.z-pttl.z).angle()
+									var walltrans = Transform(Basis().rotated(Vector3(0,-1,0), drawingwallangle), ptcen)
+									var wallnodepoints = { "tl":walltrans.xform_inv(pttl), 
+														   "tr":walltrans.xform_inv(pttr), 
+														   "bl":walltrans.xform_inv(ptbl), 
+														   "br":walltrans.xform_inv(ptbr) 
+														 }
+									var wallonepathpairs = [ "tl", "tr", "tr", "br", "br", "bl", "bl", "tl"]
+									print("must fix flaw with uniqueXCname so it keeps track properly")
+									var xcdatawall = { "name":sketchsystem.uniqueXCname("u%duu"%i), 
+													   "drawingtype":DRAWING_TYPE.DT_XCDRAWING,
+													   "transformpos":walltrans, 
+													   "nodepoints":wallnodepoints,
+													   "onepathpairs":wallonepathpairs 
+													 }
+									xcdatalist.push_back(xcdatawall)
+									xcv["xcvizstates"][xcdatawall["name"]] = DRAWING_TYPE.VIZ_XCD_HIDE
+									xcv["updatexcshells"].push_back(xcdatawall["name"])
+					xcdatalist.push_back(xcv)
 					clearactivetargetnode()
+					
 					sketchsystem.actsketchchange(xcdatalist)
 
 					
