@@ -30,6 +30,7 @@ var nodestopointload = [ ]
 var nodespointloaded = [ ]
 
 var rootnode = null
+var potreeurlmetadataorg = null
 var potreeurlmetadata = null
 
 onready var ImageSystem = get_node("/root/Spatial/ImageSystem")
@@ -97,6 +98,7 @@ func getpotreeurl():
 
 
 var Cpointsizevisibilitycutoff = 15.0
+var minCpointsizevisibilitycutoff = 7.0
 var maxvisiblepoints = 500000
 var minvisiblepoints = 200000
 var pointsizefactor = 150.0
@@ -123,6 +125,7 @@ func LoadPotree():
 		if lxcdrawingcentreline.additionalproperties != null and lxcdrawingcentreline.additionalproperties.has("potreeurlmetadata"):
 			xcdrawingcentreline = lxcdrawingcentreline
 			potreeurlmetadata = xcdrawingcentreline.additionalproperties["potreeurlmetadata"]
+	potreeurlmetadataorg = potreeurlmetadata
 	if potreeurlmetadata == null:
 		print("No potree url found")
 		return
@@ -133,7 +136,7 @@ func LoadPotree():
 		potreeurlmetadata = potreeurlmetadata.replace("localhost", selfSpatial.hostipnumber)
 		print("now setting ", potreeurlmetadata)
 		
-	var nonimagedataobject = { "url":potreeurlmetadata, "callbackobject":self, "callbacksignal":"updatepotreepriorities_fetchsignal" }
+	var nonimagedataobject = { "url":lpotreeurlmetadata, "callbackobject":self, "callbacksignal":"updatepotreepriorities_fetchsignal" }
 	ImageSystem.fetchrequesturl(nonimagedataobject)
 	var fmetadataF = yield(self, "updatepotreepriorities_fetchsignal")
 	if fmetadataF == null:
@@ -172,17 +175,17 @@ func Yupdatepotreeprioritiesfromcamera(primarycameraorigin, pointsizefactor, poi
 		nscannednodes += 1
 		if (nscannednodes % 50) == 0:
 			yield(get_tree(), "idle_frame")
+		var scanningnodetoshow = true
 		if scanningnode.name[0] == "h":
 			hierarchynodestoload.push_back(scanningnode)
-			scanningnode = rootnode.successornode(scanningnode, true)
+			scanningnodetoshow = false
 		else:
 			var boxcentre = scanningnode.global_transform.origin
 			var boxradius = (scanningnode.ocellsize/2).length()
 			var cd = boxcentre.distance_to(primarycameraorigin)
-			var scanningnodetoshow = true
 			if cd > boxradius + 0.1:
 				var pointsize = pointsizefactor*rootnode.spacing*scanningnode.powdiv2/(cd-boxradius)
-				scanningnodetoshow = (pointsize > pointsizevisibilitycutoff)
+				scanningnodetoshow = (pointsize > pointsizevisibilitycutoff) or (scanningnode == rootnode)
 				pointsizes.push_back(pointsize)
 			if not scanningnode.visibleincamera and scanningnode.visibleincameratimestamp < visibleincameratimehorizon:
 				scanningnodetoshow = false
@@ -191,7 +194,7 @@ func Yupdatepotreeprioritiesfromcamera(primarycameraorigin, pointsizefactor, poi
 				pointcloudnodestoshow.push_back(scanningnode)
 			else:
 				pointcloudnodestohide.push_back(scanningnode)
-			scanningnode = rootnode.successornode(scanningnode, not scanningnodetoshow)
+		scanningnode = rootnode.successornode(scanningnode, not scanningnodetoshow)
 
 	return { "hierarchynodestoload":hierarchynodestoload, 
 			 "pointcloudnodestoshow":pointcloudnodestoshow,
@@ -207,7 +210,7 @@ func Yupdatepotreeprioritiesfull():
 		primarycameraorigin = primarycamera.get_camera_transform().origin
 
 	var res = yield(Yupdatepotreeprioritiesfromcamera(primarycameraorigin, pointsizefactor, Cpointsizevisibilitycutoff), "completed")
-	while res["sweptvisiblepointcount"] < minvisiblepoints and len(res["pointsizes"]) != 0 and res["pointsizes"].min() < Cpointsizevisibilitycutoff:
+	while res["sweptvisiblepointcount"] < minvisiblepoints and len(res["pointsizes"]) != 0 and res["pointsizes"].min() < Cpointsizevisibilitycutoff and Cpointsizevisibilitycutoff > minCpointsizevisibilitycutoff:
 		Cpointsizevisibilitycutoff *= 0.5
 		var Dsweptvisiblepointcount = res["sweptvisiblepointcount"]
 		res = yield(Yupdatepotreeprioritiesfromcamera(primarycameraorigin, pointsizefactor, Cpointsizevisibilitycutoff), "completed")
