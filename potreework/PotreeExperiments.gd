@@ -136,7 +136,7 @@ func LoadPotree():
 		potreeurlmetadata = potreeurlmetadata.replace("localhost", selfSpatial.hostipnumber)
 		print("now setting ", potreeurlmetadata)
 		
-	var nonimagedataobject = { "url":lpotreeurlmetadata, "callbackobject":self, "callbacksignal":"updatepotreepriorities_fetchsignal" }
+	var nonimagedataobject = { "url":potreeurlmetadata, "callbackobject":self, "callbacksignal":"updatepotreepriorities_fetchsignal" }
 	ImageSystem.fetchrequesturl(nonimagedataobject)
 	var fmetadataF = yield(self, "updatepotreepriorities_fetchsignal")
 	if fmetadataF == null:
@@ -160,7 +160,9 @@ func LoadPotree():
 	queuekillpotree = false
 	call_deferred("updatepotreeprioritiesLoop")
 
-func Yupdatepotreeprioritiesfromcamera(primarycameraorigin, pointsizefactor, pointsizevisibilitycutoff):
+
+
+func Yupdatepotreeprioritiesfromcamera(primarycamera, pointsizefactor, pointsizevisibilitycutoff):
 	var hierarchynodestoload = [ ]
 	var pointcloudnodestoshow = [ ]
 	var pointcloudnodestohide = [ ]
@@ -168,7 +170,8 @@ func Yupdatepotreeprioritiesfromcamera(primarycameraorigin, pointsizefactor, poi
 	var visibleincameratimehorizon = OS.get_ticks_msec()*0.001 - 5.0
 	var sweptvisiblepointcount = 0
 	var nscannednodes = 0
-
+	var primarycameraorigin = primarycamera.get_camera_transform().origin if primarycamera != null else Vector3(0,0,0)
+		
 	var scanningnode = rootnode
 	yield(get_tree(), "idle_frame")
 	while scanningnode != null:
@@ -187,8 +190,17 @@ func Yupdatepotreeprioritiesfromcamera(primarycameraorigin, pointsizefactor, poi
 				var pointsize = pointsizefactor*rootnode.spacing*scanningnode.powdiv2/(cd-boxradius)
 				scanningnodetoshow = (pointsize > pointsizevisibilitycutoff) or (scanningnode == rootnode)
 				pointsizes.push_back(pointsize)
-			if not scanningnode.visibleincamera and scanningnode.visibleincameratimestamp < visibleincameratimehorizon:
-				scanningnodetoshow = false
+				if primarycamera != null:
+					if primarycamera.is_position_behind(boxcentre):
+						if scanningnode.visibleincamera:
+							scanningnode.visibleincamera = false
+							scanningnode.visibleincameratimestamp = OS.get_ticks_msec()*0.001
+						if scanningnode.visibleincameratimestamp < visibleincameratimehorizon:
+							scanningnodetoshow = false
+					else:
+						scanningnode.visibleincamera = true
+			else:
+				scanningnode.visibleincamera = true
 			if scanningnodetoshow:
 				sweptvisiblepointcount += scanningnode.numPoints
 				pointcloudnodestoshow.push_back(scanningnode)
@@ -204,21 +216,17 @@ func Yupdatepotreeprioritiesfromcamera(primarycameraorigin, pointsizefactor, poi
 			 "nscannednodes":nscannednodes }
 
 func Yupdatepotreeprioritiesfull():
-	var primarycameraorigin = Vector3(0, 0, 0)
 	var primarycamera = instance_from_id(Tglobal.primarycamera_instanceid)
-	if primarycamera != null:
-		primarycameraorigin = primarycamera.get_camera_transform().origin
-
-	var res = yield(Yupdatepotreeprioritiesfromcamera(primarycameraorigin, pointsizefactor, Cpointsizevisibilitycutoff), "completed")
+	var res = yield(Yupdatepotreeprioritiesfromcamera(primarycamera, pointsizefactor, Cpointsizevisibilitycutoff), "completed")
 	while res["sweptvisiblepointcount"] < minvisiblepoints and len(res["pointsizes"]) != 0 and res["pointsizes"].min() < Cpointsizevisibilitycutoff and Cpointsizevisibilitycutoff > minCpointsizevisibilitycutoff:
 		Cpointsizevisibilitycutoff *= 0.5
 		var Dsweptvisiblepointcount = res["sweptvisiblepointcount"]
-		res = yield(Yupdatepotreeprioritiesfromcamera(primarycameraorigin, pointsizefactor, Cpointsizevisibilitycutoff), "completed")
+		res = yield(Yupdatepotreeprioritiesfromcamera(primarycamera, pointsizefactor, Cpointsizevisibilitycutoff), "completed")
 		print("scaling down Cpointsizevisibilitycutoff ", Cpointsizevisibilitycutoff, "  prevcount: ", Dsweptvisiblepointcount, " newcount: ", res["sweptvisiblepointcount"])
 	while res["sweptvisiblepointcount"] > maxvisiblepoints and len(res["pointsizes"]) != 0 and res["pointsizes"].max() > Cpointsizevisibilitycutoff:
 		Cpointsizevisibilitycutoff *= 2.0
 		var Dsweptvisiblepointcount = res["sweptvisiblepointcount"]
-		res = yield(Yupdatepotreeprioritiesfromcamera(primarycameraorigin, pointsizefactor, Cpointsizevisibilitycutoff), "completed")
+		res = yield(Yupdatepotreeprioritiesfromcamera(primarycamera, pointsizefactor, Cpointsizevisibilitycutoff), "completed")
 		print("scaling up Cpointsizevisibilitycutoff ", Cpointsizevisibilitycutoff, "  prevcount: ", Dsweptvisiblepointcount, " newcount: ", res["sweptvisiblepointcount"])
 	print("hierarchynodestoload ", len(res["hierarchynodestoload"]), "   pointcloudnodestoshow  ", len(res["pointcloudnodestoshow"]), "   pointcloudnodestohide  ", len(res["pointcloudnodestohide"]),  "  sweptvisiblepointcount ", res["sweptvisiblepointcount"],  "  nscannednodes ", res["nscannednodes"]) #,   " pointsizes: ", res["pointsizes"].min(), " ", res["pointsizes"].max())
 	return res

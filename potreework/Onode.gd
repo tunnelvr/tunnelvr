@@ -42,13 +42,6 @@ func createChildAABB(pnode, index):
 	else:                      Dboxmax.z -= boxsize.z / 2;
 	
 
-func on_camera_entered(camera):
-	if camera.get_instance_id() == Tglobal.primarycamera_instanceid:
-		visibleincamera = true
-func on_camera_exited(camera):
-	if camera.get_instance_id() == Tglobal.primarycamera_instanceid:
-		visibleincamera = false
-		visibleincameratimestamp = OS.get_ticks_msec()*0.001
 		
 const Nloadcellpointsperframe = 3000
 func Yloadoctcellpoints(foctreeF, pointsizefactor, roottransforminverse, rootnode):
@@ -184,14 +177,8 @@ func constructpotreenode(parentnode, childIndex, Droottransforminverse):
 	assert (not parentnode.has_node(name))
 	constructcontainingmesh()
 
+
 func constructcontainingmesh():
-	var visnote = VisibilityNotifier.new()
-	visnote.name = "visnote"
-	visnote.aabb = AABB(-ocellsize/2, ocellsize)
-	visnote.visible = false
-	add_child(visnote)
-	visnote.connect("camera_entered", self, "on_camera_entered")
-	visnote.connect("camera_exited", self, "on_camera_exited")
 	if constructhcubes:
 		mesh = CubeMesh.new()
 		mesh.surface_set_material(0, load("res://potreework/ocellcube.material"))

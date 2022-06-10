@@ -54,8 +54,8 @@ func sethighlightplaneR(lhighlightplaneperp, lhighlightplanedot):
 		node = successornode(node, not node.visible)
 	
 func successornode(node, skip):
-	if not skip and node.get_child_count() > 1:
-		return node.get_child(1)
+	if not skip and node.get_child_count() > 0:
+		return node.get_child(0)
 	while true:
 		if node.treedepth == 0:
 			return null
@@ -87,9 +87,9 @@ func uppernodevisibilitymask(node, nodetobevisible):
 
 func updatenodeinvisibilitybelow(topnode):
 	assert (not topnode.visible)
-	if topnode.get_child_count() <= 1:
+	if topnode.get_child_count() == 0:
 		return
-	var node = topnode.get_child(1)
+	var node = topnode.get_child(0)
 	var goingdown = true
 	while true:
 		if goingdown:
@@ -103,8 +103,8 @@ func updatenodeinvisibilitybelow(topnode):
 					pnode.pointmaterial.set_shader_param("ocellmask", pnode.ocellmask)
 				node.timestampatinvisibility = OS.get_ticks_msec()
 				visiblepointcount -= node.numPoints
-				if node.get_child_count() > 1:
-					node = node.get_child(1)
+				if node.get_child_count() > 0:
+					node = node.get_child(0)
 				else:
 					goingdown = false
 			else:
@@ -128,8 +128,8 @@ func freeinvisiblenoderesources(topnode):
 	while true:
 		assert (!node.visible)
 		if goingdown:
-			if node.get_child_count() > 1:
-				node = node.get_child(1)
+			if node.get_child_count() != 0:
+				node = node.get_child(0)
 			else:
 				goingdown = false
 		else:
