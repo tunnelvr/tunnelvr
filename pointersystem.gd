@@ -1320,6 +1320,9 @@ func buttonreleased_vrgrip():
 					else:
 						xcdata["transformpos"] = Transform(Vector3(1,0,0), Vector3(0,0,1), Vector3(0,-1,0), pt0)
 					
+				if Tglobal.housahedronmode:
+					xcdata["xcflatshellmaterial"] = "ceiling" if xcdata["transformpos"].basis.z.y < -0.8 else "floor" if xcdata["transformpos"].basis.z.y > 0.8 else "specwall" 
+					
 				var xcviz = { "xcvizstates": { xcdata["name"]:DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE } }
 				sketchsystem.actsketchchange([xcdata, xcviz])
 				clearactivetargetnode()
@@ -1633,7 +1636,10 @@ func buttonreleased_vrgrip():
 											}])
 				clearactivetargetnode()
 				
-			elif pointertarget.get_name() == "ProjectXC" and activetargetnodewall != null and activetargetnodewall.drawingtype == DRAWING_TYPE.DT_XCDRAWING and gripmenu.gripmenupointertargetwall != null and gripmenu.gripmenupointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
+			elif pointertarget.get_name() == "ProjectXC" and activetargetnodewall != null and \
+					activetargetnodewall.drawingtype == DRAWING_TYPE.DT_XCDRAWING and \
+					gripmenu.gripmenupointertargetwall != null and \
+					gripmenu.gripmenupointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 				var sourcexc = activetargetnodewall
 				var destxc = gripmenu.gripmenupointertargetwall
 				var sourcesurfacetype = "ceiling" if sourcexc.transform.basis.z.y < -0.8 else "floor" if sourcexc.transform.basis.z.y > 0.8 else "wall" 
@@ -1688,7 +1694,8 @@ func buttonreleased_vrgrip():
 													   "drawingtype":DRAWING_TYPE.DT_XCDRAWING,
 													   "transformpos":walltrans, 
 													   "nodepoints":wallnodepoints,
-													   "onepathpairs":wallonepathpairs 
+													   "onepathpairs":wallonepathpairs, 
+													   "xcflatshellmaterial":"specwall" 
 													 }
 									xcdatalist.push_back(xcdatawall)
 									xcv["xcvizstates"][xcdatawall["name"]] = DRAWING_TYPE.VIZ_XCD_HIDE
