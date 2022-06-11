@@ -4,7 +4,8 @@ onready var sketchsystem = get_node("/root/Spatial/SketchSystem")
 onready var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
 onready var materialsystem = get_node("/root/Spatial/MaterialSystem")
 onready var gripmenu = get_node("/root/Spatial/GuiSystem/GripMenu")
-
+onready var potreeexperiments = get_node("/root/Spatial/PotreeExperiments")
+		
 onready var playerMe = get_parent()
 onready var headcam = playerMe.get_node('HeadCam')
 onready var handright = playerMe.get_node("HandRight")
@@ -211,11 +212,9 @@ func setactivetargetwall(newactivetargetwall):
 
 	if activetargetwall != null and activetargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		print("newactivetargetwall ", activetargetwall, " nodes ", activetargetwall.get_node("XCnodes").get_child_count())
-		var potreeexperiments = get_node("/root/Spatial/PotreeExperiments")
-		if potreeexperiments != null and potreeexperiments.visible:
-			potreeexperiments.sethighlightplane(activetargetwall.transform)
-
+		potreeexperiments.sethighlightplane(activetargetwall.transform)
 	else:
+		potreeexperiments.sethighlightplane(null)
 		print("newactivetargetwall notdrawing ", activetargetwall)
 	
 	LaserOrient.get_node("RayCast").collision_mask = raynormalcollisionmask()
@@ -398,9 +397,9 @@ func setpointertarget(laserroot, raycast, pointertargetshortdistance):
 			Tglobal.soundsystem.quicksound("PopSound", newpointertargetpoint)
 			Tglobal.soundsystem.shortvibrate(false, 0.03, 1.0)
 		
-		if activetargetwall == null and pointertargettype == "XCdrawing" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING and len(pointertargetwall.nodepoints) == 0 and activetargetnode == null:
-			print("setting blank wall active")
-			setactivetargetwall(pointertargetwall)
+		#if activetargetwall == null and pointertargettype == "XCdrawing" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING and len(pointertargetwall.nodepoints) == 0 and activetargetnode == null:
+		#	print("setting blank wall active")
+		#	setactivetargetwall(pointertargetwall)
 		
 		laserroot.get_node("LaserSpot").visible = (pointertargettype == "XCdrawing") or \
 												  (pointertargettype == "XCtubesector") or \
@@ -1272,7 +1271,6 @@ func buttonreleased_vrgrip():
 
 			var potreeplanefittrans = null
 			if Tglobal.housahedronmode:
-				var potreeexperiments = get_node("/root/Spatial/PotreeExperiments")
 				if potreeexperiments.visible:
 					var laserlength = gripmenu.gripmenulaserorient.origin.distance_to(gripmenu.gripmenupointertargetpoint)
 					var Glaserlength = min(15, laserlength if not is_zero_approx(laserlength) else 50)
@@ -1560,6 +1558,7 @@ func buttonreleased_vrgrip():
 						sketchsystem.actsketchchange([{ "xcvizstates":{ gripmenu.gripmenupointertargetwall.get_name():DRAWING_TYPE.VIZ_XCD_HIDE }, "updatetubeshells":updatetubeshells, "updatexcshells":updatexcshells }])
 					if gripmenu.gripmenupointertargetwall == activetargetwall:
 						setactivetargetwall(null)
+						
 				elif gripmenu.gripmenupointertargettype == "XCtubesector":
 					sketchsystem.actsketchchange([{ "xcvizstates":{ gripmenu.gripmenupointertargetwall.xcname0:DRAWING_TYPE.VIZ_XCD_HIDE, 
 																	gripmenu.gripmenupointertargetwall.xcname1:DRAWING_TYPE.VIZ_XCD_HIDE } } ])
@@ -1596,8 +1595,9 @@ func buttonreleased_vrgrip():
 						var xcv = { "xcvizstates":{ xcname:DRAWING_TYPE.VIZ_XCD_HIDE }, 
 									"updatexcshells":[xcname] }
 						sketchsystem.actsketchchange([xcdata, xcv])
+						setactivetargetwall(null)
 					else:
-						print("not deleted xc nodes")
+						print("not deleted xc nodes due to connecting tubes")
 				
 				
 			elif pointertarget.get_name() == "DelTube":
@@ -1632,6 +1632,77 @@ func buttonreleased_vrgrip():
 												"nextnodepoints":nextnodepoints
 											}])
 				clearactivetargetnode()
+				
+			elif pointertarget.get_name() == "ProjectXC" and activetargetnodewall != null and activetargetnodewall.drawingtype == DRAWING_TYPE.DT_XCDRAWING and gripmenu.gripmenupointertargetwall != null and gripmenu.gripmenupointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
+				var sourcexc = activetargetnodewall
+				var destxc = gripmenu.gripmenupointertargetwall
+				var sourcesurfacetype = "ceiling" if sourcexc.transform.basis.z.y < -0.8 else "floor" if sourcexc.transform.basis.z.y > 0.8 else "wall" 
+				var destsurfacetype = "ceiling" if destxc.transform.basis.z.y < -0.8 else "floor" if destxc.transform.basis.z.y > 0.8 else "wall"
+				if len(destxc.nodepoints) == 0 and ((sourcesurfacetype == "wall") == (destsurfacetype == "wall")):
+					var nextnodepoints = { }
+					for nodename in sourcexc.nodepoints:
+						var pt = sourcexc.transform.xform(activetargetnodewall.nodepoints[nodename])
+						var pto = pt - destxc.transform.origin
+						var ptox = destxc.transform.basis.x.dot(pto)
+						var ptoy = destxc.transform.basis.y.dot(pto)
+						nextnodepoints[nodename] = Vector3(ptox, ptoy, 0.0)
+					var xcdatalist = [{ "name":destxc.get_name(), 
+										"prevnodepoints":{ },
+										"nextnodepoints":nextnodepoints, 
+										"prevonepathpairs":[ ], 
+										"newonepathpairs":sourcexc.onepathpairs.duplicate()
+									 }]
+					var xcv = { "xcvizstates":{ destxc.get_name():DRAWING_TYPE.VIZ_XCD_HIDE }, "updatexcshells":[ destxc.get_name() ] }
+					xcv["xcvizstates"][sourcexc.get_name()] = DRAWING_TYPE.VIZ_XCD_HIDE
+					if (sourcesurfacetype != "wall") and (destsurfacetype != "wall"):
+						if sourcesurfacetype == destsurfacetype:
+							if sourcexc.notubeconnections_so_delxcable():
+								xcdatalist.push_back({ "name":activetargetnodewall.get_name(), 
+													   "prevnodepoints":sourcexc.nodepoints.duplicate(),
+													   "nextnodepoints":{ }, 
+													   "prevonepathpairs":sourcexc.onepathpairs.duplicate(),
+													   "newonepathpairs": [ ]
+													 })
+						elif Tglobal.housahedronmode:
+							var sourcepolys = Polynets.makexcdpolys(sourcexc.nodepoints, sourcexc.onepathpairs)
+							if len(sourcepolys) == 2:
+								var sourcepoly = sourcepolys[-1]
+								for i in range(len(sourcepoly)):
+									var nl = sourcepoly[i]
+									var nr = sourcepoly[(i+1)%len(sourcepoly)]
+									var pttl = sourcexc.transform.xform(sourcexc.nodepoints[nl])
+									var pttr = sourcexc.transform.xform(sourcexc.nodepoints[nr])
+									var ptbl = destxc.transform.xform(nextnodepoints[nl])
+									var ptbr = destxc.transform.xform(nextnodepoints[nr])
+									var ptcen = (pttl + pttr + ptbl + ptbr)*0.25
+									var drawingwallangle = Vector2(pttr.x-pttl.x, pttr.z-pttl.z).angle()
+									var walltrans = Transform(Basis().rotated(Vector3(0,-1,0), drawingwallangle), ptcen)
+									var wallnodepoints = { "tl":walltrans.xform_inv(pttl), 
+														   "tr":walltrans.xform_inv(pttr), 
+														   "bl":walltrans.xform_inv(ptbl), 
+														   "br":walltrans.xform_inv(ptbr) 
+														 }
+									var wallonepathpairs = [ "tl", "tr", "tr", "br", "br", "bl", "bl", "tl"]
+									print("must fix flaw with uniqueXCname so it keeps track properly")
+									var xcdatawall = { "name":sketchsystem.uniqueXCname("u%duu"%i), 
+													   "drawingtype":DRAWING_TYPE.DT_XCDRAWING,
+													   "transformpos":walltrans, 
+													   "nodepoints":wallnodepoints,
+													   "onepathpairs":wallonepathpairs 
+													 }
+									xcdatalist.push_back(xcdatawall)
+									xcv["xcvizstates"][xcdatawall["name"]] = DRAWING_TYPE.VIZ_XCD_HIDE
+									xcv["updatexcshells"].push_back(xcdatawall["name"])
+					xcdatalist.push_back(xcv)
+					clearactivetargetnode()
+					
+					sketchsystem.actsketchchange(xcdatalist)
+
+					
+				else:
+					print("not projecting to xcdrawing that isn't empty")
+
+				
 				
 			elif pointertarget.get_name() == "HoleXC":
 				var xcsectormaterial = gripmenu.gripmenupointertargetwall.xcsectormaterials[gripmenu.gripmenuactivetargettubesectorindex]
@@ -1730,6 +1801,7 @@ func buttonreleased_vrgrip():
 						setactivetargetwall(xcdrawing)
 						wasactivetargettube = null
 						activelaserroot.get_node("LaserSpot").visible = false
+
 
 			elif pointertarget.get_name() == "FixHoleXC" and is_instance_valid(wasactivetargettube):
 				print("FixHoleXC ", wasactivetargettube)
@@ -1869,13 +1941,16 @@ func targetwalltransformpos(optionalrevertcode):
 		prevactivetargetwallgrabbedorgtransform = activetargetwallgrabbedorgtransform
 
 	var laserrelvec = activelaserroot.global_transform.basis.xform_inv(activetargetwallgrabbedlaserroottrans.basis.z)
-	var angh = asin(activelaserroot.global_transform.basis.z.y)
+	var angh = rad2deg(asin(activelaserroot.global_transform.basis.z.y))
 	if primarilylocked:
 		pass
-	elif targetwallvertplanesticky and abs(angh) > deg2rad(60):
+	elif targetwallvertplanesticky and abs(angh) > 60:
 		targetwallvertplanesticky = false
-	elif (not targetwallvertplanesticky) and abs(angh) < deg2rad(20):
+	elif (not targetwallvertplanesticky) and abs(angh) < 20:
 		targetwallvertplanesticky = true
+
+# Can't tell what conditions are changing it and 
+# how to maintain the same porientation when we drag bits
 
 	var grabbedtargetwallvertplane = (abs(activetargetwallgrabbedorgtransform.basis.z.y) < 0.3)	
 	if optionalrevertcode == 2:
@@ -1894,14 +1969,18 @@ func targetwalltransformpos(optionalrevertcode):
 			var activetargetwallgrabbedpointmoved = activetargetwallgrabbedpoint + 20*angpush*Vector3(activetargetwallgrabbeddispvector.x, 0, activetargetwallgrabbeddispvector.z).normalized()
 			txcdata["transformpos"].origin += activetargetwallgrabbedpointmoved - txcdata["transformpos"]*activetargetwallgrabbedlocalpoint
 	elif primarilylocked and not grabbedtargetwallvertplane:
-		txcdata["transformpos"] = Transform(Vector3(1,0,0), Vector3(0,0,-1), Vector3(0,1,0), Vector3(0,0,0)) # .rotated(Vector3(0,1,0), angy)
+		if activetargetwallgrabbed.transform.basis.z.y > 0:
+			txcdata["transformpos"] = Transform(Vector3(1,0,0), Vector3(0,0,-1), Vector3(0,1,0), Vector3(0,0,0))
+		else:
+			txcdata["transformpos"] = Transform(Vector3(1,0,0), Vector3(0,0,1), Vector3(0,-1,0), Vector3(0,0,0))
 		var angpush = -(activetargetwallgrabbedlaserroottrans.origin.y - activelaserroot.global_transform.origin.y)
 		txcdata["transformpos"].origin = activetargetwallgrabbedorgtransform.origin + Vector3(0, 2*angpush, 0)
 
 	else:
-		#var angy = -Vector2(laserrelvec.z, laserrelvec.x).angle()
-		#txcdata["transformpos"] = Transform().rotated(Vector3(1,0,0), deg2rad(-90)).rotated(Vector3(0,1,0), angy)
-		txcdata["transformpos"] = Transform(Vector3(1,0,0), Vector3(0,0,-1), Vector3(0,1,0), Vector3(0,0,0)) # .rotated(Vector3(0,1,0), angy)
+		if activetargetwallgrabbed.transform.basis.z.y > 0:
+			txcdata["transformpos"] = Transform(Vector3(1,0,0), Vector3(0,0,-1), Vector3(0,1,0), Vector3(0,0,0))
+		else:
+			txcdata["transformpos"] = Transform(Vector3(1,0,0), Vector3(0,0,1), Vector3(0,-1,0), Vector3(0,0,0))
 		var angpush = -(activetargetwallgrabbedlaserroottrans.origin.y - activelaserroot.global_transform.origin.y)
 		txcdata["transformpos"].origin = activetargetwallgrabbedpoint + Vector3(0, 20*angpush, 0)
 

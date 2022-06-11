@@ -774,7 +774,7 @@ func updatexcpaths():
 	if len(onepathpairs) == 0:
 		pathlines.mesh = null
 		return
-	resetclosewidthsca(0.5 if Tglobal.housahedronmode else 1.0)
+	resetclosewidthsca(1.0 if Tglobal.housahedronmode else 1.0)
 	var llinewidth = linewidth*closewidthsca
 	
 	var surfaceTool = SurfaceTool.new()

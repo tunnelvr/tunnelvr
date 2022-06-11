@@ -21,8 +21,6 @@ extends Spatial
 # nix-shell -p caddy
 # caddy file-server -browse -root /home/julian/data/3dmodels/aidanhouse/potreeconverted -listen 0.0.0.0:8000
 
-
-
 var potreethreadmutex = Mutex.new()
 var potreethreadsemaphore = Semaphore.new()
 var potreethread = null
@@ -32,22 +30,22 @@ var nodestopointload = [ ]
 var nodespointloaded = [ ]
 
 var rootnode = null
+var potreeurlmetadataorg = null
 var potreeurlmetadata = null
 
 onready var ImageSystem = get_node("/root/Spatial/ImageSystem")
 
 func _ready():
-	var st = SurfaceTool.new()
-	st.begin(Mesh.PRIMITIVE_POINTS)
-	for i in range(4):
-		for j in range(4):
-			for k in range(4):
-				st.add_vertex((Vector3(i,j,k)*0.333333-Vector3(0.5,0.5,0.5))*2)
-	var pointmesh = Mesh.new()
-	st.commit(pointmesh)
-	$PointSample.mesh = pointmesh	
-	var pointmaterial =	$PointSample.get_surface_material(0)
-	yield(get_tree().create_timer(5.0), "timeout")
+	if $PointSampleTest.visible:
+		var st = SurfaceTool.new()
+		st.begin(Mesh.PRIMITIVE_POINTS)
+		for i in range(4):
+			for j in range(4):
+				for k in range(4):
+					st.add_vertex((Vector3(i,j,k)*0.333333-Vector3(0.5,0.5,0.5))*2)
+		var pointmesh = Mesh.new()
+		st.commit(pointmesh)
+		$PointSampleTest.mesh = pointmesh	
 			
 func potreethread_function(userdata):
 	print("potreethread_function started")
@@ -76,7 +74,10 @@ func _exit_tree():
 
 func sethighlightplane(planetransform):
 	if rootnode != null:
-		rootnode.sethighlightplane(planetransform.basis.z, planetransform.basis.z.dot(planetransform.origin))
+		if planetransform != null:
+			rootnode.sethighlightplaneR(planetransform.basis.z, planetransform.basis.z.dot(planetransform.origin))
+		else:
+			rootnode.sethighlightplaneR(Vector3(0,0,0), 0.0)
 
 func getpotreeurl():
 	var selfSpatial = get_node("/root/Spatial")
@@ -97,6 +98,7 @@ func getpotreeurl():
 
 
 var Cpointsizevisibilitycutoff = 15.0
+var minCpointsizevisibilitycutoff = 7.0
 var maxvisiblepoints = 500000
 var minvisiblepoints = 200000
 var pointsizefactor = 150.0
@@ -105,7 +107,6 @@ signal updatepotreepriorities_fetchsignal(f)
 
 
 const timems_fornextupdatepriorities = 3500
-
 
 var queuekillpotree = false
 
@@ -116,6 +117,7 @@ const colhierarchyloading = Color("#361fe51f")
 const coloctcellpointsfetching = Color("#80e418e6")
 const coloctcellpointsloading = Color("#36e418e6")
 
+
 func LoadPotree():
 	assert (rootnode == null)
 	var xcdrawingcentreline = null
@@ -123,11 +125,17 @@ func LoadPotree():
 		if lxcdrawingcentreline.additionalproperties != null and lxcdrawingcentreline.additionalproperties.has("potreeurlmetadata"):
 			xcdrawingcentreline = lxcdrawingcentreline
 			potreeurlmetadata = xcdrawingcentreline.additionalproperties["potreeurlmetadata"]
+	potreeurlmetadataorg = potreeurlmetadata
 	if potreeurlmetadata == null:
 		print("No potree url found")
 		return
 	print("Loading ", potreeurlmetadata)
 	
+	var selfSpatial = get_node("/root/Spatial")
+	if potreeurlmetadata.begins_with("http://localhost") and selfSpatial.hostipnumber != "":
+		potreeurlmetadata = potreeurlmetadata.replace("localhost", selfSpatial.hostipnumber)
+		print("now setting ", potreeurlmetadata)
+		
 	var nonimagedataobject = { "url":potreeurlmetadata, "callbackobject":self, "callbacksignal":"updatepotreepriorities_fetchsignal" }
 	ImageSystem.fetchrequesturl(nonimagedataobject)
 	var fmetadataF = yield(self, "updatepotreepriorities_fetchsignal")
@@ -152,7 +160,9 @@ func LoadPotree():
 	queuekillpotree = false
 	call_deferred("updatepotreeprioritiesLoop")
 
-func Yupdatepotreeprioritiesfromcamera(primarycameraorigin, pointsizefactor, pointsizevisibilitycutoff):
+
+
+func Yupdatepotreeprioritiesfromcamera(primarycamera, pointsizefactor, pointsizevisibilitycutoff):
 	var hierarchynodestoload = [ ]
 	var pointcloudnodestoshow = [ ]
 	var pointcloudnodestohide = [ ]
@@ -160,33 +170,43 @@ func Yupdatepotreeprioritiesfromcamera(primarycameraorigin, pointsizefactor, poi
 	var visibleincameratimehorizon = OS.get_ticks_msec()*0.001 - 5.0
 	var sweptvisiblepointcount = 0
 	var nscannednodes = 0
-
+	var primarycameraorigin = primarycamera.get_camera_transform().origin if primarycamera != null else Vector3(0,0,0)
+		
 	var scanningnode = rootnode
 	yield(get_tree(), "idle_frame")
 	while scanningnode != null:
 		nscannednodes += 1
 		if (nscannednodes % 50) == 0:
 			yield(get_tree(), "idle_frame")
+		var scanningnodetoshow = true
 		if scanningnode.name[0] == "h":
 			hierarchynodestoload.push_back(scanningnode)
-			scanningnode = rootnode.successornode(scanningnode, true)
+			scanningnodetoshow = false
 		else:
 			var boxcentre = scanningnode.global_transform.origin
 			var boxradius = (scanningnode.ocellsize/2).length()
 			var cd = boxcentre.distance_to(primarycameraorigin)
-			var scanningnodetoshow = true
 			if cd > boxradius + 0.1:
 				var pointsize = pointsizefactor*rootnode.spacing*scanningnode.powdiv2/(cd-boxradius)
-				scanningnodetoshow = (pointsize > pointsizevisibilitycutoff)
+				scanningnodetoshow = (pointsize > pointsizevisibilitycutoff) or (scanningnode == rootnode)
 				pointsizes.push_back(pointsize)
-			if not scanningnode.visibleincamera and scanningnode.visibleincameratimestamp < visibleincameratimehorizon:
-				scanningnodetoshow = false
+				if primarycamera != null:
+					if primarycamera.is_position_behind(boxcentre):
+						if scanningnode.visibleincamera:
+							scanningnode.visibleincamera = false
+							scanningnode.visibleincameratimestamp = OS.get_ticks_msec()*0.001
+						if scanningnode.visibleincameratimestamp < visibleincameratimehorizon:
+							scanningnodetoshow = false
+					else:
+						scanningnode.visibleincamera = true
+			else:
+				scanningnode.visibleincamera = true
 			if scanningnodetoshow:
 				sweptvisiblepointcount += scanningnode.numPoints
 				pointcloudnodestoshow.push_back(scanningnode)
 			else:
 				pointcloudnodestohide.push_back(scanningnode)
-			scanningnode = rootnode.successornode(scanningnode, not scanningnodetoshow)
+		scanningnode = rootnode.successornode(scanningnode, not scanningnodetoshow)
 
 	return { "hierarchynodestoload":hierarchynodestoload, 
 			 "pointcloudnodestoshow":pointcloudnodestoshow,
@@ -196,21 +216,17 @@ func Yupdatepotreeprioritiesfromcamera(primarycameraorigin, pointsizefactor, poi
 			 "nscannednodes":nscannednodes }
 
 func Yupdatepotreeprioritiesfull():
-	var primarycameraorigin = Vector3(0, 0, 0)
 	var primarycamera = instance_from_id(Tglobal.primarycamera_instanceid)
-	if primarycamera != null:
-		primarycameraorigin = primarycamera.get_camera_transform().origin
-
-	var res = yield(Yupdatepotreeprioritiesfromcamera(primarycameraorigin, pointsizefactor, Cpointsizevisibilitycutoff), "completed")
-	while res["sweptvisiblepointcount"] < minvisiblepoints and len(res["pointsizes"]) != 0 and res["pointsizes"].min() < Cpointsizevisibilitycutoff:
+	var res = yield(Yupdatepotreeprioritiesfromcamera(primarycamera, pointsizefactor, Cpointsizevisibilitycutoff), "completed")
+	while res["sweptvisiblepointcount"] < minvisiblepoints and len(res["pointsizes"]) != 0 and res["pointsizes"].min() < Cpointsizevisibilitycutoff and Cpointsizevisibilitycutoff > minCpointsizevisibilitycutoff:
 		Cpointsizevisibilitycutoff *= 0.5
 		var Dsweptvisiblepointcount = res["sweptvisiblepointcount"]
-		res = yield(Yupdatepotreeprioritiesfromcamera(primarycameraorigin, pointsizefactor, Cpointsizevisibilitycutoff), "completed")
+		res = yield(Yupdatepotreeprioritiesfromcamera(primarycamera, pointsizefactor, Cpointsizevisibilitycutoff), "completed")
 		print("scaling down Cpointsizevisibilitycutoff ", Cpointsizevisibilitycutoff, "  prevcount: ", Dsweptvisiblepointcount, " newcount: ", res["sweptvisiblepointcount"])
 	while res["sweptvisiblepointcount"] > maxvisiblepoints and len(res["pointsizes"]) != 0 and res["pointsizes"].max() > Cpointsizevisibilitycutoff:
 		Cpointsizevisibilitycutoff *= 2.0
 		var Dsweptvisiblepointcount = res["sweptvisiblepointcount"]
-		res = yield(Yupdatepotreeprioritiesfromcamera(primarycameraorigin, pointsizefactor, Cpointsizevisibilitycutoff), "completed")
+		res = yield(Yupdatepotreeprioritiesfromcamera(primarycamera, pointsizefactor, Cpointsizevisibilitycutoff), "completed")
 		print("scaling up Cpointsizevisibilitycutoff ", Cpointsizevisibilitycutoff, "  prevcount: ", Dsweptvisiblepointcount, " newcount: ", res["sweptvisiblepointcount"])
 	print("hierarchynodestoload ", len(res["hierarchynodestoload"]), "   pointcloudnodestoshow  ", len(res["pointcloudnodestoshow"]), "   pointcloudnodestohide  ", len(res["pointcloudnodestohide"]),  "  sweptvisiblepointcount ", res["sweptvisiblepointcount"],  "  nscannednodes ", res["nscannednodes"]) #,   " pointsizes: ", res["pointsizes"].min(), " ", res["pointsizes"].max())
 	return res
@@ -240,7 +256,8 @@ func updatepotreeprioritiesLoop():
 			var nnode = res["pointcloudnodestoshow"].pop_front()
 			if not nnode.visible:
 				if nnode.pointmaterial == null:
-					var nonimagedataobject = { "url":rootnode.urloctree, "callbackobject":self, 
+					var nonimagedataobject = { "url":rootnode.urloctree, 
+											   "callbackobject":self, 
 											   "callbacksignal":"updatepotreepriorities_fetchsignal", 
 											   "byteOffset":nnode.byteOffset, 
 											   "byteSize":nnode.byteSize }
@@ -248,21 +265,29 @@ func updatepotreeprioritiesLoop():
 					$LoadingCube.global_transform.origin = nnode.global_transform.origin
 					matloadingcube.albedo_color = coloctcellpointsfetching
 					$LoadingCube.visible = true
+					nnode.Dloadedstate = "fetching"
 					ImageSystem.fetchrequesturl(nonimagedataobject)
 					var foctreeF = yield(self, "updatepotreepriorities_fetchsignal")
 					if rootnode.urloctree.substr(0, 4) != "http" or foctreeF.get_len() == nnode.byteSize:
 						var roottransforminverse = rootnode.get_parent().global_transform.inverse()
 						var tp0 = OS.get_ticks_msec()
 						matloadingcube.albedo_color = coloctcellpointsloading
+						nnode.Dloadedstate = "pointsloading"
 						yield(nnode.Yloadoctcellpoints(foctreeF, pointsizefactor, roottransforminverse, rootnode), "completed")
 						var dt = OS.get_ticks_msec() - tp0
 						if dt > 100:
 							print("    Warning: long loadoctcellpoints ", nnode.get_path(), " of ", dt, " msecs", " numPoints:", nnode.numPoints, " carrieddown:", nnode.numPointsCarriedDown)
+						nnode.Dloadedstate = "pointsloaded"
 					else:
+						nnode.Dloadedstate = "failedfetching"
 						print("foctree nodesize bytes fail ", foctreeF.get_len(), " ", nnode.byteSize)
 					$LoadingCube.visible = false
 				if not nnode.visible and nnode.pointmaterial != null:
+					nnode.pointmaterial.set_shader_param("highlightplaneperp", rootnode.highlightplaneperp)
+					nnode.pointmaterial.set_shader_param("highlightplanedot", rootnode.highlightplanedot)
+					nnode.pointmaterial.set_shader_param("slicedisappearthickness", rootnode.slicedisappearthickness)
 					rootnode.uppernodevisibilitymask(nnode, true)
+					
 		
 			
 		while visible and len(res["hierarchynodestoload"]) != 0 and OS.get_ticks_msec() < ticksms_tonextupdatepriorities:
@@ -275,21 +300,25 @@ func updatepotreeprioritiesLoop():
 									   "callbacksignal":"updatepotreepriorities_fetchsignal", 
 									   "byteOffset":hnode.hierarchybyteOffset, 
 									   "byteSize":hnode.hierarchybyteSize }
+			hnode.Dloadedstate = "fetching"
 			ImageSystem.fetchrequesturl(nonimagedataobject)
 			var fhierarchyF = yield(self, "updatepotreepriorities_fetchsignal")
-			# assert ((urlhierarchy.substr(0, 4) != "http") or (fhierarchyF.get_len() == processingnode.hierarchybyteSize))
-			matloadingcube.albedo_color = colhierarchyloading
-			var nodesh = yield(hnode.Yloadhierarchychunk(fhierarchyF, rootnode.get_parent().global_transform.inverse()), "completed")
-			$LoadingCube.visible = false
-			for node in nodesh:
-				if node.name[0] != "h":
-					rootnode.otreecellscount += 1
+			if rootnode.urloctree.substr(0, 4) != "http" or fhierarchyF.get_len() == hnode.hierarchybyteSize:
+				matloadingcube.albedo_color = colhierarchyloading
+				hnode.Dloadedstate = "loadinghierarchychunk"
+				var nodesh = yield(hnode.Yloadhierarchychunk(fhierarchyF, rootnode.get_parent().global_transform.inverse()), "completed")
+				$LoadingCube.visible = false
+				for node in nodesh:
+					if node.name[0] != "h":
+						rootnode.otreecellscount += 1
+				hnode.Dloadedstate = "hierarchychunkloaded"
+			else:
+				hnode.Dloadedstate = "failedfetching"
+				print("hierarchy nodesize bytes fail ", fhierarchyF.get_len(), " ", hnode.byteSize)
 
 		var tremaining = ticksms_tonextupdatepriorities - OS.get_ticks_msec()
 		if tremaining > 5:
 			yield(get_tree().create_timer(tremaining*0.001), "timeout")
-
-
 
 
 func Dcorrectvisibilitymask():

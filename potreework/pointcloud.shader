@@ -1,29 +1,37 @@
 shader_type spatial;
 render_mode world_vertex_coords,shadows_disabled;
 
-uniform float point_scale = 16.0;
 uniform vec3 highlightplaneperp = vec3(0,1,0);
 uniform float highlightplanedot = 0.0;
-uniform mat4 roottransforminverse = mat4(1.0); 
+
+// parameters set for each octree node according to depth and displacement
+uniform float point_scale = 16.0;
 uniform vec3 ocellcentre = vec3(0,0,0);
 uniform int ocellmask = 0;
-uniform float colormixweight = 0.5; 
 
+// the transform from realspace back into potree space
+uniform mat4 roottransforminverse = mat4(1.0); 
+
+// distance shading parameters
 const vec3 closecol = vec3(1,0,0);
 const vec3 farcol = vec3(0,0,1);
 const float fardist = 30.0;
 const float fardisttaper = 20.0;
 const float fardisttaperfac = -(fardisttaper*((fardisttaper + fardist)))/fardist;
 
+// pointcloud parameters based on housahedron type
+uniform float colormixweight = 0.5; 
 uniform vec3 highlightcol = vec3(1,1,0);
 uniform vec3 highlightcol2 = vec3(0,1,1);
 uniform float highlightdist = 0.5;
+uniform float slicedisappearthickness = 100.0; 
 
+// parameters defining the colour across face of each scatter point
 const vec3 bordercolor = vec3(0.1, 0.1, 0.2);
 const float edgeborder = 0.5 - 0.05; 
 const float closenessdist = 0.8;
 
-
+// parameters carried from vertext shader into the fragment shader
 varying vec3 emissioncol;
 varying vec3 bordercol; 
 varying float edgebord; 
@@ -38,16 +46,21 @@ void vertex() {
 					 (sv.y > ocellcentre.y ? 4 : 1) * 
 					 (sv.z > ocellcentre.z ? 2 : 1); 
 	if (((ocellmask / ocellindex) % 2) != 0) {
-		POINT_SIZE = 0.0;
-		// should return here but causes points to blip purple if these other values aren't set
+		POINT_SIZE = -1.0;
+		// should be able to return here but causes points to blip purple if these other values aren't set
 	}
 
-	NORMAL = CAMERA_MATRIX[2].xyz;
+	if (slicedisappearthickness != 0.0) {
+		float distplane = dot(VERTEX, highlightplaneperp) - highlightplanedot; 
+		if (abs(distplane) >= slicedisappearthickness) {
+			POINT_SIZE = -1.0;
+		}
+		float emissionfac = clamp(1.0 - abs(distplane)/highlightdist, 0.0, 1.0);
+		emissioncol = (distplane > 0.0 ? highlightcol : highlightcol2)*emissionfac;
+	} else {
+		emissioncol = vec3(0,0,0)
+	}	
 
-	float distplane = dot(VERTEX, highlightplaneperp) - highlightplanedot; 
-	float emissionfac = clamp(1.0 - abs(distplane)/highlightdist, 0.0, 1.0);
-	emissioncol = (distplane > 0.0 ? highlightcol : highlightcol2)*emissionfac;
-	
 	float mixval = (1.0/(distcamera + fardisttaper) - 1.0/fardisttaper)*fardisttaperfac;
 	vec3 distancecolor = mix(closecol, farcol, mixval);
 	COLOR.rgb = mix(distancecolor, COLOR.rgb, colormixweight);
@@ -57,6 +70,8 @@ void vertex() {
 	edgebord = edgeborder*clamp((fadeoutfac+1.0)/2.0, 0.3, 1.0); 
 	
 	closenessfrac = 1.0 - distcamera/closenessdist;
+
+	NORMAL = CAMERA_MATRIX[2].xyz;
 }
 
 void fragment() {

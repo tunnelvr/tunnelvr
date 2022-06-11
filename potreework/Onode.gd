@@ -22,6 +22,7 @@ var timestampatinvisibility = 0
 
 var Dboxmin = Vector3(0,0,0)
 var Dboxmax = Vector3(0,0,0)
+var Dloadedstate = "notloaded"
 
 const boxpointepsilon = 0.6
 const spacingdivider = 1.55
@@ -41,13 +42,6 @@ func createChildAABB(pnode, index):
 	else:                      Dboxmax.z -= boxsize.z / 2;
 	
 
-func on_camera_entered(camera):
-	if camera.get_instance_id() == Tglobal.primarycamera_instanceid:
-		visibleincamera = true
-func on_camera_exited(camera):
-	if camera.get_instance_id() == Tglobal.primarycamera_instanceid:
-		visibleincamera = false
-		visibleincameratimestamp = OS.get_ticks_msec()*0.001
 		
 const Nloadcellpointsperframe = 3000
 func Yloadoctcellpoints(foctreeF, pointsizefactor, roottransforminverse, rootnode):
@@ -139,18 +133,24 @@ func Yloadoctcellpoints(foctreeF, pointsizefactor, roottransforminverse, rootnod
 	pointmaterial.set_shader_param("ocellcentre", ocellcentre)
 	pointmaterial.set_shader_param("ocellmask", ocellmask)
 	pointmaterial.set_shader_param("roottransforminverse", roottransforminverse)
-	pointmaterial.set_shader_param("highlightplaneperp", rootnode.highlightplaneperp)
-	pointmaterial.set_shader_param("highlightplanedot", rootnode.highlightplanedot)
+			
+	pointmaterial.set_shader_param("highlightdist", rootnode.highlightdist)
+	pointmaterial.set_shader_param("highlightcol", rootnode.highlightcol)
+	pointmaterial.set_shader_param("highlightcol2", rootnode.highlightcol2)
 
 	var colormixweight = 0.0
 	if rootnode.attributes_rgb_prebytes != -1:
-		colormixweight = 0.8 if Tglobal.housahedronmode else 0.5
+		colormixweight = 1.0 if Tglobal.housahedronmode else 0.9
 	pointmaterial.set_shader_param("colormixweight", colormixweight)
 
 	if Tglobal.housahedronmode:
 		pointmaterial.set_shader_param("highlightdist", 0.15)
 		pointmaterial.set_shader_param("highlightcol", Vector3(0.8,0.0,0.8))
 		pointmaterial.set_shader_param("highlightcol2", Vector3(0.8,0.0,0.8))
+
+	pointmaterial.set_shader_param("highlightplaneperp", rootnode.highlightplaneperp)
+	pointmaterial.set_shader_param("highlightplanedot", rootnode.highlightplanedot)
+	pointmaterial.set_shader_param("slicedisappearthickness", rootnode.slicedisappearthickness)
 
 	set_surface_material(0, pointmaterial)
 	dt = OS.get_ticks_msec() - t0
@@ -177,14 +177,8 @@ func constructpotreenode(parentnode, childIndex, Droottransforminverse):
 	assert (not parentnode.has_node(name))
 	constructcontainingmesh()
 
+
 func constructcontainingmesh():
-	var visnote = VisibilityNotifier.new()
-	visnote.name = "visnote"
-	visnote.aabb = AABB(-ocellsize/2, ocellsize)
-	visnote.visible = false
-	add_child(visnote)
-	visnote.connect("camera_entered", self, "on_camera_entered")
-	visnote.connect("camera_exited", self, "on_camera_exited")
 	if constructhcubes:
 		mesh = CubeMesh.new()
 		mesh.surface_set_material(0, load("res://potreework/ocellcube.material"))
@@ -208,7 +202,8 @@ func loadnodedefinition(fhierarchy):
 		byteSize = fhierarchy.get_64()
 		name[0] = ("n" if ntype == 0 else  "l")
 		assert ((ntype == 0) or (childMask == 0))
-
+	if numPoints == 0:
+		print("zero numPoints case ", get_path())
 
 const Nhierarchyframe = 30
 func Yloadhierarchychunk(fhierarchyF, Droottransforminverse):

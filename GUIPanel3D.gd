@@ -813,6 +813,8 @@ func _input(event):
 			$Viewport.input(event)
 		elif event.pressed:
 			if event.scancode == KEY_L:
+				$Viewport/GUI/Panel/Savegamefilename.selected = 7
+				print("auto loading ", $Viewport/GUI/Panel/Savegamefilename.get_item_text(7))
 				_on_buttonload_pressed()
 			elif event.scancode == KEY_G:
 				$Viewport/GUI/Panel/ButtonDoppelganger.pressed = not $Viewport/GUI/Panel/ButtonDoppelganger.pressed
@@ -916,7 +918,7 @@ func _on_resourceoptions_buttondown_setavailablefunctions():
 		$Viewport/GUI/Panel/ResourceOptions.set_item_disabled(showhigloadpotreeid, (centrelineselected_forresourcefunction == null or centrelineselected_forresourcefunction.additionalproperties == null or centrelineselected_forresourcefunction.additionalproperties.get("potreeurlmetadata") == null))
 	elif not potreeexperiments.visible:
 		$Viewport/GUI/Panel/ResourceOptions.set_item_text(showhigloadpotreeid, "Show Potree")
-	elif centrelineselected_forresourcefunction == null or centrelineselected_forresourcefunction.additionalproperties == null or centrelineselected_forresourcefunction.additionalproperties.get("potreeurlmetadata") != potreeexperiments.potreeurlmetadata:
+	elif centrelineselected_forresourcefunction == null or centrelineselected_forresourcefunction.additionalproperties == null or centrelineselected_forresourcefunction.additionalproperties.get("potreeurlmetadata") != potreeexperiments.potreeurlmetadataorg:
 		$Viewport/GUI/Panel/ResourceOptions.set_item_text(showhigloadpotreeid, "Remove Potree")
 	else:
 		$Viewport/GUI/Panel/ResourceOptions.set_item_text(showhigloadpotreeid, "Hide Potree")
