@@ -220,7 +220,8 @@ func setdrawingvisiblecode(ldrawingvisiblecode):
 				else:
 					$RopeHang/RopeMesh.mesh = waterlevelsystem.makewaterlevelmeshsimple(self, sketchsystem, waterflowlevelvectors)
 					waterlevelsystem.addtowaterlevelropeque(get_name())
-				$RopeHang/RopeMesh.set_surface_material(0, get_node("/root/Spatial/MaterialSystem").pathlinematerial("watermaterial"))
+				var materialsystem = get_node("/root/Spatial/MaterialSystem")
+				$RopeHang/RopeMesh.set_surface_material(0, materialsystem.pathlinematerial("watermaterial"))
 				$PathLines.visible = false
 				for xcn in $XCnodes.get_children():
 					xcn.visible = waterflowlevelvectors.has(xcn.get_name())
