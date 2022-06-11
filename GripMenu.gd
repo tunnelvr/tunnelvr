@@ -8,7 +8,6 @@ var gripmenupointertargettype = ""
 var gripmenupointertarget = null
 var gripmenuactivetargettubesectorindex = 0
 var gripmenuactivetargetnode = null
-var tubesectormaterialname = ""
 
 var previewtubematerials = { }
 var tubenamematerials = { }
@@ -102,7 +101,7 @@ func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointert
 	global_transform = paneltrans
 
 	var gmlist = [ ]
-	tubesectormaterialname = ""
+	var tubesectormaterialname = ""
 	
 	if activetargetnode != null and activetargetnodewall != null and activetargetnodewall.drawingtype == DRAWING_TYPE.DT_ROPEHANG:
 		gmlist = [ "DragXC", "DistortXC" ]
@@ -153,6 +152,7 @@ func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointert
 			pass
 		else:
 			gmlist = ["SelectXC", "NewXC", "materials"]
+			tubesectormaterialname = gripmenupointertargetwall.xcflatshellmaterial
 			if gripmenupointertargetwall.drawingtype == DRAWING_TYPE.DT_ROPEHANG:
 				if gripmenupointertargetwall.ropehangdetectedtype == DRAWING_TYPE.RH_BOULDER:
 					gmlist.push_back("CopyRock")
