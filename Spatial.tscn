@@ -1178,9 +1178,10 @@ uv1_offset = Vector3( 0, 0.594, 0 )
 [sub_resource type="PlaneMesh" id=292]
 
 [sub_resource type="SpatialMaterial" id=293]
+flags_transparent = true
 params_specular_mode = 2
 params_cull_mode = 2
-albedo_color = Color( 0.0431373, 0.0392157, 0.807843, 0.760784 )
+albedo_color = Color( 0.027451, 0.0235294, 0.980392, 0.67451 )
 
 [sub_resource type="PlaneMesh" id=294]
 

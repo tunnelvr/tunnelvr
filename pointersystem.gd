@@ -1256,6 +1256,25 @@ func buttonreleased_vrgrip():
 		materialsystem.updateflatshellmaterial(activetargetxcflatshell, "")
 		activetargetxcflatshell = null
 
+	if pointertargettype == "MaterialButton":
+		print(gripmenu.gripmenupointertarget)
+		if gripmenu.gripmenupointertargettype == "XCnode" and gripmenu.gripmenupointertargetwall != null:
+			var newflatshellmaterialname = pointertarget.get_name()
+			var newadditionalproperties = gripmenu.gripmenupointertargetwall.additionalproperties
+			if newadditionalproperties == null:
+				newadditionalproperties = { }
+			if not newadditionalproperties.has("shellfacematerials"):
+				newadditionalproperties["shellfacematerials"] = { }
+			var nodename = gripmenu.gripmenupointertarget.get_name()
+			newadditionalproperties["shellfacematerials"][nodename] = newflatshellmaterialname
+			var xcdata = { "name":gripmenu.gripmenupointertargetwall.get_name(), 
+						   "additionalproperties":newadditionalproperties 
+						 }
+			var xctupdate = {"xcvizstates":{ }, "updatexcshells":[ gripmenu.gripmenupointertargetwall.get_name() ] }
+			sketchsystem.actsketchchange([xcdata, xctupdate])
+			gripmenu.disableallgripmenus()
+			return
+
 	if activetargetwallgrabbedtransform != null:
 		sketchsystem.actsketchchange([ targetwalltransformpos(2) ])
 		activetargetwallgrabbedtransform = null

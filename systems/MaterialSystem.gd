@@ -27,15 +27,15 @@ func updateflatshellmaterial(xcdrawing, highlight):
 	var meshinstance = xctubesector.get_node("MeshInstance")
 
 	var shellfacematerials = xcdrawing.additionalproperties.get("shellfacematerials", {}) if xcdrawing.additionalproperties != null else {}
-	var materialname = xcdrawing.xcflatshellmaterial
 	for i in range(meshinstance.get_surface_material_count()):
+		var materialname = xcdrawing.xcflatshellmaterial
 		if xcdrawing.shellfaceindexes.has(i):
 			var materialnodename = xcdrawing.shellfaceindexes[i]
 			if shellfacematerials.has(materialnodename):
 				materialname = shellfacematerials[materialnodename]
 		meshinstance.set_surface_material(i, tubematerial(materialname, highlight=="all"))
 
-	if materialname == "hole":
+	if xcdrawing.xcflatshellmaterial == "hole":
 		xctubesector.collision_layer = CollisionLayer.CL_CaveWallTrans
 	elif xcdrawing.drawingtype == DRAWING_TYPE.DT_ROPEHANG and xcdrawing.ropehangdetectedtype == DRAWING_TYPE.RH_FLAGSIGN:
 		xctubesector.collision_layer = CollisionLayer.CL_CaveWallTrans
