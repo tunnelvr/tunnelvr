@@ -20,17 +20,22 @@ func updatetubesectormaterial(xctubesector, name, highlighted):
 	xctubesector.get_node("MeshInstance").set_surface_material(0, tubematerial(name, highlighted))
 	xctubesector.collision_layer = CollisionLayer.CL_CaveWallTrans if name == "hole" else CollisionLayer.CL_CaveWall
 
-func updateflatshellmaterial(xcdrawing, name, highlighted):
+func updateflatshellmaterial(xcdrawing, highlight):
 	var xctubesector = xcdrawing.get_node("XCflatshell")
 	xctubesector.visible = true
 	xctubesector.get_node("CollisionShape").disabled = false
 	var meshinstance = xctubesector.get_node("MeshInstance")
-	meshinstance.set_surface_material(0, tubematerial(name, highlighted))
 
-	for i in range(1, meshinstance.get_surface_material_count()):
-		meshinstance.set_surface_material(i, tubematerial("floor" if i == 1 else "ceiling", false))
+	var shellfacematerials = xcdrawing.additionalproperties.get("shellfacematerials", {}) if xcdrawing.additionalproperties != null else {}
+	var materialname = xcdrawing.xcflatshellmaterial
+	for i in range(meshinstance.get_surface_material_count()):
+		if xcdrawing.shellfaceindexes.has(i):
+			var materialnodename = xcdrawing.shellfaceindexes[i]
+			if shellfacematerials.has(materialnodename):
+				materialname = shellfacematerials[materialnodename]
+		meshinstance.set_surface_material(i, tubematerial(materialname, highlight=="all"))
 
-	if name == "hole":
+	if materialname == "hole":
 		xctubesector.collision_layer = CollisionLayer.CL_CaveWallTrans
 	elif xcdrawing.drawingtype == DRAWING_TYPE.DT_ROPEHANG and xcdrawing.ropehangdetectedtype == DRAWING_TYPE.RH_FLAGSIGN:
 		xctubesector.collision_layer = CollisionLayer.CL_CaveWallTrans

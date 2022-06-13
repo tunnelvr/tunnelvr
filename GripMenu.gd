@@ -166,7 +166,9 @@ func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointert
 
 	elif gripmenupointertargettype == "XCnode":
 		gmlist = ["NewXC", "HideXC"]
-		if pointertargetwall.notubeconnections_so_delxcable():
+		if gripmenupointertargetwall.shellfaceindexes.values().find(gripmenupointertarget.get_name()) != -1:
+			gmlist.push_back("materials")
+		elif pointertargetwall.notubeconnections_so_delxcable():
 			gmlist.push_back("DelXC")
 		if pointertargetwall.drawingtype == DRAWING_TYPE.DT_ROPEHANG:
 			gmlist.push_back("SpLine")
