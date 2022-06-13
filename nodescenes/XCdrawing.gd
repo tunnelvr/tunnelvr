@@ -875,9 +875,9 @@ func updatexcpaths_centreline(pathlines, mlinewidth):
 
 func fillpolysmesh(filledpolys, breverseorient):
 	var arraymesh = ArrayMesh.new()
-	var surfaceTool = SurfaceTool.new()
-	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
 	for i in range(len(filledpolys)):
+		var surfaceTool = SurfaceTool.new()
+		surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
 		var poly = filledpolys[i]
 		var pv = [ ]
 		for p in poly:
@@ -889,17 +889,17 @@ func fillpolysmesh(filledpolys, breverseorient):
 			var uvp = Vector2(nodepoints[poly[u]].x, nodepoints[poly[u]].y)
 			surfaceTool.add_uv(uvp)
 			surfaceTool.add_uv2(uvp)
-			#surfaceTool.add_vertex($XCnodes.get_node(poly[u]).transform.origin)
 			surfaceTool.add_vertex(nodepoints[poly[u]])
-	surfaceTool.generate_normals()
-	surfaceTool.commit(arraymesh)
+		surfaceTool.generate_normals()
+		surfaceTool.commit(arraymesh)
 	return arraymesh
 
 
-func makexctubeshell(xcdrawings):
+func makexcflatshell(xcdrawings):
 	var polys = Polynets.makexcdpolys(nodepoints, onepathpairs)
 	if Tglobal.housahedronmode and len(xctubesconn) == 0 and len(polys) >= 2:
-		return fillpolysmesh([polys[-1]], true)
+		return fillpolysmesh(polys.slice(0, len(polys)-2), true)
+		#return fillpolysmesh([polys[-1]], true)
 	if len(polys) <= 2:
 		return null
 	var forepolyindexes = [ ]
@@ -949,6 +949,9 @@ func updatexcshellmesh(xctubeshellmesh):
 	else:
 		if has_node("XCflatshell"):
 			$XCflatshell.queue_free()
+			
+
+
 
 func notubeconnections_so_delxcable():
 	for xctube in xctubesconn:

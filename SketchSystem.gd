@@ -384,7 +384,7 @@ remote func actsketchchangeL(xcdatalist):
 				for xcdrawingname in xcdata["updatexcshells"]:
 					var xcdrawing = $XCdrawings.get_node_or_null(xcdrawingname)
 					if xcdrawing != null and xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
-						xcdrawing.updatexcshellmesh(xcdrawing.makexctubeshell($XCdrawings))
+						xcdrawing.updatexcshellmesh(xcdrawing.makexcflatshell($XCdrawings))
 						
 		else:  # xcdrawing
 			assert ("name" in xcdata)
@@ -494,7 +494,7 @@ remote func actsketchchangeL(xcdatalist):
 		if xcdatalist[0]["caveworldchunk"] == xcdatalist[0]["caveworldchunkLast"]:
 			for xcdrawing in $XCdrawings.get_children():
 				if xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
-					var ptubeshellmesh = xcdrawing.makexctubeshell($XCdrawings)
+					var ptubeshellmesh = xcdrawing.makexcflatshell($XCdrawings)
 					xcdrawing.updatexcshellmesh(ptubeshellmesh)
 			caveworldchunkI = -1
 			caveworldchunking_networkIDsource = -1

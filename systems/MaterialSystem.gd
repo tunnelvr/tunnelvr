@@ -24,7 +24,12 @@ func updateflatshellmaterial(xcdrawing, name, highlighted):
 	var xctubesector = xcdrawing.get_node("XCflatshell")
 	xctubesector.visible = true
 	xctubesector.get_node("CollisionShape").disabled = false
-	xctubesector.get_node("MeshInstance").set_surface_material(0, tubematerial(name, highlighted))
+	var meshinstance = xctubesector.get_node("MeshInstance")
+	meshinstance.set_surface_material(0, tubematerial(name, highlighted))
+
+	for i in range(1, meshinstance.get_surface_material_count()):
+		meshinstance.set_surface_material(i, tubematerial("floor" if i == 1 else "ceiling", false))
+
 	if name == "hole":
 		xctubesector.collision_layer = CollisionLayer.CL_CaveWallTrans
 	elif xcdrawing.drawingtype == DRAWING_TYPE.DT_ROPEHANG and xcdrawing.ropehangdetectedtype == DRAWING_TYPE.RH_FLAGSIGN:

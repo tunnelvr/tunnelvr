@@ -18,7 +18,8 @@ static func isinnerpoly(poly, nodepoints):
 	var angBack = Vector2(ptblBack.x-ptbl.x, ptblBack.y-ptbl.y).angle()
 	return (angBack < angFore)
 
-static func makexcdpolys(nodepoints, onepathpairs):
+
+static func makexcdpolysDict(nodepoints, onepathpairs):
 	var Lpathvectorseq = { } 
 	for i in nodepoints.keys():
 		Lpathvectorseq[i] = [ ]  # [ (arg, pathindex) ]
@@ -42,10 +43,12 @@ static func makexcdpolys(nodepoints, onepathpairs):
 	for pathvectorseq in Lpathvectorseq.values():
 		pathvectorseq.sort_custom(sd0class, "sd0")
 		
-	var polys = [ ]
+	var polysdict = { }
 	var linearpaths = [ ]
 	var outerpoly = null
+	
 	assert (len(opvisits2) == len(onepathpairs))
+	var npoly = 0
 	for i in range(len(opvisits2)):
 		if opvisits2[i] != 0:
 			continue
@@ -55,7 +58,8 @@ static func makexcdpolys(nodepoints, onepathpairs):
 		var singlenodeindexes = [ ]
 		var hasnondoublenodes = false
 		while (opvisits2[ne*2 + (0 if onepathpairs[ne*2] == np else 1)]) == 0:
-			opvisits2[ne*2 + (0 if onepathpairs[ne*2] == np else 1)] = len(polys)+1
+			npoly += 1
+			opvisits2[ne*2 + (0 if onepathpairs[ne*2] == np else 1)] = npoly
 			poly.append(np)
 			np = onepathpairs[ne*2 + (1  if onepathpairs[ne*2] == np  else 0)]
 			if len(Lpathvectorseq[np]) == 1:
@@ -72,14 +76,6 @@ static func makexcdpolys(nodepoints, onepathpairs):
 			print("bad poly size 0")
 			continue
 			
-		if len(singlenodeindexes) == 0:
-			if not isinnerpoly(poly, nodepoints):
-				if outerpoly != null:
-					print(" *** extra outer poly ", outerpoly, poly)
-					polys.append(outerpoly) 
-				outerpoly = poly
-			else:
-				polys.append(poly)
 		if len(singlenodeindexes) == 2 and not hasnondoublenodes:
 			var linearpath
 			if singlenodeindexes[1] != len(poly):
@@ -89,14 +85,55 @@ static func makexcdpolys(nodepoints, onepathpairs):
 			if isinnerpoly(linearpath, nodepoints):
 				linearpath.invert()
 			linearpaths.append(linearpath)
-			
-	if len(polys) != 0:
-		polys.append(outerpoly if outerpoly != null else [])
-		return polys
-	if len(linearpaths) == 1:
-		return linearpaths
-	return [ ]
+			continue
 
+		var polyname = "u_%d" % len(polysdict)
+		if len(singlenodeindexes) == 1 and hasnondoublenodes:
+			var ii = singlenodeindexes.pop_at(0)
+			var iip1 = 0 if ii == len(poly)-1 else ii+1
+			var iim1 = len(poly)-1 if ii == 0 else ii-1
+			if poly[iip1] == poly[iim1]:
+				polyname = poly[ii]
+				if ii != 0:
+					poly.remove(ii)
+					poly.remove(ii-1)
+				else:
+					poly.remove(1)
+					poly.remove(0)
+			
+		if len(singlenodeindexes) == 0:
+			if not isinnerpoly(poly, nodepoints):
+				if outerpoly != null:
+					print(" *** extra outer poly ", outerpoly, poly)
+					polysdict[polyname] = outerpoly 
+				outerpoly = poly
+			else:
+				polysdict[polyname] = poly
+			
+	if len(polysdict) != 0:
+		if outerpoly != null:
+			polysdict["outerpoly"] = outerpoly
+		return polysdict
+	if len(linearpaths) == 1:
+		return { "linearpath":linearpaths[0] }
+	return { }
+
+
+static func makexcdpolys(nodepoints, onepathpairs):
+	var polysdict = makexcdpolysDict(nodepoints, onepathpairs)
+	if len(polysdict) == 0:
+		return [ ]
+	if polysdict.has("linearpath"):
+		return [ polysdict["linearpath"] ]
+	var outerpoly = polysdict.get("outerpoly", [ ])
+	polysdict.erase("outerpoly")
+	var polys = [ ]
+	for k in polysdict:
+		if k.begins_with("u_"):
+			polys.append(polysdict[k])
+	polys.append(outerpoly)
+	return polys
+		
 
 static func makeropenodesequences(nodepoints, onepathpairs, oddropeverts, anchorropeverts, suppresswallnodeson8):
 	var Lpathvectorseq = { } 
