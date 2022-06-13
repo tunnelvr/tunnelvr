@@ -94,7 +94,7 @@ func clearpointertargetmaterial():
 			pointertargetwall.updateformetresquaresscaletexture()
 		else:
 			pointertargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").set_surface_material(0, materialsystem.xcdrawingmaterial("normal"))
-	if pointertargettype == "GripMenuItem":
+	if pointertargettype == "GripMenuItem" or pointertargettype == "MaterialButton":
 		gripmenu.cleargripmenupointer(pointertarget)
 
 			
@@ -118,7 +118,7 @@ func setpointertargetmaterial():
 	if (pointertargettype == "XCdrawing" or pointertargettype == "XCnode") and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		pointertargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").set_surface_material(0, materialsystem.xcdrawingmaterial("highlight"))
 		pointertargetwall.updateformetresquaresscaletexture()
-	if pointertargettype == "GripMenuItem":
+	if pointertargettype == "GripMenuItem" or pointertargettype == "MaterialButton":
 		gripmenu.setgripmenupointer(pointertarget)
 
 
@@ -260,6 +260,8 @@ func targettype(target):
 		return "XCnode"
 	if targetparent.get_name() == "XCnodes_PlanView":
 		return "XCnode"
+	if targetparent.get_name() == "MaterialButtons":
+		return "MaterialButton"
 	if targetparent.get_parent().get_name() == "GripMenu":
 		return "GripMenuItem"
 	if targetparent.get_name() == "IntermediatePointView":
@@ -619,8 +621,7 @@ func buttonpressed_vrgrip():
 
 	elif pointertargettype == "XCflatshell":
 		activetargetxcflatshell = pointertargetwall
-		var xcflatshellmaterialname = activetargetxcflatshell.xcflatshellmaterial
-		materialsystem.updateflatshellmaterial(activetargetxcflatshell, xcflatshellmaterialname, true)
+		materialsystem.updateflatshellmaterial(activetargetxcflatshell, "all")
 
 	gripmenu.gripmenuon(LaserOrient.global_transform, pointertargetpoint, pointertargetwall, pointertargettype, pointertarget, activetargettube, activetargettubesectorindex, activetargetwall, activetargetnode, activetargetnodewall, pointertargetofstartofropehang)
 	
@@ -1217,7 +1218,7 @@ func buttonreleased_vrgrip():
 	var wasactivetargettube = activetargettube
 	if activetargettube != null:
 		activetargettube.setxctubepathlinevisibility(sketchsystem)
-		if pointertargettype == "GripMenuItem" and pointertarget.get_parent().get_name() == "MaterialButtons":
+		if pointertargettype == "MaterialButton":
 			assert (gripmenu.gripmenupointertargettype == "XCtubesector") 
 			var sectormaterialname = pointertarget.get_name()
 			if activetargettubesectorindex < len(activetargettube.xcsectormaterials):
@@ -1242,8 +1243,25 @@ func buttonreleased_vrgrip():
 		activetargettube.get_node("PathLines").set_surface_material(0, materialsystem.pathlinematerial("normal"))
 		activetargettube = null
 
+	if pointertargettype == "MaterialButton" and gripmenu.gripmenupointertargettype == "XCnode" and gripmenu.gripmenupointertargetwall != null:
+		var newflatshellmaterialname = pointertarget.get_name()
+		var newadditionalproperties = gripmenu.gripmenupointertargetwall.additionalproperties
+		if newadditionalproperties == null:
+			newadditionalproperties = { }
+		if not newadditionalproperties.has("shellfacematerials"):
+			newadditionalproperties["shellfacematerials"] = { }
+		var nodename = gripmenu.gripmenupointertarget.get_name()
+		newadditionalproperties["shellfacematerials"][nodename] = newflatshellmaterialname
+		var xcdata = { "name":gripmenu.gripmenupointertargetwall.get_name(), 
+					   "additionalproperties":newadditionalproperties 
+					 }
+		var xctupdate = {"xcvizstates":{ }, "updatexcshells":[ gripmenu.gripmenupointertargetwall.get_name() ] }
+		sketchsystem.actsketchchange([xcdata, xctupdate])
+		gripmenu.disableallgripmenus()
+		return
+
 	if activetargetxcflatshell != null:
-		if pointertargettype == "GripMenuItem" and pointertarget.get_parent().get_name() == "MaterialButtons":
+		if pointertargettype == "MaterialButton":
 			assert (gripmenu.gripmenupointertargettype == "XCflatshell") 
 			var newflatshellmaterialname = pointertarget.get_name()
 			sketchsystem.actsketchchange([{ "name":activetargetxcflatshell.get_name(), 
@@ -1252,7 +1270,7 @@ func buttonreleased_vrgrip():
 										 }])
 			gripmenu.disableallgripmenus()
 			return
-		materialsystem.updateflatshellmaterial(activetargetxcflatshell, activetargetxcflatshell.xcflatshellmaterial, false)
+		materialsystem.updateflatshellmaterial(activetargetxcflatshell, "")
 		activetargetxcflatshell = null
 
 	if activetargetwallgrabbedtransform != null:
@@ -1319,6 +1337,9 @@ func buttonreleased_vrgrip():
 						xcdata["transformpos"] = Transform(Vector3(1,0,0), Vector3(0,0,-1), Vector3(0,1,0), pt0)
 					else:
 						xcdata["transformpos"] = Transform(Vector3(1,0,0), Vector3(0,0,1), Vector3(0,-1,0), pt0)
+					
+				if Tglobal.housahedronmode:
+					xcdata["xcflatshellmaterial"] = "ceiling" if xcdata["transformpos"].basis.z.y < -0.8 else "floor" if xcdata["transformpos"].basis.z.y > 0.8 else "specwall" 
 					
 				var xcviz = { "xcvizstates": { xcdata["name"]:DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE } }
 				sketchsystem.actsketchchange([xcdata, xcviz])
@@ -1633,7 +1654,10 @@ func buttonreleased_vrgrip():
 											}])
 				clearactivetargetnode()
 				
-			elif pointertarget.get_name() == "ProjectXC" and activetargetnodewall != null and activetargetnodewall.drawingtype == DRAWING_TYPE.DT_XCDRAWING and gripmenu.gripmenupointertargetwall != null and gripmenu.gripmenupointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
+			elif pointertarget.get_name() == "ProjectXC" and activetargetnodewall != null and \
+					activetargetnodewall.drawingtype == DRAWING_TYPE.DT_XCDRAWING and \
+					gripmenu.gripmenupointertargetwall != null and \
+					gripmenu.gripmenupointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 				var sourcexc = activetargetnodewall
 				var destxc = gripmenu.gripmenupointertargetwall
 				var sourcesurfacetype = "ceiling" if sourcexc.transform.basis.z.y < -0.8 else "floor" if sourcexc.transform.basis.z.y > 0.8 else "wall" 
@@ -1688,7 +1712,8 @@ func buttonreleased_vrgrip():
 													   "drawingtype":DRAWING_TYPE.DT_XCDRAWING,
 													   "transformpos":walltrans, 
 													   "nodepoints":wallnodepoints,
-													   "onepathpairs":wallonepathpairs 
+													   "onepathpairs":wallonepathpairs, 
+													   "xcflatshellmaterial":"specwall" 
 													 }
 									xcdatalist.push_back(xcdatawall)
 									xcv["xcvizstates"][xcdatawall["name"]] = DRAWING_TYPE.VIZ_XCD_HIDE

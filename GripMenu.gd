@@ -8,7 +8,6 @@ var gripmenupointertargettype = ""
 var gripmenupointertarget = null
 var gripmenuactivetargettubesectorindex = 0
 var gripmenuactivetargetnode = null
-var tubesectormaterialname = ""
 
 var previewtubematerials = { }
 var tubenamematerials = { }
@@ -16,14 +15,20 @@ onready var materialsystem = get_node("/root/Spatial/MaterialSystem")
 
 var materialmatrix = [ ["simpledirt"], ["partialrock"], ["rockwater"], ["pebbles"], ["mediumrock"], 
 					   ["bluewater", "bluewaterfore", "bluewaterback"], ["hole"], ["calcite"], ["floormap"] ] # + , "holegap"]
+var materialmatrixHH = [ ["specwall"], ["ceiling"], ["floor"], ["extwall"], 
+						 ["intwall"], ["window"], ["hole"], ["floormap"] ] # + , "holegap"]
 
-func _ready():
+func setmaterialmatrix():
 	var tubematerials = materialsystem.get_node("tubematerials")
 	var MaterialButton = load("res://nodescenes/MaterialButton.tscn")
-	for i in range(len(materialmatrix)):
-		var ncol = len(materialmatrix[i])
+	for x in $MaterialButtons.get_children():
+		$MaterialButtons.remove_child(x)
+		x.queue_free()
+	var lmaterialmatrix = materialmatrixHH if Tglobal.housahedronmode else materialmatrix
+	for i in range(len(lmaterialmatrix)):
+		var ncol = len(lmaterialmatrix[i])
 		for j in range(ncol):
-			var materialname = materialmatrix[i][j]
+			var materialname = lmaterialmatrix[i][j]
 			var tubematerial = tubematerials.get_node(materialname)
 			var materialbutton = MaterialButton.instance()
 			materialbutton.set_name(materialname)
@@ -35,6 +40,10 @@ func _ready():
 			$MaterialButtons.add_child(materialbutton)
 			materialbutton.transform.origin = Vector3(0.25 + 0.2/ncol*((j + 0.5) - ncol/2.0), 0.15 - i*0.11, 0)
 	call_deferred("disableallgripmenus")
+	
+func _ready():
+	setmaterialmatrix()
+
 	
 func disableallgripmenus():
 	get_node("/root/Spatial/BodyObjects/GripLaserSpot").visible = false
@@ -92,7 +101,7 @@ func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointert
 	global_transform = paneltrans
 
 	var gmlist = [ ]
-	tubesectormaterialname = ""
+	var tubesectormaterialname = ""
 	
 	if activetargetnode != null and activetargetnodewall != null and activetargetnodewall.drawingtype == DRAWING_TYPE.DT_ROPEHANG:
 		gmlist = [ "DragXC", "DistortXC" ]
@@ -143,6 +152,7 @@ func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointert
 			pass
 		else:
 			gmlist = ["SelectXC", "NewXC", "materials"]
+			tubesectormaterialname = gripmenupointertargetwall.xcflatshellmaterial
 			if gripmenupointertargetwall.drawingtype == DRAWING_TYPE.DT_ROPEHANG:
 				if gripmenupointertargetwall.ropehangdetectedtype == DRAWING_TYPE.RH_BOULDER:
 					gmlist.push_back("CopyRock")
@@ -156,7 +166,9 @@ func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointert
 
 	elif gripmenupointertargettype == "XCnode":
 		gmlist = ["NewXC", "HideXC"]
-		if pointertargetwall.notubeconnections_so_delxcable():
+		if gripmenupointertargetwall.shellfaceindexes.values().find(gripmenupointertarget.get_name()) != -1:
+			gmlist.push_back("materials")
+		elif pointertargetwall.notubeconnections_so_delxcable():
 			gmlist.push_back("DelXC")
 		if pointertargetwall.drawingtype == DRAWING_TYPE.DT_ROPEHANG:
 			gmlist.push_back("SpLine")

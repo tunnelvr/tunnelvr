@@ -26,6 +26,7 @@ var nodepointmean = Vector3(0,0,0)
 var nodepointylo = 0.0
 var nodepointyhi = 0.0
 var imgheightwidthratio = 0  # known from the xcresource image (though could be cached)
+var shellfaceindexes = { }
 
 var shortestpathseglength = 0.0
 var closewidthsca = 1.0
@@ -220,7 +221,8 @@ func setdrawingvisiblecode(ldrawingvisiblecode):
 				else:
 					$RopeHang/RopeMesh.mesh = waterlevelsystem.makewaterlevelmeshsimple(self, sketchsystem, waterflowlevelvectors)
 					waterlevelsystem.addtowaterlevelropeque(get_name())
-				$RopeHang/RopeMesh.set_surface_material(0, get_node("/root/Spatial/MaterialSystem").pathlinematerial("watermaterial"))
+				var materialsystem = get_node("/root/Spatial/MaterialSystem")
+				$RopeHang/RopeMesh.set_surface_material(0, materialsystem.pathlinematerial("watermaterial"))
 				$PathLines.visible = false
 				for xcn in $XCnodes.get_children():
 					xcn.visible = waterflowlevelvectors.has(xcn.get_name())
@@ -584,13 +586,17 @@ func mergexcrpcdata(xcdata):
 				onepathpairs.push_back(onepathpairsAdd[i])
 				onepathpairs.push_back(onepathpairsAdd[i+1])
 
+	if "additionalproperties" in xcdata:
+		additionalproperties = xcdata["additionalproperties"]
+
+
 	if "xcflatshellmaterial" in xcdata:
 		xcflatshellmaterial = xcdata["xcflatshellmaterial"]
 	if "prevxcflatshellmaterial" in xcdata:
 		xcflatshellmaterial = xcdata["nextxcflatshellmaterial"]
 		if has_node("XCflatshell"):
 			var materialsystem = get_node("/root/Spatial/MaterialSystem")
-			materialsystem.updateflatshellmaterial(self, xcflatshellmaterial, false)
+			materialsystem.updateflatshellmaterial(self, "")
 
 	if "nodepoints" in xcdata or "prevnodepoints" in xcdata or "onepathpairs" in xcdata or "prevonepathpairs" in xcdata:
 		var shortestpathseglengthsq = -1.0
@@ -617,8 +623,6 @@ func mergexcrpcdata(xcdata):
 			if nodepointvalences[e] == 1:
 				nodepointvalence1s[e] = 1
 
-	if "additionalproperties" in xcdata:
-		additionalproperties = xcdata["additionalproperties"]
 	if "xcresource" in xcdata and xcresource != xcdata["xcresource"]:
 		print("Warning: xcdrawing.xcresource cannot be overridden, ", xcresource, " by ", xcdata["xcresource"])
 
@@ -637,8 +641,9 @@ func mergexcrpcdata(xcdata):
 			Tglobal.housahedronmode = (additionalproperties.get("geometrymode", "tunnelvr") == "housahedron")
 			Tglobal.splaystationnoderegex.compile(additionalproperties.get("splaystationnoderegex", ".*[^\\d]$"))
 			print("Setting housahedron mode ", Tglobal.housahedronmode)
-			# should go through and update, or ask for a restart!
-			
+			var gripmenu = get_node("/root/Spatial/GuiSystem/GripMenu")
+			gripmenu.setmaterialmatrix()
+
 	# this is was calling twice, also from xcdrawingstoupdate
 	#elif drawingtype != DRAWING_TYPE.DT_ROPEHANG:
 	#	updatexcpaths()
@@ -873,9 +878,9 @@ func updatexcpaths_centreline(pathlines, mlinewidth):
 
 func fillpolysmesh(filledpolys, breverseorient):
 	var arraymesh = ArrayMesh.new()
-	var surfaceTool = SurfaceTool.new()
-	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
 	for i in range(len(filledpolys)):
+		var surfaceTool = SurfaceTool.new()
+		surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
 		var poly = filledpolys[i]
 		var pv = [ ]
 		for p in poly:
@@ -887,49 +892,59 @@ func fillpolysmesh(filledpolys, breverseorient):
 			var uvp = Vector2(nodepoints[poly[u]].x, nodepoints[poly[u]].y)
 			surfaceTool.add_uv(uvp)
 			surfaceTool.add_uv2(uvp)
-			#surfaceTool.add_vertex($XCnodes.get_node(poly[u]).transform.origin)
 			surfaceTool.add_vertex(nodepoints[poly[u]])
-	surfaceTool.generate_normals()
-	surfaceTool.commit(arraymesh)
+		surfaceTool.generate_normals()
+		surfaceTool.commit(arraymesh)
 	return arraymesh
 
 
-func makexctubeshell(xcdrawings):
-	var polys = Polynets.makexcdpolys(nodepoints, onepathpairs)
-	if Tglobal.housahedronmode and len(xctubesconn) == 0 and len(polys) >= 2:
-		return fillpolysmesh([polys[-1]], true)
-	if len(polys) <= 2:
+func makexcflatshell(xcdrawings):
+	var polysdict = Polynets.makexcdpolysDict(nodepoints, onepathpairs)
+	
+	shellfaceindexes = { }
+	if Tglobal.housahedronmode and len(xctubesconn) == 0 and len(polysdict) >= 2:
+		polysdict.erase("outerpoly")
+		var polys = [ ]
+		for k in polysdict.keys():
+			if not k.begins_with("u_"):
+				shellfaceindexes[len(polys)] = k
+			polys.push_back(polysdict[k])
+		return fillpolysmesh(polys, true)
+		
+		#return fillpolysmesh([polys[-1]], true)
+	if len(polysdict) <= 2:
 		return null
-	var forepolyindexes = [ ]
-	var backpolyindexes = [ ]
+	var forepolykeys = [ ]
+	var backpolykeys = [ ]
 	for xctube in xctubesconn:
-		var polyindex = xctube.pickedpolyindex0 if xctube.xcname0 == get_name() else xctube.pickedpolyindex1
-		if polyindex != -1:
+		var polykey = xctube.pickedpolykey0 if xctube.xcname0 == get_name() else xctube.pickedpolykey1
+		if polykey != "":
 			var xcdrawingOther = xcdrawings.get_node(xctube.xcname1 if xctube.xcname0 == get_name() else xctube.xcname0)
 			var ftubevec = xcdrawingOther.global_transform.origin - global_transform.origin
 			if 	global_transform.basis.z.dot(ftubevec) > 0:
-				forepolyindexes.append(polyindex)
+				forepolykeys.append(polykey)
 			else:
-				backpolyindexes.append(polyindex)
-	var outerwholepolycase = [ len(polys)-1 ]
+				backpolykeys.append(polykey)
+	var outerwholepolycase = [ "outerpoly" ]
 	var polypartial
 	var breverseorient
-	if forepolyindexes == outerwholepolycase:
-		polypartial = backpolyindexes
+	if forepolykeys == outerwholepolycase:
+		polypartial = backpolykeys
 		breverseorient = true
-	elif backpolyindexes == outerwholepolycase:
-		polypartial = forepolyindexes
+	elif backpolykeys == outerwholepolycase:
+		polypartial = forepolykeys
 		breverseorient = false
 	else:
 		return null
 	
 	var filledpolys = [ ]
-	for i in range(len(polys)-1):
-		if not polypartial.has(i):
-			filledpolys.push_back(polys[i])
+	for k in polysdict:
+		if not polypartial.has(k) and k != "outerpoly":
+			filledpolys.push_back(polysdict[k])
 	if len(filledpolys) != 0:
 		return fillpolysmesh(filledpolys, breverseorient)
 	return null
+	
 	
 func updatexcshellmesh(xctubeshellmesh):
 	if xctubeshellmesh != null:
@@ -943,10 +958,11 @@ func updatexcshellmesh(xctubeshellmesh):
 		if len(tfaces) == 0:
 			print("No faces for shell!")
 		$XCflatshell/CollisionShape.shape.set_faces(tfaces)
-		get_node("/root/Spatial/MaterialSystem").updateflatshellmaterial(self, xcflatshellmaterial, false)
+		get_node("/root/Spatial/MaterialSystem").updateflatshellmaterial(self, "")
 	else:
 		if has_node("XCflatshell"):
 			$XCflatshell.queue_free()
+			
 
 func notubeconnections_so_delxcable():
 	for xctube in xctubesconn:
