@@ -94,7 +94,7 @@ func clearpointertargetmaterial():
 			pointertargetwall.updateformetresquaresscaletexture()
 		else:
 			pointertargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").set_surface_material(0, materialsystem.xcdrawingmaterial("normal"))
-	if pointertargettype == "GripMenuItem":
+	if pointertargettype == "GripMenuItem" or pointertargettype == "MaterialButton":
 		gripmenu.cleargripmenupointer(pointertarget)
 
 			
@@ -118,7 +118,7 @@ func setpointertargetmaterial():
 	if (pointertargettype == "XCdrawing" or pointertargettype == "XCnode") and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		pointertargetwall.get_node("XCdrawingplane/CollisionShape/MeshInstance").set_surface_material(0, materialsystem.xcdrawingmaterial("highlight"))
 		pointertargetwall.updateformetresquaresscaletexture()
-	if pointertargettype == "GripMenuItem":
+	if pointertargettype == "GripMenuItem" or pointertargettype == "MaterialButton":
 		gripmenu.setgripmenupointer(pointertarget)
 
 
@@ -260,6 +260,8 @@ func targettype(target):
 		return "XCnode"
 	if targetparent.get_name() == "XCnodes_PlanView":
 		return "XCnode"
+	if targetparent.get_name() == "MaterialButtons":
+		return "MaterialButton"
 	if targetparent.get_parent().get_name() == "GripMenu":
 		return "GripMenuItem"
 	if targetparent.get_name() == "IntermediatePointView":
@@ -1216,7 +1218,7 @@ func buttonreleased_vrgrip():
 	var wasactivetargettube = activetargettube
 	if activetargettube != null:
 		activetargettube.setxctubepathlinevisibility(sketchsystem)
-		if pointertargettype == "GripMenuItem" and pointertarget.get_parent().get_name() == "MaterialButtons":
+		if pointertargettype == "MaterialButton":
 			assert (gripmenu.gripmenupointertargettype == "XCtubesector") 
 			var sectormaterialname = pointertarget.get_name()
 			if activetargettubesectorindex < len(activetargettube.xcsectormaterials):
@@ -1242,7 +1244,7 @@ func buttonreleased_vrgrip():
 		activetargettube = null
 
 	if activetargetxcflatshell != null:
-		if pointertargettype == "GripMenuItem" and pointertarget.get_parent().get_name() == "MaterialButtons":
+		if pointertargettype == "MaterialButton":
 			assert (gripmenu.gripmenupointertargettype == "XCflatshell") 
 			var newflatshellmaterialname = pointertarget.get_name()
 			sketchsystem.actsketchchange([{ "name":activetargetxcflatshell.get_name(), 
