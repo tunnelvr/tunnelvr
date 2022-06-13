@@ -896,42 +896,46 @@ func fillpolysmesh(filledpolys, breverseorient):
 
 
 func makexcflatshell(xcdrawings):
-	var polys = Polynets.makexcdpolys(nodepoints, onepathpairs)
-	if Tglobal.housahedronmode and len(xctubesconn) == 0 and len(polys) >= 2:
-		return fillpolysmesh(polys.slice(0, len(polys)-2), true)
+	var polysdict = Polynets.makexcdpolysDict(nodepoints, onepathpairs)
+	if Tglobal.housahedronmode and len(xctubesconn) == 0 and len(polysdict) >= 2:
+		polysdict.erase("outerpoly")
+		return fillpolysmesh(polysdict.values(), true)
+		
 		#return fillpolysmesh([polys[-1]], true)
-	if len(polys) <= 2:
+	if len(polysdict) <= 2:
 		return null
-	var forepolyindexes = [ ]
-	var backpolyindexes = [ ]
+	var forepolykeys = [ ]
+	var backpolykeys = [ ]
 	for xctube in xctubesconn:
-		var polyindex = xctube.pickedpolyindex0 if xctube.xcname0 == get_name() else xctube.pickedpolyindex1
-		if polyindex != -1:
+		var polykey = xctube.pickedpolykey0 if xctube.xcname0 == get_name() else xctube.pickedpolykey1
+		if polykey != "":
 			var xcdrawingOther = xcdrawings.get_node(xctube.xcname1 if xctube.xcname0 == get_name() else xctube.xcname0)
 			var ftubevec = xcdrawingOther.global_transform.origin - global_transform.origin
 			if 	global_transform.basis.z.dot(ftubevec) > 0:
-				forepolyindexes.append(polyindex)
+				forepolykeys.append(polykey)
 			else:
-				backpolyindexes.append(polyindex)
-	var outerwholepolycase = [ len(polys)-1 ]
+				backpolykeys.append(polykey)
+	var outerwholepolycase = [ "outerpoly" ]
 	var polypartial
 	var breverseorient
-	if forepolyindexes == outerwholepolycase:
-		polypartial = backpolyindexes
+	if forepolykeys == outerwholepolycase:
+		polypartial = backpolykeys
 		breverseorient = true
-	elif backpolyindexes == outerwholepolycase:
-		polypartial = forepolyindexes
+	elif backpolykeys == outerwholepolycase:
+		polypartial = forepolykeys
 		breverseorient = false
 	else:
 		return null
 	
 	var filledpolys = [ ]
-	for i in range(len(polys)-1):
-		if not polypartial.has(i):
-			filledpolys.push_back(polys[i])
+	for k in polysdict:
+		if not polypartial.has(k) and k != "outerpoly":
+			filledpolys.push_back(polysdict[k])
 	if len(filledpolys) != 0:
 		return fillpolysmesh(filledpolys, breverseorient)
 	return null
+	
+	
 	
 func updatexcshellmesh(xctubeshellmesh):
 	if xctubeshellmesh != null:

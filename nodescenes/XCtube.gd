@@ -11,8 +11,8 @@ var xclinkintermediatenodes = null 		 # [ 0[Vector3(u,v,lambda), Vector3, Vector
 var xctchangesequence = -1
 
 # derived data
-var pickedpolyindex0 = -1
-var pickedpolyindex1 = -1
+var pickedpolykey0 = -1
+var pickedpolykey1 = -1
 
 var planeintersectaxisvec = null
 var planeintersectpoint = null
@@ -344,21 +344,21 @@ func detectdualconicalproblemwarning(ila, lenpoly1):
 
 func maketubepolyassociation_andreorder(xcdrawing0, xcdrawing1):
 	assert ((xcdrawing0.get_name() == xcname0) and (xcdrawing1.get_name() == xcname1))
-	var polys0 = Polynets.makexcdpolys(xcdrawing0.nodepoints, xcdrawing0.onepathpairs)
-	var polys1 = Polynets.makexcdpolys(xcdrawing1.nodepoints, xcdrawing1.onepathpairs)
-	var polys0islinearpath = (len(polys0) == 1)
-	var polys1islinearpath = (len(polys1) == 1)
+	var polysdict0 = Polynets.makexcdpolysDict(xcdrawing0.nodepoints, xcdrawing0.onepathpairs)
+	var polysdict1 = Polynets.makexcdpolysDict(xcdrawing1.nodepoints, xcdrawing1.onepathpairs)
+	var polys0islinearpath = polysdict0.has("linearpath")
+	var polys1islinearpath = polysdict1.has("linearpath")
 	
 	#assert ((len(polys0) != 1) or (len(polys0[0]) == 0))
 	#assert ((len(polys1) != 1) or (len(polys1[0]) == 0))
-	pickedpolyindex0 = Polynets.pickpolysindex(polys0, xcdrawinglink, 0)
-	pickedpolyindex1 = Polynets.pickpolysindex(polys1, xcdrawinglink, 1)
+	pickedpolykey0 = Polynets.pickpolyskey(polysdict0, xcdrawinglink, 0)
+	pickedpolykey1 = Polynets.pickpolyskey(polysdict1, xcdrawinglink, 1)
 	
-	if pickedpolyindex0 == -1 or pickedpolyindex1 == -1 or len(xcdrawinglink) == 0:
-		if pickedpolyindex0 == -1:
-			print(" *** no connecting poly available ", xcname0, polys0, " 0:", xcdrawinglink)
-		if pickedpolyindex1 == -1:
-			print(" *** no connecting poly available ", xcname1, polys1, " 1:", xcdrawinglink)
+	if pickedpolykey0 == "" or pickedpolykey1 == "" or len(xcdrawinglink) == 0:
+		if pickedpolykey0 == "":
+			print(" *** no connecting poly available ", xcname0, polysdict0, " 0:", xcdrawinglink)
+		if pickedpolykey1 == "":
+			print(" *** no connecting poly available ", xcname1, polysdict1, " 1:", xcdrawinglink)
 		return [[], [], []]
 
 	var tubevec = xcdrawing1.transform.xform(xcdrawing1.nodepointmean) - xcdrawing0.transform.xform(xcdrawing0.nodepointmean)
@@ -366,14 +366,14 @@ func maketubepolyassociation_andreorder(xcdrawing0, xcdrawing1):
 	var xcdrawing1basisz = xcdrawing1.transform.basis.z
 	var tubevecdot0 = xcdrawing0basisz.dot(tubevec)
 	var tubevecdot1 = xcdrawing1basisz.dot(tubevec)
-	var polyinvert0 = (tubevecdot0 <= 0) == (pickedpolyindex0 != len(polys0) - 1)
-	var polyinvert1 = (tubevecdot1 <= 0) == (pickedpolyindex1 != len(polys1) - 1)
+	var polyinvert0 = (tubevecdot0 <= 0) == (pickedpolykey0 != "outerpoly")
+	var polyinvert1 = (tubevecdot1 <= 0) == (pickedpolykey1 != "outerpoly")
 	#var tubenormdot = xcdrawing0basisz.dot(xcdrawing1basisz)
 	#if ((tubenormdot < 0) == (polyinvert0 == polyinvert1)) and not polys0islinearpath and not polys1islinearpath:
 	#	print("invert problem?")
 
-	var poly0 = polys0[pickedpolyindex0].duplicate()
-	var poly1 = polys1[pickedpolyindex1].duplicate()
+	var poly0 = polysdict0[pickedpolykey0].duplicate()
+	var poly1 = polysdict1[pickedpolykey1].duplicate()
 	if polyinvert0:
 		poly0.invert()
 	var ilp0 = poly0.find(xcdrawinglink[0])
@@ -446,7 +446,7 @@ func maketubepolyassociation_andreorder(xcdrawing0, xcdrawing1):
 		xcsectormaterials = newxcsectormaterials
 		xclinkintermediatenodes = newxclinkintermediatenodes
 		if xclinkintermediatenodes != null:
-			var sketchsystem = get_node("/root/Spatial/SketchSystem")
+			var sketchsystem = get_node("/roost/Spatial/SketchSystem")
 			updatetubelinkpaths(sketchsystem)
 
 	else:
@@ -475,13 +475,13 @@ func maketubepolyassociation_andreorder(xcdrawing0, xcdrawing1):
 		reordersecondvalstoavoiddoublelooping(ila)
 		
 	if polys0islinearpath:
-		assert (pickedpolyindex0 == 0)
+		assert (pickedpolykey0 == "linearpath")
 		for j in range(len(ilaM)):
 			if ilaM[j]["ila0"] == len(poly0)-1 and ilaM[j]["ila0N"] == 1:
 				ilaM[j]["opensector"] = true
 				break
 	if polys1islinearpath:
-		assert (pickedpolyindex0 == 0)
+		assert (pickedpolykey1 == "linearpath")
 		for j in range(len(ilaM)):
 			if ilaM[j]["ila1"] == len(poly1)-1 and ilaM[j]["ila1N"] == 1:
 				ilaM[j]["opensector"] = true

@@ -82,7 +82,7 @@ static func makexcdpolysDict(nodepoints, onepathpairs):
 				linearpath = poly.slice(singlenodeindexes[0], singlenodeindexes[1])
 			else:	
 				linearpath = poly.slice(0, singlenodeindexes[0])
-			if isinnerpoly(linearpath, nodepoints):
+			if not isinnerpoly(linearpath, nodepoints):
 				linearpath.invert()
 			linearpaths.append(linearpath)
 			continue
@@ -852,26 +852,27 @@ static func findclosestcuboidshellface(targetpoint, dragvec, nodepoints, cuboidr
 	return closestcuberailfac
 
 
-static func pickpolysindex(polys, xcdrawinglink, js):
-	var pickpolyindex = -1
-	for i in range(len(polys)):
+static func pickpolyskey(polysdict, xcdrawinglink, js):
+	var pickpolykey = ""
+	for k in polysdict.keys():
+		var poly = polysdict[k]
 		var meetsallnodes = true
 		var j = js
 		while j < len(xcdrawinglink):
 			var meetnodename = xcdrawinglink[j]
-			if not polys[i].has(meetnodename):
+			if not poly.has(meetnodename):
 				meetsallnodes = false
 				break
 			j += 2
 		if meetsallnodes:
-			pickpolyindex = i
+			pickpolykey = k
 			break
-	if len(polys) == 1 and pickpolyindex == 0:
+	if pickpolykey == "linearpath":
 		var meetnodenames = xcdrawinglink.slice(js, len(xcdrawinglink), 2)
-		if (not meetnodenames.has(polys[0][0])) or (not meetnodenames.has(polys[0][-1])):
-			pickpolyindex = -1
-			
-	return pickpolyindex
+		var poly = polysdict[pickpolykey]
+		if (not meetnodenames.has(poly[0])) or (not meetnodenames.has(poly[-1])):
+			pickpolykey = ""
+	return pickpolykey
 
 static func addarrowmesh(surfaceTool, p0, p1, aperp, linewidth, intermediatepts):
 	var p0m = p0
