@@ -7,6 +7,8 @@ var listregex = RegEx.new()
 var paperdrawinglist = [ ]
 var nonimagepageslist = [ ]
 var operatingrequest = null
+var sparehttpclients = [ ]
+const Nmaxsparehttpclients = 4
 
 var imagefetchingcountdowntimer = 0.0
 var imagefetchingcountdowntime = 0.15
@@ -27,6 +29,7 @@ var imagethreadloadedflags = Texture.FLAG_MIPMAPS|Texture.FLAG_REPEAT # |Texture
 onready var imagesystemreportslabel = get_node("/root/Spatial/GuiSystem/GUIPanel3D/Viewport/GUI/Panel/ImageSystemReports")
 
 var regexurl = RegEx.new()
+
 # to convert PDFs nix-shell -p imagemagick and ghostscript, then 
 # convert firstfloorplan.pdf -density 600 -geometry 200% -trim -background white -alpha remove -alpha off firstfloorplan.png
 # density is still blurry because resizing is happening after rendering, so I had to use Gimp to load and export at a higher resolution
@@ -75,21 +78,50 @@ func clearallimageloadingactivity():
 	fetcheddrawing = null
 	paperdrawinglist.clear()
 
+func assignhttpclient(operatingrequest):
+	assert (not operatingrequest.has("httpclient"))
+	var urlcomponents = regexurl.search(operatingrequest["url"])
+	if not urlcomponents:
+		print("bad urlcomponents ", operatingrequest["url"])
+		return false
+	var host = urlcomponents.strings[2]
+	var use_ssl = (urlcomponents.strings[1] == "https")
+	var port = int(urlcomponents.strings[3])
+	operatingrequest["urlkey"] = "%s %s %s"%[ host, port, use_ssl ]
+	var httpclient = null
+	for i in range(len(sparehttpclients)-1, -1, -1):
+		if sparehttpclients[i]["urlkey"] == operatingrequest["urlkey"]:
+			httpclient = sparehttpclients.pop_at(i)["httpclient"]
+			break
+	if httpclient != null:
+		sparehttpclients.erase(operatingrequest["urlkey"])
+		if httpclient.get_status() == HTTPClient.STATUS_CONNECTED:
+			operatingrequest["httpclient"] = httpclient
+			print(" reusing httpclient ", operatingrequest["url"])
+			return true
+	httpclient = HTTPClient.new()
+	var e = httpclient.connect_to_host(host, (port if port else -1), use_ssl)
+	if e != OK:
+		print("not okay connect_to_host ", e)
+		return false
+	operatingrequest["httpclient"] = httpclient
+	print(" new httpclient ", operatingrequest["url"])
+	return true
+
+func storinghttpclient(operatingrequest):
+	var httpclient = operatingrequest["httpclient"]
+	operatingrequest.erase("httpclient")
+	if httpclient.get_status() == HTTPClient.STATUS_CONNECTED:
+		sparehttpclients.push_back({"urlkey":operatingrequest["urlkey"], "httpclient":httpclient})
+	while len(sparehttpclients) >= Nmaxsparehttpclients:
+		sparehttpclients.pop_front()
+
 func http_request_poll():
 	var httpclient = operatingrequest["httpclient"]
 	httpclient.poll()
 	var httpclientstatus = httpclient.get_status()
 	if httpclientstatus == HTTPClient.STATUS_DISCONNECTED:
-		var urlcomponents = regexurl.search(operatingrequest["url"])
-		if urlcomponents:
-			var port = int(urlcomponents.strings[3])
-			var e = httpclient.connect_to_host(urlcomponents.strings[2], (port if port else -1), urlcomponents.strings[1] == "https")
-			if e != OK:
-				print("not okay connect_to_host ", e)
-				httpclient = null
-		else:
-			print("bad urlcomponents ", operatingrequest["url"])
-			httpclient = null
+		httpclient = null
 	elif httpclientstatus == HTTPClient.STATUS_RESOLVING or httpclientstatus == HTTPClient.STATUS_CONNECTING:
 		return
 	elif httpclientstatus == HTTPClient.STATUS_CANT_RESOLVE or httpclientstatus == HTTPClient.STATUS_CANT_CONNECT or httpclientstatus == HTTPClient.STATUS_CONNECTION_ERROR:
@@ -109,7 +141,7 @@ func http_request_poll():
 		var chunk = httpclient.read_response_body_chunk()
 		if chunk.size() != 0:
 			operatingrequest["partbody"] = operatingrequest["partbody"] + chunk
-			print("Chunk size ", chunk.size(), " ", len(operatingrequest["partbody"]))
+			print("httpclient Chunk size ", chunk.size(), " ", len(operatingrequest["partbody"]), " ", operatingrequest["url"])
 	elif httpclientstatus == HTTPClient.STATUS_CONNECTED and operatingrequest.has("partbody"):
 		var response_code = httpclient.get_response_code()
 		if response_code == 200 or response_code == 206:
@@ -124,7 +156,7 @@ func http_request_poll():
 				fetcheddrawing = operatingrequest["paperdrawing"]
 			else:
 				fetchednonimagedataobject = operatingrequest
-			operatingrequest.erase("httpclient")
+			storinghttpclient(operatingrequest)
 			operatingrequest = null
 			return
 		else:
@@ -140,7 +172,8 @@ func http_request_poll():
 			fetchednonimagedataobject = operatingrequest
 		operatingrequest.erase("httpclient")
 		operatingrequest = null
-		
+
+
 func correctdefaultimgtrimtofull(d):
 	var imgheight = d.imgwidth*d.imgheightwidthratio
 	d.imgtrimleftdown = Vector2(-d.imgwidth*0.5, -imgheight*0.5)
@@ -214,13 +247,13 @@ func _process(delta):
 				var err = Directory.new().make_dir(nonimagedir)
 				print("Making directory ", nonimagedir, " err code: ", err)
 			operatingrequest = nonimagepage
-			operatingrequest["httpclient"] = HTTPClient.new()
 			var headers = operatingrequest.get("headers", [])
 			if nonimagepage.has("byteOffset"):
 				headers.push_back("Range: bytes=%d-%d" % [nonimagepage["byteOffset"], nonimagepage["byteOffset"]+nonimagepage["byteSize"]-1])
 			operatingrequest["headers"] = headers
 			imagesystemreportslabel.text = "%d-%s" % [len(nonimagepageslist), "nonimage"]
-
+			assignhttpclient(operatingrequest)
+	
 		else:
 			fetchednonimagedataobject = nonimagepage
 		pt = var2str({"url":nonimagepage["url"], "byteOffset":nonimagepage.get("byteOffset")})
@@ -238,12 +271,12 @@ func _process(delta):
 				if not Directory.new().dir_exists(imgdir):
 					var err = Directory.new().make_dir(imgdir)
 					print("Making directory ", imgdir, " err code: ", err)
-				print("making httpclient ", paperdrawing.xcresource)
-				operatingrequest = { "httpclient":HTTPClient.new(), 
-									 "paperdrawing":paperdrawing, 
+				operatingrequest = { "paperdrawing":paperdrawing, 
 									 "objectname":paperdrawing.get_name(), 
 									 "fetcheddrawingfile":fetcheddrawingfile, 
 									 "url":paperdrawing.xcresource }
+				assignhttpclient(operatingrequest)
+										
 			else:
 				print("using cached image ", fetcheddrawingfile)
 				fetcheddrawing = paperdrawing
