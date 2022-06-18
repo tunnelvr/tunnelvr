@@ -4,15 +4,13 @@ var imgdir = "user://northernimages/"
 var nonimagedir = "user://nonimagewebpages/"
 var listregex = RegEx.new()
 
-#var paperdrawinglist = [ ]
-var nonimagepageslist = [ ]
-
 var queuedrequests =  [ ]
 var operatingrequests =  [ ]
 var completedrequests = [ ]
 
 var sparehttpclients = [ ]
 const Nmaxsparehttpclients = 4
+const Nmaxoperatingrequests = 2
 
 var imageloadingthreadmutex = Mutex.new()
 var imageloadingthreadsemaphore = Semaphore.new()
@@ -75,7 +73,6 @@ func _ready():
 func clearallimageloadingactivity():
 	operatingrequests.clear()
 	completedrequests.clear()
-	nonimagepageslist.clear()
 	queuedrequests.clear()
 	imageloadingrequests.clear()
 	imageloadedrequests.clear()
@@ -221,7 +218,6 @@ func getshortimagename(xcresource, withextension, md5nameleng, nonimagepage={}):
 	return fname+ext if withextension else fname
 
 
-const Nmaxoperatingrequests = 2
 func _process(delta):
 	if len(operatingrequests) != 0:
 		for i in range(len(operatingrequests)-1, -1, -1):
@@ -230,40 +226,18 @@ func _process(delta):
 				operatingrequests.remove(i)
 				completedrequests.push_back(operatingrequest)
 	while len(queuedrequests) != 0 and len(operatingrequests) < Nmaxoperatingrequests:
-		var operatingrequest = queuedrequests.pop_back()
+		var operatingrequest = queuedrequests.pop_back()   # should favour nonimage requests?
 		assignhttpclient(operatingrequest)
 		operatingrequests.push_back(operatingrequest)
 			
 	var t0 = OS.get_ticks_msec()
 	var Dpt = ""
-	if len(completedrequests) == 0 and len(operatingrequests) == 0 and len(nonimagepageslist) > 0:
-		var nonimagepage = nonimagepageslist.pop_front()
-		nonimagepage["fetchednonimagedataobjectfile"] = nonimagedir + \
-			getshortimagename(nonimagepage["url"], true, 
-							  (10 if nonimagepage.has("byteOffset") else 20), 
-							  nonimagepage)
-		if not File.new().file_exists(nonimagepage["fetchednonimagedataobjectfile"]) or nonimagepage.get("donotusecache"):
-			if not Directory.new().dir_exists(nonimagedir):
-				var err = Directory.new().make_dir(nonimagedir)
-				print("Making directory ", nonimagedir, " err code: ", err)
-			var operatingrequest = nonimagepage
-			var headers = operatingrequest.get("headers", [])
-			if nonimagepage.has("byteOffset"):
-				headers.push_back("Range: bytes=%d-%d" % [nonimagepage["byteOffset"], nonimagepage["byteOffset"]+nonimagepage["byteSize"]-1])
-			operatingrequest["headers"] = headers
-			imagesystemreportslabel.text = "%d-%s" % [len(nonimagepageslist), "nonimage"]
-			assignhttpclient(operatingrequest)
-			operatingrequests.push_back(operatingrequest)
-		else:
-			completedrequests.push_back(nonimagepage)
-		Dpt = var2str({"url":nonimagepage["url"], "byteOffset":nonimagepage.get("byteOffset")})
-		
 
 	if Nimageloadingrequests != 0:
 		imageloadingthreadmutex.lock()
 		var imageloadedrequest = imageloadedrequests.pop_front() if len(imageloadedrequests) != 0 else null
 		imageloadingthreadmutex.unlock()
-		if imageloadedrequests != null:
+		if imageloadedrequest != null:
 			var papertexture = imageloadedrequest["imageloadingthreadloadedimagetexture"]
 			Nimageloadingrequests -= 1
 			if papertexture.get_width() != 0:
@@ -358,15 +332,13 @@ func fetchunrolltree(fileviewtree, item, url, filetreeresource):
 		nonimagedataobject["filetreeresource"] = filetreeresource
 		if filetreeresource.get("type") == "caddyfiles":
 			nonimagedataobject["headers"] = [ "accept: application/json" ]
-	nonimagepageslist.append(nonimagedataobject)
-	set_process(true)
+	fetchnonimagedataobject(nonimagedataobject)
 
 func fetchrequesturl(nonimagedataobject):
 	var url = nonimagedataobject["url"]
 	if url.substr(0,4) == "http":
 		print("fetchrequesturl ", url, " ", nonimagedataobject.get("byteOffset"), " ", nonimagedataobject.get("byteSize"))
-		nonimagepageslist.append(nonimagedataobject)
-		set_process(true)
+		fetchnonimagedataobject(nonimagedataobject)
 	else:
 		var f = File.new()
 		f.open(url, File.READ)
@@ -416,3 +388,23 @@ func shuffleimagetotopoflist(paperdrawing):
 		queuedrequests[-1] = queuedrequest
 	else:
 		print("image not in queuedrequests list")
+
+func fetchnonimagedataobject(nonimagepage):
+	nonimagepage["fetchednonimagedataobjectfile"] = nonimagedir + \
+		getshortimagename(nonimagepage["url"], true, 
+						  (10 if nonimagepage.has("byteOffset") else 20), 
+						  nonimagepage)
+	if not File.new().file_exists(nonimagepage["fetchednonimagedataobjectfile"]) or nonimagepage.get("donotusecache"):
+		if not Directory.new().dir_exists(nonimagedir):
+			var err = Directory.new().make_dir(nonimagedir)
+			print("Making directory ", nonimagedir, " err code: ", err)
+		var headers = nonimagepage.get("headers", [])
+		if nonimagepage.has("byteOffset"):
+			headers.push_back("Range: bytes=%d-%d" % [nonimagepage["byteOffset"], nonimagepage["byteOffset"]+nonimagepage["byteSize"]-1])
+		nonimagepage["headers"] = headers
+		imagesystemreportslabel.text = "%d-%s" % [len(queuedrequests), "nonimage"]
+		queuedrequests.push_back(nonimagepage)
+	else:
+		completedrequests.push_back(nonimagepage)
+	set_process(true)
+
