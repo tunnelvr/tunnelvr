@@ -6,24 +6,30 @@ var listregex = RegEx.new()
 
 var paperdrawinglist = [ ]
 var nonimagepageslist = [ ]
-var operatingrequest = null
+
+var operatingrequests =  [ ]
+var completedrequests = [ ]
+
 var sparehttpclients = [ ]
 const Nmaxsparehttpclients = 4
 
 var imagefetchingcountdowntimer = 0.0
-var imagefetchingcountdowntime = 0.15
-var fetcheddrawing = null
+var imagefetchingcountdowntime = 0.05
 
-var fetchednonimagedataobject = null
-
-var fetcheddrawingfile = null
+var Dfetcheddrawing = null
+var Dfetchednonimagedataobject = null
+var Dfetcheddrawingfile = null
 
 var imageloadingthreadmutex = Mutex.new()
 var imageloadingthreadsemaphore = Semaphore.new()
 var imageloadingthread = Thread.new()
-var imageloadingthreadoperating = false
-var imageloadingthreaddrawingfile = null
-var imageloadingthreadloadedimagetexture = null
+var Nimageloadingrequests = 0
+
+var imageloadingrequests = [ ]
+var imageloadedrequests = [ ]
+#var imageloadingthreaddrawingfile = null
+#var imageloadingthreadloadedimagetexture = null
+
 var imagethreadloadedflags = Texture.FLAG_MIPMAPS|Texture.FLAG_REPEAT # |Texture.FILTER
 
 onready var imagesystemreportslabel = get_node("/root/Spatial/GuiSystem/GUIPanel3D/Viewport/GUI/Panel/ImageSystemReports")
@@ -38,14 +44,12 @@ func imageloadingthread_function(userdata):
 	print("imageloadingthread_function started")
 	while true:
 		imageloadingthreadsemaphore.wait()
-
 		imageloadingthreadmutex.lock()
-		var limageloadingthreaddrawingfile = imageloadingthreaddrawingfile
-		imageloadingthreaddrawingfile = null
+		var imagerequest = imageloadingrequests.pop_front()
 		imageloadingthreadmutex.unlock()
-
-		if limageloadingthreaddrawingfile == null:
+		if imagerequest == null:
 			break
+		var limageloadingthreaddrawingfile = imagerequest["fetcheddrawingfile"]
 		var t0 = OS.get_ticks_msec()
 		var limageloadingthreadloadedimagetexture = ImageTexture.new()
 		if not limageloadingthreaddrawingfile.begins_with("res://"):
@@ -58,13 +62,15 @@ func imageloadingthread_function(userdata):
 			limageloadingthreadloadedimagetexture.create_from_image(limageloadingthreadloadedimage, imagethreadloadedflags)
 		else:
 			limageloadingthreadloadedimagetexture = ResourceLoader.load(limageloadingthreaddrawingfile)
+		imagerequest["imageloadingthreadloadedimagetexture"] = limageloadingthreadloadedimagetexture
 		imageloadingthreadmutex.lock()
-		imageloadingthreadloadedimagetexture = limageloadingthreadloadedimagetexture
+		print(" ****yooooo ", limageloadingthreaddrawingfile)
+		imageloadedrequests.push_back(imagerequest)
 		imageloadingthreadmutex.unlock()
 
 func _exit_tree():
 	imageloadingthreadmutex.lock()
-	imageloadingthreaddrawingfile = null
+	imageloadingrequests.push_front(null)
 	imageloadingthreadmutex.unlock()
 	imageloadingthreadsemaphore.post()
 	imageloadingthread.wait_to_finish()
@@ -75,8 +81,12 @@ func _ready():
 	regexurl.compile("^(https?)://([^/:]*)(:\\d+)?(/.*)")
 
 func clearallimageloadingactivity():
-	fetcheddrawing = null
+	operatingrequests.clear()
+	completedrequests.clear()
+	nonimagepageslist.clear()
 	paperdrawinglist.clear()
+	imageloadingrequests.clear()
+	imageloadedrequests.clear()
 
 func assignhttpclient(operatingrequest):
 	assert (not operatingrequest.has("httpclient"))
@@ -88,6 +98,7 @@ func assignhttpclient(operatingrequest):
 	var use_ssl = (urlcomponents.strings[1] == "https")
 	var port = int(urlcomponents.strings[3])
 	operatingrequest["urlkey"] = "%s %s %s"%[ host, port, use_ssl ]
+	operatingrequest["urlpath"] = urlcomponents.strings[4]
 	var httpclient = null
 	for i in range(len(sparehttpclients)-1, -1, -1):
 		if sparehttpclients[i]["urlkey"] == operatingrequest["urlkey"]:
@@ -105,7 +116,7 @@ func assignhttpclient(operatingrequest):
 		print("not okay connect_to_host ", e)
 		return false
 	operatingrequest["httpclient"] = httpclient
-	print(" new httpclient ", operatingrequest["url"])
+	print(" new httpclient ", operatingrequest["urlkey"])
 	return true
 
 func storinghttpclient(operatingrequest):
@@ -113,35 +124,40 @@ func storinghttpclient(operatingrequest):
 	operatingrequest.erase("httpclient")
 	if httpclient.get_status() == HTTPClient.STATUS_CONNECTED:
 		sparehttpclients.push_back({"urlkey":operatingrequest["urlkey"], "httpclient":httpclient})
+		print(" storing httpclient ", operatingrequest["urlkey"])
+	else:
+		print(" dropping httpclient ", operatingrequest["urlkey"], " status ", httpclient.get_status())
 	while len(sparehttpclients) >= Nmaxsparehttpclients:
 		sparehttpclients.pop_front()
 
-func http_request_poll():
+func http_request_poll(operatingrequest):
 	var httpclient = operatingrequest["httpclient"]
 	httpclient.poll()
 	var httpclientstatus = httpclient.get_status()
 	if httpclientstatus == HTTPClient.STATUS_DISCONNECTED:
-		httpclient = null
+		print(" disconnected httpclient ", operatingrequest["urlkey"])
+		return -1
 	elif httpclientstatus == HTTPClient.STATUS_RESOLVING or httpclientstatus == HTTPClient.STATUS_CONNECTING:
-		return
+		return 0
 	elif httpclientstatus == HTTPClient.STATUS_CANT_RESOLVE or httpclientstatus == HTTPClient.STATUS_CANT_CONNECT or httpclientstatus == HTTPClient.STATUS_CONNECTION_ERROR:
-		print("bad httpclientstatus ", httpclientstatus)
-		httpclient = null
+		print(" bad httpclientstatus ", operatingrequest["urlkey"], " ", httpclientstatus)
+		return -1
 	elif httpclientstatus == HTTPClient.STATUS_CONNECTED and not operatingrequest.has("partbody"):
-		var urlcomponents = regexurl.search(operatingrequest["url"])
-		var err = httpclient.request(HTTPClient.METHOD_GET, urlcomponents.strings[4], PoolStringArray(operatingrequest.get("headers", []))) 
+		var err = httpclient.request(HTTPClient.METHOD_GET, operatingrequest["urlpath"], PoolStringArray(operatingrequest.get("headers", []))) 
 		if err == OK:
+			print(" httprequest made to ", operatingrequest["urlpath"])
 			operatingrequest["partbody"] = PoolByteArray()
-			return
+			return 0
 		print("bad httpclient.request ", err)
-		httpclient = null
+		return -1
 	elif httpclientstatus == HTTPClient.STATUS_REQUESTING:
-		return
+		return 0
 	elif httpclientstatus == HTTPClient.STATUS_BODY:
 		var chunk = httpclient.read_response_body_chunk()
 		if chunk.size() != 0:
 			operatingrequest["partbody"] = operatingrequest["partbody"] + chunk
-			print("httpclient Chunk size ", chunk.size(), " ", len(operatingrequest["partbody"]), " ", operatingrequest["url"])
+			#print("httpclient Chunk size ", chunk.size(), " ", len(operatingrequest["partbody"]), " ", operatingrequest["url"])
+		return 0
 	elif httpclientstatus == HTTPClient.STATUS_CONNECTED and operatingrequest.has("partbody"):
 		var response_code = httpclient.get_response_code()
 		if response_code == 200 or response_code == 206:
@@ -152,27 +168,17 @@ func http_request_poll():
 			fout.store_buffer(operatingrequest["partbody"])
 			fout.close()
 			operatingrequest.erase("partbody")
-			if "paperdrawing" in operatingrequest:
-				fetcheddrawing = operatingrequest["paperdrawing"]
-			else:
-				fetchednonimagedataobject = operatingrequest
 			storinghttpclient(operatingrequest)
-			operatingrequest = null
-			return
+			return 1
 		else:
 			operatingrequest.erase("partbody")
-			print("http response code bad ", response_code, " for ", operatingrequest)
-			httpclient = null
+			print(" http response code bad ", response_code, " for ", operatingrequest)
+			return -1
 			
-	if httpclient == null:
-		if "paperdrawing" in operatingrequest:
-			fetcheddrawing = operatingrequest["paperdrawing"]
-			fetcheddrawingfile = "res://guimaterials/imagefilefailure.png"
-		else:
-			fetchednonimagedataobject = operatingrequest
-		operatingrequest.erase("httpclient")
-		operatingrequest = null
-
+	else:
+		print(" unknown httpclientstatus ", httpclientstatus)
+		return -1
+		
 
 func correctdefaultimgtrimtofull(d):
 	var imgheight = d.imgwidth*d.imgheightwidthratio
@@ -225,9 +231,23 @@ func getshortimagename(xcresource, withextension, md5nameleng, nonimagepage={}):
 
 var nFrame = 0
 func _process(delta):
-	if operatingrequest != null and operatingrequest.has("httpclient"):
-		http_request_poll()
-	
+	if len(operatingrequests) != 0:
+		var operatingrequest = operatingrequests[0]
+		var hrp = http_request_poll(operatingrequest)
+		if hrp != 0:
+			operatingrequests.remove(0)
+#			if hrp == 1:
+#				if "paperdrawing" in operatingrequest:
+#					fetcheddrawing = operatingrequest["paperdrawing"]
+#				else:
+#					fetchednonimagedataobject = operatingrequest
+#			else:
+#				if "paperdrawing" in operatingrequest:
+#					operatingrequest["fetcheddrawingfile"] = "res://guimaterials/imagefilefailure.png"
+#				else:
+#					fetchednonimagedataobject = operatingrequest
+			completedrequests.push_back(operatingrequest)
+			
 	nFrame += 1
 	if imagefetchingcountdowntimer > 0.0:
 		imagefetchingcountdowntimer -= delta
@@ -235,8 +255,8 @@ func _process(delta):
 	imagefetchingcountdowntimer = imagefetchingcountdowntime
 	
 	var t0 = OS.get_ticks_msec()
-	var pt = ""
-	if fetcheddrawing == null and fetchednonimagedataobject == null and operatingrequest == null and len(nonimagepageslist) > 0:
+	var Dpt = ""
+	if len(completedrequests) == 0 and len(operatingrequests) == 0 and len(nonimagepageslist) > 0:
 		var nonimagepage = nonimagepageslist.pop_front()
 		nonimagepage["fetchednonimagedataobjectfile"] = nonimagedir + \
 			getshortimagename(nonimagepage["url"], true, 
@@ -246,66 +266,60 @@ func _process(delta):
 			if not Directory.new().dir_exists(nonimagedir):
 				var err = Directory.new().make_dir(nonimagedir)
 				print("Making directory ", nonimagedir, " err code: ", err)
-			operatingrequest = nonimagepage
+			var operatingrequest = nonimagepage
 			var headers = operatingrequest.get("headers", [])
 			if nonimagepage.has("byteOffset"):
 				headers.push_back("Range: bytes=%d-%d" % [nonimagepage["byteOffset"], nonimagepage["byteOffset"]+nonimagepage["byteSize"]-1])
 			operatingrequest["headers"] = headers
 			imagesystemreportslabel.text = "%d-%s" % [len(nonimagepageslist), "nonimage"]
 			assignhttpclient(operatingrequest)
-	
+			operatingrequests.push_back(operatingrequest)
 		else:
-			fetchednonimagedataobject = nonimagepage
-		pt = var2str({"url":nonimagepage["url"], "byteOffset":nonimagepage.get("byteOffset")})
+			completedrequests.push_back(nonimagepage)
+		Dpt = var2str({"url":nonimagepage["url"], "byteOffset":nonimagepage.get("byteOffset")})
 		
-	if fetcheddrawing == null and fetchednonimagedataobject == null and operatingrequest == null and len(paperdrawinglist) > 0:
+	if len(completedrequests) == 0 and len(operatingrequests) == 0 and len(paperdrawinglist) > 0:
 		var paperdrawing = paperdrawinglist.pop_back()
-		var fetchreporttype = ""
 		if paperdrawing.xcresource.begins_with("res://"):
-			fetcheddrawingfile = paperdrawing.xcresource
-			fetcheddrawing = paperdrawing
-			fetchreporttype = "res"
+			var operatingrequest = { "paperdrawing":paperdrawing, 
+									 "fetcheddrawingfile":paperdrawing.xcresource,
+									 "fetchreporttype":"res" }
+			completedrequests.push_back(operatingrequest)
+			
 		elif paperdrawing.xcresource.begins_with("http"):
-			fetcheddrawingfile = imgdir+getshortimagename(paperdrawing.xcresource, true, 12)
+			var fetcheddrawingfile = imgdir+getshortimagename(paperdrawing.xcresource, true, 12)
 			if not File.new().file_exists(fetcheddrawingfile):
 				if not Directory.new().dir_exists(imgdir):
 					var err = Directory.new().make_dir(imgdir)
 					print("Making directory ", imgdir, " err code: ", err)
-				operatingrequest = { "paperdrawing":paperdrawing, 
-									 "objectname":paperdrawing.get_name(), 
-									 "fetcheddrawingfile":fetcheddrawingfile, 
-									 "url":paperdrawing.xcresource }
+				var operatingrequest = { "paperdrawing":paperdrawing, 
+										 "objectname":paperdrawing.get_name(), 
+										 "fetcheddrawingfile":fetcheddrawingfile, 
+										 "url":paperdrawing.xcresource }
 				assignhttpclient(operatingrequest)
-										
+				operatingrequests.push_back(operatingrequest)
+				Dpt = var2str(operatingrequest)
 			else:
 				print("using cached image ", fetcheddrawingfile)
-				fetcheddrawing = paperdrawing
-				fetchreporttype = "cache"
-			
+				var operatingrequest = { "paperdrawing":paperdrawing, 
+										 "fetcheddrawingfile":fetcheddrawingfile, 
+										 "url":"cache" }
+				completedrequests.push_back(operatingrequest)
 		else:
-			fetcheddrawingfile = "res://guimaterials/imagefilefailure.png"
-			fetchreporttype = "fail"
-		pt = var2str(operatingrequest)
-		imagesystemreportslabel.text = "%d-%s" % [len(paperdrawinglist), fetchreporttype]
+			var operatingrequest = { "paperdrawing":paperdrawing, 
+									 "fetcheddrawingfile":"res://guimaterials/imagefilefailure.png", 
+									 "fetchreporttype":"fail" }
+		imagesystemreportslabel.text = "%d-%s" % [len(paperdrawinglist), "fff"]
 
-	elif fetcheddrawing != null and not imageloadingthreadoperating:
+	if Nimageloadingrequests != 0:
 		imageloadingthreadmutex.lock()
-		assert(imageloadingthreaddrawingfile == null and imageloadingthreadloadedimagetexture == null)
-		imageloadingthreaddrawingfile = fetcheddrawingfile
+		var imageloadedrequest = imageloadedrequests.pop_front() if len(imageloadedrequests) != 0 else null
 		imageloadingthreadmutex.unlock()
-		imageloadingthreadoperating = true
-		imageloadingthreadsemaphore.post()
-		pt = "semaphore thread"
-
-	elif fetcheddrawing != null:
-		imageloadingthreadmutex.lock()
-		assert (imageloadingthreaddrawingfile == null)
-		var papertexture = imageloadingthreadloadedimagetexture
-		imageloadingthreadloadedimagetexture = null
-		imageloadingthreadmutex.unlock()
-		if papertexture != null:
-			imageloadingthreadoperating = false
+		if imageloadedrequests != null:
+			var papertexture = imageloadedrequest["imageloadingthreadloadedimagetexture"]
+			Nimageloadingrequests -= 1
 			if papertexture.get_width() != 0:
+				var fetcheddrawing = imageloadedrequest["paperdrawing"]
 				var fetcheddrawingmaterial = fetcheddrawing.get_node("XCdrawingplane/CollisionShape/MeshInstance").get_surface_material(0)
 				fetcheddrawingmaterial.set_shader_param("texture_albedo", papertexture)
 				var previmgheightwidthratio = fetcheddrawing.imgheightwidthratio
@@ -316,13 +330,26 @@ func _process(delta):
 					fetcheddrawing.applytrimmedpaperuvscale()
 					
 			else:
-				print(fetcheddrawingfile, "   has zero width, deleting if user://")
-				if fetcheddrawingfile.begins_with("user://"):
-					Directory.new().remove(fetcheddrawingfile)
-			fetcheddrawing = null
-		pt = "paptex"
+				print(imageloadedrequest["fetcheddrawingfile"], "   has zero width, deleting if user://")
+				if imageloadedrequest["fetcheddrawingfile"].begins_with("user://"):
+					Directory.new().remove(imageloadedrequest["fetcheddrawingfile"])
+		Dpt = "paptex"
 
-	elif fetchednonimagedataobject != null:
+
+
+	var completedrequest = completedrequests.pop_front() if len(completedrequests) != null else null
+	if completedrequest != null and "paperdrawing" in completedrequest:
+		imageloadingthreadmutex.lock()
+		imageloadingrequests.push_back(completedrequest)
+		completedrequest = null
+		imageloadingthreadmutex.unlock()
+		Nimageloadingrequests += 1
+		imageloadingthreadsemaphore.post()
+		Dpt = "semaphore thread"
+
+
+	elif completedrequest != null:
+		var fetchednonimagedataobject = completedrequest
 		#print("FFFN ", fetchednonimagedataobject)
 		if fetchednonimagedataobject.get("parsedumpcentreline") == "yes":
 			get_node("/root/Spatial/ExecutingFeatures").parse3ddmpcentreline_execute(fetchednonimagedataobject["fetchednonimagedataobjectfile"], fetchednonimagedataobject["url"])
@@ -369,14 +396,12 @@ func _process(delta):
 		
 		fetchednonimagedataobject = null
 
-	elif operatingrequest != null:
-		pass
-		
-	else:
+	if len(operatingrequests) == 0 and len(completedrequests) != 0 and Nimageloadingrequests == 0:
 		set_process(false)
+		
 	var dt = OS.get_ticks_msec() - t0
 	if dt > 50:
-		print("Long image system process ", dt, " ", pt)
+		print("Long image system process ", dt, " ", Dpt)
 
 
 func fetchunrolltree(fileviewtree, item, url, filetreeresource):
@@ -406,6 +431,7 @@ func fetchrequesturl(nonimagedataobject):
 			nonimagedataobject["callbackobject"].emit_signal(nonimagedataobject["callbacksignal"], f)
 		
 func fetchpaperdrawing(paperdrawing):
+	print(" ****yaaaaaa ", paperdrawing.xcresource)
 	paperdrawinglist.push_back(paperdrawing)
 	set_process(true)
 	
