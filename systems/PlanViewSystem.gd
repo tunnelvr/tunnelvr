@@ -154,6 +154,53 @@ func fetchbuttonpressed(item, column, idx):
 	else:
 		print("Suppressing button ", fname, " which should be disabled")
 
+
+func actunrolltree(f, fetchednonimagedataobject):
+	var htmltext = f.get_as_text()
+	f.close()
+	var llinks = [ ]
+	if fetchednonimagedataobject.has("filetreeresource"):
+		if fetchednonimagedataobject["filetreeresource"].get("type") == "caddyfiles":
+			var jres = parse_json(htmltext)
+			if jres != null:
+				for jr in jres:
+					llinks.push_back(jr["name"] + ("/" if jr.get("is_dir") else ""))
+		elif fetchednonimagedataobject["filetreeresource"].get("type") == "githubapi":
+			var jres = parse_json(htmltext)
+			if jres != null:
+				for jr in jres:
+					llinks.push_back(jr["name"] + ("/" if jr.get("type") == "dir" else ""))
+		elif fetchednonimagedataobject["filetreeresource"].get("type") == "svnfiles":
+			for m in listregex.search_all(htmltext):
+				var lk = m.get_string(1)
+				if not lk.begins_with("."):
+					lk = lk.replace("&amp;", "&")
+					llinks.push_back(lk)
+
+	else:
+		for m in listregex.search_all(htmltext):   # svnfiles type bydefault
+			var lk = m.get_string(1)
+			if not lk.begins_with("."):
+				lk = lk.replace("&amp;", "&")
+				llinks.push_back(lk)
+	openlinklistpage(fetchednonimagedataobject["item"], llinks)
+# here is work!
+
+func fetchunrolltree(fileviewtree, item, url, filetreeresource):
+	var nonimagedataobject = { "url":url, 
+							   "tree":fileviewtree, 
+							   "item":item, 
+							   "donotusecache":true, 
+							   "callbackobject":self, 
+							   "callbackfunction":"actunrolltree"
+							 }
+	if filetreeresource != null:
+		nonimagedataobject["filetreeresource"] = filetreeresource
+		if filetreeresource.get("type") == "caddyfiles":
+			nonimagedataobject["headers"] = [ "accept: application/json" ]
+	ImageSystem.fetchnonimagedataobject(nonimagedataobject)
+
+
 func itemselected():
 	var itemclicked = fileviewtree.get_selected()
 	print("  ", itemclicked, " ", fileviewtree.get_scroll())

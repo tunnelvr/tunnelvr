@@ -44,52 +44,21 @@ func createChildAABB(pnode, index):
 
 		
 const Nloadcellpointsperframe = 3000
-func Yloadoctcellpoints(foctreeF, pointsizefactor, roottransforminverse, rootnode):
+func YloadoctcellpointsCC(pointsizefactor, nonimagedataobject, roottransforminverse, rootnode):
+	yield(get_tree(), "idle_frame")
 	var mdscale = rootnode.mdscale
 	var mdoffset = rootnode.mdoffset
-
-	var ocellcentre = roottransforminverse*global_transform.origin
+	var ocellcentre = nonimagedataobject["ocellcentre"] # roottransforminverse*global_transform.origin
+	var st = nonimagedataobject["onodesurfacetool"]
+	var Dnpointsnotinbox = nonimagedataobject["Dnpointsnotinbox"]
 	var relativeocellcentre = transform.origin
-	var childIndex = int(name)
 	if ocellcentre.distance_to((Dboxmin+Dboxmax)/2) > 0.9:
 		print("moved centre ", ocellcentre, ((Dboxmin+Dboxmax)/2))
+	var childIndex = int(name)
 	var Dboxminmax = AABB(ocellcentre - ocellsize/2, ocellsize).grow(boxpointepsilon)
 
-	var st = SurfaceTool.new()
-	st.begin(Mesh.PRIMITIVE_POINTS)
-	var Dnpointsnotinbox = 0
-	
-	yield(get_tree(), "idle_frame")
-	var t0 = OS.get_ticks_msec()
-	for i in range(numPoints):
-		var v0 = foctreeF.get_32()
-		var v1 = foctreeF.get_32()
-		var v2 = foctreeF.get_32()
-		if rootnode.attributes_rgb_prebytes != -1:
-			if rootnode.attributes_rgb_prebytes != 0:
-				foctreeF.get_buffer(rootnode.attributes_rgb_prebytes)
-			var r = foctreeF.get_16()
-			var g = foctreeF.get_16()
-			var b = foctreeF.get_16()
-			var col = Color(r/65535.0, g/65535.0, b/65535.0)
-			st.add_color(col)
-		if rootnode.attributes_postbytes != 0:
-			foctreeF.get_buffer(rootnode.attributes_postbytes)
-
-		var p = Vector3(v0*mdscale.x + mdoffset.x, 
-						v1*mdscale.y + mdoffset.y, 
-						v2*mdscale.z + mdoffset.z)
-		st.add_vertex(p - ocellcentre)
-		if not Dboxminmax.has_point(p):
-			Dnpointsnotinbox += 1
-		if ((i+1) % Nloadcellpointsperframe) == 0:
-			var dt = OS.get_ticks_msec() - t0
-			if dt > 20:
-				print("Excessive Yloadoctcellpoints_A time ", dt)
-			yield(get_tree(), "idle_frame")
-			t0 = OS.get_ticks_msec()
-		
 	numPointsCarriedDown = 0
+	var t0 = OS.get_ticks_msec()
 	if treedepth >= 1:
 		var parentsurfacearrays = get_parent().mesh.surface_get_arrays(0)
 		var parentpoints = parentsurfacearrays[Mesh.ARRAY_VERTEX]
@@ -115,19 +84,12 @@ func Yloadoctcellpoints(foctreeF, pointsizefactor, roottransforminverse, rootnod
 				if not Dboxminmax.has_point(rp + ocellcentre):
 					Dnpointsnotinbox += 1
 
-	var dt = OS.get_ticks_msec() - t0
-	if dt > 20:
-		print("Excessive Yloadoctcellpoints_C time ", dt)
-	t0 = OS.get_ticks_msec()		
 	var pointmesh = Mesh.new()
 	st.commit(pointmesh)
 	mesh = pointmesh
 	if Dnpointsnotinbox != 0:
 		print("npointsnotinbox ", Dnpointsnotinbox, " of ", numPoints+numPointsCarriedDown)
-	dt = OS.get_ticks_msec() - t0
-	if dt > 20:
-		print("Excessive Yloadoctcellpoints_D time ", dt)
-	t0 = OS.get_ticks_msec()		
+	
 	pointmaterial = load("res://potreework/pointcloudslice.material").duplicate()
 	pointmaterial.set_shader_param("point_scale", pointsizefactor*spacing)
 	pointmaterial.set_shader_param("ocellcentre", ocellcentre)
@@ -153,9 +115,6 @@ func Yloadoctcellpoints(foctreeF, pointsizefactor, roottransforminverse, rootnod
 	pointmaterial.set_shader_param("slicedisappearthickness", rootnode.slicedisappearthickness)
 
 	set_surface_material(0, pointmaterial)
-	dt = OS.get_ticks_msec() - t0
-	if dt > 20:
-		print("Excessive Yloadoctcellpoints_E time ", dt)
 
 
 func constructpotreenode(parentnode, childIndex, Droottransforminverse):

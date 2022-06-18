@@ -234,18 +234,13 @@ func Yupdatepotreeprioritiesfull():
 func updatepotreeprioritiesLoop():
 	while true:
 		if queuekillpotree or rootnode == null:
-			if rootnode != null:
-				rootnode.processingnode = null
-				remove_child(rootnode)
-				rootnode.queue_free()
-				rootnode = null
 			break
-
 		if not visible:
-			yield(get_tree().create_timer(timems_fornextupdatepriorities*0.001), "timeout")
+			yield(get_tree().create_timer(0.1), "timeout")
 			continue
 		yield(get_tree(), "idle_frame")
-		var ticksms_tonextupdatepriorities = OS.get_ticks_msec() + timems_fornextupdatepriorities
+
+		var ticksms_tonextupdatepriorities = OS.get_ticks_msec() + 500 # timems_fornextupdatepriorities
 
 		var res = yield(Yupdatepotreeprioritiesfull(), "completed")
 		for nnode in res["pointcloudnodestohide"]:
@@ -256,39 +251,44 @@ func updatepotreeprioritiesLoop():
 			var nnode = res["pointcloudnodestoshow"].pop_front()
 			if not nnode.visible:
 				if nnode.pointmaterial == null:
+					var roottransforminverse = rootnode.get_parent().global_transform.inverse()
 					var nonimagedataobject = { "url":rootnode.urloctree, 
 											   "callbackobject":self, 
 											   "callbacksignal":"updatepotreepriorities_fetchsignal", 
 											   "byteOffset":nnode.byteOffset, 
-											   "byteSize":nnode.byteSize }
+											   "byteSize":nnode.byteSize,
+											   "onodesurfacetool":SurfaceTool.new(), 
+											   "numPoints":nnode.numPoints, 
+											   "rootnode":rootnode, 
+											   "ocellcentre":roottransforminverse*nnode.global_transform.origin }
+					var boxpointepsilon = 0.6
+					nonimagedataobject["Dboxminmax"] = AABB(nonimagedataobject["ocellcentre"] - nnode.ocellsize/2, nnode.ocellsize).grow(boxpointepsilon)
+
 					$LoadingCube.mesh.size = nnode.ocellsize
 					$LoadingCube.global_transform.origin = nnode.global_transform.origin
 					matloadingcube.albedo_color = coloctcellpointsfetching
 					$LoadingCube.visible = true
 					nnode.Dloadedstate = "fetching"
 					ImageSystem.fetchrequesturl(nonimagedataobject)
-					var foctreeF = yield(self, "updatepotreepriorities_fetchsignal")
-					if rootnode.urloctree.substr(0, 4) != "http" or foctreeF.get_len() == nnode.byteSize:
-						var roottransforminverse = rootnode.get_parent().global_transform.inverse()
+					yield(self, "updatepotreepriorities_fetchsignal")
+					if nonimagedataobject["onodesurfacetool"] != null:
 						var tp0 = OS.get_ticks_msec()
 						matloadingcube.albedo_color = coloctcellpointsloading
 						nnode.Dloadedstate = "pointsloading"
-						yield(nnode.Yloadoctcellpoints(foctreeF, pointsizefactor, roottransforminverse, rootnode), "completed")
+						yield(nnode.YloadoctcellpointsCC(pointsizefactor, nonimagedataobject, roottransforminverse, rootnode), "completed")
 						var dt = OS.get_ticks_msec() - tp0
 						if dt > 100:
 							print("    Warning: long loadoctcellpoints ", nnode.get_path(), " of ", dt, " msecs", " numPoints:", nnode.numPoints, " carrieddown:", nnode.numPointsCarriedDown)
 						nnode.Dloadedstate = "pointsloaded"
 					else:
 						nnode.Dloadedstate = "failedfetching"
-						print("foctree nodesize bytes fail ", foctreeF.get_len(), " ", nnode.byteSize)
+						print("foctree nodesize bytes fail ", nonimagedataobject["foctreeFgetlen"], " ", nnode.byteSize)
 					$LoadingCube.visible = false
 				if not nnode.visible and nnode.pointmaterial != null:
 					nnode.pointmaterial.set_shader_param("highlightplaneperp", rootnode.highlightplaneperp)
 					nnode.pointmaterial.set_shader_param("highlightplanedot", rootnode.highlightplanedot)
 					nnode.pointmaterial.set_shader_param("slicedisappearthickness", rootnode.slicedisappearthickness)
 					rootnode.uppernodevisibilitymask(nnode, true)
-					
-		
 			
 		while visible and len(res["hierarchynodestoload"]) != 0 and OS.get_ticks_msec() < ticksms_tonextupdatepriorities:
 			var hnode = res["hierarchynodestoload"].pop_front()
@@ -296,7 +296,8 @@ func updatepotreeprioritiesLoop():
 			$LoadingCube.global_transform.origin = hnode.global_transform.origin
 			matloadingcube.albedo_color = colhierarchyfetching
 			$LoadingCube.visible = true
-			var nonimagedataobject = { "url":rootnode.urlhierarchy, "callbackobject":self, 
+			var nonimagedataobject = { "url":rootnode.urlhierarchy, 
+									   "callbackobject":self, 
 									   "callbacksignal":"updatepotreepriorities_fetchsignal", 
 									   "byteOffset":hnode.hierarchybyteOffset, 
 									   "byteSize":hnode.hierarchybyteSize }
@@ -320,6 +321,11 @@ func updatepotreeprioritiesLoop():
 		if tremaining > 5:
 			yield(get_tree().create_timer(tremaining*0.001), "timeout")
 
+	if rootnode != null:
+		rootnode.processingnode = null
+		remove_child(rootnode)
+		rootnode.queue_free()
+		rootnode = null
 
 func Dcorrectvisibilitymask():
 	print("Dcorrectvisibilitymask runn")

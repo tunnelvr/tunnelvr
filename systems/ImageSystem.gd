@@ -10,7 +10,7 @@ var completedrequests = [ ]
 
 var sparehttpclients = [ ]
 const Nmaxsparehttpclients = 4
-const Nmaxoperatingrequests = 2
+const Nmaxoperatingrequests = 4
 
 var imageloadingthreadmutex = Mutex.new()
 var imageloadingthreadsemaphore = Semaphore.new()
@@ -35,27 +35,68 @@ func imageloadingthread_function(userdata):
 	while true:
 		imageloadingthreadsemaphore.wait()
 		imageloadingthreadmutex.lock()
-		var imagerequest = imageloadingrequests.pop_front()
+		var imagerequestR = imageloadingrequests.pop_front()
 		imageloadingthreadmutex.unlock()
-		if imagerequest == null:
+		if imagerequestR == null:
 			break
-		var limageloadingthreaddrawingfile = imagerequest["fetcheddrawingfile"]
 		var t0 = OS.get_ticks_msec()
-		var limageloadingthreadloadedimagetexture = ImageTexture.new()
-		if not limageloadingthreaddrawingfile.begins_with("res://"):
-			var limageloadingthreadloadedimage = Image.new()
-			limageloadingthreadloadedimage.load(limageloadingthreaddrawingfile)
-			var dt = OS.get_ticks_msec() - t0
-			if dt > 100:
-				print("thread loading ", limageloadingthreaddrawingfile, " took ", dt, " msecs")
-			limageloadingthreadloadedimagetexture = ImageTexture.new()
-			limageloadingthreadloadedimagetexture.create_from_image(limageloadingthreadloadedimage, imagethreadloadedflags)
-		else:
-			limageloadingthreadloadedimagetexture = ResourceLoader.load(limageloadingthreaddrawingfile)
-		imagerequest["imageloadingthreadloadedimagetexture"] = limageloadingthreadloadedimagetexture
+		var Dmsgfile = ""
+		if "paperdrawing" in imagerequestR:
+			var imagerequest = imagerequestR
+			var limageloadingthreaddrawingfile = imagerequest["fetcheddrawingfile"]
+			var limageloadingthreadloadedimagetexture = ImageTexture.new()
+			if not limageloadingthreaddrawingfile.begins_with("res://"):
+				var limageloadingthreadloadedimage = Image.new()
+				limageloadingthreadloadedimage.load(limageloadingthreaddrawingfile)
+				limageloadingthreadloadedimagetexture = ImageTexture.new()
+				limageloadingthreadloadedimagetexture.create_from_image(limageloadingthreadloadedimage, imagethreadloadedflags)
+			else:
+				limageloadingthreadloadedimagetexture = ResourceLoader.load(limageloadingthreaddrawingfile)
+			imagerequest["imageloadingthreadloadedimagetexture"] = limageloadingthreadloadedimagetexture
+			Dmsgfile = limageloadingthreaddrawingfile
+			
+		elif "onodesurfacetool" in imagerequestR:
+			var onoderequest = imagerequestR
+			var st = onoderequest["onodesurfacetool"]
+			var rootnode = onoderequest["rootnode"]
+			var ocellcentre = onoderequest["ocellcentre"]
+			var Dboxminmax = onoderequest["Dboxminmax"]
+
+			st.begin(Mesh.PRIMITIVE_POINTS)
+			var Dnpointsnotinbox = 0
+			var mdscale = rootnode.mdscale
+			var mdoffset = rootnode.mdoffset
+			var numPoints = onoderequest["numPoints"]
+			var foctreeF = File.new()
+			foctreeF.open(onoderequest["fetchednonimagedataobjectfile"], File.READ)
+			if onoderequest["url"].substr(0, 4) != "http" or foctreeF.get_len() == onoderequest["byteSize"]:
+				for i in range(numPoints):
+					var v0 = foctreeF.get_32();  var v1 = foctreeF.get_32();  var v2 = foctreeF.get_32()
+					if rootnode.attributes_rgb_prebytes != -1:
+						if rootnode.attributes_rgb_prebytes != 0:
+							foctreeF.get_buffer(rootnode.attributes_rgb_prebytes)
+						var r = foctreeF.get_16();  var g = foctreeF.get_16();  var b = foctreeF.get_16()
+						var col = Color(r/65535.0, g/65535.0, b/65535.0)
+						st.add_color(col)
+					if rootnode.attributes_postbytes != 0:
+						foctreeF.get_buffer(rootnode.attributes_postbytes)
+					var p = Vector3(v0*mdscale.x + mdoffset.x, v1*mdscale.y + mdoffset.y, v2*mdscale.z + mdoffset.z)
+					st.add_vertex(p - ocellcentre)
+					if not Dboxminmax.has_point(p):
+						Dnpointsnotinbox += 1
+				Dmsgfile = "onode"
+			else:
+				onoderequest["onodesurfacetool"] = null
+				onoderequest["foctreeFgetlen"] = foctreeF.get_len()
+			onoderequest["Dnpointsnotinbox"] = Dnpointsnotinbox
+			
+		var dt = OS.get_ticks_msec() - t0
+		if dt > 100:
+			print("thread loading ", Dmsgfile, " took ", dt, " msecs")
 		imageloadingthreadmutex.lock()
-		print(" ****yooooo ", limageloadingthreaddrawingfile)
-		imageloadedrequests.push_back(imagerequest)
+
+		print(" ****yooooo ", Dmsgfile)
+		imageloadedrequests.push_back(imagerequestR)
 		imageloadingthreadmutex.unlock()
 
 func _exit_tree():
@@ -235,9 +276,14 @@ func _process(delta):
 
 	if Nimageloadingrequests != 0:
 		imageloadingthreadmutex.lock()
-		var imageloadedrequest = imageloadedrequests.pop_front() if len(imageloadedrequests) != 0 else null
+		var imageloadedrequestR = imageloadedrequests.pop_front() if len(imageloadedrequests) != 0 else null
 		imageloadingthreadmutex.unlock()
-		if imageloadedrequest != null:
+		if imageloadedrequestR != null and "onodesurfacetool" in imageloadedrequestR:
+			var fetchednonimagedataobject = imageloadedrequestR
+			fetchednonimagedataobject["callbackobject"].emit_signal(fetchednonimagedataobject["callbacksignal"])
+
+		elif imageloadedrequestR != null:
+			var imageloadedrequest = imageloadedrequestR
 			var papertexture = imageloadedrequest["imageloadingthreadloadedimagetexture"]
 			Nimageloadingrequests -= 1
 			if papertexture.get_width() != 0:
@@ -257,10 +303,8 @@ func _process(delta):
 					Directory.new().remove(imageloadedrequest["fetcheddrawingfile"])
 		Dpt = "paptex"
 
-
-
 	var completedrequest = completedrequests.pop_front() if len(completedrequests) != null else null
-	if completedrequest != null and "paperdrawing" in completedrequest:
+	if completedrequest != null and (("paperdrawing" in completedrequest) or ("onodesurfacetool" in completedrequest)):
 		imageloadingthreadmutex.lock()
 		imageloadingrequests.push_back(completedrequest)
 		completedrequest = null
@@ -269,44 +313,12 @@ func _process(delta):
 		imageloadingthreadsemaphore.post()
 		Dpt = "semaphore thread"
 
-
 	elif completedrequest != null:
 		var fetchednonimagedataobject = completedrequest
 		#print("FFFN ", fetchednonimagedataobject)
 		if fetchednonimagedataobject.get("parsedumpcentreline") == "yes":
+			# should be a callbackobject here VVV
 			get_node("/root/Spatial/ExecutingFeatures").parse3ddmpcentreline_execute(fetchednonimagedataobject["fetchednonimagedataobjectfile"], fetchednonimagedataobject["url"])
-			
-		elif "tree" in fetchednonimagedataobject:
-			var htmltextfile = File.new()
-			htmltextfile.open(fetchednonimagedataobject["fetchednonimagedataobjectfile"], File.READ)
-			var htmltext = htmltextfile.get_as_text()
-			htmltextfile.close()
-			var llinks = [ ]
-			if fetchednonimagedataobject.has("filetreeresource"):
-				if fetchednonimagedataobject["filetreeresource"].get("type") == "caddyfiles":
-					var jres = parse_json(htmltext)
-					if jres != null:
-						for jr in jres:
-							llinks.push_back(jr["name"] + ("/" if jr.get("is_dir") else ""))
-				elif fetchednonimagedataobject["filetreeresource"].get("type") == "githubapi":
-					var jres = parse_json(htmltext)
-					if jres != null:
-						for jr in jres:
-							llinks.push_back(jr["name"] + ("/" if jr.get("type") == "dir" else ""))
-				elif fetchednonimagedataobject["filetreeresource"].get("type") == "svnfiles":
-					for m in listregex.search_all(htmltext):
-						var lk = m.get_string(1)
-						if not lk.begins_with("."):
-							lk = lk.replace("&amp;", "&")
-							llinks.push_back(lk)
-
-			else:
-				for m in listregex.search_all(htmltext):   # svnfiles type bydefault
-					var lk = m.get_string(1)
-					if not lk.begins_with("."):
-						lk = lk.replace("&amp;", "&")
-						llinks.push_back(lk)
-			get_node("/root/Spatial/PlanViewSystem").openlinklistpage(fetchednonimagedataobject["item"], llinks)
 
 		elif "callbackobject" in fetchednonimagedataobject:
 			var f = File.new()
@@ -325,14 +337,6 @@ func _process(delta):
 	if dt > 50:
 		print("Long image system process ", dt, " ", Dpt)
 
-
-func fetchunrolltree(fileviewtree, item, url, filetreeresource):
-	var nonimagedataobject = { "url":url, "tree":fileviewtree, "item":item, "donotusecache":true }
-	if filetreeresource != null:
-		nonimagedataobject["filetreeresource"] = filetreeresource
-		if filetreeresource.get("type") == "caddyfiles":
-			nonimagedataobject["headers"] = [ "accept: application/json" ]
-	fetchnonimagedataobject(nonimagedataobject)
 
 func fetchrequesturl(nonimagedataobject):
 	var url = nonimagedataobject["url"]
@@ -372,7 +376,6 @@ func fetchpaperdrawing(paperdrawing):
 	completedrequests.push_back({ "paperdrawing":paperdrawing, 
 								  "fetcheddrawingfile":fetcheddrawingfile })
 	set_process(true)
-	
 	
 func shuffleimagetotopoflist(paperdrawing):
 	var fi = -1
