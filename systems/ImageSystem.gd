@@ -4,21 +4,15 @@ var imgdir = "user://northernimages/"
 var nonimagedir = "user://nonimagewebpages/"
 var listregex = RegEx.new()
 
-var paperdrawinglist = [ ]
+#var paperdrawinglist = [ ]
 var nonimagepageslist = [ ]
 
+var queuedrequests =  [ ]
 var operatingrequests =  [ ]
 var completedrequests = [ ]
 
 var sparehttpclients = [ ]
 const Nmaxsparehttpclients = 4
-
-var imagefetchingcountdowntimer = 0.0
-var imagefetchingcountdowntime = 0.05
-
-var Dfetcheddrawing = null
-var Dfetchednonimagedataobject = null
-var Dfetcheddrawingfile = null
 
 var imageloadingthreadmutex = Mutex.new()
 var imageloadingthreadsemaphore = Semaphore.new()
@@ -27,8 +21,6 @@ var Nimageloadingrequests = 0
 
 var imageloadingrequests = [ ]
 var imageloadedrequests = [ ]
-#var imageloadingthreaddrawingfile = null
-#var imageloadingthreadloadedimagetexture = null
 
 var imagethreadloadedflags = Texture.FLAG_MIPMAPS|Texture.FLAG_REPEAT # |Texture.FILTER
 
@@ -84,7 +76,7 @@ func clearallimageloadingactivity():
 	operatingrequests.clear()
 	completedrequests.clear()
 	nonimagepageslist.clear()
-	paperdrawinglist.clear()
+	queuedrequests.clear()
 	imageloadingrequests.clear()
 	imageloadedrequests.clear()
 
@@ -229,31 +221,19 @@ func getshortimagename(xcresource, withextension, md5nameleng, nonimagepage={}):
 	return fname+ext if withextension else fname
 
 
-var nFrame = 0
+const Nmaxoperatingrequests = 2
 func _process(delta):
 	if len(operatingrequests) != 0:
-		var operatingrequest = operatingrequests[0]
-		var hrp = http_request_poll(operatingrequest)
-		if hrp != 0:
-			operatingrequests.remove(0)
-#			if hrp == 1:
-#				if "paperdrawing" in operatingrequest:
-#					fetcheddrawing = operatingrequest["paperdrawing"]
-#				else:
-#					fetchednonimagedataobject = operatingrequest
-#			else:
-#				if "paperdrawing" in operatingrequest:
-#					operatingrequest["fetcheddrawingfile"] = "res://guimaterials/imagefilefailure.png"
-#				else:
-#					fetchednonimagedataobject = operatingrequest
-			completedrequests.push_back(operatingrequest)
+		for i in range(len(operatingrequests)-1, -1, -1):
+			var operatingrequest = operatingrequests[i]
+			if http_request_poll(operatingrequest) != 0:
+				operatingrequests.remove(i)
+				completedrequests.push_back(operatingrequest)
+	while len(queuedrequests) != 0 and len(operatingrequests) < Nmaxoperatingrequests:
+		var operatingrequest = queuedrequests.pop_back()
+		assignhttpclient(operatingrequest)
+		operatingrequests.push_back(operatingrequest)
 			
-	nFrame += 1
-	if imagefetchingcountdowntimer > 0.0:
-		imagefetchingcountdowntimer -= delta
-		return
-	imagefetchingcountdowntimer = imagefetchingcountdowntime
-	
 	var t0 = OS.get_ticks_msec()
 	var Dpt = ""
 	if len(completedrequests) == 0 and len(operatingrequests) == 0 and len(nonimagepageslist) > 0:
@@ -278,38 +258,6 @@ func _process(delta):
 			completedrequests.push_back(nonimagepage)
 		Dpt = var2str({"url":nonimagepage["url"], "byteOffset":nonimagepage.get("byteOffset")})
 		
-	if len(completedrequests) == 0 and len(operatingrequests) == 0 and len(paperdrawinglist) > 0:
-		var paperdrawing = paperdrawinglist.pop_back()
-		if paperdrawing.xcresource.begins_with("res://"):
-			var operatingrequest = { "paperdrawing":paperdrawing, 
-									 "fetcheddrawingfile":paperdrawing.xcresource,
-									 "fetchreporttype":"res" }
-			completedrequests.push_back(operatingrequest)
-			
-		elif paperdrawing.xcresource.begins_with("http"):
-			var fetcheddrawingfile = imgdir+getshortimagename(paperdrawing.xcresource, true, 12)
-			if not File.new().file_exists(fetcheddrawingfile):
-				if not Directory.new().dir_exists(imgdir):
-					var err = Directory.new().make_dir(imgdir)
-					print("Making directory ", imgdir, " err code: ", err)
-				var operatingrequest = { "paperdrawing":paperdrawing, 
-										 "objectname":paperdrawing.get_name(), 
-										 "fetcheddrawingfile":fetcheddrawingfile, 
-										 "url":paperdrawing.xcresource }
-				assignhttpclient(operatingrequest)
-				operatingrequests.push_back(operatingrequest)
-				Dpt = var2str(operatingrequest)
-			else:
-				print("using cached image ", fetcheddrawingfile)
-				var operatingrequest = { "paperdrawing":paperdrawing, 
-										 "fetcheddrawingfile":fetcheddrawingfile, 
-										 "url":"cache" }
-				completedrequests.push_back(operatingrequest)
-		else:
-			var operatingrequest = { "paperdrawing":paperdrawing, 
-									 "fetcheddrawingfile":"res://guimaterials/imagefilefailure.png", 
-									 "fetchreporttype":"fail" }
-		imagesystemreportslabel.text = "%d-%s" % [len(paperdrawinglist), "fff"]
 
 	if Nimageloadingrequests != 0:
 		imageloadingthreadmutex.lock()
@@ -432,17 +380,39 @@ func fetchrequesturl(nonimagedataobject):
 		
 func fetchpaperdrawing(paperdrawing):
 	print(" ****yaaaaaa ", paperdrawing.xcresource)
-	paperdrawinglist.push_back(paperdrawing)
+	var fetcheddrawingfile = "res://guimaterials/imagefilefailure.png"
+	if paperdrawing.xcresource.begins_with("http"):
+		fetcheddrawingfile = imgdir+getshortimagename(paperdrawing.xcresource, true, 12)
+		if not File.new().file_exists(fetcheddrawingfile):
+			if not Directory.new().dir_exists(imgdir):
+				var err = Directory.new().make_dir(imgdir)
+				print("Making directory ", imgdir, " err code: ", err)
+			var queuedrequest = { "paperdrawing":paperdrawing, 
+								  "objectname":paperdrawing.get_name(), 
+								  "fetcheddrawingfile":fetcheddrawingfile, 
+								  "url":paperdrawing.xcresource }
+			queuedrequests.push_back(queuedrequest)
+			return
+		else:
+			print("using cached image ", fetcheddrawingfile)
+	elif paperdrawing.xcresource.begins_with("res://"):
+		fetcheddrawingfile = paperdrawing.xcresource
+	completedrequests.push_back({ "paperdrawing":paperdrawing, 
+								  "fetcheddrawingfile":fetcheddrawingfile })
 	set_process(true)
+	
 	
 func shuffleimagetotopoflist(paperdrawing):
 	var fi = -1
-	for i in range(len(paperdrawinglist)):
-		if paperdrawinglist[i] == paperdrawing:
-			fi = i
+	for i in range(len(queuedrequests)):
+		var queuedrequest = queuedrequests[i]
+		if "paperdrawing" in queuedrequest:
+			if queuedrequest[i]["paperdrawing"] == paperdrawing:
+				fi = i
 	if fi != -1:
-		print("shuffling from ", fi, " in list ", len(paperdrawinglist))
-		paperdrawinglist[fi] = paperdrawinglist[-1]
-		paperdrawinglist[-1] = paperdrawing
+		print("shuffling from ", fi, " in list ", len(queuedrequests))
+		var queuedrequest = queuedrequests[-1]
+		queuedrequests[fi] = queuedrequests[-1]
+		queuedrequests[-1] = queuedrequest
 	else:
-		print("image not in paperdrawinglist queue")
+		print("image not in queuedrequests list")
