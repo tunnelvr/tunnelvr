@@ -258,11 +258,37 @@ func updatepotreeprioritiesLoop():
 											   "byteOffset":nnode.byteOffset, 
 											   "byteSize":nnode.byteSize,
 											   "onodesurfacetool":SurfaceTool.new(), 
-											   "numPoints":nnode.numPoints, 
+											   "nnode":nnode, 
+											   #"numPoints":nnode.numPoints, 
 											   "rootnode":rootnode, 
 											   "ocellcentre":roottransforminverse*nnode.global_transform.origin }
 					var boxpointepsilon = 0.6
 					nonimagedataobject["Dboxminmax"] = AABB(nonimagedataobject["ocellcentre"] - nnode.ocellsize/2, nnode.ocellsize).grow(boxpointepsilon)
+
+					nnode.pointmaterial = load("res://potreework/pointcloudslice.material").duplicate()
+					var lpointmaterial = nnode.pointmaterial
+					lpointmaterial.set_shader_param("point_scale", pointsizefactor*nnode.spacing)
+					lpointmaterial.set_shader_param("ocellcentre", nonimagedataobject["ocellcentre"])
+					lpointmaterial.set_shader_param("ocellmask", nnode.ocellmask)
+					lpointmaterial.set_shader_param("roottransforminverse", roottransforminverse)
+							
+					lpointmaterial.set_shader_param("highlightdist", rootnode.highlightdist)
+					lpointmaterial.set_shader_param("highlightcol", rootnode.highlightcol)
+					lpointmaterial.set_shader_param("highlightcol2", rootnode.highlightcol2)
+
+					var colormixweight = 0.0
+					if rootnode.attributes_rgb_prebytes != -1:
+						colormixweight = 1.0 if Tglobal.housahedronmode else 0.9
+					lpointmaterial.set_shader_param("colormixweight", colormixweight)
+
+					if Tglobal.housahedronmode:
+						lpointmaterial.set_shader_param("highlightdist", 0.15)
+						lpointmaterial.set_shader_param("highlightcol", Vector3(0.8,0.0,0.8))
+						lpointmaterial.set_shader_param("highlightcol2", Vector3(0.8,0.0,0.8))
+
+					lpointmaterial.set_shader_param("highlightplaneperp", rootnode.highlightplaneperp)
+					lpointmaterial.set_shader_param("highlightplanedot", rootnode.highlightplanedot)
+					lpointmaterial.set_shader_param("slicedisappearthickness", rootnode.slicedisappearthickness)
 
 					$LoadingCube.mesh.size = nnode.ocellsize
 					$LoadingCube.global_transform.origin = nnode.global_transform.origin
@@ -270,21 +296,9 @@ func updatepotreeprioritiesLoop():
 					$LoadingCube.visible = true
 					nnode.Dloadedstate = "fetching"
 					ImageSystem.fetchrequesturl(nonimagedataobject)
-					yield(self, "updatepotreepriorities_fetchsignal")
-					if nonimagedataobject["onodesurfacetool"] != null:
-						var tp0 = OS.get_ticks_msec()
-						matloadingcube.albedo_color = coloctcellpointsloading
-						nnode.Dloadedstate = "pointsloading"
-						yield(nnode.YloadoctcellpointsCC(pointsizefactor, nonimagedataobject, roottransforminverse, rootnode), "completed")
-						var dt = OS.get_ticks_msec() - tp0
-						if dt > 100:
-							print("    Warning: long loadoctcellpoints ", nnode.get_path(), " of ", dt, " msecs", " numPoints:", nnode.numPoints, " carrieddown:", nnode.numPointsCarriedDown)
-						nnode.Dloadedstate = "pointsloaded"
-					else:
-						nnode.Dloadedstate = "failedfetching"
-						print("foctree nodesize bytes fail ", nonimagedataobject["foctreeFgetlen"], " ", nnode.byteSize)
 					$LoadingCube.visible = false
-				if not nnode.visible and nnode.pointmaterial != null:
+					
+				if not nnode.visible and nnode.mesh != null and nnode.pointmaterial != null:
 					nnode.pointmaterial.set_shader_param("highlightplaneperp", rootnode.highlightplaneperp)
 					nnode.pointmaterial.set_shader_param("highlightplanedot", rootnode.highlightplanedot)
 					nnode.pointmaterial.set_shader_param("slicedisappearthickness", rootnode.slicedisappearthickness)

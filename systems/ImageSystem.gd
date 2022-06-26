@@ -57,38 +57,8 @@ func imageloadingthread_function(userdata):
 			
 		elif "onodesurfacetool" in imagerequestR:
 			var onoderequest = imagerequestR
-			var st = onoderequest["onodesurfacetool"]
 			var rootnode = onoderequest["rootnode"]
-			var ocellcentre = onoderequest["ocellcentre"]
-			var Dboxminmax = onoderequest["Dboxminmax"]
-
-			st.begin(Mesh.PRIMITIVE_POINTS)
-			var Dnpointsnotinbox = 0
-			var mdscale = rootnode.mdscale
-			var mdoffset = rootnode.mdoffset
-			var numPoints = onoderequest["numPoints"]
-			var foctreeF = File.new()
-			foctreeF.open(onoderequest["fetchednonimagedataobjectfile"], File.READ)
-			if onoderequest["url"].substr(0, 4) != "http" or foctreeF.get_len() == onoderequest["byteSize"]:
-				for i in range(numPoints):
-					var v0 = foctreeF.get_32();  var v1 = foctreeF.get_32();  var v2 = foctreeF.get_32()
-					if rootnode.attributes_rgb_prebytes != -1:
-						if rootnode.attributes_rgb_prebytes != 0:
-							foctreeF.get_buffer(rootnode.attributes_rgb_prebytes)
-						var r = foctreeF.get_16();  var g = foctreeF.get_16();  var b = foctreeF.get_16()
-						var col = Color(r/65535.0, g/65535.0, b/65535.0)
-						st.add_color(col)
-					if rootnode.attributes_postbytes != 0:
-						foctreeF.get_buffer(rootnode.attributes_postbytes)
-					var p = Vector3(v0*mdscale.x + mdoffset.x, v1*mdscale.y + mdoffset.y, v2*mdscale.z + mdoffset.z)
-					st.add_vertex(p - ocellcentre)
-					if not Dboxminmax.has_point(p):
-						Dnpointsnotinbox += 1
-				Dmsgfile = "onode"
-			else:
-				onoderequest["onodesurfacetool"] = null
-				onoderequest["foctreeFgetlen"] = foctreeF.get_len()
-			onoderequest["Dnpointsnotinbox"] = Dnpointsnotinbox
+			rootnode.loadocellpointsmesh(onoderequest)
 			
 		var dt = OS.get_ticks_msec() - t0
 		if dt > 100:
@@ -303,7 +273,15 @@ func _process(delta):
 					Directory.new().remove(imageloadedrequest["fetcheddrawingfile"])
 		Dpt = "paptex"
 
-	var completedrequest = completedrequests.pop_front() if len(completedrequests) != null else null
+	var completedrequest = null
+	if len(completedrequests) != 0 and (("paperdrawing" in completedrequests[0]) or not ("onodesurfacetool" in completedrequests[0])):
+		completedrequest = completedrequests.pop_front()
+	if completedrequest == null:
+		for i in range(len(completedrequests)):
+			if ("onodesurfacetool" in completedrequests[i]) and not (completedrequests[i]["nnode"].treedepth >= 1 and completedrequests[i]["nnode"].get_parent().mesh == null):
+				completedrequest = completedrequests.pop_at(i)
+				break
+		
 	if completedrequest != null and (("paperdrawing" in completedrequest) or ("onodesurfacetool" in completedrequest)):
 		imageloadingthreadmutex.lock()
 		imageloadingrequests.push_back(completedrequest)
@@ -319,6 +297,9 @@ func _process(delta):
 		if fetchednonimagedataobject.get("parsedumpcentreline") == "yes":
 			# should be a callbackobject here VVV
 			get_node("/root/Spatial/ExecutingFeatures").parse3ddmpcentreline_execute(fetchednonimagedataobject["fetchednonimagedataobjectfile"], fetchednonimagedataobject["url"])
+
+		elif "onodesurfacetool" in completedrequest:
+			completedrequest["rootnode"].completedocellpointsmesh(completedrequest)
 
 		elif "callbackobject" in fetchednonimagedataobject:
 			var f = File.new()
@@ -382,7 +363,7 @@ func shuffleimagetotopoflist(paperdrawing):
 	for i in range(len(queuedrequests)):
 		var queuedrequest = queuedrequests[i]
 		if "paperdrawing" in queuedrequest:
-			if queuedrequest[i]["paperdrawing"] == paperdrawing:
+			if queuedrequests[i]["paperdrawing"] == paperdrawing:
 				fi = i
 	if fi != -1:
 		print("shuffling from ", fi, " in list ", len(queuedrequests))
