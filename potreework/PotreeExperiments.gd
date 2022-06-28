@@ -136,7 +136,9 @@ func LoadPotree():
 		potreeurlmetadata = potreeurlmetadata.replace("localhost", selfSpatial.hostipnumber)
 		print("now setting ", potreeurlmetadata)
 		
-	var nonimagedataobject = { "url":potreeurlmetadata, "callbackobject":self, "callbacksignal":"updatepotreepriorities_fetchsignal" }
+	var nonimagedataobject = { "url":potreeurlmetadata, 
+							   "callbackobject":self, 
+							   "callbacksignal":"updatepotreepriorities_fetchsignal" }
 	ImageSystem.fetchrequesturl(nonimagedataobject)
 	var fmetadataF = yield(self, "updatepotreepriorities_fetchsignal")
 	if fmetadataF == null:
@@ -253,14 +255,12 @@ func updatepotreeprioritiesLoop():
 				if nnode.pointmaterial == null:
 					var roottransforminverse = rootnode.get_parent().global_transform.inverse()
 					var nonimagedataobject = { "url":rootnode.urloctree, 
-											   "callbackobject":self, 
-											   "callbacksignal":"updatepotreepriorities_fetchsignal", 
 											   "byteOffset":nnode.byteOffset, 
 											   "byteSize":nnode.byteSize,
-											   "onodesurfacetool":SurfaceTool.new(), 
 											   "nnode":nnode, 
-											   #"numPoints":nnode.numPoints, 
 											   "rootnode":rootnode, 
+											   "callbackobject":rootnode, 
+											   "callbackfunction":"completedocellpointsmesh", 
 											   "ocellcentre":roottransforminverse*nnode.global_transform.origin }
 					var boxpointepsilon = 0.6
 					nonimagedataobject["Dboxminmax"] = AABB(nonimagedataobject["ocellcentre"] - nnode.ocellsize/2, nnode.ocellsize).grow(boxpointepsilon)

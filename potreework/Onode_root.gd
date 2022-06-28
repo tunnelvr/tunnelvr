@@ -233,8 +233,7 @@ func completedocellpointsmesh(onoderequest):
 	else:
 		nnode.pointmaterial = null
 
-func loadocellpointsmesh(onoderequest):
-	var st = onoderequest["onodesurfacetool"]
+func loadocellpointsmesh_InWorkerThread(onoderequest):
 	var rootnode = onoderequest["rootnode"]
 	var ocellcentre = onoderequest["ocellcentre"]
 	var Dboxminmax = onoderequest["Dboxminmax"]
@@ -242,6 +241,7 @@ func loadocellpointsmesh(onoderequest):
 	var parentmesh = nnode.get_parent().mesh  if nnode.treedepth >= 1  else null
 	print("loadocellpointsmesh treedepth ", nnode.treedepth, " ", nnode.name, "parentmesh ", parentmesh)
 
+	var st = SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_POINTS)
 	st.set_material(nnode.pointmaterial)
 	var Dnpointsnotinbox = 0
@@ -302,7 +302,6 @@ func loadocellpointsmesh(onoderequest):
 
 	else:
 		nnode.Dloadedstate = "failedfetching"
-		onoderequest["onodesurfacetool"] = null
 		print("foctree nodesize bytes fail ", foctreeF.get_len(), " bytes not ", nnode.byteSize)
 		onoderequest["pointmesh"] = null
 

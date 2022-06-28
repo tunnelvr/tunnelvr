@@ -56,11 +56,9 @@ func imageloadingthread_function(userdata):
 			imagerequest["imageloadingthreadloadedimagetexture"] = limageloadingthreadloadedimagetexture
 			Dmsgfile = limageloadingthreaddrawingfile
 			
-		elif "onodesurfacetool" in imagerequestR:
-			var onoderequest = imagerequestR
-			var rootnode = onoderequest["rootnode"]
-			rootnode.loadocellpointsmesh(onoderequest)
-			print("dddddd ", imagerequestR.get("pointmesh"))
+		elif "nnode" in imagerequestR:
+			imagerequestR["rootnode"].loadocellpointsmesh_InWorkerThread(imagerequestR)
+			
 		else:
 			print("   &&& whattttnott")
 			
@@ -250,40 +248,40 @@ func _process(delta):
 
 	if Nimageloadingrequests != 0:
 		imageloadingthreadmutex.lock()
-		var imageloadedrequestR = imageloadedrequests.pop_front() if len(imageloadedrequests) != 0 else null
+		var fetchednonimagedataobject = imageloadedrequests.pop_front() if len(imageloadedrequests) != 0 else null
 		imageloadingthreadmutex.unlock()
-		if imageloadedrequestR != null and "onodesurfacetool" in imageloadedrequestR:
-			var fetchednonimagedataobject = imageloadedrequestR
-			fetchednonimagedataobject["rootnode"].completedocellpointsmesh(fetchednonimagedataobject)
-			#fetchednonimagedataobject["callbackobject"].call_deferred(fetchednonimagedataobject["callbackfunction"], f, fetchednonimagedataobject)
-
-		elif imageloadedrequestR != null:
-			var imageloadedrequest = imageloadedrequestR
-			var papertexture = imageloadedrequest["imageloadingthreadloadedimagetexture"]
-			Nimageloadingrequests -= 1
-			if papertexture.get_width() != 0:
-				var fetcheddrawing = imageloadedrequest["paperdrawing"]
-				var fetcheddrawingmaterial = fetcheddrawing.get_node("XCdrawingplane/CollisionShape/MeshInstance").get_surface_material(0)
-				fetcheddrawingmaterial.set_shader_param("texture_albedo", papertexture)
-				var previmgheightwidthratio = fetcheddrawing.imgheightwidthratio
-				fetcheddrawing.imgheightwidthratio = papertexture.get_height()*1.0/papertexture.get_width()
-				if previmgheightwidthratio == 0:
-					correctdefaultimgtrimtofull(fetcheddrawing)				
-				if fetcheddrawing.imgwidth != 0:
-					fetcheddrawing.applytrimmedpaperuvscale()
-					
-			else:
-				print(imageloadedrequest["fetcheddrawingfile"], "   has zero width, deleting if user://")
-				if imageloadedrequest["fetcheddrawingfile"].begins_with("user://"):
-					Directory.new().remove(imageloadedrequest["fetcheddrawingfile"])
-		Dpt = "paptex"
+		if fetchednonimagedataobject != null:
+			if "paperdrawing" in fetchednonimagedataobject:
+				var imageloadedrequest = fetchednonimagedataobject
+				var papertexture = imageloadedrequest["imageloadingthreadloadedimagetexture"]
+				Nimageloadingrequests -= 1
+				if papertexture.get_width() != 0:
+					var fetcheddrawing = imageloadedrequest["paperdrawing"]
+					var fetcheddrawingmaterial = fetcheddrawing.get_node("XCdrawingplane/CollisionShape/MeshInstance").get_surface_material(0)
+					fetcheddrawingmaterial.set_shader_param("texture_albedo", papertexture)
+					var previmgheightwidthratio = fetcheddrawing.imgheightwidthratio
+					fetcheddrawing.imgheightwidthratio = papertexture.get_height()*1.0/papertexture.get_width()
+					if previmgheightwidthratio == 0:
+						correctdefaultimgtrimtofull(fetcheddrawing)				
+					if fetcheddrawing.imgwidth != 0:
+						fetcheddrawing.applytrimmedpaperuvscale()
+						
+				else:
+					print(imageloadedrequest["fetcheddrawingfile"], "   has zero width, deleting if user://")
+					if imageloadedrequest["fetcheddrawingfile"].begins_with("user://"):
+						Directory.new().remove(imageloadedrequest["fetcheddrawingfile"])
+				Dpt = "paptex"
+				
+			elif "nnode" in fetchednonimagedataobject:
+				fetchednonimagedataobject["callbackobject"].call_deferred(fetchednonimagedataobject["callbackfunction"], fetchednonimagedataobject)
+				Dpt = "nnodeload"
 
 	var completedrequest = null
-	if len(completedrequests) != 0 and (("paperdrawing" in completedrequests[0]) or not ("onodesurfacetool" in completedrequests[0])):
+	if len(completedrequests) != 0 and not ("nnode" in completedrequests[0]):
 		completedrequest = completedrequests.pop_front()
 	if completedrequest == null:
 		for i in range(len(completedrequests)):
-			if "onodesurfacetool" in completedrequests[i]:
+			if "nnode" in completedrequests[i]:
 				var lnnode = completedrequests[i]["nnode"]
 				if lnnode.treedepth >= 1:
 					var lnnodeparent = lnnode.get_parent()
@@ -292,7 +290,7 @@ func _process(delta):
 				completedrequest = completedrequests.pop_at(i)
 				break
 		
-	if completedrequest != null and (("paperdrawing" in completedrequest) or ("onodesurfacetool" in completedrequest)):
+	if completedrequest != null and (("paperdrawing" in completedrequest) or ("nnode" in completedrequest)):
 		imageloadingthreadmutex.lock()
 		imageloadingrequests.push_back(completedrequest)
 		completedrequest = null
