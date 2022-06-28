@@ -19,7 +19,7 @@ extends Spatial
 #increases size by 50% to have colour:
 # wine64 ~/executables-impure/PotreeConverter_2.1_x64_windows/PotreeConverter.exe --source point_cloud_may17cc.laz --outdir potreeconverted --attributes position_cartesian --attributes rgb --method poisson
 # nix-shell -p caddy
-# caddy file-server -browse -root /home/julian/data/3dmodels/aidanhouse/potreeconverted -listen 0.0.0.0:8000
+# caddy file-server -browse -root /home/julian/data/3dmodels/aidanhouse -listen 0.0.0.0:8000
 
 var potreethreadmutex = Mutex.new()
 var potreethreadsemaphore = Semaphore.new()
@@ -265,8 +265,7 @@ func updatepotreeprioritiesLoop():
 					var boxpointepsilon = 0.6
 					nonimagedataobject["Dboxminmax"] = AABB(nonimagedataobject["ocellcentre"] - nnode.ocellsize/2, nnode.ocellsize).grow(boxpointepsilon)
 
-					nnode.pointmaterial = load("res://potreework/pointcloudslice.material").duplicate()
-					var lpointmaterial = nnode.pointmaterial
+					var lpointmaterial = load("res://potreework/pointcloudslice.material").duplicate()
 					lpointmaterial.set_shader_param("point_scale", pointsizefactor*nnode.spacing)
 					lpointmaterial.set_shader_param("ocellcentre", nonimagedataobject["ocellcentre"])
 					lpointmaterial.set_shader_param("ocellmask", nnode.ocellmask)
@@ -289,6 +288,7 @@ func updatepotreeprioritiesLoop():
 					lpointmaterial.set_shader_param("highlightplaneperp", rootnode.highlightplaneperp)
 					lpointmaterial.set_shader_param("highlightplanedot", rootnode.highlightplanedot)
 					lpointmaterial.set_shader_param("slicedisappearthickness", rootnode.slicedisappearthickness)
+					nnode.pointmaterial = lpointmaterial
 
 					$LoadingCube.mesh.size = nnode.ocellsize
 					$LoadingCube.global_transform.origin = nnode.global_transform.origin
@@ -380,7 +380,6 @@ func laserplanfitting(Glaserorient, laserlength):
 		if scanningnode.name[0] == "h" or scanningnode.pointmaterial == null:
 			scanningnode = rootnode.successornode(scanningnode, true)
 		else:
-			assert (scanningnode.mesh != null)
 			var boxcentre = scanningnode.ocellorigin
 			var boxextents = scanningnode.ocellsize/2 + Vector3(rayradius, rayradius, rayradius)
 			var boxminmax = AABB(boxcentre - boxextents, boxextents*2)
@@ -394,16 +393,17 @@ func laserplanfitting(Glaserorient, laserlength):
 	for lscanningnode in segintersectingboxestoscan:
 		var relsegfrom = laserorient.origin - lscanningnode.ocellorigin
 		var relsegvector = -laserorient.basis.z
-		var surfacearrays = lscanningnode.mesh.surface_get_arrays(0)
-		var surfacepoints = surfacearrays[Mesh.ARRAY_VERTEX]
-		for p in surfacepoints:
-			var vp = p - relsegfrom
-			var lam = vp.dot(relsegvector)
-			if lam > 0.0 and (lam < lammin or lammin == -1):
-				var vpradial = vp - relsegvector*lam
-				var vpradiallen = vpradial.length()
-				if vpradiallen < rayradius:
-					lammin = lam
+		if lscanningnode.mesh != null:
+			var surfacearrays = lscanningnode.mesh.surface_get_arrays(0)
+			var surfacepoints = surfacearrays[Mesh.ARRAY_VERTEX]
+			for p in surfacepoints:
+				var vp = p - relsegfrom
+				var lam = vp.dot(relsegvector)
+				if lam > 0.0 and (lam < lammin or lammin == -1):
+					var vpradial = vp - relsegvector*lam
+					var vpradiallen = vpradial.length()
+					if vpradiallen < rayradius:
+						lammin = lam
 				
 	if lammin == -1:
 		return null

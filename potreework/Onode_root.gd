@@ -225,9 +225,11 @@ func constructpotreerootnode(lmetadata, lurlmetadata, bboffset):
 	constructcontainingmesh()
 
 func completedocellpointsmesh(onoderequest):
-	var nnode = onoderequest["onoderequest"]
+	var nnode = onoderequest["nnode"]
+	print(" ---- completedocellpointsmeshcompletedocellpointsmeshcompletedocellpointsmesh ", onoderequest.get("pointmesh"), nnode.name)
 	if onoderequest.get("pointmesh") != null:
-		mesh = onoderequest["pointmesh"]
+		nnode.mesh = onoderequest["pointmesh"]
+		nnode.Dloadedstate = "pointsmeshactuallyloaded"
 	else:
 		nnode.pointmaterial = null
 
@@ -237,15 +239,19 @@ func loadocellpointsmesh(onoderequest):
 	var ocellcentre = onoderequest["ocellcentre"]
 	var Dboxminmax = onoderequest["Dboxminmax"]
 	var nnode = onoderequest["nnode"]
-	var parentmesh = get_parent().mesh  if nnode.treedepth >= 1  else null
+	var parentmesh = nnode.get_parent().mesh  if nnode.treedepth >= 1  else null
+	print("loadocellpointsmesh treedepth ", nnode.treedepth, " ", nnode.name, "parentmesh ", parentmesh)
 
 	st.begin(Mesh.PRIMITIVE_POINTS)
+	st.set_material(nnode.pointmaterial)
 	var Dnpointsnotinbox = 0
 	var numPoints = nnode["numPoints"]
 	var foctreeF = File.new()
 	foctreeF.open(onoderequest["fetchednonimagedataobjectfile"], File.READ)
+	print("aaa ", 1)
 	if onoderequest["url"].substr(0, 4) != "http" or foctreeF.get_len() == onoderequest["byteSize"]:
 		nnode.Dloadedstate = "pointsloading"
+		print("aaa ", numPoints)
 		for i in range(numPoints):
 			var v0 = foctreeF.get_32();  var v1 = foctreeF.get_32();  var v2 = foctreeF.get_32()
 			if rootnode.attributes_rgb_prebytes != -1:
@@ -265,13 +271,15 @@ func loadocellpointsmesh(onoderequest):
 		var relativeocellcentre = nnode.transform.origin
 		if ocellcentre.distance_to((Dboxmin+Dboxmax)/2) > 0.9:
 			print("moved centre ", ocellcentre, ((Dboxmin+Dboxmax)/2))
-		var childIndex = int(name)
+		var childIndex = int(nnode.get_name())
 		nnode.Dloadedstate = "pointscarryingdown"
 		numPointsCarriedDown = 0
+
 		if parentmesh != null:
 			var parentsurfacearrays = parentmesh.surface_get_arrays(0)
 			var parentpoints = parentsurfacearrays[Mesh.ARRAY_VERTEX]
 			var parentcolors = parentsurfacearrays[Mesh.ARRAY_COLOR] if rootnode.attributes_rgb_prebytes != -1 else null
+			print("gotparentpoints ", len(parentpoints))
 			for i in range(len(parentpoints)):
 				var p = parentpoints[i]
 				var pocellindex = (4 if p.x > 0.0 else 0) + \
@@ -288,7 +296,8 @@ func loadocellpointsmesh(onoderequest):
 
 		var pointmesh = Mesh.new()
 		st.commit(pointmesh)
-		nnode.Dloadedstate = "pointsloaded"
+		nnode.Dloadedstate = "pointsmeshmade"
+		print("saving pointmesh ", pointmesh)
 		onoderequest["pointmesh"] = pointmesh
 
 	else:

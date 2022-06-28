@@ -41,6 +41,7 @@ func imageloadingthread_function(userdata):
 			break
 		var t0 = OS.get_ticks_msec()
 		var Dmsgfile = ""
+		print("imagerequestRimagerequestR ", imagerequestR)
 		if "paperdrawing" in imagerequestR:
 			var imagerequest = imagerequestR
 			var limageloadingthreaddrawingfile = imagerequest["fetcheddrawingfile"]
@@ -59,6 +60,9 @@ func imageloadingthread_function(userdata):
 			var onoderequest = imagerequestR
 			var rootnode = onoderequest["rootnode"]
 			rootnode.loadocellpointsmesh(onoderequest)
+			print("dddddd ", imagerequestR.get("pointmesh"))
+		else:
+			print("   &&& whattttnott")
 			
 		var dt = OS.get_ticks_msec() - t0
 		if dt > 100:
@@ -250,7 +254,8 @@ func _process(delta):
 		imageloadingthreadmutex.unlock()
 		if imageloadedrequestR != null and "onodesurfacetool" in imageloadedrequestR:
 			var fetchednonimagedataobject = imageloadedrequestR
-			fetchednonimagedataobject["callbackobject"].emit_signal(fetchednonimagedataobject["callbacksignal"])
+			fetchednonimagedataobject["rootnode"].completedocellpointsmesh(fetchednonimagedataobject)
+			#fetchednonimagedataobject["callbackobject"].call_deferred(fetchednonimagedataobject["callbackfunction"], f, fetchednonimagedataobject)
 
 		elif imageloadedrequestR != null:
 			var imageloadedrequest = imageloadedrequestR
@@ -278,7 +283,12 @@ func _process(delta):
 		completedrequest = completedrequests.pop_front()
 	if completedrequest == null:
 		for i in range(len(completedrequests)):
-			if ("onodesurfacetool" in completedrequests[i]) and not (completedrequests[i]["nnode"].treedepth >= 1 and completedrequests[i]["nnode"].get_parent().mesh == null):
+			if "onodesurfacetool" in completedrequests[i]:
+				var lnnode = completedrequests[i]["nnode"]
+				if lnnode.treedepth >= 1:
+					var lnnodeparent = lnnode.get_parent()
+					if lnnodeparent.mesh == null:
+						continue
 				completedrequest = completedrequests.pop_at(i)
 				break
 		
@@ -298,17 +308,16 @@ func _process(delta):
 			# should be a callbackobject here VVV
 			get_node("/root/Spatial/ExecutingFeatures").parse3ddmpcentreline_execute(fetchednonimagedataobject["fetchednonimagedataobjectfile"], fetchednonimagedataobject["url"])
 
-		elif "onodesurfacetool" in completedrequest:
-			completedrequest["rootnode"].completedocellpointsmesh(completedrequest)
-
 		elif "callbackobject" in fetchednonimagedataobject:
 			var f = File.new()
 			f.open(fetchednonimagedataobject["fetchednonimagedataobjectfile"], File.READ)
 			if "callbackfunction" in fetchednonimagedataobject:
 				fetchednonimagedataobject["callbackobject"].call_deferred(fetchednonimagedataobject["callbackfunction"], f, fetchednonimagedataobject)
 			elif "callbacksignal" in fetchednonimagedataobject:
+				print("sending callbacksignal ", fetchednonimagedataobject["callbacksignal"], f)
 				fetchednonimagedataobject["callbackobject"].emit_signal(fetchednonimagedataobject["callbacksignal"], f)
-		
+		else:
+			print("what here?")
 		fetchednonimagedataobject = null
 
 	if len(operatingrequests) == 0 and len(completedrequests) != 0 and Nimageloadingrequests == 0:
@@ -322,7 +331,7 @@ func _process(delta):
 func fetchrequesturl(nonimagedataobject):
 	var url = nonimagedataobject["url"]
 	if url.substr(0,4) == "http":
-		print("fetchrequesturl ", url, " ", nonimagedataobject.get("byteOffset"), " ", nonimagedataobject.get("byteSize"))
+		#print("fetchrequesturl ", url, " ", nonimagedataobject.get("byteOffset"), " ", nonimagedataobject.get("byteSize"))
 		fetchnonimagedataobject(nonimagedataobject)
 	else:
 		var f = File.new()
