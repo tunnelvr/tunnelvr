@@ -223,3 +223,85 @@ func constructpotreerootnode(lmetadata, lurlmetadata, bboffset):
 		highlightcol2 = Vector3(0,1,1)
 
 	constructcontainingmesh()
+
+func completedocellpointsmesh(onoderequest):
+	var nnode = onoderequest["nnode"]
+	print(" ---- completedocellpointsmeshcompletedocellpointsmeshcompletedocellpointsmesh ", onoderequest.get("pointmesh"), nnode.name)
+	if onoderequest.get("pointmesh") != null:
+		nnode.mesh = onoderequest["pointmesh"]
+		nnode.Dloadedstate = "pointsmeshactuallyloaded"
+	else:
+		nnode.pointmaterial = null
+
+func loadocellpointsmesh_InWorkerThread(onoderequest):
+	var rootnode = onoderequest["rootnode"]
+	var ocellcentre = onoderequest["ocellcentre"]
+	var Dboxminmax = onoderequest["Dboxminmax"]
+	var nnode = onoderequest["nnode"]
+	var parentmesh = nnode.get_parent().mesh  if nnode.treedepth >= 1  else null
+	print("loadocellpointsmesh treedepth ", nnode.treedepth, " ", nnode.name, "parentmesh ", parentmesh)
+
+	var st = SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_POINTS)
+	st.set_material(nnode.pointmaterial)
+	var Dnpointsnotinbox = 0
+	var numPoints = nnode["numPoints"]
+	var foctreeF = File.new()
+	foctreeF.open(onoderequest["fetchednonimagedataobjectfile"], File.READ)
+	print("aaa ", 1)
+	if onoderequest["url"].substr(0, 4) != "http" or foctreeF.get_len() == onoderequest["byteSize"]:
+		nnode.Dloadedstate = "pointsloading"
+		print("aaa ", numPoints)
+		for i in range(numPoints):
+			var v0 = foctreeF.get_32();  var v1 = foctreeF.get_32();  var v2 = foctreeF.get_32()
+			if rootnode.attributes_rgb_prebytes != -1:
+				if rootnode.attributes_rgb_prebytes != 0:
+					foctreeF.get_buffer(rootnode.attributes_rgb_prebytes)
+				var r = foctreeF.get_16();  var g = foctreeF.get_16();  var b = foctreeF.get_16()
+				var col = Color(r/65535.0, g/65535.0, b/65535.0)
+				st.add_color(col)
+			if rootnode.attributes_postbytes != 0:
+				foctreeF.get_buffer(rootnode.attributes_postbytes)
+			var p = Vector3(v0*mdscale.x + mdoffset.x, v1*mdscale.y + mdoffset.y, v2*mdscale.z + mdoffset.z)
+			st.add_vertex(p - ocellcentre)
+			if not Dboxminmax.has_point(p):
+				Dnpointsnotinbox += 1
+		foctreeF.close()
+
+		var relativeocellcentre = nnode.transform.origin
+		if ocellcentre.distance_to((Dboxmin+Dboxmax)/2) > 0.9:
+			print("moved centre ", ocellcentre, ((Dboxmin+Dboxmax)/2))
+		var childIndex = int(nnode.get_name())
+		nnode.Dloadedstate = "pointscarryingdown"
+		numPointsCarriedDown = 0
+
+		if parentmesh != null:
+			var parentsurfacearrays = parentmesh.surface_get_arrays(0)
+			var parentpoints = parentsurfacearrays[Mesh.ARRAY_VERTEX]
+			var parentcolors = parentsurfacearrays[Mesh.ARRAY_COLOR] if rootnode.attributes_rgb_prebytes != -1 else null
+			print("gotparentpoints ", len(parentpoints))
+			for i in range(len(parentpoints)):
+				var p = parentpoints[i]
+				var pocellindex = (4 if p.x > 0.0 else 0) + \
+								  (2 if p.y > 0.0 else 0) + \
+								  (1 if p.z > 0.0 else 0) 
+				if pocellindex == childIndex:
+					var rp = p - relativeocellcentre
+					if parentcolors != null:
+						st.add_color(parentcolors[i])
+					st.add_vertex(rp)
+					numPointsCarriedDown += 1
+					if not Dboxminmax.has_point(rp + ocellcentre):
+						Dnpointsnotinbox += 1
+
+		var pointmesh = Mesh.new()
+		st.commit(pointmesh)
+		nnode.Dloadedstate = "pointsmeshmade"
+		print("saving pointmesh ", pointmesh)
+		onoderequest["pointmesh"] = pointmesh
+
+	else:
+		nnode.Dloadedstate = "failedfetching"
+		print("foctree nodesize bytes fail ", foctreeF.get_len(), " bytes not ", nnode.byteSize)
+		onoderequest["pointmesh"] = null
+

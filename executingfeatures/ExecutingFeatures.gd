@@ -259,8 +259,7 @@ func parse3ddmpcentreline_networked(f3durl):
 remote func fetch3dcentreline_execute(f3durl):
 	var ImageSystem = get_node("/root/Spatial/ImageSystem")
 	var nonimagedataobject = { "url":f3durl, "parsedumpcentreline":"yes" }
-	ImageSystem.nonimagepageslist.append(nonimagedataobject)
-	ImageSystem.set_process(true)
+	ImageSystem.fetchnonimagedataobject(nonimagedataobject)
 
 var parse3ddmpcentrelinepid = -1
 func parse3ddmpcentreline_execute(f3dfile, f3durl):

@@ -19,7 +19,7 @@ extends Spatial
 #increases size by 50% to have colour:
 # wine64 ~/executables-impure/PotreeConverter_2.1_x64_windows/PotreeConverter.exe --source point_cloud_may17cc.laz --outdir potreeconverted --attributes position_cartesian --attributes rgb --method poisson
 # nix-shell -p caddy
-# caddy file-server -browse -root /home/julian/data/3dmodels/aidanhouse/potreeconverted -listen 0.0.0.0:8000
+# caddy file-server -browse -root /home/julian/data/3dmodels/aidanhouse -listen 0.0.0.0:8000
 
 var potreethreadmutex = Mutex.new()
 var potreethreadsemaphore = Semaphore.new()
@@ -136,7 +136,9 @@ func LoadPotree():
 		potreeurlmetadata = potreeurlmetadata.replace("localhost", selfSpatial.hostipnumber)
 		print("now setting ", potreeurlmetadata)
 		
-	var nonimagedataobject = { "url":potreeurlmetadata, "callbackobject":self, "callbacksignal":"updatepotreepriorities_fetchsignal" }
+	var nonimagedataobject = { "url":potreeurlmetadata, 
+							   "callbackobject":self, 
+							   "callbacksignal":"updatepotreepriorities_fetchsignal" }
 	ImageSystem.fetchrequesturl(nonimagedataobject)
 	var fmetadataF = yield(self, "updatepotreepriorities_fetchsignal")
 	if fmetadataF == null:
@@ -234,18 +236,13 @@ func Yupdatepotreeprioritiesfull():
 func updatepotreeprioritiesLoop():
 	while true:
 		if queuekillpotree or rootnode == null:
-			if rootnode != null:
-				rootnode.processingnode = null
-				remove_child(rootnode)
-				rootnode.queue_free()
-				rootnode = null
 			break
-
 		if not visible:
-			yield(get_tree().create_timer(timems_fornextupdatepriorities*0.001), "timeout")
+			yield(get_tree().create_timer(0.1), "timeout")
 			continue
 		yield(get_tree(), "idle_frame")
-		var ticksms_tonextupdatepriorities = OS.get_ticks_msec() + timems_fornextupdatepriorities
+
+		var ticksms_tonextupdatepriorities = OS.get_ticks_msec() + 500 # timems_fornextupdatepriorities
 
 		var res = yield(Yupdatepotreeprioritiesfull(), "completed")
 		for nnode in res["pointcloudnodestohide"]:
@@ -256,39 +253,56 @@ func updatepotreeprioritiesLoop():
 			var nnode = res["pointcloudnodestoshow"].pop_front()
 			if not nnode.visible:
 				if nnode.pointmaterial == null:
+					var roottransforminverse = rootnode.get_parent().global_transform.inverse()
 					var nonimagedataobject = { "url":rootnode.urloctree, 
-											   "callbackobject":self, 
-											   "callbacksignal":"updatepotreepriorities_fetchsignal", 
 											   "byteOffset":nnode.byteOffset, 
-											   "byteSize":nnode.byteSize }
+											   "byteSize":nnode.byteSize,
+											   "nnode":nnode, 
+											   "rootnode":rootnode, 
+											   "callbackobject":rootnode, 
+											   "callbackfunction":"completedocellpointsmesh", 
+											   "ocellcentre":roottransforminverse*nnode.global_transform.origin }
+					var boxpointepsilon = 0.6
+					nonimagedataobject["Dboxminmax"] = AABB(nonimagedataobject["ocellcentre"] - nnode.ocellsize/2, nnode.ocellsize).grow(boxpointepsilon)
+
+					var lpointmaterial = load("res://potreework/pointcloudslice.material").duplicate()
+					lpointmaterial.set_shader_param("point_scale", pointsizefactor*nnode.spacing)
+					lpointmaterial.set_shader_param("ocellcentre", nonimagedataobject["ocellcentre"])
+					lpointmaterial.set_shader_param("ocellmask", nnode.ocellmask)
+					lpointmaterial.set_shader_param("roottransforminverse", roottransforminverse)
+							
+					lpointmaterial.set_shader_param("highlightdist", rootnode.highlightdist)
+					lpointmaterial.set_shader_param("highlightcol", rootnode.highlightcol)
+					lpointmaterial.set_shader_param("highlightcol2", rootnode.highlightcol2)
+
+					var colormixweight = 0.0
+					if rootnode.attributes_rgb_prebytes != -1:
+						colormixweight = 1.0 if Tglobal.housahedronmode else 0.9
+					lpointmaterial.set_shader_param("colormixweight", colormixweight)
+
+					if Tglobal.housahedronmode:
+						lpointmaterial.set_shader_param("highlightdist", 0.15)
+						lpointmaterial.set_shader_param("highlightcol", Vector3(0.8,0.0,0.8))
+						lpointmaterial.set_shader_param("highlightcol2", Vector3(0.8,0.0,0.8))
+
+					lpointmaterial.set_shader_param("highlightplaneperp", rootnode.highlightplaneperp)
+					lpointmaterial.set_shader_param("highlightplanedot", rootnode.highlightplanedot)
+					lpointmaterial.set_shader_param("slicedisappearthickness", rootnode.slicedisappearthickness)
+					nnode.pointmaterial = lpointmaterial
+
 					$LoadingCube.mesh.size = nnode.ocellsize
 					$LoadingCube.global_transform.origin = nnode.global_transform.origin
 					matloadingcube.albedo_color = coloctcellpointsfetching
 					$LoadingCube.visible = true
 					nnode.Dloadedstate = "fetching"
 					ImageSystem.fetchrequesturl(nonimagedataobject)
-					var foctreeF = yield(self, "updatepotreepriorities_fetchsignal")
-					if rootnode.urloctree.substr(0, 4) != "http" or foctreeF.get_len() == nnode.byteSize:
-						var roottransforminverse = rootnode.get_parent().global_transform.inverse()
-						var tp0 = OS.get_ticks_msec()
-						matloadingcube.albedo_color = coloctcellpointsloading
-						nnode.Dloadedstate = "pointsloading"
-						yield(nnode.Yloadoctcellpoints(foctreeF, pointsizefactor, roottransforminverse, rootnode), "completed")
-						var dt = OS.get_ticks_msec() - tp0
-						if dt > 100:
-							print("    Warning: long loadoctcellpoints ", nnode.get_path(), " of ", dt, " msecs", " numPoints:", nnode.numPoints, " carrieddown:", nnode.numPointsCarriedDown)
-						nnode.Dloadedstate = "pointsloaded"
-					else:
-						nnode.Dloadedstate = "failedfetching"
-						print("foctree nodesize bytes fail ", foctreeF.get_len(), " ", nnode.byteSize)
 					$LoadingCube.visible = false
-				if not nnode.visible and nnode.pointmaterial != null:
+					
+				if not nnode.visible and nnode.mesh != null and nnode.pointmaterial != null:
 					nnode.pointmaterial.set_shader_param("highlightplaneperp", rootnode.highlightplaneperp)
 					nnode.pointmaterial.set_shader_param("highlightplanedot", rootnode.highlightplanedot)
 					nnode.pointmaterial.set_shader_param("slicedisappearthickness", rootnode.slicedisappearthickness)
 					rootnode.uppernodevisibilitymask(nnode, true)
-					
-		
 			
 		while visible and len(res["hierarchynodestoload"]) != 0 and OS.get_ticks_msec() < ticksms_tonextupdatepriorities:
 			var hnode = res["hierarchynodestoload"].pop_front()
@@ -296,7 +310,8 @@ func updatepotreeprioritiesLoop():
 			$LoadingCube.global_transform.origin = hnode.global_transform.origin
 			matloadingcube.albedo_color = colhierarchyfetching
 			$LoadingCube.visible = true
-			var nonimagedataobject = { "url":rootnode.urlhierarchy, "callbackobject":self, 
+			var nonimagedataobject = { "url":rootnode.urlhierarchy, 
+									   "callbackobject":self, 
 									   "callbacksignal":"updatepotreepriorities_fetchsignal", 
 									   "byteOffset":hnode.hierarchybyteOffset, 
 									   "byteSize":hnode.hierarchybyteSize }
@@ -320,6 +335,11 @@ func updatepotreeprioritiesLoop():
 		if tremaining > 5:
 			yield(get_tree().create_timer(tremaining*0.001), "timeout")
 
+	if rootnode != null:
+		rootnode.processingnode = null
+		remove_child(rootnode)
+		rootnode.queue_free()
+		rootnode = null
 
 func Dcorrectvisibilitymask():
 	print("Dcorrectvisibilitymask runn")
@@ -360,7 +380,6 @@ func laserplanfitting(Glaserorient, laserlength):
 		if scanningnode.name[0] == "h" or scanningnode.pointmaterial == null:
 			scanningnode = rootnode.successornode(scanningnode, true)
 		else:
-			assert (scanningnode.mesh != null)
 			var boxcentre = scanningnode.ocellorigin
 			var boxextents = scanningnode.ocellsize/2 + Vector3(rayradius, rayradius, rayradius)
 			var boxminmax = AABB(boxcentre - boxextents, boxextents*2)
@@ -374,16 +393,17 @@ func laserplanfitting(Glaserorient, laserlength):
 	for lscanningnode in segintersectingboxestoscan:
 		var relsegfrom = laserorient.origin - lscanningnode.ocellorigin
 		var relsegvector = -laserorient.basis.z
-		var surfacearrays = lscanningnode.mesh.surface_get_arrays(0)
-		var surfacepoints = surfacearrays[Mesh.ARRAY_VERTEX]
-		for p in surfacepoints:
-			var vp = p - relsegfrom
-			var lam = vp.dot(relsegvector)
-			if lam > 0.0 and (lam < lammin or lammin == -1):
-				var vpradial = vp - relsegvector*lam
-				var vpradiallen = vpradial.length()
-				if vpradiallen < rayradius:
-					lammin = lam
+		if lscanningnode.mesh != null:
+			var surfacearrays = lscanningnode.mesh.surface_get_arrays(0)
+			var surfacepoints = surfacearrays[Mesh.ARRAY_VERTEX]
+			for p in surfacepoints:
+				var vp = p - relsegfrom
+				var lam = vp.dot(relsegvector)
+				if lam > 0.0 and (lam < lammin or lammin == -1):
+					var vpradial = vp - relsegvector*lam
+					var vpradiallen = vpradial.length()
+					if vpradiallen < rayradius:
+						lammin = lam
 				
 	if lammin == -1:
 		return null
