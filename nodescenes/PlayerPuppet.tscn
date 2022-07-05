@@ -258,7 +258,6 @@ visible = false
 
 [node name="LaserOrient" type="Spatial" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.411951, 0.678362, 0 )
-visible = false
 
 [node name="Length" type="Spatial" parent="LaserOrient"]
 

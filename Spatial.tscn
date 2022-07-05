@@ -1913,7 +1913,7 @@ light_specular = 0.43
 shadow_color = Color( 0.0823529, 0.0431373, 0.254902, 1 )
 spot_range = 191.9
 spot_attenuation = 2.07053
-spot_angle = 34.3
+spot_angle = 39.44
 spot_angle_attenuation = 1.27456
 
 [node name="HeadCentre" type="MeshInstance" parent="Players/PlayerMe/HeadCam"]
