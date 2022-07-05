@@ -385,6 +385,7 @@ func setpointertarget(laserroot, raycast, pointertargetshortdistance):
 	elif pointertargetshortdistance != -1.0:
 		newpointertargetpoint = raycast.global_transform.origin + (-raycast.global_transform.basis.z)*pointertargetshortdistance
 
+	var laserspot = laserroot.get_node("LaserSpot")
 	if newpointertarget != pointertarget:
 		#print("NN ", newpointertarget, " ", raycast.get_collision_point())
 		if pointertarget == guipanel3d or pointertarget == keyboardpanel:
@@ -402,14 +403,14 @@ func setpointertarget(laserroot, raycast, pointertargetshortdistance):
 		#if activetargetwall == null and pointertargettype == "XCdrawing" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING and len(pointertargetwall.nodepoints) == 0 and activetargetnode == null:
 		#	print("setting blank wall active")
 		#	setactivetargetwall(pointertargetwall)
+
+		laserspot.visible = (pointertargettype == "XCdrawing") or \
+							(pointertargettype == "XCtubesector") or \
+							(pointertargettype == "XCflatshell") or \
+							(pointertargettype == "IntermediatePointView") or \
+							(pointertargettype == "none" and pointertargetshortdistance != -1.0)
+		laserspot.set_surface_material(0, materialsystem.lasermaterialN((1 if activetargetnode != null else 0) + (2 if pointertarget == null else 0)))
 		
-		laserroot.get_node("LaserSpot").visible = (pointertargettype == "XCdrawing") or \
-												  (pointertargettype == "XCtubesector") or \
-												  (pointertargettype == "XCflatshell") or \
-												  (pointertargettype == "IntermediatePointView") or \
-												  (pointertargettype == "none" and pointertargetshortdistance != -1.0)
-		laserroot.get_node("LaserSpot").set_surface_material(0, materialsystem.lasermaterialN((1 if activetargetnode != null else 0) + (2 if pointertarget == null else 0)))
-			
 		var llaserselectlinelogicalvisibilitystate = 0
 		if activetargetnodewall != null and activetargetnodewall.drawingtype == DRAWING_TYPE.DT_CENTRELINE:
 			var clconnectcode = activetargetnodewall.xccentrelineconnectstofloor(sketchsystem.get_node("XCdrawings"))
@@ -466,6 +467,13 @@ func setpointertarget(laserroot, raycast, pointertargetshortdistance):
 
 	if pointertargetpoint != null:
 		laserroot.get_node("LaserSpot").global_transform.origin = pointertargetpoint
+		if laserspot.visible:
+			if laserroot == LaserOrient:
+				var collisionnormal = raycast.get_collision_normal()
+				laserspot.get_node("LaserContactDisc").global_transform = laserspot.global_transform.looking_at(laserspot.global_transform.origin + collisionnormal*10, Vector3(0,1,0))
+				laserspot.get_node("LaserContactDisc").visible = true
+			else:
+				laserspot.get_node("LaserContactDisc").visible = false
 		laserroot.get_node("Length").scale.z = -laserroot.get_node("LaserSpot").translation.z
 	else:
 		laserroot.get_node("Length").scale.z = -laserroot.get_node("RayCast").cast_to.z

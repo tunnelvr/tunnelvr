@@ -1,4 +1,4 @@
-[gd_scene load_steps=366 format=2]
+[gd_scene load_steps=367 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/underground_env.tres" type="Environment" id=2]
@@ -223,6 +223,14 @@ top_radius = 0.001
 bottom_radius = 0.02
 height = 0.2
 radial_segments = 6
+rings = 1
+
+[sub_resource type="CylinderMesh" id=298]
+material = SubResource( 61 )
+top_radius = 0.1
+bottom_radius = 0.1
+height = 0.01
+radial_segments = 12
 rings = 1
 
 [sub_resource type="SpatialMaterial" id=63]
@@ -2134,6 +2142,14 @@ material/0 = null
 [node name="LaserSpike" type="MeshInstance" parent="BodyObjects/LaserOrient/LaserSpot"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0 )
 mesh = SubResource( 62 )
+material/0 = null
+
+[node name="LaserContactDisc" type="Spatial" parent="BodyObjects/LaserOrient/LaserSpot"]
+
+[node name="LaserContactDiscMesh" type="MeshInstance" parent="BodyObjects/LaserOrient/LaserSpot/LaserContactDisc"]
+transform = Transform( 1, 5.68434e-14, 2.84217e-14, 2.84217e-14, -5.96046e-08, -1, -5.68434e-14, 1, -5.96046e-08, 0, 0, 0 )
+mesh = SubResource( 298 )
+skeleton = NodePath("../..")
 material/0 = null
 
 [node name="NotificationTorus" type="CSGTorus" parent="BodyObjects/LaserOrient"]
