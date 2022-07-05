@@ -471,9 +471,6 @@ func setpointertarget(laserroot, raycast, pointertargetshortdistance):
 			if laserroot == LaserOrient:
 				var collisionnormal = raycast.get_collision_normal()
 				laserspot.get_node("LaserContactDisc").global_transform = laserspot.global_transform.looking_at(laserspot.global_transform.origin + collisionnormal*10, Vector3(0,1,0))
-				laserspot.get_node("LaserContactDisc").visible = true
-			else:
-				laserspot.get_node("LaserContactDisc").visible = false
 		laserroot.get_node("Length").scale.z = -laserroot.get_node("LaserSpot").translation.z
 	else:
 		laserroot.get_node("Length").scale.z = -laserroot.get_node("RayCast").cast_to.z
