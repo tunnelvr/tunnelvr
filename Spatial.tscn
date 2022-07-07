@@ -2199,7 +2199,7 @@ collision_mask = 16
 [node name="FloorSpot" type="Spatial" parent="BodyObjects/FloorLaserSpot"]
 
 [node name="FloorSpotMesh" type="MeshInstance" parent="BodyObjects/FloorLaserSpot/FloorSpot"]
-transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0 )
+transform = Transform( -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0, 0, 0 )
 mesh = SubResource( 299 )
 skeleton = NodePath("../..")
 material/0 = null
