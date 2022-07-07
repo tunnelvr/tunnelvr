@@ -262,12 +262,13 @@ albedo_color = Color( 0.0823529, 0.0117647, 0.0117647, 1 )
 metallic = 0.46
 roughness = 0.28
 
-[sub_resource type="SphereMesh" id=68]
+[sub_resource type="CylinderMesh" id=299]
 material = SubResource( 67 )
-radius = 0.05
-height = 0.1
-radial_segments = 8
-rings = 4
+top_radius = 0.05
+bottom_radius = 0.05
+height = 1.0
+radial_segments = 12
+rings = 0
 
 [sub_resource type="CylinderShape" id=69]
 margin = 0.004
@@ -2195,10 +2196,12 @@ transform = Transform( 1, 0, 2.84217e-14, 0, 1, 0, -8.52651e-14, 0, 1, 0, 0, -9.
 cast_to = Vector3( 0, -50, 0 )
 collision_mask = 16
 
-[node name="FloorSpot" type="MeshInstance" parent="BodyObjects/FloorLaserSpot"]
-transform = Transform( 1, -4.60809e-07, 4.60809e-07, 0, 0.707107, 0.707107, -6.51682e-07, -0.707107, 0.707107, 0.615074, -0.372118, -10.7241 )
-visible = false
-mesh = SubResource( 68 )
+[node name="FloorSpot" type="Spatial" parent="BodyObjects/FloorLaserSpot"]
+
+[node name="FloorSpotMesh" type="MeshInstance" parent="BodyObjects/FloorLaserSpot/FloorSpot"]
+transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0 )
+mesh = SubResource( 299 )
+skeleton = NodePath("../..")
 material/0 = null
 
 [node name="IntermediatePointView" type="Spatial" parent="BodyObjects"]

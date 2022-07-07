@@ -481,7 +481,8 @@ func setpointertarget(laserroot, raycast, pointertargetshortdistance):
 				FloorLaserSpot.get_node("RayCast").transform.origin = pointertargetpoint
 				FloorLaserSpot.get_node("RayCast").force_raycast_update()
 				if FloorLaserSpot.get_node("RayCast").is_colliding():
-					FloorLaserSpot.get_node("FloorSpot").transform.origin = FloorLaserSpot.get_node("RayCast").get_collision_point()
+					FloorLaserSpot.get_node("FloorSpot").transform = Transform(laserspot.get_node("LaserContactDisc").global_transform.basis, 
+																			   FloorLaserSpot.get_node("RayCast").get_collision_point())
 					FloorLaserSpot.get_node("FloorSpot").visible = true
 				else:
 					FloorLaserSpot.get_node("FloorSpot").visible = false
