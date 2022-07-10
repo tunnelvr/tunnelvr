@@ -1,4 +1,4 @@
-[gd_scene load_steps=366 format=2]
+[gd_scene load_steps=368 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/underground_env.tres" type="Environment" id=2]
@@ -225,6 +225,17 @@ height = 0.2
 radial_segments = 6
 rings = 1
 
+[sub_resource type="SpatialMaterial" id=300]
+albedo_color = Color( 1, 0.439216, 0.439216, 1 )
+
+[sub_resource type="CylinderMesh" id=298]
+material = SubResource( 300 )
+top_radius = 0.1
+bottom_radius = 0.1
+height = 0.01
+radial_segments = 12
+rings = 1
+
 [sub_resource type="SpatialMaterial" id=63]
 albedo_color = Color( 1, 0.439216, 0.439216, 1 )
 emission_enabled = true
@@ -254,12 +265,13 @@ albedo_color = Color( 0.0823529, 0.0117647, 0.0117647, 1 )
 metallic = 0.46
 roughness = 0.28
 
-[sub_resource type="SphereMesh" id=68]
+[sub_resource type="CylinderMesh" id=299]
 material = SubResource( 67 )
-radius = 0.05
-height = 0.1
-radial_segments = 8
-rings = 4
+top_radius = 0.05
+bottom_radius = 0.05
+height = 1.0
+radial_segments = 12
+rings = 0
 
 [sub_resource type="CylinderShape" id=69]
 margin = 0.004
@@ -1913,7 +1925,7 @@ light_specular = 0.43
 shadow_color = Color( 0.0823529, 0.0431373, 0.254902, 1 )
 spot_range = 191.9
 spot_attenuation = 2.07053
-spot_angle = 34.3
+spot_angle = 39.44
 spot_angle_attenuation = 1.27456
 
 [node name="HeadCentre" type="MeshInstance" parent="Players/PlayerMe/HeadCam"]
@@ -2136,6 +2148,14 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0 )
 mesh = SubResource( 62 )
 material/0 = null
 
+[node name="LaserContactDisc" type="Spatial" parent="BodyObjects/LaserOrient/LaserSpot"]
+
+[node name="LaserContactDiscMesh" type="MeshInstance" parent="BodyObjects/LaserOrient/LaserSpot/LaserContactDisc"]
+transform = Transform( 1, 5.68434e-14, 2.84217e-14, 2.84217e-14, -5.96046e-08, -1, -5.68434e-14, 1, -5.96046e-08, 0, 0, 0 )
+mesh = SubResource( 298 )
+skeleton = NodePath("../..")
+material/0 = null
+
 [node name="NotificationTorus" type="CSGTorus" parent="BodyObjects/LaserOrient"]
 transform = Transform( 1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, -0.3 )
 visible = false
@@ -2179,10 +2199,12 @@ transform = Transform( 1, 0, 2.84217e-14, 0, 1, 0, -8.52651e-14, 0, 1, 0, 0, -9.
 cast_to = Vector3( 0, -50, 0 )
 collision_mask = 16
 
-[node name="FloorSpot" type="MeshInstance" parent="BodyObjects/FloorLaserSpot"]
-transform = Transform( 1, -4.60809e-07, 4.60809e-07, 0, 0.707107, 0.707107, -6.51682e-07, -0.707107, 0.707107, 0.615074, -0.372118, -10.7241 )
-visible = false
-mesh = SubResource( 68 )
+[node name="FloorSpot" type="Spatial" parent="BodyObjects/FloorLaserSpot"]
+
+[node name="FloorSpotMesh" type="MeshInstance" parent="BodyObjects/FloorLaserSpot/FloorSpot"]
+transform = Transform( -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0, 0, 0 )
+mesh = SubResource( 299 )
+skeleton = NodePath("../..")
 material/0 = null
 
 [node name="IntermediatePointView" type="Spatial" parent="BodyObjects"]

@@ -9,7 +9,7 @@ var executingfeaturesavailable = [ ]
 var playermqttid = ""
 
 var puppetpositionstack = [ ]         # [ { "timestamp", "Ltimestamp", "playertransform", "headcamtransform" } ] 
-var puppetpointerpositionstack = [ ]  # [ { "timestamp", "Ltimestamp", "orient", "length", "spotvisible" } ] 
+var puppetpointerpositionstack = [ ]  # [ { "timestamp", "Ltimestamp", "orient", "length" } ] 
 var puppetplanviewcameraactive = false
 var puppetplanviewcamerastack = [ ]   # [ { "timestamp", "Ltimestamp", "plancameratrans", "plancamerasize" } ] 
 
@@ -276,6 +276,9 @@ func process_puppetpointerpositionstack(delta):
 			$LaserSelectLine.visible = true
 		else:
 			$LaserSelectLine.visible = false
+		
+		
+		
 		puppetpointerpositionstack.pop_front()
 		
 		if "planviewlaser" in pp:
