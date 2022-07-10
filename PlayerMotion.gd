@@ -342,6 +342,12 @@ func transformwithinrange(trans0, trans1, poschange, cosangchange):
 		return false
 	return true
 
+func transformbasiswithinrange(q0, q1, cosangchange):
+	var dq = q0.inverse()*q1
+	if dq.w < cosangchange:
+		return false
+	return true
+
 func filter_playerhand_bandwidth(prevhand, hand):
 	var boneorientationwithinrange = true
 	if hand.has("boneorientations"):
@@ -410,8 +416,9 @@ func filter_playerposition_bandwidth(positiondict):
 		prevpositiondict["puppetbody"] = positiondict["puppetbody"].duplicate()
 
 	var laserpointerinrange = transformwithinrange(prevpositiondict["laserpointer"]["orient"], positiondict["laserpointer"]["orient"], pointerpositionchange, pointeranglechange) and \
-			abs(prevpositiondict["laserpointer"]["length"] - positiondict["laserpointer"]["length"]) < pointerpositionchange and \
-			prevpositiondict["laserpointer"]["spotvisible"] == positiondict["laserpointer"]["spotvisible"]
+							  abs(prevpositiondict["laserpointer"]["length"] - positiondict["laserpointer"]["length"]) < pointerpositionchange
+
+			
 	if laserpointerinrange and ("laserselectline" in prevpositiondict) == ("laserselectline" in positiondict) and ("planviewlaser" in prevpositiondict) == ("planviewlaser" in positiondict):
 		positiondict.erase("laserpointer")
 	else:

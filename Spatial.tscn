@@ -1,4 +1,4 @@
-[gd_scene load_steps=367 format=2]
+[gd_scene load_steps=368 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/underground_env.tres" type="Environment" id=2]
@@ -225,8 +225,11 @@ height = 0.2
 radial_segments = 6
 rings = 1
 
+[sub_resource type="SpatialMaterial" id=300]
+albedo_color = Color( 1, 0.439216, 0.439216, 1 )
+
 [sub_resource type="CylinderMesh" id=298]
-material = SubResource( 61 )
+material = SubResource( 300 )
 top_radius = 0.1
 bottom_radius = 0.1
 height = 0.01

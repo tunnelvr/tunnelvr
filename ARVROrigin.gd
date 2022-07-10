@@ -207,7 +207,8 @@ remotesync func playvoicerecording(wavrecording):
 func laserpointerdict():
 	var ldict = { "orient":$HandRight.pointerposearvrorigin, 
 				  "length": LaserOrient.get_node("Length").scale.z, 
-				  "spotvisible": LaserOrient.get_node("LaserSpot").visible }
+				}
+
 	if LaserSelectLine.visible:
 		ldict["laserselectline"] = { "global_transform":LaserSelectLine.global_transform, 
 									 "scalez":LaserSelectLine.get_node("Scale").scale.z }

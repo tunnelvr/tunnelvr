@@ -1,4 +1,4 @@
-[gd_scene load_steps=30 format=2]
+[gd_scene load_steps=32 format=2]
 
 [ext_resource path="res://nodescenes/PlayerPuppet.gd" type="Script" id=1]
 [ext_resource path="res://HandScript.gd" type="Script" id=2]
@@ -64,6 +64,17 @@ size = Vector3( 0.002, 0.002, 1 )
 flags_unshaded = true
 flags_do_not_receive_shadows = true
 albedo_color = Color( 0.976471, 0.552941, 0.0117647, 1 )
+
+[sub_resource type="SpatialMaterial" id=61]
+albedo_color = Color( 1, 0.439216, 0.439216, 1 )
+
+[sub_resource type="CylinderMesh" id=62]
+material = SubResource( 61 )
+top_radius = 0.1
+bottom_radius = 0.1
+height = 0.01
+radial_segments = 12
+rings = 1
 
 [sub_resource type="SpatialMaterial" id=13]
 flags_unshaded = true
@@ -266,6 +277,16 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.411951, 0.678362, 0 )
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.5 )
 mesh = SubResource( 11 )
 material/0 = SubResource( 12 )
+
+[node name="LaserContactDisc" type="Spatial" parent="LaserOrient"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 8.9407e-08, 0, -0.29854 )
+visible = false
+
+[node name="LaserContactDiscMesh" type="MeshInstance" parent="LaserOrient/LaserContactDisc"]
+transform = Transform( 1, 5.68434e-14, 2.84217e-14, 2.84217e-14, -5.96046e-08, -1, -5.68434e-14, 1, -5.96046e-08, 0, 0, 0 )
+mesh = SubResource( 62 )
+skeleton = NodePath("../..")
+material/0 = null
 
 [node name="LaserSelectLine" type="Spatial" parent="."]
 transform = Transform( 0.387934, 0, 0.921687, 0, 1, 0, -0.921687, 0, 0.387934, -0.338186, 0, 0 )
