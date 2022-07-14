@@ -140,7 +140,8 @@ func http_request_poll(operatingrequest):
 	elif httpclientstatus == HTTPClient.STATUS_RESOLVING or httpclientstatus == HTTPClient.STATUS_CONNECTING:
 		return 0
 	elif httpclientstatus == HTTPClient.STATUS_CANT_RESOLVE or httpclientstatus == HTTPClient.STATUS_CANT_CONNECT or httpclientstatus == HTTPClient.STATUS_CONNECTION_ERROR:
-		print(" bad httpclientstatus ", operatingrequest["urlkey"], " ", httpclientstatus)
+		var merr = "can't resolve" if httpclientstatus == HTTPClient.STATUS_CANT_RESOLVE else "can't connect" if httpclientstatus == HTTPClient.STATUS_CANT_CONNECT else "connection error"
+		print(" bad httpclientstatus ", operatingrequest["urlkey"], " ", merr)
 		return -1
 	elif httpclientstatus == HTTPClient.STATUS_CONNECTED and not operatingrequest.has("partbody"):
 		var err = httpclient.request(HTTPClient.METHOD_GET, operatingrequest["urlpath"], PoolStringArray(operatingrequest.get("headers", []))) 

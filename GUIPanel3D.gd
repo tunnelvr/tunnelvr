@@ -9,6 +9,7 @@ onready var sketchsystem = get_node("/root/Spatial/SketchSystem")
 onready var playerMe = get_node("/root/Spatial/Players/PlayerMe")
 onready var selfSpatial = get_node("/root/Spatial")
 onready var virtualkeyboard = get_node("/root/Spatial/GuiSystem/KeyboardPanel")
+onready var GithubAPI = get_node("/root/Spatial/ImageSystem/GithubAPI")
 
 var regexacceptableprojectname = RegEx.new()
 var regexjsontripleflattener = RegEx.new()
@@ -26,7 +27,6 @@ func _on_buttonload_pressed():
 		return
 	var savegamefilestringL = savegamefilestring.split(":")
 	var savegamefilename = savegamefilestringL[-1].strip_edges().lstrip("*#")
-	var GithubAPI = get_node("/root/Spatial/ImageSystem/GithubAPI")
 	var giattributesname = savegamefilestringL[0].strip_edges() if len(savegamefilestringL) == 2 else GithubAPI.ghattributes.get("name")
 	var lghattributes = GithubAPI.riattributes.get("resourcedefs", {}).get(giattributesname, {})
 	if lghattributes.get("type"):
@@ -59,12 +59,10 @@ remote func setsavegamefilename(cfile):
 		if cfile == savegamefilename:
 			snames.select(i)
 			return
-	var GithubAPI = get_node("/root/Spatial/ImageSystem/GithubAPI")
 	snames.add_item(GithubAPI.ghattributes["name"]+": *"+cfile)
 	snames.select(snames.get_item_count() - 1)
 	
 func _on_buttonsave_pressed():
-	var GithubAPI = get_node("/root/Spatial/ImageSystem/GithubAPI")
 	var snames = $Viewport/GUI/Panel/Savegamefilename
 	var savegamefileid = snames.get_selected_id()
 	var savegamefilestring = snames.get_item_text(savegamefileid)
@@ -840,7 +838,6 @@ func resources_readycall():
 		$Viewport/GUI/Panel/Savegamefilename.add_item(cfile)
 	for idx in range($Viewport/GUI/Panel/ResourceOptions.get_item_count()):
 		resourceoptionlookup[$Viewport/GUI/Panel/ResourceOptions.get_item_text(idx)] = idx
-	var GithubAPI = get_node("/root/Spatial/ImageSystem/GithubAPI")
 	GithubAPI.resources_readycallloadinfo()
 	updateresourceselector("")
 	var resourcesel = ""
@@ -856,17 +853,20 @@ func resources_readycall():
 		if (k["type"] == "svnfiles") or (k["type"] == "caddyfiles" and filetreetype == ""):
 			filetreesel = k["name"]
 			filetreetype = k["type"]
+			
+	if GithubAPI.riattributes.has("filetreesel") and GithubAPI.riattributes["resourcedefs"].has(GithubAPI.riattributes["filetreesel"]):
+		filetreesel = GithubAPI.riattributes["filetreesel"]
+	if GithubAPI.riattributes.has("resourcesel") and GithubAPI.riattributes["resourcedefs"].has(GithubAPI.riattributes["resourcesel"]):
+		resourcesel = GithubAPI.riattributes["resourcesel"]
 
 	if filetreesel != "":
-		updateresourceselector(filetreesel)
-		ApplyToFiletree()
+		ApplyToFiletree(filetreesel)
 	if resourcesel != "":
+		ApplyToCaveSave(resourcesel)
 		updateresourceselector(resourcesel)
-		ApplyToCaveSave()
 	
 func updateresourceselector(seltext):
 	$Viewport/GUI/Panel/ResourceSelector.clear()
-	var GithubAPI = get_node("/root/Spatial/ImageSystem/GithubAPI")
 	for k in GithubAPI.riattributes["resourcedefs"]:
 		$Viewport/GUI/Panel/ResourceSelector.add_item(k)
 		if k == seltext:
@@ -1072,7 +1072,6 @@ func _on_resourceoptions_selected(index):
 	
 	elif nrosel == "Print resource":
 		var resourcename = $Viewport/GUI/Panel/ResourceSelector.get_item_text($Viewport/GUI/Panel/ResourceSelector.selected)
-		var GithubAPI = get_node("/root/Spatial/ImageSystem/GithubAPI")
 		var lresourceselected = GithubAPI.riattributes["resourcedefs"].get(resourcename).duplicate()
 		if lresourceselected != null:
 			assert (lresourceselected["name"] == resourcename)
@@ -1083,7 +1082,6 @@ func _on_resourceoptions_selected(index):
 	elif nrosel == "Set resource":
 		var jresource = parse_json($Viewport/GUI/Panel/EditColorRect/TextEdit.text)
 		if jresource != null and jresource.has("name"):
-			var GithubAPI = get_node("/root/Spatial/ImageSystem/GithubAPI")
 			var ltext = "Resource file saved"
 			if jresource["name"] == "local":
 				if jresource.get("delete"):
@@ -1111,10 +1109,10 @@ func _on_resourceoptions_selected(index):
 			setpanellabeltext("Resource definition not valid")
 
 	elif nrosel == "Apply to Filetree":
-		ApplyToFiletree()
+		ApplyToFiletree($Viewport/GUI/Panel/ResourceSelector.get_item_text($Viewport/GUI/Panel/ResourceSelector.selected))
 							
 	elif nrosel == "Apply to Cavesave":
-		ApplyToCaveSave()
+		ApplyToCaveSave($Viewport/GUI/Panel/ResourceSelector.get_item_text($Viewport/GUI/Panel/ResourceSelector.selected))
 		
 	elif nrosel == "Set new file":
 		var mtext = $Viewport/GUI/Panel/EditColorRect/TextEdit.text.strip_edges()
@@ -1152,7 +1150,6 @@ func Yupdatecavefilelist():
 	var savegamefilestring = savegamefilenameoptionbutton.get_item_text(savegamefileid)
 	var savegamefilename = savegamefilestring.split(":", true, 1)[-1].strip_edges().lstrip("*#")
 
-	var GithubAPI = get_node("/root/Spatial/ImageSystem/GithubAPI")
 	var cfiles = yield(GithubAPI.Ylistdircavefilelist(), "completed")
 	if cfiles.size() == 1 and cfiles[0].begins_with("Err:"):
 		setpanellabeltext(cfiles[0])
@@ -1164,9 +1161,8 @@ func Yupdatecavefilelist():
 		if savegamefilename != "--clearcave":
 			setsavegamefilename(savegamefilename)
 		
-func ApplyToCaveSave():
-	var GithubAPI = get_node("/root/Spatial/ImageSystem/GithubAPI")
-	var resourcename = $Viewport/GUI/Panel/ResourceSelector.get_item_text($Viewport/GUI/Panel/ResourceSelector.selected)
+func ApplyToCaveSave(resourcename):
+	GithubAPI.riattributes["resourcesel"] = resourcename
 	var resourcedef = GithubAPI.riattributes["resourcedefs"][resourcename]
 	setpanellabeltext("set cave save to: "+resourcename)
 	if resourcedef.get("type") == "localfiles":
@@ -1182,10 +1178,9 @@ func ApplyToCaveSave():
 		GithubAPI.httpghapi = HTTPClient.new()
 	Yupdatecavefilelist()
 
-func ApplyToFiletree():
-	var GithubAPI = get_node("/root/Spatial/ImageSystem/GithubAPI")
+func ApplyToFiletree(resourcename):
+	GithubAPI.riattributes["filetreesel"] = resourcename
 	var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
-	var resourcename = $Viewport/GUI/Panel/ResourceSelector.get_item_text($Viewport/GUI/Panel/ResourceSelector.selected)
 	var resourcedef = GithubAPI.riattributes["resourcedefs"][resourcename]
 	if resourcedef.get("type") in ["svnfiles", "caddyfiles", "githubapi"]:
 		planviewsystem.filetreeresourcename = resourcename

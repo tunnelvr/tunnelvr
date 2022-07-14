@@ -5,6 +5,7 @@ var drawingtype = DRAWING_TYPE.DT_PLANVIEW
 onready var ImageSystem = get_node("/root/Spatial/ImageSystem")
 onready var sketchsystem = get_node("/root/Spatial/SketchSystem")
 onready var selfSpatial = get_node("/root/Spatial")
+onready var GithubAPI = get_node("/root/Spatial/ImageSystem/GithubAPI")
 	
 var activetargetfloor = null
 var activetargetfloortransformpos = null
@@ -80,14 +81,15 @@ func fetchbuttonpressed(item, column, idx):
 		print("Clearing image and webpage caches")
 		ImageSystem.clearcachedir(ImageSystem.imgdir)
 		ImageSystem.clearcachedir(ImageSystem.nonimagedir)
-		clearsetupfileviewtree("/")
+		if GithubAPI.riattributes.has("filetreesel"):
+			var guipanel3d = get_node("/root/Spatial/GuiSystem/GUIPanel3D")
+			guipanel3d.ApplyToFiletree(GithubAPI.riattributes["filetreesel"])
 		planviewcontrols.get_node("CheckBoxFileTree").pressed = false
 		return
 		
 	var fname = item.get_text(0)
 	var filetreeresource = null
 	if filetreeresourcename != null:
-		var GithubAPI = get_node("/root/Spatial/ImageSystem/GithubAPI")
 		filetreeresource = GithubAPI.riattributes["resourcedefs"].get(filetreeresourcename)
 		var path = item.get_tooltip(0)
 		if filetreeresource.get("type") == "githubapi":
@@ -147,17 +149,20 @@ func fetchbuttonpressed(item, column, idx):
 		#buttonidxtoitem.erase(idx)
 		item.set_custom_bg_color(0, Color("#ff0099"))
 		if filetreeresource != null:
+			filetreeresource["idx_failunload"] = idx
 			ImageSystem.fetchunrolltree(fileviewtree, item, url, filetreeresource)
 		else:
 			ImageSystem.fetchunrolltree(fileviewtree, item, url, null)
 
 	else:
-		print("Suppressing button ", fname, " which should be disabled")
-
+		print("Suppressing button ", fname, " which should be disabled because it is already loaded")
 
 func actunrolltree(f, fetchednonimagedataobject):
 	var htmltext = f.get_as_text()
 	f.close()
+	if htmltext == "" and fetchednonimagedataobject.has("filetreeresource") and fetchednonimagedataobject["filetreeresource"].has("idx_failunload"):
+		buttonidxloaded.erase(fetchednonimagedataobject["filetreeresource"]["idx_failunload"])
+
 	var llinks = [ ]
 	if fetchednonimagedataobject.has("filetreeresource"):
 		if fetchednonimagedataobject["filetreeresource"].get("type") == "caddyfiles":
@@ -344,7 +349,6 @@ func _ready():
 	fileviewtree.connect("button_pressed", self, "fetchbuttonpressed")
 	fileviewtree.connect("item_selected", self, "itemselected")
 
-		
 func clearsetupfileviewtree(filetreerootpath):
 	fileviewtree.clear()
 	buttonidxtoitem.clear()
