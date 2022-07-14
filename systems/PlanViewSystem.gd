@@ -80,7 +80,7 @@ func fetchbuttonpressed(item, column, idx):
 		print("Clearing image and webpage caches")
 		ImageSystem.clearcachedir(ImageSystem.imgdir)
 		ImageSystem.clearcachedir(ImageSystem.nonimagedir)
-		clearsetupfileviewtree(false, "http://cave-registry.org.uk/svn/NorthernEngland/")
+		clearsetupfileviewtree("/")
 		planviewcontrols.get_node("CheckBoxFileTree").pressed = false
 		return
 		
@@ -146,7 +146,7 @@ func fetchbuttonpressed(item, column, idx):
 		#item.erase_button(column, idx)
 		#buttonidxtoitem.erase(idx)
 		item.set_custom_bg_color(0, Color("#ff0099"))
-		if filetreeresourcename != null:
+		if filetreeresource != null:
 			ImageSystem.fetchunrolltree(fileviewtree, item, url, filetreeresource)
 		else:
 			ImageSystem.fetchunrolltree(fileviewtree, item, url, null)
@@ -184,21 +184,8 @@ func actunrolltree(f, fetchednonimagedataobject):
 				lk = lk.replace("&amp;", "&")
 				llinks.push_back(lk)
 	openlinklistpage(fetchednonimagedataobject["item"], llinks)
-# here is work!
 
-func fetchunrolltree(fileviewtree, item, url, filetreeresource):
-	var nonimagedataobject = { "url":url, 
-							   "tree":fileviewtree, 
-							   "item":item, 
-							   "donotusecache":true, 
-							   "callbackobject":self, 
-							   "callbackfunction":"actunrolltree"
-							 }
-	if filetreeresource != null:
-		nonimagedataobject["filetreeresource"] = filetreeresource
-		if filetreeresource.get("type") == "caddyfiles":
-			nonimagedataobject["headers"] = [ "accept: application/json" ]
-	ImageSystem.fetchnonimagedataobject(nonimagedataobject)
+
 
 
 func itemselected():
@@ -333,6 +320,7 @@ func checkcentrelinesvisible_pressed():
 func _ready():
 	imgregex.compile('(?i)\\.(png|jpg|jpeg)$')
 	f3dregex.compile('(?i)\\.(3d)$')
+	listregex.compile('<li><a href="([^"]*)">')
 	installbuttontex = get_node("/root/Spatial/MaterialSystem/buttonmaterials/InstallButton").get_surface_material(0).albedo_texture
 	fetchbuttontex = get_node("/root/Spatial/MaterialSystem/buttonmaterials/FetchButton").get_surface_material(0).albedo_texture
 	clearcachebuttontex = get_node("/root/Spatial/MaterialSystem/buttonmaterials/ClearCacheButton").get_surface_material(0).albedo_texture
@@ -349,15 +337,15 @@ func _ready():
 	planviewcontrols.get_node("ButtonTransmitView").connect("pressed", self, "buttontransmitview_pressed")
 	planviewcontrols.get_node("FloorMove/FloorStyle").connect("item_selected", self, "floorstyle_itemselected")
 	planviewcontrols.get_node("CheckBoxFileTree").connect("toggled", self, "checkboxfiletree_toggled")
-	call_deferred("clearsetupfileviewtree", true, "http://cave-registry.org.uk/svn/NorthernEngland/")
+
 	set_process(visible)
 	assert (planviewcontrols.get_node("CheckBoxPlanTubesVisible").pressed == (($PlanView/Viewport/PlanGUI/Camera.cull_mask & CollisionLayer.VL_xcshells) != 0))
 
+	fileviewtree.connect("button_pressed", self, "fetchbuttonpressed")
+	fileviewtree.connect("item_selected", self, "itemselected")
+
 		
-func clearsetupfileviewtree(binit, filetreerootpath):
-	if binit:
-		fileviewtree.connect("button_pressed", self, "fetchbuttonpressed")
-		fileviewtree.connect("item_selected", self, "itemselected")
+func clearsetupfileviewtree(filetreerootpath):
 	fileviewtree.clear()
 	buttonidxtoitem.clear()
 	buttonidxloaded.clear() 
@@ -365,7 +353,7 @@ func clearsetupfileviewtree(binit, filetreerootpath):
 	var root = fileviewtree.create_item()
 	root.set_text(0, "Root of tree")
 	root.set_tooltip(0, "**clear-cache**")
-	if filetreeresourcename != "":
+	if filetreeresourcename != null:
 		addsubitem(root, filetreerootpath, filetreerootpath)
 	else:
 		addsubitem(root, "NorthernEngland", filetreerootpath)

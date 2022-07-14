@@ -846,13 +846,23 @@ func resources_readycall():
 	var resourcesel = ""
 	var resourcetype = ""
 	var disablegithubdefault = OS.has_feature("pc")
+	var filetreesel = ""
+	var filetreetype = ""
 	for k in GithubAPI.riattributes["resourcedefs"].values():
 		if (k["type"] == "localfiles" and resourcetype == "") or \
 				(not disablegithubdefault and k["type"] == "githubapi" and k.get("token")):
 			resourcesel = k["name"]
 			resourcetype = k["type"]
-	updateresourceselector(resourcesel)
-	ApplyToCaveSave()
+		if (k["type"] == "svnfiles") or (k["type"] == "caddyfiles" and filetreetype == ""):
+			filetreesel = k["name"]
+			filetreetype = k["type"]
+
+	if filetreesel != "":
+		updateresourceselector(filetreesel)
+		ApplyToFiletree()
+	if resourcesel != "":
+		updateresourceselector(resourcesel)
+		ApplyToCaveSave()
 	
 func updateresourceselector(seltext):
 	$Viewport/GUI/Panel/ResourceSelector.clear()
@@ -1101,19 +1111,8 @@ func _on_resourceoptions_selected(index):
 			setpanellabeltext("Resource definition not valid")
 
 	elif nrosel == "Apply to Filetree":
-		var GithubAPI = get_node("/root/Spatial/ImageSystem/GithubAPI")
-		var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
-		var resourcename = $Viewport/GUI/Panel/ResourceSelector.get_item_text($Viewport/GUI/Panel/ResourceSelector.selected)
-		var resourcedef = GithubAPI.riattributes["resourcedefs"][resourcename]
-		if resourcedef.get("type") in ["svnfiles", "caddyfiles", "githubapi"]:
-			planviewsystem.filetreeresourcename = resourcename
-			var filetreerootpath = resourcedef.get("path", "")
-			filetreerootpath = filetreerootpath.rstrip("/") + "/"
-			planviewsystem.clearsetupfileviewtree(false, filetreerootpath)
-			setpanellabeltext("Applied resource to filetree")
-		else:
-			setpanellabeltext("Cannot apply to resource type")
-					
+		ApplyToFiletree()
+							
 	elif nrosel == "Apply to Cavesave":
 		ApplyToCaveSave()
 		
@@ -1183,6 +1182,19 @@ func ApplyToCaveSave():
 		GithubAPI.httpghapi = HTTPClient.new()
 	Yupdatecavefilelist()
 
+func ApplyToFiletree():
+	var GithubAPI = get_node("/root/Spatial/ImageSystem/GithubAPI")
+	var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
+	var resourcename = $Viewport/GUI/Panel/ResourceSelector.get_item_text($Viewport/GUI/Panel/ResourceSelector.selected)
+	var resourcedef = GithubAPI.riattributes["resourcedefs"][resourcename]
+	if resourcedef.get("type") in ["svnfiles", "caddyfiles", "githubapi"]:
+		planviewsystem.filetreeresourcename = resourcename
+		var filetreerootpath = resourcedef.get("path", "")
+		filetreerootpath = filetreerootpath.rstrip("/") + "/"
+		planviewsystem.clearsetupfileviewtree(filetreerootpath)
+		setpanellabeltext("Applied resource to filetree")
+	else:
+		setpanellabeltext("Cannot apply to resource type")
 
 
 ###############################

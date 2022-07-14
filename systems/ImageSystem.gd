@@ -2,7 +2,6 @@ extends Node
 
 var imgdir = "user://northernimages/"
 var nonimagedir = "user://nonimagewebpages/"
-var listregex = RegEx.new()
 
 var queuedrequests =  [ ]
 var operatingrequests =  [ ]
@@ -80,7 +79,6 @@ func _exit_tree():
 
 func _ready():
 	imageloadingthread.start(self, "imageloadingthread_function")
-	listregex.compile('<li><a href="([^"]*)">')
 	regexurl.compile("^(https?)://([^/:]*)(:\\d+)?(/.*)")
 
 func clearallimageloadingactivity():
@@ -341,9 +339,24 @@ func fetchrequesturl(nonimagedataobject):
 		elif "callbacksignal" in nonimagedataobject:
 			yield(get_tree(), "idle_frame")
 			nonimagedataobject["callbackobject"].emit_signal(nonimagedataobject["callbacksignal"], f)
+
+func fetchunrolltree(fileviewtree, item, url, filetreeresource):
+	var nonimagedataobject = { "url":url, 
+							   "tree":fileviewtree, 
+							   "item":item, 
+							   "donotusecache":true, 
+							   "callbackobject":get_node("/root/Spatial/PlanViewSystem"), 
+							   "callbackfunction":"actunrolltree"
+							 }
+	if filetreeresource != null:
+		nonimagedataobject["filetreeresource"] = filetreeresource
+		if filetreeresource.get("type") == "caddyfiles":
+			nonimagedataobject["headers"] = [ "accept: application/json" ]
+	fetchnonimagedataobject(nonimagedataobject)
+
 		
 func fetchpaperdrawing(paperdrawing):
-	print(" ****yaaaaaa ", paperdrawing.xcresource)
+	#print(" ****yaaaaaa ", paperdrawing.xcresource)
 	var fetcheddrawingfile = "res://guimaterials/imagefilefailure.png"
 	if paperdrawing.xcresource.begins_with("http"):
 		fetcheddrawingfile = imgdir+getshortimagename(paperdrawing.xcresource, true, 12)
