@@ -333,6 +333,7 @@ func _ready():
 
 	$RealPlanCamera.set_as_toplevel(true)
 	planviewcontrols.get_node("ZoomView/ButtonCentre").connect("pressed", self, "buttoncentre_pressed")
+	planviewcontrols.get_node("ViewSlide/ButtonFollow").connect("toggled", self, "buttonfollow_toggled")
 	planviewcontrols.get_node("ViewSlide/ButtonElev").connect("toggled", self, "buttonelev_toggled")
 	planviewcontrols.get_node("ButtonClosePlanView").connect("pressed", self, "buttonclose_pressed")
 	planviewcontrols.get_node("CheckBoxPlanTubesVisible").connect("pressed", self, "checkboxplantubesvisible_pressed")
@@ -661,6 +662,19 @@ func _process(delta):
 													(1 - cos(droty))*plancamera.transform.basis.z + \
 													sin(droty)*plancamera.transform.basis.x 
 
+	if planviewcontrols.get_node("ViewSlide/ButtonFollow").is_pressed():
+		if planviewpositiondict.empty():
+			var headcam = selfSpatial.playerMe.get_node("HeadCam")
+			var lelevrotpoint = headcam.global_transform.origin
+			var cameradistvec = plancamera.translation - lelevrotpoint
+			var lelevcameradist = plancamera.transform.basis.z.dot(cameradistvec)
+			lelevcameradist = clamp(5, 60, lelevcameradist)
+			planviewpositiondict["plancamerapos"] = lelevrotpoint + plancamera.transform.basis.z*lelevcameradist
+			planviewpositiondict["plancameraelevrotpoint"] = lelevrotpoint 
+			planviewpositiondict["plancameraelevcameradist"] = lelevcameradist
+			planviewpositiondict["plancamerafogdepthbegin"] = lelevcameradist*2 
+			planviewpositiondict["plancamerafogdepthend"] = lelevcameradist*4 
+
 	if not planviewpositiondict.empty():
 		actplanviewdict(planviewpositiondict) 
 
@@ -715,6 +729,16 @@ func _process(delta):
 			print("sending lastoptionaltxcdata ", lastoptionaltxcdata["name"])
 			sketchsystem.actsketchchange([lastoptionaltxcdata])
 			lastoptionaltxcdata.clear()
+
+
+
+
+	
+func buttonfollow_toggled(button_pressed):
+	planviewcontrols.get_node("ViewSlide/ButtonSlideDown").disabled = button_pressed
+	planviewcontrols.get_node("ViewSlide/ButtonSlideLeft").disabled = button_pressed
+	planviewcontrols.get_node("ViewSlide/ButtonSlideRight").disabled = button_pressed
+	planviewcontrols.get_node("ViewSlide/ButtonSlideUp").disabled = button_pressed
 
 	
 func buttoncentre_pressed():

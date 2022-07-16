@@ -1905,6 +1905,7 @@ extents = Vector2( 500, 500 )
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
 enablevr = false
+forcephoneoverlay = true
 
 [node name="Players" type="Spatial" parent="."]
 
@@ -2408,6 +2409,17 @@ margin_top = 69.0
 margin_right = 166.0
 margin_bottom = 93.0
 text = "Elev!!!"
+
+[node name="ButtonFollow" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ViewSlide"]
+margin_left = 66.8433
+margin_top = 3.57831
+margin_right = 89.8433
+margin_bottom = 29.5783
+toggle_mode = true
+text = "F"
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="ZoomView" type="Control" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
 material = SubResource( 75 )
@@ -4433,3 +4445,5 @@ __meta__ = {
 [node name="Lidarmodel" type="Spatial" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 13, 2.5, -6 )
 visible = false
+
+[node name="Camera2D" type="Camera2D" parent="Lidarmodel"]
