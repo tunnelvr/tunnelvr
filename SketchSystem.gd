@@ -67,6 +67,7 @@ func sketchsystemtodict(stripruntimedataforsaving):
 						 }
 	var playerMe = get_node("/root/Spatial").playerMe
 	sketchdatadict["playerMe"] = { "playerplatform":playerMe.playerplatform,
+								   "playername":playerMe.playerhumanname,
 								   "tunnelvrversion":Tglobal.tunnelvrversion, 
 								   "datetime":OS.get_datetime(),
 								   "transformpos":playerMe.global_transform, 

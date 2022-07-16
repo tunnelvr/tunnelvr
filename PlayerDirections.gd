@@ -15,6 +15,8 @@ var playerdirectedflight = false
 var playerdirectedflightvelocity = Vector3(0,0,0)
 var playerdirectedwalkingvelocity = Vector3(0,0,0)
 
+var colocatedplayer = null
+
 var forceontogroundtimedown = 0
 var floorprojectdistance = 10
 

@@ -2,6 +2,7 @@ extends Spatial
 
 var networkID = 0
 var playerplatform = ""
+var playerhumanname = ""
 var playertunnelvrversion = ""
 var playeroperatingsystem = ""
 var playeruimode = ""
@@ -20,6 +21,7 @@ const gogglescolourghostly = Color("#1b7682")
 remote func initplayerappearanceJ(playerappearance):
 	playerplatform = playerappearance.get("playerplatform", "unknown")
 	var headcolour = playerappearance.get("playerheadcolour", Color.white)
+	playerhumanname = playerappearance.get("playername", "")
 	playertunnelvrversion = playerappearance.get("tunnelvrversion", "unknown")
 	executingfeaturesavailable = playerappearance.get("executingfeaturesavailable", [ ])
 	playeroperatingsystem = playerappearance.get("playeroperatingsystem", "unknown")
@@ -44,6 +46,7 @@ remote func initplayerappearanceJ(playerappearance):
 	else:
 		get_node("HeadCam/visorline").visible = false
 	get_node("/root/Spatial/MQTTExperiment").mqttupdatenetstatus()
+	guipanel3d.updateplayerlist()
 	
 # reltime is localtime - remotetime.  More delay means message sent earlier, means bigger number. Find smallest filtering any outliers
 var relativetimeminmax = 0

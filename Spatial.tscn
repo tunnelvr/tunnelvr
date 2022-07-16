@@ -1905,7 +1905,6 @@ extents = Vector2( 500, 500 )
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
 enablevr = false
-forcephoneoverlay = true
 
 [node name="Players" type="Spatial" parent="."]
 
@@ -3062,10 +3061,10 @@ __meta__ = {
 }
 
 [node name="SwitchTest" type="OptionButton" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 22.0
-margin_top = 235.0
-margin_right = 116.0
-margin_bottom = 262.0
+margin_left = 20.2162
+margin_top = 245.108
+margin_right = 114.216
+margin_bottom = 272.108
 text = "normal"
 items = [ "normal", null, false, 0, null, "Hide XCs", null, false, 1, null, "opt: all grey", null, false, 2, null, "opt: hide xc", null, false, 3, null, "toggle guardian", null, false, 4, null, "export OBJ", null, false, 7, null, "choke", null, false, 6, null, "swap controllers", null, false, 7, null, "lock controls", null, false, 8, null, "toggle gltf", null, false, 10, null, "Huge Spiral", null, true, 11, null ]
 selected = 0
@@ -3096,27 +3095,26 @@ __meta__ = {
 }
 
 [node name="PlayerList" type="OptionButton" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 66.0
-margin_top = 208.0
-margin_right = 143.0
-margin_bottom = 231.0
-text = "server"
-items = [ "server", null, false, 0, null ]
+margin_left = 107.622
+margin_top = 218.108
+margin_right = 184.622
+margin_bottom = 241.108
+text = "player0"
+items = [ "player0", null, false, 0, null ]
 selected = 0
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ButtonGoto" type="Button" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 21.0
-margin_top = 204.0
-margin_right = 64.0
-margin_bottom = 232.0
+[node name="OptionButtonGoto" type="OptionButton" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
+margin_left = 17.0
+margin_top = 218.0
+margin_right = 89.0
+margin_bottom = 240.0
 rect_pivot_offset = Vector2( 111.073, 28.0005 )
-text = "Goto"
-__meta__ = {
-"_edit_use_anchors_": false
-}
+text = "-locate"
+items = [ "-locate", null, false, 0, null, "Goto", null, false, 1, null, "Fetch", null, false, 2, null, "Colocate", null, false, 3, null ]
+selected = 0
 
 [node name="PlayerInfo" type="Label" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
 margin_left = 145.227

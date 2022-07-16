@@ -569,7 +569,7 @@ func toplevelcalled_ready():
 	
 	$Viewport/GUI/Panel/SwitchTest.connect("item_selected", self, "_on_switchtest")
 	$Viewport/GUI/Panel/PlayerList.connect("item_selected", self, "_on_playerlist_selected")
-	$Viewport/GUI/Panel/ButtonGoto.connect("pressed", self, "_on_buttongoto_pressed")
+	$Viewport/GUI/Panel/OptionButtonGoto.connect("item_selected", self, "_on_optionbuttongoto_selected")
 	$Viewport/GUI/Panel/WorldScale.connect("item_selected", self, "_on_playerscale_selected")
 	$Viewport/GUI/Panel/Networkstate.connect("item_selected", self, "_on_networkstate_selected")
 	$Viewport/GUI/Panel/ResourceOptions.connect("item_selected", self, "_on_resourceoptions_selected")
@@ -620,12 +620,31 @@ remote func playerjumpgoto(puppetplayerid, lforcetogroundtimedown):
 	else:
 		print("Not able to playerjumpto ", puppetplayername)
 
-func _on_buttongoto_pressed():
-	if selectedplayernetworkid == playerMe.networkID:
-		if playerMe.networkID != 1 and Tglobal.connectiontoserveractive:
-			rpc_id(1, "playerjumpgoto", playerMe.networkID, 0.5)
-	elif selectedplayernetworkid != -1:
-		playerjumpgoto(selectedplayernetworkid, 0.5)
+func _on_optionbuttongoto_selected(index):
+	var optiongoto = $Viewport/GUI/Panel/OptionButtonGoto.get_item_text(index)
+	if optiongoto == "Goto":
+		if selectedplayernetworkid != -1:
+			playerjumpgoto(selectedplayernetworkid, 0.5)
+		$Viewport/GUI/Panel/OptionButtonGoto.selected = 0
+	if optiongoto == "Fetch":
+		if Tglobal.connectiontoserveractive:
+			rpc_id(selectedplayernetworkid, "playerjumpgoto", playerMe.networkID, 0.5)
+		$Viewport/GUI/Panel/OptionButtonGoto.selected = 0
+		
+	var PlayerDirections = get_node("/root/Spatial/BodyObjects/PlayerDirections")
+	if optiongoto == "Colocate":
+		var playername = "NetworkedPlayer"+String(selectedplayernetworkid)
+		var player = get_node("/root/Spatial/Players").get_node_or_null(playername)
+		if player != null and player != playerMe: 
+			PlayerDirections.colocatedplayer = player
+			$Viewport/GUI/Panel/PlayerList.disabled = true
+		else:
+			$Viewport/GUI/Panel/OptionButtonGoto.selected = 0
+	else:
+		PlayerDirections.colocatedplayer = null
+		$Viewport/GUI/Panel/PlayerList.disabled = false
+
+
 	setguipanelhide()
 
 remote func copyacrosstextedit(text):
@@ -667,45 +686,58 @@ func getflagsignofnodeselected():
 		$Viewport/GUI/Panel/EditColorRect/TextEdit.text = additionalproperties.get("flagsignlabels", {}).get(nodename, "")
 	
 				
-var selectedplayernetworkid = 0
+var selectedplayernetworkid = -1
 var selectedplayerplatform = ""
+var playerlistnetworkIDs = [ ]
 func _on_playerlist_selected(index):
-	var player = get_node("/root/Spatial/Players").get_child(index)
+	var player = null
+	if index < len(playerlistnetworkIDs):
+		selectedplayernetworkid = playerlistnetworkIDs[index]
+		var lplayername = "NetworkedPlayer"+String(selectedplayernetworkid)
+		player = get_node("/root/Spatial/Players").get_node_or_null(lplayername)
+		if player == null and selectedplayernetworkid == 0:
+			player = playerMe
+	else:
+		selectedplayernetworkid = -1
 	if player != null:
-		selectedplayernetworkid = player.networkID
 		selectedplayerplatform = player.playerplatform
 		$Viewport/GUI/Panel/PlayerInfo.text = "%s:%d" % [selectedplayerplatform, selectedplayernetworkid]
 		netlinkstatstimer = -3.0
 		networkmetricsreceived = null
-		$Viewport/GUI/Panel/ButtonGoto.disabled = selectedplayernetworkid == playerMe.networkID and playerMe.networkID == 1
-
+		$Viewport/GUI/Panel/OptionButtonGoto.set_item_disabled(1, selectedplayernetworkid == playerMe.networkID)
+		$Viewport/GUI/Panel/OptionButtonGoto.set_item_disabled(2, selectedplayernetworkid == playerMe.networkID)
+		$Viewport/GUI/Panel/OptionButtonGoto.set_item_disabled(3, selectedplayernetworkid == playerMe.networkID)
+		$Viewport/GUI/Panel/OptionButtonGoto.set_item_disabled(4, true)
 	else:
 		selectedplayernetworkid = -1
 		selectedplayerplatform = ""
 		$Viewport/GUI/Panel/PlayerInfo.text = String("updating")
-		updateplayerlist()
-		$Viewport/GUI/Panel/ButtonGoto.disabled = true
+		$Viewport/GUI/Panel/OptionButtonGoto.set_item_disabled(1, true)
+		$Viewport/GUI/Panel/OptionButtonGoto.set_item_disabled(2, true)
+		$Viewport/GUI/Panel/OptionButtonGoto.set_item_disabled(3, true)
+		$Viewport/GUI/Panel/OptionButtonGoto.set_item_disabled(4, true)
 		
-	
 func updateplayerlist():
-	var selectedplayerindex = 0
+	var selectedplayerindex = -1
 	$Viewport/GUI/Panel/PlayerList.clear()
+	playerlistnetworkIDs.clear()
 	for player in get_node("/root/Spatial/Players").get_children():
-		var playername
+		var lplayername = player.playerhumanname
+		if player.networkID == 1:
+			lplayername = "&"+lplayername
 		if player == playerMe:
-			playername = "me"
-		elif player == playerMe.doppelganger:
-			playername = "doppel"
-		elif player.networkID == 1:
-			playername = "server"
-		else:
-			playername = "player%d" % player.get_index()
-		$Viewport/GUI/Panel/PlayerList.add_item(playername)
-		
+			lplayername = "*"+lplayername
+		if player == playerMe.doppelganger:
+			lplayername = "doppelganger"
+		$Viewport/GUI/Panel/PlayerList.add_item(lplayername)
+		playerlistnetworkIDs.push_back(player.networkID)
 		if player.networkID == selectedplayernetworkid:
 			selectedplayerindex = player.get_index()
-
-	$Viewport/GUI/Panel/PlayerList.select(selectedplayerindex)
+	if selectedplayerindex == -1:
+		$Viewport/GUI/Panel/PlayerList.selected = 0
+		_on_playerlist_selected(0)
+	else:
+		$Viewport/GUI/Panel/PlayerList.selected = selectedplayerindex
 	
 
 func setguipanelvisible(controller_global_transform):
@@ -1064,11 +1096,13 @@ func _on_resourceoptions_selected(index):
 				elif jresource.get("type") != "localfiles":
 					ltext = "Err: must be type localfiles"
 				elif not jresource.get("playername"):
-					ltext = "Err: must have playername"
+					ltext = "Err: must have human playername"
 				elif jresource.get("unique_id") and jresource["unique_id"] != OS.get_unique_id():
 					ltext = "Err: unique_id mismatch"
 				else:
 					GithubAPI.riattributes["resourcedefs"][jresource["name"]] = jresource
+					playerMe.playerhumanname = jresource.get("playername", "")
+
 			elif jresource.get("type") == "erase" or jresource.get("type") == "delete":
 				GithubAPI.riattributes["resourcedefs"].erase(jresource["name"])
 				ltext = "resource deleted"
@@ -1336,6 +1370,8 @@ func _connection_failed():
 		assert (len(selfSpatial.deferred_player_connected_list) == 0)
 		assert (len(selfSpatial.players_connected_list) == 0)
 	$Viewport/GUI/Panel/Label.text = "connection_failed"
+	if $Viewport/GUI/Panel/Networkstate.selected != 0:
+		$Viewport/GUI/Panel/Networkstate.selected = 0
 
 func removeallplayersdisconnection():
 	selfSpatial.deferred_player_connected_list.clear()

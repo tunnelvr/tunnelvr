@@ -132,6 +132,8 @@ func _physics_process(delta):
 				process_projectontoground(delta, PlayerDirections.floorprojectdistance)
 		else:
 			HeadFloorprojectWarning.visible = true
+	elif is_instance_valid(PlayerDirections.colocatedplayer):
+		playerMe.transform.origin = PlayerDirections.colocatedplayer.transform.origin
 	elif PlayerDirections.playerdirectedflight:
 		process_directedflight(delta, PlayerDirections.playerdirectedflightvelocity)
 	elif playerinfreefall:
