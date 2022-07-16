@@ -2784,18 +2784,17 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="CheckBoxBackfaceCull" type="CheckBox" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
+[node name="OptionsBackfaceCull" type="OptionButton" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
 anchor_right = 0.015
 anchor_bottom = 0.24
-margin_left = 575.316
-margin_top = 25.5254
-margin_right = 655.316
-margin_bottom = 25.5254
+margin_left = 657.0
+margin_top = 6.0
+margin_right = 755.0
+margin_bottom = 4.0
 rect_pivot_offset = Vector2( 100.162, 19.0063 )
-text = "backface cull"
-__meta__ = {
-"_edit_use_anchors_": false
-}
+text = "Normal Solid"
+items = [ "Normal Solid", null, false, 0, null, "Backface Cull", null, false, 1, null, "Cartoon Colour", null, false, 2, null ]
+selected = 0
 
 [node name="CheckBoxCentrelinesVisible" type="CheckBox" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
 anchor_right = 0.015

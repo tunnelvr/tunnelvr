@@ -558,7 +558,7 @@ func _on_textedit_focus_exited():
 const clientips = [ "Local-network",
 					#"192.168.43.193 JulianS9",
 					#"10.0.32.206",
-					#"127.0.0.1",
+					"127.0.0.1",
 					"godot.doesliverpool.xyz" ]
 var uniqueinstancestring = ""
 func toplevelcalled_ready():

@@ -28,7 +28,7 @@ var clearcachebuttontex = null
 var f3dbuttontex = null
 
 var filetreeresourcename = null
-var materialsettobackfacecull = false
+var materialsettobackfacecullcartoon = 0
 
 func getactivetargetfloorViz(newactivetargetfloorname: String):
 	var xcviz = { "prevxcvizstates":{ }, "xcvizstates":{ } }
@@ -305,10 +305,10 @@ func checkboxrealtubesvisible_pressed():
 
 
 
-func checkboxbackfacecull_pressed():
+func optionsbackfacecull_selected(backfacecull_index):
 	var pvchange = planviewtodict()
-	pvchange["backfacecull"] = planviewcontrols.get_node("CheckBoxBackfaceCull").pressed
-	actplanviewdict(pvchange) 
+	pvchange["backfacecull"] = backfacecull_index
+	actplanviewdict(pvchange)
 	
 func buttontransmitview_pressed():
 	if planviewcontrols.get_node("ButtonTransmitView").pressed:
@@ -339,7 +339,7 @@ func _ready():
 	planviewcontrols.get_node("CheckBoxPlanTubesVisible").connect("pressed", self, "checkboxplantubesvisible_pressed")
 	planviewcontrols.get_node("CheckBoxRealTubesVisible").connect("pressed", self, "checkboxrealtubesvisible_pressed")
 	planviewcontrols.get_node("CheckBoxCentrelinesVisible").connect("pressed", self, "checkcentrelinesvisible_pressed")
-	planviewcontrols.get_node("CheckBoxBackfaceCull").connect("pressed", self, "checkboxbackfacecull_pressed")
+	planviewcontrols.get_node("OptionsBackfaceCull").connect("item_selected", self, "optionsbackfacecull_selected")
 	planviewcontrols.get_node("ButtonTransmitView").connect("pressed", self, "buttontransmitview_pressed")
 	planviewcontrols.get_node("FloorMove/FloorStyle").connect("item_selected", self, "floorstyle_itemselected")
 	planviewcontrols.get_node("CheckBoxFileTree").connect("toggled", self, "checkboxfiletree_toggled")
@@ -381,7 +381,7 @@ func planviewtodict():
 			 "plancamerafogdepthend":plancamera.environment.fog_depth_end, 
 			 "plancamerarotation":plancamera.rotation_degrees,
 			 "plancamerasize":plancamera.size,
-			 "backfacecull":materialsettobackfacecull,
+			 "backfacecull":materialsettobackfacecullcartoon,
 			}
 
 func planviewcameratodict():
@@ -504,11 +504,40 @@ func actplanviewdict(pvchange, resettransmitbutton=true):
 		planviewcontrols.get_node("CheckBoxPlanTubesVisible").pressed = pvchange["plantubesvisible"]
 		setcameracullmasks(pvchange["centrelinesvisible"], pvchange["plantubesvisible"])
 			
-	if "backfacecull" in pvchange and materialsettobackfacecull != pvchange["backfacecull"]:
+	if "backfacecull" in pvchange and materialsettobackfacecullcartoon != pvchange["backfacecull"]:
 		var materialsystem = get_node("/root/Spatial/MaterialSystem")
-		materialsettobackfacecull = pvchange["backfacecull"]
-		planviewcontrols.get_node("CheckBoxBackfaceCull").pressed = materialsettobackfacecull
-		materialsystem.setallbackfacecull(SpatialMaterial.CULL_BACK if materialsettobackfacecull else SpatialMaterial.CULL_DISABLED)
+		planviewcontrols.get_node("OptionsBackfaceCull").selected = pvchange["backfacecull"]
+		if pvchange["backfacecull"] == 2:
+			var tunnelxoutline = sketchsystem.get_node("tunnelxoutline")
+			var unifiedclosedmesh = Polynets.unifiedclosedmeshwithnormals(sketchsystem.get_node("XCtubes").get_children(), sketchsystem.get_node("XCdrawings").get_children())
+			var blackoutline = tunnelxoutline.get_node("blackoutline")
+			var whiteinfill = tunnelxoutline.get_node("whiteinfill")
+
+			blackoutline.mesh = unifiedclosedmesh
+			whiteinfill.mesh = unifiedclosedmesh
+			settunnelxoutlineshadervalues()
+			tunnelxoutline.visible = true
+			sketchsystem.get_node("XCtubes").visible = false
+			for xcdrawing in sketchsystem.get_node("XCdrawings").get_children():
+				if xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING and xcdrawing.has_node("XCflatshell") and xcdrawing.xcflatshellmaterial != "hole":
+					xcdrawing.get_node("XCflatshell").visible = false
+				
+		else:
+			if materialsettobackfacecullcartoon == 2:
+				sketchsystem.get_node("tunnelxoutline").visible = false
+				sketchsystem.get_node("XCtubes").visible = true
+				for xcdrawing in sketchsystem.get_node("XCdrawings").get_children():
+					if xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING and xcdrawing.has_node("XCflatshell") and xcdrawing.xcflatshellmaterial != "hole":
+						xcdrawing.get_node("XCflatshell").visible = true
+				get_node("/root/Spatial/VerletRopeSystem").update_hangingroperad(sketchsystem, -1.0)
+
+			if pvchange["backfacecull"] == 0:
+				materialsystem.setallbackfacecull(SpatialMaterial.CULL_DISABLED)
+			if pvchange["backfacecull"] == 1:
+				materialsystem.setallbackfacecull(SpatialMaterial.CULL_BACK)
+		materialsettobackfacecullcartoon = pvchange["backfacecull"]
+		
+		
 
 	if "realtubesvisible" in pvchange and Tglobal.hidecavewallstoseefloors != (not pvchange["realtubesvisible"]):
 		planviewcontrols.get_node("CheckBoxRealTubesVisible").pressed = pvchange["realtubesvisible"]
