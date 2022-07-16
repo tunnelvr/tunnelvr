@@ -437,13 +437,12 @@ func _on_switchtest(index):
 		var materialsystem = get_node("/root/Spatial/MaterialSystem")
 		var n = 0
 		var showall = (nssel == "normal")
-		if nssel != "opt: tunnelx":
-			for xcdrawing in sketchsystem.get_node("XCdrawings").get_children():
-				if xcdrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
-					if true or (xcdrawing.drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_GHOSTLY_B) != 0:
-						xcdrawing.get_node("XCdrawingplane").visible = showall
-						n += 1
-			print("Number of floor textures hidden: ", n)
+		for xcdrawing in sketchsystem.get_node("XCdrawings").get_children():
+			if xcdrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
+				if true or (xcdrawing.drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_GHOSTLY_B) != 0:
+					xcdrawing.get_node("XCdrawingplane").visible = showall
+					n += 1
+		print("Number of floor textures hidden: ", n)
 		if nssel == "opt: all grey":
 			for xctube in sketchsystem.get_node("XCtubes").get_children():
 				for xctubesector in xctube.get_node("XCtubesectors").get_children():
@@ -453,30 +452,6 @@ func _on_switchtest(index):
 		elif nssel == "normal":
 			sketchsystem.get_node("XCdrawings").visible = true
 	
-		if nssel == "opt: tunnelx":
-			var tunnelxoutline = sketchsystem.get_node("tunnelxoutline")
-			var unifiedclosedmesh = Polynets.unifiedclosedmeshwithnormals(sketchsystem.get_node("XCtubes").get_children(), sketchsystem.get_node("XCdrawings").get_children())
-			var blackoutline = tunnelxoutline.get_node("blackoutline")
-			var whiteinfill = tunnelxoutline.get_node("whiteinfill")
-			var plancamera = get_node("/root/Spatial/PlanViewSystem/PlanView/Viewport/PlanGUI/Camera")
-
-			blackoutline.mesh = unifiedclosedmesh
-			whiteinfill.mesh = unifiedclosedmesh
-			get_node("/root/Spatial/PlanViewSystem").settunnelxoutlineshadervalues()
-			tunnelxoutline.visible = true
-			sketchsystem.get_node("XCtubes").visible = false
-			for xcdrawing in sketchsystem.get_node("XCdrawings").get_children():
-				if xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING and xcdrawing.has_node("XCflatshell") and xcdrawing.xcflatshellmaterial != "hole":
-					xcdrawing.get_node("XCflatshell").visible = false
-				
-		elif prevnssel == "opt: tunnelx":
-			sketchsystem.get_node("tunnelxoutline").visible = false
-			sketchsystem.get_node("XCtubes").visible = true
-			for xcdrawing in sketchsystem.get_node("XCdrawings").get_children():
-				if xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING and xcdrawing.has_node("XCflatshell") and xcdrawing.xcflatshellmaterial != "hole":
-					xcdrawing.get_node("XCflatshell").visible = true
-			get_node("/root/Spatial/VerletRopeSystem").update_hangingroperad(sketchsystem, -1.0)
-
 		setguipanelhide()
 				
 	prevnssel = nssel
