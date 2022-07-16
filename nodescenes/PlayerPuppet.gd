@@ -253,6 +253,8 @@ func process_puppetplanviewcamerastack(delta):
 	if len(puppetplanviewcamerastack) == 0 or t < puppetplanviewcamerastack[0]["Ltimestamp"]:
 		return
 	var pp = puppetplanviewcamerastack[0]
+	$LaserOrient.visible = false
+	$LaserSelectLine.visible = false
 	if pp.has("plancameratrans") and pp.has("plancamerasize"):
 		var playermeposition = get_parent().get_parent().playerMe.get_node("HeadCam").global_transform.origin
 		var relcameraposition = pp["plancameratrans"].origin - playermeposition
@@ -272,6 +274,7 @@ func process_puppetpointerpositionstack(delta):
 	var pp = puppetpointerpositionstack[0]
 	if len(puppetpointerpositionstack) == 1:
 		$LaserOrient.transform = pp["orient"]
+		$LaserOrient.visible = true
 		$LaserOrient/Length.scale.z = pp["length"]
 		if "laserselectline" in pp:
 			$LaserSelectLine.global_transform = pp["laserselectline"]["global_transform"]
