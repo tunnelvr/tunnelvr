@@ -469,15 +469,20 @@ func setpointertarget(laserroot, raycast, pointertargetshortdistance):
 		laserroot.get_node("LaserSpot").global_transform.origin = pointertargetpoint
 		if laserspot.visible:
 			if laserroot == LaserOrient:
-				var collisionnormal = raycast.get_collision_normal()
-				laserspot.get_node("LaserContactDisc").global_transform = laserspot.global_transform.looking_at(laserspot.global_transform.origin + collisionnormal*10, Vector3(0,1,0))
+				var LaserContactDisc = laserspot.get_node("LaserContactDisc")
+				if newpointertarget != null:
+					var collisionnormal = raycast.get_collision_normal()
+					LaserContactDisc.global_transform = laserspot.global_transform.looking_at(laserspot.global_transform.origin + collisionnormal*10, Vector3(0,1,0))
+					LaserContactDisc.visible = true
+				else:
+					LaserContactDisc.visible = false
 		laserroot.get_node("Length").scale.z = -laserroot.get_node("LaserSpot").translation.z
 	else:
 		laserroot.get_node("Length").scale.z = -laserroot.get_node("RayCast").cast_to.z
 		
 	if laserroot == LaserOrient:
 		if FloorLaserSpot.visible:
-			if pointertargetpoint != null and not (pointertargettype == "XCdrawing" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE) and (pointertarget != guipanel3d) and (pointertargettype != "PlanView"):
+			if pointertargetpoint != null and not (pointertargettype == "XCdrawing" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE) and (pointertarget != guipanel3d) and (pointertargettype != "PlanView") and (Tglobal.handflickmotiongestureposition == handflickmotiongestureposition_normal):
 				FloorLaserSpot.get_node("RayCast").transform.origin = pointertargetpoint
 				FloorLaserSpot.get_node("RayCast").force_raycast_update()
 				if FloorLaserSpot.get_node("RayCast").is_colliding():
