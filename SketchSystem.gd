@@ -214,6 +214,8 @@ remote func actsketchchangeL(xcdatalist):
 			var PlayerDirections = get_node("/root/Spatial/BodyObjects/PlayerDirections")
 			Tglobal.notisloadingcavechunks = false
 			Tglobal.housahedronmode = false
+			get_node("tunnelxoutline").visible = false
+			get_node("/root/Spatial/PlanViewSystem").backfacecartoonValid = false
 			if xcdatalist[0]["sketchname"] != "importing_the_centreline__do_not_clear":
 				clearentirecaveworld()
 			else:
@@ -511,7 +513,6 @@ remote func actsketchchangeL(xcdatalist):
 				print("Now processing ", len(xcdatalistReceivedDuringChunkingL), " received during chunking")
 				for xcdatalistR in xcdatalistReceivedDuringChunkingL:
 					actsketchchangeL(xcdatalistR)
-					
 			get_node("/root/Spatial/MQTTExperiment").mqttupdatenetstatus()
 
 	if len(xcdrawingsrejected) != 0:

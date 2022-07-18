@@ -29,6 +29,7 @@ var f3dbuttontex = null
 
 var filetreeresourcename = null
 var materialsettobackfacecullcartoon = 0
+var backfacecartoonValid = true
 
 func getactivetargetfloorViz(newactivetargetfloorname: String):
 	var xcviz = { "prevxcvizstates":{ }, "xcvizstates":{ } }
@@ -504,7 +505,7 @@ func actplanviewdict(pvchange, resettransmitbutton=true):
 		planviewcontrols.get_node("CheckBoxPlanTubesVisible").pressed = pvchange["plantubesvisible"]
 		setcameracullmasks(pvchange["centrelinesvisible"], pvchange["plantubesvisible"])
 			
-	if "backfacecull" in pvchange and materialsettobackfacecullcartoon != pvchange["backfacecull"]:
+	if "backfacecull" in pvchange and (materialsettobackfacecullcartoon != pvchange["backfacecull"] or not backfacecartoonValid):
 		var materialsystem = get_node("/root/Spatial/MaterialSystem")
 		planviewcontrols.get_node("OptionsBackfaceCull").selected = pvchange["backfacecull"]
 		if pvchange["backfacecull"] == 2:
@@ -536,7 +537,7 @@ func actplanviewdict(pvchange, resettransmitbutton=true):
 			if pvchange["backfacecull"] == 1:
 				materialsystem.setallbackfacecull(SpatialMaterial.CULL_BACK)
 		materialsettobackfacecullcartoon = pvchange["backfacecull"]
-		
+		backfacecartoonValid = true
 		
 
 	if "realtubesvisible" in pvchange and Tglobal.hidecavewallstoseefloors != (not pvchange["realtubesvisible"]):
