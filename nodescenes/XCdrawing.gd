@@ -136,11 +136,8 @@ func makeflaglabels(ptsignroot, ptsigntopy, postrad, flagsigns):
 		if xcn.has_node("FlagLabel"):
 			xcn.get_node("FlagLabel").visible = false
 	for i in range(len(flagsigns)):
-		var flagmsg = flagsigns[i][0]
-		var nodefurthest = flagsigns[i][1]
-		var vecletters = flagsigns[i][2]
-		var veclettersup = flagsigns[i][3]
-		var xcn = get_node("XCnodes").get_node(nodefurthest)
+		var flagsign = flagsigns[i]
+		var xcn = get_node("XCnodes").get_node(flagsign["nodelabelled"])
 		var flaglabel = xcn.get_node_or_null("FlagLabel")
 		if flaglabel == null:
 			var materialsystem = get_node("/root/Spatial/MaterialSystem")
@@ -151,11 +148,11 @@ func makeflaglabels(ptsignroot, ptsigntopy, postrad, flagsigns):
 			flaglabel.set_surface_material(0, mat)
 			xcn.add_child(flaglabel)
 		flaglabel.visible = true
-		var flagbasis = Basis(vecletters, veclettersup, vecletters.cross(veclettersup))
+		var flagbasis = Basis(flagsign["vecletters"], flagsign["veclettersup"], flagsign["vecletters"].cross(flagsign["veclettersup"]))
 		flaglabel.global_transform = Transform(flagbasis, ptsigntop + flagbasis.x*(0*flaglabel.mesh.size.x/2))
 		flaglabel.scale.y = (1 if ptsigntopy > ptsignroot.y else -1)
-		print("fff ", flaglabel.global_transform, flagmsg)
-		var cflagmsg = "[color=#00FFFF]"+flagmsg+"[/color]"
+		print("fff ", flaglabel.global_transform, flagsign["flagmsg"])
+		var cflagmsg = "[color=#00FFFF]"+flagsign["flagmsg"]+"[/color]"
 		labelgenerator.remainingropelabels.push_back([get_name(), xcn.get_name(), cflagmsg])
 		labelgenerator.restartlabelmakingprocess(null)
 
@@ -201,13 +198,13 @@ func setdrawingvisiblecode(ldrawingvisiblecode):
 									#
 			elif signseqax != null:
 				print("signseqax ", signseqax)
-				var signshellmesh = Polynets.makesignpostshellmesh(self, signseqax[0], signseqax[1], 0.041)
+				var signshellmesh = Polynets.makesignpostshellmesh(self, signseqax["ptsignroot"], signseqax["ptsigntop"], 0.041)
 				updatexcshellmesh(signshellmesh)
-				makeflaglabels(signseqax[0], signseqax[1], 0.041, signseqax[2])
+				makeflaglabels(signseqax["ptsignroot"], signseqax["ptsigntop"], 0.041, signseqax["flagsigns"])
 				$RopeHang.visible = false
 				$PathLines.visible = false
 				for xcn in $XCnodes.get_children():
-					xcn.visible = (signseqax[3].find(xcn.get_name()) != -1)
+					xcn.visible = (signseqax["nohideaxisnodes"].find(xcn.get_name()) != -1)
 					xcn.get_node("CollisionShape").disabled = not xcn.visible
 				ropehangdetectedtype = DRAWING_TYPE.RH_FLAGSIGN
 

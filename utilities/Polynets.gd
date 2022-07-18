@@ -458,9 +458,15 @@ static func signpostfromropenodesequences(nodepoints, ropeseqs, flagsignlabels):
 				veclettersup = Vector3(-vecletters.x/vecletters2d*vecletters.y, vecletters2d, -vecletters.z/vecletters2d*vecletters.y)
 			else:
 				veclettersup = Vector3(1, 0, 0)
-		flagsigns.append([ flagmsg, nodelabelled, vecletters, veclettersup ])
+		flagsigns.append({ "flagmsg":flagmsg, 
+						   "nodelabelled":nodelabelled, 
+						   "vecletters":vecletters, 
+						   "veclettersup":veclettersup })
 
-	return [ptsignroot, ptsigntopy, flagsigns, nohideaxisnodes]
+	return { "ptsignroot":ptsignroot, 
+			 "ptsigntop":ptsigntopy, 
+			 "flagsigns":flagsigns, 
+			 "nohideaxisnodes":nohideaxisnodes }
 
 
 static func makesignpostshellmesh(xcdrawing, ptsignroot, ptsigntopy, postrad):
