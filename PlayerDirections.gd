@@ -20,16 +20,16 @@ var colocatedplayer = null
 var forceontogroundtimedown = 0
 var floorprojectdistance = 10
 
-const playeraudiencedistance = 5.0
-const playeraudiencesidedisplacement = 4.0
-const playerspawnoffsetheight = 3.0
+const playeraudiencedistance = 3.0
+const playeraudiencesidedisplacement = 2.0
+const playerspawnoffsetheight = 1.5
 
 var joyposxrotsnaphysteresis = 0
 var forebackmovementjoystick = DRAWING_TYPE.JOYPOS_LEFTCONTROLLER
 var strafemovementjoystick = DRAWING_TYPE.JOYPOS_LEFTCONTROLLER
 var snapturnemovementjoystick = DRAWING_TYPE.JOYPOS_RIGHTCONTROLLER
 
-func setasaudienceofpuppet(playerpuppet, puppetheadtrans, lforceontogroundtimedown):
+func setasaudienceofpuppet(puppetheadtrans, lforceontogroundtimedown):
 	var puppetheadpos = puppetheadtrans.origin
 	var veceyes = Vector3(puppetheadtrans.basis.z.x, 0, puppetheadtrans.basis.z.z).normalized()
 	var vecperp = Vector3(veceyes.z, 0, -veceyes.x)

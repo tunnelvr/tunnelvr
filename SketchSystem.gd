@@ -226,7 +226,7 @@ remote func actsketchchangeL(xcdatalist):
 				spawnplayerme(xcdatalist[0]["playerMe"])
 				var playerserver = get_node_or_null("/root/Spatial/Players/NetworkedPlayer1")
 				if fromremotecall and playerserver != null and playerserver != playerMe:
-					PlayerDirections.setasaudienceofpuppet(playerserver, xcdatalist[0]["playerMe"]["headtrans"], 30)
+					PlayerDirections.setasaudienceofpuppet(xcdatalist[0]["playerMe"]["headtrans"], 30)
 				else:
 					PlayerDirections.setatheadtrans(xcdatalist[0]["playerMe"]["headtrans"], 30)
 			caveworldchunking_networkIDsource = xcdatalist[0]["networkIDsource"]

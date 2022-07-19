@@ -616,7 +616,7 @@ remote func playerjumpgoto(puppetplayerid, lforcetogroundtimedown):
 	var puppetplayername = "NetworkedPlayer"+String(puppetplayerid)
 	var playerpuppet = get_node("/root/Spatial/Players").get_node_or_null(puppetplayername)
 	if playerpuppet != null:
-		get_node("/root/Spatial/BodyObjects/PlayerDirections").setasaudienceofpuppet(playerpuppet, playerpuppet.get_node("HeadCam").global_transform, 0.5)
+		get_node("/root/Spatial/BodyObjects/PlayerDirections").setasaudienceofpuppet(playerpuppet.get_node("HeadCam").global_transform, 0.5)
 	else:
 		print("Not able to playerjumpto ", puppetplayername)
 
@@ -625,8 +625,11 @@ func _on_optionbuttongoto_selected(index):
 	if optiongoto == "Goto":
 		if selectedplayernetworkid != -1:
 			playerjumpgoto(selectedplayernetworkid, 0.5)
-		elif selectedflagtrail != null:
-			 print(selectedflagtrail)
+		elif selectedflagtrail != null and selectedflagtrail["flagtrailpoints"]:
+			var playerheadbasis = playerMe.get_node("HeadCam").global_transform.basis
+			playerheadbasis = playerheadbasis.rotated(Vector3(0,1,0), deg2rad(180))
+			get_node("/root/Spatial/BodyObjects/PlayerDirections").setasaudienceofpuppet(Transform(playerheadbasis, selectedflagtrail["flagtrailpoints"][-1]), 0.25)
+		$Viewport/GUI/Panel/OptionButtonGoto.selected = 0
 			
 	if optiongoto == "Fetch":
 		if Tglobal.connectiontoserveractive:
