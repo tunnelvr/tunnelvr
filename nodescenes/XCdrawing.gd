@@ -201,6 +201,9 @@ func setdrawingvisiblecode(ldrawingvisiblecode):
 				var signshellmesh = Polynets.makesignpostshellmesh(self, signseqax["ptsignroot"], signseqax["ptsigntop"], 0.041)
 				updatexcshellmesh(signshellmesh)
 				makeflaglabels(signseqax["ptsignroot"], signseqax["ptsigntop"], 0.041, signseqax["flagsigns"])
+				var sketchsystem = get_node("/root/Spatial/SketchSystem")
+				sketchsystem.updateflagtrails(get_name(), signseqax["flagsigns"])
+
 				$RopeHang.visible = false
 				$PathLines.visible = false
 				for xcn in $XCnodes.get_children():

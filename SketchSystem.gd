@@ -13,6 +13,7 @@ var actsketchchangeundostack = [ ]
 
 var pointersystem = null
 onready var waterlevelsystem = get_node("/root/Spatial/WaterLevelSystem")
+var allflagtrails = [ ]
 
 func _ready():
 	return
@@ -941,3 +942,24 @@ func removeXCtube(xctube):
 		var i = xcdrawing1.xctubesconn.find(xctube)
 		if i != -1:
 			xcdrawing1.xctubesconn.remove(i)
+
+
+func updateflagtrails(xcname, flagsigns):
+	var bflagtrailsupdate = false
+	for i in range(len(allflagtrails)-1, -1, -1):
+		if allflagtrails[i]["xcname"] == xcname:
+			allflagtrails.pop_at(i)
+			bflagtrailsupdate = true
+	for flagsign in flagsigns:
+		if flagsign.get("flagtrail"):
+			var flagopttext = "-"+flagsign["flagmsg"]
+			if len(flagopttext)>10:
+				flagopttext = flagopttext.substr(0,8)+"..."
+			allflagtrails.push_back({ "xcname":xcname, 
+									  "flagmsg":flagsign["flagmsg"], 
+									  "flagtrail":flagsign["flagtrail"], 
+									  "flagopttext":flagopttext })
+			bflagtrailsupdate = true
+	if bflagtrailsupdate:
+		var guipanel3d = get_node("/root/Spatial/GuiSystem/GUIPanel3D")
+		guipanel3d.updateplayerlist()

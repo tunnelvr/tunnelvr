@@ -111,7 +111,7 @@ func setdoppelganger(doppelgangeron):
 		Tglobal.soundsystem.quicksound("PlayerDepart", doppelganger.global_transform.origin)
 		doppelganger.queue_free()
 		doppelganger = null	
-	get_node("/root/Spatial/GuiSystem/GUIPanel3D").updateplayerlist()
+	#get_node("/root/Spatial/GuiSystem/GUIPanel3D").updateplayerlist()
 	
 
 var handflickdistancestack = [ ]

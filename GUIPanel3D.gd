@@ -625,7 +625,9 @@ func _on_optionbuttongoto_selected(index):
 	if optiongoto == "Goto":
 		if selectedplayernetworkid != -1:
 			playerjumpgoto(selectedplayernetworkid, 0.5)
-		$Viewport/GUI/Panel/OptionButtonGoto.selected = 0
+		elif selectedflagtrail != null:
+			 print(selectedflagtrail)
+			
 	if optiongoto == "Fetch":
 		if Tglobal.connectiontoserveractive:
 			rpc_id(selectedplayernetworkid, "playerjumpgoto", playerMe.networkID, 0.5)
@@ -688,9 +690,11 @@ func getflagsignofnodeselected():
 				
 var selectedplayernetworkid = -1
 var selectedplayerplatform = ""
+var selectedflagtrail = null
 var playerlistnetworkIDs = [ ]
 func _on_playerlist_selected(index):
 	var player = null
+	selectedflagtrail = null
 	if index < len(playerlistnetworkIDs):
 		selectedplayernetworkid = playerlistnetworkIDs[index]
 		var lplayername = "NetworkedPlayer"+String(selectedplayernetworkid)
@@ -699,6 +703,10 @@ func _on_playerlist_selected(index):
 			player = playerMe
 	else:
 		selectedplayernetworkid = -1
+		var selectedflagtrailindex = index - len(playerlistnetworkIDs)
+		if 0 <= selectedflagtrailindex and selectedflagtrailindex < len(sketchsystem.allflagtrails):
+			selectedflagtrail = sketchsystem.allflagtrails[selectedflagtrailindex]
+			
 	if player != null:
 		selectedplayerplatform = player.playerplatform
 		$Viewport/GUI/Panel/PlayerInfo.text = "%s:%d" % [selectedplayerplatform, selectedplayernetworkid]
@@ -707,15 +715,29 @@ func _on_playerlist_selected(index):
 		$Viewport/GUI/Panel/OptionButtonGoto.set_item_disabled(1, selectedplayernetworkid == playerMe.networkID)
 		$Viewport/GUI/Panel/OptionButtonGoto.set_item_disabled(2, selectedplayernetworkid == playerMe.networkID)
 		$Viewport/GUI/Panel/OptionButtonGoto.set_item_disabled(3, selectedplayernetworkid == playerMe.networkID)
-		$Viewport/GUI/Panel/OptionButtonGoto.set_item_disabled(4, true)
+	elif selectedflagtrail != null:
+		$Viewport/GUI/Panel/OptionButtonGoto.set_item_disabled(1, false)
+		$Viewport/GUI/Panel/OptionButtonGoto.set_item_disabled(2, true)
+		$Viewport/GUI/Panel/OptionButtonGoto.set_item_disabled(3, false)
+		selectedflagtrail["flagtrailpoints"] = [ ]
+		var xcdrawing = sketchsystem.get_node("XCdrawings").get_node_or_null(selectedflagtrail["xcname"])
+		if xcdrawing != null:
+			for tn in selectedflagtrail["flagtrail"]:
+				var xcn = xcdrawing.get_node("XCnodes").get_node_or_null(tn)
+				if xcn != null:
+					selectedflagtrail["flagtrailpoints"].push_back(xcn.global_transform.origin)
+				else:
+					print("missing flagtrail node ", tn)
+		else:
+			print("missing flag trail point")
+
 	else:
 		selectedplayernetworkid = -1
 		selectedplayerplatform = ""
-		$Viewport/GUI/Panel/PlayerInfo.text = String("updating")
 		$Viewport/GUI/Panel/OptionButtonGoto.set_item_disabled(1, true)
 		$Viewport/GUI/Panel/OptionButtonGoto.set_item_disabled(2, true)
 		$Viewport/GUI/Panel/OptionButtonGoto.set_item_disabled(3, true)
-		$Viewport/GUI/Panel/OptionButtonGoto.set_item_disabled(4, true)
+
 		
 func updateplayerlist():
 	var selectedplayerindex = -1
@@ -731,13 +753,25 @@ func updateplayerlist():
 			lplayername = "doppelganger"
 		$Viewport/GUI/Panel/PlayerList.add_item(lplayername)
 		playerlistnetworkIDs.push_back(player.networkID)
-		if player.networkID == selectedplayernetworkid:
+		if selectedplayernetworkid != -1 and player.networkID == selectedplayernetworkid:
 			selectedplayerindex = player.get_index()
-	if selectedplayerindex == -1:
+
+	var selectedflagtrailindex = -1
+	if len(sketchsystem.allflagtrails) != 0:
+		for i in range(len(sketchsystem.allflagtrails)):
+			var flagtrailm = sketchsystem.allflagtrails[i]
+			$Viewport/GUI/Panel/PlayerList.add_item(flagtrailm["flagopttext"])
+			if selectedflagtrail != null and flagtrailm["xcname"] == selectedflagtrail["xcname"] and flagtrailm["xcname"][-1] == selectedflagtrail["flagtrail"][-1]:
+				selectedflagtrailindex = i
+
+	if selectedplayerindex != -1:
+		$Viewport/GUI/Panel/PlayerList.selected = selectedplayerindex
+	elif selectedflagtrailindex != -1:
+		_on_playerlist_selected(len(playerlistnetworkIDs) + selectedflagtrailindex)
+	else:
 		$Viewport/GUI/Panel/PlayerList.selected = 0
 		_on_playerlist_selected(0)
-	else:
-		$Viewport/GUI/Panel/PlayerList.selected = selectedplayerindex
+	
 	
 
 func setguipanelvisible(controller_global_transform):

@@ -3115,6 +3115,9 @@ rect_pivot_offset = Vector2( 111.073, 28.0005 )
 text = "-locate"
 items = [ "-locate", null, false, 0, null, "Goto", null, false, 1, null, "Fetch", null, false, 2, null, "Colocate", null, false, 3, null ]
 selected = 0
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="PlayerInfo" type="Label" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
 margin_left = 145.227
