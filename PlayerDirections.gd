@@ -169,7 +169,7 @@ func setcolocflagtrailatpos():
 	var ftpindex = len(flagtrailpoints) - 2
 	var ftplambda = 1.0
 	var ftptrailpos = colocatedflagtrail["flagtraillength"]
-	var Lftptrailpos = ftptrailpos
+	var Lftptrailpos = 0.0
 	var distsq = (flagtrailpoints[-1] - pt).length_squared()
 	for i in range(0, len(flagtrailpoints)-1):
 		var pt0 = colocatedflagtrail["flagtrailpoints"][i]
@@ -187,12 +187,15 @@ func setcolocflagtrailatpos():
 				if ldistsq < distsq:
 					ftpindex = i
 					ftplambda = lam
-					ftptrailpos = Lftptrailpos - (1-ftplambda)*vlen
+					ftptrailpos = Lftptrailpos + ftplambda*vlen
 					distsq = ldistsq
-			Lftptrailpos -= vlen
+			Lftptrailpos += vlen
 	colocatedflagtrail["ftpindex"] = ftpindex
 	colocatedflagtrail["ftplambda"] = ftplambda
 	colocatedflagtrail["ftptrailpos"] = ftptrailpos
+	suppresstrailposvaluechanged = true
+	planviewsystem.planviewcontrols.get_node("PathFollow/HSliderTrailpos").value = 100*colocatedflagtrail["ftptrailpos"]/colocatedflagtrail["flagtraillength"]
+	suppresstrailposvaluechanged = false
 	return lerp(flagtrailpoints[ftpindex], flagtrailpoints[ftpindex+1], ftplambda)				
 				
 func advancecolocflagtrailatpos(dist):
@@ -244,28 +247,39 @@ func advancecolocflagtrailatpos(dist):
 	colocatedflagtrail["ftptrailpos"] = ftptrailpos
 	return lerp(flagtrailpoints[ftpindex], flagtrailpoints[ftpindex+1], ftplambda)
 
+const hslidertrailspeeddeadzone = 0.05
 func advancablecolocflagtrail():
 	# introduce a reflectable button so it reverses and goes back if it hits the end for permanent animation
 	if planviewsystem.planviewcontrols.get_node("PathFollow/Tracktrail").pressed:
-		var val = planviewsystem.planviewcontrols.get_node("PathFollow/HSliderTrailspeed").value*0.01
-		if abs(val) > 0.1:
+		var hstval = planviewsystem.planviewcontrols.get_node("PathFollow/HSliderTrailspeed").value
+		var val = hstval*0.01
+		if abs(val) > hslidertrailspeeddeadzone:
 			if val > 0.0:
 				if colocatedflagtrail["ftpindex"] < len(colocatedflagtrail["flagtrailpoints"]) - 2 or colocatedflagtrail["ftplambda"] < 1.0:
+					return true
+				if planviewsystem.planviewcontrols.get_node("PathFollow/Trailbounce").pressed:
+					planviewsystem.planviewcontrols.get_node("PathFollow/HSliderTrailspeed").value = -hstval
 					return true
 			else:
 				if colocatedflagtrail["ftpindex"] > 0 or colocatedflagtrail["ftplambda"] > 0.0:
 					return true
+				if planviewsystem.planviewcontrols.get_node("PathFollow/Trailbounce").pressed:
+					planviewsystem.planviewcontrols.get_node("PathFollow/HSliderTrailspeed").value = -hstval
+					return true
 	return false
 
+var suppresstrailposvaluechanged = false
 func advancecolocflagtrailatposF(fac):
-	var val = planviewsystem.planviewcontrols.get_node("PathFollow/HSliderTrailspeed").value*0.01
+	var hstval = planviewsystem.planviewcontrols.get_node("PathFollow/HSliderTrailspeed").value
+	var val = hstval*0.01
 	var newpos = advancecolocflagtrailatpos(val*fac)
+	suppresstrailposvaluechanged = true
 	planviewsystem.planviewcontrols.get_node("PathFollow/HSliderTrailpos").value = 100*colocatedflagtrail["ftptrailpos"]/colocatedflagtrail["flagtraillength"]
+	suppresstrailposvaluechanged = false
 	return newpos
 	
-	
 func hslidertrailpos_valuechanged(value):
-	if colocatedflagtrail != null:
+	if colocatedflagtrail != null and not suppresstrailposvaluechanged:
 		var val = value/100.0*colocatedflagtrail["flagtraillength"]
 		colocatedflagtrail["ftpindex"] = 0
 		colocatedflagtrail["ftplambda"] = 0.0
