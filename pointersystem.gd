@@ -472,7 +472,7 @@ func setpointertarget(laserroot, raycast, pointertargetshortdistance):
 				var LaserContactDisc = laserspot.get_node("LaserContactDisc")
 				if newpointertarget != null:
 					var collisionnormal = raycast.get_collision_normal()
-					if collisionnormal.length_squared() != 0.0:
+					if collisionnormal.length_squared() == 0.0:
 						print("zero length collisionnormal ", raycast.is_colliding())
 					LaserContactDisc.global_transform = laserspot.global_transform.looking_at(laserspot.global_transform.origin + collisionnormal*10, Vector3(0,1,0))
 					LaserContactDisc.visible = true
@@ -484,7 +484,12 @@ func setpointertarget(laserroot, raycast, pointertargetshortdistance):
 		
 	if laserroot == LaserOrient:
 		if FloorLaserSpot.visible:
-			if pointertargetpoint != null and not (pointertargettype == "XCdrawing" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE) and (pointertarget != guipanel3d) and (pointertargettype != "PlanView") and (Tglobal.handflickmotiongestureposition == handflickmotiongestureposition_normal):
+			if pointertargetpoint != null \
+							and not (pointertargettype == "XCdrawing" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE) \
+							and not (pointertargettype == "XCnode" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_ROPEHANG) \
+							and (pointertarget != guipanel3d) \
+							and (pointertargettype != "PlanView") \
+							and (Tglobal.handflickmotiongestureposition == handflickmotiongestureposition_normal):
 				FloorLaserSpot.get_node("RayCast").transform.origin = pointertargetpoint
 				FloorLaserSpot.get_node("RayCast").force_raycast_update()
 				if FloorLaserSpot.get_node("RayCast").is_colliding():
