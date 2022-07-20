@@ -1905,6 +1905,7 @@ extents = Vector2( 500, 500 )
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
 enablevr = false
+forcephoneoverlay = true
 
 [node name="Players" type="Spatial" parent="."]
 
@@ -2716,25 +2717,70 @@ __meta__ = {
 [node name="PathFollow" type="Control" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
 margin_left = 190.0
 margin_top = 10.0
-margin_right = 350.0
-margin_bottom = 49.0
+margin_right = 387.0
+margin_bottom = 90.0
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Trailname" type="CheckBox" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/PathFollow"]
-margin_right = 71.0
-margin_bottom = 22.0
+[node name="Tracktrail" type="CheckBox" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/PathFollow"]
+margin_left = 7.55951
+margin_top = -5.66962
+margin_right = 97.5595
+margin_bottom = 18.3304
 text = "Track trail"
 
+[node name="Trailname" type="TextEdit" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/PathFollow"]
+margin_left = 112.559
+margin_top = -6.40973
+margin_right = 230.559
+margin_bottom = 16.5903
+text = "trail-name"
+readonly = true
+
+[node name="HSliderTrailpos" type="HSlider" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/PathFollow"]
+margin_left = 28.3304
+margin_top = 43.8898
+margin_right = 147.33
+margin_bottom = 59.8898
+tick_count = 10
+ticks_on_borders = true
+
+[node name="Label" type="Label" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/PathFollow/HSliderTrailpos"]
+margin_left = -32.7579
+margin_top = -5.66962
+margin_right = -1.75793
+margin_bottom = 16.3304
+text = "Pos"
+
 [node name="HSliderTrailspeed" type="HSlider" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/PathFollow"]
-margin_left = 3.0
-margin_top = 25.1622
-margin_right = 128.0
-margin_bottom = 41.1622
+margin_left = 50.0
+margin_top = 18.0
+margin_right = 200.0
+margin_bottom = 34.0
 min_value = -100.0
 tick_count = 3
 ticks_on_borders = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/PathFollow/HSliderTrailspeed"]
+margin_left = -52.9167
+margin_top = -1.89001
+margin_right = -5.91669
+margin_bottom = 20.11
+text = "Speed"
+
+[node name="Trailbounce" type="CheckBox" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/PathFollow"]
+margin_left = 202.436
+margin_top = 15.8989
+margin_right = 278.436
+margin_bottom = 39.8989
+text = "bounce"
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="Scalebar" type="Control" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
 margin_left = 71.0

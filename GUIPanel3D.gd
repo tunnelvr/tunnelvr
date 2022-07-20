@@ -645,11 +645,7 @@ func _on_optionbuttongoto_selected(index):
 				PlayerDirections.colocatedplayer = player
 		elif selectedflagtrail != null:
 			PlayerDirections.colocatedflagtrail = selectedflagtrail
-			var Dpt = PlayerDirections.setcolocflagtrailatpos()
-			for i in range(10):
-				var Dpt1 = PlayerDirections.advancecolocflagtrailatpos(0.5)
-				print((Dpt1 - Dpt).length(), "  ", Dpt1)
-				Dpt = Dpt1
+			PlayerDirections.setcolocflagtrailatpos()
 				
 	else:
 		PlayerDirections.colocatedplayer = null
@@ -731,12 +727,15 @@ func _on_playerlist_selected(index):
 		$Viewport/GUI/Panel/OptionButtonGoto.set_item_disabled(2, true)
 		$Viewport/GUI/Panel/OptionButtonGoto.set_item_disabled(3, false)
 		selectedflagtrail["flagtrailpoints"] = [ ]
+		selectedflagtrail["flagtraillength"] = 0.0
 		var xcdrawing = sketchsystem.get_node("XCdrawings").get_node_or_null(selectedflagtrail["xcname"])
 		if xcdrawing != null:
 			for tn in selectedflagtrail["flagtrail"]:
 				var xcn = xcdrawing.get_node("XCnodes").get_node_or_null(tn)
 				if xcn != null:
 					selectedflagtrail["flagtrailpoints"].push_back(xcn.global_transform.origin)
+					if len(selectedflagtrail["flagtrailpoints"]) >= 2:
+						selectedflagtrail["flagtraillength"] += (selectedflagtrail["flagtrailpoints"][-1] - selectedflagtrail["flagtrailpoints"][-2]).length()
 				else:
 					print("missing flagtrail node ", tn)
 		else:
@@ -751,7 +750,7 @@ func _on_playerlist_selected(index):
 
 	var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
 	var planviewcontrols = planviewsystem.get_node("PlanView/Viewport/PlanGUI/PlanViewControls")
-	planviewcontrols.get_node("PathFollow/Trailname").text = (selectedflagtrail["flagopttext"] if selectedflagtrail != null else "Track trail")
+	planviewcontrols.get_node("PathFollow/Trailname").text = (selectedflagtrail["flagopttext"] if selectedflagtrail != null else "--none")
 		
 func updateplayerlist():
 	var selectedplayerindex = -1

@@ -344,12 +344,15 @@ func _ready():
 	planviewcontrols.get_node("ButtonTransmitView").connect("pressed", self, "buttontransmitview_pressed")
 	planviewcontrols.get_node("FloorMove/FloorStyle").connect("item_selected", self, "floorstyle_itemselected")
 	planviewcontrols.get_node("CheckBoxFileTree").connect("toggled", self, "checkboxfiletree_toggled")
+	var PlayerDirections = get_node("/root/Spatial/BodyObjects/PlayerDirections")
+	planviewcontrols.get_node("PathFollow/HSliderTrailpos").connect("value_changed", PlayerDirections, "hslidertrailpos_valuechanged")
 
 	set_process(visible)
 	assert (planviewcontrols.get_node("CheckBoxPlanTubesVisible").pressed == (($PlanView/Viewport/PlanGUI/Camera.cull_mask & CollisionLayer.VL_xcshells) != 0))
 
 	fileviewtree.connect("button_pressed", self, "fetchbuttonpressed")
 	fileviewtree.connect("item_selected", self, "itemselected")
+
 
 func clearsetupfileviewtree(filetreerootpath):
 	fileviewtree.clear()

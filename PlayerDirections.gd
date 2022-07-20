@@ -168,6 +168,8 @@ func setcolocflagtrailatpos():
 	var flagtrailpoints = colocatedflagtrail["flagtrailpoints"]
 	var ftpindex = len(flagtrailpoints) - 2
 	var ftplambda = 1.0
+	var ftptrailpos = colocatedflagtrail["flagtraillength"]
+	var Lftptrailpos = ftptrailpos
 	var distsq = (flagtrailpoints[-1] - pt).length_squared()
 	for i in range(0, len(flagtrailpoints)-1):
 		var pt0 = colocatedflagtrail["flagtrailpoints"][i]
@@ -176,6 +178,7 @@ func setcolocflagtrailatpos():
 		var pv = pt - pt0
 		var vlensq = v.length_squared()
 		if vlensq != 0.0:
+			var vlen = sqrt(vlensq)
 			var lam = pv.dot(v)/vlensq
 			if lam < 1.0:
 				if lam <= 0.0:
@@ -184,15 +187,19 @@ func setcolocflagtrailatpos():
 				if ldistsq < distsq:
 					ftpindex = i
 					ftplambda = lam
+					ftptrailpos = Lftptrailpos - (1-ftplambda)*vlen
 					distsq = ldistsq
+			Lftptrailpos -= vlen
 	colocatedflagtrail["ftpindex"] = ftpindex
 	colocatedflagtrail["ftplambda"] = ftplambda
+	colocatedflagtrail["ftptrailpos"] = ftptrailpos
 	return lerp(flagtrailpoints[ftpindex], flagtrailpoints[ftpindex+1], ftplambda)				
 				
 func advancecolocflagtrailatpos(dist):
 	var flagtrailpoints = colocatedflagtrail["flagtrailpoints"]
 	var ftpindex = colocatedflagtrail["ftpindex"]
 	var ftplambda = colocatedflagtrail["ftplambda"]
+	var ftptrailpos = colocatedflagtrail["ftptrailpos"]
 	var pt = lerp(flagtrailpoints[ftpindex], flagtrailpoints[ftpindex+1], ftplambda)
 	var ddist = abs(dist)
 	var ddirfore = (dist >= 0.0)
@@ -205,10 +212,13 @@ func advancecolocflagtrailatpos(dist):
 					ftplambda += (ddist/disttoend)*(1.0 - ftplambda)
 				else:
 					ftplambda = 1.0
+				ftptrailpos += ddist
 				break
 			ftplambda = 1.0
 			ddist -= disttoend
+			ftptrailpos += disttoend
 			if ftpindex == len(flagtrailpoints) - 2:
+				ftptrailpos = colocatedflagtrail["flagtraillength"]
 				break
 			ftpindex += 1
 			ftplambda = 0.0
@@ -220,20 +230,23 @@ func advancecolocflagtrailatpos(dist):
 					ftplambda -= (ddist/disttoend)*(ftplambda)
 				else:
 					ftplambda = 0.0
+				ftptrailpos -= ddist
 				break
 			ftplambda = 0.0
 			ddist -= disttoend
 			if ftpindex == 0:
+				ftptrailpos = 0.0
 				break
 			ftpindex -= 1
 			ftplambda = 1.0
 	colocatedflagtrail["ftpindex"] = ftpindex
 	colocatedflagtrail["ftplambda"] = ftplambda
+	colocatedflagtrail["ftptrailpos"] = ftptrailpos
 	return lerp(flagtrailpoints[ftpindex], flagtrailpoints[ftpindex+1], ftplambda)
 
 func advancablecolocflagtrail():
 	# introduce a reflectable button so it reverses and goes back if it hits the end for permanent animation
-	if planviewsystem.planviewcontrols.get_node("PathFollow/Trailname").pressed:
+	if planviewsystem.planviewcontrols.get_node("PathFollow/Tracktrail").pressed:
 		var val = planviewsystem.planviewcontrols.get_node("PathFollow/HSliderTrailspeed").value*0.01
 		if abs(val) > 0.1:
 			if val > 0.0:
@@ -246,5 +259,15 @@ func advancablecolocflagtrail():
 
 func advancecolocflagtrailatposF(fac):
 	var val = planviewsystem.planviewcontrols.get_node("PathFollow/HSliderTrailspeed").value*0.01
-	return advancecolocflagtrailatpos(val*fac)
-		
+	var newpos = advancecolocflagtrailatpos(val*fac)
+	planviewsystem.planviewcontrols.get_node("PathFollow/HSliderTrailpos").value = 100*colocatedflagtrail["ftptrailpos"]/colocatedflagtrail["flagtraillength"]
+	return newpos
+	
+	
+func hslidertrailpos_valuechanged(value):
+	if colocatedflagtrail != null:
+		var val = value/100.0*colocatedflagtrail["flagtraillength"]
+		colocatedflagtrail["ftpindex"] = 0
+		colocatedflagtrail["ftplambda"] = 0.0
+		colocatedflagtrail["ftptrailpos"] = 0.0
+		advancecolocflagtrailatpos(val)
