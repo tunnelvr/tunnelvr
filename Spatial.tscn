@@ -2471,6 +2471,7 @@ __meta__ = {
 }
 
 [node name="FloorTrim" type="Control" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
+visible = false
 material = SubResource( 75 )
 margin_left = 179.691
 margin_top = 6.1189
@@ -2581,6 +2582,7 @@ __meta__ = {
 }
 
 [node name="FloorMove" type="Control" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
+visible = false
 material = SubResource( 75 )
 margin_left = 304.0
 margin_top = 7.0
@@ -2709,6 +2711,29 @@ text = "Paper:"
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="PathFollow" type="Control" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
+margin_left = 190.0
+margin_top = 10.0
+margin_right = 350.0
+margin_bottom = 49.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Trailname" type="CheckBox" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/PathFollow"]
+margin_right = 71.0
+margin_bottom = 22.0
+text = "Track trail"
+
+[node name="HSliderTrailspeed" type="HSlider" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/PathFollow"]
+margin_left = 3.0
+margin_top = 25.1622
+margin_right = 128.0
+margin_bottom = 41.1622
+min_value = -100.0
+tick_count = 3
+ticks_on_borders = true
 
 [node name="Scalebar" type="Control" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
 margin_left = 71.0

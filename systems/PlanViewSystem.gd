@@ -762,6 +762,14 @@ func _process(delta):
 
 
 
+func setfloortrimmode(floorstyleid, floorlabel):
+	var pvisible = (floorstyleid != -1)
+	planviewcontrols.get_node("FloorMove/FloorStyle").selected = max(0, floorstyleid)
+	planviewcontrols.get_node("ColorRectURL/LabelXCresource").text = floorlabel
+	planviewcontrols.get_node("ColorRectURL").visible = pvisible
+	planviewcontrols.get_node("FloorTrim").visible = pvisible
+	planviewcontrols.get_node("FloorMove").visible = pvisible
+	planviewcontrols.get_node("PathFollow").visible = not pvisible
 
 	
 func buttonfollow_toggled(button_pressed):

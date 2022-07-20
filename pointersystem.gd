@@ -472,6 +472,8 @@ func setpointertarget(laserroot, raycast, pointertargetshortdistance):
 				var LaserContactDisc = laserspot.get_node("LaserContactDisc")
 				if newpointertarget != null:
 					var collisionnormal = raycast.get_collision_normal()
+					if collisionnormal.length_squared() != 0.0:
+						print("zero length collisionnormal ", raycast.is_colliding())
 					LaserContactDisc.global_transform = laserspot.global_transform.looking_at(laserspot.global_transform.origin + collisionnormal*10, Vector3(0,1,0))
 					LaserContactDisc.visible = true
 				else:

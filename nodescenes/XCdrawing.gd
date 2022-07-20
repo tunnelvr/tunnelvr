@@ -295,8 +295,8 @@ func setdrawingvisiblecode(ldrawingvisiblecode):
 			setxcdrawingvisiblehideL(true)
 			if planviewsystem.activetargetfloor == self:
 				planviewsystem.activetargetfloor = null
-				planviewsystem.planviewcontrols.get_node("ColorRectURL").visible = false
-				planviewsystem.planviewcontrols.get_node("ColorRectURL/LabelXCresource").text = ""
+				planviewsystem.setfloortrimmode(-1, "")
+
 			$XCdrawingplane.visible = false
 			$XCdrawingplane/CollisionShape.disabled = true
 
@@ -317,9 +317,8 @@ func setdrawingvisiblecode(ldrawingvisiblecode):
 					#floorstyleid = DRAWING_TYPE.FS_UNSHADED
 					floorstyleid = DRAWING_TYPE.FS_GHOSTLY
 					
-				planviewsystem.planviewcontrols.get_node("FloorMove/FloorStyle").selected = floorstyleid
-				planviewsystem.planviewcontrols.get_node("ColorRectURL/LabelXCresource").text = xcresource.replace("%20", " ")
-				planviewsystem.planviewcontrols.get_node("ColorRectURL").visible = true
+				planviewsystem.setfloortrimmode(floorstyleid, xcresource.replace("%20", " "))
+
 				if (drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE_B) != 0:
 					matname = "xcdrawingmaterials/floorborderedactive"
 				elif (drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_GHOSTLY_B) != 0:
@@ -329,8 +328,8 @@ func setdrawingvisiblecode(ldrawingvisiblecode):
 			else:
 				if planviewsystem.activetargetfloor == self:
 					planviewsystem.activetargetfloor = null
-					planviewsystem.planviewcontrols.get_node("ColorRectURL").visible = false
-					planviewsystem.planviewcontrols.get_node("ColorRectURL/LabelXCresource").text = ""
+					planviewsystem.setfloortrimmode(-1, "")
+
 				if (drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_NOSHADE_B) != 0:
 					matname = "xcdrawingmaterials/floorborderedunshaded"
 				elif (drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_GHOSTLY_B) != 0:

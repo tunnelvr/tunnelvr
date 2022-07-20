@@ -629,26 +629,34 @@ func _on_optionbuttongoto_selected(index):
 			var playerheadbasis = playerMe.get_node("HeadCam").global_transform.basis
 			playerheadbasis = playerheadbasis.rotated(Vector3(0,1,0), deg2rad(180))
 			get_node("/root/Spatial/BodyObjects/PlayerDirections").setasaudienceofpuppet(Transform(playerheadbasis, selectedflagtrail["flagtrailpoints"][-1]), 0.25)
-		$Viewport/GUI/Panel/OptionButtonGoto.selected = 0
 			
-	if optiongoto == "Fetch":
+	elif optiongoto == "Fetch":
 		if Tglobal.connectiontoserveractive:
 			rpc_id(selectedplayernetworkid, "playerjumpgoto", playerMe.networkID, 0.5)
-		$Viewport/GUI/Panel/OptionButtonGoto.selected = 0
 		
 	var PlayerDirections = get_node("/root/Spatial/BodyObjects/PlayerDirections")
 	if optiongoto == "Colocate":
-		var playername = "NetworkedPlayer"+String(selectedplayernetworkid)
-		var player = get_node("/root/Spatial/Players").get_node_or_null(playername)
-		if player != null and player != playerMe: 
-			PlayerDirections.colocatedplayer = player
-			$Viewport/GUI/Panel/PlayerList.disabled = true
-		else:
-			$Viewport/GUI/Panel/OptionButtonGoto.selected = 0
+		PlayerDirections.colocatedplayer = null
+		PlayerDirections.colocatedflagtrail = null
+		if selectedplayernetworkid != -1:
+			var playername = "NetworkedPlayer"+String(selectedplayernetworkid)
+			var player = get_node("/root/Spatial/Players").get_node_or_null(playername)
+			if player != null and player != playerMe: 
+				PlayerDirections.colocatedplayer = player
+		elif selectedflagtrail != null:
+			PlayerDirections.colocatedflagtrail = selectedflagtrail
+			var Dpt = PlayerDirections.setcolocflagtrailatpos()
+			for i in range(10):
+				var Dpt1 = PlayerDirections.advancecolocflagtrailatpos(0.5)
+				print((Dpt1 - Dpt).length(), "  ", Dpt1)
+				Dpt = Dpt1
+				
 	else:
 		PlayerDirections.colocatedplayer = null
-		$Viewport/GUI/Panel/PlayerList.disabled = false
-
+		PlayerDirections.colocatedflagtrail = null
+		$Viewport/GUI/Panel/OptionButtonGoto.selected = 0
+		
+	$Viewport/GUI/Panel/PlayerList.disabled = ($Viewport/GUI/Panel/OptionButtonGoto.selected == 2)
 
 	setguipanelhide()
 
@@ -741,6 +749,9 @@ func _on_playerlist_selected(index):
 		$Viewport/GUI/Panel/OptionButtonGoto.set_item_disabled(2, true)
 		$Viewport/GUI/Panel/OptionButtonGoto.set_item_disabled(3, true)
 
+	var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
+	var planviewcontrols = planviewsystem.get_node("PlanView/Viewport/PlanGUI/PlanViewControls")
+	planviewcontrols.get_node("PathFollow/Trailname").text = (selectedflagtrail["flagopttext"] if selectedflagtrail != null else "Track trail")
 		
 func updateplayerlist():
 	var selectedplayerindex = -1
