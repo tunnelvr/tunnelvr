@@ -5,11 +5,21 @@ extends EditorScript
 # Control-Shift X to run this code in the editor
 # *******
 
-var a = [10,20,30]
 func _run():
-	var t = Transform(Vector3(1,0,0), Vector3(0,0,-1), Vector3(0,1,0), Vector3(0,0,0))
-	#print(t.basis.z)
-	for i in range(len(a)-1, -1, -1):
-		print(i)
-		if i == 0:	a.pop_at(i)
-	print(a)
+	var a = -361.0
+	a = 49
+	for i in range(20):
+		a = a - (floor(a/360)*360)
+		var x = rad2deg(Vector2(-1,-1).angle())
+		if x > 180:
+			x -= 180
+		if abs(x + 360 - a) < abs(x + 180 - a):
+			x += 360
+		if abs(x + 180 - a) < abs(x - a):
+			x += 180
+		if abs(x - a) > 1:
+			a += 10 if x > a else -10
+		else:
+			a = x
+		print(x, " ", a)
+		

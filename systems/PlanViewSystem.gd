@@ -703,6 +703,31 @@ func _process(delta):
 			var lelevcameradist = plancamera.transform.basis.z.dot(cameradistvec)
 			lelevcameradist = clamp(5, 60, lelevcameradist)
 			planviewpositiondict["plancamerapos"] = lelevrotpoint + plancamera.transform.basis.z*lelevcameradist
+			if plancamera.rotation_degrees.x == 0.0:
+				var PlayerDirections = get_node("/root/Spatial/BodyObjects/PlayerDirections")
+				if PlayerDirections.colocatedflagtrail != null:
+					var plancamerarotationdegreesy = plancamera.rotation_degrees.y
+					var ftpindex = PlayerDirections.colocatedflagtrail["ftpindex"]
+					var vtvec = PlayerDirections.colocatedflagtrail["flagtrailpoints"][ftpindex+1] - PlayerDirections.colocatedflagtrail["flagtrailpoints"][ftpindex]
+					var vtvec2 = Vector2(vtvec.x, vtvec.z)
+					if vtvec2.length() > 0.5:
+						var a = plancamerarotationdegreesy - (floor(plancamerarotationdegreesy/360)*360)
+						var x = rad2deg(vtvec2.angle())
+						if x > 180:
+							x -= 180
+						if abs(x + 360 - a) < abs(x + 180 - a):
+							x += 360
+						if abs(x + 180 - a) < abs(x - a):
+							x += 180
+						var da = delta*10
+						if abs(x - a) > da*1.1:
+							a += da if x > a else -da
+						else:
+							a = x
+						plancamerarotationdegreesy = a
+						var plancamerabasisy = Vector3(-sin(deg2rad(plancamerarotationdegreesy)), 0.0, -cos(deg2rad(plancamerarotationdegreesy)))
+						planviewpositiondict["plancamerapos"] = lelevrotpoint - plancamerabasisy*elevcameradist
+						planviewpositiondict["plancamerarotation"] = Vector3(0, plancamerarotationdegreesy, 0)
 			planviewpositiondict["plancameraelevrotpoint"] = lelevrotpoint 
 			planviewpositiondict["plancameraelevcameradist"] = lelevcameradist
 			planviewpositiondict["plancamerafogdepthbegin"] = lelevcameradist*2 
