@@ -699,6 +699,7 @@ func _process(delta):
 		if planviewpositiondict.empty():
 			var headcam = selfSpatial.playerMe.get_node("HeadCam")
 			var lelevrotpoint = headcam.global_transform.origin
+			lelevrotpoint -= plancamera.transform.basis.y*(plancamera.size*cameracentreyposfraction)
 			var cameradistvec = plancamera.translation - lelevrotpoint
 			var lelevcameradist = plancamera.transform.basis.z.dot(cameradistvec)
 			lelevcameradist = clamp(5, 60, lelevcameradist)
@@ -729,9 +730,6 @@ func _process(delta):
 						planviewpositiondict["plancamerapos"] = lelevrotpoint - plancamerabasisy*elevcameradist
 						planviewpositiondict["plancamerarotation"] = Vector3(0, plancamerarotationdegreesy, 0)
 			planviewpositiondict["plancameraelevrotpoint"] = lelevrotpoint 
-			planviewpositiondict["plancameraelevcameradist"] = lelevcameradist
-			planviewpositiondict["plancamerafogdepthbegin"] = lelevcameradist*2 
-			planviewpositiondict["plancamerafogdepthend"] = lelevcameradist*4 
 
 	if not planviewpositiondict.empty():
 		actplanviewdict(planviewpositiondict) 
@@ -806,13 +804,15 @@ func buttonfollow_toggled(button_pressed):
 	planviewcontrols.get_node("ViewSlide/ButtonSlideRight").disabled = button_pressed
 	planviewcontrols.get_node("ViewSlide/ButtonSlideUp").disabled = button_pressed
 
-	
+const cameracentreyposfraction = 0.06	
 func buttoncentre_pressed():
 	var headcam = get_node("/root/Spatial").playerMe.get_node("HeadCam")
 	var lelevrotpoint = headcam.global_transform.origin
+	lelevrotpoint -= plancamera.transform.basis.y*(plancamera.size*cameracentreyposfraction)
 	var cameradistvec = plancamera.translation - lelevrotpoint
 	var lelevcameradist = plancamera.transform.basis.z.dot(cameradistvec)
 	lelevcameradist = clamp(5, 60, lelevcameradist)
+	
 	var planviewpositiondict = { "plancamerapos":lelevrotpoint + plancamera.transform.basis.z*lelevcameradist, 
 								 "plancameraelevrotpoint":lelevrotpoint, 
 								 "plancameraelevcameradist":lelevcameradist,

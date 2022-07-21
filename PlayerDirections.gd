@@ -249,7 +249,6 @@ func advancecolocflagtrailatpos(dist):
 
 const hslidertrailspeeddeadzone = 0.05
 func advancablecolocflagtrail():
-	# introduce a reflectable button so it reverses and goes back if it hits the end for permanent animation
 	if planviewsystem.planviewcontrols.get_node("PathFollow/Tracktrail").pressed:
 		var hstval = planviewsystem.planviewcontrols.get_node("PathFollow/HSliderTrailspeed").value
 		var val = hstval*0.01
