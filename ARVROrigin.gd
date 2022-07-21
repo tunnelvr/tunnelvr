@@ -5,6 +5,7 @@ var doppelganger = null
 var networkID = 0
 var playerplatform = ""
 var playeroperatingsystem = ""
+var playerhumanname = ""
 onready var playertunnelvrversion = Tglobal.tunnelvrversion
 var guardianpoly = null
 var executingfeaturesavailable = [ ]
@@ -109,8 +110,9 @@ func setdoppelganger(doppelgangeron):
 	elif not doppelgangeron and doppelganger != null:
 		Tglobal.soundsystem.quicksound("PlayerDepart", doppelganger.global_transform.origin)
 		doppelganger.queue_free()
-		doppelganger = null	
-	get_node("/root/Spatial/GuiSystem/GUIPanel3D").updateplayerlist()
+		doppelganger = null
+		yield(get_tree(), "idle_frame")
+		get_node("/root/Spatial/GuiSystem/GUIPanel3D").updateplayerlist()
 	
 
 var handflickdistancestack = [ ]
@@ -237,6 +239,7 @@ func playerpositiondict():
 func playerappearancedict():
 	return { "playerplatform":playerplatform, 
 			 "playeroperatingsystem":playeroperatingsystem,
+			 "playername":playerhumanname,
 			 "playeruimode":"phoneoverlay" if Tglobal.phoneoverlay != null else "normal", 
 			 "playerheadcolour":get_node("HeadCam/csgheadmesh/skullcomponent").material.albedo_color, 
 			 "torchon":get_node("HeadCam/HeadtorchLight").visible, 

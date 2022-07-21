@@ -2,6 +2,7 @@ extends Spatial
 
 var networkID = 0
 var playerplatform = ""
+var playerhumanname = ""
 var playertunnelvrversion = ""
 var playeroperatingsystem = ""
 var playeruimode = ""
@@ -20,6 +21,7 @@ const gogglescolourghostly = Color("#1b7682")
 remote func initplayerappearanceJ(playerappearance):
 	playerplatform = playerappearance.get("playerplatform", "unknown")
 	var headcolour = playerappearance.get("playerheadcolour", Color.white)
+	playerhumanname = playerappearance.get("playername", "")
 	playertunnelvrversion = playerappearance.get("tunnelvrversion", "unknown")
 	executingfeaturesavailable = playerappearance.get("executingfeaturesavailable", [ ])
 	playeroperatingsystem = playerappearance.get("playeroperatingsystem", "unknown")
@@ -44,6 +46,7 @@ remote func initplayerappearanceJ(playerappearance):
 	else:
 		get_node("HeadCam/visorline").visible = false
 	get_node("/root/Spatial/MQTTExperiment").mqttupdatenetstatus()
+	guipanel3d.updateplayerlist()
 	
 # reltime is localtime - remotetime.  More delay means message sent earlier, means bigger number. Find smallest filtering any outliers
 var relativetimeminmax = 0
@@ -250,6 +253,8 @@ func process_puppetplanviewcamerastack(delta):
 	if len(puppetplanviewcamerastack) == 0 or t < puppetplanviewcamerastack[0]["Ltimestamp"]:
 		return
 	var pp = puppetplanviewcamerastack[0]
+	$LaserOrient.visible = false
+	$LaserSelectLine.visible = false
 	if pp.has("plancameratrans") and pp.has("plancamerasize"):
 		var playermeposition = get_parent().get_parent().playerMe.get_node("HeadCam").global_transform.origin
 		var relcameraposition = pp["plancameratrans"].origin - playermeposition
@@ -269,6 +274,7 @@ func process_puppetpointerpositionstack(delta):
 	var pp = puppetpointerpositionstack[0]
 	if len(puppetpointerpositionstack) == 1:
 		$LaserOrient.transform = pp["orient"]
+		$LaserOrient.visible = true
 		$LaserOrient/Length.scale.z = pp["length"]
 		if "laserselectline" in pp:
 			$LaserSelectLine.global_transform = pp["laserselectline"]["global_transform"]

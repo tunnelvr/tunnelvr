@@ -4,7 +4,7 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-21.11";
     godot-source = {
-      url = "github:godotengine/godot/3.4.2-stable";
+      url = "github:godotengine/godot/3.4.4-stable";
       flake = false;
     };
     flake-compat-ci.url = "github:hercules-ci/flake-compat-ci";
@@ -97,7 +97,7 @@
                 '';
                 export-templates = final.fetchzip {
                   url = "https://downloads.tuxfamily.org/godotengine/${version.string}/Godot_v${version.string}-${version.status}_export_templates.tpz";
-                  sha256 = "sha256-OMSB/CRbO7F/uLsVKX2ZiaHxHsCQD2Y0IKzbkWLPm/M=";
+                  sha256 = "sha256-6eiPnyyWRE+1WFdsJSNZm+h9VJUnDxz4yBx64WhxzOQ=";
                   # postFetch is necessary because the downloaded file has a
                   # .tpz extension, meaning `fetchzip` cannot otherwise extract
                   # it properly. Additionally, the game engine expects the

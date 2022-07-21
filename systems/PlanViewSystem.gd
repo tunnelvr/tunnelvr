@@ -28,7 +28,8 @@ var clearcachebuttontex = null
 var f3dbuttontex = null
 
 var filetreeresourcename = null
-var materialsettobackfacecull = false
+var materialsettobackfacecullcartoon = 0
+var backfacecartoonValid = true
 
 func getactivetargetfloorViz(newactivetargetfloorname: String):
 	var xcviz = { "prevxcvizstates":{ }, "xcvizstates":{ } }
@@ -305,10 +306,10 @@ func checkboxrealtubesvisible_pressed():
 
 
 
-func checkboxbackfacecull_pressed():
+func optionsbackfacecull_selected(backfacecull_index):
 	var pvchange = planviewtodict()
-	pvchange["backfacecull"] = planviewcontrols.get_node("CheckBoxBackfaceCull").pressed
-	actplanviewdict(pvchange) 
+	pvchange["backfacecull"] = backfacecull_index
+	actplanviewdict(pvchange)
 	
 func buttontransmitview_pressed():
 	if planviewcontrols.get_node("ButtonTransmitView").pressed:
@@ -333,21 +334,25 @@ func _ready():
 
 	$RealPlanCamera.set_as_toplevel(true)
 	planviewcontrols.get_node("ZoomView/ButtonCentre").connect("pressed", self, "buttoncentre_pressed")
+	planviewcontrols.get_node("ViewSlide/ButtonFollow").connect("toggled", self, "buttonfollow_toggled")
 	planviewcontrols.get_node("ViewSlide/ButtonElev").connect("toggled", self, "buttonelev_toggled")
 	planviewcontrols.get_node("ButtonClosePlanView").connect("pressed", self, "buttonclose_pressed")
 	planviewcontrols.get_node("CheckBoxPlanTubesVisible").connect("pressed", self, "checkboxplantubesvisible_pressed")
 	planviewcontrols.get_node("CheckBoxRealTubesVisible").connect("pressed", self, "checkboxrealtubesvisible_pressed")
 	planviewcontrols.get_node("CheckBoxCentrelinesVisible").connect("pressed", self, "checkcentrelinesvisible_pressed")
-	planviewcontrols.get_node("CheckBoxBackfaceCull").connect("pressed", self, "checkboxbackfacecull_pressed")
+	planviewcontrols.get_node("OptionsBackfaceCull").connect("item_selected", self, "optionsbackfacecull_selected")
 	planviewcontrols.get_node("ButtonTransmitView").connect("pressed", self, "buttontransmitview_pressed")
 	planviewcontrols.get_node("FloorMove/FloorStyle").connect("item_selected", self, "floorstyle_itemselected")
 	planviewcontrols.get_node("CheckBoxFileTree").connect("toggled", self, "checkboxfiletree_toggled")
+	var PlayerDirections = get_node("/root/Spatial/BodyObjects/PlayerDirections")
+	planviewcontrols.get_node("PathFollow/HSliderTrailpos").connect("value_changed", PlayerDirections, "hslidertrailpos_valuechanged")
 
 	set_process(visible)
 	assert (planviewcontrols.get_node("CheckBoxPlanTubesVisible").pressed == (($PlanView/Viewport/PlanGUI/Camera.cull_mask & CollisionLayer.VL_xcshells) != 0))
 
 	fileviewtree.connect("button_pressed", self, "fetchbuttonpressed")
 	fileviewtree.connect("item_selected", self, "itemselected")
+
 
 func clearsetupfileviewtree(filetreerootpath):
 	fileviewtree.clear()
@@ -380,7 +385,7 @@ func planviewtodict():
 			 "plancamerafogdepthend":plancamera.environment.fog_depth_end, 
 			 "plancamerarotation":plancamera.rotation_degrees,
 			 "plancamerasize":plancamera.size,
-			 "backfacecull":materialsettobackfacecull,
+			 "backfacecull":materialsettobackfacecullcartoon,
 			}
 
 func planviewcameratodict():
@@ -503,11 +508,40 @@ func actplanviewdict(pvchange, resettransmitbutton=true):
 		planviewcontrols.get_node("CheckBoxPlanTubesVisible").pressed = pvchange["plantubesvisible"]
 		setcameracullmasks(pvchange["centrelinesvisible"], pvchange["plantubesvisible"])
 			
-	if "backfacecull" in pvchange and materialsettobackfacecull != pvchange["backfacecull"]:
+	if "backfacecull" in pvchange and (materialsettobackfacecullcartoon != pvchange["backfacecull"] or not backfacecartoonValid):
 		var materialsystem = get_node("/root/Spatial/MaterialSystem")
-		materialsettobackfacecull = pvchange["backfacecull"]
-		planviewcontrols.get_node("CheckBoxBackfaceCull").pressed = materialsettobackfacecull
-		materialsystem.setallbackfacecull(SpatialMaterial.CULL_BACK if materialsettobackfacecull else SpatialMaterial.CULL_DISABLED)
+		planviewcontrols.get_node("OptionsBackfaceCull").selected = pvchange["backfacecull"]
+		if pvchange["backfacecull"] == 2:
+			var tunnelxoutline = sketchsystem.get_node("tunnelxoutline")
+			var unifiedclosedmesh = Polynets.unifiedclosedmeshwithnormals(sketchsystem.get_node("XCtubes").get_children(), sketchsystem.get_node("XCdrawings").get_children())
+			var blackoutline = tunnelxoutline.get_node("blackoutline")
+			var whiteinfill = tunnelxoutline.get_node("whiteinfill")
+
+			blackoutline.mesh = unifiedclosedmesh
+			whiteinfill.mesh = unifiedclosedmesh
+			settunnelxoutlineshadervalues()
+			tunnelxoutline.visible = true
+			sketchsystem.get_node("XCtubes").visible = false
+			for xcdrawing in sketchsystem.get_node("XCdrawings").get_children():
+				if xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING and xcdrawing.has_node("XCflatshell") and xcdrawing.xcflatshellmaterial != "hole":
+					xcdrawing.get_node("XCflatshell").visible = false
+				
+		else:
+			if materialsettobackfacecullcartoon == 2:
+				sketchsystem.get_node("tunnelxoutline").visible = false
+				sketchsystem.get_node("XCtubes").visible = true
+				for xcdrawing in sketchsystem.get_node("XCdrawings").get_children():
+					if xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING and xcdrawing.has_node("XCflatshell") and xcdrawing.xcflatshellmaterial != "hole":
+						xcdrawing.get_node("XCflatshell").visible = true
+				get_node("/root/Spatial/VerletRopeSystem").update_hangingroperad(sketchsystem, -1.0)
+
+			if pvchange["backfacecull"] == 0:
+				materialsystem.setallbackfacecull(SpatialMaterial.CULL_DISABLED)
+			if pvchange["backfacecull"] == 1:
+				materialsystem.setallbackfacecull(SpatialMaterial.CULL_BACK)
+		materialsettobackfacecullcartoon = pvchange["backfacecull"]
+		backfacecartoonValid = true
+		
 
 	if "realtubesvisible" in pvchange and Tglobal.hidecavewallstoseefloors != (not pvchange["realtubesvisible"]):
 		planviewcontrols.get_node("CheckBoxRealTubesVisible").pressed = pvchange["realtubesvisible"]
@@ -661,6 +695,42 @@ func _process(delta):
 													(1 - cos(droty))*plancamera.transform.basis.z + \
 													sin(droty)*plancamera.transform.basis.x 
 
+	if planviewcontrols.get_node("ViewSlide/ButtonFollow").is_pressed():
+		if planviewpositiondict.empty():
+			var headcam = selfSpatial.playerMe.get_node("HeadCam")
+			var lelevrotpoint = headcam.global_transform.origin
+			lelevrotpoint -= plancamera.transform.basis.y*(plancamera.size*cameracentreyposfraction)
+			var cameradistvec = plancamera.translation - lelevrotpoint
+			var lelevcameradist = plancamera.transform.basis.z.dot(cameradistvec)
+			lelevcameradist = clamp(5, 60, lelevcameradist)
+			planviewpositiondict["plancamerapos"] = lelevrotpoint + plancamera.transform.basis.z*lelevcameradist
+			if plancamera.rotation_degrees.x == 0.0:
+				var PlayerDirections = get_node("/root/Spatial/BodyObjects/PlayerDirections")
+				if PlayerDirections.colocatedflagtrail != null:
+					var plancamerarotationdegreesy = plancamera.rotation_degrees.y
+					var ftpindex = PlayerDirections.colocatedflagtrail["ftpindex"]
+					var vtvec = PlayerDirections.colocatedflagtrail["flagtrailpoints"][ftpindex+1] - PlayerDirections.colocatedflagtrail["flagtrailpoints"][ftpindex]
+					var vtvec2 = Vector2(vtvec.x, vtvec.z)
+					if vtvec2.length() > 0.5:
+						var a = plancamerarotationdegreesy - (floor(plancamerarotationdegreesy/360)*360)
+						var x = rad2deg(vtvec2.angle())
+						if x > 180:
+							x -= 180
+						if abs(x + 360 - a) < abs(x + 180 - a):
+							x += 360
+						if abs(x + 180 - a) < abs(x - a):
+							x += 180
+						var da = delta*10
+						if abs(x - a) > da*1.1:
+							a += da if x > a else -da
+						else:
+							a = x
+						plancamerarotationdegreesy = a
+						var plancamerabasisy = Vector3(-sin(deg2rad(plancamerarotationdegreesy)), 0.0, -cos(deg2rad(plancamerarotationdegreesy)))
+						planviewpositiondict["plancamerapos"] = lelevrotpoint - plancamerabasisy*elevcameradist
+						planviewpositiondict["plancamerarotation"] = Vector3(0, plancamerarotationdegreesy, 0)
+			planviewpositiondict["plancameraelevrotpoint"] = lelevrotpoint 
+
 	if not planviewpositiondict.empty():
 		actplanviewdict(planviewpositiondict) 
 
@@ -716,13 +786,33 @@ func _process(delta):
 			sketchsystem.actsketchchange([lastoptionaltxcdata])
 			lastoptionaltxcdata.clear()
 
+
+
+func setfloortrimmode(floorstyleid, floorlabel):
+	var pvisible = (floorstyleid != -1)
+	planviewcontrols.get_node("FloorMove/FloorStyle").selected = max(0, floorstyleid)
+	planviewcontrols.get_node("ColorRectURL/LabelXCresource").text = floorlabel
+	planviewcontrols.get_node("ColorRectURL").visible = pvisible
+	planviewcontrols.get_node("FloorTrim").visible = pvisible
+	planviewcontrols.get_node("FloorMove").visible = pvisible
+	planviewcontrols.get_node("PathFollow").visible = not pvisible
+
 	
+func buttonfollow_toggled(button_pressed):
+	planviewcontrols.get_node("ViewSlide/ButtonSlideDown").disabled = button_pressed
+	planviewcontrols.get_node("ViewSlide/ButtonSlideLeft").disabled = button_pressed
+	planviewcontrols.get_node("ViewSlide/ButtonSlideRight").disabled = button_pressed
+	planviewcontrols.get_node("ViewSlide/ButtonSlideUp").disabled = button_pressed
+
+const cameracentreyposfraction = 0.06	
 func buttoncentre_pressed():
 	var headcam = get_node("/root/Spatial").playerMe.get_node("HeadCam")
 	var lelevrotpoint = headcam.global_transform.origin
+	lelevrotpoint -= plancamera.transform.basis.y*(plancamera.size*cameracentreyposfraction)
 	var cameradistvec = plancamera.translation - lelevrotpoint
 	var lelevcameradist = plancamera.transform.basis.z.dot(cameradistvec)
 	lelevcameradist = clamp(5, 60, lelevcameradist)
+	
 	var planviewpositiondict = { "plancamerapos":lelevrotpoint + plancamera.transform.basis.z*lelevcameradist, 
 								 "plancameraelevrotpoint":lelevrotpoint, 
 								 "plancameraelevcameradist":lelevcameradist,

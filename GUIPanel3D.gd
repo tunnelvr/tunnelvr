@@ -437,13 +437,12 @@ func _on_switchtest(index):
 		var materialsystem = get_node("/root/Spatial/MaterialSystem")
 		var n = 0
 		var showall = (nssel == "normal")
-		if nssel != "opt: tunnelx":
-			for xcdrawing in sketchsystem.get_node("XCdrawings").get_children():
-				if xcdrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
-					if true or (xcdrawing.drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_GHOSTLY_B) != 0:
-						xcdrawing.get_node("XCdrawingplane").visible = showall
-						n += 1
-			print("Number of floor textures hidden: ", n)
+		for xcdrawing in sketchsystem.get_node("XCdrawings").get_children():
+			if xcdrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
+				if true or (xcdrawing.drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_GHOSTLY_B) != 0:
+					xcdrawing.get_node("XCdrawingplane").visible = showall
+					n += 1
+		print("Number of floor textures hidden: ", n)
 		if nssel == "opt: all grey":
 			for xctube in sketchsystem.get_node("XCtubes").get_children():
 				for xctubesector in xctube.get_node("XCtubesectors").get_children():
@@ -453,30 +452,6 @@ func _on_switchtest(index):
 		elif nssel == "normal":
 			sketchsystem.get_node("XCdrawings").visible = true
 	
-		if nssel == "opt: tunnelx":
-			var tunnelxoutline = sketchsystem.get_node("tunnelxoutline")
-			var unifiedclosedmesh = Polynets.unifiedclosedmeshwithnormals(sketchsystem.get_node("XCtubes").get_children(), sketchsystem.get_node("XCdrawings").get_children())
-			var blackoutline = tunnelxoutline.get_node("blackoutline")
-			var whiteinfill = tunnelxoutline.get_node("whiteinfill")
-			var plancamera = get_node("/root/Spatial/PlanViewSystem/PlanView/Viewport/PlanGUI/Camera")
-
-			blackoutline.mesh = unifiedclosedmesh
-			whiteinfill.mesh = unifiedclosedmesh
-			get_node("/root/Spatial/PlanViewSystem").settunnelxoutlineshadervalues()
-			tunnelxoutline.visible = true
-			sketchsystem.get_node("XCtubes").visible = false
-			for xcdrawing in sketchsystem.get_node("XCdrawings").get_children():
-				if xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING and xcdrawing.has_node("XCflatshell") and xcdrawing.xcflatshellmaterial != "hole":
-					xcdrawing.get_node("XCflatshell").visible = false
-				
-		elif prevnssel == "opt: tunnelx":
-			sketchsystem.get_node("tunnelxoutline").visible = false
-			sketchsystem.get_node("XCtubes").visible = true
-			for xcdrawing in sketchsystem.get_node("XCdrawings").get_children():
-				if xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING and xcdrawing.has_node("XCflatshell") and xcdrawing.xcflatshellmaterial != "hole":
-					xcdrawing.get_node("XCflatshell").visible = true
-			get_node("/root/Spatial/VerletRopeSystem").update_hangingroperad(sketchsystem, -1.0)
-
 		setguipanelhide()
 				
 	prevnssel = nssel
@@ -558,7 +533,7 @@ func _on_textedit_focus_exited():
 const clientips = [ "Local-network",
 					#"192.168.43.193 JulianS9",
 					#"10.0.32.206",
-					#"127.0.0.1",
+					"127.0.0.1",
 					"godot.doesliverpool.xyz" ]
 var uniqueinstancestring = ""
 func toplevelcalled_ready():
@@ -594,7 +569,7 @@ func toplevelcalled_ready():
 	
 	$Viewport/GUI/Panel/SwitchTest.connect("item_selected", self, "_on_switchtest")
 	$Viewport/GUI/Panel/PlayerList.connect("item_selected", self, "_on_playerlist_selected")
-	$Viewport/GUI/Panel/ButtonGoto.connect("pressed", self, "_on_buttongoto_pressed")
+	$Viewport/GUI/Panel/OptionButtonGoto.connect("item_selected", self, "_on_optionbuttongoto_selected")
 	$Viewport/GUI/Panel/WorldScale.connect("item_selected", self, "_on_playerscale_selected")
 	$Viewport/GUI/Panel/Networkstate.connect("item_selected", self, "_on_networkstate_selected")
 	$Viewport/GUI/Panel/ResourceOptions.connect("item_selected", self, "_on_resourceoptions_selected")
@@ -641,16 +616,44 @@ remote func playerjumpgoto(puppetplayerid, lforcetogroundtimedown):
 	var puppetplayername = "NetworkedPlayer"+String(puppetplayerid)
 	var playerpuppet = get_node("/root/Spatial/Players").get_node_or_null(puppetplayername)
 	if playerpuppet != null:
-		get_node("/root/Spatial/BodyObjects/PlayerDirections").setasaudienceofpuppet(playerpuppet, playerpuppet.get_node("HeadCam").global_transform, 0.5)
+		get_node("/root/Spatial/BodyObjects/PlayerDirections").setasaudienceofpuppet(playerpuppet.get_node("HeadCam").global_transform, 0.5)
 	else:
 		print("Not able to playerjumpto ", puppetplayername)
 
-func _on_buttongoto_pressed():
-	if selectedplayernetworkid == playerMe.networkID:
-		if playerMe.networkID != 1 and Tglobal.connectiontoserveractive:
-			rpc_id(1, "playerjumpgoto", playerMe.networkID, 0.5)
-	elif selectedplayernetworkid != -1:
-		playerjumpgoto(selectedplayernetworkid, 0.5)
+func _on_optionbuttongoto_selected(index):
+	var optiongoto = $Viewport/GUI/Panel/OptionButtonGoto.get_item_text(index)
+	if optiongoto == "Goto":
+		if selectedplayernetworkid != -1:
+			playerjumpgoto(selectedplayernetworkid, 0.5)
+		elif selectedflagtrail != null and selectedflagtrail["flagtrailpoints"]:
+			var playerheadbasis = playerMe.get_node("HeadCam").global_transform.basis
+			playerheadbasis = playerheadbasis.rotated(Vector3(0,1,0), deg2rad(180))
+			get_node("/root/Spatial/BodyObjects/PlayerDirections").setasaudienceofpuppet(Transform(playerheadbasis, selectedflagtrail["flagtrailpoints"][-1]), 0.25)
+			
+	elif optiongoto == "Fetch":
+		if Tglobal.connectiontoserveractive:
+			rpc_id(selectedplayernetworkid, "playerjumpgoto", playerMe.networkID, 0.5)
+		
+	var PlayerDirections = get_node("/root/Spatial/BodyObjects/PlayerDirections")
+	if optiongoto == "Colocate":
+		PlayerDirections.colocatedplayer = null
+		PlayerDirections.colocatedflagtrail = null
+		if selectedplayernetworkid != -1:
+			var playername = "NetworkedPlayer"+String(selectedplayernetworkid)
+			var player = get_node("/root/Spatial/Players").get_node_or_null(playername)
+			if player != null and player != playerMe: 
+				PlayerDirections.colocatedplayer = player
+		elif selectedflagtrail != null:
+			PlayerDirections.colocatedflagtrail = selectedflagtrail
+			PlayerDirections.setcolocflagtrailatpos()
+				
+	else:
+		PlayerDirections.colocatedplayer = null
+		PlayerDirections.colocatedflagtrail = null
+		$Viewport/GUI/Panel/OptionButtonGoto.selected = 0
+		
+	$Viewport/GUI/Panel/PlayerList.disabled = ($Viewport/GUI/Panel/OptionButtonGoto.selected == 2)
+
 	setguipanelhide()
 
 remote func copyacrosstextedit(text):
@@ -692,45 +695,97 @@ func getflagsignofnodeselected():
 		$Viewport/GUI/Panel/EditColorRect/TextEdit.text = additionalproperties.get("flagsignlabels", {}).get(nodename, "")
 	
 				
-var selectedplayernetworkid = 0
+var selectedplayernetworkid = -1
 var selectedplayerplatform = ""
+var selectedflagtrail = null
+var playerlistnetworkIDs = [ ]
 func _on_playerlist_selected(index):
-	var player = get_node("/root/Spatial/Players").get_child(index)
+	var player = null
+	selectedflagtrail = null
+	if index < len(playerlistnetworkIDs):
+		selectedplayernetworkid = playerlistnetworkIDs[index]
+		var lplayername = "NetworkedPlayer"+String(selectedplayernetworkid)
+		player = get_node("/root/Spatial/Players").get_node_or_null(lplayername)
+		if player == null and selectedplayernetworkid == 0:
+			player = playerMe
+	else:
+		selectedplayernetworkid = -1
+		var selectedflagtrailindex = index - len(playerlistnetworkIDs)
+		if 0 <= selectedflagtrailindex and selectedflagtrailindex < len(sketchsystem.allflagtrails):
+			selectedflagtrail = sketchsystem.allflagtrails[selectedflagtrailindex]
+			
 	if player != null:
-		selectedplayernetworkid = player.networkID
 		selectedplayerplatform = player.playerplatform
 		$Viewport/GUI/Panel/PlayerInfo.text = "%s:%d" % [selectedplayerplatform, selectedplayernetworkid]
 		netlinkstatstimer = -3.0
 		networkmetricsreceived = null
-		$Viewport/GUI/Panel/ButtonGoto.disabled = selectedplayernetworkid == playerMe.networkID and playerMe.networkID == 1
+		$Viewport/GUI/Panel/OptionButtonGoto.set_item_disabled(1, selectedplayernetworkid == playerMe.networkID)
+		$Viewport/GUI/Panel/OptionButtonGoto.set_item_disabled(2, selectedplayernetworkid == playerMe.networkID)
+		$Viewport/GUI/Panel/OptionButtonGoto.set_item_disabled(3, selectedplayernetworkid == playerMe.networkID)
+	elif selectedflagtrail != null:
+		$Viewport/GUI/Panel/OptionButtonGoto.set_item_disabled(1, false)
+		$Viewport/GUI/Panel/OptionButtonGoto.set_item_disabled(2, true)
+		$Viewport/GUI/Panel/OptionButtonGoto.set_item_disabled(3, false)
+		selectedflagtrail["flagtrailpoints"] = [ ]
+		selectedflagtrail["flagtraillength"] = 0.0
+		var xcdrawing = sketchsystem.get_node("XCdrawings").get_node_or_null(selectedflagtrail["xcname"])
+		if xcdrawing != null:
+			for tn in selectedflagtrail["flagtrail"]:
+				var xcn = xcdrawing.get_node("XCnodes").get_node_or_null(tn)
+				if xcn != null:
+					selectedflagtrail["flagtrailpoints"].push_back(xcn.global_transform.origin)
+					if len(selectedflagtrail["flagtrailpoints"]) >= 2:
+						selectedflagtrail["flagtraillength"] += (selectedflagtrail["flagtrailpoints"][-1] - selectedflagtrail["flagtrailpoints"][-2]).length()
+				else:
+					print("missing flagtrail node ", tn)
+		else:
+			print("missing flag trail point")
 
 	else:
 		selectedplayernetworkid = -1
 		selectedplayerplatform = ""
-		$Viewport/GUI/Panel/PlayerInfo.text = String("updating")
-		updateplayerlist()
-		$Viewport/GUI/Panel/ButtonGoto.disabled = true
+		$Viewport/GUI/Panel/OptionButtonGoto.set_item_disabled(1, true)
+		$Viewport/GUI/Panel/OptionButtonGoto.set_item_disabled(2, true)
+		$Viewport/GUI/Panel/OptionButtonGoto.set_item_disabled(3, true)
+
+	var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
+	var planviewcontrols = planviewsystem.get_node("PlanView/Viewport/PlanGUI/PlanViewControls")
+	planviewcontrols.get_node("PathFollow/Trailname").text = (selectedflagtrail["flagopttext"] if selectedflagtrail != null else "--none")
 		
-	
 func updateplayerlist():
-	var selectedplayerindex = 0
+	var selectedplayerindex = -1
 	$Viewport/GUI/Panel/PlayerList.clear()
+	playerlistnetworkIDs.clear()
 	for player in get_node("/root/Spatial/Players").get_children():
-		var playername
+		var lplayername = player.playerhumanname
+		if player.networkID == 1:
+			lplayername = "&"+lplayername
 		if player == playerMe:
-			playername = "me"
-		elif player == playerMe.doppelganger:
-			playername = "doppel"
-		elif player.networkID == 1:
-			playername = "server"
-		else:
-			playername = "player%d" % player.get_index()
-		$Viewport/GUI/Panel/PlayerList.add_item(playername)
-		
-		if player.networkID == selectedplayernetworkid:
+			lplayername = "*"+lplayername
+		if player == playerMe.doppelganger:
+			lplayername = "doppelganger"
+		$Viewport/GUI/Panel/PlayerList.add_item(lplayername)
+		playerlistnetworkIDs.push_back(player.networkID)
+		if selectedplayernetworkid != -1 and player.networkID == selectedplayernetworkid:
 			selectedplayerindex = player.get_index()
 
-	$Viewport/GUI/Panel/PlayerList.select(selectedplayerindex)
+	var selectedflagtrailindex = -1
+	if len(sketchsystem.allflagtrails) != 0:
+		for i in range(len(sketchsystem.allflagtrails)):
+			var flagtrailm = sketchsystem.allflagtrails[i]
+			$Viewport/GUI/Panel/PlayerList.add_item(flagtrailm["flagopttext"])
+			if selectedflagtrail != null and flagtrailm["xcname"] == selectedflagtrail["xcname"] and flagtrailm["flagtrail"][-1] == selectedflagtrail["flagtrail"][-1]:
+				selectedflagtrailindex = i
+
+	if selectedplayerindex != -1:
+		$Viewport/GUI/Panel/PlayerList.selected = selectedplayerindex
+	elif selectedflagtrailindex != -1:
+		$Viewport/GUI/Panel/PlayerList.selected = len(playerlistnetworkIDs) + selectedflagtrailindex
+		_on_playerlist_selected(len(playerlistnetworkIDs) + selectedflagtrailindex)
+	else:
+		$Viewport/GUI/Panel/PlayerList.selected = 0
+		_on_playerlist_selected(0)
+	
 	
 
 func setguipanelvisible(controller_global_transform):
@@ -1089,11 +1144,13 @@ func _on_resourceoptions_selected(index):
 				elif jresource.get("type") != "localfiles":
 					ltext = "Err: must be type localfiles"
 				elif not jresource.get("playername"):
-					ltext = "Err: must have playername"
+					ltext = "Err: must have human playername"
 				elif jresource.get("unique_id") and jresource["unique_id"] != OS.get_unique_id():
 					ltext = "Err: unique_id mismatch"
 				else:
 					GithubAPI.riattributes["resourcedefs"][jresource["name"]] = jresource
+					playerMe.playerhumanname = jresource.get("playername", "")
+
 			elif jresource.get("type") == "erase" or jresource.get("type") == "delete":
 				GithubAPI.riattributes["resourcedefs"].erase(jresource["name"])
 				ltext = "resource deleted"
@@ -1361,6 +1418,8 @@ func _connection_failed():
 		assert (len(selfSpatial.deferred_player_connected_list) == 0)
 		assert (len(selfSpatial.players_connected_list) == 0)
 	$Viewport/GUI/Panel/Label.text = "connection_failed"
+	if $Viewport/GUI/Panel/Networkstate.selected != 0:
+		$Viewport/GUI/Panel/Networkstate.selected = 0
 
 func removeallplayersdisconnection():
 	selfSpatial.deferred_player_connected_list.clear()
@@ -1446,7 +1505,7 @@ func _process(delta):
 					sumdelta = 0.0
 					countframes = 0
 
-			if selectedplayernetworkid >= 0:
+			if selectedplayernetworkid >= 0 and selectedplayernetworkid != playerMe.networkID:
 				rpc_id(selectedplayernetworkid, "sendbacknetworkmetrics", { "ticksout":OS.get_ticks_msec() }, playerMe.networkID)
 			elif selectedplayernetworkid == -10:
 				call_deferred("sendbacknetworkmetrics", { "ticksout":OS.get_ticks_msec() }, -11)

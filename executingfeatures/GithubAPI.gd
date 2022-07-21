@@ -27,15 +27,18 @@ func resources_readycallloadinfo():
 	if not riattributes:
 		riattributes = { }
 		randomize()
-		var possibleusernames = get_node("/root/Spatial/MQTTExperiment").possibleusernames
-		var randomplayername = possibleusernames[randi()%len(possibleusernames)]
-		var resourcedefs = { "local":    { "name":"local", "type":"localfiles", "path":"user://cavefiles/", "playername":randomplayername }, 
+		var possiblehumannames = get_node("/root/Spatial/MQTTExperiment").possibleusernames
+		var randomplayerhumanname = possiblehumannames[randi()%len(possiblehumannames)]
+		var resourcedefs = { "local":    { "name":"local", "type":"localfiles", "path":"user://cavefiles/", "playername":randomplayerhumanname }, 
 							 "cavereg1": { "name":"cavereg1", "type":"svnfiles", "url":"http://cave-registry.org.uk/svn/", "path":"NorthernEngland" },
 							 "caddyg":   { "name":"caddyg", "type":"caddyfiles", "url":"http://godot.doesliverpool.xyz:8000/", "path":"" },
 							 "ghfiles":  { "name":"ghfiles", "type":"githubapi", "apiurl":"api.github.com", "owner":"goatchurchprime", "repo":"tunnelvr_cave_data", "path":"cavedata/firstarea" }
 						   }
 		riattributes["resourcedefs"] = resourcedefs
 		saveresourcesinformationfile()
+	var playerMe = get_node("/root/Spatial").playerMe
+	playerMe.playerhumanname = riattributes.get("resourcedefs", {}).get("local", {}).get("playername", "")
+		
 	var dir = Directory.new()
 	if not dir.dir_exists(ghdirectory):
 		dir.make_dir(ghdirectory)
@@ -120,9 +123,8 @@ func Ysavecavefile(savegamefilename, bfileisnew):
 		elif not ghattributes.has("token"):
 			return "Missing github API token"
 		else:
-			var playername = riattributes.get("resourcedefs", {}).get("local", {}).get("playername", "unknown")
-			var playerplatform = get_node("/root/Spatial").playerMe.playerplatform
-			var message = "Saved by %s from %s" % [ playername, playerplatform ]
+			var playerMe = get_node("/root/Spatial").playerMe
+			var message = "Saved by %s from %s" % [ playerMe.playerhumanname, playerMe.playerplatform ]
 			sketchsystem.savesketchsystem(ghfetcheddatafile)
 			var guipanel3d = get_node("/root/Spatial/GuiSystem/GUIPanel3D")
 			guipanel3d.setpanellabeltext("Committing file")

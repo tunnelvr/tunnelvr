@@ -200,10 +200,13 @@ static func makeropenodesequences(nodepoints, onepathpairs, oddropeverts, anchor
 		if len(ropeseq) >= 2:
 			if breaksequenceatwallnodes and ropeseq[-1][0] == "a":
 				ropeseq.invert()
+			elif breaksequenceatwallnodes and ropeseq[0][0] == "a" and ropeseq[-1][0] != "a":
+				pass
 			elif len(Lpathvectorseq[ropeseq[0]]) == 1:
 				ropeseq.invert()
 			ropesequences.append(ropeseq)
 	return ropesequences
+
 
 static func ropeseqsfindsplitatnode(ropeseqs, nodename):
 	var ropeseqssplit = [ ]
@@ -342,25 +345,46 @@ static func makestalshellmesh(revseq, p0, vec):
 	surfaceTool.commit(arraymesh)
 	return arraymesh
 
-
 static func signpostfromropenodesequences(nodepoints, ropeseqs, flagsignlabels):
 	if len(ropeseqs) <= 1:
 		return null
-	var signpostseqj = -1
-	for j in range(len(ropeseqs)):
-		var ropeseq = ropeseqs[j]
-		if ropeseq[0][0] == "a" or ropeseq[-1][0] == "a":
-			if len(ropeseq) != 2 or signpostseqj != -1:
-				return null
-			if ropeseq[-1][0] == "a":
-				if ropeseq[0][0] == "a":
-					return null
-				ropeseq.invert()
-			signpostseqj = j
-	if signpostseqj == -1:
+		
+	var ropeseqdanchoredlong = { }
+	var ropeseqsanchoredshort = [ ]
+	var ropeseqmiddles = [ ]
+	for ropeseq in ropeseqs:
+		if ropeseq[0][0] == "a":
+			if len(ropeseq) > 2:
+				ropeseqdanchoredlong[ropeseq[-1]] = ropeseq
+			elif len(ropeseq) == 2:
+				ropeseqsanchoredshort.push_back(ropeseq)
+		else:
+			ropeseqmiddles.push_back(ropeseq)
+	if len(ropeseqsanchoredshort) != 1:
 		return null
+	var signpostseq = ropeseqsanchoredshort[0]
 
-	var signpostseq = ropeseqs[signpostseqj]
+	if len(ropeseqdanchoredlong) != 0 and not flagsignlabels:
+		return null
+	var ropeseqstrails = [ ]
+	for nodenamejoin in ropeseqdanchoredlong:
+		var ropemiddlestrailendsj = [ ]
+		for j in len(ropeseqmiddles):
+			var ropeseqm = ropeseqmiddles[j]
+			if ropeseqm[0] == nodenamejoin or ropeseqm[-1] == nodenamejoin:
+				ropemiddlestrailendsj.append(j)
+		if len(ropemiddlestrailendsj) != 2:
+			return null
+		var ropemiddle1 = ropeseqmiddles.pop_at(ropemiddlestrailendsj[1]).duplicate()
+		var ropemiddle0 = ropeseqmiddles.pop_at(ropemiddlestrailendsj[0]).duplicate()
+		if ropemiddle0[0] == nodenamejoin:
+			ropemiddle0.invert()
+		if ropemiddle1[-1] == nodenamejoin:
+			ropemiddle1.invert()
+		ropemiddle0.pop_back()
+		ropemiddle0.append_array(ropemiddle1)
+		ropeseqmiddles.push_back(ropemiddle0)
+
 	var vss = nodepoints[signpostseq[1]] - nodepoints[signpostseq[0]]
 	var vssa = rad2deg(Vector2(vss.y, Vector2(vss.x, vss.z).length()).angle())
 	var signdownwards = (vssa > 90)
@@ -370,8 +394,9 @@ static func signpostfromropenodesequences(nodepoints, ropeseqs, flagsignlabels):
 	var ptsignroot = nodepoints[signpostseq[0]]
 	var ptsigntopy = nodepoints[signpostseq[1]].y
 	var flagpolys = [ ]
-	if len(ropeseqs) == 2:
-		var flagseq = ropeseqs[1-signpostseqj]
+	
+	if len(ropeseqmiddles) == 1:
+		var flagseq = ropeseqmiddles[0]
 		if len(flagseq) < 4:
 			return null
 		if flagseq[0] != flagseq[-1]:
@@ -392,34 +417,31 @@ static func signpostfromropenodesequences(nodepoints, ropeseqs, flagsignlabels):
 		ptsigntopy = nodepoints[flagseq[1]].y
 		flagpolys.append(flagseq)
 		
-	elif len(ropeseqs) >= 4:
+	elif len(ropeseqmiddles) >= 3:
 		var signpostseqjtop = -1
-		for j in range(len(ropeseqs)):
-			if j != signpostseqj:
-				var ropeseq = ropeseqs[j]
-				if len(ropeseq) == 2:
-					if signpostseqjtop != -1:
-						return null
-					if ropeseq[-1] == signpostseq[1]:
-						ropeseq.invert()
-					if ropeseq[0] != signpostseq[1]:
-						return null
-					signpostseqjtop = j
+		for j in range(len(ropeseqmiddles)):
+			var ropeseq = ropeseqs[j]
+			if len(ropeseq) == 2:
+				if signpostseqjtop != -1:
+					return null
+				if ropeseq[-1] == signpostseq[1]:
+					ropeseq.invert()
+				if ropeseq[0] != signpostseq[1]:
+					return null
+				signpostseqjtop = j
 		if signpostseqjtop == -1:
 			return null
-		var signpostseqtop = ropeseqs[signpostseqjtop]
+		var signpostseqtop = ropeseqmiddles.pop_at(signpostseqjtop)
 
-		for j in range(len(ropeseqs)):
-			if j != signpostseqj and j != signpostseqjtop:
-				var ropeseq = ropeseqs[j]
-				if ropeseq[-1] == signpostseqtop[1]:
-					ropeseq.invert()
-				if ropeseq[0] != signpostseqtop[1] or ropeseq[-1] != signpostseqtop[0]:
-					return null
-				var flagseq = signpostseqtop.duplicate()
-				for k in range(1, len(ropeseq)):
-					flagseq.append(ropeseq[k])
-				flagpolys.append(flagseq)
+		for ropeseq in ropeseqmiddles:
+			if ropeseq[-1] == signpostseqtop[1]:
+				ropeseq.invert()
+			if ropeseq[0] != signpostseqtop[1] or ropeseq[-1] != signpostseqtop[0]:
+				return null
+			var flagseq = signpostseqtop.duplicate()
+			for k in range(1, len(ropeseq)):
+				flagseq.append(ropeseq[k])
+			flagpolys.append(flagseq)
 		ptsigntopy = nodepoints[signpostseqtop[1]].y
 		
 	var ptsigntop = Vector3(ptsignroot.x, ptsigntopy, ptsignroot.z)
@@ -429,12 +451,16 @@ static func signpostfromropenodesequences(nodepoints, ropeseqs, flagsignlabels):
 		var ppoly = [ ]
 		var flagmsg = ""
 		var nodelabelled = null
+		var flagtrail = [ ]
 		for d in flagpolys[j]:
 			ppoly.append(nodepoints[d])
 			var flagsignlabel = flagsignlabels.get(d)
 			if flagsignlabel != null and len(flagsignlabel) > len(flagmsg):
 				flagmsg = flagsignlabel
 				nodelabelled = d
+			if ropeseqdanchoredlong.has(d):
+				flagtrail = ropeseqdanchoredlong[d]
+				
 		var vecfurthest = ppoly[0] - ptsigntop
 		var nodefurthest = flagpolys[j][0]
 		for i in range(1, len(ppoly)):
@@ -458,9 +484,16 @@ static func signpostfromropenodesequences(nodepoints, ropeseqs, flagsignlabels):
 				veclettersup = Vector3(-vecletters.x/vecletters2d*vecletters.y, vecletters2d, -vecletters.z/vecletters2d*vecletters.y)
 			else:
 				veclettersup = Vector3(1, 0, 0)
-		flagsigns.append([ flagmsg, nodelabelled, vecletters, veclettersup ])
+		flagsigns.append({ "flagmsg":flagmsg, 
+						   "nodelabelled":nodelabelled, 
+						   "vecletters":vecletters, 
+						   "veclettersup":veclettersup, 
+						   "flagtrail":flagtrail })
 
-	return [ptsignroot, ptsigntopy, flagsigns, nohideaxisnodes]
+	return { "ptsignroot":ptsignroot, 
+			 "ptsigntop":ptsigntopy, 
+			 "flagsigns":flagsigns, 
+			 "nohideaxisnodes":nohideaxisnodes }
 
 
 static func makesignpostshellmesh(xcdrawing, ptsignroot, ptsigntopy, postrad):

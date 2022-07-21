@@ -10,6 +10,7 @@ onready var HeadCollisionWarning = HeadCam.get_node("HeadCollisionWarning")
 onready var HeadFloorprojectWarning = HeadCam.get_node("HeadFloorprojectWarning")
 onready var playerheadbodyradius = $PlayerKinematicBody/PlayerBodyCapsule.shape.radius
 onready var PlayerDirections = get_node("../PlayerDirections")
+onready var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
 
 var floor_max_angle = deg2rad(45)
 var floor_max_angle_gradient = sin(floor_max_angle)
@@ -132,8 +133,12 @@ func _physics_process(delta):
 				process_projectontoground(delta, PlayerDirections.floorprojectdistance)
 		else:
 			HeadFloorprojectWarning.visible = true
+	elif is_instance_valid(PlayerDirections.colocatedplayer):
+		playerMe.transform.origin = PlayerDirections.colocatedplayer.transform.origin
 	elif PlayerDirections.playerdirectedflight:
 		process_directedflight(delta, PlayerDirections.playerdirectedflightvelocity)
+	elif PlayerDirections.colocatedflagtrail != null and PlayerDirections.advancablecolocflagtrail():
+		playerMe.transform.origin = PlayerDirections.advancecolocflagtrailatposF(4.0*delta)
 	elif playerinfreefall:
 		process_freefall(delta)
 	else:
@@ -440,7 +445,6 @@ func filter_playerposition_bandwidth(positiondict):
 	return positiondict
 
 
-onready var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
 func process_shareplayerposition():
 	var doppelganger = playerMe.doppelganger
 	if is_instance_valid(playerMe.doppelganger) or Tglobal.morethanoneplayer:

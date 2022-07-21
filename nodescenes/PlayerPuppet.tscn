@@ -317,6 +317,7 @@ __meta__ = {
 }
 
 [node name="FakeGuiSystem" type="Spatial" parent="."]
+visible = false
 
 [node name="GripMenu" type="Spatial" parent="FakeGuiSystem"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, -2.617 )

@@ -2200,6 +2200,7 @@ cast_to = Vector3( 0, -50, 0 )
 collision_mask = 16
 
 [node name="FloorSpot" type="Spatial" parent="BodyObjects/FloorLaserSpot"]
+visible = false
 
 [node name="FloorSpotMesh" type="MeshInstance" parent="BodyObjects/FloorLaserSpot/FloorSpot"]
 transform = Transform( -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0, 0, 0 )
@@ -2409,6 +2410,17 @@ margin_right = 166.0
 margin_bottom = 93.0
 text = "Elev!!!"
 
+[node name="ButtonFollow" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/ViewSlide"]
+margin_left = 66.8433
+margin_top = 3.57831
+margin_right = 89.8433
+margin_bottom = 29.5783
+toggle_mode = true
+text = "F"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [node name="ZoomView" type="Control" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
 material = SubResource( 75 )
 margin_left = 94.0
@@ -2460,6 +2472,7 @@ __meta__ = {
 }
 
 [node name="FloorTrim" type="Control" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
+visible = false
 material = SubResource( 75 )
 margin_left = 179.691
 margin_top = 6.1189
@@ -2570,6 +2583,7 @@ __meta__ = {
 }
 
 [node name="FloorMove" type="Control" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
+visible = false
 material = SubResource( 75 )
 margin_left = 304.0
 margin_top = 7.0
@@ -2699,6 +2713,74 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="PathFollow" type="Control" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
+margin_left = 190.0
+margin_top = 10.0
+margin_right = 387.0
+margin_bottom = 90.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Tracktrail" type="CheckBox" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/PathFollow"]
+margin_left = 7.55951
+margin_top = -5.66962
+margin_right = 97.5595
+margin_bottom = 18.3304
+text = "Track trail"
+
+[node name="Trailname" type="TextEdit" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/PathFollow"]
+margin_left = 112.559
+margin_top = -6.40973
+margin_right = 230.559
+margin_bottom = 16.5903
+text = "trail-name"
+readonly = true
+
+[node name="HSliderTrailpos" type="HSlider" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/PathFollow"]
+margin_left = 28.3304
+margin_top = 43.8898
+margin_right = 147.33
+margin_bottom = 59.8898
+tick_count = 10
+ticks_on_borders = true
+
+[node name="Label" type="Label" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/PathFollow/HSliderTrailpos"]
+margin_left = -32.7579
+margin_top = -5.66962
+margin_right = -1.75793
+margin_bottom = 16.3304
+text = "Pos"
+
+[node name="HSliderTrailspeed" type="HSlider" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/PathFollow"]
+margin_left = 50.0
+margin_top = 18.0
+margin_right = 200.0
+margin_bottom = 34.0
+min_value = -100.0
+tick_count = 3
+ticks_on_borders = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/PathFollow/HSliderTrailspeed"]
+margin_left = -52.9167
+margin_top = -1.89001
+margin_right = -5.91669
+margin_bottom = 20.11
+text = "Speed"
+
+[node name="Trailbounce" type="CheckBox" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/PathFollow"]
+margin_left = 202.436
+margin_top = 15.8989
+margin_right = 278.436
+margin_bottom = 39.8989
+text = "bounce"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [node name="Scalebar" type="Control" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
 margin_left = 71.0
 margin_top = -36.0
@@ -2772,18 +2854,17 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="CheckBoxBackfaceCull" type="CheckBox" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
+[node name="OptionsBackfaceCull" type="OptionButton" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
 anchor_right = 0.015
 anchor_bottom = 0.24
-margin_left = 575.316
-margin_top = 25.5254
-margin_right = 655.316
-margin_bottom = 25.5254
+margin_left = 657.0
+margin_top = 6.0
+margin_right = 755.0
+margin_bottom = 4.0
 rect_pivot_offset = Vector2( 100.162, 19.0063 )
-text = "backface cull"
-__meta__ = {
-"_edit_use_anchors_": false
-}
+text = "Normal Solid"
+items = [ "Normal Solid", null, false, 0, null, "Backface Cull", null, false, 1, null, "Cartoon Colour", null, false, 2, null ]
+selected = 0
 
 [node name="CheckBoxCentrelinesVisible" type="CheckBox" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
 anchor_right = 0.015
@@ -3051,12 +3132,12 @@ __meta__ = {
 }
 
 [node name="SwitchTest" type="OptionButton" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 22.0
-margin_top = 235.0
-margin_right = 116.0
-margin_bottom = 262.0
+margin_left = 20.2162
+margin_top = 245.108
+margin_right = 114.216
+margin_bottom = 272.108
 text = "normal"
-items = [ "normal", null, false, 0, null, "Hide XCs", null, false, 1, null, "opt: all grey", null, false, 2, null, "opt: hide xc", null, false, 3, null, "toggle guardian", null, false, 4, null, "export OBJ", null, false, 7, null, "choke", null, false, 6, null, "swap controllers", null, false, 7, null, "lock controls", null, false, 8, null, "toggle gltf", null, false, 10, null, "opt: tunnelx", null, false, 10, null, "Huge Spiral", null, true, 11, null ]
+items = [ "normal", null, false, 0, null, "Hide XCs", null, false, 1, null, "opt: all grey", null, false, 2, null, "opt: hide xc", null, false, 3, null, "toggle guardian", null, false, 4, null, "export OBJ", null, false, 7, null, "choke", null, false, 6, null, "swap controllers", null, false, 7, null, "lock controls", null, false, 8, null, "toggle gltf", null, false, 10, null, "Huge Spiral", null, true, 11, null ]
 selected = 0
 __meta__ = {
 "_edit_use_anchors_": false
@@ -3085,24 +3166,26 @@ __meta__ = {
 }
 
 [node name="PlayerList" type="OptionButton" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 66.0
-margin_top = 208.0
-margin_right = 143.0
-margin_bottom = 231.0
-text = "server"
-items = [ "server", null, false, 0, null ]
+margin_left = 107.622
+margin_top = 218.108
+margin_right = 184.622
+margin_bottom = 241.108
+text = "player0"
+items = [ "player0", null, false, 0, null ]
 selected = 0
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ButtonGoto" type="Button" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 21.0
-margin_top = 204.0
-margin_right = 64.0
-margin_bottom = 232.0
+[node name="OptionButtonGoto" type="OptionButton" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
+margin_left = 17.0
+margin_top = 218.0
+margin_right = 89.0
+margin_bottom = 240.0
 rect_pivot_offset = Vector2( 111.073, 28.0005 )
-text = "Goto"
+text = "-locate"
+items = [ "-locate", null, false, 0, null, "Goto", null, false, 1, null, "Fetch", null, false, 2, null, "Colocate", null, false, 3, null ]
+selected = 0
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -4433,3 +4516,5 @@ __meta__ = {
 [node name="Lidarmodel" type="Spatial" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 13, 2.5, -6 )
 visible = false
+
+[node name="Camera2D" type="Camera2D" parent="Lidarmodel"]

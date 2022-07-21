@@ -6,6 +6,7 @@ onready var HeadCam = playerMe.get_node("HeadCam")
 onready var HandLeft = playerMe.get_node("HandLeft")
 onready var HandRight = playerMe.get_node("HandRight")
 onready var HandLeftController = playerMe.get_node("HandLeftController")
+onready var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
 
 var flyspeed = 5.0
 var walkspeed = 3.0
@@ -15,23 +16,26 @@ var playerdirectedflight = false
 var playerdirectedflightvelocity = Vector3(0,0,0)
 var playerdirectedwalkingvelocity = Vector3(0,0,0)
 
+var colocatedplayer = null
+var colocatedflagtrail = null
+
 var forceontogroundtimedown = 0
 var floorprojectdistance = 10
 
-const playeraudiencedistance = 5.0
-const playeraudiencesidedisplacement = 4.0
-const playerspawnoffsetheight = 3.0
+const playeraudiencedistance = 3.0
+const playeraudiencesidedisplacement = 2.0
+const playerspawnoffsetheight = 1.5
 
 var joyposxrotsnaphysteresis = 0
 var forebackmovementjoystick = DRAWING_TYPE.JOYPOS_LEFTCONTROLLER
 var strafemovementjoystick = DRAWING_TYPE.JOYPOS_LEFTCONTROLLER
 var snapturnemovementjoystick = DRAWING_TYPE.JOYPOS_RIGHTCONTROLLER
 
-func setasaudienceofpuppet(playerpuppet, puppetheadtrans, lforceontogroundtimedown):
+func setasaudienceofpuppet(puppetheadtrans, lforceontogroundtimedown):
 	var puppetheadpos = puppetheadtrans.origin
 	var veceyes = Vector3(puppetheadtrans.basis.z.x, 0, puppetheadtrans.basis.z.z).normalized()
 	var vecperp = Vector3(veceyes.z, 0, -veceyes.x)
-	var cenpos = puppetheadtrans.origin - veceyes*(playeraudiencedistance*0.5)*playerpuppet.playerscale
+	var cenpos = puppetheadtrans.origin - veceyes*(playeraudiencedistance*0.5)*playerMe.playerscale
 	var playerlam = (playerMe.networkID%10000)/10000.0
 	var playerheadbasis = puppetheadtrans.basis.rotated(Vector3(0,1,0), deg2rad(180))
 	print("playerheadbasisplayerheadbasis ", playerheadbasis.determinant())
@@ -159,9 +163,124 @@ func _on_button_release(p_button):
 	if p_button == BUTTONS.VR_BUTTON_BY:
 		pass
 
+func setcolocflagtrailatpos():
+	var pt = playerMe.get_node("HeadCam").global_transform.origin
+	var flagtrailpoints = colocatedflagtrail["flagtrailpoints"]
+	var ftpindex = len(flagtrailpoints) - 2
+	var ftplambda = 1.0
+	var ftptrailpos = colocatedflagtrail["flagtraillength"]
+	var Lftptrailpos = 0.0
+	var distsq = (flagtrailpoints[-1] - pt).length_squared()
+	for i in range(0, len(flagtrailpoints)-1):
+		var pt0 = colocatedflagtrail["flagtrailpoints"][i]
+		var pt1 = colocatedflagtrail["flagtrailpoints"][i+1]
+		var v = pt1 - pt0
+		var pv = pt - pt0
+		var vlensq = v.length_squared()
+		if vlensq != 0.0:
+			var vlen = sqrt(vlensq)
+			var lam = pv.dot(v)/vlensq
+			if lam < 1.0:
+				if lam <= 0.0:
+					lam = 0.0
+				var ldistsq = (pt0 + v*lam - pt).length_squared()
+				if ldistsq < distsq:
+					ftpindex = i
+					ftplambda = lam
+					ftptrailpos = Lftptrailpos + ftplambda*vlen
+					distsq = ldistsq
+			Lftptrailpos += vlen
+	colocatedflagtrail["ftpindex"] = ftpindex
+	colocatedflagtrail["ftplambda"] = ftplambda
+	colocatedflagtrail["ftptrailpos"] = ftptrailpos
+	suppresstrailposvaluechanged = true
+	planviewsystem.planviewcontrols.get_node("PathFollow/HSliderTrailpos").value = 100*colocatedflagtrail["ftptrailpos"]/colocatedflagtrail["flagtraillength"]
+	suppresstrailposvaluechanged = false
+	return lerp(flagtrailpoints[ftpindex], flagtrailpoints[ftpindex+1], ftplambda)				
+				
+func advancecolocflagtrailatpos(dist):
+	var flagtrailpoints = colocatedflagtrail["flagtrailpoints"]
+	var ftpindex = colocatedflagtrail["ftpindex"]
+	var ftplambda = colocatedflagtrail["ftplambda"]
+	var ftptrailpos = colocatedflagtrail["ftptrailpos"]
+	var pt = lerp(flagtrailpoints[ftpindex], flagtrailpoints[ftpindex+1], ftplambda)
+	var ddist = abs(dist)
+	var ddirfore = (dist >= 0.0)
+	while true:
+		if ddirfore:
+			var ptend = flagtrailpoints[ftpindex+1]
+			var disttoend = (ptend - pt).length()
+			if ddist <= disttoend:
+				if disttoend != 0.0:
+					ftplambda += (ddist/disttoend)*(1.0 - ftplambda)
+				else:
+					ftplambda = 1.0
+				ftptrailpos += ddist
+				break
+			ftplambda = 1.0
+			ddist -= disttoend
+			ftptrailpos += disttoend
+			if ftpindex == len(flagtrailpoints) - 2:
+				ftptrailpos = colocatedflagtrail["flagtraillength"]
+				break
+			ftpindex += 1
+			ftplambda = 0.0
+		else:
+			var ptend = flagtrailpoints[ftpindex]
+			var disttoend = (ptend - pt).length()
+			if ddist <= disttoend:
+				if disttoend != 0.0:
+					ftplambda -= (ddist/disttoend)*(ftplambda)
+				else:
+					ftplambda = 0.0
+				ftptrailpos -= ddist
+				break
+			ftplambda = 0.0
+			ddist -= disttoend
+			if ftpindex == 0:
+				ftptrailpos = 0.0
+				break
+			ftpindex -= 1
+			ftplambda = 1.0
+	colocatedflagtrail["ftpindex"] = ftpindex
+	colocatedflagtrail["ftplambda"] = ftplambda
+	colocatedflagtrail["ftptrailpos"] = ftptrailpos
+	return lerp(flagtrailpoints[ftpindex], flagtrailpoints[ftpindex+1], ftplambda)
 
+const hslidertrailspeeddeadzone = 0.05
+func advancablecolocflagtrail():
+	if planviewsystem.planviewcontrols.get_node("PathFollow/Tracktrail").pressed:
+		var hstval = planviewsystem.planviewcontrols.get_node("PathFollow/HSliderTrailspeed").value
+		var val = hstval*0.01
+		if abs(val) > hslidertrailspeeddeadzone:
+			if val > 0.0:
+				if colocatedflagtrail["ftpindex"] < len(colocatedflagtrail["flagtrailpoints"]) - 2 or colocatedflagtrail["ftplambda"] < 1.0:
+					return true
+				if planviewsystem.planviewcontrols.get_node("PathFollow/Trailbounce").pressed:
+					planviewsystem.planviewcontrols.get_node("PathFollow/HSliderTrailspeed").value = -hstval
+					return true
+			else:
+				if colocatedflagtrail["ftpindex"] > 0 or colocatedflagtrail["ftplambda"] > 0.0:
+					return true
+				if planviewsystem.planviewcontrols.get_node("PathFollow/Trailbounce").pressed:
+					planviewsystem.planviewcontrols.get_node("PathFollow/HSliderTrailspeed").value = -hstval
+					return true
+	return false
 
-var laserangleadjustmode = false
-var laserangleoriginal = 0
-var laserhandanglevector = Vector2(0,0)
-var prevlaserangleoffset = 0
+var suppresstrailposvaluechanged = false
+func advancecolocflagtrailatposF(fac):
+	var hstval = planviewsystem.planviewcontrols.get_node("PathFollow/HSliderTrailspeed").value
+	var val = hstval*0.01
+	var newpos = advancecolocflagtrailatpos(val*fac)
+	suppresstrailposvaluechanged = true
+	planviewsystem.planviewcontrols.get_node("PathFollow/HSliderTrailpos").value = 100*colocatedflagtrail["ftptrailpos"]/colocatedflagtrail["flagtraillength"]
+	suppresstrailposvaluechanged = false
+	return newpos
+	
+func hslidertrailpos_valuechanged(value):
+	if colocatedflagtrail != null and not suppresstrailposvaluechanged:
+		var val = value/100.0*colocatedflagtrail["flagtraillength"]
+		colocatedflagtrail["ftpindex"] = 0
+		colocatedflagtrail["ftplambda"] = 0.0
+		colocatedflagtrail["ftptrailpos"] = 0.0
+		advancecolocflagtrailatpos(val)

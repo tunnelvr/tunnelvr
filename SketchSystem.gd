@@ -13,6 +13,7 @@ var actsketchchangeundostack = [ ]
 
 var pointersystem = null
 onready var waterlevelsystem = get_node("/root/Spatial/WaterLevelSystem")
+var allflagtrails = [ ]
 
 func _ready():
 	return
@@ -67,6 +68,7 @@ func sketchsystemtodict(stripruntimedataforsaving):
 						 }
 	var playerMe = get_node("/root/Spatial").playerMe
 	sketchdatadict["playerMe"] = { "playerplatform":playerMe.playerplatform,
+								   "playername":playerMe.playerhumanname,
 								   "tunnelvrversion":Tglobal.tunnelvrversion, 
 								   "datetime":OS.get_datetime(),
 								   "transformpos":playerMe.global_transform, 
@@ -213,6 +215,8 @@ remote func actsketchchangeL(xcdatalist):
 			var PlayerDirections = get_node("/root/Spatial/BodyObjects/PlayerDirections")
 			Tglobal.notisloadingcavechunks = false
 			Tglobal.housahedronmode = false
+			get_node("tunnelxoutline").visible = false
+			get_node("/root/Spatial/PlanViewSystem").backfacecartoonValid = false
 			if xcdatalist[0]["sketchname"] != "importing_the_centreline__do_not_clear":
 				clearentirecaveworld()
 			else:
@@ -222,7 +226,7 @@ remote func actsketchchangeL(xcdatalist):
 				spawnplayerme(xcdatalist[0]["playerMe"])
 				var playerserver = get_node_or_null("/root/Spatial/Players/NetworkedPlayer1")
 				if fromremotecall and playerserver != null and playerserver != playerMe:
-					PlayerDirections.setasaudienceofpuppet(playerserver, xcdatalist[0]["playerMe"]["headtrans"], 30)
+					PlayerDirections.setasaudienceofpuppet(xcdatalist[0]["playerMe"]["headtrans"], 30)
 				else:
 					PlayerDirections.setatheadtrans(xcdatalist[0]["playerMe"]["headtrans"], 30)
 			caveworldchunking_networkIDsource = xcdatalist[0]["networkIDsource"]
@@ -510,7 +514,6 @@ remote func actsketchchangeL(xcdatalist):
 				print("Now processing ", len(xcdatalistReceivedDuringChunkingL), " received during chunking")
 				for xcdatalistR in xcdatalistReceivedDuringChunkingL:
 					actsketchchangeL(xcdatalistR)
-					
 			get_node("/root/Spatial/MQTTExperiment").mqttupdatenetstatus()
 
 	if len(xcdrawingsrejected) != 0:
@@ -939,3 +942,24 @@ func removeXCtube(xctube):
 		var i = xcdrawing1.xctubesconn.find(xctube)
 		if i != -1:
 			xcdrawing1.xctubesconn.remove(i)
+
+
+func updateflagtrails(xcname, flagsigns):
+	var bflagtrailsupdate = false
+	for i in range(len(allflagtrails)-1, -1, -1):
+		if allflagtrails[i]["xcname"] == xcname:
+			allflagtrails.pop_at(i)
+			bflagtrailsupdate = true
+	for flagsign in flagsigns:
+		if flagsign.get("flagtrail"):
+			var flagopttext = "-"+flagsign["flagmsg"]
+			if len(flagopttext)>10:
+				flagopttext = flagopttext.substr(0,8)+"..."
+			allflagtrails.push_back({ "xcname":xcname, 
+									  "flagmsg":flagsign["flagmsg"], 
+									  "flagtrail":flagsign["flagtrail"], 
+									  "flagopttext":flagopttext })
+			bflagtrailsupdate = true
+	if bflagtrailsupdate:
+		var guipanel3d = get_node("/root/Spatial/GuiSystem/GUIPanel3D")
+		guipanel3d.updateplayerlist()
