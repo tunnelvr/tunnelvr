@@ -774,12 +774,13 @@ func updateplayerlist():
 		for i in range(len(sketchsystem.allflagtrails)):
 			var flagtrailm = sketchsystem.allflagtrails[i]
 			$Viewport/GUI/Panel/PlayerList.add_item(flagtrailm["flagopttext"])
-			if selectedflagtrail != null and flagtrailm["xcname"] == selectedflagtrail["xcname"] and flagtrailm["xcname"][-1] == selectedflagtrail["flagtrail"][-1]:
+			if selectedflagtrail != null and flagtrailm["xcname"] == selectedflagtrail["xcname"] and flagtrailm["flagtrail"][-1] == selectedflagtrail["flagtrail"][-1]:
 				selectedflagtrailindex = i
 
 	if selectedplayerindex != -1:
 		$Viewport/GUI/Panel/PlayerList.selected = selectedplayerindex
 	elif selectedflagtrailindex != -1:
+		$Viewport/GUI/Panel/PlayerList.selected = len(playerlistnetworkIDs) + selectedflagtrailindex
 		_on_playerlist_selected(len(playerlistnetworkIDs) + selectedflagtrailindex)
 	else:
 		$Viewport/GUI/Panel/PlayerList.selected = 0
