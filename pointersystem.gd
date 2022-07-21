@@ -470,7 +470,7 @@ func setpointertarget(laserroot, raycast, pointertargetshortdistance):
 		if laserspot.visible:
 			if laserroot == LaserOrient:
 				var LaserContactDisc = laserspot.get_node("LaserContactDisc")
-				if newpointertarget != null:
+				if newpointertarget != null and not (pointertargettype == "XCdrawing" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE):
 					var collisionnormal = raycast.get_collision_normal()
 					if collisionnormal.length_squared() == 0.0:
 						print("zero length collisionnormal ", raycast.is_colliding())

@@ -1505,7 +1505,7 @@ func _process(delta):
 					sumdelta = 0.0
 					countframes = 0
 
-			if selectedplayernetworkid >= 0:
+			if selectedplayernetworkid >= 0 and selectedplayernetworkid != playerMe.networkID:
 				rpc_id(selectedplayernetworkid, "sendbacknetworkmetrics", { "ticksout":OS.get_ticks_msec() }, playerMe.networkID)
 			elif selectedplayernetworkid == -10:
 				call_deferred("sendbacknetworkmetrics", { "ticksout":OS.get_ticks_msec() }, -11)
