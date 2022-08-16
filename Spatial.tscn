@@ -1932,7 +1932,6 @@ spot_angle_attenuation = 1.27456
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.051, 0.085 )
 visible = false
 mesh = SubResource( 1 )
-material/0 = null
 
 [node name="csgheadmesh" parent="Players/PlayerMe/HeadCam" instance=ExtResource( 12 )]
 material = SubResource( 2 )
@@ -2119,7 +2118,6 @@ transform = Transform( 1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, -
 [node name="Mesh" type="MeshInstance" parent="BodyObjects/PlayerMotion/MotionVectorPreview/Scale"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.5 )
 mesh = SubResource( 56 )
-material/0 = null
 
 [node name="LaserOrient" type="Spatial" parent="BodyObjects"]
 transform = Transform( 1, -4.60809e-07, 4.60809e-07, 0, 0.707107, 0.707107, -6.51682e-07, -0.707107, 0.707107, 0.199998, 3.5, -6.852 )
@@ -2141,12 +2139,10 @@ collision_mask = 248
 [node name="LaserSpot" type="MeshInstance" parent="BodyObjects/LaserOrient"]
 transform = Transform( 1, 0, 0, 0, 1, -8.9407e-08, 0, 8.9407e-08, 1, 0, -4.76837e-07, -5.476 )
 mesh = SubResource( 60 )
-material/0 = null
 
 [node name="LaserSpike" type="MeshInstance" parent="BodyObjects/LaserOrient/LaserSpot"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0 )
 mesh = SubResource( 62 )
-material/0 = null
 
 [node name="LaserContactDisc" type="Spatial" parent="BodyObjects/LaserOrient/LaserSpot"]
 
@@ -2154,7 +2150,6 @@ material/0 = null
 transform = Transform( 1, 5.68434e-14, 2.84217e-14, 2.84217e-14, -5.96046e-08, -1, -5.68434e-14, 1, -5.96046e-08, 0, 0, 0 )
 mesh = SubResource( 298 )
 skeleton = NodePath("../..")
-material/0 = null
 
 [node name="NotificationTorus" type="CSGTorus" parent="BodyObjects/LaserOrient"]
 transform = Transform( 1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, -0.3 )
@@ -2190,7 +2185,6 @@ material/0 = SubResource( 66 )
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0 )
 visible = false
 mesh = SubResource( 62 )
-material/0 = null
 
 [node name="FloorLaserSpot" type="Spatial" parent="BodyObjects"]
 transform = Transform( 1, 0, 2.84217e-14, 0, 1, 0, -8.52651e-14, 0, 1, 0, 0, -9.53674e-07 )
@@ -2206,7 +2200,6 @@ visible = false
 transform = Transform( -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0, 0, 0 )
 mesh = SubResource( 299 )
 skeleton = NodePath("../..")
-material/0 = null
 
 [node name="IntermediatePointView" type="Spatial" parent="BodyObjects"]
 visible = false
@@ -2953,7 +2946,6 @@ material/0 = SubResource( 77 )
 [node name="ImageFrame" type="MeshInstance" parent="PlanViewSystem/PlanView/ProjectionScreen"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.055 )
 mesh = SubResource( 79 )
-material/0 = null
 
 [node name="CollisionShape" type="CollisionShape" parent="PlanViewSystem/PlanView"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.01 )
@@ -2970,19 +2962,16 @@ __meta__ = {
 transform = Transform( 70, 0, 0, 0, 1, 0, 0, 0, 70, 0, 0.6, 0 )
 cast_shadow = 0
 mesh = SubResource( 82 )
-material/0 = null
 
 [node name="RealCameraLens" type="MeshInstance" parent="PlanViewSystem/RealPlanCamera/RealCameraBox"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.132259, 0 )
 cast_shadow = 0
 mesh = SubResource( 84 )
-material/0 = null
 
 [node name="LaserScope" type="MeshInstance" parent="PlanViewSystem/RealPlanCamera"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 0 )
 cast_shadow = 0
 mesh = SubResource( 86 )
-material/0 = null
 
 [node name="LaserOrient" type="Spatial" parent="PlanViewSystem/RealPlanCamera/LaserScope"]
 transform = Transform( 1, 0, 0, 0, -1.62921e-07, 1, 0, -1, -1.62921e-07, 0, 0, 0 )
@@ -2993,7 +2982,6 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 60, 0, 0, 0 )
 [node name="LaserVertical" type="MeshInstance" parent="PlanViewSystem/RealPlanCamera/LaserScope/LaserOrient/Length"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.5 )
 mesh = SubResource( 88 )
-material/0 = null
 
 [node name="RayCast" type="RayCast" parent="PlanViewSystem/RealPlanCamera/LaserScope/LaserOrient"]
 cast_to = Vector3( 0, 0, -150 )
@@ -3002,12 +2990,10 @@ collision_mask = 312
 [node name="LaserSpot" type="MeshInstance" parent="PlanViewSystem/RealPlanCamera/LaserScope/LaserOrient"]
 transform = Transform( 1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, 0.478879, -49.3258, -0.0697994 )
 mesh = SubResource( 89 )
-material/0 = null
 
 [node name="LaserSpike" type="MeshInstance" parent="PlanViewSystem/RealPlanCamera/LaserScope/LaserOrient/LaserSpot"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0 )
 mesh = SubResource( 90 )
-material/0 = null
 
 [node name="GuiSystem" type="Spatial" parent="."]
 transform = Transform( -0.999994, 0, 0.00336804, 0, 1, 0, -0.00336804, 0, -0.999994, 5.95264e-10, 2, 6.412 )
@@ -3030,9 +3016,6 @@ margin_right = 380.0
 margin_bottom = 280.0
 mouse_filter = 1
 theme = ExtResource( 47 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="Panel" type="Panel" parent="GuiSystem/GUIPanel3D/Viewport/GUI"]
 anchor_right = 1.0
@@ -3144,10 +3127,10 @@ __meta__ = {
 }
 
 [node name="WorldScaleLabel" type="Label" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 203.0
-margin_top = 80.0
-margin_right = 285.0
-margin_bottom = 102.0
+margin_left = 200.351
+margin_top = 78.9405
+margin_right = 282.351
+margin_bottom = 100.941
 text = "Avatar size:"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -3240,10 +3223,10 @@ __meta__ = {
 }
 
 [node name="ResourceSelector" type="OptionButton" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
-margin_left = 126.3
-margin_top = 104.0
-margin_right = 226.3
-margin_bottom = 126.0
+margin_left = 122.592
+margin_top = 103.47
+margin_right = 222.592
+margin_bottom = 125.47
 text = "--select"
 items = [ "--select", null, false, 1, null ]
 selected = 0
@@ -4006,7 +3989,6 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -1.22997, 0, -1.16549 )
 [node name="spot" type="MeshInstance" parent="MaterialSystem/lasermaterial"]
 transform = Transform( 1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, 0, 0, 0 )
 mesh = SubResource( 60 )
-material/0 = null
 
 [node name="spotselected" type="MeshInstance" parent="MaterialSystem/lasermaterial"]
 transform = Transform( 1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, -0.610968, 0, 0 )
@@ -4026,7 +4008,6 @@ material/0 = SubResource( 165 )
 [node name="spike" type="MeshInstance" parent="MaterialSystem/lasermaterial"]
 transform = Transform( 1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, 0, 0.07, -0.07 )
 mesh = SubResource( 62 )
-material/0 = null
 
 [node name="laser" type="MeshInstance" parent="MaterialSystem/lasermaterial"]
 transform = Transform( 1, 0, 0, 0, 0.707107, 0.353553, 0, -0.707107, 0.353553, 0, 0.14, 0.14 )
@@ -4337,7 +4318,6 @@ shape = SubResource( 225 )
 [node name="Mesh" type="MeshInstance" parent="underfloor"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.000788898, 0.0279074, 0.000322576 )
 mesh = SubResource( 227 )
-material/0 = null
 
 [node name="BoulderClutter" type="Spatial" parent="."]
 

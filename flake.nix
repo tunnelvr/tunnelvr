@@ -2,9 +2,10 @@
   description = "TunnelVR for Nix automation purposes";
 
   inputs = {
+    nixpkgs-unstable.url = "github:matthewcroughan/nixpkgs/mc/fix-godot-wrapper-recurse";
     nixpkgs.url = "github:nixos/nixpkgs/nixos-21.11";
     godot-source = {
-      url = "github:godotengine/godot/3.4.4-stable";
+      url = "github:godotengine/godot/3.5-stable";
       flake = false;
     };
     flake-compat-ci.url = "github:hercules-ci/flake-compat-ci";
@@ -14,7 +15,7 @@
     };
   };
 
-  outputs = { self, nixpkgs, godot-source, flake-compat, flake-compat-ci }:
+  outputs = { self, nixpkgs, godot-source, flake-compat, flake-compat-ci, nixpkgs-unstable }:
     let
       # Generate a user-friendly version numer.
       version = builtins.substring 0 8 self.lastModifiedDate;
@@ -82,7 +83,7 @@
                 # can parse it using regex in order to construct the link to
                 # download the export templates from.
                 version = rec {
-                  # Fully constructed string, example: "3.4.2".
+                  # Fully constructed string, example: "3.5".
                   string = "${major + "." + minor + (final.lib.optionalString (patch != "") "." + patch)}";
                   file = "${godot-source}/version.py";
                   major = toString (builtins.match ".+major = ([0-9]+).+" (builtins.readFile file));
@@ -97,7 +98,7 @@
                 '';
                 export-templates = final.fetchzip {
                   url = "https://downloads.tuxfamily.org/godotengine/${version.string}/Godot_v${version.string}-${version.status}_export_templates.tpz";
-                  sha256 = "sha256-6eiPnyyWRE+1WFdsJSNZm+h9VJUnDxz4yBx64WhxzOQ=";
+                  sha256 = "sha256-RRtgMuyaS1XJrfexOS1u5aIl2yq7fSEuMQ71G/k7MkY=";
                   # postFetch is necessary because the downloaded file has a
                   # .tpz extension, meaning `fetchzip` cannot otherwise extract
                   # it properly. Additionally, the game engine expects the
@@ -118,7 +119,7 @@
                   --set tunnelvr_DEBUG_KEY "${debugKey}"
               '';
           };
-          my-godot = godot.overrideAttrs (oldAttrs: rec {
+          my-godot = nixpkgs-unstable.outputs.legacyPackages.x86_64-linux.godot.overrideAttrs (oldAttrs: rec {
             version = godot-source.rev;
             src = godot-source;
             preBuild =
