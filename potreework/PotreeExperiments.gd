@@ -18,8 +18,14 @@ extends Spatial
 # wine64 ~/executables-impure/PotreeConverter_2.1_x64_windows/PotreeConverter.exe --source point_cloud_may17cc.laz --outdir potreeconverted --attributes position_cartesian --method poisson
 #increases size by 50% to have colour:
 # wine64 ~/executables-impure/PotreeConverter_2.1_x64_windows/PotreeConverter.exe --source point_cloud_may17cc.laz --outdir potreeconverted --attributes position_cartesian --attributes rgb --method poisson
+
+# nix build github:matthewcroughan/nixpkgs/mc/potreeconverter#potreeconverter
+# results/bin/PotreeConverter  --source point_cloud_may17cc.laz --outdir potreeconverted --attributes position_cartesian --method poisson
+
 # nix-shell -p caddy
 # caddy file-server -browse -root /home/julian/data/3dmodels/aidanhouse -listen 0.0.0.0:8000
+# caddy file-server -browse -root . -listen 0.0.0.0:8000
+# on godot.doesliverpool.xyz the files are in /var/lib/private/tunnelvr/.local/share/godot/app_userdata/tunnelvr_v0.7/caddywebserver/
 
 var potreethreadmutex = Mutex.new()
 var potreethreadsemaphore = Semaphore.new()

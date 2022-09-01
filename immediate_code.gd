@@ -5,21 +5,30 @@ extends EditorScript
 # Control-Shift X to run this code in the editor
 # *******
 
-func _run():
-	var a = -361.0
-	a = 49
-	for i in range(20):
-		a = a - (floor(a/360)*360)
-		var x = rad2deg(Vector2(-1,-1).angle())
-		if x > 180:
-			x -= 180
-		if abs(x + 360 - a) < abs(x + 180 - a):
-			x += 360
-		if abs(x + 180 - a) < abs(x - a):
-			x += 180
-		if abs(x - a) > 1:
-			a += 10 if x > a else -10
+# rotationtoalign(a, b)*a is parallel to b
+func rotationtoalign(a, b):
+	var c = a.cross(b)
+	var d = a.dot(b)
+	var clength = c.length()
+	var abl = a.length()*b.length()
+	if abl == 0.0 or clength == 0.0:
+		return Basis()
+	var sinrot = clength/(a.length()*b.length())
+	var rotang = asin(sinrot)
+	if d < 0.0:
+		if rotang > 0.0:
+			rotang = PI-rotang
 		else:
-			a = x
-		print(x, " ", a)
+			rotang = -(PI-(-rotang))
+	var res = Basis(c/clength, rotang)
+	var l = res.xform(a)*b.length()
+	print(c, b, l)
+	return res
+
+func _run():
+	var x = Vector3(-0.027, 0.003, -0.027).normalized()
+#	rotationtoalign(Vector3(0,0,1), Vector3(-0.027, 0.003, -0.027))
+#	rotationtoalign(Vector3(0,0,1), x)
+	rotationtoalign(Vector3(0,0,1), Vector3(-1,0,-1))
+	rotationtoalign(Vector3(0,0,1), Vector3(-1,0,1))
 		
