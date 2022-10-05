@@ -5,6 +5,7 @@ extends EditorScript
 # Control-Shift X to run this code in the editor
 # *******
 
+
 # rotationtoalign(a, b)*a is parallel to b
 func rotationtoalign(a, b):
 	var c = a.cross(b)
@@ -26,9 +27,18 @@ func rotationtoalign(a, b):
 	return res
 
 func _run():
-	var x = Vector3(-0.027, 0.003, -0.027).normalized()
+#	var x = Vector3(-0.027, 0.003, -0.027).normalized()
 #	rotationtoalign(Vector3(0,0,1), Vector3(-0.027, 0.003, -0.027))
 #	rotationtoalign(Vector3(0,0,1), x)
-	rotationtoalign(Vector3(0,0,1), Vector3(-1,0,-1))
-	rotationtoalign(Vector3(0,0,1), Vector3(-1,0,1))
-		
+#	rotationtoalign(Vector3(0,0,1), Vector3(-1,0,-1))
+#	rotationtoalign(Vector3(0,0,1), Vector3(-1,0,1))
+	var regexbrokerurl = RegEx.new()
+	regexbrokerurl.compile('^(wss://|ws://|ssl://)?([^:\\s]+)(:\\d+)?(/\\S*)?$')
+	var brokerurl = "test.mosquitto.org:8080/mqtt"
+	var x = regexbrokerurl.search(brokerurl)
+	print(x.strings if x else x)
+	print(int(x.strings[3].substr(1)), str(900))
+	print(PoolByteArray())
+	
+	
+	

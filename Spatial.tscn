@@ -1723,11 +1723,8 @@ mid_height = 0.5
 albedo_color = Color( 0.980392, 0.47451, 0.435294, 1 )
 metallic = 0.14
 roughness = 0.33
-transmission_enabled = true
-transmission = Color( 0.113725, 0.164706, 0.968627, 1 )
 
 [sub_resource type="SpatialMaterial" id=203]
-params_cull_mode = 2
 albedo_color = Color( 0.482353, 0.976471, 0.52549, 1 )
 metallic = 0.32
 roughness = 0.62
@@ -2022,7 +2019,6 @@ mesh = SubResource( 8 )
 material/0 = SubResource( 9 )
 
 [node name="right_hand_model" parent="Players/PlayerMe/HandRight" instance=ExtResource( 71 )]
-visible = false
 
 [node name="OculusQuestTouchController_Right_Reactive" parent="Players/PlayerMe/HandRight" instance=ExtResource( 70 )]
 visible = false

@@ -19,8 +19,9 @@ onready var planviewcontrols = $PlanView/Viewport/PlanGUI/PlanViewControls
 onready var plancamera = $PlanView/Viewport/PlanGUI/Camera
 
 var imgregex = RegEx.new()
-var listregex = RegEx.new()
+var listsvnregex = RegEx.new()
 var f3dregex = RegEx.new()
+var listhttpregex = RegEx.new()
 
 var installbuttontex = null
 var fetchbuttontex = null
@@ -103,6 +104,8 @@ func fetchbuttonpressed(item, column, idx):
 			url = filetreeresource.get("url") + path.lstrip("/")
 		elif filetreeresource.get("type") == "svnfiles":
 			url = filetreeresource.get("url") + path.lstrip("/")
+		elif filetreeresource.get("type") == "httpfiles":
+			url = filetreeresource.get("url") + path.lstrip("/")
 		
 	print("url to fetch: ", url)
 	if imgregex.search(fname):
@@ -177,14 +180,20 @@ func actunrolltree(f, fetchednonimagedataobject):
 				for jr in jres:
 					llinks.push_back(jr["name"] + ("/" if jr.get("type") == "dir" else ""))
 		elif fetchednonimagedataobject["filetreeresource"].get("type") == "svnfiles":
-			for m in listregex.search_all(htmltext):
+			for m in listsvnregex.search_all(htmltext):
+				var lk = m.get_string(1)
+				if not lk.begins_with("."):
+					lk = lk.replace("&amp;", "&")
+					llinks.push_back(lk)
+		elif fetchednonimagedataobject["filetreeresource"].get("type") == "httpfiles":
+			for m in listhttpregex.search_all(htmltext):
 				var lk = m.get_string(1)
 				if not lk.begins_with("."):
 					lk = lk.replace("&amp;", "&")
 					llinks.push_back(lk)
 
 	else:
-		for m in listregex.search_all(htmltext):   # svnfiles type bydefault
+		for m in listsvnregex.search_all(htmltext):   # svnfiles type bydefault
 			var lk = m.get_string(1)
 			if not lk.begins_with("."):
 				lk = lk.replace("&amp;", "&")
@@ -326,7 +335,8 @@ func checkcentrelinesvisible_pressed():
 func _ready():
 	imgregex.compile('(?i)\\.(png|jpg|jpeg)$')
 	f3dregex.compile('(?i)\\.(3d)$')
-	listregex.compile('<li><a href="([^"]*)">')
+	listsvnregex.compile('<li><a href="([^"]*)">')
+	listhttpregex.compile('<td><a href="([^"]*)">')
 	installbuttontex = get_node("/root/Spatial/MaterialSystem/buttonmaterials/InstallButton").get_surface_material(0).albedo_texture
 	fetchbuttontex = get_node("/root/Spatial/MaterialSystem/buttonmaterials/FetchButton").get_surface_material(0).albedo_texture
 	clearcachebuttontex = get_node("/root/Spatial/MaterialSystem/buttonmaterials/ClearCacheButton").get_surface_material(0).albedo_texture

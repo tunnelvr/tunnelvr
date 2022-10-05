@@ -905,7 +905,7 @@ func resources_readycall():
 				(not disablegithubdefault and k["type"] == "githubapi" and k.get("token")):
 			resourcesel = k["name"]
 			resourcetype = k["type"]
-		if (k["type"] == "svnfiles") or (k["type"] == "caddyfiles" and filetreetype == ""):
+		if (k["type"] == "svnfiles") or (k["type"] == "httpfiles") or (k["type"] == "caddyfiles" and filetreetype == ""):
 			filetreesel = k["name"]
 			filetreetype = k["type"]
 			
@@ -1154,7 +1154,7 @@ func _on_resourceoptions_selected(index):
 			elif jresource.get("type") == "erase" or jresource.get("type") == "delete":
 				GithubAPI.riattributes["resourcedefs"].erase(jresource["name"])
 				ltext = "resource deleted"
-			elif jresource.get("type") in ["githubapi", "svnfiles", "caddyfiles"]:
+			elif jresource.get("type") in ["githubapi", "svnfiles", "httpfiles", "caddyfiles"]:
 				GithubAPI.riattributes["resourcedefs"][jresource["name"]] = jresource
 			else:
 				ltext = "Err: unknown type"
@@ -1239,7 +1239,7 @@ func ApplyToFiletree(resourcename):
 	GithubAPI.riattributes["filetreesel"] = resourcename
 	var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
 	var resourcedef = GithubAPI.riattributes["resourcedefs"][resourcename]
-	if resourcedef.get("type") in ["svnfiles", "caddyfiles", "githubapi"]:
+	if resourcedef.get("type") in ["svnfiles", "caddyfiles", "httpfiles", "githubapi"]:
 		planviewsystem.filetreeresourcename = resourcename
 		var filetreerootpath = resourcedef.get("path", "")
 		filetreerootpath = filetreerootpath.rstrip("/") + "/"
