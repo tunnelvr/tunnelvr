@@ -643,6 +643,14 @@ func mergexcrpcdata(xcdata):
 			var gripmenu = get_node("/root/Spatial/GuiSystem/GripMenu")
 			gripmenu.setmaterialmatrix()
 
+			if Tglobal.housahedronmode:
+				var MQTT = get_node("/root/Spatial/MQTTExperiment/MQTT")
+				if not MQTT.is_connected_to_server():
+					MQTT.server = "mosquitto.doesliverpool.xyz"
+					if yield(MQTT.connect_to_server(), "completed"):
+						MQTT.publish("sapjs/vr1/json", to_json({"clear":"elements"}))
+
+				
 	# this is was calling twice, also from xcdrawingstoupdate
 	#elif drawingtype != DRAWING_TYPE.DT_ROPEHANG:
 	#	updatexcpaths()

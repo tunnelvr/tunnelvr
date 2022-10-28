@@ -22,13 +22,14 @@ func _ready():
 	$MQTT.connect("broker_disconnected", self, "on_broker_disconnect")
 	randomize()
 	$MQTT.client_id = "s%d" % randi()
-	$MQTT.client_id = "my_test_id"
 	
 	randomplayername = possibleusernames[randi()%len(possibleusernames)]
 	$MQTT.set_process(false)
 	
+	
 func mqttupdatenetstatus():
 	return
+	
 	var selfSpatial = get_node("/root/Spatial")
 	var playerplatform = selfSpatial.playerMe.playerplatform
 	var ltopicstatus = "tunnelvrv/%s/%s/%s/netstatus" % [$MQTT.client_id, playerplatform, randomplayername]

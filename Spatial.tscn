@@ -4352,6 +4352,9 @@ script = ExtResource( 50 )
 [node name="MQTT" type="Node" parent="MQTTExperiment"]
 script = ExtResource( 48 )
 
+[node name="Timer" type="Timer" parent="MQTTExperiment/MQTT"]
+wait_time = 30.0
+
 [node name="LightingExperiments" type="Spatial" parent="."]
 visible = false
 
@@ -4494,3 +4497,5 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 13, 2.5, -6 )
 visible = false
 
 [node name="Camera2D" type="Camera2D" parent="Lidarmodel"]
+
+[connection signal="timeout" from="MQTTExperiment/MQTT/Timer" to="MQTTExperiment/MQTT" method="ping"]
