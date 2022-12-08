@@ -1282,11 +1282,39 @@ func buttonreleased_vrgrip():
 		if pointertargettype == "MaterialButton":
 			assert (gripmenu.gripmenupointertargettype == "XCflatshell") 
 			var newflatshellmaterialname = pointertarget.get_name()
-			sketchsystem.actsketchchange([{ "name":activetargetxcflatshell.get_name(), 
+			var aflatshellname = activetargetxcflatshell.get_name()
+			sketchsystem.actsketchchange([{ "name":aflatshellname, 
 											"prevxcflatshellmaterial":activetargetxcflatshell.xcflatshellmaterial,
 											"nextxcflatshellmaterial":newflatshellmaterialname
 										 }])
 			gripmenu.disableallgripmenus()
+
+			if Tglobal.housahedronmode:
+				print("aflatshellname", aflatshellname)
+				var xcdrawingM = sketchsystem.get_node("XCdrawings").get_node(aflatshellname)
+				var MQTT = get_node("/root/Spatial/MQTTExperiment/MQTT")
+				if MQTT.is_connected_to_server():
+					var xcflatshell = xcdrawingM.get_node_or_null("XCflatshell/MeshInstance")
+					var xctubeshellmesh = xcflatshell.mesh if xcflatshell else null
+					var tfaces = xctubeshellmesh.get_faces() if xctubeshellmesh else null
+					if tfaces:
+						var minx = tfaces[0].x
+						var maxx = tfaces[0].x
+						var trianglearea = 0.0
+						for i in range(len(tfaces)):
+							minx = min(minx, tfaces[i].x)
+							maxx = max(maxx, tfaces[i].x)
+							if (i%3) == 2:
+								trianglearea += 0.5*(tfaces[i] - tfaces[i-2]).cross(tfaces[i] - tfaces[i-1]).length()
+						var payload = { "source":"tunnelvr", 
+										"name":aflatshellname, 
+										"xcflatshellmaterial":xcdrawingM.xcflatshellmaterial, 
+										"width":(maxx-minx), 
+										"area":trianglearea,
+										"orientationvec":[xcdrawingM.transform.basis.z.x, xcdrawingM.transform.basis.z.y, xcdrawingM.transform.basis.z.z]
+									  }
+						MQTT.publish("sapjs/vr1/json", to_json(payload))
+
 			return
 		materialsystem.updateflatshellmaterial(activetargetxcflatshell, "")
 		activetargetxcflatshell = null

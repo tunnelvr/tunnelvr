@@ -111,7 +111,6 @@ func _process(delta):
 	in_wait_msg = false
 
 
-
 func websocketexperiment():
 	websocketclient = WebSocketClient.new()
 	var URL = "ws://node-red.dynamicdevices.co.uk:1880/ws/test"
@@ -224,6 +223,8 @@ func firstmessagetoserver():
 
 func connect_to_server(usessl=false):
 	set_process(true)
+	$Timer.start()
+	yield(get_tree(), "idle_frame")
 	assert (server != "")
 	if client_id == "":
 		client_id = "rr%d" % randi()
@@ -341,7 +342,8 @@ func disconnect_from_server():
 	set_process(false)
 
 func ping():
-	senddata(PoolByteArray([0xC0, 0x00]))
+	if is_connected_to_server():
+		senddata(PoolByteArray([0xC0, 0x00]))
 
 func publish(topic, msg, retain=false, qos=0):
 	if not binarymessages:
