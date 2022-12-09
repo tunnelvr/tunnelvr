@@ -18,7 +18,6 @@ var planeintersectaxisvec = null
 var planeintersectpoint = null
 var planealongvecwhenparallel = null
 
-
 const linewidth = 0.02
 
 func exportxctrpcdata(stripruntimedataforsaving):   # read by xctubefromdata()
@@ -1087,6 +1086,12 @@ func CopyHoleGapShape(li, sketchsystem):
 
 	
 func makeplaneintersectionaxisvec(xcdrawing0, xcdrawing1):
+	if xcdrawing0 == xcdrawing1:
+		planeintersectaxisvec = xcdrawing0.transform.basis.y
+		planealongvecwhenparallel = xcdrawing0.transform.basis.x
+		planeintersectpoint = xcdrawing0.transform.origin
+		return
+		
 	var n0 = xcdrawing0.transform.basis.z
 	var n1 = xcdrawing1.transform.basis.z
 	var c0 = n0.dot(xcdrawing0.transform.origin)
@@ -1101,6 +1106,7 @@ func makeplaneintersectionaxisvec(xcdrawing0, xcdrawing1):
 		var ad0 = c0 - n0dn1*c1
 		var ad1 = -n0dn1*c0 + c1
 		planeintersectpoint = (n0*ad0 + n1*ad1)/adet
+		planealongvecwhenparallel = null
 	else:
 		planeintersectaxisvec = xcdrawing0.transform.basis.y
 		planealongvecwhenparallel = xcdrawing0.transform.basis.x
@@ -1117,7 +1123,6 @@ func intermedpointplanebasis(pointertargetpoint):
 	if not is_equal_approx(bzvec.length(), 1):
 		print("bad zvecn ", bzvec.length())
 	return Basis(bxvec, byvec, bzvec)
-
 
 func removexclinkintermediatenode(j, dv):
 	if xclinkintermediatenodes != null:
