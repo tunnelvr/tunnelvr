@@ -1,4 +1,4 @@
-[gd_scene load_steps=368 format=2]
+[gd_scene load_steps=369 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/underground_env.tres" type="Environment" id=2]
@@ -31,6 +31,7 @@
 [ext_resource path="res://lightweighttextures/seamlesspebbles1.jpg" type="Texture" id=29]
 [ext_resource path="res://systems/VerletRopeSystem.gd" type="Script" id=30]
 [ext_resource path="res://lightweighttextures/streamarrow_right.png" type="Texture" id=31]
+[ext_resource path="res://systems/TunnelXSystem.gd" type="Script" id=32]
 [ext_resource path="res://lightweighttextures/streamarrow_left.png" type="Texture" id=33]
 [ext_resource path="res://lightweighttextures/yellowchecker_five.png" type="Texture" id=34]
 [ext_resource path="res://lightweighttextures/simpledirt.material" type="Material" id=35]
@@ -3003,9 +3004,6 @@ script = ExtResource( 14 )
 [node name="Viewport" type="Control" parent="GuiSystem/GUIPanel3D"]
 margin_right = 40.0
 margin_bottom = 40.0
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="GUI" type="Control" parent="GuiSystem/GUIPanel3D/Viewport"]
 margin_right = 380.0
@@ -3116,7 +3114,7 @@ margin_top = 245.108
 margin_right = 114.216
 margin_bottom = 272.108
 text = "normal"
-items = [ "normal", null, false, 0, null, "Hide XCs", null, false, 1, null, "opt: all grey", null, false, 2, null, "opt: hide xc", null, false, 3, null, "toggle guardian", null, false, 4, null, "export OBJ", null, false, 7, null, "choke", null, false, 6, null, "swap controllers", null, false, 7, null, "lock controls", null, false, 8, null, "toggle gltf", null, false, 10, null, "Huge Spiral", null, true, 11, null ]
+items = [ "normal", null, false, 0, null, "Hide XCs", null, false, 1, null, "opt: all grey", null, false, 2, null, "opt: hide xc", null, false, 3, null, "toggle guardian", null, false, 4, null, "export OBJ", null, false, 7, null, "choke", null, false, 6, null, "swap controllers", null, false, 7, null, "lock controls", null, false, 8, null, "toggle gltf", null, false, 10, null, "Huge Spiral", null, true, 11, null, "LoadX", null, false, 12, null ]
 selected = 0
 __meta__ = {
 "_edit_use_anchors_": false
@@ -4301,6 +4299,9 @@ script = ExtResource( 79 )
 
 [node name="RayCast" type="RayCast" parent="WaterLevelSystem"]
 collision_mask = 48
+
+[node name="TunnelXSystem" type="Spatial" parent="."]
+script = ExtResource( 32 )
 
 [node name="underfloor" type="StaticBody" parent="."]
 transform = Transform( 200, 0, 0, 0, 1, 0, 0, 0, 200, 0, -11.5, 0 )

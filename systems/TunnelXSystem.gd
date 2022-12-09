@@ -1,9 +1,4 @@
-tool
-extends EditorScript
-
-# *******
-# Control-Shift X to run this code in the editor
-# *******
+extends Spatial
 
 class SkFrame:
 	var sfscaledown : float
@@ -15,7 +10,6 @@ class SkFrame:
 	var sfstyle : String
 	var nodeconnzsetrelative : float
 	var sfpixwidthheight : Vector2
-
 
 class SkPath:
 	var from : int
@@ -36,6 +30,7 @@ func skpath(xp):
 	sk.from = int(xp.get_named_attribute_value("from"))
 	sk.to = int(xp.get_named_attribute_value("to"))
 	sk.linestyle = xp.get_named_attribute_value("linestyle")
+
 	var pts = [ ]
 	var subsets = [ ]
 	while not (xp.get_node_type() == xp.NODE_ELEMENT_END and xp.get_node_name() == "skpath"):
@@ -77,11 +72,18 @@ func skpath(xp):
 	sk.pts = PoolVector3Array(pts)
 	if subsets:
 		sk.subsets = PoolStringArray(subsets)
+	return sk
+	
 
+#flagsignlabels)
+#flagsignlabels = { }
+#	var xctdataviz = { "xcvizstates":{ prevxcname:finishedplanedrawingtype }, 
+#					   "updatetubeshells":[
+#						{ "tubename":xctdata["tubename"], "xcname0":xctdata["xcname0"], "xcname1":xctdata["xcname1"] } 
+#					] }
+								
 
-func _run():
-	var fname = "res://assets/miscobjects/292-sketch1.xml"
-
+func loadtunnelxsketch(fname):
 	var xp = XMLParser.new()
 	print(xp.open(fname))
 	xp.read()
@@ -92,12 +94,47 @@ func _run():
 	xp.read()
 	if not (xp.get_node_type() == xp.NODE_ELEMENT and xp.get_node_name() == "sketch"):
 		return
+		
+	var nodepoints = { }
+	var conepathpairs = [ ]
+	var flagsignlabels = { }
+	var skpaths = [ ]
 	for i in range(10000):
 		xp.read()
 		if xp.get_node_type() == xp.NODE_ELEMENT_END and xp.get_node_name() == "sketch":
 			print("done ", i)
 			break
 		if xp.get_node_type() == xp.NODE_ELEMENT and xp.get_node_name() == "skpath":
-			skpath(xp)
-	
-	
+			var sk = skpath(xp)
+			nodepoints["n%d" % sk.from] = sk.pts[0]
+			nodepoints["n%d" % sk.to] = sk.pts[-1]
+			if sk.linestyle == "centreline":
+				flagsignlabels["n%d" % sk.from] = sk.cltail
+				flagsignlabels["n%d" % sk.to] = sk.clhead
+				conepathpairs.append("n%d" % sk.from)
+				conepathpairs.append("n%d" % sk.to)
+			skpaths.append(sk)
+
+#			drawinglinks
+
+	var sketchsystem = get_node("/root/Spatial/SketchSystem")
+	var rotzminus90 = Basis(Vector3(1,0,0), Vector3(0,0,-1), Vector3(0,1,0))
+	var bbcenvec = Vector3()
+	var centrelinetransformpos = Transform(rotzminus90, -rotzminus90.xform(bbcenvec))
+	var xcdata = { "name":sketchsystem.uniqueXCname("tunnelx"), 
+				   "drawingtype":DRAWING_TYPE.DT_CENTRELINE,
+				   "drawingvisiblecode":DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE,
+				   "transformpos":centrelinetransformpos, 
+				   "nodepoints":nodepoints, 
+				   "onepathpairs":conepathpairs, 
+				   "additionalproperties": { "flagsignlabels": flagsignlabels }
+				 }
+#	var xctdata = { "tubename":"**notset", 
+#					"xcname0":xcdata["name"],
+#					"xcname1":xcdata["name"],
+#					"prevdrawinglinks":[], 
+#					"newdrawinglinks":drawinglinks }
+
+
+	sketchsystem.actsketchchange([ xcdata ])
+

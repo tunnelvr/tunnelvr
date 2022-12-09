@@ -363,6 +363,10 @@ func _on_switchtest(index):
 		playerMe.togglefog()
 		SwitchTest.selected = 0
 
+	elif nssel == "LoadX":
+		var tunnelxsystem = get_node("/root/Spatial/TunnelXSystem")
+		tunnelxsystem.loadtunnelxsketch("res://assets/miscobjects/292-sketch1.xml")
+		
 	elif nssel == "Huge Spiral":
 		var xcrad = 1.5
 		var Nxcnodes = 23
