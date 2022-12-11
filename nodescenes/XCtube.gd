@@ -273,8 +273,9 @@ func updatetubelinkpaths(sketchsystem):
 		var nintermediatenodes = (0 if xclinkintermediatenodes == null else len(xclinkintermediatenodes[jb]))
 		var intermediatepts = [ ]
 		if nintermediatenodes != 0:
+			var intermediatenodes = xclinkintermediatenodes[jb]
 			for i in range(nintermediatenodes):
-				var p1mtrans = intermedpointposT(p0, p1, xclinkintermediatenodes[jb][i])
+				var p1mtrans = intermedpointposT(p0, p1, intermediatenodes[i])
 				intermediatepts.push_back(p1mtrans.origin)
 				var inodename = encodeintermediatenodename(jb, i)
 				var inode = $PathLines.get_node_or_null(inodename)

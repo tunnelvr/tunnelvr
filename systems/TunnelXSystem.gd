@@ -2,6 +2,131 @@ extends Spatial
 
 onready var sketchsystem = get_node("/root/Spatial/SketchSystem")
 
+var tunnelx_xcname = null
+var tunnelx_tubename = null
+
+# things to do: 
+# updateznodes settings going out
+# plot edges according to their style and Color
+# sketchgraphicspanel.UpdateZNodes();
+# sketchgraphicspanel.UpdateSAreas();
+# the areas are going to need sensible triangulating, 
+#   some kind of nice grid that works on other faces
+# sketchgraphicspanel.GUpdateSymbolLayout();
+# convert the skframes into floor sketches below the connective bits
+# is fixing up and exporting remotely feasible?
+# use xcsectormaterials to set the linestyle!
+
+class sd0class:
+	static func sd0(a, b):
+		return a[0] < b[0]
+
+func maketunnelxnetwork(nodepoints, onepathpairs, xctunnelxtube):
+	var Lpathvectorseq = { } 
+	for i in nodepoints.keys():
+		Lpathvectorseq[i] = [ ]  # [ (arg, pathindex*2 + (0 if bfore else 1)) ]
+
+	var xcdrawinglink = xctunnelxtube.xcdrawinglink
+	var xclinkintermediatenodes = xctunnelxtube.xclinkintermediatenodes
+	var Ndrawinglinks = len(xcdrawinglink)/2
+	for i in range(Ndrawinglinks):
+		var i0 = xcdrawinglink[i*2]
+		var i1 = xcdrawinglink[i*2+1]
+		var p0 = nodepoints[i0]
+		var p1 = nodepoints[i1]
+		var p0i = p1
+		var p1i = p0
+		if xclinkintermediatenodes != null and xclinkintermediatenodes[i] != null and len(xclinkintermediatenodes[i]) != 0:
+			p0i = xctunnelxtube.intermedpointpos(p0, p1, xclinkintermediatenodes[i][0])
+			p1i = xctunnelxtube.intermedpointpos(p0, p1, xclinkintermediatenodes[i][-1])
+
+		var vec30 = p0i - p0
+		var vec0 = Vector2(vec30.x, vec30.y)
+		var vec31 = p1 - p1i
+		var vec1 = Vector2(vec31.x, vec31.y)
+		Lpathvectorseq[i0].push_back([vec0.angle(), i*2])
+		Lpathvectorseq[i1].push_back([(-vec1).angle(), i*2+1])
+
+	if onepathpairs != null:
+		var Npaths = len(onepathpairs)/2
+		for i in range(Npaths):
+			var i0 = onepathpairs[i*2]
+			var i1 = onepathpairs[i*2+1]
+			var vec3 = nodepoints[i1] - nodepoints[i0]
+			var vec = Vector2(vec3.x, vec3.y)
+			Lpathvectorseq[i0].push_back([vec.angle(), Ndrawinglinks*2 + i*2])
+			Lpathvectorseq[i1].push_back([(-vec).angle(), Ndrawinglinks*2 + i*2+1])
+
+	for pathvectorseq in Lpathvectorseq.values():
+		pathvectorseq.sort_custom(sd0class, "sd0")
+	return Lpathvectorseq
+
+func ShortestPathsToCentrelineNodes(Sopn, num, nodepoints, onepathpairs, Lpathvectorseq):
+	var proxqueue = [ [ 0.0, Sopn, 0.0 ] ]  # [ (dist, opn, zdist) ]
+	var opnvisited = { }
+	var closestcentrelinenodes = [ ]
+	while len(proxqueue) != 0:
+		var iqmin = 0
+		for i in range(iqmin):
+			if proxqueue[i][0] < proxqueue[iqmin][0]:
+				iqmin = i
+		var qmin = proxqueue[iqmin]
+		proxqueue[iqmin] = proxqueue[-1]
+		proxqueue.pop_back()
+		var opn = qmin[1]
+		if opn in opnvisited:
+			continue
+		opnvisited[opn] = 1
+		if not opn.begins_with("_"):
+			closestcentrelinenodes.append(qmin)
+			if len(closestcentrelinenodes) == num:
+				break
+			continue
+		for piv in Lpathvectorseq[opn]:
+			assert (onepathpairs[piv[1]] == opn)
+			var pivother = piv[1] + (1 if (piv[1] % 2) == 0 else -1)
+			var opnother = onepathpairs[pivother]
+			if opnother in opnvisited:
+				continue
+			var pathlen = Vector2(nodepoints[opn].x - nodepoints[opnother].x, nodepoints[opn].y - nodepoints[opnother].y).length()
+			var pathzdiff = 0.0
+			proxqueue.push_back([qmin[0] + pathlen, opnother, qmin[2] + pathzdiff])
+	return closestcentrelinenodes
+	
+	
+func updateznodes(xctunnelxdrawing, xctunnelxtube):
+	var nodepoints = xctunnelxdrawing.nodepoints
+	var Lpathvectorseq = maketunnelxnetwork(nodepoints, null, xctunnelxtube)
+	var nextnodepoints = { }
+	for opn in nodepoints:
+		if not opn.begins_with("_"):
+			continue
+		var ccons = ShortestPathsToCentrelineNodes(opn, 4, xctunnelxdrawing.nodepoints, xctunnelxtube.xcdrawinglink, Lpathvectorseq)
+		if len(ccons) == 0: 
+			continue
+
+		var tweight = 0.0
+		var zaltsum = 0.0
+		for ccon in ccons:
+			if ccon[0] != 0.0:
+				var weight = 1.0/(ccon[0]*ccon[0])
+				zaltsum += (nodepoints[ccon[1]].z + ccon[2]) * weight;
+				tweight += weight;
+			else:
+				tweight = 1.0
+				zaltsum = nodepoints[ccon[1]].z + ccon[2]
+				break
+		if tweight != 0.0:
+			var newz = zaltsum/tweight
+			nextnodepoints[opn] = Vector3(nodepoints[opn].x, nodepoints[opn].y, newz)
+
+	var prevnodepoints = { }
+	for opn in nextnodepoints:
+		prevnodepoints[opn] = nodepoints[opn]
+	return ({ "name":xctunnelxdrawing.name, 
+			  "prevnodepoints":prevnodepoints,
+			  "nextnodepoints":nextnodepoints }) 
+
 
 class SkFrame:
 	var sfscaledown : float
@@ -99,11 +224,10 @@ func makexcdata(skpaths, nodeidsmap):
 	var nodepoints = { }
 	var conepathpairs = [ ]
 	for sk in skpaths:
-		nodepoints[nodeidsmap[sk.from]] = sk.pts[0]
-		nodepoints[nodeidsmap[sk.to]] = sk.pts[-1]
-		if sk.linestyle == "centreline":
-			conepathpairs.append(nodeidsmap[sk.from])
-			conepathpairs.append(nodeidsmap[sk.to])
+		if not nodepoints.has(nodeidsmap[sk.from]) or sk.linestyle == "centreline":
+			nodepoints[nodeidsmap[sk.from]] = sk.pts[0]
+		if not nodepoints.has(nodeidsmap[sk.to]) or sk.linestyle == "centreline":
+			nodepoints[nodeidsmap[sk.to]] = sk.pts[-1]
 
 	var rotzminus90 = Basis(Vector3(1,0,0), Vector3(0,0,-1), Vector3(0,1,0))
 	var bbcenvec = Vector3()
@@ -132,7 +256,7 @@ func makedrawinglinks(skpaths, nodeidsmap, spbasis):
 			if vecsq == 0.0:
 				vecsq = 1.0
 			for i in range(1, len(sk.pts) - 1):
-				var dpz = (sk.pts[i] - p0).dot(vec)/vecsq
+				var dpz = clamp((sk.pts[i] - p0).dot(vec)/vecsq, 0.0, 1.0)
 				var sp = lerp(p0, p1, dpz)
 				var dp = sk.pts[i] - sp
 				intermediatepoints.push_back(Vector3(dp.dot(spbasis.x), dp.dot(spbasis.z), dpz))
@@ -140,6 +264,12 @@ func makedrawinglinks(skpaths, nodeidsmap, spbasis):
 		else:
 			drawinglinks.push_back(null)
 	return drawinglinks
+
+
+
+#sketchgraphicspanel.UpdateZNodes();
+#sketchgraphicspanel.UpdateSAreas();
+#sketchgraphicspanel.GUpdateSymbolLayout(true, visiprogressbar);
 
 
 func loadtunnelxsketch(fname):
@@ -173,5 +303,18 @@ func loadtunnelxsketch(fname):
 					"newdrawinglinks":makedrawinglinks(skpaths, nodeidsmap, xcdata["transformpos"].basis)
 				   }
 	sketchsystem.setnewtubename(xctdata)
+	tunnelx_xcname = xcdata["name"]
+	tunnelx_tubename = xctdata["tubename"]
 	sketchsystem.actsketchchange([ xcdata, xctdata ])
+
+	var xctunnelxdrawing = sketchsystem.get_node("XCdrawings").get_node(tunnelx_xcname)
+	var xctunnelxtube = sketchsystem.get_node("XCtubes").get_node(tunnelx_tubename)
+	var xczdata = updateznodes(xctunnelxdrawing, xctunnelxtube)
+	var xctdataviz = { "xcvizstates": [ ], 
+					   "updatetubeshells":[
+						   { "tubename":xctunnelxtube.get_name(), "xcname0":xctunnelxtube.xcname0, "xcname1":xctunnelxtube.xcname1 } 
+					   ] 
+					 }
+					
+	sketchsystem.actsketchchange([ xczdata, xctdataviz ])
 
