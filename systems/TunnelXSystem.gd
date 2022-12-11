@@ -6,8 +6,9 @@ var tunnelx_xcname = null
 var tunnelx_tubename = null
 
 # things to do: 
-# updateznodes settings going out
+# 
 # plot edges according to their style and Color
+# implement nodeconnzsetrelative
 # sketchgraphicspanel.UpdateZNodes();
 # sketchgraphicspanel.UpdateSAreas();
 # the areas are going to need sensible triangulating, 
@@ -89,12 +90,12 @@ func ShortestPathsToCentrelineNodes(Sopn, num, nodepoints, onepathpairs, Lpathve
 			if opnother in opnvisited:
 				continue
 			var pathlen = Vector2(nodepoints[opn].x - nodepoints[opnother].x, nodepoints[opn].y - nodepoints[opnother].y).length()
-			var pathzdiff = 0.0
-			proxqueue.push_back([qmin[0] + pathlen, opnother, qmin[2] + pathzdiff])
+			var nodeconnzsetrelative = 0.0
+			proxqueue.push_back([qmin[0] + pathlen, opnother, qmin[2] + nodeconnzsetrelative])
 	return closestcentrelinenodes
 	
 	
-func updateznodes(xctunnelxdrawing, xctunnelxtube):
+func updateznodes(xctunnelxdrawing, xctunnelxtube, bflatteninzfor2Dviewing=false):
 	var nodepoints = xctunnelxdrawing.nodepoints
 	var Lpathvectorseq = maketunnelxnetwork(nodepoints, null, xctunnelxtube)
 	var nextnodepoints = { }
@@ -120,12 +121,20 @@ func updateznodes(xctunnelxdrawing, xctunnelxtube):
 			var newz = zaltsum/tweight
 			nextnodepoints[opn] = Vector3(nodepoints[opn].x, nodepoints[opn].y, newz)
 
+	if bflatteninzfor2Dviewing:
+		for opn in nodepoints:
+			var pt = nextnodepoints[opn] if nextnodepoints.has(opn) else nodepoints[opn]
+			pt.z = tunnelxZshift + (pt.z - tunnelxZshift)*0.05
+			nextnodepoints[opn] = pt
+			
 	var prevnodepoints = { }
 	for opn in nextnodepoints:
 		prevnodepoints[opn] = nodepoints[opn]
+
 	return ({ "name":xctunnelxdrawing.name, 
 			  "prevnodepoints":prevnodepoints,
 			  "nextnodepoints":nextnodepoints }) 
+
 
 
 class SkFrame:
@@ -309,12 +318,6 @@ func loadtunnelxsketch(fname):
 
 	var xctunnelxdrawing = sketchsystem.get_node("XCdrawings").get_node(tunnelx_xcname)
 	var xctunnelxtube = sketchsystem.get_node("XCtubes").get_node(tunnelx_tubename)
-	var xczdata = updateznodes(xctunnelxdrawing, xctunnelxtube)
-	var xctdataviz = { "xcvizstates": [ ], 
-					   "updatetubeshells":[
-						   { "tubename":xctunnelxtube.get_name(), "xcname0":xctunnelxtube.xcname0, "xcname1":xctunnelxtube.xcname1 } 
-					   ] 
-					 }
-					
-	sketchsystem.actsketchchange([ xczdata, xctdataviz ])
+	var xczdata = updateznodes(xctunnelxdrawing, xctunnelxtube, true)
+	sketchsystem.actsketchchange([ xczdata ])
 
