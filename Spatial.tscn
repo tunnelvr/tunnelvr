@@ -1,4 +1,4 @@
-[gd_scene load_steps=369 format=2]
+[gd_scene load_steps=373 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/underground_env.tres" type="Environment" id=2]
@@ -1715,6 +1715,37 @@ emission_on_uv2 = false
 
 [sub_resource type="PlaneMesh" id=261]
 size = Vector2( 1, 0.2 )
+
+[sub_resource type="QuadMesh" id=301]
+size = Vector2( 1, 0.2 )
+
+[sub_resource type="SpatialMaterial" id=302]
+params_cull_mode = 2
+albedo_color = Color( 0.435294, 0.431373, 0.984314, 1 )
+metallic = 0.8
+roughness = 0.67
+emission_enabled = true
+emission = Color( 0.0627451, 0.0588235, 0.992157, 1 )
+emission_energy = 1.0
+emission_operator = 0
+emission_on_uv2 = false
+
+[sub_resource type="SpatialMaterial" id=303]
+params_cull_mode = 2
+albedo_color = Color( 0.2, 0.196078, 0.580392, 1 )
+metallic = 0.8
+roughness = 0.67
+emission_enabled = true
+emission = Color( 0.0941176, 0.0941176, 0.290196, 1 )
+emission_energy = 1.0
+emission_operator = 0
+emission_on_uv2 = false
+
+[sub_resource type="SpatialMaterial" id=304]
+params_cull_mode = 2
+albedo_color = Color( 0.0588235, 0.996078, 0.027451, 1 )
+metallic = 0.8
+roughness = 0.67
 
 [sub_resource type="CapsuleMesh" id=201]
 radius = 0.1
@@ -4120,6 +4151,21 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 1.08158, 2.38419e-07, 0.505133
 mesh = SubResource( 261 )
 skeleton = NodePath("../../tubematerials")
 material/0 = ExtResource( 3 )
+
+[node name="tunnelxwall" type="MeshInstance" parent="MaterialSystem/pathlines"]
+transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, -1.35198, 0.0395899, -0.0477467 )
+mesh = SubResource( 301 )
+material/0 = SubResource( 302 )
+
+[node name="tunnelxdetail" type="MeshInstance" parent="MaterialSystem/pathlines"]
+transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, -1.35198, 0.0395899, -0.37789 )
+mesh = SubResource( 301 )
+material/0 = SubResource( 303 )
+
+[node name="tunnelxconnective" type="MeshInstance" parent="MaterialSystem/pathlines"]
+transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, -1.35198, 0.0395899, -0.661028 )
+mesh = SubResource( 301 )
+material/0 = SubResource( 304 )
 
 [node name="handmaterials" type="Spatial" parent="MaterialSystem"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -3.78539, 0, 1.47726 )

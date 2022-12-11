@@ -241,8 +241,22 @@ func updatecentrelineassociationlinks(sketchsystem):
 	$PathLines.visible = true
 
 func updatetunnelxsketchlinkpaths(sketchsystem):
-	var surfaceTool = SurfaceTool.new()
-	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var NlinestyleSurfaces = 3
+	var linestylemap = { "wall":0, "estwall":0, "filled":0, 
+						 "detail":1, "pitchbound":1, "ceilingbound":1, 
+						 "connective":2, "invisible":2, "centreline":2 }
+	var pathlinestylematerials = [ "tunnelxwall", "tunnelxdetail", "tunnelxconnective" ]
+	var linewidthmap = { "wall":3, "estwall":2, "filled":1, 
+						 "detail":1, "pitchbound":2, "ceilingbound":2, 
+						 "connective":0.5, "invisible":1, "centreline":1 }
+
+
+	assert (len(pathlinestylematerials) == NlinestyleSurfaces)
+	var surfaceTools = [ ]
+	for i in range(NlinestyleSurfaces):
+		surfaceTools.push_back(SurfaceTool.new())
+		surfaceTools[-1].begin(Mesh.PRIMITIVE_TRIANGLES)
+
 	assert (xcname0 == xcname1)
 	var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(xcname0)
 	assert (xcdrawing0.drawingtype == DRAWING_TYPE.DT_CENTRELINE)
@@ -256,6 +270,7 @@ func updatetunnelxsketchlinkpaths(sketchsystem):
 		var p1u = xcdrawing1.nodepoints[xcdrawinglink[j+1]]
 		var p1 = xcdrawing1.transform * p1u
 		var jb = j/2
+		var linestyle = xcsectormaterials[jb]
 		var nintermediatenodes = (0 if xclinkintermediatenodes == null else len(xclinkintermediatenodes[jb]))
 		var intermediatepts = [ ]
 		if nintermediatenodes != 0:
@@ -263,12 +278,23 @@ func updatetunnelxsketchlinkpaths(sketchsystem):
 			for i in range(nintermediatenodes):
 				var p1mtrans = intermedpointposT(p0, p1, intermediatenodes[i])
 				intermediatepts.push_back(p1mtrans.origin)
-		Polynets.addnoarrowhorizontalmesh(surfaceTool, p0, p1, tubelinklinewidth*3, intermediatepts)
-	surfaceTool.generate_normals()
-	$PathLines.mesh = surfaceTool.commit()
-	assert($PathLines.get_surface_material_count() != 0)
-	$PathLines.set_surface_material(0, get_node("/root/Spatial/MaterialSystem").pathlinematerial("normal"))
+		var surfaceTool = surfaceTools[linestylemap.get(linestyle, 0)]
+		var linewidth = linewidthmap.get(linestyle, 1.0)*tubelinklinewidth
+		Polynets.addnoarrowhorizontalmesh(surfaceTool, p0, p1, linewidth, intermediatepts)
+
+	var amesh = ArrayMesh.new()
+	for i in range(NlinestyleSurfaces):
+		surfaceTools[i].generate_normals()
+		var smesh = surfaceTools[i].commit()
+		assert (smesh.get_surface_count() == 1)
+		var arrays = smesh.surface_get_arrays(0)
+		amesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	$PathLines.mesh = amesh
+	assert($PathLines.get_surface_material_count() == NlinestyleSurfaces)
+	for i in range(NlinestyleSurfaces):
+		$PathLines.set_surface_material(i, get_node("/root/Spatial/MaterialSystem").pathlinematerial(pathlinestylematerials[i]))
 	return true
+
 
 func updatetubelinkpaths(sketchsystem):
 	var surfaceTool = SurfaceTool.new()
