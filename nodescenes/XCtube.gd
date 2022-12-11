@@ -203,7 +203,7 @@ func updatecentrelineassociationlinks(sketchsystem):
 	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(xcname0)
 	var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(xcname1)
-	assert(xcdrawing0.drawingtype == DRAWING_TYPE.DT_CENTRELINE and xcdrawing1.drawingtype == DRAWING_TYPE.DT_CENTRELINE)
+	assert(xcdrawing0.drawingtype == DRAWING_TYPE.DT_CENTRELINE and xcdrawing1.drawingtype == DRAWING_TYPE.DT_CENTRELINE and xcname0 != xcname1)
 	assert ((len(xcdrawinglink)%2) == 0)
 	var sperp = Vector3(0, 0, 0)
 	for j in range(0, len(xcdrawinglink), 2):
@@ -240,9 +240,41 @@ func updatecentrelineassociationlinks(sketchsystem):
 	$PathLines.layers = CollisionLayer.VL_xctubeposlines
 	$PathLines.visible = true
 
+func updatetunnelxsketchlinkpaths(sketchsystem):
+	var surfaceTool = SurfaceTool.new()
+	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
+	assert (xcname0 == xcname1)
+	var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(xcname0)
+	assert (xcdrawing0.drawingtype == DRAWING_TYPE.DT_CENTRELINE)
+	var xcdrawing1 = xcdrawing0
+	makeplaneintersectionaxisvec(xcdrawing0, xcdrawing1)
+	assert ((len(xcdrawinglink)%2) == 0)
+	for j in range(0, len(xcdrawinglink), 2):
+		var lp0 = xcdrawing0.nodepoints.get(xcdrawinglink[j])
+		var lp1 = xcdrawing1.nodepoints.get(xcdrawinglink[j+1])
+		var p0 = xcdrawing0.transform * xcdrawing0.nodepoints[xcdrawinglink[j]]
+		var p1u = xcdrawing1.nodepoints[xcdrawinglink[j+1]]
+		var p1 = xcdrawing1.transform * p1u
+		var jb = j/2
+		var nintermediatenodes = (0 if xclinkintermediatenodes == null else len(xclinkintermediatenodes[jb]))
+		var intermediatepts = [ ]
+		if nintermediatenodes != 0:
+			var intermediatenodes = xclinkintermediatenodes[jb]
+			for i in range(nintermediatenodes):
+				var p1mtrans = intermedpointposT(p0, p1, intermediatenodes[i])
+				intermediatepts.push_back(p1mtrans.origin)
+		Polynets.addnoarrowhorizontalmesh(surfaceTool, p0, p1, tubelinklinewidth*3, intermediatepts)
+	surfaceTool.generate_normals()
+	$PathLines.mesh = surfaceTool.commit()
+	assert($PathLines.get_surface_material_count() != 0)
+	$PathLines.set_surface_material(0, get_node("/root/Spatial/MaterialSystem").pathlinematerial("normal"))
+	return true
+
 func updatetubelinkpaths(sketchsystem):
 	var surfaceTool = SurfaceTool.new()
 	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
+	if xcname0 == xcname1:
+		print("Warning, calling updatetubepathlinks on tunnelxsketch case")
 	var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(xcname0)
 	var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(xcname1)
 	makeplaneintersectionaxisvec(xcdrawing0, xcdrawing1)
@@ -309,6 +341,8 @@ func updatetubelinkpaths(sketchsystem):
 	assert($PathLines.get_surface_material_count() != 0)
 	$PathLines.set_surface_material(0, get_node("/root/Spatial/MaterialSystem").pathlinematerial("normal"))
 	return true
+
+
 
 
 func fa(a, b):

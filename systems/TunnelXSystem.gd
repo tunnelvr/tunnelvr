@@ -94,7 +94,7 @@ func ShortestPathsToCentrelineNodes(Sopn, num, nodepoints, onepathpairs, Lpathve
 			proxqueue.push_back([qmin[0] + pathlen, opnother, qmin[2] + nodeconnzsetrelative])
 	return closestcentrelinenodes
 	
-	
+
 func updateznodes(xctunnelxdrawing, xctunnelxtube, bflatteninzfor2Dviewing=false):
 	var nodepoints = xctunnelxdrawing.nodepoints
 	var Lpathvectorseq = maketunnelxnetwork(nodepoints, null, xctunnelxtube)
@@ -255,7 +255,7 @@ func makedrawinglinks(skpaths, nodeidsmap, spbasis):
 	for sk in skpaths:
 		drawinglinks.push_back(nodeidsmap[sk.from])
 		drawinglinks.push_back(nodeidsmap[sk.to])
-		drawinglinks.push_back(null)
+		drawinglinks.push_back(sk.linestyle)
 		if len(sk.pts) > 2:
 			var intermediatepoints = [ ]
 			var p0 = sk.pts[0]

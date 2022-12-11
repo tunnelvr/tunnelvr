@@ -467,8 +467,7 @@ remote func actsketchchangeL(xcdatalist):
 		if $XCdrawings.get_node(xctube.xcname0).drawingtype == DRAWING_TYPE.DT_CENTRELINE:
 			if xctube.xcname1 == xctube.xcname0:
 				print("updating tubelink paths on tunnelx self-connecting tube")
-				if not xctube.updatetubelinkpaths(self):
-					badtubeswithnoconnections.push_back(xctube)
+				xctube.updatetunnelxsketchlinkpaths(self)
 			elif $XCdrawings.get_node(xctube.xcname1).drawingtype == DRAWING_TYPE.DT_CENTRELINE:
 				xctube.updatecentrelineassociationlinks(self)
 			else:
