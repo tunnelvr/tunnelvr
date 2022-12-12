@@ -291,14 +291,20 @@ func makedrawinglinks(skpaths, nodeidsmap, spbasis):
 
 func loadtunnelxsketch(fname):
 	var xp = XMLParser.new()
-	print(xp.open(fname))
-	xp.read()
-	xp.read()
-	xp.read()
+	xp.open(fname)
+	for i in range(3):
+		xp.read()
+		if xp.get_node_type() == xp.NODE_ELEMENT:
+			break
+		print("xml1 ", xp.get_node_type())
 	if not (xp.get_node_type() == xp.NODE_ELEMENT and xp.get_node_name() == "tunnelxml"):
+		print("bailing out ", xp.get_node_type())
+		print(xp.get_node_name())
 		return
 	xp.read()
 	if not (xp.get_node_type() == xp.NODE_ELEMENT and xp.get_node_name() == "sketch"):
+		print("bailing out ", xp.get_node_type())
+		print(xp.get_node_name())
 		return
 		
 	var skpaths = [ ]
@@ -311,6 +317,7 @@ func loadtunnelxsketch(fname):
 			var sk = skpath(xp)
 			skpaths.append(sk)
 
+	print("Num_skpaths ", len(skpaths))
 	var nodeidsmap = makenodeidsmap(skpaths)
 	var xcdata = makexcdata(skpaths, nodeidsmap)
 	var xctdata = { "tubename":"**notset", 
@@ -329,14 +336,17 @@ func loadtunnelxsketch(fname):
 	var xczdata = updateznodes(xctunnelxdrawing, xctunnelxtube, true)
 	var xctupdate = { "xcvizstates":{ xctunnelxdrawing.get_name():DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE }, 
 					  "updatetubeshells":[{"tubename":xctunnelxtube.get_name(), "xcname0":xctunnelxtube.xcname0, "xcname1":xctunnelxtube.xcname0 }] }
+	#sketchsystem.actsketchchange([ xczdata ])
 	sketchsystem.actsketchchange([ xczdata, xctupdate ])
+	
+	
 
 var linestyleboundaries = [ "wall", "estwall", "detail", "pitchbound", "ceilingbound", "invisible" ]
 
 func SArealinkssequence(idl, Lpathvectorseq, xcdrawinglink, linestyles):
 	var seq = [ ]
 	var innerconnectives = [ ]
-	while (len(seq) == 0 or seq[0] != idl) and (len(seq) < 100):
+	while (len(seq) == 0 or seq[0] != idl) and (len(seq) < 10000):
 		seq.push_back(idl)
 		var idlo = idl + (1 if ((idl%2) == 0) else -1)
 		var opn = xcdrawinglink[idlo]

@@ -279,6 +279,7 @@ func updatetunnelxsketchlinkpaths(sketchsystem):
 		var linewidth = linewidthmap.get(linestyle, 1.0)*tubelinklinewidth
 		Polynets.addnoarrowhorizontalmesh(surfaceTool, p0, p1, linewidth, intermediatepts)
 
+
 	var amesh = ArrayMesh.new()
 	for i in range(NlinestyleSurfaces):
 		surfaceTools[i].generate_normals()
@@ -290,6 +291,9 @@ func updatetunnelxsketchlinkpaths(sketchsystem):
 	assert($PathLines.get_surface_material_count() == NlinestyleSurfaces)
 	for i in range(NlinestyleSurfaces):
 		$PathLines.set_surface_material(i, get_node("/root/Spatial/MaterialSystem").pathlinematerial(pathlinestylematerials[i]))
+
+	print("Big tunnelx sketchlink paths AABB ", amesh.get_aabb())
+
 	return true
 
 
@@ -895,6 +899,7 @@ func updatetunnelxareas(xcdrawings):
 		clearalltubesectors()
 	var tunnelxsystem = get_node("/root/Spatial/TunnelXSystem")
 	var surfaceTools = tunnelxsystem.UpdateSAreas(xcdrawing0, self)
+	var aabb = null
 	for i in range(len(surfaceTools)):
 		var surfaceTool = surfaceTools[i]
 		surfaceTool.generate_normals()
@@ -909,6 +914,9 @@ func updatetunnelxareas(xcdrawings):
 		xctubesector.get_node("CollisionShape").shape.set_faces(tubesectormesh.get_faces())
 		get_node("/root/Spatial/MaterialSystem").updatetubesectormaterial(xctubesector, "simpledirt", false)
 		$XCtubesectors.add_child(xctubesector)
+		aabb = (aabb.merge(tubesectormesh.get_aabb()) if aabb else tubesectormesh.get_aabb())
+	
+	print("Big tunnelx combined sectors AABB ", aabb)
 	
 
 func updatetubeshell(xcdrawings):

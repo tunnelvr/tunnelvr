@@ -753,9 +753,10 @@ remote func loadsketchsystemL(fname):
 		if $XCdrawings.get_child_count() != 1:
 			for xcdrawing in $XCdrawings.get_children():
 				if xcdrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
-					sketchdatadict["xcdrawings"].append(xcdrawing.exportxcrpcdata(true))
-					sketchdatadict["xcdrawings"][0]["nodepoints"].clear()
-					break
+					if (xcdrawing.drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_GHOSTLY_B) == 0:
+						sketchdatadict["xcdrawings"].append(xcdrawing.exportxcrpcdata(true))
+						sketchdatadict["xcdrawings"][0]["nodepoints"].clear()
+						break
 	elif sketchdatafile.file_exists(fname):
 		print("Loading sketchsystemtodict from ", fname)
 		sketchdatafile.open(fname, File.READ)

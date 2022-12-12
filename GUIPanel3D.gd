@@ -365,7 +365,8 @@ func _on_switchtest(index):
 
 	elif nssel == "LoadX":
 		var tunnelxsystem = get_node("/root/Spatial/TunnelXSystem")
-		tunnelxsystem.loadtunnelxsketch("res://assets/miscobjects/292-sketch1.xml")
+#		tunnelxsystem.loadtunnelxsketch("res://assets/miscobjects/292-sketch1.xml")
+		tunnelxsystem.loadtunnelxsketch("res://assets/miscobjects/1623-midbalc2022.xml")
 		
 	elif nssel == "Huge Spiral":
 		var xcrad = 1.5
