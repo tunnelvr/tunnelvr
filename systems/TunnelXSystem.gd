@@ -7,7 +7,8 @@ var tunnelx_tubename = null
 var tunnelxlocoffset = Vector3()
 var tunnelxlocoffset_local = Vector3()
 const tunnelxFac = 0.1
-const tunnelxZshift = 10.0
+var tunnelxZshift = 10.0
+var tunnelxZscaledown = 0.2
 
 # things to do: 
 # 
@@ -140,7 +141,7 @@ func updateznodes(xctunnelxdrawing, xctunnelxtube, bflatteninzfor2Dviewing=false
 	if bflatteninzfor2Dviewing:
 		for opn in nodepoints:
 			var pt = nextnodepoints[opn] if nextnodepoints.has(opn) else nodepoints[opn]
-			pt.z = tunnelxZshift + (pt.z - tunnelxZshift)*0.05
+			pt.z = tunnelxZshift + (pt.z - tunnelxZshift)*tunnelxZscaledown
 			nextnodepoints[opn] = pt
 			
 	var prevnodepoints = { }
@@ -189,7 +190,7 @@ func skpath(xp):
 	while not (xp.get_node_type() == xp.NODE_ELEMENT_END and xp.get_node_name() == "skpath"):
 		if xp.get_node_type() == xp.NODE_ELEMENT:
 			if xp.get_node_name() == "pt":
-				var pt = Vector3(float(xp.get_named_attribute_value("X"))*tunnelxFac, float(xp.get_named_attribute_value("Y"))*tunnelxFac, tunnelxZshift)
+				var pt = Vector3(float(xp.get_named_attribute_value("X"))*tunnelxFac, -float(xp.get_named_attribute_value("Y"))*tunnelxFac, tunnelxZshift)
 				if sk.linestyle == "centreline":
 					pt.z = float(xp.get_named_attribute_value("Z"))*tunnelxFac + tunnelxZshift
 				pts.append(pt)
@@ -220,7 +221,7 @@ func skpath(xp):
 					sk.pctext_rel = Vector2(float(xp.get_named_attribute_value("nodeposxrel")), float(xp.get_named_attribute_value("nodeposyrel")))
 					xp.read()
 					sk.pctext = xp.get_node_data() if xp.get_node_type() == xp.NODE_TEXT else ""
-					print("TEXT ", sk.pctext_style, " ", sk.pctext if len(sk.pctext) < 20 else len(sk.pctext))
+					#print("TEXT ", sk.pctext_style, " ", sk.pctext if len(sk.pctext) < 20 else len(sk.pctext))
 		xp.read()
 	sk.pts = PoolVector3Array(pts)
 	if subsets:
@@ -431,24 +432,17 @@ func UpdateSAreas(xctunnelxdrawing, xctunnelxtube):
 			assert (not drawinglinksvisited.has(ldil))
 			drawinglinksvisited[ldil] = 1
 		var areacontour = SAreacontour(dlseq, xctunnelxdrawing, xctunnelxtube)
-		var rpolygon = [ ]
-		for p in areacontour:
-			rpolygon.push_back(Vector2(p.x, p.z))
-		var polygon = PoolVector2Array(rpolygon)
-		if Geometry.is_polygon_clockwise(polygon):
-			continue
-		var pi = Geometry.triangulate_polygon(polygon)
-		if pi:
+		var rotzminus90 = Basis(Vector3(1,0,0), Vector3(0,0,-1), Vector3(0,1,0))
+		var arr = makegoodtriangulation(areacontour, rotzminus90)
+		if arr and arr[Mesh.ARRAY_INDEX]:
 			var surfaceTool = SurfaceTool.new()
 			surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
-			for u in pi:
-				surfaceTool.add_uv(rpolygon[u])
-				surfaceTool.add_vertex(areacontour[u])
+			for u in arr[Mesh.ARRAY_INDEX]:
+				surfaceTool.add_uv(arr[Mesh.ARRAY_TEX_UV][u])
+				surfaceTool.add_vertex(arr[Mesh.ARRAY_VERTEX][u])
 			surfaceTools.append(surfaceTool)		
 
 	return surfaceTools
-
-
 
 
 func loadtunnelxsketch(fname):
@@ -511,3 +505,104 @@ func loadtunnelxsketch(fname):
 	#sketchsystem.actsketchchange([ xczdata ])
 	sketchsystem.actsketchchange([ xczdata, xctupdate ])
 	
+
+var basicbadtriangulation = true
+var goodpolyslicewidth = 0.5
+
+func makebadtriangulation(contour, flataligntransform):
+	var arr = []
+	arr.resize(Mesh.ARRAY_MAX)
+	var rpolygon = [ ]
+	for p in contour:
+		var tp = flataligntransform.xform(p)
+		rpolygon.push_back(Vector2(tp.x, tp.y))
+	var polygon = PoolVector2Array(rpolygon)
+	if Geometry.is_polygon_clockwise(polygon):
+		return [ ]
+	var pi = Geometry.triangulate_polygon(rpolygon)
+	arr[Mesh.ARRAY_VERTEX] = PoolVector3Array(contour)
+	var uvs = [ ]
+	for p in contour:
+		uvs.push_back(Vector2(p.x, p.z))
+	arr[Mesh.ARRAY_TEX_UV] = PoolVector2Array(uvs)
+	arr[Mesh.ARRAY_INDEX] = PoolIntArray(pi)
+	return arr
+
+class SslypolygonX:
+	var slypolygon
+	func sly(i, j):
+		return slypolygon[i].x < slypolygon[j].x
+
+
+func makegoodtriangulation(contour, flataligntransform):
+	if basicbadtriangulation:
+		return makebadtriangulation(contour, flataligntransform)
+	
+	var rcontour = [ ]
+	var ylo = flataligntransform.xform(contour[0]).y
+	var yhi = ylo
+	for cp in contour:
+		var p = flataligntransform.xform(cp)
+		rcontour.push_back(p)
+		ylo = min(ylo, p.y)
+		yhi = max(yhi, p.y)
+
+	var nslices = int((yhi - ylo)/goodpolyslicewidth + 1.1)
+	var sliceyvals = [ ]
+	var slyindexpts = [ ]
+	for i in range(1, nslices):
+		sliceyvals.push_back(lerp(ylo, yhi, i*1.0/nslices))
+		slyindexpts.push_back([])
+		
+	var p0 = rcontour[-1]
+	var islice = 0
+	while islice < len(sliceyvals) and sliceyvals[islice] < p0.y:
+		islice += 1
+
+	var slypolygon = [ ]
+	var slyslice = [ ]
+	for p in rcontour:
+		assert (islice == len(sliceyvals) or p0.y <= sliceyvals[islice])
+		assert (islice == 0 or p0.y > sliceyvals[islice-1])
+		if p.y > p0.y:
+			while islice < len(sliceyvals) and sliceyvals[islice] < p.y:
+				var lam = inverse_lerp(p0.y, p.y, sliceyvals[islice])
+				slypolygon.push_back(Vector3(lerp(p0.x, p.x, lam), sliceyvals[islice], lerp(p0.z, p.z, lam)))
+				slyindexpts[islice].push_back(len(slypolygon))
+				islice += 1
+				slyslice.push_back(islice)
+		else:
+			while islice >= 1 and sliceyvals[islice-1] >= p.y:
+				islice -= 1
+				var lam = inverse_lerp(p0.y, p.y, sliceyvals[islice])
+				slypolygon.push_back(Vector3(lerp(p0.x, p.x, lam), sliceyvals[islice], lerp(p0.z, p.z, lam)))
+				slyindexpts[islice].push_back(len(slypolygon))
+				slyslice.push_back(islice)
+		slypolygon.push_back(p)
+		slyslice.push_back(islice)
+		p0 = p
+
+	var SyX = SslypolygonX.new()
+	SyX.slypolygon = slypolygon
+	for slyindexptsL in slyindexpts:
+		slyindexptsL.sort_custom(SyX, "sly")
+
+	var slabs = [ ]
+	for Jislice in range(len(slyindexpts)):
+		break
+		for j in slyindexpts[Jislice]:
+			if slyindexpts[Jislice][j] == -1:
+				continue
+			var slabi = [ ]
+			var i = slyindexpts[Jislice][j]
+			islice = slyslice[i]
+#			assert (islice == Jislice or islice == Jslice+1)
+#			while 
+			
+
+			slabs.push_back(slabi)
+			
+			
+	print("ss ", len(slypolygon), " ", len(rcontour))
+	return makebadtriangulation(contour, flataligntransform)
+
