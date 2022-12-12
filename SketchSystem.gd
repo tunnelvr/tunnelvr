@@ -382,8 +382,11 @@ remote func actsketchchangeL(xcdatalist):
 				for xct in xcdata["updatetubeshells"]:
 					var xctube = findxctube(xct["xcname0"], xct["xcname1"])
 					if xctube != null:
-						xctube.updatetubeshell($XCdrawings)
-						waterlevelsystem.checkupdatewaterlevelintube(xctube.get_name())
+						if xctube.xcname0 != xctube.xcname1:
+							xctube.updatetubeshell($XCdrawings)
+							waterlevelsystem.checkupdatewaterlevelintube(xctube.get_name())
+						else:
+							xctube.updatetunnelxareas($XCdrawings)
 			if "updatexcshells" in xcdata:
 				for xcdrawingname in xcdata["updatexcshells"]:
 					var xcdrawing = $XCdrawings.get_node_or_null(xcdrawingname)

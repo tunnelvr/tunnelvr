@@ -264,11 +264,8 @@ func updatetunnelxsketchlinkpaths(sketchsystem):
 	makeplaneintersectionaxisvec(xcdrawing0, xcdrawing1)
 	assert ((len(xcdrawinglink)%2) == 0)
 	for j in range(0, len(xcdrawinglink), 2):
-		var lp0 = xcdrawing0.nodepoints.get(xcdrawinglink[j])
-		var lp1 = xcdrawing1.nodepoints.get(xcdrawinglink[j+1])
 		var p0 = xcdrawing0.transform * xcdrawing0.nodepoints[xcdrawinglink[j]]
-		var p1u = xcdrawing1.nodepoints[xcdrawinglink[j+1]]
-		var p1 = xcdrawing1.transform * p1u
+		var p1 = xcdrawing1.transform * xcdrawing1.nodepoints[xcdrawinglink[j+1]]
 		var jb = j/2
 		var linestyle = xcsectormaterials[jb]
 		var nintermediatenodes = (0 if xclinkintermediatenodes == null else len(xclinkintermediatenodes[jb]))
@@ -881,22 +878,47 @@ func slicerungsatintermediatetuberail(tuberail0, tuberail1, rung0k, rung1k):
 	return tuberailk
 
 
+func clearalltubesectors():
+	var xctubesectors_old = $XCtubesectors
+	xctubesectors_old.set_name("XCtubesectors_old")
+	for x in xctubesectors_old.get_children():
+		x.queue_free()
+	xctubesectors_old.queue_free()
+	var xctubesectors_new = Spatial.new()
+	xctubesectors_new.set_name("XCtubesectors")
+	add_child(xctubesectors_new)
+
+func updatetunnelxareas(xcdrawings):
+	var xcdrawing0 = xcdrawings.get_node(xcname0)
+	assert ((xcname0 == xcname1) and (xcdrawing0.drawingtype == DRAWING_TYPE.DT_CENTRELINE))
+	if $XCtubesectors.get_child_count() != 0:
+		clearalltubesectors()
+	var tunnelxsystem = get_node("/root/Spatial/TunnelXSystem")
+	var surfaceTools = tunnelxsystem.UpdateSAreas(xcdrawing0, self)
+	for i in range(len(surfaceTools)):
+		var surfaceTool = surfaceTools[i]
+		surfaceTool.generate_normals()
+		surfaceTool.generate_tangents()
+		var tubesectormesh = surfaceTool.commit()
+		var xctubesector = preload("res://nodescenes/XCtubeshell.tscn").instance()
+		xctubesector.set_name("XCtubesector_"+String(i))
+		xctubesector.get_node("MeshInstance").mesh = tubesectormesh
+		var cps = ConcavePolygonShape.new()
+		cps.margin = 0.01
+		xctubesector.get_node("CollisionShape").shape = cps
+		xctubesector.get_node("CollisionShape").shape.set_faces(tubesectormesh.get_faces())
+		get_node("/root/Spatial/MaterialSystem").updatetubesectormaterial(xctubesector, "simpledirt", false)
+		$XCtubesectors.add_child(xctubesector)
+	
+
 func updatetubeshell(xcdrawings):
 	var xcdrawing0 = xcdrawings.get_node(xcname0)
 	var xcdrawing1 = xcdrawings.get_node(xcname1)
 	if xcdrawing0.drawingtype != DRAWING_TYPE.DT_XCDRAWING or xcdrawing1.drawingtype != DRAWING_TYPE.DT_XCDRAWING:
 		print("skipping updatetubeshell on ", get_name())
 		return
-	
 	if $XCtubesectors.get_child_count() != 0:
-		var xctubesectors_old = $XCtubesectors
-		xctubesectors_old.set_name("XCtubesectors_old")
-		for x in xctubesectors_old.get_children():
-			x.queue_free()   # because it's not transitive (should file a ticket)
-		xctubesectors_old.queue_free()
-		var xctubesectors_new = Spatial.new()
-		xctubesectors_new.set_name("XCtubesectors")
-		add_child(xctubesectors_new)
+		clearalltubesectors()
 		
 	var mtpa = maketubepolyassociation_andreorder(xcdrawing0, xcdrawing1)
 	var poly0 = mtpa[0]
@@ -913,7 +935,6 @@ func updatetubeshell(xcdrawings):
 		var ila1 = ilaM[li]["ila1"]
 		var ila1N = ilaM[li]["ila1N"]
 			
-
 		var tuberails = initialtuberails(xcdrawing0, poly0, ila0, ila0N, xcdrawing1, poly1, ila1, ila1N)
 		var tuberail0 = tuberails[0]
 		var tuberail1 = tuberails[1]

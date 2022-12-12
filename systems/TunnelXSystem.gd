@@ -7,10 +7,9 @@ var tunnelx_tubename = null
 
 # things to do: 
 # 
-# plot edges according to their style and Color
 # implement nodeconnzsetrelative
-# sketchgraphicspanel.UpdateZNodes();
 # sketchgraphicspanel.UpdateSAreas();
+
 # the areas are going to need sensible triangulating, 
 #   some kind of nice grid that works on other faces
 # sketchgraphicspanel.GUpdateSymbolLayout();
@@ -22,7 +21,7 @@ class sd0class:
 	static func sd0(a, b):
 		return a[0] < b[0]
 
-func maketunnelxnetwork(nodepoints, onepathpairs, xctunnelxtube):
+func maketunnelxnetwork(nodepoints, onepathpairs, xctunnelxtube, bdropangles):
 	var Lpathvectorseq = { } 
 	for i in nodepoints.keys():
 		Lpathvectorseq[i] = [ ]  # [ (arg, pathindex*2 + (0 if bfore else 1)) ]
@@ -58,9 +57,23 @@ func maketunnelxnetwork(nodepoints, onepathpairs, xctunnelxtube):
 			Lpathvectorseq[i0].push_back([vec.angle(), Ndrawinglinks*2 + i*2])
 			Lpathvectorseq[i1].push_back([(-vec).angle(), Ndrawinglinks*2 + i*2+1])
 
+
+	if bdropangles:
+		var res = { }
+		for i in nodepoints.keys():
+			var pathvectorseq = Lpathvectorseq[i]
+			pathvectorseq.sort_custom(sd0class, "sd0")
+			var pathvectorseqI = [ ]
+			for jp in pathvectorseq:
+				pathvectorseqI.push_back(jp[1])
+			res[i] = pathvectorseqI
+		return res
+		
 	for pathvectorseq in Lpathvectorseq.values():
 		pathvectorseq.sort_custom(sd0class, "sd0")
 	return Lpathvectorseq
+
+
 
 func ShortestPathsToCentrelineNodes(Sopn, num, nodepoints, onepathpairs, Lpathvectorseq):
 	var proxqueue = [ [ 0.0, Sopn, 0.0 ] ]  # [ (dist, opn, zdist) ]
@@ -97,7 +110,7 @@ func ShortestPathsToCentrelineNodes(Sopn, num, nodepoints, onepathpairs, Lpathve
 
 func updateznodes(xctunnelxdrawing, xctunnelxtube, bflatteninzfor2Dviewing=false):
 	var nodepoints = xctunnelxdrawing.nodepoints
-	var Lpathvectorseq = maketunnelxnetwork(nodepoints, null, xctunnelxtube)
+	var Lpathvectorseq = maketunnelxnetwork(nodepoints, null, xctunnelxtube, false)
 	var nextnodepoints = { }
 	for opn in nodepoints:
 		if not opn.begins_with("_"):
@@ -276,11 +289,6 @@ func makedrawinglinks(skpaths, nodeidsmap, spbasis):
 
 
 
-#sketchgraphicspanel.UpdateZNodes();
-#sketchgraphicspanel.UpdateSAreas();
-#sketchgraphicspanel.GUpdateSymbolLayout(true, visiprogressbar);
-
-
 func loadtunnelxsketch(fname):
 	var xp = XMLParser.new()
 	print(xp.open(fname))
@@ -319,5 +327,109 @@ func loadtunnelxsketch(fname):
 	var xctunnelxdrawing = sketchsystem.get_node("XCdrawings").get_node(tunnelx_xcname)
 	var xctunnelxtube = sketchsystem.get_node("XCtubes").get_node(tunnelx_tubename)
 	var xczdata = updateznodes(xctunnelxdrawing, xctunnelxtube, true)
-	sketchsystem.actsketchchange([ xczdata ])
+	var xctupdate = { "xcvizstates":{ xctunnelxdrawing.get_name():DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE }, 
+					  "updatetubeshells":[{"tubename":xctunnelxtube.get_name(), "xcname0":xctunnelxtube.xcname0, "xcname1":xctunnelxtube.xcname0 }] }
+	sketchsystem.actsketchchange([ xczdata, xctupdate ])
 
+var linestyleboundaries = [ "wall", "estwall", "detail", "pitchbound", "ceilingbound", "invisible" ]
+
+func SArealinkssequence(idl, Lpathvectorseq, xcdrawinglink, linestyles):
+	var seq = [ ]
+	var innerconnectives = [ ]
+	while (len(seq) == 0 or seq[0] != idl) and (len(seq) < 100):
+		seq.push_back(idl)
+		var idlo = idl + (1 if ((idl%2) == 0) else -1)
+		var opn = xcdrawinglink[idlo]
+		var Npathvectorseq = Lpathvectorseq[opn]
+		var j = Npathvectorseq.find(idlo)
+		assert (j != -1)
+		var idloB = idlo
+		for k in range(1, len(Npathvectorseq)):
+			var idloL = Npathvectorseq[((j + k) % len(Npathvectorseq))]
+			var linestyleL = linestyles[int(idloL/2)]
+			if linestyleboundaries.has(linestyleL):
+				idloB = idloL
+				break
+			elif linestyleL == "connective":
+				innerconnectives.push_back(idloL)
+		idl = idloB
+	return seq
+
+# make the polygon
+# check its orientation
+# do the rough and crappy triangulation
+# (make an improved smooth triangulation if we can)
+# extract the contour colours
+# extract the subsets
+# colour the triangulation
+# check with big big tunnelx file
+# check we are importing the centreline properly
+# implement the dropdown stuff
+
+
+#func Sareapolygon(dlseq, nodepoints, xcdrawinglink, xclinkintermediatenodes):
+#	var res = [ ]
+#	for idl in dlseq:
+#		var i = int(idl/2)
+#		var bfore = ((idl%2) == 0)
+#		var idlo = idl + (1 if bfore else -1)
+#		var intermediatenodes = xclinkintermediatenodes[idlo]
+
+#		res.push_back()
+
+func SAreacontour(dlseq, xctunnelxdrawing, xctunnelxtube):
+	var areacontour = [ ]
+	var nodepoints = xctunnelxdrawing.nodepoints
+	var xcdrawinglink = xctunnelxtube.xcdrawinglink
+	var xclinkintermediatenodes = xctunnelxtube.xclinkintermediatenodes
+	assert ((xctunnelxtube.xcname0 == xctunnelxtube.xcname1) and (xctunnelxdrawing.get_name() == xctunnelxtube.xcname0))
+	for idl in dlseq:
+		var i = int(idl/2)
+		var p0 = xctunnelxdrawing.transform * xctunnelxdrawing.nodepoints[xcdrawinglink[i*2]]
+		var p1 = xctunnelxdrawing.transform * xctunnelxdrawing.nodepoints[xcdrawinglink[i*2+1]]
+		var intermediatenodes = ([ ] if xclinkintermediatenodes == null else xclinkintermediatenodes[i])
+		if (idl%2) == 0:
+			areacontour.push_back(p0)
+		else:
+			areacontour.push_back(p1)
+			intermediatenodes = intermediatenodes.duplicate()
+			intermediatenodes.invert()
+		for dp in intermediatenodes:
+			var p1mtrans = xctunnelxtube.intermedpointposT(p0, p1, dp)
+			areacontour.push_back(p1mtrans.origin)
+	return areacontour
+
+
+func UpdateSAreas(xctunnelxdrawing, xctunnelxtube):
+	var nodepoints = xctunnelxdrawing.nodepoints
+	var xclinkintermediatenodes = xctunnelxtube.xclinkintermediatenodes
+	var Lpathvectorseq = maketunnelxnetwork(nodepoints, null, xctunnelxtube, true)
+	var xcdrawinglink = xctunnelxtube.xcdrawinglink
+	var linestyles = xctunnelxtube.xcsectormaterials
+	var Ndrawinglinks = len(xcdrawinglink)/2
+	var drawinglinksvisited = { }
+	var surfaceTools = [ ]
+	for idl in range(Ndrawinglinks*2):
+		var i = int(idl/2)
+		if (not (linestyles[i] in linestyleboundaries)) or drawinglinksvisited.has(idl):
+			continue
+		var dlseq = SArealinkssequence(idl, Lpathvectorseq, xcdrawinglink, linestyles)
+		for ldil in dlseq:
+			assert (not drawinglinksvisited.has(ldil))
+			drawinglinksvisited[ldil] = 1
+		var areacontour = SAreacontour(dlseq, xctunnelxdrawing, xctunnelxtube)
+		var rpolygon = [ ]
+		for p in areacontour:
+			rpolygon.push_back(Vector2(p.x, p.z))
+		var polygon = PoolVector2Array(rpolygon)
+		if Geometry.is_polygon_clockwise(polygon):
+			continue
+		var pi = Geometry.triangulate_polygon(polygon)
+		var surfaceTool = SurfaceTool.new()
+		surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
+		for u in pi:
+			surfaceTool.add_uv(rpolygon[u])
+			surfaceTool.add_vertex(areacontour[u])
+		surfaceTools.append(surfaceTool)		
+
+	return surfaceTools
