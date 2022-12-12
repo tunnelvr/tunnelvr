@@ -4,18 +4,21 @@ onready var sketchsystem = get_node("/root/Spatial/SketchSystem")
 
 var tunnelx_xcname = null
 var tunnelx_tubename = null
+var tunnelxlocoffset = Vector3()
+var tunnelxlocoffset_local = Vector3()
+const tunnelxFac = 0.1
+const tunnelxZshift = 10.0
 
 # things to do: 
 # 
 # implement nodeconnzsetrelative
-# sketchgraphicspanel.UpdateSAreas();
-
 # the areas are going to need sensible triangulating, 
 #   some kind of nice grid that works on other faces
 # sketchgraphicspanel.GUpdateSymbolLayout();
 # convert the skframes into floor sketches below the connective bits
 # is fixing up and exporting remotely feasible?
 # use xcsectormaterials to set the linestyle!
+# 
 
 class sd0class:
 	static func sd0(a, b):
@@ -175,9 +178,6 @@ class SkPath:
 	var area_signal : String
 	var skframe : SkFrame	
 
-const tunnelxFac = 0.1
-const tunnelxZshift = 10.0
-
 func skpath(xp):
 	var sk = SkPath.new()
 	sk.from = int(xp.get_named_attribute_value("from"))
@@ -227,6 +227,36 @@ func skpath(xp):
 		sk.subsets = PoolStringArray(subsets)
 	return sk
 	
+	
+func skpathstoaabb(skpaths):
+	var xlo = 0.0
+	var xhi = 0.0
+	var ylo = 0.0
+	var yhi = 0.0
+	var zlo = 0.0
+	var zhi = 0.0
+	var bfirstxy = true
+	var bfirstz = true
+	for sk in skpaths:
+		for pt in sk.pts:
+			if pt.x < xlo or bfirstxy:
+				xlo = pt.x
+			if pt.x > xhi or bfirstxy:
+				xhi = pt.x
+			if pt.y < ylo or bfirstxy:
+				ylo = pt.y
+			if pt.x > xhi or bfirstxy:
+				yhi = pt.y
+			bfirstxy = false
+		if sk.linestyle == "centreline":
+			for pt in sk.pts:
+				if pt.z < zlo or bfirstz:
+					zlo = pt.z
+				if pt.z > zhi or bfirstz:
+					zhi = pt.z
+				bfirstz = false
+	return AABB(Vector3(xlo, ylo, zlo), Vector3(xhi-xlo, yhi-ylo, zhi-zlo))
+
 
 func makenodeidsmap(skpaths):
 	var nodeidsmap = { }
@@ -242,14 +272,14 @@ func makenodeidsmap(skpaths):
 	return nodeidsmap
 	
 
-func makexcdata(skpaths, nodeidsmap):
+func makexcdata(skpaths, nodeidsmap, ptoffset):
 	var nodepoints = { }
 	var conepathpairs = [ ]
 	for sk in skpaths:
 		if not nodepoints.has(nodeidsmap[sk.from]) or sk.linestyle == "centreline":
-			nodepoints[nodeidsmap[sk.from]] = sk.pts[0]
+			nodepoints[nodeidsmap[sk.from]] = sk.pts[0] + ptoffset
 		if not nodepoints.has(nodeidsmap[sk.to]) or sk.linestyle == "centreline":
-			nodepoints[nodeidsmap[sk.to]] = sk.pts[-1]
+			nodepoints[nodeidsmap[sk.to]] = sk.pts[-1] + ptoffset
 
 	var rotzminus90 = Basis(Vector3(1,0,0), Vector3(0,0,-1), Vector3(0,1,0))
 	var bbcenvec = Vector3()
@@ -262,6 +292,7 @@ func makexcdata(skpaths, nodeidsmap):
 				   "onepathpairs":conepathpairs
 				 }
 	return xcdata
+
 
 func makedrawinglinks(skpaths, nodeidsmap, spbasis):
 	var drawinglinks = [ ]
@@ -287,58 +318,30 @@ func makedrawinglinks(skpaths, nodeidsmap, spbasis):
 			drawinglinks.push_back(null)
 	return drawinglinks
 
+func makedrawinglinksDL(skpaths, nodeidsmap, spbasis, xcdrawinglink, xcsectormaterials, xclinkintermediatenodes):
+	var drawinglinks = [ ]
+	for sk in skpaths:
+		xcdrawinglink.push_back(nodeidsmap[sk.from])
+		xcdrawinglink.push_back(nodeidsmap[sk.to])
+		xcsectormaterials.push_back(sk.linestyle)
+		if len(sk.pts) > 2:
+			var intermediatepoints = [ ]
+			var p0 = sk.pts[0]
+			var p1 = sk.pts[-1]
+			var vec = p1 - p0
+			var vecsq = vec.length_squared()
+			if vecsq == 0.0:
+				vecsq = 1.0
+			for i in range(1, len(sk.pts) - 1):
+				var dpz = clamp((sk.pts[i] - p0).dot(vec)/vecsq, 0.0, 1.0)
+				var sp = lerp(p0, p1, dpz)
+				var dp = sk.pts[i] - sp
+				intermediatepoints.push_back(Vector3(dp.dot(spbasis.x), dp.dot(spbasis.z), dpz))
+			xclinkintermediatenodes.push_back(intermediatepoints)
+		else:
+			xclinkintermediatenodes.push_back([])
+	return drawinglinks
 
-
-func loadtunnelxsketch(fname):
-	var xp = XMLParser.new()
-	xp.open(fname)
-	for i in range(3):
-		xp.read()
-		if xp.get_node_type() == xp.NODE_ELEMENT:
-			break
-		print("xml1 ", xp.get_node_type())
-	if not (xp.get_node_type() == xp.NODE_ELEMENT and xp.get_node_name() == "tunnelxml"):
-		print("bailing out ", xp.get_node_type())
-		print(xp.get_node_name())
-		return
-	xp.read()
-	if not (xp.get_node_type() == xp.NODE_ELEMENT and xp.get_node_name() == "sketch"):
-		print("bailing out ", xp.get_node_type())
-		print(xp.get_node_name())
-		return
-		
-	var skpaths = [ ]
-	for i in range(10000):
-		xp.read()
-		if xp.get_node_type() == xp.NODE_ELEMENT_END and xp.get_node_name() == "sketch":
-			print("done ", i)
-			break
-		if xp.get_node_type() == xp.NODE_ELEMENT and xp.get_node_name() == "skpath":
-			var sk = skpath(xp)
-			skpaths.append(sk)
-
-	print("Num_skpaths ", len(skpaths))
-	var nodeidsmap = makenodeidsmap(skpaths)
-	var xcdata = makexcdata(skpaths, nodeidsmap)
-	var xctdata = { "tubename":"**notset", 
-					"xcname0":xcdata["name"],
-					"xcname1":xcdata["name"],
-					"prevdrawinglinks":[], 
-					"newdrawinglinks":makedrawinglinks(skpaths, nodeidsmap, xcdata["transformpos"].basis)
-				   }
-	sketchsystem.setnewtubename(xctdata)
-	tunnelx_xcname = xcdata["name"]
-	tunnelx_tubename = xctdata["tubename"]
-	sketchsystem.actsketchchange([ xcdata, xctdata ])
-
-	var xctunnelxdrawing = sketchsystem.get_node("XCdrawings").get_node(tunnelx_xcname)
-	var xctunnelxtube = sketchsystem.get_node("XCtubes").get_node(tunnelx_tubename)
-	var xczdata = updateznodes(xctunnelxdrawing, xctunnelxtube, true)
-	var xctupdate = { "xcvizstates":{ xctunnelxdrawing.get_name():DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE }, 
-					  "updatetubeshells":[{"tubename":xctunnelxtube.get_name(), "xcname0":xctunnelxtube.xcname0, "xcname1":xctunnelxtube.xcname0 }] }
-	#sketchsystem.actsketchchange([ xczdata ])
-	sketchsystem.actsketchchange([ xczdata, xctupdate ])
-	
 	
 
 var linestyleboundaries = [ "wall", "estwall", "detail", "pitchbound", "ceilingbound", "invisible" ]
@@ -435,11 +438,76 @@ func UpdateSAreas(xctunnelxdrawing, xctunnelxtube):
 		if Geometry.is_polygon_clockwise(polygon):
 			continue
 		var pi = Geometry.triangulate_polygon(polygon)
-		var surfaceTool = SurfaceTool.new()
-		surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
-		for u in pi:
-			surfaceTool.add_uv(rpolygon[u])
-			surfaceTool.add_vertex(areacontour[u])
-		surfaceTools.append(surfaceTool)		
+		if pi:
+			var surfaceTool = SurfaceTool.new()
+			surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
+			for u in pi:
+				surfaceTool.add_uv(rpolygon[u])
+				surfaceTool.add_vertex(areacontour[u])
+			surfaceTools.append(surfaceTool)		
 
 	return surfaceTools
+
+
+
+
+func loadtunnelxsketch(fname):
+	var xp = XMLParser.new()
+	xp.open(fname)
+	for i in range(3):
+		xp.read()
+		if xp.get_node_type() == xp.NODE_ELEMENT:
+			break
+		print("xml1 ", xp.get_node_type())
+	if not (xp.get_node_type() == xp.NODE_ELEMENT and xp.get_node_name() == "tunnelxml"):
+		print("bailing out ", xp.get_node_type())
+		print(xp.get_node_name())
+		return
+	xp.read()
+	if not (xp.get_node_type() == xp.NODE_ELEMENT and xp.get_node_name() == "sketch"):
+		print("bailing out ", xp.get_node_type())
+		print(xp.get_node_name())
+		return
+	tunnelxlocoffset = Vector3(float(xp.get_named_attribute_value("locoffsetx")), float(xp.get_named_attribute_value("locoffsety")), float(xp.get_named_attribute_value("locoffsetz")))
+		
+	var skpaths = [ ]
+	for i in range(10000):
+		xp.read()
+		if xp.get_node_type() == xp.NODE_ELEMENT_END and xp.get_node_name() == "sketch":
+			print("done ", i)
+			break
+		if xp.get_node_type() == xp.NODE_ELEMENT and xp.get_node_name() == "skpath":
+			var sk = skpath(xp)
+			skpaths.append(sk)
+
+	var skpathsaabb = skpathstoaabb(skpaths)
+	print("Num_skpaths ", len(skpaths), " aabb: ", skpathsaabb)
+	tunnelxlocoffset_local = skpathsaabb.get_center()
+
+	var nodeidsmap = makenodeidsmap(skpaths)
+	var xcdata = makexcdata(skpaths, nodeidsmap, -tunnelxlocoffset_local)
+
+	var xcdrawinglink = [ ]
+	var xcsectormaterials = [ ]
+	var xclinkintermediatenodes = [ ]
+	var newdrawinglinks = makedrawinglinksDL(skpaths, nodeidsmap, xcdata["transformpos"].basis, xcdrawinglink, xcsectormaterials, xclinkintermediatenodes)
+	var xctdata = { "tubename":"**notset", 
+					"xcname0":xcdata["name"],
+					"xcname1":xcdata["name"],
+					"xcdrawinglink":xcdrawinglink, 
+					"xcsectormaterials":xcsectormaterials, 
+					"xclinkintermediatenodes":xclinkintermediatenodes
+				  }
+	sketchsystem.setnewtubename(xctdata)
+	tunnelx_xcname = xcdata["name"]
+	tunnelx_tubename = xctdata["tubename"]
+	sketchsystem.actsketchchange([ xcdata, xctdata ])
+
+	var xctunnelxdrawing = sketchsystem.get_node("XCdrawings").get_node(tunnelx_xcname)
+	var xctunnelxtube = sketchsystem.get_node("XCtubes").get_node(tunnelx_tubename)
+	var xczdata = updateznodes(xctunnelxdrawing, xctunnelxtube, true)
+	var xctupdate = { "xcvizstates":{ xctunnelxdrawing.get_name():DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE }, 
+					  "updatetubeshells":[{"tubename":xctunnelxtube.get_name(), "xcname0":xctunnelxtube.xcname0, "xcname1":xctunnelxtube.xcname0 }] }
+	#sketchsystem.actsketchchange([ xczdata ])
+	sketchsystem.actsketchchange([ xczdata, xctupdate ])
+	
