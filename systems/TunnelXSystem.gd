@@ -7,8 +7,11 @@ var tunnelx_tubename = null
 var tunnelxlocoffset = Vector3()
 var tunnelxlocoffset_local = Vector3()
 const tunnelxFac = 0.1
-var tunnelxZshift = 10.0
-var tunnelxZscaledown = 0.2
+var tunnelxZshift = 13.0
+var tunnelxZscaledown = 0.1
+var basicbadtriangulation = false
+var goodpolyslicewidth = 0.5
+
 
 # things to do: 
 # 
@@ -433,6 +436,7 @@ func UpdateSAreas(xctunnelxdrawing, xctunnelxtube):
 			drawinglinksvisited[ldil] = 1
 		var areacontour = SAreacontour(dlseq, xctunnelxdrawing, xctunnelxtube)
 		var rotzminus90 = Basis(Vector3(1,0,0), Vector3(0,0,-1), Vector3(0,1,0))
+		areacontour.invert()
 		var arr = makegoodtriangulation(areacontour, rotzminus90)
 		if arr and arr[Mesh.ARRAY_INDEX]:
 			var surfaceTool = SurfaceTool.new()
@@ -506,8 +510,6 @@ func loadtunnelxsketch(fname):
 	sketchsystem.actsketchchange([ xczdata, xctupdate ])
 	
 
-var basicbadtriangulation = true
-var goodpolyslicewidth = 0.5
 
 func makebadtriangulation(contour, flataligntransform):
 	var arr = []
@@ -517,7 +519,7 @@ func makebadtriangulation(contour, flataligntransform):
 		var tp = flataligntransform.xform(p)
 		rpolygon.push_back(Vector2(tp.x, tp.y))
 	var polygon = PoolVector2Array(rpolygon)
-	if Geometry.is_polygon_clockwise(polygon):
+	if not Geometry.is_polygon_clockwise(polygon):
 		return [ ]
 	var pi = Geometry.triangulate_polygon(rpolygon)
 	arr[Mesh.ARRAY_VERTEX] = PoolVector3Array(contour)
@@ -529,10 +531,15 @@ func makebadtriangulation(contour, flataligntransform):
 	return arr
 
 class SslypolygonX:
-	var slypolygon
+	var contoursliced
+	var contourslabindexes
 	func sly(i, j):
-		return slypolygon[i].x < slypolygon[j].x
+		if contoursliced[i].x == contoursliced[j].x:
+			return contourslabindexes[i] < contourslabindexes[j]
+		return contoursliced[i].x < contoursliced[j].x
+		
 
+var discardcclockpolygons = true
 
 func makegoodtriangulation(contour, flataligntransform):
 	if basicbadtriangulation:
@@ -547,62 +554,135 @@ func makegoodtriangulation(contour, flataligntransform):
 		ylo = min(ylo, p.y)
 		yhi = max(yhi, p.y)
 
-	var nslices = int((yhi - ylo)/goodpolyslicewidth + 1.1)
-	var sliceyvals = [ ]
-	var slyindexpts = [ ]
-	for i in range(1, nslices):
-		sliceyvals.push_back(lerp(ylo, yhi, i*1.0/nslices))
-		slyindexpts.push_back([])
+	var nslicerails = int((yhi - ylo)/goodpolyslicewidth + 1.1)
+	var slicerailyvals = [ ]
+	var slicerailcrossings = [ ]
+	var slicerailcrossingflags = [ ]
+	for i in range(nslicerails):
+		var ydouble = lerp(ylo - goodpolyslicewidth/2, yhi + goodpolyslicewidth/2, (i+1.0)/(nslicerails+2))
+		slicerailyvals.push_back(Vector3(0, ydouble, 0))
+		slicerailcrossings.push_back([])
+		slicerailcrossingflags.push_back([])
 		
 	var p0 = rcontour[-1]
-	var islice = 0
-	while islice < len(sliceyvals) and sliceyvals[islice] < p0.y:
-		islice += 1
+	var islice0 = 0
+	while islice0 < len(slicerailyvals) and slicerailyvals[islice0].y < p0.y:
+		islice0 += 1
 
-	var slypolygon = [ ]
-	var slyslice = [ ]
+	var contoursliced = [ ]
+	var contourslabindexes = [ ]
 	for p in rcontour:
-		assert (islice == len(sliceyvals) or p0.y <= sliceyvals[islice])
-		assert (islice == 0 or p0.y > sliceyvals[islice-1])
+		assert (islice0 == len(slicerailyvals) or p0.y <= slicerailyvals[islice0].y)
+		assert (islice0 == 0 or p0.y > slicerailyvals[islice0-1].y)
 		if p.y > p0.y:
-			while islice < len(sliceyvals) and sliceyvals[islice] < p.y:
-				var lam = inverse_lerp(p0.y, p.y, sliceyvals[islice])
-				slypolygon.push_back(Vector3(lerp(p0.x, p.x, lam), sliceyvals[islice], lerp(p0.z, p.z, lam)))
-				slyindexpts[islice].push_back(len(slypolygon))
-				islice += 1
-				slyslice.push_back(islice)
+			while islice0 < len(slicerailyvals) and slicerailyvals[islice0].y < p.y:
+				var lam = inverse_lerp(p0.y, p.y, slicerailyvals[islice0].y)
+				slicerailcrossings[islice0].push_back(len(contoursliced))
+				slicerailcrossingflags[islice0].push_back(0)
+				contoursliced.push_back(Vector3(lerp(p0.x, p.x, lam), slicerailyvals[islice0].y, lerp(p0.z, p.z, lam)))
+				islice0 += 1
+				contourslabindexes.push_back(islice0)
 		else:
-			while islice >= 1 and sliceyvals[islice-1] >= p.y:
-				islice -= 1
-				var lam = inverse_lerp(p0.y, p.y, sliceyvals[islice])
-				slypolygon.push_back(Vector3(lerp(p0.x, p.x, lam), sliceyvals[islice], lerp(p0.z, p.z, lam)))
-				slyindexpts[islice].push_back(len(slypolygon))
-				slyslice.push_back(islice)
-		slypolygon.push_back(p)
-		slyslice.push_back(islice)
+			while islice0 >= 1 and slicerailyvals[islice0-1].y >= p.y:
+				islice0 -= 1
+				var lam = inverse_lerp(p0.y, p.y, slicerailyvals[islice0].y)
+				slicerailcrossings[islice0].push_back(len(contoursliced))
+				slicerailcrossingflags[islice0].push_back(0)
+				contoursliced.push_back(Vector3(lerp(p0.x, p.x, lam), slicerailyvals[islice0].y, lerp(p0.z, p.z, lam)))
+				contourslabindexes.push_back(islice0)
+		contoursliced.push_back(p)
+		contourslabindexes.push_back(islice0)
 		p0 = p
 
+	assert (len(contoursliced) == len(contourslabindexes))
 	var SyX = SslypolygonX.new()
-	SyX.slypolygon = slypolygon
-	for slyindexptsL in slyindexpts:
-		slyindexptsL.sort_custom(SyX, "sly")
+	SyX.contoursliced = contoursliced
+	SyX.contourslabindexes = contourslabindexes
+	for islicerail in range(len(slicerailcrossings)):
+		var slicerailcrossingsL = slicerailcrossings[islicerail]
+		slicerailcrossingsL.sort_custom(SyX, "sly")
+
+	if discardcclockpolygons:
+		var isliceMid = int(len(slicerailcrossings)/2)
+		var slicerailcrossingsM = slicerailcrossings[isliceMid]
+		var imid0 = slicerailcrossingsM[0]
+		var isliceslabM = contourslabindexes[imid0]
+		assert (contoursliced[imid0].y == slicerailyvals[isliceMid].y)
+		assert (isliceslabM == isliceMid or isliceslabM == isliceMid+1)
+		if isliceMid == isliceslabM:
+			return [ ]
 
 	var slabs = [ ]
-	for Jislice in range(len(slyindexpts)):
-		break
-		for j in slyindexpts[Jislice]:
-			if slyindexpts[Jislice][j] == -1:
+	for islicerail in range(len(slicerailcrossings)):
+		var slicerailcrossingsL = slicerailcrossings[islicerail]
+		var slicerailcrossingflagsL = slicerailcrossingflags[islicerail]
+		for j in range(len(slicerailcrossingsL)):
+			var i0 = slicerailcrossingsL[j]
+			assert (contoursliced[i0].y == slicerailyvals[islicerail].y)
+			var isliceslab = contourslabindexes[i0]
+			assert (isliceslab == islicerail or isliceslab == islicerail+1)
+			var slabflagL = 2 if isliceslab == islicerail+1 else 1
+			if (slicerailcrossingflagsL[j] & slabflagL) != 0:
 				continue
-			var slabi = [ ]
-			var i = slyindexpts[Jislice][j]
-			islice = slyslice[i]
-#			assert (islice == Jislice or islice == Jslice+1)
-#			while 
-			
-
+			slicerailcrossingflagsL[j] |= slabflagL
+			var slabi = [ i0 ]
+			var i = i0
+			while len(slabi) < len(contourslabindexes):
+				while contourslabindexes[i] == isliceslab:
+					assert (isliceslab == 0 or (slicerailyvals[isliceslab-1].y <= contoursliced[i].y))
+					assert (isliceslab == len(slicerailyvals) or (contoursliced[i].y <= slicerailyvals[isliceslab].y))
+					i = (i+1) % len(contourslabindexes)
+					slabi.push_back(i)
+				assert (contourslabindexes[i] == isliceslab+1 or contourslabindexes[i] == isliceslab-1)
+				var btopgoingright = (contourslabindexes[i] == isliceslab+1)
+				var isliceslabSide = isliceslab if btopgoingright else isliceslab-1
+				assert (isliceslabSide >= 0 and isliceslabSide < len(slicerailyvals))
+				var slabflagA = 1 if btopgoingright else 2
+				assert (contoursliced[i].y == slicerailyvals[isliceslabSide].y)
+				var slicerailcrossingsA = slicerailcrossings[isliceslabSide]
+				var slicerailcrossingflagsA = slicerailcrossingflags[isliceslabSide]
+				var jc = slicerailcrossingsA.find(i)
+				assert (jc != -1)
+				assert ((slicerailcrossingflagsA[jc] & slabflagA) == 0)
+				slicerailcrossingflagsA[jc] |= slabflagA
+				var jc1 = jc+1 if btopgoingright else jc-1
+				assert ((jc1 < len(slicerailcrossingflagsA)) if btopgoingright else (jc1 >= 0))
+				var i1 = slicerailcrossingsA[jc1]
+				assert (contourslabindexes[i1] == isliceslab)
+				if (slicerailcrossingflagsA[jc1] & slabflagA) != 0:
+					assert (islicerail == isliceslabSide and i1 == i0)
+					break
+				slicerailcrossingflagsA[jc1] |= slabflagA
+				slabi.push_back(i1)
+				i = i1
 			slabs.push_back(slabi)
-			
-			
-	print("ss ", len(slypolygon), " ", len(rcontour))
-	return makebadtriangulation(contour, flataligntransform)
+
+
+	var arr = []
+	arr.resize(Mesh.ARRAY_MAX)
+	var meshvertex = [ ]
+	var meshuv = [ ]
+	for p in contoursliced:
+		meshuv.push_back(Vector2(p.x, p.y))
+		meshvertex.push_back(flataligntransform.xform_inv(p))
+	arr[Mesh.ARRAY_VERTEX] = PoolVector3Array(meshvertex)
+	arr[Mesh.ARRAY_TEX_UV] = PoolVector2Array(meshuv)
+	var meshindex = [ ]
+	for isliceslab in range(len(slabs)):
+		var slabi = slabs[isliceslab]
+		var slabpoly = [ ]
+		for k in slabi:
+			slabpoly.push_back(meshuv[k])
+		var pi = Geometry.triangulate_polygon(slabpoly)
+		if not pi:
+			print("bad slab triangulation ", isliceslab, " ", slabi)
+			for k in slabi:
+				print(k, " ", contourslabindexes[k], meshuv[k])
+		for ki in pi:
+			meshindex.push_back(slabi[ki])
+	arr[Mesh.ARRAY_INDEX] = PoolIntArray(meshindex)
+	return arr
+
+	#return makebadtriangulation(contour, flataligntransform)
+
 
