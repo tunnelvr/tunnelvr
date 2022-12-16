@@ -11,13 +11,14 @@ var tunnelxZshift = 13.0
 var tunnelxZscaledown = 0.1
 var basicbadtriangulation = false
 var goodpolyslicewidth = 0.5
+var floordownfromcentrelineoffset = 0.8
 
 
 # things to do: 
 # 
 # don't plot connective lines or centrelines
 # shift all floors down by 1.2m from the centrelines
-# don't create centrelinenode for _thing values
+# labels coming up as those flagsighs
 
 # implement nodeconnzsetrelative
 # the areas are going to need sensible triangulating, 
@@ -120,6 +121,7 @@ func updateznodes(xctunnelxdrawing, xctunnelxtube, bflatteninzfor2Dviewing=false
 	var nodepoints = xctunnelxdrawing.nodepoints
 	var Lpathvectorseq = maketunnelxnetwork(nodepoints, null, xctunnelxtube)
 	var nextnodepoints = { }
+	var lfloordownfromcentrelineoffset = floordownfromcentrelineoffset*(1/tunnelxZscaledown if bflatteninzfor2Dviewing else 1.0)
 	for opn in nodepoints:
 		if not opn.begins_with("_"):
 			continue
@@ -139,7 +141,7 @@ func updateznodes(xctunnelxdrawing, xctunnelxtube, bflatteninzfor2Dviewing=false
 				zaltsum = nodepoints[ccon[1]].z + ccon[2]
 				break
 		if tweight != 0.0:
-			var newz = zaltsum/tweight
+			var newz = zaltsum/tweight - lfloordownfromcentrelineoffset
 			nextnodepoints[opn] = Vector3(nodepoints[opn].x, nodepoints[opn].y, newz)
 
 	if bflatteninzfor2Dviewing:
