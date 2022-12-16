@@ -35,7 +35,6 @@ func exportxctrpcdata(stripruntimedataforsaving):   # read by xctubefromdata()
 		res["xctchangesequence"] = xctchangesequence
 	return res 
 
-
 func linkspresentindex(nodename0, nodename1):
 	for j in range(int(len(xcdrawinglink)/2)):
 		if xcdrawinglink[j*2] == nodename0 and (nodename1 == null or xcdrawinglink[j*2+1] == nodename1):
@@ -244,12 +243,13 @@ func updatetunnelxsketchlinkpaths(sketchsystem):
 	var NlinestyleSurfaces = 3
 	var linestylemap = { "wall":0, "estwall":0, "filled":0, 
 						 "detail":1, "pitchbound":1, "ceilingbound":1, 
-						 "connective":2, "invisible":2, "centreline":2 }
+						 "connective":2, "invisible":2, "centreline":2, 
+						 "connective_rock":2, "connective_hole":2 }
 	var pathlinestylematerials = [ "tunnelxwall", "tunnelxdetail", "tunnelxconnective" ]
 	var linewidthmap = { "wall":3, "estwall":2, "filled":1, 
 						 "detail":1, "pitchbound":2, "ceilingbound":2, 
-						 "connective":0.5, "invisible":1, "centreline":1 }
-
+						 "connective":0.5, "connective_rock":0.5, "connective_hole":0.5, 
+						 "invisible":1, "centreline":1 }
 
 	assert (len(pathlinestylematerials) == NlinestyleSurfaces)
 	var surfaceTools = [ ]

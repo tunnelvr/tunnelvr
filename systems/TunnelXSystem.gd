@@ -216,7 +216,11 @@ func skpath(xp):
 					sf.sfpixwidthheight = Vector2(float(xp.get_named_attribute_value("sfpixwidth")), float(xp.get_named_attribute_value("sfpixheight")))
 					sk.skframe = sf
 					print(sf.sfsketch)
-			
+				elif sk.area_signal == "rock" or sk.area_signal == "hole":
+					pass
+				else:
+					print("unprogrammed area signal ", sk.area_signal)
+
 			elif xp.get_node_name() == "pctext":
 				if xp.get_named_attribute_value("style") != "":
 					sk.pctext_style = xp.get_named_attribute_value("style")
@@ -297,36 +301,17 @@ func makexcdata(skpaths, nodeidsmap, ptoffset):
 	return xcdata
 
 
-func makedrawinglinks(skpaths, nodeidsmap, spbasis):
-	var drawinglinks = [ ]
-	for sk in skpaths:
-		drawinglinks.push_back(nodeidsmap[sk.from])
-		drawinglinks.push_back(nodeidsmap[sk.to])
-		drawinglinks.push_back(sk.linestyle)
-		if len(sk.pts) > 2:
-			var intermediatepoints = [ ]
-			var p0 = sk.pts[0]
-			var p1 = sk.pts[-1]
-			var vec = p1 - p0
-			var vecsq = vec.length_squared()
-			if vecsq == 0.0:
-				vecsq = 1.0
-			for i in range(1, len(sk.pts) - 1):
-				var dpz = clamp((sk.pts[i] - p0).dot(vec)/vecsq, 0.0, 1.0)
-				var sp = lerp(p0, p1, dpz)
-				var dp = sk.pts[i] - sp
-				intermediatepoints.push_back(Vector3(dp.dot(spbasis.x), dp.dot(spbasis.z), dpz))
-			drawinglinks.push_back(intermediatepoints)
-		else:
-			drawinglinks.push_back(null)
-	return drawinglinks
-
 func makedrawinglinksDL(skpaths, nodeidsmap, spbasis, xcdrawinglink, xcsectormaterials, xclinkintermediatenodes):
 	var drawinglinks = [ ]
 	for sk in skpaths:
 		xcdrawinglink.push_back(nodeidsmap[sk.from])
 		xcdrawinglink.push_back(nodeidsmap[sk.to])
-		xcsectormaterials.push_back(sk.linestyle)
+
+		if sk.linestyle == "connective" and (sk.area_signal == "rock" or sk.area_signal == "hole"):
+			xcsectormaterials.push_back("connective_" + sk.area_signal)
+		else:
+			xcsectormaterials.push_back(sk.linestyle)
+
 		if len(sk.pts) > 2:
 			var intermediatepoints = [ ]
 			var p0 = sk.pts[0]
@@ -349,15 +334,46 @@ func makedrawinglinksDL(skpaths, nodeidsmap, spbasis, xcdrawinglink, xcsectormat
 
 var linestyleboundaries = [ "wall", "estwall", "detail", "pitchbound", "ceilingbound", "invisible" ]
 
-func SArealinkssequence(idl, Lpathvectorseq, xcdrawinglink, linestyles, nodeseq=null):
+func Sinnerconnectivenetwork(rootinnerconnectives, Lpathvectorseq, xcdrawinglink, linestyles):
+	var innerconnectivesM = { }
+	for innerconnective in rootinnerconnectives:
+		if innerconnectivesM.has(innerconnective):
+			continue
+		var innerconnectivestack = [ innerconnective ]
+		while len(innerconnectivestack) != 0:
+			var linnerconnective = innerconnectivestack.pop_back()
+			if innerconnectivesM.has(linnerconnective):
+				continue
+			innerconnectivesM[linnerconnective] = 1
+			var linnerconnectiveo = linnerconnective + (1 if ((linnerconnective%2) == 0) else -1)
+			var copn = xcdrawinglink[linnerconnectiveo]
+			var CNpathvectorseq = Lpathvectorseq[copn]
+			if len(CNpathvectorseq) == 1:
+				continue
+			var cj = CNpathvectorseq.find(linnerconnectiveo)
+			assert (cj != -1)
+			for k in range(len(CNpathvectorseq)):
+				var cjm1 = (len(CNpathvectorseq)-1 if cj == 0 else cj-1)
+				var linestylem1 = linestyles[int(CNpathvectorseq[cjm1]/2)]
+				if linestyleboundaries.has(linestylem1):
+					break
+				cj = cjm1
+			for k in range(len(CNpathvectorseq)):
+				var cjp = ((cj + k)%len(CNpathvectorseq))
+				var linestylep = linestyles[int(CNpathvectorseq[cjp]/2)]
+				if linestyleboundaries.has(linestylep):
+					break
+				if linestylep.begins_with("connective"):
+					innerconnectivestack.push_back(CNpathvectorseq[cjp])
+	return innerconnectivesM.keys()
+
+func SArealinkssequence(idl, Lpathvectorseq, xcdrawinglink, linestyles):
 	var seq = [ ]
-	var innerconnectives = [ ]
-	while (len(seq) == 0 or seq[0] != idl) and (len(seq) < 10000):
+	var rootinnerconnectives = [ ]
+	while (len(seq) == 0 or seq[0] != idl) and (len(seq) < len(xcdrawinglink) + 10):
 		seq.push_back(idl)
 		var idlo = idl + (1 if ((idl%2) == 0) else -1)
 		var opn = xcdrawinglink[idlo]
-		if nodeseq != null:
-			nodeseq.push_back(opn)
 		var Npathvectorseq = Lpathvectorseq[opn]
 		var j = Npathvectorseq.find(idlo)
 		assert (j != -1)
@@ -368,10 +384,19 @@ func SArealinkssequence(idl, Lpathvectorseq, xcdrawinglink, linestyles, nodeseq=
 			if linestyleboundaries.has(linestyleL):
 				idloB = idloL
 				break
-			elif linestyleL == "connective":
-				innerconnectives.push_back(idloL)
+			elif linestyleL.begins_with("connective"):
+				rootinnerconnectives.push_back(idloL)
 		idl = idloB
-	return seq
+		
+	var connectives = Sinnerconnectivenetwork(rootinnerconnectives, Lpathvectorseq, xcdrawinglink, linestyles)
+	var area_signal = ""
+	for conn in connectives:
+		var linestyleC = linestyles[int(conn/2)]
+		if linestyleC == "connective_rock":
+			area_signal = "rock"
+		elif linestyleC == "connective_hole" and area_signal == "":
+			area_signal = "hole"
+	return { "seq":seq, "connectives":connectives, "area_signal":area_signal }
 	
 	
 
@@ -433,11 +458,13 @@ func UpdateSAreas(xctunnelxdrawing, xctunnelxtube):
 		var i = int(idl/2)
 		if (not (linestyles[i] in linestyleboundaries)) or drawinglinksvisited.has(idl):
 			continue
-		var nodeseq = [ ]
-		var dlseq = SArealinkssequence(idl, Lpathvectorseq, xcdrawinglink, linestyles, nodeseq)
+		var dlseqM = SArealinkssequence(idl, Lpathvectorseq, xcdrawinglink, linestyles)
+		var dlseq = dlseqM["seq"]
 		for ldil in dlseq:
 			assert (not drawinglinksvisited.has(ldil))
 			drawinglinksvisited[ldil] = 1
+		if dlseqM.get("area_signal", "") == "rock" or dlseqM.get("area_signal", "") == "hole":
+			continue
 		var areacontour = SAreacontour(dlseq, xctunnelxdrawing, xctunnelxtube)
 		var rotzminus90 = Basis(Vector3(1,0,0), Vector3(0,0,-1), Vector3(0,1,0))
 		areacontour.invert()
