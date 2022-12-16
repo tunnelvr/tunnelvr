@@ -273,8 +273,9 @@ func updatetunnelxsketchlinkpaths(sketchsystem):
 		if nintermediatenodes != 0:
 			var intermediatenodes = xclinkintermediatenodes[jb]
 			for i in range(nintermediatenodes):
-				var p1mtrans = intermedpointposT(p0, p1, intermediatenodes[i])
-				intermediatepts.push_back(p1mtrans.origin)
+				var pt = intermedpointpos(p0, p1, intermediatenodes[i])
+				intermediatepts.push_back(pt)
+				
 		var surfaceTool = surfaceTools[linestylemap.get(linestyle, 0)]
 		var linewidth = linewidthmap.get(linestyle, 1.0)*tubelinklinewidth
 		Polynets.addnoarrowhorizontalmesh(surfaceTool, p0, p1, linewidth, intermediatepts)
@@ -898,6 +899,7 @@ func updatetunnelxareas(xcdrawings):
 	if $XCtubesectors.get_child_count() != 0:
 		clearalltubesectors()
 	var tunnelxsystem = get_node("/root/Spatial/TunnelXSystem")
+	makeplaneintersectionaxisvec(xcdrawing0, xcdrawing0)
 	var surfaceTools = tunnelxsystem.UpdateSAreas(xcdrawing0, self)
 	var aabb = null
 	for i in range(len(surfaceTools)):

@@ -44,15 +44,19 @@ func maketunnelxnetwork(nodepoints, onepathpairs, xctunnelxtube, bdropangles):
 		var p0i = p1
 		var p1i = p0
 		if xclinkintermediatenodes != null and xclinkintermediatenodes[i] != null and len(xclinkintermediatenodes[i]) != 0:
-			p0i = xctunnelxtube.intermedpointpos(p0, p1, xclinkintermediatenodes[i][0])
-			p1i = xctunnelxtube.intermedpointpos(p0, p1, xclinkintermediatenodes[i][-1])
+			var dp0i = xclinkintermediatenodes[i][0]
+			var dp1i = xclinkintermediatenodes[i][-1]
+			p0i = lerp(p0, p1, dp0i.z) + Vector3(dp0i.x, dp0i.y, 0.0)
+			#p0i = xctunnelxtube.intermedpointpos(p0, p1, xclinkintermediatenodes[i][0])
+			p1i = lerp(p0, p1, dp1i.z) + Vector3(dp1i.x, dp1i.y, 0.0)
 
 		var vec30 = p0i - p0
 		var vec0 = Vector2(vec30.x, vec30.y)
 		var vec31 = p1 - p1i
 		var vec1 = Vector2(vec31.x, vec31.y)
-		Lpathvectorseq[i0].push_back([vec0.angle(), i*2])
-		Lpathvectorseq[i1].push_back([(-vec1).angle(), i*2+1])
+
+		Lpathvectorseq[i0].push_back([rad2deg(vec0.angle()), i*2])
+		Lpathvectorseq[i1].push_back([rad2deg((-vec1).angle()), i*2+1])
 
 	if onepathpairs != null:
 		var Npaths = len(onepathpairs)/2
@@ -350,13 +354,15 @@ func makedrawinglinksDL(skpaths, nodeidsmap, spbasis, xcdrawinglink, xcsectormat
 
 var linestyleboundaries = [ "wall", "estwall", "detail", "pitchbound", "ceilingbound", "invisible" ]
 
-func SArealinkssequence(idl, Lpathvectorseq, xcdrawinglink, linestyles):
+func SArealinkssequence(idl, Lpathvectorseq, xcdrawinglink, linestyles, nodeseq=null):
 	var seq = [ ]
 	var innerconnectives = [ ]
 	while (len(seq) == 0 or seq[0] != idl) and (len(seq) < 10000):
 		seq.push_back(idl)
 		var idlo = idl + (1 if ((idl%2) == 0) else -1)
 		var opn = xcdrawinglink[idlo]
+		if nodeseq != null:
+			nodeseq.push_back(opn)
 		var Npathvectorseq = Lpathvectorseq[opn]
 		var j = Npathvectorseq.find(idlo)
 		assert (j != -1)
@@ -371,6 +377,8 @@ func SArealinkssequence(idl, Lpathvectorseq, xcdrawinglink, linestyles):
 				innerconnectives.push_back(idloL)
 		idl = idloB
 	return seq
+	
+	
 
 # make the polygon
 # check its orientation
@@ -430,7 +438,8 @@ func UpdateSAreas(xctunnelxdrawing, xctunnelxtube):
 		var i = int(idl/2)
 		if (not (linestyles[i] in linestyleboundaries)) or drawinglinksvisited.has(idl):
 			continue
-		var dlseq = SArealinkssequence(idl, Lpathvectorseq, xcdrawinglink, linestyles)
+		var nodeseq = [ ]
+		var dlseq = SArealinkssequence(idl, Lpathvectorseq, xcdrawinglink, linestyles, nodeseq)
 		for ldil in dlseq:
 			assert (not drawinglinksvisited.has(ldil))
 			drawinglinksvisited[ldil] = 1
