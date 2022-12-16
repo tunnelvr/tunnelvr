@@ -15,13 +15,15 @@ var goodpolyslicewidth = 0.5
 
 # things to do: 
 # 
+# don't plot connective lines or centrelines
+# shift all floors down by 1.2m from the centrelines
+# don't create centrelinenode for _thing values
+
 # implement nodeconnzsetrelative
 # the areas are going to need sensible triangulating, 
 #   some kind of nice grid that works on other faces
-# sketchgraphicspanel.GUpdateSymbolLayout();
+# sketchgraphicspanel.GUpdateSymbolLayout(); (we don't know how to mark symbols)
 # convert the skframes into floor sketches below the connective bits
-# is fixing up and exporting remotely feasible?
-# use xcsectormaterials to set the linestyle!
 # 
 
 class sd0class:
