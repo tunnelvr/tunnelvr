@@ -28,7 +28,7 @@ class sd0class:
 	static func sd0(a, b):
 		return a[0] < b[0]
 
-func maketunnelxnetwork(nodepoints, onepathpairs, xctunnelxtube, bdropangles):
+func maketunnelxnetwork(nodepoints, onepathpairs, xctunnelxtube):
 	var Lpathvectorseq = { } 
 	for i in nodepoints.keys():
 		Lpathvectorseq[i] = [ ]  # [ (arg, pathindex*2 + (0 if bfore else 1)) ]
@@ -69,20 +69,15 @@ func maketunnelxnetwork(nodepoints, onepathpairs, xctunnelxtube, bdropangles):
 			Lpathvectorseq[i1].push_back([(-vec).angle(), Ndrawinglinks*2 + i*2+1])
 
 
-	if bdropangles:
-		var res = { }
-		for i in nodepoints.keys():
-			var pathvectorseq = Lpathvectorseq[i]
-			pathvectorseq.sort_custom(sd0class, "sd0")
-			var pathvectorseqI = [ ]
-			for jp in pathvectorseq:
-				pathvectorseqI.push_back(jp[1])
-			res[i] = pathvectorseqI
-		return res
-		
-	for pathvectorseq in Lpathvectorseq.values():
+	var res = { }
+	for i in nodepoints.keys():
+		var pathvectorseq = Lpathvectorseq[i]
 		pathvectorseq.sort_custom(sd0class, "sd0")
-	return Lpathvectorseq
+		var pathvectorseqI = [ ]
+		for jp in pathvectorseq:
+			pathvectorseqI.push_back(jp[1])
+		res[i] = pathvectorseqI
+	return res
 
 
 
@@ -108,8 +103,8 @@ func ShortestPathsToCentrelineNodes(Sopn, num, nodepoints, onepathpairs, Lpathve
 				break
 			continue
 		for piv in Lpathvectorseq[opn]:
-			assert (onepathpairs[piv[1]] == opn)
-			var pivother = piv[1] + (1 if (piv[1] % 2) == 0 else -1)
+			assert (onepathpairs[piv] == opn)
+			var pivother = piv + (1 if (piv % 2) == 0 else -1)
 			var opnother = onepathpairs[pivother]
 			if opnother in opnvisited:
 				continue
@@ -121,7 +116,7 @@ func ShortestPathsToCentrelineNodes(Sopn, num, nodepoints, onepathpairs, Lpathve
 
 func updateznodes(xctunnelxdrawing, xctunnelxtube, bflatteninzfor2Dviewing=false):
 	var nodepoints = xctunnelxdrawing.nodepoints
-	var Lpathvectorseq = maketunnelxnetwork(nodepoints, null, xctunnelxtube, false)
+	var Lpathvectorseq = maketunnelxnetwork(nodepoints, null, xctunnelxtube)
 	var nextnodepoints = { }
 	for opn in nodepoints:
 		if not opn.begins_with("_"):
@@ -428,7 +423,7 @@ func SAreacontour(dlseq, xctunnelxdrawing, xctunnelxtube):
 func UpdateSAreas(xctunnelxdrawing, xctunnelxtube):
 	var nodepoints = xctunnelxdrawing.nodepoints
 	var xclinkintermediatenodes = xctunnelxtube.xclinkintermediatenodes
-	var Lpathvectorseq = maketunnelxnetwork(nodepoints, null, xctunnelxtube, true)
+	var Lpathvectorseq = maketunnelxnetwork(nodepoints, null, xctunnelxtube)
 	var xcdrawinglink = xctunnelxtube.xcdrawinglink
 	var linestyles = xctunnelxtube.xcsectormaterials
 	var Ndrawinglinks = len(xcdrawinglink)/2
@@ -691,7 +686,5 @@ func makegoodtriangulation(contour, flataligntransform):
 			meshindex.push_back(slabi[ki])
 	arr[Mesh.ARRAY_INDEX] = PoolIntArray(meshindex)
 	return arr
-
-	#return makebadtriangulation(contour, flataligntransform)
 
 
