@@ -250,6 +250,7 @@ func updatetunnelxsketchlinkpaths(sketchsystem):
 						 "detail":1, "pitchbound":2, "ceilingbound":2, 
 						 "connective":0.5, "connective_rock":0.5, "connective_hole":0.5, 
 						 "invisible":1, "centreline":1 }
+	var hideconnectivelines = true
 
 	assert (len(pathlinestylematerials) == NlinestyleSurfaces)
 	var surfaceTools = [ ]
@@ -268,6 +269,8 @@ func updatetunnelxsketchlinkpaths(sketchsystem):
 		var p1 = xcdrawing1.transform * xcdrawing1.nodepoints[xcdrawinglink[j+1]]
 		var jb = j/2
 		var linestyle = xcsectormaterials[jb]
+		if hideconnectivelines and (linestyle.begins_with("connective") or linestyle == "centreline"):
+			continue
 		var nintermediatenodes = (0 if xclinkintermediatenodes == null else len(xclinkintermediatenodes[jb]))
 		var intermediatepts = [ ]
 		if nintermediatenodes != 0:
@@ -894,6 +897,7 @@ func clearalltubesectors():
 	add_child(xctubesectors_new)
 
 func updatetunnelxareas(xcdrawings):
+	var tunnelxareamaterial = "simpledirt"
 	var xcdrawing0 = xcdrawings.get_node(xcname0)
 	assert ((xcname0 == xcname1) and (xcdrawing0.drawingtype == DRAWING_TYPE.DT_CENTRELINE))
 	if $XCtubesectors.get_child_count() != 0:
@@ -914,7 +918,7 @@ func updatetunnelxareas(xcdrawings):
 		cps.margin = 0.01
 		xctubesector.get_node("CollisionShape").shape = cps
 		xctubesector.get_node("CollisionShape").shape.set_faces(tubesectormesh.get_faces())
-		get_node("/root/Spatial/MaterialSystem").updatetubesectormaterial(xctubesector, "simpledirt", false)
+		get_node("/root/Spatial/MaterialSystem").updatetubesectormaterial(xctubesector, tunnelxareamaterial, false)
 		$XCtubesectors.add_child(xctubesector)
 		aabb = (aabb.merge(tubesectormesh.get_aabb()) if aabb else tubesectormesh.get_aabb())
 	

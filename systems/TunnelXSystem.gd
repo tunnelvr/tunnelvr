@@ -7,8 +7,9 @@ var tunnelx_tubename = null
 var tunnelxlocoffset = Vector3()
 var tunnelxlocoffset_local = Vector3()
 const tunnelxFac = 0.1
+var tunnelxZbottom = 3.0
 var tunnelxZshift = 13.0
-var tunnelxZscaledown = 0.1
+var tunnelxZscaledown = 1.0  # 0.5
 var basicbadtriangulation = false
 var goodpolyslicewidth = 0.5
 var floordownfromcentrelineoffset = 0.8
@@ -16,16 +17,21 @@ var floordownfromcentrelineoffset = 0.8
 
 # things to do: 
 # 
-# don't plot connective lines or centrelines
-# shift all floors down by 1.2m from the centrelines
-# labels coming up as those flagsighs
+# labels coming up as those flagsigns
+# no setting of materials in UI when it's the tunnelx type
+
+# We could separate the centreline thing into its own xcdrawing
+# and link each one to a peer node in the tunnelxsketch one so 
+# we can better handle centreline structures properly
+# we could have each centrelinenode have a connected peer in the 
+# then this lower node doesn't have any paths in it
 
 # implement nodeconnzsetrelative
 # the areas are going to need sensible triangulating, 
 #   some kind of nice grid that works on other faces
 # sketchgraphicspanel.GUpdateSymbolLayout(); (we don't know how to mark symbols)
 # convert the skframes into floor sketches below the connective bits
-# 
+ 
 
 class sd0class:
 	static func sd0(a, b):
@@ -222,6 +228,8 @@ func skpath(xp):
 					print(sf.sfsketch)
 				elif sk.area_signal == "rock" or sk.area_signal == "hole":
 					pass
+				elif sk.area_signal == "dropdown":
+					print("unhandled area signal ", sk.area_signal)
 				else:
 					print("unprogrammed area signal ", sk.area_signal)
 
@@ -291,6 +299,9 @@ func makexcdata(skpaths, nodeidsmap, ptoffset):
 			nodepoints[nodeidsmap[sk.from]] = sk.pts[0] + ptoffset
 		if not nodepoints.has(nodeidsmap[sk.to]) or sk.linestyle == "centreline":
 			nodepoints[nodeidsmap[sk.to]] = sk.pts[-1] + ptoffset
+		if sk.linestyle == "centreline":
+			conepathpairs.push_back(nodeidsmap[sk.from])
+			conepathpairs.push_back(nodeidsmap[sk.to])
 
 	var rotzminus90 = Basis(Vector3(1,0,0), Vector3(0,0,-1), Vector3(0,1,0))
 	var bbcenvec = Vector3()
@@ -373,11 +384,13 @@ func Sinnerconnectivenetwork(rootinnerconnectives, Lpathvectorseq, xcdrawinglink
 
 func SArealinkssequence(idl, Lpathvectorseq, xcdrawinglink, linestyles):
 	var seq = [ ]
+	var nodeseq = [ ]
 	var rootinnerconnectives = [ ]
 	while (len(seq) == 0 or seq[0] != idl) and (len(seq) < len(xcdrawinglink) + 10):
-		seq.push_back(idl)
 		var idlo = idl + (1 if ((idl%2) == 0) else -1)
 		var opn = xcdrawinglink[idlo]
+		seq.push_back(idl)
+		nodeseq.push_back(opn)
 		var Npathvectorseq = Lpathvectorseq[opn]
 		var j = Npathvectorseq.find(idlo)
 		assert (j != -1)
@@ -391,7 +404,7 @@ func SArealinkssequence(idl, Lpathvectorseq, xcdrawinglink, linestyles):
 			elif linestyleL.begins_with("connective"):
 				rootinnerconnectives.push_back(idloL)
 		idl = idloB
-		
+	
 	var connectives = Sinnerconnectivenetwork(rootinnerconnectives, Lpathvectorseq, xcdrawinglink, linestyles)
 	var area_signal = ""
 	for conn in connectives:
@@ -400,31 +413,8 @@ func SArealinkssequence(idl, Lpathvectorseq, xcdrawinglink, linestyles):
 			area_signal = "rock"
 		elif linestyleC == "connective_hole" and area_signal == "":
 			area_signal = "hole"
-	return { "seq":seq, "connectives":connectives, "area_signal":area_signal }
+	return { "seq":seq, "nodeseq":nodeseq, "connectives":connectives, "area_signal":area_signal }
 	
-	
-
-# make the polygon
-# check its orientation
-# do the rough and crappy triangulation
-# (make an improved smooth triangulation if we can)
-# extract the contour colours
-# extract the subsets
-# colour the triangulation
-# check with big big tunnelx file
-# check we are importing the centreline properly
-# implement the dropdown stuff
-
-
-#func Sareapolygon(dlseq, nodepoints, xcdrawinglink, xclinkintermediatenodes):
-#	var res = [ ]
-#	for idl in dlseq:
-#		var i = int(idl/2)
-#		var bfore = ((idl%2) == 0)
-#		var idlo = idl + (1 if bfore else -1)
-#		var intermediatenodes = xclinkintermediatenodes[idlo]
-
-#		res.push_back()
 
 func SAreacontour(dlseq, xctunnelxdrawing, xctunnelxtube):
 	var areacontour = [ ]
@@ -448,6 +438,19 @@ func SAreacontour(dlseq, xctunnelxdrawing, xctunnelxtube):
 			areacontour.push_back(p1mtrans.origin)
 	return areacontour
 
+func SAreatrimtree(dlseq):
+	var dlseqTT = [ ]
+	for idl in dlseq:
+		var idlo = idl + (1 if ((idl%2) == 0) else -1)
+		if len(dlseqTT) != 0 and dlseqTT[-1] == idlo:
+			dlseqTT.pop_back()
+		else:
+			dlseqTT.push_back(idl)
+	while len(dlseqTT) >= 2 and dlseqTT[-1] == dlseqTT[0] + (1 if ((dlseqTT[0]%2) == 0) else -1):
+		dlseqTT.pop_back()
+		dlseqTT.pop_front()
+	return dlseqTT
+	
 
 func UpdateSAreas(xctunnelxdrawing, xctunnelxtube):
 	var nodepoints = xctunnelxdrawing.nodepoints
@@ -469,10 +472,13 @@ func UpdateSAreas(xctunnelxdrawing, xctunnelxtube):
 			drawinglinksvisited[ldil] = 1
 		if dlseqM.get("area_signal", "") == "rock" or dlseqM.get("area_signal", "") == "hole":
 			continue
-		var areacontour = SAreacontour(dlseq, xctunnelxdrawing, xctunnelxtube)
+		var dlseqTT = SAreatrimtree(dlseq)
+		if len(dlseqTT) == 0:
+			continue
+		var areacontour = SAreacontour(dlseqTT, xctunnelxdrawing, xctunnelxtube)
 		var rotzminus90 = Basis(Vector3(1,0,0), Vector3(0,0,-1), Vector3(0,1,0))
 		areacontour.invert()
-		var arr = makegoodtriangulation(areacontour, rotzminus90)
+		var arr = makegoodtriangulation(areacontour, rotzminus90, idl)
 		if arr and arr[Mesh.ARRAY_INDEX]:
 			var surfaceTool = SurfaceTool.new()
 			surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
@@ -516,6 +522,7 @@ func loadtunnelxsketch(fname):
 	var skpathsaabb = skpathstoaabb(skpaths)
 	print("Num_skpaths ", len(skpaths), " aabb: ", skpathsaabb)
 	tunnelxlocoffset_local = skpathsaabb.get_center()
+	tunnelxlocoffset_local.z = skpathsaabb.position.z - tunnelxZbottom
 
 	var nodeidsmap = makenodeidsmap(skpaths)
 	var xcdata = makexcdata(skpaths, nodeidsmap, -tunnelxlocoffset_local)
@@ -570,13 +577,13 @@ class SslypolygonX:
 	var contourslabindexes
 	func sly(i, j):
 		if contoursliced[i].x == contoursliced[j].x:
-			return contourslabindexes[i] < contourslabindexes[j]
+			return contourslabindexes[i] < contourslabindexes[j]  # assumes doubled edge is internal
 		return contoursliced[i].x < contoursliced[j].x
 		
 
 var discardcclockpolygons = true
 
-func makegoodtriangulation(contour, flataligntransform):
+func makegoodtriangulation(contour, flataligntransform, Didl):
 	if basicbadtriangulation:
 		return makebadtriangulation(contour, flataligntransform)
 	
@@ -638,19 +645,47 @@ func makegoodtriangulation(contour, flataligntransform):
 		slicerailcrossingsL.sort_custom(SyX, "sly")
 
 	if discardcclockpolygons:
-		var isliceMid = int(len(slicerailcrossings)/2)
-		var slicerailcrossingsM = slicerailcrossings[isliceMid]
-		var imid0 = slicerailcrossingsM[0]
-		var isliceslabM = contourslabindexes[imid0]
-		assert (contoursliced[imid0].y == slicerailyvals[isliceMid].y)
-		assert (isliceslabM == isliceMid or isliceslabM == isliceMid+1)
-		if isliceMid == isliceslabM:
+		var Nrailseenasclock = 0
+		var Nedgedoubles = 0
+		for islicerail in range(len(slicerailcrossings)):
+			var slicerailcrossingsL = slicerailcrossings[islicerail]
+			assert ((len(slicerailcrossingsL)%2) == 0)
+			if len(slicerailcrossingsL) == 0:
+				continue
+			if Didl == 5383 and islicerail == 2:
+				print("  dddd")
+				for Di in slicerailcrossingsL:
+					print(Di, contoursliced[Di], contourslabindexes[Di])
+			for j in range(0, len(slicerailcrossingsL), 2):
+				if j == 0 or j == len(slicerailcrossingsL) - 2:
+					if not (contoursliced[slicerailcrossingsL[j]].x < contoursliced[slicerailcrossingsL[j+1]].x):
+						Nedgedoubles += 1
+				var iiB = slicerailcrossingsL[j]
+				var ciB = contourslabindexes[iiB]
+				var iiE = slicerailcrossingsL[j+1]
+				var ciE = contourslabindexes[iiE]
+				assert ((contoursliced[iiB].y == slicerailyvals[islicerail].y) and (contoursliced[iiE].y == slicerailyvals[islicerail].y))
+				assert (ciB == islicerail or ciB == islicerail+1)
+				assert (ciE == islicerail or ciE == islicerail+1)
+				if ciB == islicerail or ciE == islicerail+1:
+					Nrailseenasclock += 1
+		if Nrailseenasclock != 0:
 			return [ ]
+		else:
+			assert (Nedgedoubles == 0)
+
+			
 
 	var slabs = [ ]
 	for islicerail in range(len(slicerailcrossings)):
 		var slicerailcrossingsL = slicerailcrossings[islicerail]
 		var slicerailcrossingflagsL = slicerailcrossingflags[islicerail]
+		
+		if Didl == 1755 and islicerail == 16:
+			for Di in slicerailcrossingsL:
+				print(Di, contoursliced[Di], contourslabindexes[Di])
+			print(slicerailcrossingsL)
+		
 		for j in range(len(slicerailcrossingsL)):
 			var i0 = slicerailcrossingsL[j]
 			assert (contoursliced[i0].y == slicerailyvals[islicerail].y)
@@ -711,8 +746,8 @@ func makegoodtriangulation(contour, flataligntransform):
 		var pi = Geometry.triangulate_polygon(slabpoly)
 		if not pi:
 			print("bad slab triangulation ", isliceslab, " ", slabi)
-			for k in slabi:
-				print(k, " ", contourslabindexes[k], meshuv[k])
+			#for k in slabi:
+			#	print(k, " ", contourslabindexes[k], meshuv[k])
 		for ki in pi:
 			meshindex.push_back(slabi[ki])
 	arr[Mesh.ARRAY_INDEX] = PoolIntArray(meshindex)

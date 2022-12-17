@@ -364,9 +364,9 @@ func _on_switchtest(index):
 
 	elif nssel == "LoadX":
 		var tunnelxsystem = get_node("/root/Spatial/TunnelXSystem")
-		tunnelxsystem.loadtunnelxsketch("res://assets/miscobjects/292-sketch1.xml")
+#		tunnelxsystem.loadtunnelxsketch("res://assets/miscobjects/292-sketch1.xml")
 #		tunnelxsystem.loadtunnelxsketch("res://assets/miscobjects/1623-midbalc2022.xml")
-#		tunnelxsystem.loadtunnelxsketch("res://assets/miscobjects/290+291+295-Nov2022jgtfix.xml")
+		tunnelxsystem.loadtunnelxsketch("res://assets/miscobjects/290+291+295-Nov2022jgtfix.xml")
 
 		
 	elif nssel == "Huge Spiral":
