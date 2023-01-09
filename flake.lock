@@ -34,48 +34,32 @@
     "godot-source": {
       "flake": false,
       "locked": {
-        "lastModified": 1659663616,
-        "narHash": "sha256-aU5cTiz7OaM0fsv0EzJDUA1Es+Ei63CKLE6GVspJexc=",
+        "lastModified": 1664316215,
+        "narHash": "sha256-uHwTthyhfeQN0R1XjqZ+kGRa5WcpeQzA/DO9hZk4lvU=",
         "owner": "godotengine",
         "repo": "godot",
-        "rev": "991bb6ac74ac8c09d7683041b50a8ced3a2defb1",
+        "rev": "6fed1ffa313c6760fa88b368ae580378daaef0f0",
         "type": "github"
       },
       "original": {
         "owner": "godotengine",
-        "ref": "3.5-stable",
+        "ref": "3.5.1-stable",
         "repo": "godot",
         "type": "github"
       }
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1640077788,
-        "narHash": "sha256-YMSDk3hlucJTTARaHNOeQEF6zEW3A/x4sXgrz94VbS0=",
+        "lastModified": 1673163619,
+        "narHash": "sha256-B33PFBL64ZgTWgMnhFL3jgheAN/DjHPsZ1Ih3z0VE5I=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "9ab7d12287ced0e1b4c03b61c781901f178d9d77",
+        "rev": "8c54d842d9544361aac5f5b212ba04e4089e8efe",
         "type": "github"
       },
       "original": {
         "owner": "nixos",
-        "ref": "nixos-21.11",
-        "repo": "nixpkgs",
-        "type": "github"
-      }
-    },
-    "nixpkgs-unstable": {
-      "locked": {
-        "lastModified": 1661026808,
-        "narHash": "sha256-gbhUhtU3jBsUl5PISSeMtxJsk1ULqZAjwW+J+esxrlM=",
-        "owner": "matthewcroughan",
-        "repo": "nixpkgs",
-        "rev": "9c86dfdd611a56757e1a74a08f98302bc60f83a1",
-        "type": "github"
-      },
-      "original": {
-        "owner": "matthewcroughan",
-        "ref": "mc/fix-godot-wrapper-recurse",
+        "ref": "nixos-22.11",
         "repo": "nixpkgs",
         "type": "github"
       }
@@ -85,8 +69,7 @@
         "flake-compat": "flake-compat",
         "flake-compat-ci": "flake-compat-ci",
         "godot-source": "godot-source",
-        "nixpkgs": "nixpkgs",
-        "nixpkgs-unstable": "nixpkgs-unstable"
+        "nixpkgs": "nixpkgs"
       }
     }
   },

@@ -1,11 +1,15 @@
 {
   description = "TunnelVR for Nix automation purposes";
 
+  nixConfig = {
+    extra-substituters = ["https://tunnelvr.cachix.org"];
+    extra-trusted-public-keys = ["tunnelvr.cachix.org-1:IZUIF+ytsd6o+5F0wi45s83mHI+aQaFSoHJ3zHrc2G0="];
+  };
+
   inputs = {
-    nixpkgs-unstable.url = "github:matthewcroughan/nixpkgs/mc/fix-godot-wrapper-recurse";
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-21.11";
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-22.11";
     godot-source = {
-      url = "github:godotengine/godot/3.5-stable";
+      url = "github:godotengine/godot/3.5.1-stable";
       flake = false;
     };
     flake-compat-ci.url = "github:hercules-ci/flake-compat-ci";
@@ -15,7 +19,7 @@
     };
   };
 
-  outputs = { self, nixpkgs, godot-source, flake-compat, flake-compat-ci, nixpkgs-unstable }:
+  outputs = { self, nixpkgs, godot-source, flake-compat, flake-compat-ci }:
     let
       # Generate a user-friendly version numer.
       version = builtins.substring 0 8 self.lastModifiedDate;
@@ -31,6 +35,7 @@
       nixpkgsFor = forAllSystems (system:
         import nixpkgs {
           inherit system;
+          config.allowUnfree = true;
           overlays = [ self.overlay ];
           config.android_sdk.accept_license = true;
         });
@@ -96,17 +101,19 @@
                   ${final.jre_minimal}/bin/keytool -keyalg RSA -genkeypair -alias androiddebugkey -keypass android -keystore debug.keystore -storepass android -dname "CN=Android Debug,O=Android,C=US" -validity 9999 -deststoretype pkcs12
                   mv debug.keystore $out
                 '';
-                export-templates = final.fetchzip {
+                export-templates = final.fetchurl {
                   url = "https://downloads.tuxfamily.org/godotengine/${version.string}/Godot_v${version.string}-${version.status}_export_templates.tpz";
-                  sha256 = "sha256-RRtgMuyaS1XJrfexOS1u5aIl2yq7fSEuMQ71G/k7MkY=";
+                  sha256 = "sha256-gqTv9Z/AUFxInh5HPLrESDOwQMGk38QXI1xPYjBQqEo=";
+                  recursiveHash = true;
                   # postFetch is necessary because the downloaded file has a
                   # .tpz extension, meaning `fetchzip` cannot otherwise extract
                   # it properly. Additionally, the game engine expects the
                   # template path to be in a folder by the name of the current
                   # version + status, like '3.4.2-stable/templates' for example,
                   # so we accomplish that here.
+                  downloadToTemp = true;
                   postFetch = ''
-                    unzip $downloadedFile -d ./
+                    ${final.unzip}/bin/unzip $downloadedFile -d ./
                     mkdir -p $out/templates/${version.string}.${version.status}
                     mv ./templates/* $out/templates/${version.string}.${version.status}
                   '';
@@ -119,7 +126,7 @@
                   --set tunnelvr_DEBUG_KEY "${debugKey}"
               '';
           };
-          my-godot = nixpkgs-unstable.outputs.legacyPackages.x86_64-linux.godot.overrideAttrs (oldAttrs: rec {
+          my-godot = godot.overrideAttrs (oldAttrs: rec {
             version = godot-source.rev;
             src = godot-source;
             preBuild =
