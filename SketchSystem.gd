@@ -382,8 +382,11 @@ remote func actsketchchangeL(xcdatalist):
 				for xct in xcdata["updatetubeshells"]:
 					var xctube = findxctube(xct["xcname0"], xct["xcname1"])
 					if xctube != null:
-						xctube.updatetubeshell($XCdrawings)
-						waterlevelsystem.checkupdatewaterlevelintube(xctube.get_name())
+						if xctube.xcname0 != xctube.xcname1:
+							xctube.updatetubeshell($XCdrawings)
+							waterlevelsystem.checkupdatewaterlevelintube(xctube.get_name())
+						else:
+							xctube.updatetunnelxareas($XCdrawings)
 			if "updatexcshells" in xcdata:
 				for xcdrawingname in xcdata["updatexcshells"]:
 					var xcdrawing = $XCdrawings.get_node_or_null(xcdrawingname)
@@ -465,7 +468,10 @@ remote func actsketchchangeL(xcdatalist):
 	var badtubeswithnoconnections = [ ]
 	for xctube in xctubestoupdate.values():
 		if $XCdrawings.get_node(xctube.xcname0).drawingtype == DRAWING_TYPE.DT_CENTRELINE:
-			if $XCdrawings.get_node(xctube.xcname1).drawingtype == DRAWING_TYPE.DT_CENTRELINE:
+			if xctube.xcname1 == xctube.xcname0:
+				print("updating tubelink paths on tunnelx self-connecting tube")
+				xctube.updatetunnelxsketchlinkpaths(self)
+			elif $XCdrawings.get_node(xctube.xcname1).drawingtype == DRAWING_TYPE.DT_CENTRELINE:
 				xctube.updatecentrelineassociationlinks(self)
 			else:
 				xctube.updatefloorcentrelinepositionlinks(self)
@@ -747,9 +753,10 @@ remote func loadsketchsystemL(fname):
 		if $XCdrawings.get_child_count() != 1:
 			for xcdrawing in $XCdrawings.get_children():
 				if xcdrawing.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
-					sketchdatadict["xcdrawings"].append(xcdrawing.exportxcrpcdata(true))
-					sketchdatadict["xcdrawings"][0]["nodepoints"].clear()
-					break
+					if (xcdrawing.drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_FLOOR_GHOSTLY_B) == 0:
+						sketchdatadict["xcdrawings"].append(xcdrawing.exportxcrpcdata(true))
+						sketchdatadict["xcdrawings"][0]["nodepoints"].clear()
+						break
 	elif sketchdatafile.file_exists(fname):
 		print("Loading sketchsystemtodict from ", fname)
 		sketchdatafile.open(fname, File.READ)

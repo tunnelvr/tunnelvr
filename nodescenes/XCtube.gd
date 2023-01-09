@@ -18,7 +18,6 @@ var planeintersectaxisvec = null
 var planeintersectpoint = null
 var planealongvecwhenparallel = null
 
-
 const linewidth = 0.02
 
 func exportxctrpcdata(stripruntimedataforsaving):   # read by xctubefromdata()
@@ -35,7 +34,6 @@ func exportxctrpcdata(stripruntimedataforsaving):   # read by xctubefromdata()
 	if not stripruntimedataforsaving:
 		res["xctchangesequence"] = xctchangesequence
 	return res 
-
 
 func linkspresentindex(nodename0, nodename1):
 	for j in range(int(len(xcdrawinglink)/2)):
@@ -204,7 +202,7 @@ func updatecentrelineassociationlinks(sketchsystem):
 	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(xcname0)
 	var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(xcname1)
-	assert(xcdrawing0.drawingtype == DRAWING_TYPE.DT_CENTRELINE and xcdrawing1.drawingtype == DRAWING_TYPE.DT_CENTRELINE)
+	assert(xcdrawing0.drawingtype == DRAWING_TYPE.DT_CENTRELINE and xcdrawing1.drawingtype == DRAWING_TYPE.DT_CENTRELINE and xcname0 != xcname1)
 	assert ((len(xcdrawinglink)%2) == 0)
 	var sperp = Vector3(0, 0, 0)
 	for j in range(0, len(xcdrawinglink), 2):
@@ -241,9 +239,73 @@ func updatecentrelineassociationlinks(sketchsystem):
 	$PathLines.layers = CollisionLayer.VL_xctubeposlines
 	$PathLines.visible = true
 
+func updatetunnelxsketchlinkpaths(sketchsystem):
+	var NlinestyleSurfaces = 3
+	var linestylemap = { "wall":0, "estwall":0, "filled":0, 
+						 "detail":1, "pitchbound":1, "ceilingbound":1, 
+						 "connective":2, "invisible":2, "centreline":2, 
+						 "connective_rock":2, "connective_hole":2 }
+	var pathlinestylematerials = [ "tunnelxwall", "tunnelxdetail", "tunnelxconnective" ]
+	var linewidthmap = { "wall":3, "estwall":2, "filled":1, 
+						 "detail":1, "pitchbound":2, "ceilingbound":2, 
+						 "connective":0.5, "connective_rock":0.5, "connective_hole":0.5, 
+						 "invisible":1, "centreline":1 }
+	var hideconnectivelines = true
+
+	assert (len(pathlinestylematerials) == NlinestyleSurfaces)
+	var surfaceTools = [ ]
+	for i in range(NlinestyleSurfaces):
+		surfaceTools.push_back(SurfaceTool.new())
+		surfaceTools[-1].begin(Mesh.PRIMITIVE_TRIANGLES)
+
+	assert (xcname0 == xcname1)
+	var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(xcname0)
+	assert (xcdrawing0.drawingtype == DRAWING_TYPE.DT_CENTRELINE)
+	var xcdrawing1 = xcdrawing0
+	makeplaneintersectionaxisvec(xcdrawing0, xcdrawing1)
+	assert ((len(xcdrawinglink)%2) == 0)
+	for j in range(0, len(xcdrawinglink), 2):
+		var p0 = xcdrawing0.transform * xcdrawing0.nodepoints[xcdrawinglink[j]]
+		var p1 = xcdrawing1.transform * xcdrawing1.nodepoints[xcdrawinglink[j+1]]
+		var jb = j/2
+		var linestyle = xcsectormaterials[jb]
+		if hideconnectivelines and (linestyle.begins_with("connective") or linestyle == "centreline"):
+			continue
+		var nintermediatenodes = (0 if xclinkintermediatenodes == null else len(xclinkintermediatenodes[jb]))
+		var intermediatepts = [ ]
+		if nintermediatenodes != 0:
+			var intermediatenodes = xclinkintermediatenodes[jb]
+			for i in range(nintermediatenodes):
+				var pt = intermedpointpos(p0, p1, intermediatenodes[i])
+				intermediatepts.push_back(pt)
+				
+		var surfaceTool = surfaceTools[linestylemap.get(linestyle, 0)]
+		var linewidth = linewidthmap.get(linestyle, 1.0)*tubelinklinewidth
+		Polynets.addnoarrowhorizontalmesh(surfaceTool, p0, p1, linewidth, intermediatepts)
+
+
+	var amesh = ArrayMesh.new()
+	for i in range(NlinestyleSurfaces):
+		surfaceTools[i].generate_normals()
+		var smesh = surfaceTools[i].commit()
+		assert (smesh.get_surface_count() == 1)
+		var arrays = smesh.surface_get_arrays(0)
+		amesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	$PathLines.mesh = amesh
+	assert($PathLines.get_surface_material_count() == NlinestyleSurfaces)
+	for i in range(NlinestyleSurfaces):
+		$PathLines.set_surface_material(i, get_node("/root/Spatial/MaterialSystem").pathlinematerial(pathlinestylematerials[i]))
+
+	print("Big tunnelx sketchlink paths AABB ", amesh.get_aabb())
+
+	return true
+
+
 func updatetubelinkpaths(sketchsystem):
 	var surfaceTool = SurfaceTool.new()
 	surfaceTool.begin(Mesh.PRIMITIVE_TRIANGLES)
+	if xcname0 == xcname1:
+		print("Warning, calling updatetubepathlinks on tunnelxsketch case")
 	var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(xcname0)
 	var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(xcname1)
 	makeplaneintersectionaxisvec(xcdrawing0, xcdrawing1)
@@ -274,8 +336,9 @@ func updatetubelinkpaths(sketchsystem):
 		var nintermediatenodes = (0 if xclinkintermediatenodes == null else len(xclinkintermediatenodes[jb]))
 		var intermediatepts = [ ]
 		if nintermediatenodes != 0:
+			var intermediatenodes = xclinkintermediatenodes[jb]
 			for i in range(nintermediatenodes):
-				var p1mtrans = intermedpointposT(p0, p1, xclinkintermediatenodes[jb][i])
+				var p1mtrans = intermedpointposT(p0, p1, intermediatenodes[i])
 				intermediatepts.push_back(p1mtrans.origin)
 				var inodename = encodeintermediatenodename(jb, i)
 				var inode = $PathLines.get_node_or_null(inodename)
@@ -309,6 +372,8 @@ func updatetubelinkpaths(sketchsystem):
 	assert($PathLines.get_surface_material_count() != 0)
 	$PathLines.set_surface_material(0, get_node("/root/Spatial/MaterialSystem").pathlinematerial("normal"))
 	return true
+
+
 
 
 func fa(a, b):
@@ -821,22 +886,53 @@ func slicerungsatintermediatetuberail(tuberail0, tuberail1, rung0k, rung1k):
 	return tuberailk
 
 
+func clearalltubesectors():
+	var xctubesectors_old = $XCtubesectors
+	xctubesectors_old.set_name("XCtubesectors_old")
+	for x in xctubesectors_old.get_children():
+		x.queue_free()
+	xctubesectors_old.queue_free()
+	var xctubesectors_new = Spatial.new()
+	xctubesectors_new.set_name("XCtubesectors")
+	add_child(xctubesectors_new)
+
+func updatetunnelxareas(xcdrawings):
+	var tunnelxareamaterial = "simpledirt"
+	var xcdrawing0 = xcdrawings.get_node(xcname0)
+	assert ((xcname0 == xcname1) and (xcdrawing0.drawingtype == DRAWING_TYPE.DT_CENTRELINE))
+	if $XCtubesectors.get_child_count() != 0:
+		clearalltubesectors()
+	var tunnelxsystem = get_node("/root/Spatial/TunnelXSystem")
+	makeplaneintersectionaxisvec(xcdrawing0, xcdrawing0)
+	var surfaceTools = tunnelxsystem.UpdateSAreas(xcdrawing0, self)
+	var aabb = null
+	for i in range(len(surfaceTools)):
+		var surfaceTool = surfaceTools[i]
+		surfaceTool.generate_normals()
+		surfaceTool.generate_tangents()
+		var tubesectormesh = surfaceTool.commit()
+		var xctubesector = preload("res://nodescenes/XCtubeshell.tscn").instance()
+		xctubesector.set_name("XCtubesector_"+String(i))
+		xctubesector.get_node("MeshInstance").mesh = tubesectormesh
+		var cps = ConcavePolygonShape.new()
+		cps.margin = 0.01
+		xctubesector.get_node("CollisionShape").shape = cps
+		xctubesector.get_node("CollisionShape").shape.set_faces(tubesectormesh.get_faces())
+		get_node("/root/Spatial/MaterialSystem").updatetubesectormaterial(xctubesector, tunnelxareamaterial, false)
+		$XCtubesectors.add_child(xctubesector)
+		aabb = (aabb.merge(tubesectormesh.get_aabb()) if aabb else tubesectormesh.get_aabb())
+	
+	print("Big tunnelx combined sectors AABB ", aabb)
+	
+
 func updatetubeshell(xcdrawings):
 	var xcdrawing0 = xcdrawings.get_node(xcname0)
 	var xcdrawing1 = xcdrawings.get_node(xcname1)
 	if xcdrawing0.drawingtype != DRAWING_TYPE.DT_XCDRAWING or xcdrawing1.drawingtype != DRAWING_TYPE.DT_XCDRAWING:
 		print("skipping updatetubeshell on ", get_name())
 		return
-	
 	if $XCtubesectors.get_child_count() != 0:
-		var xctubesectors_old = $XCtubesectors
-		xctubesectors_old.set_name("XCtubesectors_old")
-		for x in xctubesectors_old.get_children():
-			x.queue_free()   # because it's not transitive (should file a ticket)
-		xctubesectors_old.queue_free()
-		var xctubesectors_new = Spatial.new()
-		xctubesectors_new.set_name("XCtubesectors")
-		add_child(xctubesectors_new)
+		clearalltubesectors()
 		
 	var mtpa = maketubepolyassociation_andreorder(xcdrawing0, xcdrawing1)
 	var poly0 = mtpa[0]
@@ -853,7 +949,6 @@ func updatetubeshell(xcdrawings):
 		var ila1 = ilaM[li]["ila1"]
 		var ila1N = ilaM[li]["ila1N"]
 			
-
 		var tuberails = initialtuberails(xcdrawing0, poly0, ila0, ila0N, xcdrawing1, poly1, ila1, ila1N)
 		var tuberail0 = tuberails[0]
 		var tuberail1 = tuberails[1]
@@ -1087,6 +1182,12 @@ func CopyHoleGapShape(li, sketchsystem):
 
 	
 func makeplaneintersectionaxisvec(xcdrawing0, xcdrawing1):
+	if xcdrawing0 == xcdrawing1:
+		planeintersectaxisvec = xcdrawing0.transform.basis.y
+		planealongvecwhenparallel = xcdrawing0.transform.basis.x
+		planeintersectpoint = xcdrawing0.transform.origin
+		return
+		
 	var n0 = xcdrawing0.transform.basis.z
 	var n1 = xcdrawing1.transform.basis.z
 	var c0 = n0.dot(xcdrawing0.transform.origin)
@@ -1101,6 +1202,7 @@ func makeplaneintersectionaxisvec(xcdrawing0, xcdrawing1):
 		var ad0 = c0 - n0dn1*c1
 		var ad1 = -n0dn1*c0 + c1
 		planeintersectpoint = (n0*ad0 + n1*ad1)/adet
+		planealongvecwhenparallel = null
 	else:
 		planeintersectaxisvec = xcdrawing0.transform.basis.y
 		planealongvecwhenparallel = xcdrawing0.transform.basis.x
@@ -1117,7 +1219,6 @@ func intermedpointplanebasis(pointertargetpoint):
 	if not is_equal_approx(bzvec.length(), 1):
 		print("bad zvecn ", bzvec.length())
 	return Basis(bxvec, byvec, bzvec)
-
 
 func removexclinkintermediatenode(j, dv):
 	if xclinkintermediatenodes != null:

@@ -948,6 +948,29 @@ static func addarrowmesh(surfaceTool, p0, p1, aperp, linewidth, intermediatepts)
 	surfaceTool.add_vertex(pa + arrowfac*aperp)
 	surfaceTool.add_vertex(pa - arrowfac*aperp)
 
+static func addnoarrowhorizontalmesh(surfaceTool, p0, p1, linewidth, intermediatepts):
+	var p0m = p0
+	var p0mleft = p0m
+	var p0mright = p0m
+	for i in range(1 + len(intermediatepts)):
+		var lp1m = intermediatepts[i] if i != len(intermediatepts) else p1
+		var aperp = Vector3(lp1m.x - p0m.x, 0.0, lp1m.z - p0m.z).cross(Vector3(0,1,0)).normalized()
+		if i == 0:
+			p0mleft = p0m - linewidth*aperp
+			p0mright = p0m + linewidth*aperp
+		var lp1mleft = lp1m - linewidth*aperp
+		var lp1mright = lp1m + linewidth*aperp
+		surfaceTool.add_vertex(p0mleft)
+		surfaceTool.add_vertex(lp1mleft)
+		surfaceTool.add_vertex(p0mright)
+		surfaceTool.add_vertex(p0mright)
+		surfaceTool.add_vertex(lp1mleft)
+		surfaceTool.add_vertex(lp1mright)
+		p0m = lp1m
+		p0mleft = lp1mleft
+		p0mright = lp1mright
+
+
 static func triangulatetuberung(surfaceTool, tuberail0rung0, tuberail1rung0, tuberail0rung1, tuberail1rung1):
 	surfaceTool.add_uv(tuberail0rung0[1])
 	#surfaceTool.add_uv2(tuberail0rung0[1])

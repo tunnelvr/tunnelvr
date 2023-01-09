@@ -31,6 +31,6 @@ var housahedronmode = false
 var splaystationnoderegex = null
 func _ready():
 	splaystationnoderegex = RegEx.new()
-	splaystationnoderegex.compile(".*[^\\d]$")
+	splaystationnoderegex.compile("_\\d+$|.*[^\\d]$")
 
 	

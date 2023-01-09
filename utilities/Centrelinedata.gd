@@ -37,7 +37,7 @@ static func sketchdatadictlistfromcentreline(centrelinefile, perfectoverlayavoid
 	for i in range(len(stationpointsnamesorg)):
 		var stationpointname = stationpointsnamesorg[i].replace(".", ",")   # dots not allowed in node name, but commas are
 		
-		# see splaystatoonnoderegex for ourcoding from cusseypot
+		# see splaystationnoderegex for ourcoding from cusseypot
 		# but other times splays come in as blank
 		# we should have labelled splay explicitly on load
 		if stationpointname == "":
