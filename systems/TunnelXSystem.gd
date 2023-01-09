@@ -14,11 +14,13 @@ var basicbadtriangulation = false
 var goodpolyslicewidth = 0.5
 var floordownfromcentrelineoffset = 0.8
 
-
 # things to do: 
 # 
 # labels coming up as those flagsigns
-# no setting of materials in UI when it's the tunnelx type
+# no setting of materials or other edits in UI when it's the tunnelx type
+# connecting in from other headset should apply the fill areas
+# check problem areas in top canyons in the tunnelx file
+
 
 # We could separate the centreline thing into its own xcdrawing
 # and link each one to a peer node in the tunnelxsketch one so 
