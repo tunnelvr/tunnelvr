@@ -18,6 +18,8 @@ You can make improvements to the map with your friends in VR.  It is easier and 
 because it is in 3D from the perspective of how you see it in the real life, rather than 
 as a technical 2D drawing with overlapping layers.
 
+[<img src="https://user-images.githubusercontent.com/677254/213687531-523eca50-7c89-413a-8737-42688f5e4041.png" width="50%">](https://www.youtube.com/watch?v=vOktKq0c7BY "Presentation at University of Internationa Spelaeologists 2022")
+
 # How to run
 
 ## As a binary executable
