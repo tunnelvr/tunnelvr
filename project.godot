@@ -62,7 +62,7 @@ _global_script_class_icons={
 
 [application]
 
-config/name="tunnelvr_v0.7"
+config/name="tunnelvr_v0.8"
 run/main_scene="res://Spatial.tscn"
 boot_splash/image="res://screenshot.png"
 config/icon="res://icon.png"
@@ -83,7 +83,8 @@ gdscript/warnings/integer_division=false
 
 [gdnative]
 
-singletons=[ "res://addons/godot_ovrmobile/godot_ovrmobile.gdnlib" ]
+singletons=[ "res://addons/godot-openxr/config/godot_openxr.gdnlib", "res://addons/godot_ovrmobile/godot_ovrmobile.gdnlib" ]
+singletons_disabled=[ "res://addons/godot_ovrmobile/godot_ovrmobile.gdnlib" ]
 
 [input]
 
