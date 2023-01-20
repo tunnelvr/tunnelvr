@@ -109,24 +109,6 @@ func _ready():
 		playerMe.playerplatform = "HTML5"
 		print("warning: untested HTML5 mode")
 		
-	elif OS.has_feature("DQuest"):
-		if not checkloadinterface("OVRMobile"):
-			print("Error: Quest device not able to find OVRMobile interface")
-		ovr_init_config = load("res://addons/godot_ovrmobile/OvrInitConfig.gdns").new()
-		ovr_performance = load("res://addons/godot_ovrmobile/OvrPerformance.gdns").new()
-		ovr_hand_tracking = load("res://addons/godot_ovrmobile/OvrHandTracking.gdns").new();
-		ovr_guardian_system = load("res://addons/godot_ovrmobile/OvrGuardianSystem.gdns").new();
-		playerMe.ovr_guardian_system = ovr_guardian_system
-		call_deferred("ovrconfig")
-		ovr_init_config.set_render_target_size_multiplier(1)
-		if Tglobal.arvrinterface.initialize():
-			get_viewport().arvr = true
-			Engine.target_fps = 72
-			Engine.iterations_per_second = 72
-			print("  Success initializing Quest Interface.")
-		else:
-			Tglobal.arvrinterface = null
-		playerMe.playerplatform = "Quest"
 
 	elif OS.has_feature("Quest"):
 		if not checkloadinterface("OpenXR"):
@@ -149,6 +131,7 @@ func _ready():
 		#if enable_passthrough and _openxr_is_passthrough_supported():
 		#	enable_passthrough = _openxr_start_passthrough()
 		get_viewport().arvr = true
+		$PlanViewSystem.slowviewportframerateenabled = true
 		playerMe.playerplatform = "Quest"
 
 	elif OS.has_feature("Android"):

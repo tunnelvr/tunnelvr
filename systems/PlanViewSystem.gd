@@ -659,10 +659,11 @@ func updateplanviewentitysizes():
 
 var slowviewportframeratecountdown = 1
 var slowviewupdatecentrelinesizeupdaterate = 1.5
+var slowviewportframerateenabled = false
 var prevcamerasizeforupdateplanviewentitysizes = 0
 var lastoptionaltxcdata = { }
 func _process(delta):
-	if Tglobal.arvrinterfacename == "OVRMobile" and visible:
+	if slowviewportframerateenabled and visible:
 		slowviewportframeratecountdown -= delta
 		if slowviewportframeratecountdown < 0:
 			slowviewportframeratecountdown = 1
