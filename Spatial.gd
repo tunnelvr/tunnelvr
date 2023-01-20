@@ -56,8 +56,6 @@ export var enablevr: = true
 export var forcephoneoverlay: = false
 export var usewebsockets: = false
 
-var ovr_init_config = null
-var ovr_performance = null
 var ovr_hand_tracking = null
 var ovr_guardian_system = null
 
@@ -85,10 +83,6 @@ func setnetworkidname(player, networkID):
 	player.networkID = networkID
 	player.set_network_master(networkID)
 	player.set_name("NetworkedPlayer"+String(networkID))
-	
-func ovrconfig():
-	ovr_performance.set_clock_levels(1, 1)
-	ovr_performance.set_extra_latency_mode(1)
 	
 	
 func _ready():
@@ -208,10 +202,10 @@ func _ready():
 	Tglobal.VRoperating = (Tglobal.arvrinterfacename != "none")
 	if Tglobal.VRoperating:
 		#$BodyObjects/Locomotion_WalkInPlace.initjogdetectionsystem(playerMe.get_node("HeadCam"))
-		if Tglobal.arvrinterfacename == "OVRMobile":
-			playerMe.initquesthandtrackingnow(ovr_hand_tracking)
+		if Tglobal.arvrinterfacename == "OpenXR" and playerMe.playerplatform == "Quest":
+			playerMe.initquesthandtrackingnow()
 			$WorldEnvironment/DirectionalLight.shadow_enabled = false
-			$BodyObjects/PlayerDirections.initquesthandcontrollersignalconnections()
+			#$BodyObjects/PlayerDirections.initquesthandcontrollersignalconnections()
 		else:
 			playerMe.initnormalvrtrackingnow()
 		$BodyObjects/PlayerDirections.initcontrollersignalconnections()

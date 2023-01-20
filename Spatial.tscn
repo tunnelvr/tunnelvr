@@ -1,4 +1,4 @@
-[gd_scene load_steps=373 format=2]
+[gd_scene load_steps=374 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/underground_env.tres" type="Environment" id=2]
@@ -79,6 +79,7 @@
 [ext_resource path="res://lightweighttextures/spikyrocks/spikyrocks.tres" type="Material" id=77]
 [ext_resource path="res://lightweighttextures/spikyrocks/spikyrocks_albedo.png" type="Texture" id=78]
 [ext_resource path="res://systems/WaterLevelSystem.gd" type="Script" id=79]
+[ext_resource path="res://OpenXRallhandsdata.tscn" type="PackedScene" id=80]
 
 [sub_resource type="CubeMesh" id=1]
 size = Vector3( 0.35, 0.01, 0.01 )
@@ -2074,6 +2075,14 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.299, 0 )
 transform = Transform( -1.62921e-07, 0, 1, 0, 1, 0, -1, 0, -1.62921e-07, 0, 0.3, 0 )
 mesh = SubResource( 10 )
 material/0 = SubResource( 11 )
+
+[node name="ARVRController3" type="ARVRController" parent="Players/PlayerMe"]
+controller_id = 3
+
+[node name="ARVRController4" type="ARVRController" parent="Players/PlayerMe"]
+controller_id = 4
+
+[node name="OpenXRallhandsdata" parent="Players/PlayerMe" instance=ExtResource( 80 )]
 
 [node name="BodyObjects" type="Spatial" parent="."]
 

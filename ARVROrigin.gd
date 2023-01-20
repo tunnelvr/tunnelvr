@@ -370,11 +370,23 @@ func initnormalvrtrackingnow():
 	$HandLeft.initnormalvrtracking($HandLeftController)
 	$HandRight.initnormalvrtracking($HandRightController)
 
-func initquesthandtrackingnow(lovr_hand_tracking):
+
+const TRACKING_CONFIDENCE_HIGH = 2
+var ovrhandrightrestdata = null
+var ovrhandleftrestdata = null
+
+func initquesthandtrackingnow():
+	ovrhandrightrestdata = OpenXRtrackedhand_funcs.getovrhandrestdata($HandLeft/left_hand_model)
+	ovrhandleftrestdata = OpenXRtrackedhand_funcs.getovrhandrestdata($HandRight/right_hand_model)
+
 	Tglobal.questhandtracking = true
 	$HeadCam/HeadtorchLight.shadow_enabled = false
 
-	ovr_hand_tracking = lovr_hand_tracking
+	print("FOR NOW INITNORMAL")
+	initnormalvrtrackingnow()
+	return
+	
+	#ovr_hand_tracking = lovr_hand_tracking  TO KILL
 	$HandLeft.initovrhandtracking(ovr_hand_tracking, $HandLeftController)
 	$HandRight.initovrhandtracking(ovr_hand_tracking, $HandRightController)
 	#get_node("/root/Spatial/GuiSystem/GUIPanel3D/Viewport/GUI/Panel/ButtonSwapControllers").disabled = true

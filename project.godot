@@ -29,6 +29,16 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://utilities/DRAWING_TYPE.gd"
 }, {
+"base": "Spatial",
+"class": "OpenXRallhandsdata",
+"language": "GDScript",
+"path": "res://OpenXRallhandsdata.gd"
+}, {
+"base": "Reference",
+"class": "OpenXRtrackedhand_funcs",
+"language": "GDScript",
+"path": "res://OpenXRtrackedhand_funcs.gd"
+}, {
 "base": "Reference",
 "class": "Polynets",
 "language": "GDScript",
@@ -39,6 +49,8 @@ _global_script_class_icons={
 "Centrelinedata": "",
 "CollisionLayer": "",
 "DRAWING_TYPE": "",
+"OpenXRallhandsdata": "",
+"OpenXRtrackedhand_funcs": "",
 "Polynets": ""
 }
 
