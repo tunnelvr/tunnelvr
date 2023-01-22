@@ -2005,6 +2005,18 @@ material/0 = SubResource( 252 )
 [node name="HandLeftController" type="ARVRController" parent="Players/PlayerMe"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.2, 1.5, -0.5 )
 
+[node name="HandRightController" type="ARVRController" parent="Players/PlayerMe"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.2, 1.5, -0.5 )
+controller_id = 2
+
+[node name="ARVRController3" type="ARVRController" parent="Players/PlayerMe"]
+controller_id = 3
+
+[node name="ARVRController4" type="ARVRController" parent="Players/PlayerMe"]
+controller_id = 4
+
+[node name="OpenXRallhandsdata" parent="Players/PlayerMe" instance=ExtResource( 80 )]
+
 [node name="HandLeft" type="Spatial" parent="Players/PlayerMe"]
 script = ExtResource( 43 )
 
@@ -2023,10 +2035,6 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.09, -0.02, 0 )
 visible = false
 mesh = SubResource( 6 )
 material/0 = SubResource( 7 )
-
-[node name="HandRightController" type="ARVRController" parent="Players/PlayerMe"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.2, 1.5, -0.5 )
-controller_id = 2
 
 [node name="HandRight" type="Spatial" parent="Players/PlayerMe"]
 script = ExtResource( 43 )
@@ -2075,14 +2083,6 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.299, 0 )
 transform = Transform( -1.62921e-07, 0, 1, 0, 1, 0, -1, 0, -1.62921e-07, 0, 0.3, 0 )
 mesh = SubResource( 10 )
 material/0 = SubResource( 11 )
-
-[node name="ARVRController3" type="ARVRController" parent="Players/PlayerMe"]
-controller_id = 3
-
-[node name="ARVRController4" type="ARVRController" parent="Players/PlayerMe"]
-controller_id = 4
-
-[node name="OpenXRallhandsdata" parent="Players/PlayerMe" instance=ExtResource( 80 )]
 
 [node name="BodyObjects" type="Spatial" parent="."]
 

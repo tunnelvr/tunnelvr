@@ -259,6 +259,8 @@ var headrotdegreesDown = Vector3(0,0,0)
 enum { HS_INVALID=0, HS_HAND=1, HS_TOUCHCONTROLLER=2 }
 func _process(delta):
 	if Tglobal.questhandtracking:
+		
+		# abolish this section
 		var rightquesthandcontrollername = $HandRightController.get_controller_name()
 		if rightquesthandcontrollername != Drightquesthandcontrollername:
 			print("Controller change: ", rightquesthandcontrollername)
@@ -268,7 +270,8 @@ func _process(delta):
 			print("Controller change: ", leftquesthandcontrollername)
 			Dleftquesthandcontrollername = leftquesthandcontrollername
 
-		if rightquesthandcontrollername == "Oculus Tracked Right Hand":
+		#if rightquesthandcontrollername == "Oculus Tracked Right Hand":
+		if $OpenXRallhandsdata.palm_joint_confidence_R != OpenXRallhandsdata.TRACKING_CONFIDENCE_NOT_APPLICABLE:
 			if $HandRight.handstate == HS_TOUCHCONTROLLER:
 				$HandRight.handstate = HS_INVALID
 			$HandRight.process_ovrhandtracking(delta)
@@ -278,7 +281,8 @@ func _process(delta):
 			$HandRight.process_normalvrtracking(delta)
 			Tglobal.questhandtrackingactive = false
 			
-		if leftquesthandcontrollername == "Oculus Tracked Left Hand":
+		#if leftquesthandcontrollername == "Oculus Tracked Left Hand":
+		if $OpenXRallhandsdata.palm_joint_confidence_L != OpenXRallhandsdata.TRACKING_CONFIDENCE_NOT_APPLICABLE:
 			if $HandLeft.handstate == HS_TOUCHCONTROLLER:
 				$HandLeft.handstate = HS_INVALID
 			$HandLeft.process_ovrhandtracking(delta)
@@ -376,18 +380,13 @@ var ovrhandrightrestdata = null
 var ovrhandleftrestdata = null
 
 func initquesthandtrackingnow():
-	ovrhandrightrestdata = OpenXRtrackedhand_funcs.getovrhandrestdata($HandLeft/left_hand_model)
-	ovrhandleftrestdata = OpenXRtrackedhand_funcs.getovrhandrestdata($HandRight/right_hand_model)
+	ovrhandleftrestdata = OpenXRtrackedhand_funcs.getovrhandrestdata($HandLeft/left_hand_model)
+	ovrhandrightrestdata = OpenXRtrackedhand_funcs.getovrhandrestdata($HandRight/right_hand_model)
 
 	Tglobal.questhandtracking = true
 	$HeadCam/HeadtorchLight.shadow_enabled = false
 
-	print("FOR NOW INITNORMAL")
-	initnormalvrtrackingnow()
-	return
-	
-	#ovr_hand_tracking = lovr_hand_tracking  TO KILL
-	$HandLeft.initovrhandtracking(ovr_hand_tracking, $HandLeftController)
-	$HandRight.initovrhandtracking(ovr_hand_tracking, $HandRightController)
+	$HandLeft.initovrhandtracking($HandLeftController, ovrhandleftrestdata)
+	$HandRight.initovrhandtracking($HandRightController, ovrhandrightrestdata)
 	#get_node("/root/Spatial/GuiSystem/GUIPanel3D/Viewport/GUI/Panel/ButtonSwapControllers").disabled = true
 
