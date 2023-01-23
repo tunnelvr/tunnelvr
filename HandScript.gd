@@ -98,12 +98,15 @@ func _ready():
 	transform = controllerhandtransform
 	handarmature = handmodel.get_child(0)
 	handskeleton = handarmature.get_node("Skeleton")
-	for i in range(0, handskeleton.get_bone_count()):
-		var bone_rest = handskeleton.get_bone_rest(i)
-		#print(i, "++++", var2str(bone_rest))
-		handskeleton.set_bone_pose(i, Transform(bone_rest.basis)); # use the original rest as pose
-		bone_rest.basis = Basis()
-		handskeleton.set_bone_rest(i, bone_rest)
+
+	print("kill bone rest setting to stationary thing")
+#	for i in range(0, handskeleton.get_bone_count()):
+#		var bone_rest = handskeleton.get_bone_rest(i)
+#		#print(i, "++++", var2str(bone_rest))
+#		handskeleton.set_bone_pose(i, Transform(bone_rest.basis)); # use the original rest as pose
+#		bone_rest.basis = Basis()
+#		handskeleton.set_bone_rest(i, bone_rest)
+		
 	meshnode = handskeleton.get_node("l_handMeshNode" if islefthand else "r_handMeshNode")
 	#handmaterial = load("res://shinyhandmesh.material").duplicate()
 	var handmaterials = get_node("/root/Spatial/MaterialSystem/handmaterials")
@@ -298,6 +301,8 @@ func handposeimmediate(boneorientations, dt):
 func initnormalvrtracking(lhandcontroller):
 	handcontroller = lhandcontroller
 
+
+var Dovrhandleftrestdata = null
 func process_ovrhandtracking(delta):
 	handpositionstack.clear()
 	var handconfidence = OpenXRallhandsdata.palm_joint_confidence_L if islefthand else OpenXRallhandsdata.palm_joint_confidence_R
@@ -312,6 +317,14 @@ func process_ovrhandtracking(delta):
 		transform = ovrhandpose["handtransform"] 
 		gripbuttonheld = false # handcontroller.is_button_pressed(BUTTONS.HT_PINCH_MIDDLE_FINGER)
 		triggerbuttonheld = false # handcontroller.is_button_pressed(BUTTONS.HT_PINCH_INDEX_FINGER)
+
+#		if islefthand and Dovrhandleftrestdata:
+#			var Dovrhandpose = OpenXRtrackedhand_funcs.setshapetobonesOVR(joint_transforms, ovrhandLRrestdata)
+#			Dovrhandleftrestdata["ovrhandmodel"].transform = ovrhandpose["handtransform"]
+#			var skel = Dovrhandleftrestdata["skel"]
+#			for i in range(23):
+#				skel.set_bone_pose(i, ovrhandpose[i])
+
 			
 	else:
 		handstate == HS_INVALID
@@ -321,6 +334,9 @@ func process_ovrhandtracking(delta):
 	#pointervalid = (handstate == HS_HAND) and ovr_hand_tracking.is_pointer_pose_valid(controller_id)
 	#if pointervalid:
 	#	pointerposearvrorigin = ovr_hand_tracking.get_pointer_pose(controller_id)
+
+
+
 		
 func process_normalvrtracking(delta):
 	joypos = Vector2(handcontroller.get_joystick_axis(0), handcontroller.get_joystick_axis(1))

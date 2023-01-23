@@ -296,13 +296,13 @@ func _process(delta):
 			var joint_transforms = $OpenXRallhandsdata.joint_transforms_L
 			if $OpenXRallhandsdata.palm_joint_confidence_L == TRACKING_CONFIDENCE_HIGH: 
 				var ovrhandpose = OpenXRtrackedhand_funcs.setshapetobonesOVR(joint_transforms, Dovrhandleftrestdata)
-				ovr_LR_hand_model.transform = ovrhandpose["handtransform"]
+				Dovrhandleftrestdata["ovrhandmodel"].transform = ovrhandpose["handtransform"]
 				var skel = Dovrhandleftrestdata["skel"]
 				for i in range(23):
 					skel.set_bone_pose(i, ovrhandpose[i])
-				ovr_LR_hand_model.visible = true
+				Dovrhandleftrestdata["ovrhandmodel"].visible = true
 			else:
-				ovr_LR_hand_model.visible = false
+				Dovrhandleftrestdata["ovrhandmodel"].visible = false
 
 
 
@@ -401,11 +401,21 @@ func initquesthandtrackingnow():
 	ovrhandrightrestdata = OpenXRtrackedhand_funcs.getovrhandrestdata($HandRight/right_hand_model)
 	Dovrhandleftrestdata = OpenXRtrackedhand_funcs.getovrhandrestdata($left_hand_model_container/left_hand_model)
 
+	for x in ["posindex1", "posring1", "wristtransinverse", "skeltrans"]:
+		print(x)
+		print("  ", ovrhandleftrestdata[x])
+		print("  ", Dovrhandleftrestdata[x])
+	for i in range(23):
+		print(i)
+		print("  ", ovrhandleftrestdata[i])
+		print("  ", Dovrhandleftrestdata[i])
+		#Dovrhandleftrestdata[i] = ovrhandleftrestdata[i]
 
 	Tglobal.questhandtracking = true
 	$HeadCam/HeadtorchLight.shadow_enabled = false
 
 	$HandLeft.initovrhandtracking($HandLeftController, ovrhandleftrestdata)
+	$HandLeft.Dovrhandleftrestdata = Dovrhandleftrestdata
 	$HandRight.initovrhandtracking($HandRightController, ovrhandrightrestdata)
 	#get_node("/root/Spatial/GuiSystem/GUIPanel3D/Viewport/GUI/Panel/ButtonSwapControllers").disabled = true
 
