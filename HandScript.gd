@@ -99,13 +99,12 @@ func _ready():
 	handarmature = handmodel.get_child(0)
 	handskeleton = handarmature.get_node("Skeleton")
 
-	print("kill bone rest setting to stationary thing")
-#	for i in range(0, handskeleton.get_bone_count()):
-#		var bone_rest = handskeleton.get_bone_rest(i)
-#		#print(i, "++++", var2str(bone_rest))
-#		handskeleton.set_bone_pose(i, Transform(bone_rest.basis)); # use the original rest as pose
-#		bone_rest.basis = Basis()
-#		handskeleton.set_bone_rest(i, bone_rest)
+	print("reset the hand bone rests (for the original OVR functioning) bwhenrestisreset")
+	for i in range(0, handskeleton.get_bone_count()):
+		var bone_rest = handskeleton.get_bone_rest(i)
+		handskeleton.set_bone_pose(i, Transform(bone_rest.basis)); # use the original rest as pose
+		bone_rest.basis = Basis()
+		handskeleton.set_bone_rest(i, bone_rest)
 		
 	meshnode = handskeleton.get_node("l_handMeshNode" if islefthand else "r_handMeshNode")
 	#handmaterial = load("res://shinyhandmesh.material").duplicate()
@@ -302,7 +301,8 @@ func initnormalvrtracking(lhandcontroller):
 	handcontroller = lhandcontroller
 
 
-var Dovrhandleftrestdata = null
+var Dhandconfidence = -1
+
 func process_ovrhandtracking(delta):
 	handpositionstack.clear()
 	var handconfidence = OpenXRallhandsdata.palm_joint_confidence_L if islefthand else OpenXRallhandsdata.palm_joint_confidence_R
@@ -310,21 +310,19 @@ func process_ovrhandtracking(delta):
 	if handconfidence == OpenXRallhandsdata.TRACKING_CONFIDENCE_HIGH:
 		var ovrhandpose = OpenXRtrackedhand_funcs.setshapetobonesOVR(joint_transforms, ovrhandLRrestdata)
 		for i in range(hand_bone_mappings.size()):
-			if hand_bone_mappings[i] != 23:
-				hand_boneorientations[i] = ovrhandpose[hand_bone_mappings[i]].basis.get_rotation_quat()
+			var ib = hand_bone_mappings[i]
+			if ib != 23:
+				hand_boneorientations[i] = (ovrhandLRrestdata[ib].basis*ovrhandpose[ib].basis).get_rotation_quat()
 
 		handstate = HS_HAND
 		transform = ovrhandpose["handtransform"] 
 		gripbuttonheld = false # handcontroller.is_button_pressed(BUTTONS.HT_PINCH_MIDDLE_FINGER)
 		triggerbuttonheld = false # handcontroller.is_button_pressed(BUTTONS.HT_PINCH_INDEX_FINGER)
 
-#		if islefthand and Dovrhandleftrestdata:
-#			var Dovrhandpose = OpenXRtrackedhand_funcs.setshapetobonesOVR(joint_transforms, ovrhandLRrestdata)
-#			Dovrhandleftrestdata["ovrhandmodel"].transform = ovrhandpose["handtransform"]
-#			var skel = Dovrhandleftrestdata["skel"]
-#			for i in range(23):
-#				skel.set_bone_pose(i, ovrhandpose[i])
-
+		if islefthand:
+			if Dhandconfidence != handconfidence:
+				Dhandconfidence = handconfidence
+				print(" Change LH confidence to ", Dhandconfidence)
 			
 	else:
 		handstate == HS_INVALID

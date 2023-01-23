@@ -242,6 +242,10 @@ func skel_backtoOXRjointtransforms(joint_transforms, skel):
 
 var Dt = 0
 
+var Dpalm_joint_confidence_L = -1
+var Dpointer_pose_confidence_L = -1
+var Dcontroller_pose_confidence_L = -1
+
 func _physics_process(delta):
 	if specialist_openxr_gdns_script_loaded:
 		palm_joint_confidence_L = skel_backtoOXRjointtransforms(joint_transforms_L, $LeftHandSkelPose/LeftHandBlankSkeleton) \
@@ -257,6 +261,14 @@ func _physics_process(delta):
 	controller_pose_transform_L = arvrcontrollerleft.transform
 	controller_pose_transform_R = arvrcontrollerright.transform
 	headcam_pose = arvrheadcam.transform
+
+	if Dpalm_joint_confidence_L != palm_joint_confidence_L or \
+			Dpointer_pose_confidence_L != pointer_pose_confidence_L or \
+			Dcontroller_pose_confidence_L != controller_pose_confidence_L:
+		Dpalm_joint_confidence_L = palm_joint_confidence_L
+		Dpointer_pose_confidence_L = pointer_pose_confidence_L
+		Dcontroller_pose_confidence_L = controller_pose_confidence_L
+		print("  CCCLEFT H:", Dpalm_joint_confidence_L, " P:", Dpointer_pose_confidence_L, " C:", Dcontroller_pose_confidence_L)
 
 	triggerpinchedjoyvalue_L = (arvrcontroller3.get_joystick_axis(JOY_AXIS_THUMB_INDEX_PINCH)+1)/2 if arvrcontroller3.get_joystick_id() != -1 else arvrcontrollerleft.get_joystick_axis(JOY_AXIS_TRIGGER_BUTTON)
 	triggerpinchedjoyvalue_R = (arvrcontroller4.get_joystick_axis(JOY_AXIS_THUMB_INDEX_PINCH)+1)/2 if arvrcontroller4.get_joystick_id() != -1 else arvrcontrollerright.get_joystick_axis(JOY_AXIS_TRIGGER_BUTTON)

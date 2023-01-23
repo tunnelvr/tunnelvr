@@ -39,12 +39,15 @@ static func veclengstretchrat(vecB, vecT):
 	var vecldiff = vecTleng - vecBleng
 	return vecldiff/vecBleng
 
-static func getovrhandrestdata(ovrhandmodel):
+static func getovrhandrestdata(ovrhandmodel, bwhenrestisreset):
 	var ovrhanddata = { "ovrhandmodel":ovrhandmodel }
 	var skel = ovrhandmodel.get_node("ArmatureRight/Skeleton") if ovrhandmodel.has_node("ArmatureRight") else ovrhandmodel.get_node("ArmatureLeft/Skeleton")	
 	ovrhanddata["skel"] = skel
 	for i in range(24):
-		ovrhanddata[i] = skel.get_bone_rest(i)
+		if bwhenrestisreset:
+			ovrhanddata[i] = Transform(skel.get_bone_pose(i).basis, skel.get_bone_rest(i).origin)
+		else:
+			ovrhanddata[i] = skel.get_bone_rest(i)
 		
 	var hminverse = ovrhandmodel.global_transform.basis.inverse()
 	var skelgtrans = skel.global_transform
