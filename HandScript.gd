@@ -7,8 +7,6 @@ var handcontroller = null
 var controller_id = 0
 var OpenXRallhandsdata = null
 
-
-
 var controllermodel = null
 var controllermodel_trigger = null
 var controllermodel_grip = null
@@ -20,7 +18,7 @@ var handskeleton = null
 var meshnode = null
 var handmaterial = null
 var handmaterial_orgtransparency = false
-var handmaterial_orgtranslucency = 1
+var handmaterial_orgtranslucency = 0.5
 
 var joypos = Vector2(0, 0)
 
@@ -314,6 +312,7 @@ func process_ovrhandtracking(delta):
 		transform = ovrhandpose["handtransform"] 
 		gripbuttonheld = false # handcontroller.is_button_pressed(BUTTONS.HT_PINCH_MIDDLE_FINGER)
 		triggerbuttonheld = false # handcontroller.is_button_pressed(BUTTONS.HT_PINCH_INDEX_FINGER)
+			
 	else:
 		handstate == HS_INVALID
 	#indexfingerpinchbutton.get_node("MeshInstance").get_surface_material(0).emission_energy = 1 if triggerbuttonheld else (handcontroller.get_joystick_axis(0)+1)/3

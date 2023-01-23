@@ -1,4 +1,4 @@
-[gd_scene load_steps=374 format=2]
+[gd_scene load_steps=375 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/underground_env.tres" type="Environment" id=2]
@@ -80,6 +80,7 @@
 [ext_resource path="res://lightweighttextures/spikyrocks/spikyrocks_albedo.png" type="Texture" id=78]
 [ext_resource path="res://systems/WaterLevelSystem.gd" type="Script" id=79]
 [ext_resource path="res://OpenXRallhandsdata.tscn" type="PackedScene" id=80]
+[ext_resource path="res://addons/godot-openxr/scenes/left_hand_nodes.tscn" type="PackedScene" id=81]
 
 [sub_resource type="CubeMesh" id=1]
 size = Vector3( 0.35, 0.01, 0.01 )
@@ -1753,6 +1754,7 @@ radius = 0.1
 mid_height = 0.5
 
 [sub_resource type="SpatialMaterial" id=202]
+flags_transparent = true
 albedo_color = Color( 0.980392, 0.47451, 0.435294, 1 )
 metallic = 0.14
 roughness = 0.33
@@ -2083,6 +2085,54 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.299, 0 )
 transform = Transform( -1.62921e-07, 0, 1, 0, 1, 0, -1, 0, -1.62921e-07, 0, 0.3, 0 )
 mesh = SubResource( 10 )
 material/0 = SubResource( 11 )
+
+[node name="Left_hand" parent="Players/PlayerMe" instance=ExtResource( 81 )]
+
+[node name="left_hand_model_container" type="Spatial" parent="Players/PlayerMe"]
+
+[node name="left_hand_model" parent="Players/PlayerMe/left_hand_model_container" instance=ExtResource( 72 )]
+
+[node name="Skeleton" parent="Players/PlayerMe/left_hand_model_container/left_hand_model/ArmatureLeft" index="0"]
+bones/0/bound_children = [ NodePath("BoneAttachment11") ]
+bones/2/bound_children = [ NodePath("BoneAttachment") ]
+bones/6/bound_children = [ NodePath("BoneAttachment6") ]
+bones/7/bound_children = [ NodePath("BoneAttachment5") ]
+bones/8/bound_children = [ NodePath("BoneAttachment2"), NodePath("BoneAttachment3"), NodePath("BoneAttachment4") ]
+bones/11/bound_children = [ NodePath("BoneAttachment10") ]
+bones/12/bound_children = [ NodePath("BoneAttachment7"), NodePath("BoneAttachment8"), NodePath("BoneAttachment9") ]
+
+[node name="BoneAttachment" parent="Players/PlayerMe/left_hand_model_container/left_hand_model/ArmatureLeft/Skeleton" index="0"]
+transform = Transform( 0.715415, 0.480301, 0.507437, -0.520631, 0.850801, -0.0712855, -0.465966, -0.213189, 0.858735, 3.59584, -2.80285, -1.91577 )
+
+[node name="BoneAttachment2" parent="Players/PlayerMe/left_hand_model_container/left_hand_model/ArmatureLeft/Skeleton" index="1"]
+transform = Transform( 0.992608, 0.0543436, -0.108515, 0.109344, -0.0125266, 0.993925, 0.0526541, -0.998444, -0.0183762, 15.792, -2.06916, -1.2769 )
+
+[node name="BoneAttachment3" parent="Players/PlayerMe/left_hand_model_container/left_hand_model/ArmatureLeft/Skeleton" index="2"]
+transform = Transform( 0.992608, 0.0543436, -0.108515, 0.109344, -0.0125266, 0.993925, 0.0526541, -0.998444, -0.0183762, 15.792, -2.06916, -1.2769 )
+
+[node name="BoneAttachment4" parent="Players/PlayerMe/left_hand_model_container/left_hand_model/ArmatureLeft/Skeleton" index="3"]
+transform = Transform( 0.992608, 0.0543436, -0.108515, 0.109344, -0.0125266, 0.993925, 0.0526541, -0.998444, -0.0183762, 15.792, -2.06916, -1.2769 )
+
+[node name="BoneAttachment5" parent="Players/PlayerMe/left_hand_model_container/left_hand_model/ArmatureLeft/Skeleton" index="4"]
+transform = Transform( 0.994319, -0.0918412, -0.0538007, 0.0547372, 0.00770647, 0.998471, -0.0912861, -0.995744, 0.0126898, 13.3754, -2.20219, -1.05505 )
+
+[node name="BoneAttachment6" parent="Players/PlayerMe/left_hand_model_container/left_hand_model/ArmatureLeft/Skeleton" index="5"]
+transform = Transform( 0.995542, -0.0875827, -0.0349953, 0.0403074, 0.0596366, 0.997406, -0.0852684, -0.994371, 0.062901, 9.59962, -2.35507, -0.731646 )
+
+[node name="BoneAttachment7" parent="Players/PlayerMe/left_hand_model_container/left_hand_model/ArmatureLeft/Skeleton" index="6"]
+transform = Transform( 0.987593, 0.0968454, -0.123618, 0.132458, -0.0908864, 0.987013, 0.0843523, -0.991141, -0.102587, 16.5356, 0.568593, -0.979278 )
+
+[node name="BoneAttachment8" parent="Players/PlayerMe/left_hand_model_container/left_hand_model/ArmatureLeft/Skeleton" index="7"]
+transform = Transform( 0.987593, 0.0968454, -0.123618, 0.132458, -0.0908864, 0.987013, 0.0843523, -0.991141, -0.102587, 16.5356, 0.568593, -0.979278 )
+
+[node name="BoneAttachment9" parent="Players/PlayerMe/left_hand_model_container/left_hand_model/ArmatureLeft/Skeleton" index="8"]
+transform = Transform( 0.987593, 0.0968454, -0.123618, 0.132458, -0.0908864, 0.987013, 0.0843523, -0.991141, -0.102587, 16.5356, 0.568593, -0.979278 )
+
+[node name="BoneAttachment10" parent="Players/PlayerMe/left_hand_model_container/left_hand_model/ArmatureLeft/Skeleton" index="9"]
+transform = Transform( 0.988767, -0.0960949, -0.114484, 0.110551, -0.0453154, 0.992837, -0.100594, -0.99434, -0.034183, 13.8116, 0.264029, -0.702145 )
+
+[node name="BoneAttachment11" parent="Players/PlayerMe/left_hand_model_container/left_hand_model/ArmatureLeft/Skeleton" index="10"]
+transform = Transform( 1, 0, 0, 0, 0, 1, 0, -1, 0, 0, 0, 0 )
 
 [node name="BodyObjects" type="Spatial" parent="."]
 
@@ -4556,3 +4606,5 @@ visible = false
 [node name="Camera2D" type="Camera2D" parent="Lidarmodel"]
 
 [connection signal="timeout" from="MQTTExperiment/MQTT/Timer" to="MQTTExperiment/MQTT" method="ping"]
+
+[editable path="Players/PlayerMe/left_hand_model_container/left_hand_model"]

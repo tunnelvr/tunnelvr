@@ -290,6 +290,22 @@ func _process(delta):
 			$HandLeft.handstate = HS_TOUCHCONTROLLER
 			$HandLeft.process_normalvrtracking(delta)
 
+
+		if $OpenXRallhandsdata.palm_joint_confidence_L != -1:
+			var ovr_LR_hand_model = $left_hand_model_container/left_hand_model
+			var joint_transforms = $OpenXRallhandsdata.joint_transforms_L
+			if $OpenXRallhandsdata.palm_joint_confidence_L == TRACKING_CONFIDENCE_HIGH: 
+				var ovrhandpose = OpenXRtrackedhand_funcs.setshapetobonesOVR(joint_transforms, Dovrhandleftrestdata)
+				ovr_LR_hand_model.transform = ovrhandpose["handtransform"]
+				var skel = Dovrhandleftrestdata["skel"]
+				for i in range(23):
+					skel.set_bone_pose(i, ovrhandpose[i])
+				ovr_LR_hand_model.visible = true
+			else:
+				ovr_LR_hand_model.visible = false
+
+
+
 	elif Tglobal.VRoperating:
 		if $HandRight.handstate == HS_INVALID:
 			$HandRight.handstate = HS_TOUCHCONTROLLER if Tglobal.arvrinterfacename == "Oculus" else HS_HAND
@@ -378,10 +394,13 @@ func initnormalvrtrackingnow():
 const TRACKING_CONFIDENCE_HIGH = 2
 var ovrhandrightrestdata = null
 var ovrhandleftrestdata = null
+var Dovrhandleftrestdata = null
 
 func initquesthandtrackingnow():
 	ovrhandleftrestdata = OpenXRtrackedhand_funcs.getovrhandrestdata($HandLeft/left_hand_model)
 	ovrhandrightrestdata = OpenXRtrackedhand_funcs.getovrhandrestdata($HandRight/right_hand_model)
+	Dovrhandleftrestdata = OpenXRtrackedhand_funcs.getovrhandrestdata($left_hand_model_container/left_hand_model)
+
 
 	Tglobal.questhandtracking = true
 	$HeadCam/HeadtorchLight.shadow_enabled = false

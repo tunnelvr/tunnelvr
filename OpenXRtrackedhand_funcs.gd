@@ -114,7 +114,7 @@ static func setfingerbonesGXT(ib1, tproximal, tintermediate, tdistal, ttip, bone
 
 static func setshapetobonesLowPoly(joint_transforms, bonerest, bright=true):
 	var rotz90 = Transform(Basis(Vector3(0,0,1), deg2rad(90 if bright else -90)))
-
+	
 # trying to find what is required to stop the hand turning inside out 
 #	bright = false
 
