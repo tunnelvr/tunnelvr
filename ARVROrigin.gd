@@ -378,7 +378,7 @@ func initnormalvrtrackingnow():
 	$HandRight.initnormalvrtracking($HandRightController)
 
 
-const TRACKING_CONFIDENCE_HIGH = 2
+
 var ovrhandrightrestdata = null
 var ovrhandleftrestdata = null
 
@@ -389,7 +389,6 @@ func initquesthandtrackingnow():
 	Tglobal.questhandtracking = true
 	$HeadCam/HeadtorchLight.shadow_enabled = false
 
-	$HandLeft.initovrhandtracking($HandLeftController, ovrhandleftrestdata)
-	$HandRight.initovrhandtracking($HandRightController, ovrhandrightrestdata)
-	#get_node("/root/Spatial/GuiSystem/GUIPanel3D/Viewport/GUI/Panel/ButtonSwapControllers").disabled = true
+	$HandLeft.initovrhandtracking($HandLeftController, $ARVRController3, ovrhandleftrestdata)
+	$HandRight.initovrhandtracking($HandRightController, $ARVRController4, ovrhandrightrestdata)
 

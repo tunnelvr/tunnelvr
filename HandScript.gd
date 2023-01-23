@@ -4,6 +4,7 @@ const hand_bone_mappings = [0, 23,  1, 2, 3, 4,  6, 7, 8,  10, 11, 12,  14, 15, 
 var ovrhandLRrestdata = null
 var islefthand = false
 var handcontroller = null
+var handposecontroller = null
 var controller_id = 0
 var OpenXRallhandsdata = null
 
@@ -140,13 +141,14 @@ func addfingerpinchbutton(bname):
 	fingerpinchbutton.get_node("MeshInstance").set_surface_material(0, fingerpinchbutton.get_node("MeshInstance").get_surface_material(0).duplicate())
 	boneattachment.add_child(fingerpinchbutton)
 	fingerpinchbutton.set_name(bname)
-	fingerpinchbutton.visible = false
+	fingerpinchbutton.visible = true
 	return fingerpinchbutton
 	
-func initovrhandtracking(lhandcontroller, lovrhandLRrestdata):
+func initovrhandtracking(lhandcontroller, lhandposecontroller, lovrhandLRrestdata):
 	controllerpointerposetransform = Transform(Basis(Vector3(1,0,0), deg2rad(-65)), Vector3(0,0,0))
 	ovrhandLRrestdata = lovrhandLRrestdata
 	handcontroller = lhandcontroller
+	handposecontroller = lhandposecontroller
 	OpenXRallhandsdata = get_parent().get_node_or_null("OpenXRallhandsdata")
 	controller_id = handcontroller.controller_id
 	var lovrhandscale = 1.0 # ovr_hand_tracking.get_hand_scale(controller_id)
@@ -301,8 +303,6 @@ func initnormalvrtracking(lhandcontroller):
 	handcontroller = lhandcontroller
 
 
-var Dhandconfidence = -1
-
 func process_ovrhandtracking(delta):
 	handpositionstack.clear()
 	var handconfidence = OpenXRallhandsdata.palm_joint_confidence_L if islefthand else OpenXRallhandsdata.palm_joint_confidence_R
@@ -316,23 +316,21 @@ func process_ovrhandtracking(delta):
 
 		handstate = HS_HAND
 		transform = ovrhandpose["handtransform"] 
-		gripbuttonheld = false # handcontroller.is_button_pressed(BUTTONS.HT_PINCH_MIDDLE_FINGER)
-		triggerbuttonheld = false # handcontroller.is_button_pressed(BUTTONS.HT_PINCH_INDEX_FINGER)
+		gripbuttonheld = handposecontroller.is_button_pressed(BUTTONS.HT_PINCH_MIDDLE_FINGER)
+		triggerbuttonheld = handposecontroller.is_button_pressed(BUTTONS.HT_PINCH_INDEX_FINGER)
 
-		if islefthand:
-			if Dhandconfidence != handconfidence:
-				Dhandconfidence = handconfidence
-				print(" Change LH confidence to ", Dhandconfidence)
-			
+		OpenXRallhandsdata.triggerpinchedjoyvalue_L if islefthand else OpenXRallhandsdata.triggerpinchedjoyvalue_R
+
 	else:
+		if handstate != HS_INVALID:
+			print("  *** handstate made invalid...")
 		handstate == HS_INVALID
-	#indexfingerpinchbutton.get_node("MeshInstance").get_surface_material(0).emission_energy = 1 if triggerbuttonheld else (handcontroller.get_joystick_axis(0)+1)/3
-	#middlefingerpinchbutton.get_node("MeshInstance").get_surface_material(0).emission_energy = 1 if gripbuttonheld else (handcontroller.get_joystick_axis(1)+1)/3
+	indexfingerpinchbutton.get_node("MeshInstance").get_surface_material(0).emission_energy = 1 if triggerbuttonheld else (handposecontroller.get_joystick_axis(OpenXRallhandsdata.JOY_AXIS_THUMB_INDEX_PINCH)+1)/3
+	middlefingerpinchbutton.get_node("MeshInstance").get_surface_material(0).emission_energy = 1 if gripbuttonheld else (handposecontroller.get_joystick_axis(OpenXRallhandsdata.JOY_AXIS_THUMB_MIDDLE_PINCH)+1)/3
 	update_handpose(delta)
 	#pointervalid = (handstate == HS_HAND) and ovr_hand_tracking.is_pointer_pose_valid(controller_id)
 	#if pointervalid:
 	#	pointerposearvrorigin = ovr_hand_tracking.get_pointer_pose(controller_id)
-
 
 
 		
