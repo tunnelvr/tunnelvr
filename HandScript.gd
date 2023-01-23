@@ -332,6 +332,7 @@ func process_ovrhandtracking(delta):
 	if pointervalid:
 		pointerposearvrorigin = handposecontroller.transform
 		
+const controllerzdisplacementcorrection = 0.05
 func process_normalvrtracking(delta):
 	joypos = Vector2(handcontroller.get_joystick_axis(0), handcontroller.get_joystick_axis(1))
 	gripbuttonheld = handcontroller.is_button_pressed(BUTTONS.VR_GRIP)
@@ -339,11 +340,12 @@ func process_normalvrtracking(delta):
 	vrbybuttonheld = handcontroller.is_button_pressed(BUTTONS.VR_BUTTON_BY)
 	vrpadbuttonheld = handcontroller.is_button_pressed(BUTTONS.VR_PAD)
 	if handstate == HS_TOUCHCONTROLLER:
-		transform = handcontroller.transform
+		transform = Transform(handcontroller.transform.basis, handcontroller.transform.origin + controllerzdisplacementcorrection*handcontroller.transform.basis.z)
+		pointerposearvrorigin = transform * controllerpointerposetransform
 	else:
 		transform = handcontroller.transform * controllerhandtransform
+		pointerposearvrorigin = handcontroller.transform * controllerpointerposetransform
 	pointervalid = true
-	pointerposearvrorigin = handcontroller.transform * controllerpointerposetransform
 	indexfingerpinchbutton.get_node("MeshInstance").get_surface_material(0).emission_energy = 1 if triggerbuttonheld else 0
 	middlefingerpinchbutton.get_node("MeshInstance").get_surface_material(0).emission_energy = 1 if gripbuttonheld else 0
 	process_handgesturefromcontrol()
