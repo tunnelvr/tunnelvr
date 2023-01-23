@@ -1,4 +1,4 @@
-[gd_scene load_steps=375 format=2]
+[gd_scene load_steps=374 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/underground_env.tres" type="Environment" id=2]
@@ -80,7 +80,6 @@
 [ext_resource path="res://lightweighttextures/spikyrocks/spikyrocks_albedo.png" type="Texture" id=78]
 [ext_resource path="res://systems/WaterLevelSystem.gd" type="Script" id=79]
 [ext_resource path="res://OpenXRallhandsdata.tscn" type="PackedScene" id=80]
-[ext_resource path="res://addons/godot-openxr/scenes/left_hand_nodes.tscn" type="PackedScene" id=81]
 
 [sub_resource type="CubeMesh" id=1]
 size = Vector3( 0.35, 0.01, 0.01 )
@@ -1754,7 +1753,6 @@ radius = 0.1
 mid_height = 0.5
 
 [sub_resource type="SpatialMaterial" id=202]
-flags_transparent = true
 albedo_color = Color( 0.980392, 0.47451, 0.435294, 1 )
 metallic = 0.14
 roughness = 0.33
@@ -2127,8 +2125,6 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.299, 0 )
 transform = Transform( -1.62921e-07, 0, 1, 0, 1, 0, -1, 0, -1.62921e-07, 0, 0.3, 0 )
 mesh = SubResource( 10 )
 material/0 = SubResource( 11 )
-
-[node name="Left_hand" parent="Players/PlayerMe" instance=ExtResource( 81 )]
 
 [node name="BodyObjects" type="Spatial" parent="."]
 

@@ -19,7 +19,7 @@ var handskeleton = null
 var meshnode = null
 var handmaterial = null
 var handmaterial_orgtransparency = false
-var handmaterial_orgtranslucency = 0.5
+var handmaterial_orgtranslucency = 1.0
 
 var joypos = Vector2(0, 0)
 
@@ -324,15 +324,13 @@ func process_ovrhandtracking(delta):
 	else:
 		if handstate != HS_INVALID:
 			print("  *** handstate made invalid...")
-		handstate == HS_INVALID
+		handstate = HS_INVALID
 	indexfingerpinchbutton.get_node("MeshInstance").get_surface_material(0).emission_energy = 1 if triggerbuttonheld else (handposecontroller.get_joystick_axis(OpenXRallhandsdata.JOY_AXIS_THUMB_INDEX_PINCH)+1)/3
 	middlefingerpinchbutton.get_node("MeshInstance").get_surface_material(0).emission_energy = 1 if gripbuttonheld else (handposecontroller.get_joystick_axis(OpenXRallhandsdata.JOY_AXIS_THUMB_MIDDLE_PINCH)+1)/3
 	update_handpose(delta)
-	#pointervalid = (handstate == HS_HAND) and ovr_hand_tracking.is_pointer_pose_valid(controller_id)
-	#if pointervalid:
-	#	pointerposearvrorigin = ovr_hand_tracking.get_pointer_pose(controller_id)
-
-
+	pointervalid = (handstate == HS_HAND) and handposecontroller.get_is_active()
+	if pointervalid:
+		pointerposearvrorigin = handposecontroller.transform
 		
 func process_normalvrtracking(delta):
 	joypos = Vector2(handcontroller.get_joystick_axis(0), handcontroller.get_joystick_axis(1))
