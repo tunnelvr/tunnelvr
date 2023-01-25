@@ -6,7 +6,7 @@ var connectiontoserveractive = false
 var morethanoneplayer = false
 var notisloadingcavechunks = true
 
-var arvrinterfacename = "none"  # OVRMobile, Oculus, OpenVR
+var arvrinterfacename = "none"  # OpenXR, Oculus, OpenVR
 var arvrinterface = null
 var VRoperating = false
 

@@ -56,10 +56,11 @@ export var enablevr: = true
 export var forcephoneoverlay: = false
 export var usewebsockets: = false
 
-var ovr_init_config = null
-var ovr_performance = null
 var ovr_hand_tracking = null
 var ovr_guardian_system = null
+
+var _openxr_configuration
+var _openxr_enabled_extensions : Array
 
 onready var playerMe = $Players/PlayerMe
 onready var mqttsystem = $MQTTExperiment
@@ -83,10 +84,6 @@ func setnetworkidname(player, networkID):
 	player.set_network_master(networkID)
 	player.set_name("NetworkedPlayer"+String(networkID))
 	
-func ovrconfig():
-	ovr_performance.set_clock_levels(1, 1)
-	ovr_performance.set_extra_latency_mode(1)
-	
 	
 func _ready():
 	print("  Available Interfaces are %s: " % str(ARVRServer.get_interfaces()));
@@ -106,23 +103,29 @@ func _ready():
 		playerMe.playerplatform = "HTML5"
 		print("warning: untested HTML5 mode")
 		
+
 	elif OS.has_feature("Quest"):
-		if not checkloadinterface("OVRMobile"):
-			print("Error: Quest device not able to find OVRMobile interface")
-		ovr_init_config = load("res://addons/godot_ovrmobile/OvrInitConfig.gdns").new()
-		ovr_performance = load("res://addons/godot_ovrmobile/OvrPerformance.gdns").new()
-		ovr_hand_tracking = load("res://addons/godot_ovrmobile/OvrHandTracking.gdns").new();
-		ovr_guardian_system = load("res://addons/godot_ovrmobile/OvrGuardianSystem.gdns").new();
-		playerMe.ovr_guardian_system = ovr_guardian_system
-		call_deferred("ovrconfig")
-		ovr_init_config.set_render_target_size_multiplier(1)
-		if Tglobal.arvrinterface.initialize():
-			get_viewport().arvr = true
-			Engine.target_fps = 72
-			Engine.iterations_per_second = 72
-			print("  Success initializing Quest Interface.")
-		else:
-			Tglobal.arvrinterface = null
+		if not checkloadinterface("OpenXR"):
+			push_error("Error: Quest device not able to find OpenXR interface")
+		var openxr_config_res := load("res://addons/godot-openxr/config/OpenXRConfig.gdns")
+		if not openxr_config_res:
+			push_error("OpenXR: Unable to load OpenXRConfig.gdns")
+		_openxr_configuration = openxr_config_res.new()
+		_openxr_configuration.render_target_size_multiplier = 1.0
+
+		if not Tglobal.arvrinterface.interface_is_initialized:
+			print("OpenXR: Initializing interface")
+			if not Tglobal.arvrinterface.initialize():
+				push_error("OpenXR: Failed to initialize")
+		print("OpenXR: System name: ", _openxr_configuration.get_system_name())
+		#ARVRServer.connect("openxr_session_begun", self, "_on_openxr_session_begun")
+		#ARVRServer.connect("openxr_visible_state", self, "_on_openxr_visible_state")
+		#ARVRServer.connect("openxr_focused_state", self, "_on_openxr_focused_state")
+		_openxr_enabled_extensions = _openxr_configuration.get_enabled_extensions()
+		#if enable_passthrough and _openxr_is_passthrough_supported():
+		#	enable_passthrough = _openxr_start_passthrough()
+		get_viewport().arvr = true
+		$PlanViewSystem.slowviewportframerateenabled = true
 		playerMe.playerplatform = "Quest"
 
 	elif OS.has_feature("Android"):
@@ -199,10 +202,10 @@ func _ready():
 	Tglobal.VRoperating = (Tglobal.arvrinterfacename != "none")
 	if Tglobal.VRoperating:
 		#$BodyObjects/Locomotion_WalkInPlace.initjogdetectionsystem(playerMe.get_node("HeadCam"))
-		if Tglobal.arvrinterfacename == "OVRMobile":
-			playerMe.initquesthandtrackingnow(ovr_hand_tracking)
+		if Tglobal.arvrinterfacename == "OpenXR" and playerMe.playerplatform == "Quest":
+			playerMe.initquesthandtrackingnow()
 			$WorldEnvironment/DirectionalLight.shadow_enabled = false
-			$BodyObjects/PlayerDirections.initquesthandcontrollersignalconnections()
+			#$BodyObjects/PlayerDirections.initquesthandcontrollersignalconnections()
 		else:
 			playerMe.initnormalvrtrackingnow()
 		$BodyObjects/PlayerDirections.initcontrollersignalconnections()

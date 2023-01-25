@@ -29,20 +29,15 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://utilities/DRAWING_TYPE.gd"
 }, {
-"base": "OculusTracker",
-"class": "OculusHandTracker",
+"base": "Spatial",
+"class": "OpenXRallhandsdata",
 "language": "GDScript",
-"path": "res://addons/godot_ovrmobile/example_scenes/oculus_hand_tracker.gd"
+"path": "res://OpenXRallhandsdata.gd"
 }, {
-"base": "OculusTracker",
-"class": "OculusTouchController",
+"base": "Reference",
+"class": "OpenXRtrackedhand_funcs",
 "language": "GDScript",
-"path": "res://addons/godot_ovrmobile/example_scenes/oculus_touch_controller.gd"
-}, {
-"base": "ARVRController",
-"class": "OculusTracker",
-"language": "GDScript",
-"path": "res://addons/godot_ovrmobile/example_scenes/oculus_tracker.gd"
+"path": "res://OpenXRtrackedhand_funcs.gd"
 }, {
 "base": "Reference",
 "class": "Polynets",
@@ -54,15 +49,14 @@ _global_script_class_icons={
 "Centrelinedata": "",
 "CollisionLayer": "",
 "DRAWING_TYPE": "",
-"OculusHandTracker": "",
-"OculusTouchController": "",
-"OculusTracker": "",
+"OpenXRallhandsdata": "",
+"OpenXRtrackedhand_funcs": "",
 "Polynets": ""
 }
 
 [application]
 
-config/name="tunnelvr_v0.7"
+config/name="tunnelvr_v0.8"
 run/main_scene="res://Spatial.tscn"
 boot_splash/image="res://screenshot.png"
 config/icon="res://icon.png"
@@ -83,7 +77,8 @@ gdscript/warnings/integer_division=false
 
 [gdnative]
 
-singletons=[ "res://addons/godot_ovrmobile/godot_ovrmobile.gdnlib" ]
+singletons=[ "res://addons/godot-openxr/config/godot_openxr.gdnlib" ]
+singletons_disabled=[  ]
 
 [input]
 

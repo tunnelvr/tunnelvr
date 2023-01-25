@@ -1,10 +1,12 @@
 extends Spatial
 
 const hand_bone_mappings = [0, 23,  1, 2, 3, 4,  6, 7, 8,  10, 11, 12,  14, 15, 16, 18, 19, 20, 21];
-var ovr_hand_tracking = null
+var ovrhandLRrestdata = null
 var islefthand = false
 var handcontroller = null
+var handposecontroller = null
 var controller_id = 0
+var OpenXRallhandsdata = null
 
 var controllermodel = null
 var controllermodel_trigger = null
@@ -17,7 +19,7 @@ var handskeleton = null
 var meshnode = null
 var handmaterial = null
 var handmaterial_orgtransparency = false
-var handmaterial_orgtranslucency = 1
+var handmaterial_orgtranslucency = 1.0
 
 var joypos = Vector2(0, 0)
 
@@ -92,18 +94,19 @@ func _ready():
 	controllergripmaterial.albedo_color = Color(0.5, 1.0, 0.5)
 	controllermodel_grip.mesh.surface_set_material(0, controllergripmaterial)
 	
-	
 	handmodel = get_node("left_hand_model" if islefthand else "right_hand_model")
 	setcontrollerhandtransform(1.0)
 	transform = controllerhandtransform
 	handarmature = handmodel.get_child(0)
 	handskeleton = handarmature.get_node("Skeleton")
+
+	print("reset the hand bone rests (for the original OVR functioning) bwhenrestisreset")
 	for i in range(0, handskeleton.get_bone_count()):
 		var bone_rest = handskeleton.get_bone_rest(i)
-		#print(i, "++++", var2str(bone_rest))
 		handskeleton.set_bone_pose(i, Transform(bone_rest.basis)); # use the original rest as pose
 		bone_rest.basis = Basis()
 		handskeleton.set_bone_rest(i, bone_rest)
+		
 	meshnode = handskeleton.get_node("l_handMeshNode" if islefthand else "r_handMeshNode")
 	#handmaterial = load("res://shinyhandmesh.material").duplicate()
 	var handmaterials = get_node("/root/Spatial/MaterialSystem/handmaterials")
@@ -138,15 +141,17 @@ func addfingerpinchbutton(bname):
 	fingerpinchbutton.get_node("MeshInstance").set_surface_material(0, fingerpinchbutton.get_node("MeshInstance").get_surface_material(0).duplicate())
 	boneattachment.add_child(fingerpinchbutton)
 	fingerpinchbutton.set_name(bname)
-	fingerpinchbutton.visible = false
+	fingerpinchbutton.visible = true
 	return fingerpinchbutton
 	
-func initovrhandtracking(lovr_hand_tracking, lhandcontroller):
+func initovrhandtracking(lhandcontroller, lhandposecontroller, lovrhandLRrestdata):
 	controllerpointerposetransform = Transform(Basis(Vector3(1,0,0), deg2rad(-65)), Vector3(0,0,0))
-	ovr_hand_tracking = lovr_hand_tracking
+	ovrhandLRrestdata = lovrhandLRrestdata
 	handcontroller = lhandcontroller
+	handposecontroller = lhandposecontroller
+	OpenXRallhandsdata = get_parent().get_node_or_null("OpenXRallhandsdata")
 	controller_id = handcontroller.controller_id
-	var lovrhandscale = ovr_hand_tracking.get_hand_scale(controller_id)
+	var lovrhandscale = 1.0 # ovr_hand_tracking.get_hand_scale(controller_id)
 	if lovrhandscale > 0:
 		ovrhandscale = lovrhandscale
 	handmodel.scale = Vector3(ovrhandscale, ovrhandscale, ovrhandscale)
@@ -158,6 +163,7 @@ func update_handpose(delta):
 	if handstate == HS_HAND:
 		for i in range(hand_bone_mappings.size()):
 			handskeleton.set_bone_pose(hand_bone_mappings[i], Transform(hand_boneorientations[i]))
+
 		if internalhandray != null:
 			var tipfinger = boneattachmentmiddletip.global_transform*Vector3(-1, 0, 0) # factored up with handmodelscale=0.01
 			var wristpos = global_transform
@@ -296,24 +302,37 @@ func handposeimmediate(boneorientations, dt):
 func initnormalvrtracking(lhandcontroller):
 	handcontroller = lhandcontroller
 
+
 func process_ovrhandtracking(delta):
 	handpositionstack.clear()
-	handconfidence = ovr_hand_tracking.get_hand_pose(controller_id, hand_boneorientations)
-	for i in range(len(hand_boneorientations)):
-		hand_boneorientations[i] = hand_boneorientations[i].normalized()  # really?
-		
-	handstate = HS_HAND if (handconfidence != null and handconfidence == 1) else HS_INVALID
-	if handstate == HS_HAND:
-		transform = handcontroller.transform 
-		gripbuttonheld = handcontroller.is_button_pressed(BUTTONS.HT_PINCH_MIDDLE_FINGER)
-		triggerbuttonheld = handcontroller.is_button_pressed(BUTTONS.HT_PINCH_INDEX_FINGER)
-	indexfingerpinchbutton.get_node("MeshInstance").get_surface_material(0).emission_energy = 1 if triggerbuttonheld else (handcontroller.get_joystick_axis(0)+1)/3
-	middlefingerpinchbutton.get_node("MeshInstance").get_surface_material(0).emission_energy = 1 if gripbuttonheld else (handcontroller.get_joystick_axis(1)+1)/3
+	var handconfidence = OpenXRallhandsdata.palm_joint_confidence_L if islefthand else OpenXRallhandsdata.palm_joint_confidence_R
+	var joint_transforms = OpenXRallhandsdata.joint_transforms_L if islefthand else OpenXRallhandsdata.joint_transforms_R
+	if handconfidence == OpenXRallhandsdata.TRACKING_CONFIDENCE_HIGH:
+		var ovrhandpose = OpenXRtrackedhand_funcs.setshapetobonesOVR(joint_transforms, ovrhandLRrestdata)
+		for i in range(hand_bone_mappings.size()):
+			var ib = hand_bone_mappings[i]
+			if ib != 23:
+				hand_boneorientations[i] = (ovrhandLRrestdata[ib].basis*ovrhandpose[ib].basis).get_rotation_quat()
+
+		handstate = HS_HAND
+		transform = ovrhandpose["handtransform"] 
+		gripbuttonheld = handposecontroller.is_button_pressed(BUTTONS.HT_PINCH_MIDDLE_FINGER)
+		triggerbuttonheld = handposecontroller.is_button_pressed(BUTTONS.HT_PINCH_INDEX_FINGER)
+
+		OpenXRallhandsdata.triggerpinchedjoyvalue_L if islefthand else OpenXRallhandsdata.triggerpinchedjoyvalue_R
+
+	else:
+		if handstate != HS_INVALID:
+			print("  *** handstate made invalid...")
+		handstate = HS_INVALID
+	indexfingerpinchbutton.get_node("MeshInstance").get_surface_material(0).emission_energy = 1 if triggerbuttonheld else (handposecontroller.get_joystick_axis(OpenXRallhandsdata.JOY_AXIS_THUMB_INDEX_PINCH)+1)/3
+	middlefingerpinchbutton.get_node("MeshInstance").get_surface_material(0).emission_energy = 1 if gripbuttonheld else (handposecontroller.get_joystick_axis(OpenXRallhandsdata.JOY_AXIS_THUMB_MIDDLE_PINCH)+1)/3
 	update_handpose(delta)
-	pointervalid = (handstate == HS_HAND) and ovr_hand_tracking.is_pointer_pose_valid(controller_id)
+	pointervalid = (handstate == HS_HAND) and handposecontroller.get_is_active()
 	if pointervalid:
-		pointerposearvrorigin = ovr_hand_tracking.get_pointer_pose(controller_id)
+		pointerposearvrorigin = handposecontroller.transform
 		
+const controllerzdisplacementcorrection = 0.05
 func process_normalvrtracking(delta):
 	joypos = Vector2(handcontroller.get_joystick_axis(0), handcontroller.get_joystick_axis(1))
 	gripbuttonheld = handcontroller.is_button_pressed(BUTTONS.VR_GRIP)
@@ -321,11 +340,12 @@ func process_normalvrtracking(delta):
 	vrbybuttonheld = handcontroller.is_button_pressed(BUTTONS.VR_BUTTON_BY)
 	vrpadbuttonheld = handcontroller.is_button_pressed(BUTTONS.VR_PAD)
 	if handstate == HS_TOUCHCONTROLLER:
-		transform = handcontroller.transform
+		transform = Transform(handcontroller.transform.basis, handcontroller.transform.origin + controllerzdisplacementcorrection*handcontroller.transform.basis.z)
+		pointerposearvrorigin = transform * controllerpointerposetransform
 	else:
 		transform = handcontroller.transform * controllerhandtransform
+		pointerposearvrorigin = handcontroller.transform * controllerpointerposetransform
 	pointervalid = true
-	pointerposearvrorigin = handcontroller.transform * controllerpointerposetransform
 	indexfingerpinchbutton.get_node("MeshInstance").get_surface_material(0).emission_energy = 1 if triggerbuttonheld else 0
 	middlefingerpinchbutton.get_node("MeshInstance").get_surface_material(0).emission_energy = 1 if gripbuttonheld else 0
 	process_handgesturefromcontrol()

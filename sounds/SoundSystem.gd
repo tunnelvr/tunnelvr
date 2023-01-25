@@ -71,10 +71,11 @@ func _process(delta):
 		set_process(false)
 
 func shortvibrate(leftright, duration, intensity):
-	if leftright:
-		HandLeftController.rumble = intensity
-		rumblecountdownleft = duration
-	else:
-		HandRightController.rumble = intensity
-		rumblecountdownright = duration
-	set_process(true)
+	if not Tglobal.questhandtrackingactive:
+		if leftright:
+			HandLeftController.rumble = intensity
+			rumblecountdownleft = duration
+		else:
+			HandRightController.rumble = intensity
+			rumblecountdownright = duration
+		set_process(true)

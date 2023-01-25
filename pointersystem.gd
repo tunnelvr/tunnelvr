@@ -10,6 +10,7 @@ onready var playerMe = get_parent()
 onready var headcam = playerMe.get_node('HeadCam')
 onready var handright = playerMe.get_node("HandRight")
 onready var handrightcontroller = playerMe.get_node("HandRightController")
+onready var handrighthandtrackingposecontroller = playerMe.get_node("ARVRController4")
 onready var guipanel3d = get_node("/root/Spatial/GuiSystem/GUIPanel3D")
 onready var keyboardpanel = get_node("/root/Spatial/GuiSystem/KeyboardPanel")
 
@@ -238,6 +239,8 @@ func setactivetargetwall(newactivetargetwall):
 func _ready():
 	handrightcontroller.connect("button_pressed", self, "_on_button_pressed")
 	handrightcontroller.connect("button_release", self, "_on_button_release")
+	handrighthandtrackingposecontroller.connect("button_pressed", self, "_on_button_pressed")
+	handrighthandtrackingposecontroller.connect("button_release", self, "_on_button_release")
 	$CubeCornerRayCast.set_as_toplevel(true)
 
 func targettype(target):
@@ -314,7 +317,7 @@ func set_handflickmotiongestureposition(lhandflickmotiongestureposition):
 			
 func panelsendmousemotiontopointertarget():
 	var guipanel = pointertarget
-	var controller_trigger = (handrightcontroller.is_button_pressed(BUTTONS.HT_PINCH_INDEX_FINGER) if Tglobal.questhandtrackingactive else handrightcontroller.is_button_pressed(BUTTONS.VR_TRIGGER)) or Input.is_mouse_button_pressed(BUTTON_LEFT)
+	var controller_trigger = (handrighthandtrackingposecontroller.is_button_pressed(BUTTONS.HT_PINCH_INDEX_FINGER) if Tglobal.questhandtrackingactive else handrightcontroller.is_button_pressed(BUTTONS.VR_TRIGGER)) or Input.is_mouse_button_pressed(BUTTON_LEFT)
 	var controller_global_transform = LaserOrient.global_transform
 	var collision_point = pointertargetpoint
 	guipanel.collision_point = collision_point
@@ -555,15 +558,15 @@ func _on_button_pressed(p_button):
 	var gripbuttonheld = handright.gripbuttonheld
 	print("pppp ", pointertargetpoint, " ", [activetargetnode, pointertargettype, " pbutton", p_button])
 	if Tglobal.questhandtrackingactive:
-		gripbuttonheld = handrightcontroller.is_button_pressed(BUTTONS.HT_PINCH_MIDDLE_FINGER)
+		gripbuttonheld = handrighthandtrackingposecontroller.is_button_pressed(BUTTONS.HT_PINCH_MIDDLE_FINGER)
 		if p_button == BUTTONS.HT_PINCH_RING_FINGER:
-			if handrightcontroller.is_button_pressed(BUTTONS.HT_PINCH_PINKY):
+			if handrighthandtrackingposecontroller.is_button_pressed(BUTTONS.HT_PINCH_PINKY):
 				buttonpressed_vrby()
 		elif p_button == BUTTONS.HT_PINCH_PINKY:
-			if handrightcontroller.is_button_pressed(BUTTONS.HT_PINCH_RING_FINGER):
+			if handrighthandtrackingposecontroller.is_button_pressed(BUTTONS.HT_PINCH_RING_FINGER):
 				buttonpressed_vrby()
 		elif Tglobal.controlslocked:
-			print("Controls locked")	
+			print("Controls locked")
 		elif p_button == BUTTONS.HT_PINCH_INDEX_FINGER:
 			buttonpressed_vrtrigger(gripbuttonheld)
 		elif p_button == BUTTONS.HT_PINCH_MIDDLE_FINGER:
@@ -597,8 +600,6 @@ func _on_button_release(p_button):
 		elif p_button == BUTTONS.VR_BUTTON_BY:
 			buttonreleased_vrby()
 
-
-	
 func buttonreleased_vrby():
 	if playerMe.ovr_guardian_system != null:
 		playerMe.ovr_guardian_system.request_boundary_visible(false)

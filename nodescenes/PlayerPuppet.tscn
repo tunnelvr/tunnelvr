@@ -286,7 +286,6 @@ visible = false
 transform = Transform( 1, 5.68434e-14, 2.84217e-14, 2.84217e-14, -5.96046e-08, -1, -5.68434e-14, 1, -5.96046e-08, 0, 0, 0 )
 mesh = SubResource( 62 )
 skeleton = NodePath("../..")
-material/0 = null
 
 [node name="LaserSelectLine" type="Spatial" parent="."]
 transform = Transform( 0.387934, 0, 0.921687, 0, 1, 0, -0.921687, 0, 0.387934, -0.338186, 0, 0 )
@@ -297,7 +296,6 @@ visible = false
 [node name="Mesh" type="MeshInstance" parent="LaserSelectLine/Scale"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.5 )
 mesh = SubResource( 14 )
-material/0 = null
 __meta__ = {
 "_editor_description_": ""
 }
@@ -311,7 +309,6 @@ visible = false
 [node name="LaserVertical" type="MeshInstance" parent="PlanViewLaser/Length"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.5 )
 mesh = SubResource( 15 )
-material/0 = null
 __meta__ = {
 "_editor_description_": ""
 }
