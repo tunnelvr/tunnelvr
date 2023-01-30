@@ -10,8 +10,9 @@ onready var playerMe = get_node("/root/Spatial/Players/PlayerMe")
 onready var selfSpatial = get_node("/root/Spatial")
 onready var virtualkeyboard = get_node("/root/Spatial/GuiSystem/KeyboardPanel")
 onready var GithubAPI = get_node("/root/Spatial/ImageSystem/GithubAPI")
-
-var regexacceptableprojectname = RegEx.new()
+onready var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
+	
+var regexacceptablefilecommand = RegEx.new()
 var regexjsontripleflattener = RegEx.new()
 
 
@@ -86,7 +87,6 @@ func _on_buttonsave_pressed():
 
 func _on_buttonplanview_pressed():
 	var button_pressed = $Viewport/GUI/Panel/ButtonPlanView.pressed
-	var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
 	if button_pressed:
 		var pvchange = planviewsystem.planviewtodict()
 		pvchange["visible"] = true
@@ -544,7 +544,7 @@ const clientips = [ "Local-network",
 var uniqueinstancestring = ""
 func toplevelcalled_ready():
 	uniqueinstancestring = OS.get_unique_id().replace("{", "").split("-")[0].to_upper()+"_"+str(randi())
-	regexacceptableprojectname.compile('(?i)^([a-z0-9.\\-_]+)\\s*$')
+	regexacceptablefilecommand.compile('(?i)^(?:|([a-z0-9.\\-_]+)\\s*:\\s*(newcave|newdir|cleardir|deletedir))\\s*$')
 	regexjsontripleflattener.compile('\\[\\s*([^,]+),\\s*([^,]+),\\s*(\\S+)\\s*]')
 	if has_node("ViewportReal") and Tglobal.phoneoverlay == null:
 		var fgui = $Viewport/GUI
@@ -582,6 +582,8 @@ func toplevelcalled_ready():
 
 	if $Viewport/GUI/Panel/Networkstate.selected != 0:  # could record saved settings on disk
 		call_deferred("_on_networkstate_selected", $Viewport/GUI/Panel/Networkstate.selected)
+
+	get_tree().connect("files_dropped", self, "_on_files_dropped")
 
 	resources_readycall()
 
@@ -753,7 +755,6 @@ func _on_playerlist_selected(index):
 		$Viewport/GUI/Panel/OptionButtonGoto.set_item_disabled(2, true)
 		$Viewport/GUI/Panel/OptionButtonGoto.set_item_disabled(3, true)
 
-	var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
 	var planviewcontrols = planviewsystem.get_node("PlanView/Viewport/PlanGUI/PlanViewControls")
 	planviewcontrols.get_node("PathFollow/Trailname").text = (selectedflagtrail["flagopttext"] if selectedflagtrail != null else "--none")
 		
@@ -830,6 +831,16 @@ func setguipanelvisible(controller_global_transform):
 		selfSpatial.playerMe.doppelganger.puppetenableguipanel(transform)
 
 	getflagsignofnodeselected()
+
+
+	if planviewsystem.visible and planviewsystem.fileviewtree.visible:
+		if len($Viewport/GUI/Panel/EditColorRect/TextEdit.text.strip_edges()) == 0:
+			var itemselected = planviewsystem.fileviewtree.get_selected()
+			if itemselected != null:
+				print("iiitemsel ", itemselected.get_text(0), " ", itemselected.get_tooltip(0))
+				var url = itemselected.get_tooltip(0)
+				if url != "**clear-cache**":
+					$Viewport/GUI/Panel/EditColorRect/TextEdit.text = itemselected.get_text(0)
 		
 func setguipanelhide():
 	if not Tglobal.controlslocked:
@@ -948,7 +959,6 @@ func _on_resourceoptions_buttondown_setavailablefunctions():
 	elif sketchsystem.pointersystem.activetargetwall != null:
 		xcselecteddrawing_forrsourcefunctions = sketchsystem.pointersystem.activetargetwall
 	else:
-		var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
 		if planviewsystem.planviewactive and planviewsystem.activetargetfloor != null:
 			xcselecteddrawing_forrsourcefunctions = planviewsystem.activetargetfloor
 		elif len(xcdrawingcentrelines) == 1:
@@ -993,7 +1003,8 @@ func _on_resourceoptions_buttondown_setavailablefunctions():
 	else:
 		$Viewport/GUI/Panel/ResourceOptions.set_item_text(showhigloadpotreeid, "Hide Potree")
 
-	$Viewport/GUI/Panel/ResourceOptions.set_item_disabled(resourceoptionlookup["Set new file"], regexacceptableprojectname.search(mtext) == null)
+	$Viewport/GUI/Panel/ResourceOptions.set_item_disabled(resourceoptionlookup["File command"], not (regexacceptablefilecommand.search(mtext) != null and planviewsystem.visible and planviewsystem.fileviewtree.visible)) 
+
 	$Viewport/GUI/Panel/ResourceOptions.set_item_disabled(resourceoptionlookup["Send message"], not Tglobal.connectiontoserveractive)
 	$Viewport/GUI/Panel/ResourceOptions.set_item_disabled(resourceoptionlookup["Apply to flagsign"], not (sketchsystem.pointersystem.activetargetnode != null and sketchsystem.pointersystem.activetargetnodewall != null and sketchsystem.pointersystem.activetargetnodewall.drawingtype == DRAWING_TYPE.DT_ROPEHANG))
 
@@ -1176,11 +1187,18 @@ func _on_resourceoptions_selected(index):
 	elif nrosel == "Apply to Cavesave":
 		ApplyToCaveSave($Viewport/GUI/Panel/ResourceSelector.get_item_text($Viewport/GUI/Panel/ResourceSelector.selected))
 		
-	elif nrosel == "Set new file":
-		var mtext = $Viewport/GUI/Panel/EditColorRect/TextEdit.text.strip_edges()
-		var mmtext = regexacceptableprojectname.search(mtext)
-		if mmtext != null:
+	elif nrosel == "File command":
+		var filecommandtextedit = $Viewport/GUI/Panel/EditColorRect/TextEdit
+		var mtext = filecommandtextedit.text.strip_edges()
+		var mmtext = regexacceptablefilecommand.search(mtext)
+		if mmtext == null :
+			filecommandtextedit.text += "\n  mismatch command"
+		elif len(mmtext.get_string(0)) == 0:
+			filecommandtextedit.text = "file/dirname : newcave/newdir/cleardir/deletedir"
+		elif mmtext.get_string(2) == "newcave":
 			setsavegamefilename(mmtext.get_string(0))
+		else:
+			planviewsystem.applyfilecommand(.get_string(1), .get_string(2))
 
 	elif nrosel == "Send message":
 		if Tglobal.connectiontoserveractive:
@@ -1205,6 +1223,14 @@ func _on_resourceoptions_selected(index):
 				
 	Tglobal.soundsystem.quicksound("MenuClick", collision_point)
 	prevnrosel = nrosel
+
+func _on_files_dropped(files: PoolStringArray, screen: int):
+	var filecommandtextedit = $Viewport/GUI/Panel/EditColorRect/TextEdit
+
+	print("Files dropped ", files)
+	if not visible: 
+		return
+
 
 func Yupdatecavefilelist():
 	var savegamefilenameoptionbutton = $Viewport/GUI/Panel/Savegamefilename
@@ -1242,13 +1268,12 @@ func ApplyToCaveSave(resourcename):
 
 func ApplyToFiletree(resourcename):
 	GithubAPI.riattributes["filetreesel"] = resourcename
-	var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
 	var resourcedef = GithubAPI.riattributes["resourcedefs"][resourcename]
 	if resourcedef.get("type") in ["svnfiles", "caddyfiles", "httpfiles", "githubapi"]:
 		planviewsystem.filetreeresourcename = resourcename
 		var filetreerootpath = resourcedef.get("path", "")
 		filetreerootpath = filetreerootpath.rstrip("/") + "/"
-		planviewsystem.clearsetupfileviewtree(filetreerootpath)
+		planviewsystem.clearsetupfileviewtree(filetreerootpath, resourcedef.get("url", ""))
 		setpanellabeltext("Applied resource to filetree")
 	else:
 		setpanellabeltext("Cannot apply to resource type")

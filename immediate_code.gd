@@ -5,11 +5,16 @@ extends EditorScript
 # Control-Shift X to run this code in the editor
 # *******
 
+var regexacceptablefilecommand = RegEx.new()
 
+func D_run():
+	regexacceptablefilecommand.compile('(?i)^(?:|([a-z0-9.\\-_]+)\\s*:\\s*(newcave|newdir|cleardir|deletedir))\\s*$')
+	var x = ""
+	var mmtext = regexacceptablefilecommand.search(x)
+	print(mmtext)
+	if mmtext:
+		print(mmtext.strings)
+		print(len(mmtext.strings[0]))
 
 func _run():
-	var pts = [ Vector2(1,0), Vector2(0,0), Vector2(1,1), Vector2(0.5,0.2) ]
-	var c = Geometry.convex_hull_2d(PoolVector2Array(pts))
-	var d = Geometry.triangulate_delaunay_2d(PoolVector2Array(pts.slice(0,2)))
-	print(d)
-	
+	print(Input.get_joy_name(0), " ", Input.get_joy_axis(0, 0), " ", Input.get_joy_axis(0, 1))

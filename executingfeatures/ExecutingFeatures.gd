@@ -12,9 +12,10 @@ func startcaddywebserver():
 	if not dir.dir_exists("user://caddywebserver"):
 		dir.make_dir("user://caddywebserver")
 	var arguments = PoolStringArray([
-			"file-server", "-browse", 
-			"-root", ProjectSettings.globalize_path("user://caddywebserver"), 
-			"-listen", "0.0.0.0:8000" ])
+			"file-server", 
+			"--browse", 
+			"--root", ProjectSettings.globalize_path("user://caddywebserver"), 
+			"--listen", "0.0.0.0:8000" ])
 	caddywebserverpid = OS.execute("caddy", arguments, false)
 	print(caddywebserverpid, " caddy ", arguments)
 
