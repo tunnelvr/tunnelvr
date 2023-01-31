@@ -17,4 +17,6 @@ func D_run():
 		print(len(mmtext.strings[0]))
 
 func _run():
-	print(Input.get_joy_name(0), " ", Input.get_joy_axis(0, 0), " ", Input.get_joy_axis(0, 1))
+	var x = "asdasd asdas\nasdasd\nasssd"
+	print(x.split("\n"))
+	

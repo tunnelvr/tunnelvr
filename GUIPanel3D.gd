@@ -544,7 +544,7 @@ const clientips = [ "Local-network",
 var uniqueinstancestring = ""
 func toplevelcalled_ready():
 	uniqueinstancestring = OS.get_unique_id().replace("{", "").split("-")[0].to_upper()+"_"+str(randi())
-	regexacceptablefilecommand.compile('(?i)^(?:|([a-z0-9.\\-_]+)\\s*:\\s*(newcave|newdir|cleardir|deletedir))\\s*$')
+	#regexacceptablefilecommand.compile('(?i)^(?:|([a-z0-9.\\-_]+)\\s*:\\s*(newcave|newdir|cleardir|deletedir))$')
 	regexjsontripleflattener.compile('\\[\\s*([^,]+),\\s*([^,]+),\\s*(\\S+)\\s*]')
 	if has_node("ViewportReal") and Tglobal.phoneoverlay == null:
 		var fgui = $Viewport/GUI
@@ -831,17 +831,7 @@ func setguipanelvisible(controller_global_transform):
 		selfSpatial.playerMe.doppelganger.puppetenableguipanel(transform)
 
 	getflagsignofnodeselected()
-
-
-	if planviewsystem.visible and planviewsystem.fileviewtree.visible:
-		if len($Viewport/GUI/Panel/EditColorRect/TextEdit.text.strip_edges()) == 0:
-			var itemselected = planviewsystem.fileviewtree.get_selected()
-			if itemselected != null:
-				print("iiitemsel ", itemselected.get_text(0), " ", itemselected.get_tooltip(0))
-				var url = itemselected.get_tooltip(0)
-				if url != "**clear-cache**":
-					$Viewport/GUI/Panel/EditColorRect/TextEdit.text = itemselected.get_text(0)
-		
+	
 func setguipanelhide():
 	if not Tglobal.controlslocked:
 		#if virtualkeyboard.visible:
@@ -875,9 +865,11 @@ func _input(event):
 						get_node(textedit.focus_next).grab_focus()
 					else:
 						textedit.release_focus()
+				get_tree().set_input_as_handled()
 			elif Tglobal.phoneoverlay == null:
 				$Viewport.input(event)
-			get_tree().set_input_as_handled()
+				get_tree().set_input_as_handled()
+
 		elif event.scancode == KEY_TAB and Tglobal.phoneoverlay == null:
 			$Viewport.input(event)
 		elif event.pressed:
@@ -1003,8 +995,9 @@ func _on_resourceoptions_buttondown_setavailablefunctions():
 	else:
 		$Viewport/GUI/Panel/ResourceOptions.set_item_text(showhigloadpotreeid, "Hide Potree")
 
-	$Viewport/GUI/Panel/ResourceOptions.set_item_disabled(resourceoptionlookup["File command"], not (regexacceptablefilecommand.search(mtext) != null and planviewsystem.visible and planviewsystem.fileviewtree.visible)) 
-
+	#$Viewport/GUI/Panel/ResourceOptions.set_item_disabled(resourceoptionlookup["File command"], not (regexacceptablefilecommand.search(mtext) != null and planviewsystem.visible and planviewsystem.fileviewtree.visible)) 
+	$Viewport/GUI/Panel/ResourceOptions.set_item_disabled(resourceoptionlookup["File command"], false)
+	
 	$Viewport/GUI/Panel/ResourceOptions.set_item_disabled(resourceoptionlookup["Send message"], not Tglobal.connectiontoserveractive)
 	$Viewport/GUI/Panel/ResourceOptions.set_item_disabled(resourceoptionlookup["Apply to flagsign"], not (sketchsystem.pointersystem.activetargetnode != null and sketchsystem.pointersystem.activetargetnodewall != null and sketchsystem.pointersystem.activetargetnodewall.drawingtype == DRAWING_TYPE.DT_ROPEHANG))
 
@@ -1188,17 +1181,7 @@ func _on_resourceoptions_selected(index):
 		ApplyToCaveSave($Viewport/GUI/Panel/ResourceSelector.get_item_text($Viewport/GUI/Panel/ResourceSelector.selected))
 		
 	elif nrosel == "File command":
-		var filecommandtextedit = $Viewport/GUI/Panel/EditColorRect/TextEdit
-		var mtext = filecommandtextedit.text.strip_edges()
-		var mmtext = regexacceptablefilecommand.search(mtext)
-		if mmtext == null :
-			filecommandtextedit.text += "\n  mismatch command"
-		elif len(mmtext.get_string(0)) == 0:
-			filecommandtextedit.text = "file/dirname : newcave/newdir/cleardir/deletedir"
-		elif mmtext.get_string(2) == "newcave":
-			setsavegamefilename(mmtext.get_string(0))
-		else:
-			planviewsystem.applyfilecommand(.get_string(1), .get_string(2))
+		ExecuteFileCommand()
 
 	elif nrosel == "Send message":
 		if Tglobal.connectiontoserveractive:
@@ -1224,12 +1207,41 @@ func _on_resourceoptions_selected(index):
 	Tglobal.soundsystem.quicksound("MenuClick", collision_point)
 	prevnrosel = nrosel
 
+func ExecuteFileCommand():
+	var filecommandtextedit = $Viewport/GUI/Panel/EditColorRect/TextEdit
+	var fcomms = filecommandtextedit.text.strip_edges().split("\n")
+	if len(fcomms) == 0:
+		filecommandtextedit.text = "file command (caddy_uploadto/caddy_newdir/caddy_cleardir/caddy_deletedir/caddy_genpotree/newcave) missing"
+		return
+	if fcomms[0] == "caddy_uploadto":
+		if len(fcomms) == 3:
+			if GithubAPI.caddy_uploadto(fcomms[1], fcomms[2]):
+				return
+		filecommandtextedit.text = "malformed file command\n\n" + filecommandtextedit.text
+	elif fcomms[0] == "caddy_newdir":
+		pass
+	#elif fcomms[0] == "newcave":
+	#	setsavegamefilename(mmtext.get_string(0))
+	# planviewsystem.applyfilecommand(mmtext.get_string(1), mmtext.get_string(2))
+
+
 func _on_files_dropped(files: PoolStringArray, screen: int):
 	var filecommandtextedit = $Viewport/GUI/Panel/EditColorRect/TextEdit
-
-	print("Files dropped ", files)
-	if not visible: 
+	if not (visible if Tglobal.phoneoverlay == null else $Viewport.visible):
+		print("GUIpanel not visible")
 		return
+	if len(files) != 1:
+		filecommandtextedit.text = "Drop one file at a time\n\n" + filecommandtextedit.text
+		return
+	if planviewsystem.visible and planviewsystem.fileviewtree.visible:
+		var url = planviewsystem.fetchselectedcaddyfileurl()
+		if url != "":
+			filecommandtextedit.text = "caddy_uploadto\n" + url
+	var fcommlines = filecommandtextedit.text.strip_edges().split("\n")
+	if len(fcommlines) != 2 or fcommlines[0].strip_edges() != "caddy_uploadto":
+		filecommandtextedit.text = "select filetree or have 'caddy_uploadto'\ncaddy-url" + ("\n\n" + filecommandtextedit.text if filecommandtextedit.text.strip_edges() != "" else "")
+		return
+	filecommandtextedit.text = filecommandtextedit.text.strip_edges() + "\n" + files[0]
 
 
 func Yupdatecavefilelist():

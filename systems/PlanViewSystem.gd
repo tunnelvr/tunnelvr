@@ -66,6 +66,17 @@ func floorstyle_itemselected(floorstyleid):
 		sketchsystem.actsketchchange([floorviz])
 
 
+func fetchselectedcaddyfileurl():
+	var itemselected = fileviewtree.get_selected()
+	if itemselected != null and filetreeresourcename != null:
+		var path = itemselected.get_tooltip(0)
+		if path != "**clear-cache**" :
+			var filetreeresource = GithubAPI.riattributes["resourcedefs"].get(filetreeresourcename)
+			if filetreeresource.get("type") == "caddyfiles":
+				return filetreeresource.get("url") + path.lstrip("/")
+	return ""
+
+
 var photolayerimport = 0
 func fetchbuttonpressed(item, column, idx):
 	if item == null:
@@ -954,7 +965,9 @@ func planviewguipanelreleasemouse():
 # * images will then be imported as a batch
 
 func applyfilecommand(localfname, filecommand):
+	# file/dirname : newcave/newdir/cleardir/deletedir/upload/rename	
 	print("FILECOMMAND: ", filecommand, " ", localfname)
+	
 
 
 	

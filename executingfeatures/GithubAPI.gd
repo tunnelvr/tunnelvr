@@ -231,3 +231,12 @@ func Ycommitfile(cname, message):
 	ghcurrentsha = d["content"]["sha"]
 	return ghfetcheddatafile
 
+
+func caddy_uploadto(caddyurl, filetoupload):
+	print("here is where we depack the caddyurl and work out ")
+	print("if we are connected to the server enough to stream through")
+	print("we also call same function locally not remote on a loopback")
+	print("where it calls back and asks for the next bit to get")
+	print("we need to know the host of the machine we are on")
+	
+	
