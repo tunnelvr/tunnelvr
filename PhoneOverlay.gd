@@ -3,6 +3,7 @@ extends Control
 
 var thumbarearadius = 50
 onready var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
+onready var selfSpatial = get_node("/root/Spatial")
 
 var plancamerascreensize = Vector2(100,100)
 var touchscreentype = false
@@ -53,7 +54,6 @@ func setupoverlaycomponentpositions():
 	$DrawmodeButton.rect_position = Vector2(0, plancamerascreensize.y/2 - $DrawmodeButton.rect_size.y/2*$DrawmodeButton.rect_scale.y)
 	$DrawmodeButton.rect_scale = Vector2(max(1.5, panelscale), max(1.5, panelscale))
 
-	
 	var planviewviewport = get_node("/root/Spatial/PlanViewSystem/PlanView/Viewport")
 	var planviewviewcontrols = planviewviewport.get_node("PlanGUI/PlanViewControls")
 	var planviewcontrolsscale = plancamerascreensize.x/planviewviewcontrols.rect_size.x
@@ -91,12 +91,30 @@ var screentouchplaces0pos = { }
 var screentouchposindex0 = 0
 var screentouchposindex1 = 0
 var screentouchposindex2 = 0
+
+var touchedindrawmode = false
+
 func updatescreentouchplaces0state():
 	if len(screentouchplaces0pos) == 0:
 		fingerdragpos = null
 		return
 	var plancamera = planviewsystem.plancamera
 	var screentouchplaces0keys = screentouchplaces0pos.keys()
+
+	if touchedindrawmode:
+		var headcam = selfSpatial.playerMe.get_node("HeadCam")
+		screentouchposindex0 = screentouchplaces0keys[0]
+		fingerdragpos = screentouchplaces0pos[screentouchposindex0]
+		var handright = selfSpatial.playerMe.get_node("HandRight")
+		var raycameranormal = headcam.project_ray_normal(fingerdragpos)
+		var rayorigin = headcam.project_ray_origin(fingerdragpos)
+		var raytransform = Transform(Basis(), rayorigin).looking_at(rayorigin + raycameranormal*10, Vector3(0,1,0))
+		handright.pointerposearvrorigin = selfSpatial.playerMe.global_transform.inverse()*raytransform
+		handright.pointervalid = true
+		return
+	if not planviewsystem.visible:
+		return
+		
 	if len(screentouchplaces0pos) == 1:
 		screentouchposindex0 = screentouchplaces0keys[0]
 		fingerdragpos = screentouchplaces0pos[screentouchposindex0]
@@ -153,6 +171,11 @@ func updatescreentouchplaces0state():
 func updatescreentouchplaces0drag():
 	var plancamera = planviewsystem.plancamera
 	var planviewpositiondict = { }
+	if touchedindrawmode:
+		return
+	if not planviewsystem.visible:
+		return
+
 	if len(screentouchplaces0pos) == 1:
 		var panvec = fingerdragpos - screentouchplaces0pos[screentouchposindex0]
 		planviewpositiondict["plancamerapos"] = plancameratranslation + plancameraxvec*panvec.x + plancamerayvec*panvec.y
@@ -238,12 +261,12 @@ func backgroundmotioninput(viewport: Object, event: InputEvent, shape_idx: int):
 			elif $ThumbRight.visible and (event.position - $ThumbRight.position).length() <= thumbarearadius:
 				screentouchplaces[event.index] = 1
 				$ThumbRight/ThumbCircle.visible = true
-			elif planviewsystem.visible:
+			else:
+				if len(screentouchplaces0pos) == 0:
+					touchedindrawmode = $DrawmodeButton.pressed
 				screentouchplaces[event.index] = 0
 				screentouchplaces0pos[event.index] = event.position
 				updatescreentouchplaces0state()
-			else:
-				return
 
 		else:
 			if screentouchplaces.get(event.index) == -1:
@@ -257,7 +280,6 @@ func backgroundmotioninput(viewport: Object, event: InputEvent, shape_idx: int):
 				updatescreentouchplaces0state()
 			screentouchplaces.erase(event.index)
 			return
-			
 			
 	if event is InputEventScreenDrag or event is InputEventScreenTouch:
 		if screentouchplaces.get(event.index) == -1:
