@@ -7,7 +7,9 @@
   };
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-22.11";
+    #nixpkgs.url = "github:nixos/nixpkgs/nixos-22.11";
+    nixpkgs.url = "github:matthewcroughan/nixpkgs/9fa9e7ad05089e7acf0de53613fd90f6e22e25ed";
+        
     godot-source = {
       url = "github:godotengine/godot/3.5.1-stable";
       flake = false;
@@ -65,7 +67,15 @@
       devShell = forAllSystems (system:
         let pkgs = nixpkgsFor."${system}";
         in pkgs.mkShell {
-          buildInputs = with pkgs; [ my-godot-wrapped jre_headless ];
+          buildInputs = with pkgs; [ 
+              my-godot-wrapped 
+              jre_headless 
+              caddy survex 
+              #potreeconverter
+              python310Packages.pyproj
+              python310Packages.laspy
+              python310Packages.matplotlib
+            ];
         });
 
       overlay = final: prev:

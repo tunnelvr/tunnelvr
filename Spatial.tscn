@@ -1,4 +1,4 @@
-[gd_scene load_steps=374 format=2]
+[gd_scene load_steps=376 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/underground_env.tres" type="Environment" id=2]
@@ -133,6 +133,12 @@ size = Vector3( 0.05, 0.01, 0.05 )
 
 [sub_resource type="SpatialMaterial" id=9]
 albedo_color = Color( 0.0588235, 0.113725, 0.952941, 1 )
+
+[sub_resource type="CubeMesh" id=305]
+size = Vector3( 0.01, 0.19, 0.01 )
+
+[sub_resource type="SpatialMaterial" id=306]
+albedo_color = Color( 0.941176, 0.941176, 0.0470588, 1 )
 
 [sub_resource type="PrismMesh" id=10]
 left_to_right = 0.1
@@ -2106,6 +2112,12 @@ material/0 = SubResource( 9 )
 [node name="OculusQuestTouchController_Right_Reactive" parent="Players/PlayerMe/HandRight" instance=ExtResource( 70 )]
 visible = false
 
+[node name="MeshInstance" type="MeshInstance" parent="Players/PlayerMe/HandRight"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.1, 0, 0 )
+visible = false
+mesh = SubResource( 305 )
+material/0 = SubResource( 306 )
+
 [node name="pointersystem" type="Node" parent="Players/PlayerMe"]
 script = ExtResource( 5 )
 
@@ -3292,11 +3304,8 @@ margin_top = 104.487
 margin_right = 360.371
 margin_bottom = 126.487
 text = "--resources"
-items = [ "--resources", null, false, 0, null, "Print XCproperties", null, false, 1, null, "Set XCproperties", null, false, 2, null, "Show/Hide/Load Potree", null, false, 4, null, "Print resource", null, false, 6, null, "Set resource", null, false, 7, null, "Set new file", null, false, 9, null, "Send message", null, false, 8, null, "Apply to flagsign", null, false, 9, null, "Apply to Filetree", null, false, 10, null, "Apply to Cavesave", null, false, 11, null, "Centreline distort", null, false, 11, null ]
+items = [ "--resources", null, false, 0, null, "Print XCproperties", null, false, 1, null, "Set XCproperties", null, false, 2, null, "Show/Hide/Load Potree", null, false, 4, null, "Print resource", null, false, 6, null, "Set resource", null, false, 7, null, "File command", null, false, 9, null, "Send message", null, false, 8, null, "Apply to flagsign", null, false, 9, null, "Apply to Filetree", null, false, 10, null, "Apply to Cavesave", null, false, 11, null, "Centreline distort", null, false, 11, null ]
 selected = 0
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="ResourceSelector" type="OptionButton" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
 margin_left = 122.592

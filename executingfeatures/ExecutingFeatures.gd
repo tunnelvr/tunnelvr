@@ -12,9 +12,10 @@ func startcaddywebserver():
 	if not dir.dir_exists("user://caddywebserver"):
 		dir.make_dir("user://caddywebserver")
 	var arguments = PoolStringArray([
-			"file-server", "-browse", 
-			"-root", ProjectSettings.globalize_path("user://caddywebserver"), 
-			"-listen", "0.0.0.0:8000" ])
+			"file-server", 
+			"--browse", 
+			"--root", ProjectSettings.globalize_path("user://caddywebserver"), 
+			"--listen", "0.0.0.0:8000" ])
 	caddywebserverpid = OS.execute("caddy", arguments, false)
 	print(caddywebserverpid, " caddy ", arguments)
 
@@ -231,6 +232,25 @@ func copytouserfilesystem(f):
 		if e != 0:
 			print("copytousrfilesystem ERROR ", e)
 	return ProjectSettings.globalize_path(dest)
+
+remote func enettransferfile(senderid, path, filename, data):
+	print("hi there ", filename)
+
+
+
+func uploaddroppedfiles(caddy_url, path, filestoupload, filenames):
+	var playerwithcaddy = null
+	for player in get_node("/root/Spatial/Players").get_children():
+		if player.executingfeaturesavailable.has("caddy"):
+			playerwithcaddy = player
+			break
+	if playerwithcaddy != null:
+		var playermeid = get_node("/root/Spatial").playerMe.networkID
+		if playerwithcaddy.networkID == get_node("/root/Spatial").playerMe.networkID:
+			call_deferred("enettransferfile", playermeid, path, filenames[0], "hithere")
+		else:
+			rpc_id(playerwithcaddy.networkID, "enettransferfile", playermeid, path, filenames[0], "hithere")
+
 
 
 

@@ -25,8 +25,8 @@ extends Spatial
 # result/bin/PotreeConverter  --source miscpointclouds/Ship1-poly/ship1-cc.las --outdir miscpointclouds/Ship1-poly/potreeconverted --attributes position_cartesian --attributes rgb --method poisson
 
 # nix-shell -p caddy
-# caddy file-server -browse -root /home/julian/data/3dmodels/aidanhouse -listen 0.0.0.0:8000
-# caddy file-server -browse -root . -listen 0.0.0.0:8000
+# caddy file-server --browse --root /home/julian/data/3dmodels/aidanhouse --listen 0.0.0.0:8000
+# caddy file-server --browse --root . --listen 0.0.0.0:8000
 # on godot.doesliverpool.xyz the files are in /var/lib/private/tunnelvr/.local/share/godot/app_userdata/tunnelvr_v0.7/caddywebserver/
 
 var potreethreadmutex = Mutex.new()

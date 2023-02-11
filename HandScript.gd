@@ -387,3 +387,15 @@ func _process(delta):
 		pointermodel.transform = transform.inverse()*pointerposearvrorigin
 	pointertranslucentvalidity = update_fademode(delta, pointervalid, pointertranslucentvalidity, pointermodel, pointermaterial)
 
+#	if not islefthand:
+#		var a = (Input.get_joy_axis(0, 0)+1)/2*32768
+#		var b = (Input.get_joy_axis(0, 1)+1)/2*32768
+#		var c = (Input.get_joy_axis(0, 2)+1)/2*32768
+#		print(int(a), " ", int(c), " ", Input.get_joy_name(0), " ", Input.get_joy_axis(0, 3), " ", Input.get_joy_axis(0, 4), " ", Input.get_joy_name(2), " ", Input.get_joy_axis(0, 5), " ", Input.get_joy_axis(0, 6))
+#		$MeshInstance.rotation_degrees.x = a/30000*360-180
+#		$MeshInstance.rotation_degrees.z = b/30000*360-90
+#		$MeshInstance.rotation_degrees.y = c/30000*360-180
+
+
+	
+

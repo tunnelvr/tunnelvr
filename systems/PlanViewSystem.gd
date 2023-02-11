@@ -65,6 +65,13 @@ func floorstyle_itemselected(floorstyleid):
 						 "xcvizstates":{ activetargetfloor.get_name():newdrawingcode } }
 		sketchsystem.actsketchchange([floorviz])
 
+func fetchselectedcaddyfilepath():
+	var itemselected = fileviewtree.get_selected()
+	if itemselected != null and filetreeresourcename != null:
+		var path = itemselected.get_tooltip(0)
+		if path != "**clear-cache**" :
+			return path
+	return ""
 
 var photolayerimport = 0
 func fetchbuttonpressed(item, column, idx):
@@ -205,7 +212,7 @@ func actunrolltree(f, fetchednonimagedataobject):
 
 func itemselected():
 	var itemclicked = fileviewtree.get_selected()
-	print("  ", itemclicked, " ", fileviewtree.get_scroll())
+	print(" filetree_itemselected ", itemclicked, " ", fileviewtree.get_scroll())
 
 func scrolltree(bdown):
 	var itemselected = fileviewtree.get_selected()
@@ -363,14 +370,13 @@ func _ready():
 	fileviewtree.connect("button_pressed", self, "fetchbuttonpressed")
 	fileviewtree.connect("item_selected", self, "itemselected")
 
-
-func clearsetupfileviewtree(filetreerootpath):
+func clearsetupfileviewtree(filetreerootpath, turl):
 	fileviewtree.clear()
 	buttonidxtoitem.clear()
 	buttonidxloaded.clear() 
 		
 	var root = fileviewtree.create_item()
-	root.set_text(0, "Root of tree")
+	root.set_text(0, "dir: " + turl)
 	root.set_tooltip(0, "**clear-cache**")
 	if filetreeresourcename != null:
 		addsubitem(root, filetreerootpath, filetreerootpath)
@@ -945,4 +951,19 @@ func planviewguipanelreleasemouse():
 	$PlanView/Viewport.input(event)
 
 
+# * keyboard to work on phone overlay mode
+# * root of tree should give URL of the tree
+# * flag when the root of tree is localhost
+# * create/delete/clear directory from the menu controls when the FileTree is open
+# * Selected cleared directory in mode to allow (or continue) upload
+# * upload locally and through ENET, using ab and seek values
+# * When laz file is done, option to process into images using python laspy
+# * images will then be imported as a batch
 
+func applyfilecommand(localfname, filecommand):
+	# file/dirname : newcave/newdir/cleardir/deletedir/upload/rename	
+	print("FILECOMMAND: ", filecommand, " ", localfname)
+	
+
+
+	
