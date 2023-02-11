@@ -2112,8 +2112,16 @@ func _physics_process(delta):
 		var firstlasertarget = LaserOrient.get_node("RayCast").get_collider()
 		if firstlasertarget != null and firstlasertarget.is_queued_for_deletion():
 			firstlasertarget = null
+
+		if Tglobal.phoneoverlay != null and planviewsystem.planviewactive:
+			planviewsystem.get_node("RealPlanCamera/LaserScope").global_transform.origin = LaserOrient.global_transform.origin
+			planviewsystem.get_node("RealPlanCamera/LaserScope").visible = true
+			activelaserroot = planviewsystem.get_node("RealPlanCamera/LaserScope/LaserOrient")
+			activelaserroot.get_node("LaserSpot").global_transform.basis = LaserOrient.global_transform.basis
+			activelaserroot.get_node("RayCast").force_raycast_update()
+			setpointertarget(activelaserroot, activelaserroot.get_node("RayCast"), -1.0)
 			
-		if firstlasertarget == guipanel3d or firstlasertarget == keyboardpanel:
+		elif firstlasertarget == guipanel3d or firstlasertarget == keyboardpanel:
 			LaserOrient.visible = true
 			activelaserroot = LaserOrient
 			setpointertarget(activelaserroot, activelaserroot.get_node("RayCast"), -1.0)

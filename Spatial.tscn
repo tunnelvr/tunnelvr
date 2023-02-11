@@ -2353,18 +2353,12 @@ margin_left = 600.0
 margin_right = 640.0
 margin_bottom = 40.0
 mouse_filter = 2
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="PlanGUI" type="Control" parent="PlanViewSystem/PlanView/Viewport"]
 margin_right = 800.0
 margin_bottom = 800.0
 mouse_filter = 2
 theme = ExtResource( 47 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="Camera" type="Camera" parent="PlanViewSystem/PlanView/Viewport/PlanGUI"]
 transform = Transform( 1, 0, 0, 0, -1.62921e-07, 1, 0, -1, -1.62921e-07, -1, 50, -12 )
@@ -4584,6 +4578,14 @@ margin_right = 83.0
 margin_bottom = 440.0
 toggle_mode = true
 text = "Draw"
+
+[node name="SelectmodeButton" type="Button" parent="PhoneOverlay"]
+margin_left = 23.0
+margin_top = 420.0
+margin_right = 83.0
+margin_bottom = 440.0
+toggle_mode = true
+text = "Select"
 
 [node name="DepthInfo" type="ColorRect" parent="PhoneOverlay"]
 visible = false

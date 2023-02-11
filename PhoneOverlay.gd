@@ -4,6 +4,7 @@ extends Control
 var thumbarearadius = 50
 onready var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
 onready var selfSpatial = get_node("/root/Spatial")
+onready var pointersystem = get_node("/root/Spatial/Players/PlayerMe/pointersystem")
 
 var plancamerascreensize = Vector2(100,100)
 var touchscreentype = false
@@ -51,8 +52,10 @@ func setupoverlaycomponentpositions():
 	$MenuButton.rect_position = guipanel3dviewport.rect_position + Vector2(orgpanelsize.x*panelscale/2, orgpanelsize.y*panelscale) - $MenuButton.rect_size*max(1, panelscale)
 	$MenuButton.rect_scale = Vector2(max(1.5, panelscale), max(1.5, panelscale))
 	$DepthInfo.rect_scale = Vector2(max(1.5, panelscale), max(1.5, panelscale))
-	$DrawmodeButton.rect_position = Vector2(0, plancamerascreensize.y/2 - $DrawmodeButton.rect_size.y/2*$DrawmodeButton.rect_scale.y)
+	$SelectmodeButton.rect_scale = Vector2(max(1.5, panelscale), max(1.5, panelscale))
 	$DrawmodeButton.rect_scale = Vector2(max(1.5, panelscale), max(1.5, panelscale))
+	$DrawmodeButton.rect_position = Vector2(0, plancamerascreensize.y/2 - $DrawmodeButton.rect_size.y/2*$DrawmodeButton.rect_scale.y)
+	$SelectmodeButton.rect_position = $DrawmodeButton.rect_position - Vector2(0, $SelectmodeButton.rect_size.y*$SelectmodeButton.rect_scale.y)
 
 	var planviewviewport = get_node("/root/Spatial/PlanViewSystem/PlanView/Viewport")
 	var planviewviewcontrols = planviewviewport.get_node("PlanGUI/PlanViewControls")
@@ -93,28 +96,42 @@ var screentouchposindex1 = 0
 var screentouchposindex2 = 0
 
 var touchedindrawmode = false
+var touchedinselectmode = false
+var screentouchposindex0draw = -1
 
-func updatescreentouchplaces0state():
+func setpointersystemray(drawpos):
+	var headcam = planviewsystem.plancamera if planviewsystem.visible else selfSpatial.playerMe.get_node("HeadCam")
+	var raycameranormal = headcam.project_ray_normal(drawpos)
+	var rayorigin = headcam.project_ray_origin(drawpos)
+	var raytransform = Transform(Basis(), rayorigin).looking_at(rayorigin + raycameranormal*10, Vector3(0,1,0))
+	pointersystem.handright.pointerposearvrorigin = selfSpatial.playerMe.global_transform.inverse()*raytransform
+
+func updatescreentouchplaces0stateDraw(pressed):
+	var screentouchplaces0keys = screentouchplaces0pos.keys()
+	if pressed and len(screentouchplaces0keys) == 1:
+		screentouchposindex0draw = screentouchplaces0keys[0]
+		setpointersystemray(screentouchplaces0pos[screentouchposindex0draw])
+		pointersystem.handright.pointervalid = true
+		yield(get_tree(), "idle_frame")
+		yield(get_tree(), "idle_frame")
+		pointersystem._on_button_pressed(BUTTONS.VR_GRIP if touchedindrawmode else BUTTONS.VR_TRIGGER)
+	elif not pressed and not screentouchplaces0pos.has(screentouchposindex0draw): 
+		pointersystem._on_button_release(BUTTONS.VR_GRIP if touchedindrawmode else BUTTONS.VR_TRIGGER)
+		pointersystem.handright.pointervalid = false
+		screentouchposindex0draw = -1
+
+func updatescreentouchplaces0dragDraw():
+	if screentouchposindex0draw != -1 and screentouchplaces0pos.has(screentouchposindex0draw):
+		setpointersystemray(screentouchplaces0pos[screentouchposindex0draw])
+
+func updatescreentouchplaces0state(pressed):
 	if len(screentouchplaces0pos) == 0:
 		fingerdragpos = null
 		return
 	var plancamera = planviewsystem.plancamera
 	var screentouchplaces0keys = screentouchplaces0pos.keys()
-
-	if touchedindrawmode:
-		var headcam = selfSpatial.playerMe.get_node("HeadCam")
-		screentouchposindex0 = screentouchplaces0keys[0]
-		fingerdragpos = screentouchplaces0pos[screentouchposindex0]
-		var handright = selfSpatial.playerMe.get_node("HandRight")
-		var raycameranormal = headcam.project_ray_normal(fingerdragpos)
-		var rayorigin = headcam.project_ray_origin(fingerdragpos)
-		var raytransform = Transform(Basis(), rayorigin).looking_at(rayorigin + raycameranormal*10, Vector3(0,1,0))
-		handright.pointerposearvrorigin = selfSpatial.playerMe.global_transform.inverse()*raytransform
-		handright.pointervalid = true
-		return
 	if not planviewsystem.visible:
 		return
-		
 	if len(screentouchplaces0pos) == 1:
 		screentouchposindex0 = screentouchplaces0keys[0]
 		fingerdragpos = screentouchplaces0pos[screentouchposindex0]
@@ -168,10 +185,13 @@ func updatescreentouchplaces0state():
 	plancameraroty = plancamera.rotation_degrees.y
 	plancamerasize = plancamera.size
 
+
 func updatescreentouchplaces0drag():
 	var plancamera = planviewsystem.plancamera
 	var planviewpositiondict = { }
 	if touchedindrawmode:
+		return
+	if touchedinselectmode:
 		return
 	if not planviewsystem.visible:
 		return
@@ -264,10 +284,14 @@ func backgroundmotioninput(viewport: Object, event: InputEvent, shape_idx: int):
 			else:
 				if len(screentouchplaces0pos) == 0:
 					touchedindrawmode = $DrawmodeButton.pressed
+					touchedinselectmode = $SelectmodeButton.pressed
 				screentouchplaces[event.index] = 0
 				screentouchplaces0pos[event.index] = event.position
-				updatescreentouchplaces0state()
-
+				if touchedindrawmode or touchedinselectmode:
+					updatescreentouchplaces0stateDraw(true)
+					return
+				else:
+					updatescreentouchplaces0state(true)
 		else:
 			if screentouchplaces.get(event.index) == -1:
 				$ThumbLeft/ThumbCircle.visible = false
@@ -277,7 +301,10 @@ func backgroundmotioninput(viewport: Object, event: InputEvent, shape_idx: int):
 				Tglobal.phonethumbmotionposition = null
 			elif screentouchplaces.get(event.index) == 0:
 				screentouchplaces0pos.erase(event.index)
-				updatescreentouchplaces0state()
+				if touchedindrawmode or touchedinselectmode:
+					updatescreentouchplaces0stateDraw(false)
+				else:
+					updatescreentouchplaces0state(false)
 			screentouchplaces.erase(event.index)
 			return
 			
@@ -290,6 +317,9 @@ func backgroundmotioninput(viewport: Object, event: InputEvent, shape_idx: int):
 			$ThumbRight/ThumbCircle.transform.origin = Tglobal.phonethumbmotionposition*thumbarearadius
 		elif screentouchplaces.get(event.index) == 0:
 			screentouchplaces0pos[event.index] = event.position
-			updatescreentouchplaces0drag()
+			if touchedindrawmode or touchedinselectmode:
+				updatescreentouchplaces0dragDraw()
+			else:
+				updatescreentouchplaces0drag()
 
 
