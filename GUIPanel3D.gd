@@ -1209,40 +1209,51 @@ func _on_resourceoptions_selected(index):
 
 func ExecuteFileCommand():
 	var filecommandtextedit = $Viewport/GUI/Panel/EditColorRect/TextEdit
-	var fcomms = filecommandtextedit.text.strip_edges().split("\n")
-	if len(fcomms) == 0:
-		filecommandtextedit.text = "file command (caddy_uploadto/caddy_newdir/caddy_cleardir/caddy_deletedir/caddy_genpotree/newcave) missing"
+	var filecmdstruct = parse_json(filecommandtextedit.text)
+	if not filecmdstruct:
 		return
-	if fcomms[0] == "caddy_uploadto":
-		if len(fcomms) == 3:
-			if GithubAPI.caddy_uploadto(fcomms[1], fcomms[2]):
-				return
-		filecommandtextedit.text = "malformed file command\n\n" + filecommandtextedit.text
-	elif fcomms[0] == "caddy_newdir":
-		pass
+	var caddy_url = filecmdstruct.get("caddy_url", "")
+	var path = filecmdstruct.get("path", "")
+	var filestoupload = filecmdstruct.get("filestoupload")
+	var filenames = filecmdstruct.get("filenames")
+	if caddy_url and typeof(filestoupload) == TYPE_STRING_ARRAY and typeof(filenames) == TYPE_STRING_ARRAY and len(filenames) == len(filestoupload):
+		get_node("/root/Spatial/ExecutingFeatures").uploaddroppedfiles(caddy_url, path, filestoupload, filenames)
+
+
 	#elif fcomms[0] == "newcave":
 	#	setsavegamefilename(mmtext.get_string(0))
 	# planviewsystem.applyfilecommand(mmtext.get_string(1), mmtext.get_string(2))
 
 
 func _on_files_dropped(files: PoolStringArray, screen: int):
-	var filecommandtextedit = $Viewport/GUI/Panel/EditColorRect/TextEdit
 	if not (visible if Tglobal.phoneoverlay == null else $Viewport.visible):
 		print("GUIpanel not visible")
 		return
-	if len(files) != 1:
-		filecommandtextedit.text = "Drop one file at a time\n\n" + filecommandtextedit.text
+	var filecommandtextedit = $Viewport/GUI/Panel/EditColorRect/TextEdit
+	var prevfilecmdstruct = parse_json(filecommandtextedit.text)
+	if not prevfilecmdstruct:
+		prevfilecmdstruct = { }
+	var playertouploadto = null
+	for player in get_node("/root/Spatial/Players").get_children():
+		if player.executingfeaturesavailable.has("caddy"):
+			if not playertouploadto or playertouploadto.networkID != 1:
+				playertouploadto = player
+	if not playertouploadto:
+		filecommandtextedit.text = "No caddy-server player"
 		return
-	if planviewsystem.visible and planviewsystem.fileviewtree.visible:
-		var url = planviewsystem.fetchselectedcaddyfileurl()
-		if url != "":
-			filecommandtextedit.text = "caddy_uploadto\n" + url
-	var fcommlines = filecommandtextedit.text.strip_edges().split("\n")
-	if len(fcommlines) != 2 or fcommlines[0].strip_edges() != "caddy_uploadto":
-		filecommandtextedit.text = "select filetree or have 'caddy_uploadto'\ncaddy-url" + ("\n\n" + filecommandtextedit.text if filecommandtextedit.text.strip_edges() != "" else "")
-		return
-	filecommandtextedit.text = filecommandtextedit.text.strip_edges() + "\n" + files[0]
-
+	var filenames = [ ]
+	for f in files:
+		filenames.push_back(f.substr(f.find_last("/")+1))
+	var path = planviewsystem.fetchselectedcaddyfilepath() if not prevfilecmdstruct.get("path") else prevfilecmdstruct.get("path")
+	var filecmdstruct = { 
+		"cmd":"uploadfiles",
+		"path":path if path else "tmpdir",
+		"networkID":playertouploadto.networkID, 
+		"name":playertouploadto.playerhumanname, 
+		"filestoupload":files,
+		"caddy_url":planviewsystem.filetreeresource.get("url")
+	}
+	filecommandtextedit.text = JSON.print(filecmdstruct, "  ", true)
 
 func Yupdatecavefilelist():
 	var savegamefilenameoptionbutton = $Viewport/GUI/Panel/Savegamefilename

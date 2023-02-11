@@ -65,17 +65,13 @@ func floorstyle_itemselected(floorstyleid):
 						 "xcvizstates":{ activetargetfloor.get_name():newdrawingcode } }
 		sketchsystem.actsketchchange([floorviz])
 
-
-func fetchselectedcaddyfileurl():
+func fetchselectedcaddyfilepath():
 	var itemselected = fileviewtree.get_selected()
 	if itemselected != null and filetreeresourcename != null:
 		var path = itemselected.get_tooltip(0)
 		if path != "**clear-cache**" :
-			var filetreeresource = GithubAPI.riattributes["resourcedefs"].get(filetreeresourcename)
-			if filetreeresource.get("type") == "caddyfiles":
-				return filetreeresource.get("url") + path.lstrip("/")
+			return path
 	return ""
-
 
 var photolayerimport = 0
 func fetchbuttonpressed(item, column, idx):

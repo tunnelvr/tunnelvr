@@ -233,6 +233,25 @@ func copytouserfilesystem(f):
 			print("copytousrfilesystem ERROR ", e)
 	return ProjectSettings.globalize_path(dest)
 
+remote func enettransferfile(senderid, path, filename, data):
+	print("hi there ", filename)
+
+
+
+func uploaddroppedfiles(caddy_url, path, filestoupload, filenames):
+	var playerwithcaddy = null
+	for player in get_node("/root/Spatial/Players").get_children():
+		if player.executingfeaturesavailable.has("caddy"):
+			playerwithcaddy = player
+			break
+	if playerwithcaddy != null:
+		var playermeid = get_node("/root/Spatial").playerMe.networkID
+		if playerwithcaddy.networkID == get_node("/root/Spatial").playerMe.networkID:
+			call_deferred("enettransferfile", playermeid, path, filenames[0], "hithere")
+		else:
+			rpc_id(playerwithcaddy.networkID, "enettransferfile", playermeid, path, filenames[0], "hithere")
+
+
 
 
 func parse3ddmpcentreline_networked(f3durl):

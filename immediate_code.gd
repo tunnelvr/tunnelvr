@@ -17,6 +17,7 @@ func D_run():
 		print(len(mmtext.strings[0]))
 
 func _run():
-	var x = "asdasd asdas\nasdasd\nasssd"
-	print(x.split("\n"))
+	var t = '{1":2}'
+	var g = parse_json(t) #or { }
+	print(g)
 	
