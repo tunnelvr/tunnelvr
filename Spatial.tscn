@@ -1941,6 +1941,7 @@ extents = Vector2( 500, 500 )
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
 enablevr = false
+forcephoneoverlay = true
 
 [node name="Players" type="Spatial" parent="."]
 
@@ -4539,9 +4540,6 @@ material/0 = ExtResource( 75 )
 margin_right = 40.0
 margin_bottom = 40.0
 script = ExtResource( 76 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="ThumbLeft" type="Node2D" parent="PhoneOverlay"]
 position = Vector2( 90, 500 )
@@ -4578,9 +4576,14 @@ margin_top = 564.0
 margin_right = 291.0
 margin_bottom = 584.0
 text = "Menu"
-__meta__ = {
-"_edit_use_anchors_": false
-}
+
+[node name="DrawmodeButton" type="Button" parent="PhoneOverlay"]
+margin_left = 23.0
+margin_top = 420.0
+margin_right = 83.0
+margin_bottom = 440.0
+toggle_mode = true
+text = "Draw"
 
 [node name="DepthInfo" type="ColorRect" parent="PhoneOverlay"]
 visible = false

@@ -50,6 +50,9 @@ func setupoverlaycomponentpositions():
 	$MenuButton.rect_position = guipanel3dviewport.rect_position + Vector2(orgpanelsize.x*panelscale/2, orgpanelsize.y*panelscale) - $MenuButton.rect_size*max(1, panelscale)
 	$MenuButton.rect_scale = Vector2(max(1.5, panelscale), max(1.5, panelscale))
 	$DepthInfo.rect_scale = Vector2(max(1.5, panelscale), max(1.5, panelscale))
+	$DrawmodeButton.rect_position = Vector2(0, plancamerascreensize.y/2 - $DrawmodeButton.rect_size.y/2*$DrawmodeButton.rect_scale.y)
+	$DrawmodeButton.rect_scale = Vector2(max(1.5, panelscale), max(1.5, panelscale))
+
 	
 	var planviewviewport = get_node("/root/Spatial/PlanViewSystem/PlanView/Viewport")
 	var planviewviewcontrols = planviewviewport.get_node("PlanGUI/PlanViewControls")
