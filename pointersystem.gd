@@ -73,6 +73,8 @@ var handflickmotiongestureposition_shortpos_length = 0.25
 const handflickmotiongestureposition_gone = 2
 const splineamplificationfactor = 10.0
 
+var selectlinefatness = 8.0
+
 func clearpointertargetmaterial():
 	if pointertargettype == "XCnode" and pointertarget != null:
 		if pointertargetwall != null and pointertargetwall.drawingtype == DRAWING_TYPE.DT_CENTRELINE:
@@ -527,7 +529,7 @@ func setpointertarget(laserroot, raycast, pointertargetshortdistance):
 			var bv = LaserOrient.transform.origin - b*LaserOrient.transform.basis.z
 			var skewdist = av.distance_to(bv)
 			LaserSelectLine.transform = Transform(activetargetnodewall.transform.basis, nodezerozposition)
-			LaserSelectLine.get_node("Scale").scale = Vector3(8, 8, -a)
+			LaserSelectLine.get_node("Scale").scale = Vector3(selectlinefatness, selectlinefatness, -a)
 			nodetriggerpulledmaxd = max(nodetriggerpulledmaxd, abs(activetargetnodetriggerpulledz - tpnodepoint.z))
 			LaserSelectLine.visible = (skewdist < 0.1) and (abs(a) < nodetriggerpullinglimit) and \
 					(nodetriggerpulledmaxd > nodetriggerpullingmind) and (OS.get_ticks_msec()*0.001 - nodetriggerpulledtimestamp > nodetriggerpullingminduration) and \
@@ -550,7 +552,7 @@ func setpointertarget(laserroot, raycast, pointertargetshortdistance):
 		if lslfrom != null:
 			LaserSelectLine.transform.origin = GripLaserSpot.transform.origin if GripLaserSpot.visible else pointertargetpoint
 			var d = LaserSelectLine.transform.origin.distance_to(lslfrom)
-			LaserSelectLine.get_node("Scale").scale.z = max(0.01, d)
+			LaserSelectLine.get_node("Scale").scale = Vector3(selectlinefatness, selectlinefatness, max(0.01, d))
 			if not is_zero_approx(d):
 				LaserSelectLine.transform = LaserSelectLine.transform.looking_at(lslfrom, Vector3(0,1,0))
 

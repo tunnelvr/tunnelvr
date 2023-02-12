@@ -881,6 +881,8 @@ func newXCuniquedrawing(drawingtype, sname):
 		xcdrawing.get_node("PathLines_PlanView").visible = true
 		xcdrawing.get_node("PathLines_PlanView").layers = CollisionLayer.VL_centrelinedrawinglinesplanview
 		xcdrawing.get_node("XCnodes").visible = true
+		var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
+		planviewsystem.updatecentrelineactivityui()
 	
 	else:
 		assert (false)

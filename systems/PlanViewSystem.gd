@@ -364,6 +364,9 @@ func _ready():
 	var PlayerDirections = get_node("/root/Spatial/BodyObjects/PlayerDirections")
 	planviewcontrols.get_node("PathFollow/HSliderTrailpos").connect("value_changed", PlayerDirections, "hslidertrailpos_valuechanged")
 
+	planviewcontrols.get_node("CentrelineActivity/OptionsCentreline").connect("item_selected", self, "centrelineactivityoptions_selected")
+	planviewcontrols.get_node("CentrelineActivity/CentrelineList").connect("item_selected", self, "centrelineactivitylist_selected")
+
 	set_process(visible)
 	assert (planviewcontrols.get_node("CheckBoxPlanTubesVisible").pressed == (($PlanView/Viewport/PlanGUI/Camera.cull_mask & CollisionLayer.VL_xcshells) != 0))
 
@@ -606,6 +609,7 @@ func planviewtransformpos(guidpaneltransform, guidpanelsize):
 func updateplanviewlocatorlines():
 	var nodesca = plancamera.size/70.0*3.0
 	var labelsca = nodesca*2.0
+	sketchsystem.pointersystem.selectlinefatness = nodesca*8.0
 	for player in selfSpatial.get_node("Players").get_children():
 		var planviewlocatorline = player.get_node("headlocator/planviewlocatorline")
 		planviewlocatorline.scale = Vector3(nodesca*3.0, 1, nodesca*3.0)
@@ -949,6 +953,35 @@ func planviewguipanelreleasemouse():
 	var event = InputEventMouseMotion.new()
 	event.position = Vector2(0,0)
 	$PlanView/Viewport.input(event)
+
+
+var activecentrelinexcname = ""
+func updatecentrelineactivityui():
+	var CentrelineList = $PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity/CentrelineList
+	var selectedcentrelinexcname = CentrelineList.get_item_text(CentrelineList.selected) if CentrelineList.selected != -1 else ""
+	CentrelineList.clear()
+	CentrelineList.add_item("--none--")
+	var selectedcentrelinexcnameIndex = 0
+	for lxcdrawingcentreline in get_tree().get_nodes_in_group("gpcentrelinegeo"):
+		CentrelineList.add_item(lxcdrawingcentreline.get_name())
+		if lxcdrawingcentreline.get_name() == selectedcentrelinexcname:
+			selectedcentrelinexcnameIndex = CentrelineList.get_item_count()-1
+	CentrelineList.select(selectedcentrelinexcnameIndex)
+
+func centrelineactivityoptions_selected(index):
+	var CentrelineList = $PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity/CentrelineList
+	var selectedcentrelinexcname = CentrelineList.get_item_text(CentrelineList.selected) if CentrelineList.selected != -1 else ""
+	if index == 1 and selectedcentrelinexcname != "--none--":
+		activecentrelinexcname = selectedcentrelinexcname
+	elif index == 0 and activecentrelinexcname == selectedcentrelinexcname:
+		activecentrelinexcname = ""
+	print(" new current activecentrelinexcname: ", activecentrelinexcname)
+
+func centrelineactivitylist_selected(index):
+	var CentrelineList = $PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity/CentrelineList
+	var selectedcentrelinexcname = CentrelineList.get_item_text(CentrelineList.selected) if CentrelineList.selected != -1 else ""
+	var OptionsCentreline = $PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity/OptionsCentreline
+	OptionsCentreline.select(1 if selectedcentrelinexcname == activecentrelinexcname else 0)
 
 
 # * keyboard to work on phone overlay mode

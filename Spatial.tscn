@@ -2379,9 +2379,6 @@ update_scale = false
 margin_top = 700.0
 margin_right = 800.0
 margin_bottom = 800.0
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="ViewSlide" type="Control" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
 material = SubResource( 75 )
@@ -2793,6 +2790,7 @@ __meta__ = {
 }
 
 [node name="PathFollow" type="Control" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
+visible = false
 margin_left = 190.0
 margin_top = 10.0
 margin_right = 387.0
@@ -2893,6 +2891,24 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="CentrelineActivity" type="Control" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
+margin_left = 475.0
+margin_top = 3.0
+margin_right = 650.0
+margin_bottom = 30.0
+
+[node name="OptionsCentreline" type="OptionButton" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity"]
+margin_right = 28.0
+margin_bottom = 22.0
+text = "normal centreline"
+items = [ "normal centreline", null, false, 0, null, "drawing centreline", null, false, 1, null ]
+selected = 0
+
+[node name="CentrelineList" type="OptionButton" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity"]
+margin_left = 147.0
+margin_right = 249.0
+margin_bottom = 22.0
+
 [node name="ButtonClosePlanView" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
 margin_left = 0.943848
 margin_top = 0.943909
@@ -2901,17 +2917,12 @@ margin_bottom = 35.9439
 hint_tooltip = "Close Plan View
 "
 text = "X"
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="CheckBoxPlanTubesVisible" type="CheckBox" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
-anchor_right = 0.015
-anchor_bottom = 0.24
 margin_left = 470.838
 margin_top = 49.6852
-margin_right = 522.838
-margin_bottom = 49.6852
+margin_right = 534.838
+margin_bottom = 73.6852
 rect_pivot_offset = Vector2( 100.162, 19.0063 )
 pressed = true
 text = "plan tubes"
@@ -2936,10 +2947,10 @@ __meta__ = {
 [node name="OptionsBackfaceCull" type="OptionButton" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
 anchor_right = 0.015
 anchor_bottom = 0.24
-margin_left = 657.0
-margin_top = 6.0
-margin_right = 755.0
-margin_bottom = 4.0
+margin_left = 656.0
+margin_top = 29.0
+margin_right = 754.0
+margin_bottom = 27.0
 rect_pivot_offset = Vector2( 100.162, 19.0063 )
 text = "Normal Solid"
 items = [ "Normal Solid", null, false, 0, null, "Backface Cull", null, false, 1, null, "Cartoon Colour", null, false, 2, null ]
