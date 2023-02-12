@@ -1214,3 +1214,34 @@ static func waterlevelsfromropesequences(nodepoints, ropeseqs):
 				return null
 	return null if len(waterflowlevelvectors) == 0 else waterflowlevelvectors
 
+static func thincurve(pts, tol):
+	if len(pts) <= 3:
+		return pts
+	var i0 = 0
+	var tpts = [ pts[i0] ]
+	var i1stack = [ len(pts)-1 ]
+	while i1stack:
+		var i1 = i1stack[-1]
+		var pt0 = pts[i0]
+		var pt1 = pts[i1]
+		var vec = pt1 - pt0
+		var vecsq = vec.length_squared()
+		var immaxd = -1
+		var maxd = -1.0
+		for i in range(i0+1, i1):
+			var pti = pts[i]
+			var vecd = vec.dot(pti - pt0)
+			var lam = clamp(vecd/vecsq, 0.0, 1.0) if vecsq != 0.0 else 0.0
+			var dpti = pt0 + vec*lam - pti
+			var dptilen = dpti.length()
+			if immaxd == -1 or dptilen > maxd:
+				immaxd = i
+				maxd = dptilen
+		if maxd >= tol:
+			i1stack.push_back(immaxd)
+		else:
+			i0 = i1
+			tpts.push_back(pts[i0])
+			i1stack.pop_back()
+	return tpts
+	

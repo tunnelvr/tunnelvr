@@ -4616,6 +4616,12 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="DrawCurve" type="Line2D" parent="PhoneOverlay"]
+visible = false
+points = PoolVector2Array( 257, 329, 426, 156, 426, 309, 416, 395, 200, 412, 207, 291 )
+width = 5.0
+default_color = Color( 0.937255, 0.921569, 0.384314, 1 )
+
 [node name="Lidarmodel" type="Spatial" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 13, 2.5, -6 )
 visible = false

@@ -106,22 +106,38 @@ func setpointersystemray(drawpos):
 	var raytransform = Transform(Basis(), rayorigin).looking_at(rayorigin + raycameranormal*10, Vector3(0,1,0))
 	pointersystem.handright.pointerposearvrorigin = selfSpatial.playerMe.global_transform.inverse()*raytransform
 
+
+var drawcurvepoints = [ ]
 func updatescreentouchplaces0stateDraw(pressed):
 	var screentouchplaces0keys = screentouchplaces0pos.keys()
 	if pressed and len(screentouchplaces0keys) == 1:
 		screentouchposindex0draw = screentouchplaces0keys[0]
-		setpointersystemray(screentouchplaces0pos[screentouchposindex0draw])
-		pointersystem.handright.pointervalid = true
-		yield(get_tree(), "idle_frame")
-		yield(get_tree(), "idle_frame")
-		pointersystem._on_button_pressed(BUTTONS.VR_GRIP if touchedindrawmode else BUTTONS.VR_TRIGGER)
+		if not touchedinselectmode and touchedindrawmode:
+			$DrawCurve.visible = true
+			drawcurvepoints = [ screentouchplaces0pos[screentouchposindex0draw] ]
+			$DrawCurve.points = PoolVector2Array(drawcurvepoints)
+		else:
+			setpointersystemray(screentouchplaces0pos[screentouchposindex0draw])
+			pointersystem.handright.pointervalid = true
+			yield(get_tree(), "idle_frame")
+			yield(get_tree(), "idle_frame")
+			pointersystem._on_button_pressed(BUTTONS.VR_GRIP if touchedindrawmode else BUTTONS.VR_TRIGGER)
 	elif not pressed and not screentouchplaces0pos.has(screentouchposindex0draw): 
-		pointersystem._on_button_release(BUTTONS.VR_GRIP if touchedindrawmode else BUTTONS.VR_TRIGGER)
-		pointersystem.handright.pointervalid = false
+		if $DrawCurve.visible:
+			$DrawCurve.points = PoolVector2Array(Polynets.thincurve(drawcurvepoints, 2.0))
+#			$DrawCurve.visible = false
+			print("drawcurve point count ", len(drawcurvepoints), " thinned to ", len($DrawCurve.points))
+		else:
+			pointersystem._on_button_release(BUTTONS.VR_GRIP if touchedindrawmode else BUTTONS.VR_TRIGGER)
+			pointersystem.handright.pointervalid = false
 		screentouchposindex0draw = -1
-
+		
 func updatescreentouchplaces0dragDraw():
 	if screentouchposindex0draw != -1 and screentouchplaces0pos.has(screentouchposindex0draw):
+		if $DrawCurve.visible:
+			var pt = screentouchplaces0pos[screentouchposindex0draw]
+			drawcurvepoints.push_back(pt)
+			$DrawCurve.points = PoolVector2Array(drawcurvepoints)
 		setpointersystemray(screentouchplaces0pos[screentouchposindex0draw])
 
 func updatescreentouchplaces0state(pressed):

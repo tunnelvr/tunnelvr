@@ -954,7 +954,7 @@ func planviewguipanelreleasemouse():
 	event.position = Vector2(0,0)
 	$PlanView/Viewport.input(event)
 
-
+# this should be transmitted with planview transmit stuff
 var activecentrelinexcname = ""
 func updatecentrelineactivityui():
 	var CentrelineList = $PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity/CentrelineList
@@ -971,8 +971,8 @@ func updatecentrelineactivityui():
 func centrelineactivityoptions_selected(index):
 	var CentrelineList = $PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity/CentrelineList
 	var selectedcentrelinexcname = CentrelineList.get_item_text(CentrelineList.selected) if CentrelineList.selected != -1 else ""
-	if index == 1 and selectedcentrelinexcname != "--none--":
-		activecentrelinexcname = selectedcentrelinexcname
+	if index == 1:
+		activecentrelinexcname = selectedcentrelinexcname if selectedcentrelinexcname != "--none--" else ""
 	elif index == 0 and activecentrelinexcname == selectedcentrelinexcname:
 		activecentrelinexcname = ""
 	print(" new current activecentrelinexcname: ", activecentrelinexcname)
