@@ -283,18 +283,20 @@ func updatetunnelxsketchlinkpaths(sketchsystem):
 		var linewidth = linewidthmap.get(linestyle, 1.0)*tubelinklinewidth
 		Polynets.addnoarrowhorizontalmesh(surfaceTool, p0, p1, linewidth, intermediatepts)
 
-
 	var amesh = ArrayMesh.new()
+	var surfacematerials = [ ]
+	var materialsystem = get_node("/root/Spatial/MaterialSystem")
 	for i in range(NlinestyleSurfaces):
 		surfaceTools[i].generate_normals()
 		var smesh = surfaceTools[i].commit()
-		assert (smesh.get_surface_count() == 1)
-		var arrays = smesh.surface_get_arrays(0)
-		amesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+		if smesh.get_surface_count() == 1:
+			var arrays = smesh.surface_get_arrays(0)
+			amesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+			surfacematerials.push_back(materialsystem.pathlinematerial(pathlinestylematerials[i]))
 	$PathLines.mesh = amesh
-	assert($PathLines.get_surface_material_count() == NlinestyleSurfaces)
-	for i in range(NlinestyleSurfaces):
-		$PathLines.set_surface_material(i, get_node("/root/Spatial/MaterialSystem").pathlinematerial(pathlinestylematerials[i]))
+	assert($PathLines.get_surface_material_count() == len(surfacematerials))
+	for i in range(len(surfacematerials)):
+		$PathLines.set_surface_material(i, surfacematerials[i])
 
 	print("Big tunnelx sketchlink paths AABB ", amesh.get_aabb())
 

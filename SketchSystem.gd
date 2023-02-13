@@ -22,10 +22,9 @@ func findxctube(xcname0, xcname1):
 	var xcdrawing0 = get_node("XCdrawings").get_node_or_null(xcname0)
 	if xcdrawing0 != null:
 		for xctube in xcdrawing0.xctubesconn:
-			assert (xctube.xcname0 == xcname0 or xctube.xcname1 == xcname0)
-			if xctube.xcname1 == xcname1:
+			if xctube.xcname1 == xcname1 and xctube.xcname0 == xcname0:
 				return xctube
-			if xctube.xcname0 == xcname1:
+			if xctube.xcname0 == xcname1 and xctube.xcname1 == xcname0:
 				return xctube
 	return null
 	

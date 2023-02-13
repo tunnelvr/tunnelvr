@@ -103,9 +103,48 @@ func setpointersystemray(drawpos):
 	var headcam = planviewsystem.plancamera if planviewsystem.visible else selfSpatial.playerMe.get_node("HeadCam")
 	var raycameranormal = headcam.project_ray_normal(drawpos)
 	var rayorigin = headcam.project_ray_origin(drawpos)
-	var raytransform = Transform(Basis(), rayorigin).looking_at(rayorigin + raycameranormal*10, Vector3(0,1,0))
+	var upvec = Vector3(0,1,0) if (raycameranormal.x != 0 or raycameranormal.z != 0) else Vector3(0,0,-1)
+	var raytransform = Transform(Basis(), rayorigin).looking_at(rayorigin + raycameranormal*10, upvec)
 	pointersystem.handright.pointerposearvrorigin = selfSpatial.playerMe.global_transform.inverse()*raytransform
 
+func getactivecentreline():
+	var centrelinename = planviewsystem.activecentrelinexcname
+	var lastcentreline = null
+	for lxcdrawingcentreline in get_tree().get_nodes_in_group("gpcentrelinegeo"):
+		lastcentreline = lxcdrawingcentreline
+		if centrelinename and centrelinename == lxcdrawingcentreline.get_name():
+			return lxcdrawingcentreline
+	return lastcentreline
+
+func makeactxcdrawndata(tpts):
+	var headcam = planviewsystem.plancamera if planviewsystem.visible else selfSpatial.playerMe.get_node("HeadCam")
+	var cpts = [ ]
+	for pt in tpts:
+		var cpt = headcam.project_ray_origin(pt)
+		var cnorm = headcam.project_ray_normal(pt)
+		var cptP = cpt + cnorm*5
+		cpts.push_back(cptP)
+	var drawingcentreline = getactivecentreline()
+	if drawingcentreline == null:
+		return
+	var drawingnodename0 = drawingcentreline.newuniquexcnodename("_")
+	var drawingnodename1 = drawingcentreline.newuniquexcnodename("_")
+	var xcdata = { "name":drawingcentreline.get_name(), 
+				   "prevnodepoints":{ }, 
+				   "nextnodepoints":{ drawingnodename0:cpts[0], drawingnodename1:cpts[-1] }, 
+				   "prevonepathpairs": [ ],
+				   "newonepathpairs": [ drawingnodename0, drawingnodename1 ]
+				 }
+
+	var intermediatenodes = Polynets.intermediatedrawnpoints(cpts, drawingcentreline.transform.basis)
+	var xctdata = { "tubename":"**notset", 
+					"xcname0":xcdata["name"],
+					"xcname1":xcdata["name"],
+					"prevdrawinglinks":[ ],
+					"newdrawinglinks":[ drawingnodename0, drawingnodename1, "wall", intermediatenodes ], 
+				  }
+	planviewsystem.sketchsystem.setnewtubename(xctdata)
+	planviewsystem.sketchsystem.actsketchchange([xcdata, xctdata])
 
 var drawcurvepoints = [ ]
 func updatescreentouchplaces0stateDraw(pressed):
@@ -124,9 +163,12 @@ func updatescreentouchplaces0stateDraw(pressed):
 			pointersystem._on_button_pressed(BUTTONS.VR_GRIP if touchedindrawmode else BUTTONS.VR_TRIGGER)
 	elif not pressed and not screentouchplaces0pos.has(screentouchposindex0draw): 
 		if $DrawCurve.visible:
-			$DrawCurve.points = PoolVector2Array(Polynets.thincurve(drawcurvepoints, 2.0))
+			var tpts = Polynets.thincurve(drawcurvepoints, 2.0)
+			$DrawCurve.points = PoolVector2Array(tpts)
+			makeactxcdrawndata(tpts)
 #			$DrawCurve.visible = false
 			print("drawcurve point count ", len(drawcurvepoints), " thinned to ", len($DrawCurve.points))
+			
 		else:
 			pointersystem._on_button_release(BUTTONS.VR_GRIP if touchedindrawmode else BUTTONS.VR_TRIGGER)
 			pointersystem.handright.pointervalid = false

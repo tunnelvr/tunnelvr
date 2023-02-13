@@ -1245,3 +1245,19 @@ static func thincurve(pts, tol):
 			i1stack.pop_back()
 	return tpts
 	
+static func intermediatedrawnpoints(pts, spbasis):
+	if len(pts) <= 2:
+		return [ ]
+	var intermediatepoints = [ ]
+	var p0 = pts[0]
+	var p1 = pts[-1]
+	var vec = p1 - p0
+	var vecsq = vec.length_squared()
+	if vecsq == 0.0:
+		vecsq = 1.0
+	for i in range(1, len(pts) - 1):
+		var dpz = clamp((pts[i] - p0).dot(vec)/vecsq, 0.0, 1.0)
+		var sp = lerp(p0, p1, dpz)
+		var dp = pts[i] - sp
+		intermediatepoints.push_back(Vector3(dp.dot(spbasis.x), dp.dot(spbasis.z), dpz))
+	return intermediatepoints
