@@ -118,15 +118,15 @@ func getactivecentreline():
 
 func makeactxcdrawndata(tpts):
 	var headcam = planviewsystem.plancamera if planviewsystem.visible else selfSpatial.playerMe.get_node("HeadCam")
+	var drawingcentreline = getactivecentreline()
+	if drawingcentreline == null:
+		return
 	var cpts = [ ]
 	for pt in tpts:
 		var cpt = headcam.project_ray_origin(pt)
 		var cnorm = headcam.project_ray_normal(pt)
 		var cptP = cpt + cnorm*5
-		cpts.push_back(cptP)
-	var drawingcentreline = getactivecentreline()
-	if drawingcentreline == null:
-		return
+		cpts.push_back(drawingcentreline.transform.xform_inv(cptP))
 	var drawingnodename0 = drawingcentreline.newuniquexcnodename("_")
 	var drawingnodename1 = drawingcentreline.newuniquexcnodename("_")
 	var xcdata = { "name":drawingcentreline.get_name(), 
@@ -141,7 +141,7 @@ func makeactxcdrawndata(tpts):
 					"xcname0":xcdata["name"],
 					"xcname1":xcdata["name"],
 					"prevdrawinglinks":[ ],
-					"newdrawinglinks":[ drawingnodename0, drawingnodename1, "wall", intermediatenodes ], 
+					"newdrawinglinks":[ drawingnodename1, drawingnodename0, "wall", intermediatenodes ], 
 				  }
 	planviewsystem.sketchsystem.setnewtubename(xctdata)
 	planviewsystem.sketchsystem.actsketchchange([xcdata, xctdata])
@@ -166,7 +166,7 @@ func updatescreentouchplaces0stateDraw(pressed):
 			var tpts = Polynets.thincurve(drawcurvepoints, 2.0)
 			$DrawCurve.points = PoolVector2Array(tpts)
 			makeactxcdrawndata(tpts)
-#			$DrawCurve.visible = false
+			$DrawCurve.visible = false
 			print("drawcurve point count ", len(drawcurvepoints), " thinned to ", len($DrawCurve.points))
 			
 		else:
