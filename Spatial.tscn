@@ -2901,7 +2901,7 @@ margin_bottom = 30.0
 margin_right = 28.0
 margin_bottom = 22.0
 text = "normal centreline"
-items = [ "normal centreline", null, false, 0, null, "drawing centreline", null, false, 1, null ]
+items = [ "normal centreline", null, false, 0, null, "sketching centreline", null, false, 1, null, "new plan", null, false, 3, null, "new elevation", null, true, 4, null ]
 selected = 0
 
 [node name="CentrelineList" type="OptionButton" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity"]

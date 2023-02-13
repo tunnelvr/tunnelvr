@@ -964,7 +964,7 @@ func updatecentrelineactivityui():
 	var selectedcentrelinexcnameIndex = 0
 	for lxcdrawingcentreline in get_tree().get_nodes_in_group("gpcentrelinegeo"):
 		CentrelineList.add_item(lxcdrawingcentreline.get_name())
-		if lxcdrawingcentreline.get_name() == selectedcentrelinexcname:
+		if lxcdrawingcentreline.get_name() == selectedcentrelinexcname or lxcdrawingcentreline.get_name() == activecentrelinexcname:
 			selectedcentrelinexcnameIndex = CentrelineList.get_item_count()-1
 	CentrelineList.select(selectedcentrelinexcnameIndex)
 
@@ -975,8 +975,21 @@ func centrelineactivityoptions_selected(index):
 		activecentrelinexcname = selectedcentrelinexcname if selectedcentrelinexcname != "--none--" else ""
 	elif index == 0 and activecentrelinexcname == selectedcentrelinexcname:
 		activecentrelinexcname = ""
-	print(" new current activecentrelinexcname: ", activecentrelinexcname)
-
+	elif index == 2:
+		var rotzminus90 = Basis(Vector3(1,0,0), Vector3(0,0,-1), Vector3(0,1,0))
+		var bbcenvec = Vector3()
+		var centrelinetransformpos = Transform(rotzminus90, -rotzminus90.xform(bbcenvec))
+		var xcdata = { "name":sketchsystem.uniqueXCname("plansketch"), 
+					   "drawingtype":DRAWING_TYPE.DT_CENTRELINE,
+					   "drawingvisiblecode":DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE,
+					   "transformpos":centrelinetransformpos, 
+					   "nodepoints":{}, 
+					   "onepathpairs":[]
+					 }
+		activecentrelinexcname = xcdata["name"]
+		sketchsystem.actsketchchange([ xcdata ])
+		centrelineactivitylist_selected(CentrelineList.selected)
+	
 func centrelineactivitylist_selected(index):
 	var CentrelineList = $PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity/CentrelineList
 	var selectedcentrelinexcname = CentrelineList.get_item_text(CentrelineList.selected) if CentrelineList.selected != -1 else ""
