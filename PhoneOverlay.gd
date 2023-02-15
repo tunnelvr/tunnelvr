@@ -167,7 +167,6 @@ func unusednodepoints(drawingcentreline, prevdrawinglinks):
 			prevnodepoints[drawingnodename1] = drawingcentreline.nodepoints[drawingnodename1]
 	return prevnodepoints
 
-
 func drawndeletelast():
 	var drawingcentreline = getactivecentreline()
 	if drawingcentreline:
@@ -189,13 +188,68 @@ func drawndeletelast():
 						   "nextnodepoints":{ } 
 						 }
 			planviewsystem.sketchsystem.actsketchchange([xctdata, xcdata])
-	
-	
 
-func makeactxcdeletedata(tpts):
+
+	
+func makeactxcdeletedata(tpts, dcrect):
+	var headcam = planviewsystem.plancamera if planviewsystem.visible else selfSpatial.playerMe.get_node("HeadCam")
 	print("delete here")
+	var drawingcentreline = getactivecentreline()
+	if not drawingcentreline:
+		return
+	var spbasis = drawingcentreline.transform.basis
+	var xctube = planviewsystem.sketchsystem.findxctube(drawingcentreline.name, drawingcentreline.name)
+	if xctube == null:
+		return
+		
+	var prevdrawinglinks = [ ]
+	var nE = int(len(xctube.xcdrawinglink)/2)
+	for iA in range(nE):
+		var cpts = [ ]
+		var pt0 = drawingcentreline.nodepoints[xctube.xcdrawinglink[iA*2]]
+		var pt1 = drawingcentreline.nodepoints[xctube.xcdrawinglink[iA*2+1]]
+		cpts.push_back(headcam.unproject_position(drawingcentreline.transform.xform(pt0)))
+		var intermediatepoints = xctube.xclinkintermediatenodes[iA]  if xctube.xclinkintermediatenodes and xctube.xclinkintermediatenodes[iA]  else [ ]
+		for ipt in intermediatepoints:
+			var cpt = spbasis.x*ipt.x + spbasis.z*ipt.y + lerp(pt0, pt1, ipt.z)
+			cpts.push_back(headcam.unproject_position(drawingcentreline.transform.xform(cpt)))
+		cpts.push_back(headcam.unproject_position(drawingcentreline.transform.xform(pt1)))
+
+		var bintersects = false
+		for i in range(len(cpts)-1):
+			var cpt0 = cpts[i]
+			var cpt1 = cpts[i+1]
+			var crect = Rect2(min(cpt0.x, cpt1.x), min(cpt0.y, cpt1.y), abs(cpt1.x - cpt0.x), abs(cpt1.y - cpt0.y))
+			if not dcrect.intersects(crect):
+				continue
+			for j in range(len(tpts)-1):
+				if Geometry.segment_intersects_segment_2d(cpt0, cpt1, tpts[j], tpts[j+1]) != null:
+					bintersects = true
+					break
+
+		if bintersects:
+			#$DrawCurve.points = PoolVector2Array(cpts)
+			#break
+			prevdrawinglinks.append_array([ xctube.xcdrawinglink[iA*2],  
+											xctube.xcdrawinglink[iA*2+1],  
+											xctube.xcsectormaterials[iA], 
+											xctube.xclinkintermediatenodes[iA] if xctube.xclinkintermediatenodes else null ])
+	var xctdata = { "tubename":xctube.get_name(), 
+					"xcname0":drawingcentreline.get_name(),
+					"xcname1":drawingcentreline.get_name(),
+					"prevdrawinglinks":prevdrawinglinks,
+					"newdrawinglinks":[ ] 
+				  }
+	var prevnodepoints = unusednodepoints(drawingcentreline, prevdrawinglinks)
+	var xcdata = { "name":drawingcentreline.get_name(), 
+				   "prevnodepoints":prevnodepoints, 
+				   "nextnodepoints":{ } 
+				 }
+	planviewsystem.sketchsystem.actsketchchange([xctdata, xcdata])
+
 	
 var drawcurvepoints = [ ]
+var dcrect = Rect2()
 func updatescreentouchplaces0stateDraw(pressed):
 	var screentouchplaces0keys = screentouchplaces0pos.keys()
 	if pressed and len(screentouchplaces0keys) == 1:
@@ -203,6 +257,7 @@ func updatescreentouchplaces0stateDraw(pressed):
 		if not touchedinselectmode and touchedindrawmode:
 			$DrawCurve.visible = true
 			drawcurvepoints = [ screentouchplaces0pos[screentouchposindex0draw] ]
+			dcrect = Rect2(drawcurvepoints[0], Vector2(0,0))
 			$DrawCurve.points = PoolVector2Array(drawcurvepoints)
 		else:
 			setpointersystemray(screentouchplaces0pos[screentouchposindex0draw])
@@ -217,7 +272,7 @@ func updatescreentouchplaces0stateDraw(pressed):
 			var linetypeoptions = planviewsystem.planviewcontrols.get_node("CentrelineActivity/LineType")
 			var linetype = linetypeoptions.get_item_text(linetypeoptions.selected)
 			if linetype == "*delete":
-				makeactxcdeletedata(tpts)
+				makeactxcdeletedata(tpts, dcrect)
 			else:
 				makeactxcdrawndata(tpts, linetype)
 			$DrawCurve.visible = false
@@ -234,6 +289,7 @@ func updatescreentouchplaces0dragDraw():
 			var pt = screentouchplaces0pos[screentouchposindex0draw]
 			drawcurvepoints.push_back(pt)
 			$DrawCurve.points = PoolVector2Array(drawcurvepoints)
+			dcrect = dcrect.expand(pt)
 		setpointersystemray(screentouchplaces0pos[screentouchposindex0draw])
 
 func updatescreentouchplaces0state(pressed):

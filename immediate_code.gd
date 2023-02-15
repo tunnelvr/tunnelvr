@@ -17,7 +17,7 @@ func D_run():
 		print(len(mmtext.strings[0]))
 
 func _run():
-	var t = '{1":2}'
-	var g = parse_json(t) #or { }
-	print(g)
-	
+	var x = Rect2(Vector2(0,0), Vector2(20,20))
+	var y = Rect2(Vector2(1.1,1.1), Vector2(3,3))
+	print(x.intersects(y), y.intersects(x))
+	print(x.clip(y))

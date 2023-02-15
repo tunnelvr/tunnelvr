@@ -328,25 +328,8 @@ func makedrawinglinksDL(skpaths, nodeidsmap, spbasis, xcdrawinglink, xcsectormat
 			xcsectormaterials.push_back("connective_" + sk.area_signal)
 		else:
 			xcsectormaterials.push_back(sk.linestyle)
-
-		if len(sk.pts) > 2:
-			var intermediatepoints = [ ]
-			var p0 = sk.pts[0]
-			var p1 = sk.pts[-1]
-			var vec = p1 - p0
-			var vecsq = vec.length_squared()
-			if vecsq == 0.0:
-				vecsq = 1.0
-			for i in range(1, len(sk.pts) - 1):
-				var dpz = clamp((sk.pts[i] - p0).dot(vec)/vecsq, 0.0, 1.0)
-				var sp = lerp(p0, p1, dpz)
-				var dp = sk.pts[i] - sp
-				intermediatepoints.push_back(Vector3(dp.dot(spbasis.x), dp.dot(spbasis.z), dpz))
-			xclinkintermediatenodes.push_back(intermediatepoints)
-		else:
-			xclinkintermediatenodes.push_back([])
+		xclinkintermediatenodes.push_back(Polynets.intermediatedrawnpoints(sk.pts, spbasis))
 	return drawinglinks
-
 	
 
 var linestyleboundaries = [ "wall", "estwall", "detail", "pitchbound", "ceilingbound", "invisible" ]
