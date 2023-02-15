@@ -111,7 +111,7 @@ func setpointersystemray(drawpos):
 	var headcam = planviewsystem.plancamera if planviewsystem.visible else selfSpatial.playerMe.get_node("HeadCam")
 	var raycameranormal = headcam.project_ray_normal(drawpos)
 	var rayorigin = headcam.project_ray_origin(drawpos)
-	var upvec = Vector3(0,1,0) if (raycameranormal.x != 0 or raycameranormal.z != 0) else Vector3(0,0,-1)
+	var upvec = Vector3(0,0,-1) if is_zero_approx(raycameranormal.x) and is_zero_approx(raycameranormal.z) else Vector3(0,1,0)
 	var raytransform = Transform(Basis(), rayorigin).looking_at(rayorigin + raycameranormal*10, upvec)
 	pointersystem.handright.pointerposearvrorigin = selfSpatial.playerMe.global_transform.inverse()*raytransform
 
@@ -138,9 +138,7 @@ func makeactxcdrawndata(tpts, linetype):
 	var drawingnodename1 = drawingcentreline.newuniquexcnodename("_")
 	var xcdata = { "name":drawingcentreline.get_name(), 
 				   "prevnodepoints":{ }, 
-				   "nextnodepoints":{ drawingnodename0:cpts[0], drawingnodename1:cpts[-1] }, 
-				   "prevonepathpairs": [ ],
-				   "newonepathpairs": [ ]
+				   "nextnodepoints":{ drawingnodename0:cpts[0], drawingnodename1:cpts[-1] } 
 				 }
 
 	var intermediatenodes = Polynets.intermediatedrawnpoints(cpts, drawingcentreline.transform.basis)
@@ -148,13 +146,29 @@ func makeactxcdrawndata(tpts, linetype):
 					"xcname0":xcdata["name"],
 					"xcname1":xcdata["name"],
 					"prevdrawinglinks":[ ],
-					"newdrawinglinks":[ drawingnodename0, drawingnodename1, linetype, intermediatenodes ], 
+					"newdrawinglinks":[ drawingnodename0, drawingnodename1, linetype, intermediatenodes ] 
 				  }
 	planviewsystem.sketchsystem.setnewtubename(xctdata)
 	planviewsystem.sketchsystem.actsketchchange([xcdata, xctdata])
 
 func drawndeletelast():
-	print("drawndeletelast HERE")
+	var drawingcentreline = getactivecentreline()
+	if drawingcentreline:
+		var xctube = planviewsystem.sketchsystem.findxctube(drawingcentreline.name, drawingcentreline.name)
+		if xctube != null and len(xctube.xcdrawinglink) != 0:
+			var prevdrawinglinks = [ xctube.xcdrawinglink[-2], 
+									 xctube.xcdrawinglink[-1], 
+									 xctube.xcsectormaterials[-1], 
+									 xctube.xclinkintermediatenodes[-1] if xctube.xclinkintermediatenodes else null ]
+			var xctdata = { "tubename":xctube.get_name(), 
+							"xcname0":drawingcentreline.get_name(),
+							"xcname1":drawingcentreline.get_name(),
+							"prevdrawinglinks":prevdrawinglinks,
+							"newdrawinglinks":[ ] 
+						  }
+			planviewsystem.sketchsystem.actsketchchange([xctdata])
+	
+	
 
 func makeactxcdeletedata(tpts):
 	print("delete here")
