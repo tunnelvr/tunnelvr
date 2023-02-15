@@ -151,6 +151,23 @@ func makeactxcdrawndata(tpts, linetype):
 	planviewsystem.sketchsystem.setnewtubename(xctdata)
 	planviewsystem.sketchsystem.actsketchchange([xcdata, xctdata])
 
+const rN = 4
+func unusednodepoints(drawingcentreline, prevdrawinglinks):
+	var nE = int(len(prevdrawinglinks)/rN)
+	var nodesconnectedset = { }
+	for i in drawingcentreline.onepathpairs:
+		nodesconnectedset[i] = 1
+	var prevnodepoints = { }
+	for iA in range(nE):
+		var drawingnodename0 = prevdrawinglinks[iA*rN+0]
+		var drawingnodename1 = prevdrawinglinks[iA*rN+1]
+		if not nodesconnectedset.has(drawingnodename0):
+			prevnodepoints[drawingnodename0] = drawingcentreline.nodepoints[drawingnodename0]
+		if not nodesconnectedset.has(drawingnodename1):
+			prevnodepoints[drawingnodename1] = drawingcentreline.nodepoints[drawingnodename1]
+	return prevnodepoints
+
+
 func drawndeletelast():
 	var drawingcentreline = getactivecentreline()
 	if drawingcentreline:
@@ -166,7 +183,12 @@ func drawndeletelast():
 							"prevdrawinglinks":prevdrawinglinks,
 							"newdrawinglinks":[ ] 
 						  }
-			planviewsystem.sketchsystem.actsketchchange([xctdata])
+			var prevnodepoints = unusednodepoints(drawingcentreline, prevdrawinglinks)
+			var xcdata = { "name":drawingcentreline.get_name(), 
+						   "prevnodepoints":prevnodepoints, 
+						   "nextnodepoints":{ } 
+						 }
+			planviewsystem.sketchsystem.actsketchchange([xctdata, xcdata])
 	
 	
 

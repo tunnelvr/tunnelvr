@@ -409,9 +409,9 @@ remote func actsketchchangeL(xcdatalist):
 				xcdrawingsrejected.append(xcdata["name"])
 				print("rejecting XC drawing from data", xcdata)
 
-			elif xcdrawing.drawingtype == DRAWING_TYPE.DT_CENTRELINE and len(xcdrawing.nodepoints) == 0 and len(xcdata.get("prevnodepoints", [])) != 0:
-				print("immediate deletion of centreline xcdrawing case; not waiting for file save")
-				xcdrawing.queue_free()
+			#elif xcdrawing.drawingtype == DRAWING_TYPE.DT_CENTRELINE and len(xcdrawing.nodepoints) == 0 and len(xcdata.get("prevnodepoints", [])) != 0:
+			#	print("immediate deletion of centreline xcdrawing case; not waiting for file save")
+			#	xcdrawing.queue_free()
 
 			elif "nodepoints" in xcdata or "nextnodepoints" in xcdata or "onepathpairs" in xcdata or "newonepathpairs" in xcdata:
 				if xcdata.has("drawingvisiblecode") and xcdrawing.drawingtype == DRAWING_TYPE.DT_ROPEHANG:
