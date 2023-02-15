@@ -2892,10 +2892,10 @@ __meta__ = {
 }
 
 [node name="CentrelineActivity" type="Control" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
-margin_left = 475.0
+margin_left = 201.0
 margin_top = 3.0
-margin_right = 650.0
-margin_bottom = 30.0
+margin_right = 461.0
+margin_bottom = 34.0
 
 [node name="OptionsCentreline" type="OptionButton" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity"]
 margin_right = 28.0
@@ -2905,9 +2905,21 @@ items = [ "normal centreline", null, false, 0, null, "sketching centreline", nul
 selected = 0
 
 [node name="CentrelineList" type="OptionButton" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity"]
-margin_left = 147.0
-margin_right = 249.0
+margin_left = 151.0
+margin_right = 258.0
 margin_bottom = 22.0
+text = "--none--"
+items = [ "--none--", null, false, 0, null ]
+selected = 0
+
+[node name="LineType" type="OptionButton" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity"]
+margin_left = 152.0
+margin_top = 25.0
+margin_right = 180.0
+margin_bottom = 47.0
+text = "wall"
+items = [ "wall", null, false, 0, null, "estwall", null, false, 1, null, "detail", null, false, 2, null, "pitchbound", null, false, 3, null, "ceilingbound", null, false, 4, null ]
+selected = 0
 
 [node name="ButtonClosePlanView" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
 margin_left = 0.943848

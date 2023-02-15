@@ -655,11 +655,13 @@ func _on_optionbuttongoto_selected(index):
 		elif selectedflagtrail != null:
 			PlayerDirections.colocatedflagtrail = selectedflagtrail
 			PlayerDirections.setcolocflagtrailatpos()
+		planviewsystem.planviewcontrols.get_node("PathFollow").visible = true
 				
 	else:
 		PlayerDirections.colocatedplayer = null
 		PlayerDirections.colocatedflagtrail = null
 		$Viewport/GUI/Panel/OptionButtonGoto.selected = 0
+		planviewsystem.planviewcontrols.get_node("PathFollow").visible = true
 		
 	$Viewport/GUI/Panel/PlayerList.disabled = ($Viewport/GUI/Panel/OptionButtonGoto.selected == 2)
 

@@ -366,6 +366,7 @@ func _ready():
 
 	planviewcontrols.get_node("CentrelineActivity/OptionsCentreline").connect("item_selected", self, "centrelineactivityoptions_selected")
 	planviewcontrols.get_node("CentrelineActivity/CentrelineList").connect("item_selected", self, "centrelineactivitylist_selected")
+	planviewcontrols.get_node("CentrelineActivity/LineType").select(0)
 
 	set_process(visible)
 	assert (planviewcontrols.get_node("CheckBoxPlanTubesVisible").pressed == (($PlanView/Viewport/PlanGUI/Camera.cull_mask & CollisionLayer.VL_xcshells) != 0))
@@ -816,8 +817,6 @@ func setfloortrimmode(floorstyleid, floorlabel):
 	planviewcontrols.get_node("ColorRectURL").visible = pvisible
 	planviewcontrols.get_node("FloorTrim").visible = pvisible
 	planviewcontrols.get_node("FloorMove").visible = pvisible
-	planviewcontrols.get_node("PathFollow").visible = not pvisible
-
 	
 func buttonfollow_toggled(button_pressed):
 	planviewcontrols.get_node("ViewSlide/ButtonSlideDown").disabled = button_pressed

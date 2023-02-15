@@ -317,7 +317,7 @@ remote func actsketchchangeL(xcdatalist):
 				if xcdrawing0.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 					xctube.makeplaneintersectionaxisvec(xcdrawing0, xcdrawing1)
 			else:
-				xcdata["m0"] = 1 if xctube.xcname0 == xcdata["xcname1"] else 0
+				xcdata["m0"] = 0 if xctube.xcname0 == xcdata["xcname0"] else 1
 
 			if "overridingxctube" in xcdata:
 				assert(fromremotecall)

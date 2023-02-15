@@ -133,15 +133,17 @@ func makeactxcdrawndata(tpts):
 				   "prevnodepoints":{ }, 
 				   "nextnodepoints":{ drawingnodename0:cpts[0], drawingnodename1:cpts[-1] }, 
 				   "prevonepathpairs": [ ],
-				   "newonepathpairs": [ drawingnodename0, drawingnodename1 ]
+				   "newonepathpairs": [ ]
 				 }
 
 	var intermediatenodes = Polynets.intermediatedrawnpoints(cpts, drawingcentreline.transform.basis)
+	var linetypeoptions = planviewsystem.planviewcontrols.get_node("CentrelineActivity/LineType")
+	var linetype = linetypeoptions.get_item_text(linetypeoptions.selected)
 	var xctdata = { "tubename":"**notset", 
 					"xcname0":xcdata["name"],
 					"xcname1":xcdata["name"],
 					"prevdrawinglinks":[ ],
-					"newdrawinglinks":[ drawingnodename1, drawingnodename0, "wall", intermediatenodes ], 
+					"newdrawinglinks":[ drawingnodename0, drawingnodename1, linetype, intermediatenodes ], 
 				  }
 	planviewsystem.sketchsystem.setnewtubename(xctdata)
 	planviewsystem.sketchsystem.actsketchchange([xcdata, xctdata])
