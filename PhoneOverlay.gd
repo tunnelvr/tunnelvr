@@ -9,6 +9,14 @@ onready var pointersystem = get_node("/root/Spatial/Players/PlayerMe/pointersyst
 var plancamerascreensize = Vector2(100,100)
 var touchscreentype = false
 
+func _ready():
+	$DrawmodeButton.connect("toggled", self, "_ondrawmodebuttontoggled")
+	_ondrawmodebuttontoggled(false)
+	planviewsystem.planviewcontrols.get_node("CentrelineActivity/DelLast").connect("pressed", self, "drawndeletelast")
+
+func _ondrawmodebuttontoggled(button_pressed: bool):
+	planviewsystem.planviewcontrols.get_node("CentrelineActivity").visible = button_pressed
+
 func setupphoneoverlaysystem(ltouchscreentype):
 	visible = true
 	Tglobal.phoneoverlay = self
@@ -109,14 +117,13 @@ func setpointersystemray(drawpos):
 
 func getactivecentreline():
 	var centrelinename = planviewsystem.activecentrelinexcname
-	var lastcentreline = null
-	for lxcdrawingcentreline in get_tree().get_nodes_in_group("gpcentrelinegeo"):
-		lastcentreline = lxcdrawingcentreline
-		if centrelinename and centrelinename == lxcdrawingcentreline.get_name():
-			return lxcdrawingcentreline
-	return lastcentreline
+	if centrelinename:
+		for lxcdrawingcentreline in get_tree().get_nodes_in_group("gpcentrelinegeo"):
+			if centrelinename and centrelinename == lxcdrawingcentreline.get_name():
+				return lxcdrawingcentreline
+	return null
 
-func makeactxcdrawndata(tpts):
+func makeactxcdrawndata(tpts, linetype):
 	var headcam = planviewsystem.plancamera if planviewsystem.visible else selfSpatial.playerMe.get_node("HeadCam")
 	var drawingcentreline = getactivecentreline()
 	if drawingcentreline == null:
@@ -137,8 +144,6 @@ func makeactxcdrawndata(tpts):
 				 }
 
 	var intermediatenodes = Polynets.intermediatedrawnpoints(cpts, drawingcentreline.transform.basis)
-	var linetypeoptions = planviewsystem.planviewcontrols.get_node("CentrelineActivity/LineType")
-	var linetype = linetypeoptions.get_item_text(linetypeoptions.selected)
 	var xctdata = { "tubename":"**notset", 
 					"xcname0":xcdata["name"],
 					"xcname1":xcdata["name"],
@@ -148,6 +153,12 @@ func makeactxcdrawndata(tpts):
 	planviewsystem.sketchsystem.setnewtubename(xctdata)
 	planviewsystem.sketchsystem.actsketchchange([xcdata, xctdata])
 
+func drawndeletelast():
+	print("drawndeletelast HERE")
+
+func makeactxcdeletedata(tpts):
+	print("delete here")
+	
 var drawcurvepoints = [ ]
 func updatescreentouchplaces0stateDraw(pressed):
 	var screentouchplaces0keys = screentouchplaces0pos.keys()
@@ -167,7 +178,12 @@ func updatescreentouchplaces0stateDraw(pressed):
 		if $DrawCurve.visible:
 			var tpts = Polynets.thincurve(drawcurvepoints, 2.0)
 			$DrawCurve.points = PoolVector2Array(tpts)
-			makeactxcdrawndata(tpts)
+			var linetypeoptions = planviewsystem.planviewcontrols.get_node("CentrelineActivity/LineType")
+			var linetype = linetypeoptions.get_item_text(linetypeoptions.selected)
+			if linetype == "*delete":
+				makeactxcdeletedata(tpts)
+			else:
+				makeactxcdrawndata(tpts, linetype)
 			$DrawCurve.visible = false
 			print("drawcurve point count ", len(drawcurvepoints), " thinned to ", len($DrawCurve.points))
 			

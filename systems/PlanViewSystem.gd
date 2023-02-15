@@ -817,6 +817,8 @@ func setfloortrimmode(floorstyleid, floorlabel):
 	planviewcontrols.get_node("ColorRectURL").visible = pvisible
 	planviewcontrols.get_node("FloorTrim").visible = pvisible
 	planviewcontrols.get_node("FloorMove").visible = pvisible
+	if pvisible:
+		planviewcontrols.get_node("PathFollow").visible = false
 	
 func buttonfollow_toggled(button_pressed):
 	planviewcontrols.get_node("ViewSlide/ButtonSlideDown").disabled = button_pressed
@@ -995,6 +997,7 @@ func centrelineactivitylist_selected(index):
 	var OptionsCentreline = $PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity/OptionsCentreline
 	OptionsCentreline.select(1 if selectedcentrelinexcname == activecentrelinexcname else 0)
 
+	
 
 # * keyboard to work on phone overlay mode
 # * root of tree should give URL of the tree

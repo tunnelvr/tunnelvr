@@ -1,4 +1,4 @@
-[gd_scene load_steps=376 format=2]
+[gd_scene load_steps=377 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/underground_env.tres" type="Environment" id=2]
@@ -385,6 +385,9 @@ shader_param/woundcolor = Color( 0.992157, 0.478431, 0.141176, 1 )
 shader_param/faceupbrightcolor = Color( 0.827451, 1, 0.807843, 1 )
 
 [sub_resource type="CanvasItemMaterial" id=75]
+
+[sub_resource type="DynamicFont" id=307]
+font_data = ExtResource( 40 )
 
 [sub_resource type="QuadMesh" id=76]
 size = Vector2( 1.6, 1 )
@@ -1739,7 +1742,7 @@ emission_on_uv2 = false
 
 [sub_resource type="SpatialMaterial" id=303]
 params_cull_mode = 2
-albedo_color = Color( 0.2, 0.196078, 0.580392, 1 )
+albedo_color = Color( 0.94902, 0.188235, 0.952941, 1 )
 metallic = 0.8
 roughness = 0.67
 emission_enabled = true
@@ -2547,6 +2550,68 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="CentrelineActivity" type="Control" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
+margin_left = 184.0
+margin_top = 3.0
+margin_right = 349.0
+margin_bottom = 98.0
+
+[node name="ColorRect" type="ColorRect" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity"]
+margin_top = -4.0
+margin_right = 195.0
+margin_bottom = 93.0
+color = Color( 0.317647, 0.286275, 0.133333, 1 )
+
+[node name="Label" type="Label" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity"]
+margin_left = 1.0
+margin_top = -5.0
+margin_right = 89.0
+margin_bottom = 23.0
+custom_fonts/font = SubResource( 307 )
+text = "Topodraw"
+
+[node name="Label2" type="Label" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity"]
+margin_left = 3.0
+margin_top = 15.0
+margin_right = 47.0
+margin_bottom = 43.0
+custom_fonts/font = SubResource( 307 )
+text = "CL:"
+
+[node name="OptionsCentreline" type="OptionButton" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity"]
+margin_left = 15.0
+margin_top = 45.0
+margin_right = 157.0
+margin_bottom = 67.0
+text = "normal centreline"
+items = [ "normal centreline", null, false, 0, null, "sketching centreline", null, false, 1, null, "new plan", null, false, 3, null, "new elevation", null, true, 4, null ]
+selected = 0
+
+[node name="CentrelineList" type="OptionButton" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity"]
+margin_left = 51.0
+margin_top = 21.0
+margin_right = 158.0
+margin_bottom = 43.0
+text = "--none--"
+items = [ "--none--", null, false, 0, null ]
+selected = 0
+
+[node name="LineType" type="OptionButton" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity"]
+margin_left = 89.0
+margin_top = -3.0
+margin_right = 142.0
+margin_bottom = 19.0
+text = "wall"
+items = [ "wall", null, false, 0, null, "estwall", null, false, 1, null, "detail", null, false, 2, null, "pitchbound", null, false, 3, null, "ceilingbound", null, false, 4, null, "*delete", null, false, 5, null ]
+selected = 0
+
+[node name="DelLast" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity"]
+margin_left = 27.0
+margin_top = 69.0
+margin_right = 73.0
+margin_bottom = 91.0
+text = "Delete Last"
+
 [node name="FloorTrim" type="Control" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
 visible = false
 material = SubResource( 75 )
@@ -2890,36 +2955,6 @@ text = "Scale: 1m"
 __meta__ = {
 "_edit_use_anchors_": false
 }
-
-[node name="CentrelineActivity" type="Control" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
-margin_left = 201.0
-margin_top = 3.0
-margin_right = 461.0
-margin_bottom = 34.0
-
-[node name="OptionsCentreline" type="OptionButton" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity"]
-margin_right = 28.0
-margin_bottom = 22.0
-text = "normal centreline"
-items = [ "normal centreline", null, false, 0, null, "sketching centreline", null, false, 1, null, "new plan", null, false, 3, null, "new elevation", null, true, 4, null ]
-selected = 0
-
-[node name="CentrelineList" type="OptionButton" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity"]
-margin_left = 151.0
-margin_right = 258.0
-margin_bottom = 22.0
-text = "--none--"
-items = [ "--none--", null, false, 0, null ]
-selected = 0
-
-[node name="LineType" type="OptionButton" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity"]
-margin_left = 152.0
-margin_top = 25.0
-margin_right = 180.0
-margin_bottom = 47.0
-text = "wall"
-items = [ "wall", null, false, 0, null, "estwall", null, false, 1, null, "detail", null, false, 2, null, "pitchbound", null, false, 3, null, "ceilingbound", null, false, 4, null ]
-selected = 0
 
 [node name="ButtonClosePlanView" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
 margin_left = 0.943848
@@ -4374,9 +4409,6 @@ script = ExtResource( 38 )
 
 [node name="Viewport" type="Control" parent="LabelGenerator"]
 margin_top = 300.0
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="RichTextLabel" type="RichTextLabel" parent="LabelGenerator/Viewport"]
 margin_right = 113.0
@@ -4603,10 +4635,10 @@ toggle_mode = true
 text = "Draw"
 
 [node name="SelectmodeButton" type="Button" parent="PhoneOverlay"]
-margin_left = 23.0
-margin_top = 420.0
-margin_right = 83.0
-margin_bottom = 440.0
+margin_left = 26.0
+margin_top = 382.0
+margin_right = 86.0
+margin_bottom = 402.0
 toggle_mode = true
 text = "Select"
 
