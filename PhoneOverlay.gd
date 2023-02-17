@@ -491,21 +491,26 @@ func backgroundmotioninput(viewport: Object, event: InputEvent, shape_idx: int):
 				updatescreentouchplaces0drag()
 
 var deviceaxisvalues = [ 0, 0, 0, 0, 0, 0, 0, 0 ]
+var distoxquat = Quat()
+var distoxlength = 0.0
+var quatsettime = 0
+
 func _input(event):
 	if event is InputEventJoypadButton:
-		print("Jbutton ", ("down" if event.pressed else "up"), " ", event.button_index)
-		if event.device == 0 and event.button_index == 5 and event.pressed:
-			print(" shunt the joystick data into LaserSelectLine")
-	elif event is InputEventJoypadMotion:
-		print("Jmotion ", event.axis, " dev ", event.device, " value ", (event.axis_value+1)/2*32767)
-		if event.device == 0 and event.axis < 8:
-			deviceaxisvalues[event.axis] = int((event.axis_value+1.0)/2*32767)
-#	if not islefthand:
+		if event.button_index != 4:
+			print("Jbutton ", ("down" if event.pressed else "up"), " ", event.button_index)
+		if event.device == 0 and (event.button_index == 4 or event.button_index == 5) and not event.pressed:
+			var lquat = Quat(deviceaxisvalues[0], deviceaxisvalues[1], deviceaxisvalues[2], deviceaxisvalues[5])
+			if event.button_index == 4:
+				if abs(lquat.length() - 1.0) < 0.1:
+					distoxquat = lquat.normalized()
+					print(" quat ", distoxquat, " ", distoxquat.length())
+					quatsettime = OS.get_ticks_msec()
+			else:
+				distoxlength = (deviceaxisvalues[3]+1)*20
+				print("length ", distoxlength, "  quat ", distoxquat, " ", distoxquat.length())
 
-#		var a = (Input.get_joy_axis(0, 0)+1)/2*32768
-#		var b = (Input.get_joy_axis(0, 1)+1)/2*32768
-#		var c = (Input.get_joy_axis(0, 2)+1)/2*32768
-#		print(int(a), " ", int(c), " ", Input.get_joy_name(0), " ", Input.get_joy_axis(0, 3), " ", Input.get_joy_axis(0, 4), " ", Input.get_joy_name(2), " ", Input.get_joy_axis(0, 5), " ", Input.get_joy_axis(0, 6))
-#		$MeshInstance.rotation_degrees.x = a/30000*360-180
-#		$MeshInstance.rotation_degrees.z = b/30000*360-90
-#		$MeshInstance.rotation_degrees.y = c/30000*360-180
+	elif event is InputEventJoypadMotion:
+		if event.device == 0 and event.axis < 8:
+			deviceaxisvalues[event.axis] = event.axis_value
+			#print(event.axis, " ", event.axis_value)

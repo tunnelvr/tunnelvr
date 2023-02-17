@@ -2188,6 +2188,12 @@ func _physics_process(delta):
 	if activetargetwallgrabbedtransform != null:
 		sketchsystem.actsketchchange([ targetwalltransformpos(0) ])
 
+	if Tglobal.phoneoverlay != null and (activetargetnodewall != null) and (activetargetnodewall.drawingtype == DRAWING_TYPE.DT_CENTRELINE) and \
+	   (activetargetnode != null) and (OS.get_ticks_msec() < Tglobal.phoneoverlay.quatsettime + 2000) and (laserselectlinelogicalvisibilitystate == 0):
+			LaserSelectLine.transform = Transform(Basis(Tglobal.phoneoverlay.distoxquat), activetargetnodewall.transform.xform(activetargetnode.transform.origin))
+			LaserSelectLine.get_node("Scale").scale = Vector3(selectlinefatness, selectlinefatness, -(Tglobal.phoneoverlay.distoxlength + 2.0)/2)
+			LaserSelectLine.visible = true
+
 		
 var rightmousebuttonheld = false
 func _input(event):
