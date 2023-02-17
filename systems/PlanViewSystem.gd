@@ -364,6 +364,10 @@ func _ready():
 	var PlayerDirections = get_node("/root/Spatial/BodyObjects/PlayerDirections")
 	planviewcontrols.get_node("PathFollow/HSliderTrailpos").connect("value_changed", PlayerDirections, "hslidertrailpos_valuechanged")
 
+	planviewcontrols.get_node("CentrelineActivity/OptionsCentreline").connect("item_selected", self, "centrelineactivityoptions_selected")
+	planviewcontrols.get_node("CentrelineActivity/CentrelineList").connect("item_selected", self, "centrelineactivitylist_selected")
+	planviewcontrols.get_node("CentrelineActivity/LineType").select(0)
+
 	set_process(visible)
 	assert (planviewcontrols.get_node("CheckBoxPlanTubesVisible").pressed == (($PlanView/Viewport/PlanGUI/Camera.cull_mask & CollisionLayer.VL_xcshells) != 0))
 
@@ -606,6 +610,7 @@ func planviewtransformpos(guidpaneltransform, guidpanelsize):
 func updateplanviewlocatorlines():
 	var nodesca = plancamera.size/70.0*3.0
 	var labelsca = nodesca*2.0
+	sketchsystem.pointersystem.selectlinefatness = nodesca*8.0
 	for player in selfSpatial.get_node("Players").get_children():
 		var planviewlocatorline = player.get_node("headlocator/planviewlocatorline")
 		planviewlocatorline.scale = Vector3(nodesca*3.0, 1, nodesca*3.0)
@@ -615,9 +620,10 @@ func updateplanviewlocatorlines():
 			planviewlocatorline.translation.y = max(3.0 + planviewlocatorline.mesh.size.y/2, plancamera.translation.y - 5.0 + planviewlocatorline.mesh.size.y/2 - player.get_node("headlocator").global_transform.origin.y)
 
 var updateplanviewentitysizes_working = false
+var nodesca = 1.0
 func updateplanviewentitysizes():
 	var Dt0 = OS.get_ticks_msec()
-	var nodesca = plancamera.size/70.0*3.0
+	nodesca = plancamera.size/70.0*3.0
 	var labelsca = nodesca*2.0
 	var vertexyinvert = -1.0 if Tglobal.phoneoverlay != null else 1.0
 		
@@ -812,8 +818,8 @@ func setfloortrimmode(floorstyleid, floorlabel):
 	planviewcontrols.get_node("ColorRectURL").visible = pvisible
 	planviewcontrols.get_node("FloorTrim").visible = pvisible
 	planviewcontrols.get_node("FloorMove").visible = pvisible
-	planviewcontrols.get_node("PathFollow").visible = not pvisible
-
+	if pvisible:
+		planviewcontrols.get_node("PathFollow").visible = false
 	
 func buttonfollow_toggled(button_pressed):
 	planviewcontrols.get_node("ViewSlide/ButtonSlideDown").disabled = button_pressed
@@ -950,6 +956,49 @@ func planviewguipanelreleasemouse():
 	event.position = Vector2(0,0)
 	$PlanView/Viewport.input(event)
 
+# this should be transmitted with planview transmit stuff
+var activecentrelinexcname = ""
+func updatecentrelineactivityui():
+	var CentrelineList = $PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity/CentrelineList
+	var selectedcentrelinexcname = CentrelineList.get_item_text(CentrelineList.selected) if CentrelineList.selected != -1 else ""
+	CentrelineList.clear()
+	CentrelineList.add_item("--none--")
+	var selectedcentrelinexcnameIndex = 0
+	for lxcdrawingcentreline in get_tree().get_nodes_in_group("gpcentrelinegeo"):
+		CentrelineList.add_item(lxcdrawingcentreline.get_name())
+		if lxcdrawingcentreline.get_name() == selectedcentrelinexcname or lxcdrawingcentreline.get_name() == activecentrelinexcname:
+			selectedcentrelinexcnameIndex = CentrelineList.get_item_count()-1
+	CentrelineList.select(selectedcentrelinexcnameIndex)
+
+func centrelineactivityoptions_selected(index):
+	var CentrelineList = $PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity/CentrelineList
+	var selectedcentrelinexcname = CentrelineList.get_item_text(CentrelineList.selected) if CentrelineList.selected != -1 else ""
+	if index == 1:
+		activecentrelinexcname = selectedcentrelinexcname if selectedcentrelinexcname != "--none--" else ""
+	elif index == 0 and activecentrelinexcname == selectedcentrelinexcname:
+		activecentrelinexcname = ""
+	elif index == 2:
+		var rotzminus90 = Basis(Vector3(1,0,0), Vector3(0,0,-1), Vector3(0,1,0))
+		var bbcenvec = Vector3()
+		var centrelinetransformpos = Transform(rotzminus90, -rotzminus90.xform(bbcenvec))
+		var xcdata = { "name":sketchsystem.uniqueXCname("plansketch"), 
+					   "drawingtype":DRAWING_TYPE.DT_CENTRELINE,
+					   "drawingvisiblecode":DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE,
+					   "transformpos":centrelinetransformpos, 
+					   "nodepoints":{}, 
+					   "onepathpairs":[]
+					 }
+		activecentrelinexcname = xcdata["name"]
+		sketchsystem.actsketchchange([ xcdata ])
+		centrelineactivitylist_selected(CentrelineList.selected)
+	
+func centrelineactivitylist_selected(index):
+	var CentrelineList = $PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity/CentrelineList
+	var selectedcentrelinexcname = CentrelineList.get_item_text(CentrelineList.selected) if CentrelineList.selected != -1 else ""
+	var OptionsCentreline = $PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity/OptionsCentreline
+	OptionsCentreline.select(1 if selectedcentrelinexcname == activecentrelinexcname else 0)
+
+	
 
 # * keyboard to work on phone overlay mode
 # * root of tree should give URL of the tree

@@ -21,7 +21,7 @@ onready var GripLaserSpot = get_node("/root/Spatial/BodyObjects/GripLaserSpot")
 
 onready var LaseSelectLinegoodcolour = LaserSelectLine.get_node("Scale/Mesh").get_surface_material(0).albedo_color
 onready var LaseSelectLinebadcolour = Color(0.30, 0.08, 0.08, 1)
-
+onready var LaseSelectLinedistoxcolour = Color(0.08, 0.40, 0.08, 1)
 var viewport_point = null
 
 onready var activelaserroot = LaserOrient
@@ -72,6 +72,8 @@ const handflickmotiongestureposition_shortpos = 1
 var handflickmotiongestureposition_shortpos_length = 0.25
 const handflickmotiongestureposition_gone = 2
 const splineamplificationfactor = 10.0
+
+var selectlinefatness = 8.0
 
 func clearpointertargetmaterial():
 	if pointertargettype == "XCnode" and pointertarget != null:
@@ -527,7 +529,7 @@ func setpointertarget(laserroot, raycast, pointertargetshortdistance):
 			var bv = LaserOrient.transform.origin - b*LaserOrient.transform.basis.z
 			var skewdist = av.distance_to(bv)
 			LaserSelectLine.transform = Transform(activetargetnodewall.transform.basis, nodezerozposition)
-			LaserSelectLine.get_node("Scale").scale = Vector3(8, 8, -a)
+			LaserSelectLine.get_node("Scale").scale = Vector3(selectlinefatness, selectlinefatness, -a)
 			nodetriggerpulledmaxd = max(nodetriggerpulledmaxd, abs(activetargetnodetriggerpulledz - tpnodepoint.z))
 			LaserSelectLine.visible = (skewdist < 0.1) and (abs(a) < nodetriggerpullinglimit) and \
 					(nodetriggerpulledmaxd > nodetriggerpullingmind) and (OS.get_ticks_msec()*0.001 - nodetriggerpulledtimestamp > nodetriggerpullingminduration) and \
@@ -550,7 +552,7 @@ func setpointertarget(laserroot, raycast, pointertargetshortdistance):
 		if lslfrom != null:
 			LaserSelectLine.transform.origin = GripLaserSpot.transform.origin if GripLaserSpot.visible else pointertargetpoint
 			var d = LaserSelectLine.transform.origin.distance_to(lslfrom)
-			LaserSelectLine.get_node("Scale").scale.z = max(0.01, d)
+			LaserSelectLine.get_node("Scale").scale = Vector3(selectlinefatness, selectlinefatness, max(0.01, d))
 			if not is_zero_approx(d):
 				LaserSelectLine.transform = LaserSelectLine.transform.looking_at(lslfrom, Vector3(0,1,0))
 
@@ -2112,8 +2114,16 @@ func _physics_process(delta):
 		var firstlasertarget = LaserOrient.get_node("RayCast").get_collider()
 		if firstlasertarget != null and firstlasertarget.is_queued_for_deletion():
 			firstlasertarget = null
+
+		if Tglobal.phoneoverlay != null and planviewsystem.planviewactive:
+			planviewsystem.get_node("RealPlanCamera/LaserScope").global_transform.origin = LaserOrient.global_transform.origin
+			planviewsystem.get_node("RealPlanCamera/LaserScope").visible = true
+			activelaserroot = planviewsystem.get_node("RealPlanCamera/LaserScope/LaserOrient")
+			activelaserroot.get_node("LaserSpot").global_transform.basis = LaserOrient.global_transform.basis
+			activelaserroot.get_node("RayCast").force_raycast_update()
+			setpointertarget(activelaserroot, activelaserroot.get_node("RayCast"), -1.0)
 			
-		if firstlasertarget == guipanel3d or firstlasertarget == keyboardpanel:
+		elif firstlasertarget == guipanel3d or firstlasertarget == keyboardpanel:
 			LaserOrient.visible = true
 			activelaserroot = LaserOrient
 			setpointertarget(activelaserroot, activelaserroot.get_node("RayCast"), -1.0)
@@ -2178,6 +2188,15 @@ func _physics_process(delta):
 	if activetargetwallgrabbedtransform != null:
 		sketchsystem.actsketchchange([ targetwalltransformpos(0) ])
 
+	if Tglobal.phoneoverlay != null and (activetargetnodewall != null) and (activetargetnodewall.drawingtype == DRAWING_TYPE.DT_CENTRELINE) and \
+	   (activetargetnode != null) and (laserselectlinelogicalvisibilitystate == 0):
+		if OS.get_ticks_msec() < Tglobal.phoneoverlay.quatsettime + 2000:
+			LaserSelectLine.transform = Transform(Basis(Tglobal.phoneoverlay.distoxquat), activetargetnodewall.transform.xform(activetargetnode.transform.origin))
+			LaserSelectLine.get_node("Scale").scale = Vector3(selectlinefatness, selectlinefatness, -(Tglobal.phoneoverlay.distoxlength + 2.0)/2)
+			LaserSelectLine.get_node("Scale/Mesh").get_surface_material(0).albedo_color = LaseSelectLinedistoxcolour
+			LaserSelectLine.visible = true
+		else:
+			LaserSelectLine.visible = false
 		
 var rightmousebuttonheld = false
 func _input(event):

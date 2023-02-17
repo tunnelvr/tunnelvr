@@ -366,7 +366,9 @@ func _on_switchtest(index):
 		var tunnelxsystem = get_node("/root/Spatial/TunnelXSystem")
 #		tunnelxsystem.loadtunnelxsketch("res://assets/miscobjects/292-sketch1.xml")
 #		tunnelxsystem.loadtunnelxsketch("res://assets/miscobjects/1623-midbalc2022.xml")
-		tunnelxsystem.loadtunnelxsketch("res://assets/miscobjects/290+291+295-Nov2022jgtfix.xml")
+#		tunnelxsystem.loadtunnelxsketch("res://assets/miscobjects/290+291+295-Nov2022jgtfix.xml")
+		tunnelxsystem.loadtunnelxsketch("res://assets/miscobjects/SkirwithCave-sketch.xml")
+
 
 		
 	elif nssel == "Huge Spiral":
@@ -653,11 +655,12 @@ func _on_optionbuttongoto_selected(index):
 		elif selectedflagtrail != null:
 			PlayerDirections.colocatedflagtrail = selectedflagtrail
 			PlayerDirections.setcolocflagtrailatpos()
-				
 	else:
 		PlayerDirections.colocatedplayer = null
 		PlayerDirections.colocatedflagtrail = null
 		$Viewport/GUI/Panel/OptionButtonGoto.selected = 0
+	planviewsystem.planviewcontrols.get_node("CentrelineActivity").visible = false
+	planviewsystem.planviewcontrols.get_node("PathFollow").visible = true
 		
 	$Viewport/GUI/Panel/PlayerList.disabled = ($Viewport/GUI/Panel/OptionButtonGoto.selected == 2)
 

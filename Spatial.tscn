@@ -1,4 +1,4 @@
-[gd_scene load_steps=376 format=2]
+[gd_scene load_steps=377 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/underground_env.tres" type="Environment" id=2]
@@ -385,6 +385,9 @@ shader_param/woundcolor = Color( 0.992157, 0.478431, 0.141176, 1 )
 shader_param/faceupbrightcolor = Color( 0.827451, 1, 0.807843, 1 )
 
 [sub_resource type="CanvasItemMaterial" id=75]
+
+[sub_resource type="DynamicFont" id=307]
+font_data = ExtResource( 40 )
 
 [sub_resource type="QuadMesh" id=76]
 size = Vector2( 1.6, 1 )
@@ -1739,7 +1742,7 @@ emission_on_uv2 = false
 
 [sub_resource type="SpatialMaterial" id=303]
 params_cull_mode = 2
-albedo_color = Color( 0.2, 0.196078, 0.580392, 1 )
+albedo_color = Color( 0.94902, 0.188235, 0.952941, 1 )
 metallic = 0.8
 roughness = 0.67
 emission_enabled = true
@@ -1941,6 +1944,7 @@ extents = Vector2( 500, 500 )
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
 enablevr = false
+forcephoneoverlay = true
 
 [node name="Players" type="Spatial" parent="."]
 
@@ -2352,18 +2356,12 @@ margin_left = 600.0
 margin_right = 640.0
 margin_bottom = 40.0
 mouse_filter = 2
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="PlanGUI" type="Control" parent="PlanViewSystem/PlanView/Viewport"]
 margin_right = 800.0
 margin_bottom = 800.0
 mouse_filter = 2
 theme = ExtResource( 47 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="Camera" type="Camera" parent="PlanViewSystem/PlanView/Viewport/PlanGUI"]
 transform = Transform( 1, 0, 0, 0, -1.62921e-07, 1, 0, -1, -1.62921e-07, -1, 50, -12 )
@@ -2384,9 +2382,6 @@ update_scale = false
 margin_top = 700.0
 margin_right = 800.0
 margin_bottom = 800.0
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="ViewSlide" type="Control" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
 material = SubResource( 75 )
@@ -2554,6 +2549,68 @@ text = ">>"
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="CentrelineActivity" type="Control" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
+margin_left = 184.0
+margin_top = 3.0
+margin_right = 349.0
+margin_bottom = 98.0
+
+[node name="ColorRect" type="ColorRect" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity"]
+margin_top = -4.0
+margin_right = 195.0
+margin_bottom = 93.0
+color = Color( 0.317647, 0.286275, 0.133333, 1 )
+
+[node name="Label" type="Label" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity"]
+margin_left = 1.0
+margin_top = -5.0
+margin_right = 89.0
+margin_bottom = 23.0
+custom_fonts/font = SubResource( 307 )
+text = "Topodraw"
+
+[node name="Label2" type="Label" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity"]
+margin_left = 3.0
+margin_top = 15.0
+margin_right = 47.0
+margin_bottom = 43.0
+custom_fonts/font = SubResource( 307 )
+text = "CL:"
+
+[node name="OptionsCentreline" type="OptionButton" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity"]
+margin_left = 15.0
+margin_top = 45.0
+margin_right = 157.0
+margin_bottom = 67.0
+text = "normal centreline"
+items = [ "normal centreline", null, false, 0, null, "sketching centreline", null, false, 1, null, "new plan", null, false, 3, null, "new elevation", null, true, 4, null ]
+selected = 0
+
+[node name="CentrelineList" type="OptionButton" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity"]
+margin_left = 51.0
+margin_top = 21.0
+margin_right = 158.0
+margin_bottom = 43.0
+text = "--none--"
+items = [ "--none--", null, false, 0, null ]
+selected = 0
+
+[node name="LineType" type="OptionButton" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity"]
+margin_left = 89.0
+margin_top = -3.0
+margin_right = 142.0
+margin_bottom = 19.0
+text = "wall"
+items = [ "wall", null, false, 0, null, "estwall", null, false, 1, null, "detail", null, false, 2, null, "pitchbound", null, false, 3, null, "ceilingbound", null, false, 4, null, "*delete", null, false, 5, null ]
+selected = 0
+
+[node name="DelLast" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity"]
+margin_left = 27.0
+margin_top = 69.0
+margin_right = 73.0
+margin_bottom = 91.0
+text = "Delete Last"
 
 [node name="FloorTrim" type="Control" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
 visible = false
@@ -2798,6 +2855,7 @@ __meta__ = {
 }
 
 [node name="PathFollow" type="Control" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
+visible = false
 margin_left = 190.0
 margin_top = 10.0
 margin_right = 387.0
@@ -2906,17 +2964,12 @@ margin_bottom = 35.9439
 hint_tooltip = "Close Plan View
 "
 text = "X"
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="CheckBoxPlanTubesVisible" type="CheckBox" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
-anchor_right = 0.015
-anchor_bottom = 0.24
 margin_left = 470.838
 margin_top = 49.6852
-margin_right = 522.838
-margin_bottom = 49.6852
+margin_right = 534.838
+margin_bottom = 73.6852
 rect_pivot_offset = Vector2( 100.162, 19.0063 )
 pressed = true
 text = "plan tubes"
@@ -2941,10 +2994,10 @@ __meta__ = {
 [node name="OptionsBackfaceCull" type="OptionButton" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
 anchor_right = 0.015
 anchor_bottom = 0.24
-margin_left = 657.0
-margin_top = 6.0
-margin_right = 755.0
-margin_bottom = 4.0
+margin_left = 656.0
+margin_top = 29.0
+margin_right = 754.0
+margin_bottom = 27.0
 rect_pivot_offset = Vector2( 100.162, 19.0063 )
 text = "Normal Solid"
 items = [ "Normal Solid", null, false, 0, null, "Backface Cull", null, false, 1, null, "Cartoon Colour", null, false, 2, null ]
@@ -4356,9 +4409,6 @@ script = ExtResource( 38 )
 
 [node name="Viewport" type="Control" parent="LabelGenerator"]
 margin_top = 300.0
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="RichTextLabel" type="RichTextLabel" parent="LabelGenerator/Viewport"]
 margin_right = 113.0
@@ -4539,9 +4589,6 @@ material/0 = ExtResource( 75 )
 margin_right = 40.0
 margin_bottom = 40.0
 script = ExtResource( 76 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="ThumbLeft" type="Node2D" parent="PhoneOverlay"]
 position = Vector2( 90, 500 )
@@ -4578,9 +4625,22 @@ margin_top = 564.0
 margin_right = 291.0
 margin_bottom = 584.0
 text = "Menu"
-__meta__ = {
-"_edit_use_anchors_": false
-}
+
+[node name="DrawmodeButton" type="Button" parent="PhoneOverlay"]
+margin_left = 23.0
+margin_top = 420.0
+margin_right = 83.0
+margin_bottom = 440.0
+toggle_mode = true
+text = "Draw"
+
+[node name="SelectmodeButton" type="Button" parent="PhoneOverlay"]
+margin_left = 26.0
+margin_top = 382.0
+margin_right = 86.0
+margin_bottom = 402.0
+toggle_mode = true
+text = "Select"
 
 [node name="DepthInfo" type="ColorRect" parent="PhoneOverlay"]
 visible = false
@@ -4599,6 +4659,12 @@ text = "dsfsdf"
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="DrawCurve" type="Line2D" parent="PhoneOverlay"]
+visible = false
+points = PoolVector2Array( 257, 329, 426, 156, 426, 309, 416, 395, 200, 412, 207, 291 )
+width = 5.0
+default_color = Color( 0.937255, 0.921569, 0.384314, 1 )
 
 [node name="Lidarmodel" type="Spatial" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 13, 2.5, -6 )
