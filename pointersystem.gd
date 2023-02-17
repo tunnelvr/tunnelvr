@@ -21,7 +21,7 @@ onready var GripLaserSpot = get_node("/root/Spatial/BodyObjects/GripLaserSpot")
 
 onready var LaseSelectLinegoodcolour = LaserSelectLine.get_node("Scale/Mesh").get_surface_material(0).albedo_color
 onready var LaseSelectLinebadcolour = Color(0.30, 0.08, 0.08, 1)
-
+onready var LaseSelectLinedistoxcolour = Color(0.08, 0.40, 0.08, 1)
 var viewport_point = null
 
 onready var activelaserroot = LaserOrient
@@ -2189,11 +2189,14 @@ func _physics_process(delta):
 		sketchsystem.actsketchchange([ targetwalltransformpos(0) ])
 
 	if Tglobal.phoneoverlay != null and (activetargetnodewall != null) and (activetargetnodewall.drawingtype == DRAWING_TYPE.DT_CENTRELINE) and \
-	   (activetargetnode != null) and (OS.get_ticks_msec() < Tglobal.phoneoverlay.quatsettime + 2000) and (laserselectlinelogicalvisibilitystate == 0):
+	   (activetargetnode != null) and (laserselectlinelogicalvisibilitystate == 0):
+		if OS.get_ticks_msec() < Tglobal.phoneoverlay.quatsettime + 2000:
 			LaserSelectLine.transform = Transform(Basis(Tglobal.phoneoverlay.distoxquat), activetargetnodewall.transform.xform(activetargetnode.transform.origin))
 			LaserSelectLine.get_node("Scale").scale = Vector3(selectlinefatness, selectlinefatness, -(Tglobal.phoneoverlay.distoxlength + 2.0)/2)
+			LaserSelectLine.get_node("Scale/Mesh").get_surface_material(0).albedo_color = LaseSelectLinedistoxcolour
 			LaserSelectLine.visible = true
-
+		else:
+			LaserSelectLine.visible = false
 		
 var rightmousebuttonheld = false
 func _input(event):

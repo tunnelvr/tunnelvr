@@ -620,9 +620,10 @@ func updateplanviewlocatorlines():
 			planviewlocatorline.translation.y = max(3.0 + planviewlocatorline.mesh.size.y/2, plancamera.translation.y - 5.0 + planviewlocatorline.mesh.size.y/2 - player.get_node("headlocator").global_transform.origin.y)
 
 var updateplanviewentitysizes_working = false
+var nodesca = 1.0
 func updateplanviewentitysizes():
 	var Dt0 = OS.get_ticks_msec()
-	var nodesca = plancamera.size/70.0*3.0
+	nodesca = plancamera.size/70.0*3.0
 	var labelsca = nodesca*2.0
 	var vertexyinvert = -1.0 if Tglobal.phoneoverlay != null else 1.0
 		

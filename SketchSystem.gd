@@ -4,6 +4,7 @@ const XCdrawing = preload("res://nodescenes/XCdrawing.tscn")
 const XCtube = preload("res://nodescenes/XCtube.tscn")
 const RopeHang = preload("res://nodescenes/RopeHang.tscn")
 
+
 const linewidth = 0.05
 var sketchname = "unnamedsketch"
 const fileheading = "__tunnelvr__ "
@@ -13,6 +14,7 @@ var actsketchchangeundostack = [ ]
 
 var pointersystem = null
 onready var waterlevelsystem = get_node("/root/Spatial/WaterLevelSystem")
+onready var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
 var allflagtrails = [ ]
 
 func _ready():
@@ -215,7 +217,7 @@ remote func actsketchchangeL(xcdatalist):
 			Tglobal.notisloadingcavechunks = false
 			Tglobal.housahedronmode = false
 			get_node("tunnelxoutline").visible = false
-			get_node("/root/Spatial/PlanViewSystem").backfacecartoonValid = false
+			planviewsystem.backfacecartoonValid = false
 			if xcdatalist[0]["sketchname"] != "importing_the_centreline__do_not_clear":
 				clearentirecaveworld()
 			else:
@@ -349,7 +351,6 @@ remote func actsketchchangeL(xcdatalist):
 				print("rejecting XC tube from data", xcdata)
 							
 		elif "planview" in xcdata:
-			var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
 			planviewsystem.actplanviewdict(xcdata["planview"], false)
 														
 		elif "xcvizstates" in xcdata:
@@ -461,6 +462,8 @@ remote func actsketchchangeL(xcdatalist):
 			xcdrawing.setdrawingvisiblecode(xcdrawing.drawingvisiblecode)
 		elif xcdrawing.drawingtype == DRAWING_TYPE.DT_CENTRELINE:
 			xcdrawing.updatexcpaths_centreline(xcdrawing.get_node("PathLines"), xcdrawing.linewidth)
+			if planviewsystem.planviewactive:
+				xcdrawing.updatexcpaths_centreline(xcdrawing.get_node("PathLines_PlanView"), 0.05*planviewsystem.nodesca)
 		else:
 			xcdrawing.updatexcpaths()
 
@@ -829,7 +832,6 @@ remote func loadsketchsystemL(fname):
 		#print("sending caveworldchunk ", xcdatachunk[0].caveworldchunk, " size ", len(var2bytes(xcdatachunk)))
 		actsketchchange(xcdatachunk)
 		yield(get_tree().create_timer(0.2), "timeout")
-	var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
 	actsketchchange([{"planview":planviewsystem.planviewtodict()}]) 
 				
 func uniqueXCname(ch):
@@ -880,7 +882,6 @@ func newXCuniquedrawing(drawingtype, sname):
 		xcdrawing.get_node("PathLines_PlanView").visible = true
 		xcdrawing.get_node("PathLines_PlanView").layers = CollisionLayer.VL_centrelinedrawinglinesplanview
 		xcdrawing.get_node("XCnodes").visible = true
-		var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
 		planviewsystem.updatecentrelineactivityui()
 	
 	else:

@@ -1,5 +1,18 @@
 extends Control
 
+# Notes to do for the distox simulation
+# recode the esp32.  Why is its screen going dark?
+#  speed up the laser reading
+# Currently need to select a centreline node and then it is active
+# (second centreline node selection should be disabled)
+# Feature to convert to drag, spin and scale even when in drawing mode if two fingers touch the screen
+# option to show the last 2 or 1 characters of the station name
+# option to make new station in a new plan (to connect to)
+# option to inherit that station from a station position in the old centreline
+# option to remember and delete laser lines added to that centreline
+# option to implement the 3 close lines to set the next station
+# option to generate a svx file with the exports for the new survey
+
 
 var thumbarearadius = 50
 onready var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
@@ -26,6 +39,9 @@ func setupphoneoverlaysystem(ltouchscreentype):
 	$BackgroundCapture.connect("input_event", self, "backgroundmotioninput")
 	get_node("/root").connect("size_changed", self, "setupoverlaycomponentpositions")
 	setupoverlaycomponentpositions()
+
+
+
 
 func setupoverlaycomponentpositions():
 	var n = 16
@@ -500,15 +516,28 @@ func _input(event):
 		if event.button_index != 4:
 			print("Jbutton ", ("down" if event.pressed else "up"), " ", event.button_index)
 		if event.device == 0 and (event.button_index == 4 or event.button_index == 5) and not event.pressed:
-			var lquat = Quat(deviceaxisvalues[0], deviceaxisvalues[1], deviceaxisvalues[2], deviceaxisvalues[5])
+			var lquat = Quat(deviceaxisvalues[1], deviceaxisvalues[2], deviceaxisvalues[0], deviceaxisvalues[5])
 			if event.button_index == 4:
 				if abs(lquat.length() - 1.0) < 0.1:
 					distoxquat = lquat.normalized()
-					print(" quat ", distoxquat, " ", distoxquat.length())
+					#print(" quat ", distoxquat, " ", distoxquat.length())
 					quatsettime = OS.get_ticks_msec()
-			else:
+			elif event.button_index == 5:
 				distoxlength = (deviceaxisvalues[3]+1)*20
 				print("length ", distoxlength, "  quat ", distoxquat, " ", distoxquat.length())
+				if (pointersystem.activetargetnodewall != null) and (pointersystem.activetargetnodewall.drawingtype == DRAWING_TYPE.DT_CENTRELINE) and \
+						(pointersystem.activetargetnode != null): # and (pointersystem.activetargetnodewall == drawingcentreline):
+					var lasernodename1 = pointersystem.activetargetnodewall.newuniquexcnodename("_")
+					var lasernodeposG = pointersystem.activetargetnodewall.transform.xform(pointersystem.activetargetnode.transform.origin) + \
+										distoxquat.xform(Vector3(0,0,distoxlength))
+					var xcdata = { "name":pointersystem.activetargetnodewall.get_name(), 
+								   "prevnodepoints":{ }, 
+								   "nextnodepoints":{ lasernodename1:pointersystem.activetargetnodewall.transform.xform_inv(lasernodeposG) },  
+								   "prevonepathpairs":[ ], 
+								   "newonepathpairs":[ pointersystem.activetargetnode.get_name(), lasernodename1 ]
+								 }
+					planviewsystem.sketchsystem.actsketchchange([xcdata])
+				
 
 	elif event is InputEventJoypadMotion:
 		if event.device == 0 and event.axis < 8:
