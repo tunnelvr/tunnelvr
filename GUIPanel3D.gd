@@ -1215,6 +1215,11 @@ func ExecuteFileCommand():
 	var filecmdstruct = parse_json(filecommandtextedit.text)
 	if not filecmdstruct:
 		return
+
+	if filecmdstruct.has("newcave"):
+		setsavegamefilename(filecmdstruct["newcave"])
+		return
+
 	var caddy_url = filecmdstruct.get("caddy_url", "")
 	var path = filecmdstruct.get("path", "")
 	var filestoupload = filecmdstruct.get("filestoupload")
@@ -1222,10 +1227,7 @@ func ExecuteFileCommand():
 	if caddy_url and typeof(filestoupload) == TYPE_STRING_ARRAY and typeof(filenames) == TYPE_STRING_ARRAY and len(filenames) == len(filestoupload):
 		get_node("/root/Spatial/ExecutingFeatures").uploaddroppedfiles(caddy_url, path, filestoupload, filenames)
 
-
-	#elif fcomms[0] == "newcave":
-	#	setsavegamefilename(mmtext.get_string(0))
-	# planviewsystem.applyfilecommand(mmtext.get_string(1), mmtext.get_string(2))
+	#planviewsystem.applyfilecommand(mmtext.get_string(1), mmtext.get_string(2))
 
 
 func _on_files_dropped(files: PoolStringArray, screen: int):

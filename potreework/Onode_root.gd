@@ -34,8 +34,6 @@ var attributes_postbytes = 0
 
 onready var ImageSystem = get_node("/root/Spatial/ImageSystem")
 
-
-
 func sethighlightplaneR(lhighlightplaneperp, lhighlightplanedot):
 	highlightplaneperp = lhighlightplaneperp
 	highlightplanedot = lhighlightplanedot
@@ -233,6 +231,7 @@ func completedocellpointsmesh(onoderequest):
 	else:
 		nnode.pointmaterial = null
 
+var potree_color_multfactor = 1/255.0  # or 1/65535.0
 func loadocellpointsmesh_InWorkerThread(onoderequest):
 	var rootnode = onoderequest["rootnode"]
 	var ocellcentre = onoderequest["ocellcentre"]
@@ -258,7 +257,9 @@ func loadocellpointsmesh_InWorkerThread(onoderequest):
 				if rootnode.attributes_rgb_prebytes != 0:
 					foctreeF.get_buffer(rootnode.attributes_rgb_prebytes)
 				var r = foctreeF.get_16();  var g = foctreeF.get_16();  var b = foctreeF.get_16()
-				var col = Color(r/65535.0, g/65535.0, b/65535.0)
+				var col = Color(r*potree_color_multfactor, g*potree_color_multfactor, b*potree_color_multfactor)
+				if i == 0:
+					print("ttcc ", col, " ", r, " ", g, " ", b)
 				st.add_color(col)
 			if rootnode.attributes_postbytes != 0:
 				foctreeF.get_buffer(rootnode.attributes_postbytes)
