@@ -291,7 +291,7 @@ func updatepotreeprioritiesLoop():
 					lpointmaterial.set_shader_param("highlightcol2", rootnode.highlightcol2)
 
 					var colormixweight = 0.0
-					if rootnode.attributes_rgb_prebytes != -1:
+					if rootnode.attributes_rgb_prebytes != -1 and rootnode.potree_color_multfactor != 0.0:
 						colormixweight = 1.0 if Tglobal.housahedronmode else 0.9
 					lpointmaterial.set_shader_param("colormixweight", colormixweight)
 

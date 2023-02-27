@@ -263,9 +263,10 @@ func loadocellpointsmesh_InWorkerThread(onoderequest):
 				var r = foctreeF.get_16()  
 				var g = foctreeF.get_16()  
 				var b = foctreeF.get_16()
-				var col = Color(r*potree_color_multfactor, g*potree_color_multfactor, b*potree_color_multfactor)
-				Dmaxcolorval = max(max(Dmaxcolorval, r), max(g, b))
-				st.add_color(col)
+				if potree_color_multfactor != 0.0:
+					var col = Color(r*potree_color_multfactor, g*potree_color_multfactor, b*potree_color_multfactor)
+					Dmaxcolorval = max(max(Dmaxcolorval, r), max(g, b))
+					st.add_color(col)
 			if rootnode.attributes_postbytes != 0:
 				foctreeF.get_buffer(rootnode.attributes_postbytes)
 			var p = Vector3(v0*mdscale.x + mdoffset.x, 
@@ -295,7 +296,7 @@ func loadocellpointsmesh_InWorkerThread(onoderequest):
 		if parentmesh != null:
 			var parentsurfacearrays = parentmesh.surface_get_arrays(0)
 			var parentpoints = parentsurfacearrays[Mesh.ARRAY_VERTEX]
-			var parentcolors = parentsurfacearrays[Mesh.ARRAY_COLOR] if rootnode.attributes_rgb_prebytes != -1 else null
+			var parentcolors = parentsurfacearrays[Mesh.ARRAY_COLOR] if (rootnode.attributes_rgb_prebytes != -1 and rootnode.potree_color_multfactor != 0.0) else null
 			print("gotparentpoints ", len(parentpoints))
 			for i in range(len(parentpoints)):
 				var p = parentpoints[i]
