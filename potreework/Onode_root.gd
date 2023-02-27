@@ -194,7 +194,8 @@ func constructpotreerootnode(lmetadata, lurlmetadata, bboffset):
 	else:
 		attributes_rgb_prebytes = attributes_rgb_offset - 12
 		attributes_postbytes = attributes_size - (attributes_rgb_offset + 6)
-	
+		
+		
 	hierarchybyteOffset = 0
 	hierarchybyteSize = metadata["hierarchy"]["firstChunkSize"]
 	var mdmin = Vector3(metadata["boundingBox"]["min"][0], metadata["boundingBox"]["min"][1], metadata["boundingBox"]["min"][2])
@@ -231,7 +232,9 @@ func completedocellpointsmesh(onoderequest):
 	else:
 		nnode.pointmaterial = null
 
-var potree_color_multfactor = 1/255.0  # or 1/65535.0
+var potree_color_multfactor = 1/65535.0
+var Dmaxcolorval = 0
+var Dmaxcolorcheckpointcount = 0
 func loadocellpointsmesh_InWorkerThread(onoderequest):
 	var rootnode = onoderequest["rootnode"]
 	var ocellcentre = onoderequest["ocellcentre"]
@@ -247,27 +250,40 @@ func loadocellpointsmesh_InWorkerThread(onoderequest):
 	var numPoints = nnode["numPoints"]
 	var foctreeF = File.new()
 	foctreeF.open(onoderequest["fetchednonimagedataobjectfile"], File.READ)
-	print("aaa ", 1)
+	print("aaa ", Dmaxcolorcheckpointcount, " ", Dmaxcolorval)
 	if onoderequest["url"].substr(0, 4) != "http" or foctreeF.get_len() == onoderequest["byteSize"]:
 		nnode.Dloadedstate = "pointsloading"
-		print("aaa ", numPoints)
 		for i in range(numPoints):
-			var v0 = foctreeF.get_32();  var v1 = foctreeF.get_32();  var v2 = foctreeF.get_32()
+			var v0 = foctreeF.get_32()  
+			var v1 = foctreeF.get_32()  
+			var v2 = foctreeF.get_32()
 			if rootnode.attributes_rgb_prebytes != -1:
 				if rootnode.attributes_rgb_prebytes != 0:
 					foctreeF.get_buffer(rootnode.attributes_rgb_prebytes)
-				var r = foctreeF.get_16();  var g = foctreeF.get_16();  var b = foctreeF.get_16()
+				var r = foctreeF.get_16()  
+				var g = foctreeF.get_16()  
+				var b = foctreeF.get_16()
 				var col = Color(r*potree_color_multfactor, g*potree_color_multfactor, b*potree_color_multfactor)
-				if i == 0:
-					print("ttcc ", col, " ", r, " ", g, " ", b)
+				Dmaxcolorval = max(max(Dmaxcolorval, r), max(g, b))
 				st.add_color(col)
 			if rootnode.attributes_postbytes != 0:
 				foctreeF.get_buffer(rootnode.attributes_postbytes)
-			var p = Vector3(v0*mdscale.x + mdoffset.x, v1*mdscale.y + mdoffset.y, v2*mdscale.z + mdoffset.z)
+			var p = Vector3(v0*mdscale.x + mdoffset.x, 
+							v1*mdscale.y + mdoffset.y, 
+							v2*mdscale.z + mdoffset.z)
 			st.add_vertex(p - ocellcentre)
 			if not Dboxminmax.has_point(p):
 				Dnpointsnotinbox += 1
 		foctreeF.close()
+
+		Dmaxcolorcheckpointcount += 1
+		if Dmaxcolorcheckpointcount == 10 and rootnode.attributes_rgb_prebytes != -1:
+			print("Max potree rgb color values ", Dmaxcolorval)
+			if Dmaxcolorval < 256:
+				if is_equal_approx(potree_color_multfactor, 1.0/65535):
+					print("  *** should set potreecolorscale to 255")
+			elif not is_equal_approx(potree_color_multfactor, 1.0/65535):
+				print("  *** should set potreecolorscale to 65535")
 
 		var relativeocellcentre = nnode.transform.origin
 		if ocellcentre.distance_to((Dboxmin+Dboxmax)/2) > 0.9:

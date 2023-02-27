@@ -40,6 +40,7 @@ var nodespointloaded = [ ]
 var rootnode = null
 var potreeurlmetadataorg = null
 var potreeurlmetadata = null
+var potreecolorscale = 65535.0
 
 onready var ImageSystem = get_node("/root/Spatial/ImageSystem")
 
@@ -133,6 +134,7 @@ func LoadPotree():
 		if lxcdrawingcentreline.additionalproperties != null and lxcdrawingcentreline.additionalproperties.has("potreeurlmetadata"):
 			xcdrawingcentreline = lxcdrawingcentreline
 			potreeurlmetadata = xcdrawingcentreline.additionalproperties["potreeurlmetadata"]
+			potreecolorscale = clamp(int(xcdrawingcentreline.additionalproperties.get("potreecolorscale", 65535)), 0, 65535)
 	potreeurlmetadataorg = potreeurlmetadata
 	if potreeurlmetadata == null:
 		print("No potree url found")
@@ -162,8 +164,13 @@ func LoadPotree():
 	var bboffseta = xcdrawingcentreline.additionalproperties["svxp0"]  if xcdrawingcentreline != null and xcdrawingcentreline.additionalproperties != null and xcdrawingcentreline.additionalproperties.has("svxp0")  else [0,0,0]
 	var bboffset = Vector3(bboffseta[0], bboffseta[1], bboffseta[2])
 	rootnode.constructpotreerootnode(metadata, potreeurlmetadata, bboffset)
-	if rootnode.attributes_rgb_prebytes != -1:
+	if rootnode.attributes_rgb_prebytes != -1 and potreecolorscale != 0.0:
 		pointsizefactor = 400
+		rootnode.potree_color_multfactor = 1.0/potreecolorscale
+	else:
+		rootnode.potree_color_multfactor = 0.0
+		potreecolorscale = 0.0
+
 	if xcdrawingcentreline != null:
 		transform = xcdrawingcentreline.transform
 	add_child(rootnode)

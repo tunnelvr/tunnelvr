@@ -993,7 +993,10 @@ func _on_resourceoptions_buttondown_setavailablefunctions():
 		$Viewport/GUI/Panel/ResourceOptions.set_item_disabled(showhigloadpotreeid, (centrelineselected_forresourcefunction == null or centrelineselected_forresourcefunction.additionalproperties == null or centrelineselected_forresourcefunction.additionalproperties.get("potreeurlmetadata") == null))
 	elif not potreeexperiments.visible:
 		$Viewport/GUI/Panel/ResourceOptions.set_item_text(showhigloadpotreeid, "Show Potree")
-	elif centrelineselected_forresourcefunction == null or centrelineselected_forresourcefunction.additionalproperties == null or centrelineselected_forresourcefunction.additionalproperties.get("potreeurlmetadata") != potreeexperiments.potreeurlmetadataorg:
+	elif centrelineselected_forresourcefunction == null or \
+			centrelineselected_forresourcefunction.additionalproperties == null or \
+			centrelineselected_forresourcefunction.additionalproperties.get("potreeurlmetadata") != potreeexperiments.potreeurlmetadataorg or \
+			centrelineselected_forresourcefunction.additionalproperties.get("potreecolorscale") != potreeexperiments.potreecolorscale:
 		$Viewport/GUI/Panel/ResourceOptions.set_item_text(showhigloadpotreeid, "Remove Potree")
 	else:
 		$Viewport/GUI/Panel/ResourceOptions.set_item_text(showhigloadpotreeid, "Hide Potree")
@@ -1029,6 +1032,8 @@ func _on_resourceoptions_selected(index):
 			xcproperties["centrelineconnection"] = "anchored" if clconnectcode == 1 else ("incoming for mapping" if clconnectcode == 2 else "free") 
 			if not xcproperties.has("potreeurlmetadata"):
 				xcproperties["potreeurlmetadata"] = ""
+			if not xcproperties.has("potreecolorscale"):
+				xcproperties["potreecolorscale"] = 65535
 			if not xcproperties.has("geometrymode"):
 				xcproperties["geometrymode"] = "tunnelvr"
 			if not xcproperties.has("splaystationnoderegex"):
@@ -1056,6 +1061,8 @@ func _on_resourceoptions_selected(index):
 					jresource.erase("centrelineconnection")
 				if jresource.has("potreeurlmetadata") and jresource["potreeurlmetadata"] == "":
 					jresource.erase("potreeurlmetadata")
+					if jresource.has("potreecolorscale"):
+						jresource.erase("potreecolorscale")
 				if jresource.has("geometrymode") and jresource["geometrymode"] == "tunnelvr":
 					jresource.erase("geometrymode")
 				if jresource.has("drawingtype"):
