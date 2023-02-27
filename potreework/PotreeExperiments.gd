@@ -41,8 +41,31 @@ var rootnode = null
 var potreeurlmetadataorg = null
 var potreeurlmetadata = null
 var potreecolorscale = 65535.0
+var potreepointsizefactor = 200.0
+
+
+var Cpointsizevisibilitycutoff = 15.0
+var minCpointsizevisibilitycutoff = 7.0
+var maxvisiblepoints = 500000
+var minvisiblepoints = 200000
+
+const updatepotreeprioritiesworkingtimeout = 4.0
+signal updatepotreepriorities_fetchsignal(f)
+
+const timems_fornextupdatepriorities = 3500
+
+var queuekillpotree = false
+
+onready var matloadingcube = $LoadingCube.get_surface_material(0)
+
+const colhierarchyfetching = Color("#901fe51f")
+const colhierarchyloading = Color("#361fe51f")
+const coloctcellpointsfetching = Color("#80e418e6")
+const coloctcellpointsloading = Color("#36e418e6")
 
 onready var ImageSystem = get_node("/root/Spatial/ImageSystem")
+
+
 
 func _ready():
 	if $PointSampleTest.visible:
@@ -105,28 +128,6 @@ func getpotreeurl():
 	return urlotreedir
 
 
-
-var Cpointsizevisibilitycutoff = 15.0
-var minCpointsizevisibilitycutoff = 7.0
-var maxvisiblepoints = 500000
-var minvisiblepoints = 200000
-var pointsizefactor = 150.0
-const updatepotreeprioritiesworkingtimeout = 4.0
-signal updatepotreepriorities_fetchsignal(f)
-
-
-const timems_fornextupdatepriorities = 3500
-
-var queuekillpotree = false
-
-onready var matloadingcube = $LoadingCube.get_surface_material(0)
-
-const colhierarchyfetching = Color("#901fe51f")
-const colhierarchyloading = Color("#361fe51f")
-const coloctcellpointsfetching = Color("#80e418e6")
-const coloctcellpointsloading = Color("#36e418e6")
-
-
 func LoadPotree():
 	assert (rootnode == null)
 	var xcdrawingcentreline = null
@@ -135,6 +136,7 @@ func LoadPotree():
 			xcdrawingcentreline = lxcdrawingcentreline
 			potreeurlmetadata = xcdrawingcentreline.additionalproperties["potreeurlmetadata"]
 			potreecolorscale = clamp(int(xcdrawingcentreline.additionalproperties.get("potreecolorscale", 65535)), 0, 65535)
+			potreepointsizefactor = clamp(int(xcdrawingcentreline.additionalproperties.get("potreepointsizefactor", 200)), 10, 100000)
 	potreeurlmetadataorg = potreeurlmetadata
 	if potreeurlmetadata == null:
 		print("No potree url found")
@@ -165,7 +167,6 @@ func LoadPotree():
 	var bboffset = Vector3(bboffseta[0], bboffseta[1], bboffseta[2])
 	rootnode.constructpotreerootnode(metadata, potreeurlmetadata, bboffset)
 	if rootnode.attributes_rgb_prebytes != -1 and potreecolorscale != 0.0:
-		pointsizefactor = 400
 		rootnode.potree_color_multfactor = 1.0/potreecolorscale
 	else:
 		rootnode.potree_color_multfactor = 0.0
@@ -234,16 +235,16 @@ func Yupdatepotreeprioritiesfromcamera(primarycamera, pointsizefactor, pointsize
 
 func Yupdatepotreeprioritiesfull():
 	var primarycamera = instance_from_id(Tglobal.primarycamera_instanceid)
-	var res = yield(Yupdatepotreeprioritiesfromcamera(primarycamera, pointsizefactor, Cpointsizevisibilitycutoff), "completed")
+	var res = yield(Yupdatepotreeprioritiesfromcamera(primarycamera, potreepointsizefactor, Cpointsizevisibilitycutoff), "completed")
 	while res["sweptvisiblepointcount"] < minvisiblepoints and len(res["pointsizes"]) != 0 and res["pointsizes"].min() < Cpointsizevisibilitycutoff and Cpointsizevisibilitycutoff > minCpointsizevisibilitycutoff:
 		Cpointsizevisibilitycutoff *= 0.5
 		var Dsweptvisiblepointcount = res["sweptvisiblepointcount"]
-		res = yield(Yupdatepotreeprioritiesfromcamera(primarycamera, pointsizefactor, Cpointsizevisibilitycutoff), "completed")
+		res = yield(Yupdatepotreeprioritiesfromcamera(primarycamera, potreepointsizefactor, Cpointsizevisibilitycutoff), "completed")
 		print("scaling down Cpointsizevisibilitycutoff ", Cpointsizevisibilitycutoff, "  prevcount: ", Dsweptvisiblepointcount, " newcount: ", res["sweptvisiblepointcount"])
 	while res["sweptvisiblepointcount"] > maxvisiblepoints and len(res["pointsizes"]) != 0 and res["pointsizes"].max() > Cpointsizevisibilitycutoff:
 		Cpointsizevisibilitycutoff *= 2.0
 		var Dsweptvisiblepointcount = res["sweptvisiblepointcount"]
-		res = yield(Yupdatepotreeprioritiesfromcamera(primarycamera, pointsizefactor, Cpointsizevisibilitycutoff), "completed")
+		res = yield(Yupdatepotreeprioritiesfromcamera(primarycamera, potreepointsizefactor, Cpointsizevisibilitycutoff), "completed")
 		print("scaling up Cpointsizevisibilitycutoff ", Cpointsizevisibilitycutoff, "  prevcount: ", Dsweptvisiblepointcount, " newcount: ", res["sweptvisiblepointcount"])
 	print("hierarchynodestoload ", len(res["hierarchynodestoload"]), "   pointcloudnodestoshow  ", len(res["pointcloudnodestoshow"]), "   pointcloudnodestohide  ", len(res["pointcloudnodestohide"]),  "  sweptvisiblepointcount ", res["sweptvisiblepointcount"],  "  nscannednodes ", res["nscannednodes"]) #,   " pointsizes: ", res["pointsizes"].min(), " ", res["pointsizes"].max())
 	return res
@@ -258,7 +259,6 @@ func updatepotreeprioritiesLoop():
 		yield(get_tree(), "idle_frame")
 
 		var ticksms_tonextupdatepriorities = OS.get_ticks_msec() + 500 # timems_fornextupdatepriorities
-
 		var res = yield(Yupdatepotreeprioritiesfull(), "completed")
 		for nnode in res["pointcloudnodestohide"]:
 			if nnode.visible:
@@ -281,7 +281,7 @@ func updatepotreeprioritiesLoop():
 					nonimagedataobject["Dboxminmax"] = AABB(nonimagedataobject["ocellcentre"] - nnode.ocellsize/2, nnode.ocellsize).grow(boxpointepsilon)
 
 					var lpointmaterial = load("res://potreework/pointcloudslice.material").duplicate()
-					lpointmaterial.set_shader_param("point_scale", pointsizefactor*nnode.spacing)
+					lpointmaterial.set_shader_param("point_scale", potreepointsizefactor*nnode.spacing)
 					lpointmaterial.set_shader_param("ocellcentre", nonimagedataobject["ocellcentre"])
 					lpointmaterial.set_shader_param("ocellmask", nnode.ocellmask)
 					lpointmaterial.set_shader_param("roottransforminverse", roottransforminverse)

@@ -996,7 +996,8 @@ func _on_resourceoptions_buttondown_setavailablefunctions():
 	elif centrelineselected_forresourcefunction == null or \
 			centrelineselected_forresourcefunction.additionalproperties == null or \
 			centrelineselected_forresourcefunction.additionalproperties.get("potreeurlmetadata") != potreeexperiments.potreeurlmetadataorg or \
-			centrelineselected_forresourcefunction.additionalproperties.get("potreecolorscale") != potreeexperiments.potreecolorscale:
+			centrelineselected_forresourcefunction.additionalproperties.get("potreecolorscale") != potreeexperiments.potreecolorscale or \
+			centrelineselected_forresourcefunction.additionalproperties.get("potreepointsizefactor") != potreeexperiments.potreepointsizefactor:
 		$Viewport/GUI/Panel/ResourceOptions.set_item_text(showhigloadpotreeid, "Remove Potree")
 	else:
 		$Viewport/GUI/Panel/ResourceOptions.set_item_text(showhigloadpotreeid, "Hide Potree")
@@ -1034,6 +1035,8 @@ func _on_resourceoptions_selected(index):
 				xcproperties["potreeurlmetadata"] = ""
 			if not xcproperties.has("potreecolorscale"):
 				xcproperties["potreecolorscale"] = 65535
+			if not xcproperties.has("potreepointsizefactor"):
+				xcproperties["potreepointsizefactor"] = 200
 			if not xcproperties.has("geometrymode"):
 				xcproperties["geometrymode"] = "tunnelvr"
 			if not xcproperties.has("splaystationnoderegex"):
@@ -1063,6 +1066,8 @@ func _on_resourceoptions_selected(index):
 					jresource.erase("potreeurlmetadata")
 					if jresource.has("potreecolorscale"):
 						jresource.erase("potreecolorscale")
+					if jresource.has("potreepointsizefactor"):
+						jresource.erase("potreepointsizefactor")
 				if jresource.has("geometrymode") and jresource["geometrymode"] == "tunnelvr":
 					jresource.erase("geometrymode")
 				if jresource.has("drawingtype"):
