@@ -40,7 +40,7 @@ func imageloadingthread_function(userdata):
 			break
 		var t0 = OS.get_ticks_msec()
 		var Dmsgfile = ""
-		print("imagerequestRimagerequestR ", imagerequestR)
+#		print("imagerequestRimagerequestR ", imagerequestR)
 		if "paperdrawing" in imagerequestR:
 			var imagerequest = imagerequestR
 			var limageloadingthreaddrawingfile = imagerequest["fetcheddrawingfile"]

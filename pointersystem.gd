@@ -476,10 +476,10 @@ func setpointertarget(laserroot, raycast, pointertargetshortdistance):
 			if laserroot == LaserOrient:
 				var LaserContactDisc = laserspot.get_node("LaserContactDisc")
 				if newpointertarget != null and not (pointertargettype == "XCdrawing" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE):
-					var collisionnormal = raycast.get_collision_normal()
-					if collisionnormal.length_squared() == 0.0:
-						print("zero length collisionnormal ", raycast.is_colliding())
-					LaserContactDisc.global_transform = laserspot.global_transform.looking_at(laserspot.global_transform.origin + collisionnormal*10, Vector3(0,1,0))
+					var surfaceawayvec = raycast.get_collision_normal()
+					if abs(surfaceawayvec.x) < 0.01 and abs(surfaceawayvec.z) < 0.01:
+						surfaceawayvec = -LaserOrient.transform.basis.z; 
+					LaserContactDisc.global_transform = laserspot.global_transform.looking_at(laserspot.global_transform.origin + surfaceawayvec*10, Vector3(0,1,0))
 					LaserContactDisc.visible = true
 				else:
 					LaserContactDisc.visible = false
@@ -489,22 +489,21 @@ func setpointertarget(laserroot, raycast, pointertargetshortdistance):
 		
 	if laserroot == LaserOrient:
 		if FloorLaserSpot.visible:
+			var lfloorspotvisible = false
 			if pointertargetpoint != null \
 							and not (pointertargettype == "XCdrawing" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE) \
 							and not (pointertargettype == "XCnode" and pointertargetwall.drawingtype == DRAWING_TYPE.DT_ROPEHANG) \
 							and (pointertarget != guipanel3d) \
 							and (pointertargettype != "PlanView") \
+							and (pointertargettype != "GripMenuItem") \
 							and (Tglobal.handflickmotiongestureposition == handflickmotiongestureposition_normal):
 				FloorLaserSpot.get_node("RayCast").transform.origin = pointertargetpoint
 				FloorLaserSpot.get_node("RayCast").force_raycast_update()
-				if FloorLaserSpot.get_node("RayCast").is_colliding():
-					FloorLaserSpot.get_node("FloorSpot").transform = Transform(laserspot.get_node("LaserContactDisc").global_transform.basis, 
-																			   FloorLaserSpot.get_node("RayCast").get_collision_point())
-					FloorLaserSpot.get_node("FloorSpot").visible = true
-				else:
-					FloorLaserSpot.get_node("FloorSpot").visible = false
-			else:
-				FloorLaserSpot.get_node("FloorSpot").visible = false
+				if FloorLaserSpot.get_node("RayCast").is_colliding() and FloorLaserSpot.visible:
+					var floorspotpt = FloorLaserSpot.get_node("RayCast").get_collision_point()
+					FloorLaserSpot.get_node("FloorSpot").transform = Transform(laserspot.get_node("LaserContactDisc").global_transform.basis, floorspotpt)
+					lfloorspotvisible = (pointertargetpoint - floorspotpt).length() > 0.2
+			FloorLaserSpot.get_node("FloorSpot").visible = lfloorspotvisible
 
 		
 	if activetargetnodetriggerpulling:
@@ -1367,7 +1366,9 @@ func buttonreleased_vrgrip():
 				if abs(gripmenu.gripmenupointertargetwall.global_transform.basis.z.y) > 0.3:
 					newxcvertplane = false
 			elif gripmenu.gripmenupointertargettype == "XCdrawing" and gripmenu.gripmenupointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
-				pass
+				var eyeptpitchangle = rad2deg(atan2(eyept0vec.y, Vector2(eyept0vec.x, eyept0vec.z).length()))
+				print("eyeptpitchangle ", eyeptpitchangle)
+				newxcvertplane = (abs(eyeptpitchangle) <= 75)
 			elif gripmenu.gripmenupointertargettype == "XCflatshell":
 				pt0 += -eyept0vec/2
 			else:
@@ -1377,15 +1378,15 @@ func buttonreleased_vrgrip():
 				pt0 = headcam.global_transform.origin + eyept0vec.normalized()*2.9
 				
 			if pt0 != null:
-				var drawingwallangle = Vector2(eyept0vec.x, eyept0vec.z).angle() + deg2rad(90)
+				var transformpos
+				if newxcvertplane:
+					var drawingwallangle = Vector2(eyept0vec.x, eyept0vec.z).angle() + deg2rad(90)
+					transformpos = Transform(Basis().rotated(Vector3(0,-1,0), drawingwallangle), pt0)
+				else:
+					transformpos = Transform(Vector3(1,0,0), Vector3(0,0,-1), Vector3(0,1,0), pt0) if eyept0vec.y < 0.0 else Transform(Vector3(1,0,0), Vector3(0,0,1), Vector3(0,-1,0), pt0)
 				var xcdata = { "name":sketchsystem.uniqueXCname("s"), 
 							   "drawingtype":DRAWING_TYPE.DT_XCDRAWING,
-							   "transformpos":Transform(Basis().rotated(Vector3(0,-1,0), drawingwallangle), pt0) }
-				if not newxcvertplane:
-					if eyept0vec.y < 0.0:
-						xcdata["transformpos"] = Transform(Vector3(1,0,0), Vector3(0,0,-1), Vector3(0,1,0), pt0)
-					else:
-						xcdata["transformpos"] = Transform(Vector3(1,0,0), Vector3(0,0,1), Vector3(0,-1,0), pt0)
+							   "transformpos":transformpos }
 					
 				if Tglobal.housahedronmode:
 					xcdata["xcflatshellmaterial"] = "ceiling" if xcdata["transformpos"].basis.z.y < -0.8 else "floor" if xcdata["transformpos"].basis.z.y > 0.8 else "specwall" 
@@ -1400,6 +1401,8 @@ func buttonreleased_vrgrip():
 					var xcdrawing1 = sketchsystem.get_node("XCdrawings").get_node(gripmenu.gripmenupointertargetwall.xcname1)
 					xcdrawing.expandxcdrawingfitprojectedfromxcdrawingnodes(xcdrawing0)
 					xcdrawing.expandxcdrawingfitprojectedfromxcdrawingnodes(xcdrawing1)
+				if newxcvertplane:
+					xcdrawing.expandxcdrawingscale(Vector3(pt0.x, headcam.global_transform.origin.y, pt0.z))
 
 		elif pointertarget.get_name() == "toPaper":
 			if gripmenu.gripmenupointertargettype == "XCdrawing" and gripmenu.gripmenupointertargetwall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:

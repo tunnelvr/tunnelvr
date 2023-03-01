@@ -993,7 +993,11 @@ func _on_resourceoptions_buttondown_setavailablefunctions():
 		$Viewport/GUI/Panel/ResourceOptions.set_item_disabled(showhigloadpotreeid, (centrelineselected_forresourcefunction == null or centrelineselected_forresourcefunction.additionalproperties == null or centrelineselected_forresourcefunction.additionalproperties.get("potreeurlmetadata") == null))
 	elif not potreeexperiments.visible:
 		$Viewport/GUI/Panel/ResourceOptions.set_item_text(showhigloadpotreeid, "Show Potree")
-	elif centrelineselected_forresourcefunction == null or centrelineselected_forresourcefunction.additionalproperties == null or centrelineselected_forresourcefunction.additionalproperties.get("potreeurlmetadata") != potreeexperiments.potreeurlmetadataorg:
+	elif centrelineselected_forresourcefunction == null or \
+			centrelineselected_forresourcefunction.additionalproperties == null or \
+			centrelineselected_forresourcefunction.additionalproperties.get("potreeurlmetadata") != potreeexperiments.potreeurlmetadataorg or \
+			centrelineselected_forresourcefunction.additionalproperties.get("potreecolorscale") != potreeexperiments.potreecolorscale or \
+			centrelineselected_forresourcefunction.additionalproperties.get("potreepointsizefactor") != potreeexperiments.potreepointsizefactor:
 		$Viewport/GUI/Panel/ResourceOptions.set_item_text(showhigloadpotreeid, "Remove Potree")
 	else:
 		$Viewport/GUI/Panel/ResourceOptions.set_item_text(showhigloadpotreeid, "Hide Potree")
@@ -1029,6 +1033,10 @@ func _on_resourceoptions_selected(index):
 			xcproperties["centrelineconnection"] = "anchored" if clconnectcode == 1 else ("incoming for mapping" if clconnectcode == 2 else "free") 
 			if not xcproperties.has("potreeurlmetadata"):
 				xcproperties["potreeurlmetadata"] = ""
+			if not xcproperties.has("potreecolorscale"):
+				xcproperties["potreecolorscale"] = 65535
+			if not xcproperties.has("potreepointsizefactor"):
+				xcproperties["potreepointsizefactor"] = 200
 			if not xcproperties.has("geometrymode"):
 				xcproperties["geometrymode"] = "tunnelvr"
 			if not xcproperties.has("splaystationnoderegex"):
@@ -1056,6 +1064,10 @@ func _on_resourceoptions_selected(index):
 					jresource.erase("centrelineconnection")
 				if jresource.has("potreeurlmetadata") and jresource["potreeurlmetadata"] == "":
 					jresource.erase("potreeurlmetadata")
+					if jresource.has("potreecolorscale"):
+						jresource.erase("potreecolorscale")
+					if jresource.has("potreepointsizefactor"):
+						jresource.erase("potreepointsizefactor")
 				if jresource.has("geometrymode") and jresource["geometrymode"] == "tunnelvr":
 					jresource.erase("geometrymode")
 				if jresource.has("drawingtype"):
@@ -1215,6 +1227,11 @@ func ExecuteFileCommand():
 	var filecmdstruct = parse_json(filecommandtextedit.text)
 	if not filecmdstruct:
 		return
+
+	if filecmdstruct.has("newcave"):
+		setsavegamefilename(filecmdstruct["newcave"])
+		return
+
 	var caddy_url = filecmdstruct.get("caddy_url", "")
 	var path = filecmdstruct.get("path", "")
 	var filestoupload = filecmdstruct.get("filestoupload")
@@ -1222,10 +1239,7 @@ func ExecuteFileCommand():
 	if caddy_url and typeof(filestoupload) == TYPE_STRING_ARRAY and typeof(filenames) == TYPE_STRING_ARRAY and len(filenames) == len(filestoupload):
 		get_node("/root/Spatial/ExecutingFeatures").uploaddroppedfiles(caddy_url, path, filestoupload, filenames)
 
-
-	#elif fcomms[0] == "newcave":
-	#	setsavegamefilename(mmtext.get_string(0))
-	# planviewsystem.applyfilecommand(mmtext.get_string(1), mmtext.get_string(2))
+	#planviewsystem.applyfilecommand(mmtext.get_string(1), mmtext.get_string(2))
 
 
 func _on_files_dropped(files: PoolStringArray, screen: int):

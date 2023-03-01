@@ -17,7 +17,4 @@ func D_run():
 		print(len(mmtext.strings[0]))
 
 func _run():
-	var t = Quat(Vector3())
-	var q = Quat(0,0,0,1)
-	print(q.xform(Vector3(0,0,1)))
-	
+	print(int("u99"))	
