@@ -17,4 +17,6 @@ func D_run():
 		print(len(mmtext.strings[0]))
 
 func _run():
-	print(int("u99"))	
+	var q = Quat(-0.001616,-0.585384,0.000884,0.810754).normalized()
+	var b = Basis(q).scaled(Vector3(1,1,0.1))
+	print(b)

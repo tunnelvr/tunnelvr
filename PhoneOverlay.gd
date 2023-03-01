@@ -361,7 +361,7 @@ func updatescreentouchplaces0state(pressed):
 
 	$DepthInfo.visible = (len(screentouchplaces0pos) == 3)
 
-	var fingerdown1posPP = plancamera.project_position(fingerdragpos, 0.0)
+	var fingerdown1posPP = plancamera.ject_position(fingerdragpos, 0.0)
 	plancameraxvec = plancamera.project_position(fingerdragpos+Vector2(1,0), 0.0) - fingerdown1posPP; 
 	plancamerayvec = plancamera.project_position(fingerdragpos+Vector2(0,1), 0.0) - fingerdown1posPP; 
 	plancamerazvec = plancameraxvec.length()*(plancamera.project_position(fingerdragpos, 1.0) - fingerdown1posPP)
@@ -511,18 +511,30 @@ var distoxquat = Quat()
 var distoxlength = 0.0
 var quatsettime = 0
 
+var BUTTON_MARKAXESVALUES = 14 - 1 
+var BUTTON_MARKLAXESVALUES = 15 - 1 
+
+func _process(delta):
+	if quatsettime + 2000 > OS.get_ticks_msec() and pointersystem.handright.handstate != 0:
+		var bdistoxquat = Basis(distoxquat)
+		$DistoxLaser.transform = Transform(Basis(bdistoxquat.x, bdistoxquat.y, bdistoxquat.z*distoxlength), 
+				pointersystem.handright.global_transform.origin + bdistoxquat.z*(distoxlength*0.5 + 0.05))
+		$DistoxLaser.visible = true
+	else:
+		$DistoxLaser.visible = false
+		
 func _input(event):
 	if event is InputEventJoypadButton:
 		if event.button_index != 4:
 			print("Jbutton ", ("down" if event.pressed else "up"), " ", event.button_index)
-		if event.device == 0 and (event.button_index == 4 or event.button_index == 5) and not event.pressed:
+		if event.device == 0 and (event.button_index == BUTTON_MARKAXESVALUES or event.button_index == BUTTON_MARKLAXESVALUES) and not event.pressed:
 			var lquat = Quat(deviceaxisvalues[1], deviceaxisvalues[2], deviceaxisvalues[0], deviceaxisvalues[5])
-			if event.button_index == 4:
+			if event.button_index == BUTTON_MARKAXESVALUES:
 				if abs(lquat.length() - 1.0) < 0.1:
 					distoxquat = lquat.normalized()
 					#print(" quat ", distoxquat, " ", distoxquat.length())
 					quatsettime = OS.get_ticks_msec()
-			elif event.button_index == 5:
+			elif event.button_index == BUTTON_MARKLAXESVALUES:
 				distoxlength = (deviceaxisvalues[3]+1)*20
 				print("length ", distoxlength, "  quat ", distoxquat, " ", distoxquat.length())
 				if (pointersystem.activetargetnodewall != null) and (pointersystem.activetargetnodewall.drawingtype == DRAWING_TYPE.DT_CENTRELINE) and \
@@ -537,6 +549,7 @@ func _input(event):
 								   "newonepathpairs":[ pointersystem.activetargetnode.get_name(), lasernodename1 ]
 								 }
 					planviewsystem.sketchsystem.actsketchchange([xcdata])
+				quatsettime = OS.get_ticks_msec()
 				
 
 	elif event is InputEventJoypadMotion:
