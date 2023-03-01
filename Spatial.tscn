@@ -2111,6 +2111,7 @@ mesh = SubResource( 8 )
 material/0 = SubResource( 9 )
 
 [node name="right_hand_model" parent="Players/PlayerMe/HandRight" instance=ExtResource( 71 )]
+visible = false
 
 [node name="OculusQuestTouchController_Right_Reactive" parent="Players/PlayerMe/HandRight" instance=ExtResource( 70 )]
 visible = false

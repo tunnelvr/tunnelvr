@@ -26,6 +26,7 @@ func _ready():
 	$DrawmodeButton.connect("toggled", self, "_ondrawmodebuttontoggled")
 	_ondrawmodebuttontoggled(false)
 	planviewsystem.planviewcontrols.get_node("CentrelineActivity/DelLast").connect("pressed", self, "drawndeletelast")
+	set_process(false)
 
 func _ondrawmodebuttontoggled(button_pressed: bool):
 	planviewsystem.planviewcontrols.get_node("CentrelineActivity").visible = button_pressed
@@ -361,7 +362,7 @@ func updatescreentouchplaces0state(pressed):
 
 	$DepthInfo.visible = (len(screentouchplaces0pos) == 3)
 
-	var fingerdown1posPP = plancamera.ject_position(fingerdragpos, 0.0)
+	var fingerdown1posPP = plancamera.project_position(fingerdragpos, 0.0)
 	plancameraxvec = plancamera.project_position(fingerdragpos+Vector2(1,0), 0.0) - fingerdown1posPP; 
 	plancamerayvec = plancamera.project_position(fingerdragpos+Vector2(0,1), 0.0) - fingerdown1posPP; 
 	plancamerazvec = plancameraxvec.length()*(plancamera.project_position(fingerdragpos, 1.0) - fingerdown1posPP)
@@ -515,18 +516,23 @@ var BUTTON_MARKAXESVALUES = 14 - 1
 var BUTTON_MARKLAXESVALUES = 15 - 1 
 
 func _process(delta):
-	if quatsettime + 2000 > OS.get_ticks_msec() and pointersystem.handright.handstate != 0:
+	if quatsettime + 2000 > OS.get_ticks_msec():
+		var cpos = pointersystem.handright.global_transform.origin if pointersystem.handright.handstate != 0 else selfSpatial.playerMe.get_node("HeadCam").global_transform.origin
+		var lwidth = 10.0*planviewsystem.nodesca if planviewsystem.visible else 1.0
 		var bdistoxquat = Basis(distoxquat)
-		$DistoxLaser.transform = Transform(Basis(bdistoxquat.x, bdistoxquat.y, bdistoxquat.z*distoxlength), 
-				pointersystem.handright.global_transform.origin + bdistoxquat.z*(distoxlength*0.5 + 0.05))
+		$DistoxLaser.transform = Transform(Basis(bdistoxquat.x*lwidth, bdistoxquat.y*lwidth, bdistoxquat.z*distoxlength), 
+										   cpos + bdistoxquat.z*(distoxlength*0.5 + 0.05))
 		$DistoxLaser.visible = true
 	else:
 		$DistoxLaser.visible = false
 		
 func _input(event):
 	if event is InputEventJoypadButton:
-		if event.button_index != 4:
-			print("Jbutton ", ("down" if event.pressed else "up"), " ", event.button_index)
+		if event.button_index == BUTTON_MARKAXESVALUES or event.button_index == BUTTON_MARKLAXESVALUES:
+			set_process(true)
+		else:
+			print("BLEJoybutton ", ("down" if event.pressed else "up"), " ", event.button_index)
+			
 		if event.device == 0 and (event.button_index == BUTTON_MARKAXESVALUES or event.button_index == BUTTON_MARKLAXESVALUES) and not event.pressed:
 			var lquat = Quat(deviceaxisvalues[1], deviceaxisvalues[2], deviceaxisvalues[0], deviceaxisvalues[5])
 			if event.button_index == BUTTON_MARKAXESVALUES:
