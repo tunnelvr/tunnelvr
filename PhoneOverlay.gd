@@ -523,8 +523,9 @@ func _process(delta):
 		var cpos = pointersystem.handright.global_transform.origin if pointersystem.handright.handstate != 0 else selfSpatial.playerMe.get_node("HeadCam").global_transform.origin
 		var lwidth = 10.0*planviewsystem.nodesca if planviewsystem.visible else 1.0
 		var bdistoxquat = Basis(distoxquat)
-		$DistoxLaser.transform = Transform(Basis(bdistoxquat.x*lwidth, bdistoxquat.y*lwidth, bdistoxquat.z*distoxlength), 
-										   cpos + bdistoxquat.z*(distoxlength*0.5 + 0.05))
+		var ldistoxlength = max(0.2, distoxlength)
+		$DistoxLaser.transform = Transform(Basis(bdistoxquat.x*lwidth, bdistoxquat.y*lwidth, bdistoxquat.z*ldistoxlength), 
+										   cpos + bdistoxquat.z*(ldistoxlength*0.5 + 0.05))
 		$DistoxLaser.visible = true
 	else:
 		$DistoxLaser.visible = false
