@@ -214,9 +214,9 @@ func _process(delta):
 				var matp = xcnodelabelpanelp.get_surface_material(0)
 				matp.set_shader_param("texture_albedo", tex)
 				matp.set_shader_param("vertex_offset", Vector3(-(xcnodelabelpanelp.mesh.size.x*0.5 + 0.15), xcnodelabelpanel.mesh.size.y*0.5, 0))
-				matp.set_shader_param("vertex_scale", 1.0)
 				matp.set_shader_param("vertex_scale", currentplanlabelsca)
-				#matp.set_shader_param("uv1_scale", Vector3(1,-1,1))
+				matp.set_shader_param("vertexyinvert", -1.0 if Tglobal.phoneoverlay != null else 1.0)
+	
 				matp.set_shader_param("uv1_scale", Vector3(lineimgwidth*1.0/tex.get_width(),-1.0/len(workingxcnodenamelist),1))
 				matp.set_shader_param("uv1_offset", Vector3(0,(i+1)*1.0/len(workingxcnodenamelist),0))
 				xcnodelabelpanelp.visible = true

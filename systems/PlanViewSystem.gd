@@ -608,8 +608,6 @@ func planviewtransformpos(guidpaneltransform, guidpanelsize):
 
 
 func updateplanviewlocatorlines():
-	var nodesca = plancamera.size/70.0*3.0
-	var labelsca = nodesca*2.0
 	sketchsystem.pointersystem.selectlinefatness = nodesca*8.0
 	for player in selfSpatial.get_node("Players").get_children():
 		var planviewlocatorline = player.get_node("headlocator/planviewlocatorline")
@@ -621,10 +619,11 @@ func updateplanviewlocatorlines():
 
 var updateplanviewentitysizes_working = false
 var nodesca = 1.0
+var labelsca = 1.0
 func updateplanviewentitysizes():
 	var Dt0 = OS.get_ticks_msec()
-	nodesca = plancamera.size/70.0*3.0
-	var labelsca = nodesca*2.0
+	nodesca = plancamera.size/70.0*(6.0 if Tglobal.phoneoverlay != null else 3.0)
+	labelsca = plancamera.size/70.0*6.0
 	var vertexyinvert = -1.0 if Tglobal.phoneoverlay != null else 1.0
 		
 	var tunnelxoutline = sketchsystem.get_node("tunnelxoutline")
@@ -635,8 +634,9 @@ func updateplanviewentitysizes():
 		sketchsystem.get_node("tunnelxoutline/blackoutline").material_override.set_shader_param("normaloffsetdistance", nodesca*0.2)
 		get_node("/root/Spatial/VerletRopeSystem").update_hangingroperad(sketchsystem, nodesca*0.05)
 
-	get_node("/root/Spatial/LabelGenerator").currentplannodesca = nodesca
-	get_node("/root/Spatial/LabelGenerator").currentplanlabelsca = labelsca
+	var labelgenerator = get_node("/root/Spatial/LabelGenerator")
+	labelgenerator.currentplannodesca = nodesca
+	labelgenerator.currentplanlabelsca = labelsca
 	var labelrects = [ ]
 	var rectrecttests = 0
 	var rectrecttestt0 = OS.get_ticks_msec()

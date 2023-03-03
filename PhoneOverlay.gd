@@ -472,6 +472,9 @@ func backgroundmotioninput(viewport: Object, event: InputEvent, shape_idx: int):
 					touchedinselectmode = $SelectmodeButton.pressed
 				screentouchplaces[event.index] = 0
 				screentouchplaces0pos[event.index] = event.position
+				if len(screentouchplaces0pos) >= 2 and touchedindrawmode:
+					touchedindrawmode = false
+					$DrawCurve.visible = false
 				if touchedindrawmode or touchedinselectmode:
 					updatescreentouchplaces0stateDraw(true)
 					return

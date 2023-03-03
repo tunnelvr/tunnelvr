@@ -1944,6 +1944,7 @@ albedo_color = Color( 0.941176, 0.941176, 0.0470588, 1 )
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
 enablevr = false
+forcephoneoverlay = true
 
 [node name="Players" type="Spatial" parent="."]
 
