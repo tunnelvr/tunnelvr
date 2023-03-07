@@ -493,7 +493,8 @@ func actplanviewdict(pvchange, resettransmitbutton=true):
 			if Tglobal.phoneoverlay != null:
 				$PlanView/Viewport/PlanGUI/Camera.current = true
 				$PlanView/Viewport.visible = true
-				#Tglobal.phoneoverlay.get_node("ThumbLeft").visible = false
+				if selfSpatial.playerMe.playerplatform != "PC":
+					Tglobal.phoneoverlay.get_node("ThumbLeft").visible = false
 				Tglobal.phoneoverlay.get_node("ThumbRight").visible = false
 			else:
 				get_node("PlanView/CollisionShape").disabled = false
@@ -608,7 +609,6 @@ func planviewtransformpos(guidpaneltransform, guidpanelsize):
 
 
 func updateplanviewlocatorlines():
-	sketchsystem.pointersystem.selectlinefatness = nodesca*8.0
 	for player in selfSpatial.get_node("Players").get_children():
 		var planviewlocatorline = player.get_node("headlocator/planviewlocatorline")
 		planviewlocatorline.scale = Vector3(nodesca*3.0, 1, nodesca*3.0)
@@ -970,23 +970,29 @@ func updatecentrelineactivityui():
 			selectedcentrelinexcnameIndex = CentrelineList.get_item_count()-1
 	CentrelineList.select(selectedcentrelinexcnameIndex)
 
+
+const OptionsCentreline_NORMALCENTRELINE = 0
+const OptionsCentreline_SKETCHINGCENTRELINE = 1
+const OptionsCentreline_NEWPLAN = 2
 func centrelineactivityoptions_selected(index):
 	var CentrelineList = $PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity/CentrelineList
 	var selectedcentrelinexcname = CentrelineList.get_item_text(CentrelineList.selected) if CentrelineList.selected != -1 else ""
-	if index == 1:
+	if index == OptionsCentreline_SKETCHINGCENTRELINE:
 		activecentrelinexcname = selectedcentrelinexcname if selectedcentrelinexcname != "--none--" else ""
-	elif index == 0 and activecentrelinexcname == selectedcentrelinexcname:
+	elif index == OptionsCentreline_NORMALCENTRELINE and activecentrelinexcname == selectedcentrelinexcname:
 		activecentrelinexcname = ""
-	elif index == 2:
+	elif index == OptionsCentreline_NEWPLAN:
 		var rotzminus90 = Basis(Vector3(1,0,0), Vector3(0,0,-1), Vector3(0,1,0))
 		var bbcenvec = Vector3()
 		var centrelinetransformpos = Transform(rotzminus90, -rotzminus90.xform(bbcenvec))
+		var playermeheadpos = selfSpatial.playerMe.get_node("HeadCam").global_transform.origin
 		var xcdata = { "name":sketchsystem.uniqueXCname("plansketch"), 
 					   "drawingtype":DRAWING_TYPE.DT_CENTRELINE,
 					   "drawingvisiblecode":DRAWING_TYPE.VIZ_XCD_PLANE_AND_NODES_VISIBLE,
 					   "transformpos":centrelinetransformpos, 
-					   "nodepoints":{}, 
-					   "onepathpairs":[]
+					   "nodepoints":{ "S0":centrelinetransformpos.xform_inv(playermeheadpos + Vector3(5,0,0)), 
+									  "S1":centrelinetransformpos.xform_inv(playermeheadpos + Vector3(0,0.1,5)) }, 
+					   "onepathpairs":[ "S0", "S1" ]
 					 }
 		activecentrelinexcname = xcdata["name"]
 		sketchsystem.actsketchchange([ xcdata ])
@@ -996,9 +1002,8 @@ func centrelineactivitylist_selected(index):
 	var CentrelineList = $PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity/CentrelineList
 	var selectedcentrelinexcname = CentrelineList.get_item_text(CentrelineList.selected) if CentrelineList.selected != -1 else ""
 	var OptionsCentreline = $PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity/OptionsCentreline
-	OptionsCentreline.select(1 if selectedcentrelinexcname == activecentrelinexcname else 0)
+	OptionsCentreline.select(OptionsCentreline_SKETCHINGCENTRELINE if selectedcentrelinexcname == activecentrelinexcname else OptionsCentreline_NORMALCENTRELINE)
 
-	
 
 # * keyboard to work on phone overlay mode
 # * root of tree should give URL of the tree

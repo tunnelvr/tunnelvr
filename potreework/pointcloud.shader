@@ -77,7 +77,6 @@ void vertex() {
 void fragment() {
 	ALBEDO = COLOR.rgb;
 	EMISSION = emissioncol;
-	float squarecentredist = max(abs(POINT_COORD.x-0.5), abs(POINT_COORD.y-0.5)); 
 	
 	float rsq = (POINT_COORD.x-0.5)*(POINT_COORD.x-0.5) + (POINT_COORD.y-0.5)*(POINT_COORD.y-0.5);
 	if (rsq > 0.25+point_scale*0.002) 
