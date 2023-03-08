@@ -315,7 +315,7 @@ func process_ovrhandtracking(delta):
 				hand_boneorientations[i] = (ovrhandLRrestdata[ib].basis*ovrhandpose[ib].basis).get_rotation_quat()
 
 		handstate = HS_HAND
-		transform = ovrhandpose["handtransform"] 
+		transform = ovrhandpose["handtransform"]
 		gripbuttonheld = handposecontroller.is_button_pressed(BUTTONS.HT_PINCH_MIDDLE_FINGER)
 		triggerbuttonheld = handposecontroller.is_button_pressed(BUTTONS.HT_PINCH_INDEX_FINGER)
 
@@ -330,7 +330,7 @@ func process_ovrhandtracking(delta):
 	update_handpose(delta)
 	pointervalid = (handstate == HS_HAND) and handposecontroller.get_is_active()
 	if pointervalid:
-		pointerposearvrorigin = handposecontroller.transform
+		pointerposearvrorigin = Transform(handposecontroller.transform.basis, handposecontroller.transform.origin/ARVRServer.world_scale)
 		
 const controllerzdisplacementcorrection = 0.05
 func process_normalvrtracking(delta):
