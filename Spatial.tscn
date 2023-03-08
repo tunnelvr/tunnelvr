@@ -2036,15 +2036,6 @@ collision_mask = 40
 [node name="left_hand_model" parent="Players/PlayerMe/HandLeft" instance=ExtResource( 72 )]
 visible = false
 
-[node name="Skeleton" parent="Players/PlayerMe/HandLeft/left_hand_model/ArmatureLeft" index="0"]
-bones/0/bound_children = [ NodePath("BoneAttachment11") ]
-bones/2/bound_children = [ NodePath("BoneAttachment") ]
-bones/6/bound_children = [ NodePath("BoneAttachment6") ]
-bones/7/bound_children = [ NodePath("BoneAttachment5") ]
-bones/8/bound_children = [ NodePath("BoneAttachment2"), NodePath("BoneAttachment3"), NodePath("BoneAttachment4") ]
-bones/11/bound_children = [ NodePath("BoneAttachment10") ]
-bones/12/bound_children = [ NodePath("BoneAttachment7"), NodePath("BoneAttachment8"), NodePath("BoneAttachment9") ]
-
 [node name="BoneAttachment" parent="Players/PlayerMe/HandLeft/left_hand_model/ArmatureLeft/Skeleton" index="0"]
 transform = Transform( 0.715415, 0.480301, 0.507437, -0.520631, 0.850801, -0.0712855, -0.465966, -0.213189, 0.858735, 3.59584, -2.80285, -1.91577 )
 
