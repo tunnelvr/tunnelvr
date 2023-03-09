@@ -26,6 +26,7 @@ func _ready():
 	$DrawmodeButton.connect("toggled", self, "_ondrawmodebuttontoggled")
 	_ondrawmodebuttontoggled(false)
 	planviewsystem.planviewcontrols.get_node("CentrelineActivity/DelLast").connect("pressed", self, "drawndeletelast")
+	set_process(false)
 
 func _ondrawmodebuttontoggled(button_pressed: bool):
 	planviewsystem.planviewcontrols.get_node("CentrelineActivity").visible = button_pressed
@@ -471,6 +472,9 @@ func backgroundmotioninput(viewport: Object, event: InputEvent, shape_idx: int):
 					touchedinselectmode = $SelectmodeButton.pressed
 				screentouchplaces[event.index] = 0
 				screentouchplaces0pos[event.index] = event.position
+				if len(screentouchplaces0pos) >= 2 and touchedindrawmode:
+					touchedindrawmode = false
+					$DrawCurve.visible = false
 				if touchedindrawmode or touchedinselectmode:
 					updatescreentouchplaces0stateDraw(true)
 					return
@@ -511,18 +515,36 @@ var distoxquat = Quat()
 var distoxlength = 0.0
 var quatsettime = 0
 
+var BUTTON_MARKAXESVALUES = 14 - 1 
+var BUTTON_MARKLAXESVALUES = 15 - 1 
+
+func _process(delta):
+	if quatsettime + 2000 > OS.get_ticks_msec():
+		var cpos = pointersystem.handright.global_transform.origin if pointersystem.handright.handstate != 0 else selfSpatial.playerMe.get_node("HeadCam").global_transform.origin
+		var lwidth = 10.0*planviewsystem.nodesca if planviewsystem.visible else 1.0
+		var bdistoxquat = Basis(distoxquat)
+		var ldistoxlength = max(0.2, distoxlength)
+		$DistoxLaser.transform = Transform(Basis(bdistoxquat.x*lwidth, bdistoxquat.y*lwidth, bdistoxquat.z*ldistoxlength), 
+										   cpos + bdistoxquat.z*(ldistoxlength*0.5 + 0.05))
+		$DistoxLaser.visible = true
+	else:
+		$DistoxLaser.visible = false
+		
 func _input(event):
 	if event is InputEventJoypadButton:
-		if event.button_index != 4:
-			print("Jbutton ", ("down" if event.pressed else "up"), " ", event.button_index)
-		if event.device == 0 and (event.button_index == 4 or event.button_index == 5) and not event.pressed:
+		if event.button_index == BUTTON_MARKAXESVALUES or event.button_index == BUTTON_MARKLAXESVALUES:
+			set_process(true)
+		else:
+			print("BLEJoybutton ", ("down" if event.pressed else "up"), " ", event.button_index)
+			
+		if event.device == 0 and (event.button_index == BUTTON_MARKAXESVALUES or event.button_index == BUTTON_MARKLAXESVALUES) and not event.pressed:
 			var lquat = Quat(deviceaxisvalues[1], deviceaxisvalues[2], deviceaxisvalues[0], deviceaxisvalues[5])
-			if event.button_index == 4:
+			if event.button_index == BUTTON_MARKAXESVALUES:
 				if abs(lquat.length() - 1.0) < 0.1:
 					distoxquat = lquat.normalized()
 					#print(" quat ", distoxquat, " ", distoxquat.length())
 					quatsettime = OS.get_ticks_msec()
-			elif event.button_index == 5:
+			elif event.button_index == BUTTON_MARKLAXESVALUES:
 				distoxlength = (deviceaxisvalues[3]+1)*20
 				print("length ", distoxlength, "  quat ", distoxquat, " ", distoxquat.length())
 				if (pointersystem.activetargetnodewall != null) and (pointersystem.activetargetnodewall.drawingtype == DRAWING_TYPE.DT_CENTRELINE) and \
@@ -537,6 +559,7 @@ func _input(event):
 								   "newonepathpairs":[ pointersystem.activetargetnode.get_name(), lasernodename1 ]
 								 }
 					planviewsystem.sketchsystem.actsketchchange([xcdata])
+				quatsettime = OS.get_ticks_msec()
 				
 
 	elif event is InputEventJoypadMotion:

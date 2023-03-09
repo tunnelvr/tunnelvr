@@ -124,7 +124,7 @@ static func setshapetobonesLowPoly(joint_transforms, bonerest, bright=true):
 	var wristtransform = joint_transforms[OpenXRallhandsdata.XR_HAND_JOINT_WRIST_EXT]*rotz90
 	var bonepose = { "handtransform":wristtransform }
 	for i in range(25):
-		bonepose[i] = Transform()
+		bonepose[i] = Transform() 
 	bonepose[0] = Transform(Basis(), -bonerest[0].basis.xform_inv(bonerest[0].origin))
 	
 	var tRboneposeGR = bonepose["handtransform"]*bonerest["skeltrans"]
@@ -236,7 +236,7 @@ static func setshapetobonesOVR(joint_transforms, ovrhandrestdata):
 
 	var ovrhandmodelbasis = handbasis*ovrhandrestdata["wristtransinverse"]
 	var ovrhandmodelorigin = h["hi1"] - ovrhandmodelbasis*ovrhandrestdata["posindex1"]
-	var ovrhandpose = { "handtransform":Transform(ovrhandmodelbasis, ovrhandmodelorigin) }
+	var ovrhandpose = { "handtransform":Transform(ovrhandmodelbasis, ovrhandmodelorigin*ARVRServer.world_scale ) }
 
 	ovrhandpose[0] = Transform()
 	var tRboneposeGR = ovrhandpose["handtransform"]*ovrhandrestdata["skeltrans"]

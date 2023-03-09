@@ -1243,32 +1243,30 @@ func ExecuteFileCommand():
 
 
 func _on_files_dropped(files: PoolStringArray, screen: int):
-	if not (visible if Tglobal.phoneoverlay == null else $Viewport.visible):
-		print("GUIpanel not visible")
-		return
+	if not visible:
+		setguipanelvisible(sketchsystem.pointersystem.LaserOrient.global_transform)
 	var filecommandtextedit = $Viewport/GUI/Panel/EditColorRect/TextEdit
 	var prevfilecmdstruct = parse_json(filecommandtextedit.text)
 	if not prevfilecmdstruct:
 		prevfilecmdstruct = { }
 	var playertouploadto = null
 	for player in get_node("/root/Spatial/Players").get_children():
-		if player.executingfeaturesavailable.has("caddy"):
-			if not playertouploadto or playertouploadto.networkID != 1:
-				playertouploadto = player
+		if player.executingfeaturesavailable.has("caddy") and player.networkID == 1:
+			playertouploadto = player
 	if not playertouploadto:
-		filecommandtextedit.text = "No caddy-server player"
+		filecommandtextedit.text = "Please connect to player\nrunning caddy webserver"
 		return
 	var filenames = [ ]
 	for f in files:
 		filenames.push_back(f.substr(f.find_last("/")+1))
 	var path = planviewsystem.fetchselectedcaddyfilepath() if not prevfilecmdstruct.get("path") else prevfilecmdstruct.get("path")
+
 	var filecmdstruct = { 
 		"cmd":"uploadfiles",
 		"path":path if path else "tmpdir",
-		"networkID":playertouploadto.networkID, 
 		"name":playertouploadto.playerhumanname, 
 		"filestoupload":files,
-		"caddy_url":planviewsystem.filetreeresource.get("url")
+		"caddy_url":"http://%s:8000" % selfSpatial.hostipnumber
 	}
 	filecommandtextedit.text = JSON.print(filecmdstruct, "  ", true)
 

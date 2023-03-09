@@ -22,7 +22,7 @@ extends Spatial
 
 # nix build github:matthewcroughan/nixpkgs/mc/potreeconverter#potreeconverter
 # result/bin/PotreeConverter  --source point_cloud_may17cc.laz --outdir potreeconverted --attributes position_cartesian --method poisson
-# result/bin/PotreeConverter  --source miscpointclouds/Ship1-poly/ship1-cc.las --outdir miscpointclouds/Ship1-poly/potreeconverted --attributes position_cartesian --attributes rgb --method poisson
+# result/bin/PotreeConverter  --source miscpointclouds/Ship1-poly/Fship1-cc.las --outdir miscpointclouds/Ship1-poly/potreeconverted --attributes position_cartesian --attributes rgb --method poisson
 
 # nix-shell -p caddy
 # caddy file-server --browse --root /home/julian/data/3dmodels/aidanhouse --listen 0.0.0.0:8000

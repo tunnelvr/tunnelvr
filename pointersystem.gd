@@ -2195,7 +2195,8 @@ func _physics_process(delta):
 	   (activetargetnode != null) and (laserselectlinelogicalvisibilitystate == 0):
 		if OS.get_ticks_msec() < Tglobal.phoneoverlay.quatsettime + 2000:
 			LaserSelectLine.transform = Transform(Basis(Tglobal.phoneoverlay.distoxquat), activetargetnodewall.transform.xform(activetargetnode.transform.origin))
-			LaserSelectLine.get_node("Scale").scale = Vector3(selectlinefatness, selectlinefatness, -(Tglobal.phoneoverlay.distoxlength + 2.0)/2)
+			var lselectlinefatness = planviewsystem.nodesca*8.0
+			LaserSelectLine.get_node("Scale").scale = Vector3(lselectlinefatness, lselectlinefatness, -max(0.2, Tglobal.phoneoverlay.distoxlength))
 			LaserSelectLine.get_node("Scale/Mesh").get_surface_material(0).albedo_color = LaseSelectLinedistoxcolour
 			LaserSelectLine.visible = true
 		else:

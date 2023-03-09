@@ -17,4 +17,6 @@ func D_run():
 		print(len(mmtext.strings[0]))
 
 func _run():
-	print(int("u99"))	
+	var openxrposegnds = load("res://addons/godot_openxr/config/OpenXRPose.gdns")
+	var openxr_config_res = load("res://addons/godot-openxr/config/OpenXRConfig.gdns")
+	print(openxr_config_res)

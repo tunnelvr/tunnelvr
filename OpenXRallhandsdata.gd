@@ -125,38 +125,58 @@ enum {
 	VR_BUTTON_THUMB_INDEX_PINCH_VIA_CONTROLLER_SIGNAL = 4,
 }
 
+var openxrposegnds = load("res://addons/godot-openxr/config/OpenXRPose.gdns")
+var openxrskeletongnds = load("res://addons/godot-openxr/config/OpenXRSkeleton.gdns")
 
-func setupopenxrpluginhandskeleton(handskelpose, _LR):
+func setupopenxrpluginhandskeleton(handskelposename, handblankskelname, _LR):
 	# for these parameters see https://github.com/GodotVR/godot_openxr/blob/master/src/gdclasses/OpenXRPose.cpp
+	var handskelpose = Spatial.new()
+	handskelpose.name = handskelposename
+	handskelpose.set_script(openxrposegnds)
 	handskelpose.action = "SkeletonBase"
 	handskelpose.path = "/user/hand/right" if _LR == "_R" else "/user/hand/left"
 
 	# for these parameters see https://github.com/GodotVR/godot_openxr/blob/master/src/gdclasses/OpenXRSkeleton.cpp
 	assert (len(XRbone_names) == XR_HAND_JOINT_COUNT_EXT)
 	assert (len(boneparentsToWrist) == XR_HAND_JOINT_COUNT_EXT)
-	var handskel = handskelpose.get_child(0)
+	var handskel = Skeleton.new()
+	handskel.name = handblankskelname
+	handskel.set_script(openxrskeletongnds)
 	handskel.hand = 1 if _LR == "_R" else 0
 	handskel.motion_range = XR_HAND_JOINTS_MOTION_RANGE_UNOBSTRUCTED_EXT
 	for i in range(len(XRbone_names)):
 		handskel.add_bone(XRbone_names[i] + _LR)
 		if i >= 2:
 			handskel.set_bone_parent(i, boneparentsToWrist[i])
-
+	handskelpose.add_child(handskel)
+	add_child(handskelpose)
+	
 func _enter_tree():
-	specialist_openxr_gdns_script_loaded = ("path" in $LeftHandSkelPose)
-	print("Handtrack enabled ", specialist_openxr_gdns_script_loaded, " ", $LeftHandSkelPose.get_script())
+	#specialist_openxr_gdns_script_loaded = ("path" in $LeftHandSkelPose)
+	specialist_openxr_gdns_script_loaded = OS.has_feature("Quest") and (openxrposegnds != null)
+	#print("Handtrack enabled ", specialist_openxr_gdns_script_loaded, " ", $LeftHandSkelPose.get_script())
 	if specialist_openxr_gdns_script_loaded:
-		setupopenxrpluginhandskeleton($LeftHandSkelPose, "_L")
-		$LeftHandAimPose.action = "godot/aim_pose"
-		$LeftHandAimPose.path = "/user/hand/left"
-		$LeftHandGripPose.action = "godot/grip_pose"
-		$LeftHandGripPose.path = "/user/hand/left"
-		setupopenxrpluginhandskeleton($RightHandSkelPose, "_R")
-		$RightHandAimPose.action = "godot/aim_pose"
-		$RightHandAimPose.path = "/user/hand/right"
+		print("  ==***** = ", openxrposegnds, openxrskeletongnds)
+	if specialist_openxr_gdns_script_loaded:
+		print("  ============= ", openxrposegnds, openxrskeletongnds)
+		setupopenxrpluginhandskeleton("LeftHandSkelPose", "LeftHandBlankSkeleton", "_L")
+		setupopenxrpluginhandskeleton("RightHandSkelPose", "RightHandBlankSkeleton", "_R")
+		var LeftHandAimPose = Spatial.new()
+		LeftHandAimPose.name = "LeftHandAimPose"
+		LeftHandAimPose.set_script(openxrposegnds)
+		LeftHandAimPose.action = "godot/aim_pose"
+		LeftHandAimPose.path = "/user/hand/left"
+		add_child(LeftHandAimPose)
+		var RightHandAimPose = Spatial.new()
+		RightHandAimPose.name = "RightHandAimPose"
+		RightHandAimPose.set_script(openxrposegnds)
+		RightHandAimPose.action = "godot/aim_pose"
+		RightHandAimPose.path = "/user/hand/right"
+		add_child(RightHandAimPose)
 		for i in range(XR_HAND_JOINT_COUNT_EXT):
 			joint_transforms_L.push_back(Transform())
 			joint_transforms_R.push_back(Transform())
+		
 	else:
 		print("HAND TRACKING SYSTEM DISABLED")
 

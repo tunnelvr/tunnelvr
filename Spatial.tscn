@@ -134,12 +134,6 @@ size = Vector3( 0.05, 0.01, 0.05 )
 [sub_resource type="SpatialMaterial" id=9]
 albedo_color = Color( 0.0588235, 0.113725, 0.952941, 1 )
 
-[sub_resource type="CubeMesh" id=305]
-size = Vector3( 0.01, 0.19, 0.01 )
-
-[sub_resource type="SpatialMaterial" id=306]
-albedo_color = Color( 0.941176, 0.941176, 0.0470588, 1 )
-
 [sub_resource type="PrismMesh" id=10]
 left_to_right = 0.1
 size = Vector3( 0.1, 0.2, 0.1 )
@@ -1941,6 +1935,12 @@ albedo_color = Color( 0.168627, 0.972549, 0.027451, 1 )
 [sub_resource type="RectangleShape2D" id=250]
 extents = Vector2( 500, 500 )
 
+[sub_resource type="CubeMesh" id=305]
+size = Vector3( 0.01, 0.01, 1 )
+
+[sub_resource type="SpatialMaterial" id=306]
+albedo_color = Color( 0.941176, 0.941176, 0.0470588, 1 )
+
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
 enablevr = false
@@ -2036,15 +2036,6 @@ collision_mask = 40
 [node name="left_hand_model" parent="Players/PlayerMe/HandLeft" instance=ExtResource( 72 )]
 visible = false
 
-[node name="Skeleton" parent="Players/PlayerMe/HandLeft/left_hand_model/ArmatureLeft" index="0"]
-bones/0/bound_children = [ NodePath("BoneAttachment11") ]
-bones/2/bound_children = [ NodePath("BoneAttachment") ]
-bones/6/bound_children = [ NodePath("BoneAttachment6") ]
-bones/7/bound_children = [ NodePath("BoneAttachment5") ]
-bones/8/bound_children = [ NodePath("BoneAttachment2"), NodePath("BoneAttachment3"), NodePath("BoneAttachment4") ]
-bones/11/bound_children = [ NodePath("BoneAttachment10") ]
-bones/12/bound_children = [ NodePath("BoneAttachment7"), NodePath("BoneAttachment8"), NodePath("BoneAttachment9") ]
-
 [node name="BoneAttachment" parent="Players/PlayerMe/HandLeft/left_hand_model/ArmatureLeft/Skeleton" index="0"]
 transform = Transform( 0.715415, 0.480301, 0.507437, -0.520631, 0.850801, -0.0712855, -0.465966, -0.213189, 0.858735, 3.59584, -2.80285, -1.91577 )
 
@@ -2111,15 +2102,10 @@ mesh = SubResource( 8 )
 material/0 = SubResource( 9 )
 
 [node name="right_hand_model" parent="Players/PlayerMe/HandRight" instance=ExtResource( 71 )]
+visible = false
 
 [node name="OculusQuestTouchController_Right_Reactive" parent="Players/PlayerMe/HandRight" instance=ExtResource( 70 )]
 visible = false
-
-[node name="MeshInstance" type="MeshInstance" parent="Players/PlayerMe/HandRight"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.1, 0, 0 )
-visible = false
-mesh = SubResource( 305 )
-material/0 = SubResource( 306 )
 
 [node name="pointersystem" type="Node" parent="Players/PlayerMe"]
 script = ExtResource( 5 )
@@ -4664,6 +4650,13 @@ visible = false
 points = PoolVector2Array( 257, 329, 426, 156, 426, 309, 416, 395, 200, 412, 207, 291 )
 width = 5.0
 default_color = Color( 0.937255, 0.921569, 0.384314, 1 )
+
+[node name="DistoxLaser" type="MeshInstance" parent="PhoneOverlay"]
+transform = Transform( -0.999994, 0, 0.00336815, 0, 1, 0, -0.00336815, 0, -0.999994, 0.0999994, 2, 6.41234 )
+visible = false
+mesh = SubResource( 305 )
+skeleton = NodePath("../../Players/PlayerMe/HandRight")
+material/0 = SubResource( 306 )
 
 [node name="Lidarmodel" type="Spatial" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 13, 2.5, -6 )
