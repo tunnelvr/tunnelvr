@@ -345,10 +345,13 @@ func _connected_to_server():
 		call_deferred("_player_connected", id)
 	
 
-func _process(_delta):
+var sumdelta = 0.0
+func _process(delta):
 	#	$BatFlutter/BatCentre/batflap/AnimationPlayer.get_animation("ArmatureAction").loop = true
 	#	$BatFlutter/BatCentre/batflap/AnimationPlayer.play("ArmatureAction")
-	$BatFlutter.rotation_degrees.y += _delta*60
+	$BatFlutter.rotation_degrees.y += delta*60
+	sumdelta += delta
+	$BatFlutter/BatCentre/batflap/CPUParticles.emitting = ((int(sumdelta) % 20) < 5)
 				
 func clearallprocessactivityforreload():
 	$VerletRopeSystem.clearallverletactivity()
