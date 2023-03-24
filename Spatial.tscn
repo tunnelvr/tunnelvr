@@ -4585,6 +4585,7 @@ transform = Transform( 0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 0, 0 )
 transform = Transform( 1, -1.49012e-08, -2.22045e-16, 1.49012e-08, 1, 5.96046e-08, -6.66134e-16, -5.96046e-08, 1, 0.011, 0.873, -0.81 )
 amount = 2000
 lifetime = 3.0
+lifetime_randomness = 0.25
 local_coords = false
 mesh = SubResource( 310 )
 flag_align_y = true

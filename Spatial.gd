@@ -351,7 +351,7 @@ func _process(delta):
 	#	$BatFlutter/BatCentre/batflap/AnimationPlayer.play("ArmatureAction")
 	$BatFlutter.rotation_degrees.y += delta*60
 	sumdelta += delta
-	$BatFlutter/BatCentre/batflap/CPUParticles.emitting = ((int(sumdelta) % 20) < 5)
+	$BatFlutter/BatCentre/batflap/CPUParticles.emitting = ((int(sumdelta) % 20) < 9)
 				
 func clearallprocessactivityforreload():
 	$VerletRopeSystem.clearallverletactivity()
