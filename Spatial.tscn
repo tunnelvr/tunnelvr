@@ -1,4 +1,4 @@
-[gd_scene load_steps=377 format=2]
+[gd_scene load_steps=383 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/underground_env.tres" type="Environment" id=2]
@@ -80,6 +80,7 @@
 [ext_resource path="res://lightweighttextures/spikyrocks/spikyrocks_albedo.png" type="Texture" id=78]
 [ext_resource path="res://systems/WaterLevelSystem.gd" type="Script" id=79]
 [ext_resource path="res://OpenXRallhandsdata.tscn" type="PackedScene" id=80]
+[ext_resource path="res://utilities/magictinsel.gdshader" type="Shader" id=81]
 
 [sub_resource type="CubeMesh" id=1]
 size = Vector3( 0.35, 0.01, 0.01 )
@@ -1928,6 +1929,26 @@ height = 1.1
 [sub_resource type="SpatialMaterial" id=240]
 albedo_color = Color( 0.168627, 0.972549, 0.027451, 1 )
 
+[sub_resource type="OpenSimplexNoise" id=311]
+
+[sub_resource type="NoiseTexture" id=312]
+seamless = true
+as_normalmap = true
+noise = SubResource( 311 )
+
+[sub_resource type="ShaderMaterial" id=309]
+shader = ExtResource( 81 )
+shader_param/albedo = Color( 1, 1, 1, 1 )
+shader_param/point_size = 1.0
+shader_param/position_noise = SubResource( 312 )
+
+[sub_resource type="PlaneMesh" id=310]
+material = SubResource( 309 )
+size = Vector2( 0, 0 )
+subdivide_depth = 5
+
+[sub_resource type="Gradient" id=313]
+
 [sub_resource type="PointMesh" id=241]
 
 [sub_resource type="CubeMesh" id=245]
@@ -1952,12 +1973,12 @@ transform = Transform( -0.999994, 0, 0.00336815, 0, 1, 0, -0.00336815, 0, -0.999
 script = ExtResource( 18 )
 
 [node name="HeadCam" type="ARVRCamera" parent="Players/PlayerMe"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, -0.261 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 1.86265e-09, 1.5, -0.261 )
 cull_mask = 938495
 far = 321.0
 
 [node name="HeadtorchLight" type="SpotLight" parent="Players/PlayerMe/HeadCam"]
-transform = Transform( 1, 0, 0, 0, 0.939693, 0.34202, 0, -0.34202, 0.939693, 0, 0.24, 0 )
+transform = Transform( 1, 0, -2.32831e-10, 0, 0.939693, 0.34202, 0, -0.34202, 0.939693, 0, 0.24, 0 )
 light_energy = 1.1
 light_indirect_energy = 7.26
 light_specular = 0.43
@@ -4543,13 +4564,27 @@ mesh = SubResource( 238 )
 material/0 = SubResource( 240 )
 
 [node name="BatFlutter" type="Spatial" parent="."]
-transform = Transform( 0.866025, 0, 0.5, 0, 1, 0, -0.5, 0, 0.866025, 0, 9.65659, 0 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 9.65659, 0 )
 
 [node name="BatCentre" type="Spatial" parent="BatFlutter"]
 transform = Transform( 0.927973, 0.372648, 0, -0.372648, 0.927973, 0, 0, 0, 1, -17.7989, 0, 0 )
 
 [node name="batflap" parent="BatFlutter/BatCentre" instance=ExtResource( 58 )]
 transform = Transform( 0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 0, 0 )
+
+[node name="CPUParticles" type="CPUParticles" parent="BatFlutter/BatCentre/batflap"]
+transform = Transform( 1, -1.49012e-08, -2.22045e-16, 1.49012e-08, 1, 5.96046e-08, -6.66134e-16, -5.96046e-08, 1, 0.011, 0.873, -0.81 )
+amount = 2000
+lifetime = 3.0
+lifetime_randomness = 0.25
+local_coords = false
+mesh = SubResource( 310 )
+flag_align_y = true
+direction = Vector3( -1, 0, 0 )
+spread = 180.0
+gravity = Vector3( 0, 0, 0 )
+initial_velocity = 0.02
+color_ramp = SubResource( 313 )
 
 [node name="ExecutingFeatures" type="Node" parent="."]
 script = ExtResource( 62 )
