@@ -582,9 +582,6 @@ func toplevelcalled_ready():
 	$Viewport/GUI/Panel/ResourceOptions.connect("item_selected", self, "_on_resourceoptions_selected")
 	$Viewport/GUI/Panel/ResourceOptions.connect("button_down", self, "_on_resourceoptions_buttondown_setavailablefunctions")
 
-	if $Viewport/GUI/Panel/Networkstate.selected != 0:  # could record saved settings on disk
-		call_deferred("_on_networkstate_selected", $Viewport/GUI/Panel/Networkstate.selected)
-
 	get_tree().connect("files_dropped", self, "_on_files_dropped")
 
 	resources_readycall()
@@ -1392,7 +1389,7 @@ func _on_networkstate_selected(index):
 		networksignalsalreadyconnected = true
 		
 	if nssel.begins_with("As Server"):
-		networkstartasserver(true)
+		networkstartasserver()
 		if selfSpatial.playerMe.networkID == 0:
 			setpanellabeltext("server failed to start")
 		else:
@@ -1431,9 +1428,7 @@ func _on_networkstate_selected(index):
 		$Viewport/GUI/Panel/Label.text = "connecting "+("websocket" if selfSpatial.usewebsockets else "ENET")
 		#setguipanelhide()
 	
-func networkstartasserver(fromgui):
-	if not fromgui:
-		yield(get_tree().create_timer(2.0), "timeout")
+func networkstartasserver():
 	print("Starting as server, ipnumber list:")
 	selfSpatial.hostipnumber = ""
 	for k in IP.get_local_interfaces():

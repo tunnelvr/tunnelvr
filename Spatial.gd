@@ -84,6 +84,11 @@ func setnetworkidname(player, networkID):
 	player.set_network_master(networkID)
 	player.set_name("NetworkedPlayer"+String(networkID))
 	
+func delayednetworkstart():
+	yield(get_tree().create_timer(8.0), "timeout")
+	$GuiSystem/GUIPanel3D/Viewport/GUI/Panel/Networkstate.selected = 2
+	$GuiSystem/GUIPanel3D._on_networkstate_selected($GuiSystem/GUIPanel3D/Viewport/GUI/Panel/Networkstate.selected)
+
 	
 func _ready():
 	print("  Available Interfaces are %s: " % str(ARVRServer.get_interfaces()));
@@ -93,7 +98,7 @@ func _ready():
 	$PhoneOverlay.visible = false
 	if OS.has_feature("Server"):
 		print("On server mode, autostart server connection")
-		$GuiSystem/GUIPanel3D.call_deferred("networkstartasserver", false)
+		call_deferred("delayednetworkstart")
 		# export Linux/X11 runable, go into directory and run
 		# ../../Godot_v3.2.3-stable_linux_server.64 --main-pack linuxserverversion.pck	
 		# Using Ubuntu App on Windows to get the command line
