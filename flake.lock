@@ -1,73 +1,77 @@
 {
   "nodes": {
-    "flake-compat": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1627913399,
-        "narHash": "sha256-hY8g6H2KFL8ownSiFeMOjwPC8P0ueXpCVEbxgda3pko=",
-        "owner": "edolstra",
-        "repo": "flake-compat",
-        "rev": "12c64ca55c1014cdc1b16ed5a804aa8576601ff2",
-        "type": "github"
+    "flake-parts": {
+      "inputs": {
+        "nixpkgs-lib": "nixpkgs-lib"
       },
-      "original": {
-        "owner": "edolstra",
-        "repo": "flake-compat",
-        "type": "github"
-      }
-    },
-    "flake-compat-ci": {
       "locked": {
-        "lastModified": 1638753619,
-        "narHash": "sha256-uJoNBfbXkn17W5PIrtQDPEk+zfN91oOB9I9XF9pOTmo=",
+        "lastModified": 1679737941,
+        "narHash": "sha256-srSD9CwsVPnUMsIZ7Kt/UegkKUEBcTyU1Rev7mO45S0=",
         "owner": "hercules-ci",
-        "repo": "flake-compat-ci",
-        "rev": "e950b4e71c711f3311cbf6323394c0aff7b7e4ec",
+        "repo": "flake-parts",
+        "rev": "3502ee99d6dade045bdeaf7b0cd8ec703484c25c",
         "type": "github"
       },
       "original": {
         "owner": "hercules-ci",
-        "repo": "flake-compat-ci",
+        "repo": "flake-parts",
         "type": "github"
       }
     },
     "godot-source": {
       "flake": false,
       "locked": {
-        "lastModified": 1664316215,
-        "narHash": "sha256-uHwTthyhfeQN0R1XjqZ+kGRa5WcpeQzA/DO9hZk4lvU=",
+        "lastModified": 1678112021,
+        "narHash": "sha256-C+1J5N0ETL1qKust+2xP9uB4x9NwrMqIm8aFAivVYQw=",
         "owner": "godotengine",
         "repo": "godot",
-        "rev": "6fed1ffa313c6760fa88b368ae580378daaef0f0",
+        "rev": "170ba337a5d9e4c1e40d63b89dc1ba297b71860b",
         "type": "github"
       },
       "original": {
         "owner": "godotengine",
-        "ref": "3.5.1-stable",
+        "ref": "3.5.2-stable",
         "repo": "godot",
         "type": "github"
       }
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1674582251,
-        "narHash": "sha256-WBoTPEvClAE0kwDkzUtc+FOZT8L1auTCMlyd6QFzRNc=",
-        "owner": "matthewcroughan",
+        "lastModified": 1679705136,
+        "narHash": "sha256-MDlZUR7wJ3PlPtqwwoGQr3euNOe0vdSSteVVOef7tBY=",
+        "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "9fa9e7ad05089e7acf0de53613fd90f6e22e25ed",
+        "rev": "8f40f2f90b9c9032d1b824442cfbbe0dbabd0dbd",
         "type": "github"
       },
       "original": {
-        "owner": "matthewcroughan",
+        "owner": "nixos",
+        "ref": "nixos-unstable",
         "repo": "nixpkgs",
-        "rev": "9fa9e7ad05089e7acf0de53613fd90f6e22e25ed",
+        "type": "github"
+      }
+    },
+    "nixpkgs-lib": {
+      "locked": {
+        "dir": "lib",
+        "lastModified": 1678375444,
+        "narHash": "sha256-XIgHfGvjFvZQ8hrkfocanCDxMefc/77rXeHvYdzBMc8=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "130fa0baaa2b93ec45523fdcde942f6844ee9f6e",
+        "type": "github"
+      },
+      "original": {
+        "dir": "lib",
+        "owner": "NixOS",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
         "type": "github"
       }
     },
     "root": {
       "inputs": {
-        "flake-compat": "flake-compat",
-        "flake-compat-ci": "flake-compat-ci",
+        "flake-parts": "flake-parts",
         "godot-source": "godot-source",
         "nixpkgs": "nixpkgs"
       }

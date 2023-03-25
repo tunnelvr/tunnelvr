@@ -1,4 +1,4 @@
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, self, ... }:
 
 with lib;
 
@@ -15,6 +15,12 @@ in
       description = "the directory to store all user data";
     };
 
+    package = mkOption {
+      default = self.packages.${pkgs.hostPlatform.system}.tunnelvr-headless_withPrograms;
+      defaultText = literalExpression "self.packages.${pkgs.hostPlatform.system}.tunnelvr-headless_withPrograms;";
+      type = types.package;
+      description = lib.mdDoc "TunnelVR package to use.";
+    };
   };
 
   config = mkIf cfg.enable {
@@ -27,7 +33,7 @@ in
         Environment = [
           "HOME=${cfg.userDir}"
         ];
-        ExecStart = "${pkgs.bash}/bin/bash ${pkgs.tunnelvr_headless_withPrograms}/bin/tunnelvr_headless";
+        ExecStart = "${pkgs.bash}/bin/bash ${cfg.package}/bin/tunnelvr-headless";
         PrivateTmp = true;
         Restart = "always";
         StateDirectory = "tunnelvr";
