@@ -234,8 +234,11 @@ func _process(delta):
 	if len(operatingrequests) != 0:
 		for i in range(len(operatingrequests)-1, -1, -1):
 			var operatingrequest = operatingrequests[i]
-			if http_request_poll(operatingrequest) != 0:
+			var pollcode = http_request_poll(operatingrequest)
+			if pollcode != 0:
+				print("pollcode ", pollcode, " ", operatingrequest["urlkey"])
 				operatingrequests.remove(i)
+				
 				completedrequests.push_back(operatingrequest)
 	while len(queuedrequests) != 0 and len(operatingrequests) < Nmaxoperatingrequests:
 		var operatingrequest = queuedrequests.pop_back()   # should favour nonimage requests?

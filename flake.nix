@@ -42,12 +42,13 @@
           tunnelvr-godot-unwrapped = final.callPackage ./nix/tunnelvr-godot/unwrapped.nix { inherit godot-source; };
           tunnelvr_withPrograms = final.callPackage ./nix/tunnelvr-with-programs.nix {};
           tunnelvr-headless_withPrograms = final.callPackage ./nix/tunnelvr-headless-with-programs.nix {};
+          potreeconverter = final.callPackage ./nix/potreeconverter { };
         };
         devShells.default = pkgs.mkShell {
           buildInputs = with pkgs; [
             final.tunnelvr-godot
             jre_headless
-            caddy survex
+            caddy survex potreeconverter
             python310Packages.pyproj
             python310Packages.laspy
           ];
