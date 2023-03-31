@@ -7,6 +7,7 @@ parser = OptionParser()
 parser.add_option("-l", "--laz",        dest="inlaz",      metavar="FILE",                    help="Input laz file")
 parser.add_option("-o", "--outdir",     dest="outdir",     metavar="DIR",                     help="Potree files directory")
 parser.add_option("-F", "--ipfs",       dest="ipfs",       action="store_true", default=True, help="IPFS add potree files")
+parser.add_option("-s", "--reffile",    dest="reffile",    metavar="FILE",                    help="File to store result IPFS ref")
 
 parser.description = "Convert survex LAZ file to potree bin data, fixing errors"
 parser.epilog = "python potreconversion.py thing.laz --ipfs\n"
@@ -73,6 +74,12 @@ if options.ipfs:
     res = client.add(outdir)
     for r in res:
         print(r)
-    print("\n\nIPFSPOTREELINK %s/metadata.json" % res[-1]["Hash"]) 
+    ipfsmetadatafile = '{ "ipfsrefpotreemetadatafile": "%s/metadata.json" }' % res[-1]["Hash"]
+    print(ipfsmetadatafile)
+    if options.reffile:
+        fout = open(options.reffile, "w")
+        fout.write(ipfsmetadatafile)
+        fout.close()
+        
     
 

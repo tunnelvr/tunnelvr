@@ -1243,29 +1243,24 @@ func _on_files_dropped(files: PoolStringArray, screen: int):
 	if not visible:
 		setguipanelvisible(sketchsystem.pointersystem.LaserOrient.global_transform)
 	var filecommandtextedit = $Viewport/GUI/Panel/EditColorRect/TextEdit
-	var prevfilecmdstruct = parse_json(filecommandtextedit.text)
-	if not prevfilecmdstruct:
-		prevfilecmdstruct = { }
-	var playertouploadto = null
-	for player in get_node("/root/Spatial/Players").get_children():
-		if player.executingfeaturesavailable.has("caddy") and player.networkID == 1:
-			playertouploadto = player
-	if not playertouploadto:
-		filecommandtextedit.text = "Please connect to player\nrunning caddy webserver"
-		return
-	var filenames = [ ]
-	for f in files:
-		filenames.push_back(f.substr(f.find_last("/")+1))
-	var path = planviewsystem.fetchselectedcaddyfilepath() if not prevfilecmdstruct.get("path") else prevfilecmdstruct.get("path")
+	if len(files) != 1:
+		filecommandtextedit.text = "Only one file please"
+	elif files[0].ends_with(".laz"):
+		if selfSpatial.playerMe.executingfeaturesavailable.has("potreeconvertipfs_files"):
+			var ipfsrefpotreemetadatafile = yield(get_node("/root/Spatial/ExecutingFeatures").potreeconvertipfs_execute(files[0]), "completed")
+			filecommandtextedit.text = ipfsrefpotreemetadatafile
+		else:
+			var playertouploadto = null
+			for player in get_node("/root/Spatial/Players").get_children():
+				if player.executingfeaturesavailable.has("potreeconvertipfs_files") and player.networkID == 1:
+					playertouploadto = player
+			if playertouploadto:
+				filecommandtextedit.text = "Uploading to other players\nnot yet implemented"
+			else:
+				filecommandtextedit.text = "Please connect to player\nrunning potreeconvertipfs"
+	else:
+		filecommandtextedit.text = "Only one laz file please"
 
-	var filecmdstruct = { 
-		"cmd":"uploadfiles",
-		"path":path if path else "tmpdir",
-		"name":playertouploadto.playerhumanname, 
-		"filestoupload":files,
-		"caddy_url":"http://%s:8000" % selfSpatial.hostipnumber
-	}
-	filecommandtextedit.text = JSON.print(filecmdstruct, "  ", true)
 
 func Yupdatecavefilelist():
 	var savegamefilenameoptionbutton = $Viewport/GUI/Panel/Savegamefilename

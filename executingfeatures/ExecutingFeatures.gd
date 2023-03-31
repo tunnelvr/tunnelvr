@@ -290,7 +290,6 @@ func parse3ddmpcentreline_execute(f3dfile, f3durl):
 	if not dir.dir_exists("user://executingfeatures"):
 		dir.make_dir("user://executingfeatures")
 	var jcentreline = "user://executingfeatures/fcentreline.json"
-
 	var fout = File.new()
 	if fout.file_exists(jcentreline):
 		dir.remove(jcentreline)
@@ -337,6 +336,49 @@ func parse3ddmpcentreline_execute(f3dfile, f3durl):
 		yield(get_tree().create_timer(0.2), "timeout")
 		sketchsystem.actsketchchange(xcdatachunk)
 	#sketchsystem.rpc_id(id, "actsketchchangeL", [{"planview":$PlanViewSystem.planviewtodict()}]) 
+
+onready var imagesystemreportslabel = get_node("/root/Spatial/GuiSystem/GUIPanel3D/Viewport/GUI/Panel/ImageSystemReports")
+
+var potreeconvertipfspid = -1
+const potreeconvertipfstimeoutMS = 15*1000
+func potreeconvertipfs_execute(lazfile):
+	print("entering potreeconvertipfs_execute")
+	if potreeconvertipfspid != -1:
+		print("already busy")
+		return ""
+
+	potreeconvertipfspid = 0
+
+	var dir = Directory.new()
+	if not dir.dir_exists("user://executingfeatures"):
+		dir.make_dir("user://executingfeatures")
+	var ipfsreffile = "user://executingfeatures/ipfsreffile.txt"
+	var f = File.new()
+	if f.file_exists(ipfsreffile):
+		dir.remove(ipfsreffile)
+	
+	var fpotreeconvertipfs = copytouserfilesystem("res://potreework/potreeconvertipfs.py")
+	var arguments = PoolStringArray([fpotreeconvertipfs, 
+		lazfile, "--ipfs", "--reffile="+ProjectSettings.globalize_path(ipfsreffile)])
+	potreeconvertipfspid = OS.execute("python", arguments, false)
+	print(potreeconvertipfspid, " python ", arguments)
+	var t0 = Time.get_ticks_msec()
+	while potreeconvertipfspid != -1 and OS.is_process_running(potreeconvertipfspid):
+		var dt = Time.get_ticks_msec() - t0
+		if dt > potreeconvertipfstimeoutMS:
+			print("killing potreeconvertipfs after ", dt, "ms")
+			OS.kill(potreeconvertipfspid)
+		yield(get_tree().create_timer(0.8), "timeout")
+		imagesystemreportslabel.text = "ipfs %.1f seconds" % (dt/1000.0)
+		
+	potreeconvertipfspid = -1
+	if f.file_exists(ipfsreffile):
+		if (f.open(ipfsreffile, File.READ)) == OK:
+			var ipfsrefJ = parse_json(f.get_as_text())
+			print("We have the Converted IPFS file ", ipfsrefJ)
+			if ipfsrefJ:
+				return ipfsrefJ.get("ipfsrefpotreemetadatafile", "")
+	return ""
 
 
 func _ready():
