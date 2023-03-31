@@ -191,16 +191,13 @@ func find_executingfeaturesavailable():
 		var ffindexecutingfeaturespy = copytouserfilesystem("res://surveyscans/find_executingfeatures.py")
 		var arguments = PoolStringArray([ffindexecutingfeaturespy])
 		var output = [ ]
-		# this is where parse3ddmp_centreline gets added
 		var ffindexecutingfeaturespy_status = OS.execute("python", arguments, true, output)
-		if ffindexecutingfeaturespy_status == 0 and len(output) == 1:
-			executingfeaturesavailable = Array(output[0].split(" "))
-
-		var caddyarguments = PoolStringArray(["version"])
-		output = [ ]
-		var caddyoutputstatus = OS.execute("caddy", caddyarguments, true, output)
-		if caddyoutputstatus == 0:
-			executingfeaturesavailable.push_back("caddy")
+		if ffindexecutingfeaturespy_status == 0:
+			for outputline in output:
+				var lres = outputline.split(" ")
+				if len(lres) != 0 and lres[0] == "FOUNDEXECUTINGFEATURES:":
+					lres.remove(0)
+					executingfeaturesavailable = lres
 	return executingfeaturesavailable
 
 

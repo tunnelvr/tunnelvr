@@ -19,4 +19,4 @@ func D_run():
 func _run():
 	var openxrposegnds = load("res://addons/godot_openxr/config/OpenXRPose.gdns")
 	var openxr_config_res = load("res://addons/godot-openxr/config/OpenXRConfig.gdns")
-	print(openxr_config_res)
+	print("a s d f f g".split(" ").remove(2))

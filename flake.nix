@@ -51,6 +51,7 @@
             caddy survex potreeconverter
             python310Packages.pyproj
             python310Packages.laspy
+            python310Packages.ipfshttpclient
           ];
         };
       };
