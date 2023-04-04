@@ -21,6 +21,7 @@ extends Spatial
 # wine64 ~/executables-impure/PotreeConverter_2.1_x64_windows/PotreeConverter.exe --source point_cloud_may17cc.laz --outdir potreeconverted --attributes position_cartesian --attributes rgb --method poisson
 
 # nix build github:matthewcroughan/nixpkgs/mc/potreeconverter#potreeconverter
+# nix build github:matthewcroughan/nixpkgs/mc/fix-potreeconverter#potreeconverter
 # result/bin/PotreeConverter  --source point_cloud_may17cc.laz --outdir potreeconverted --attributes position_cartesian --method poisson
 # result/bin/PotreeConverter  --source miscpointclouds/Ship1-poly/Fship1-cc.las --outdir miscpointclouds/Ship1-poly/potreeconverted --attributes position_cartesian --attributes rgb --method poisson
 

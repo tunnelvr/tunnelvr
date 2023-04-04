@@ -359,7 +359,9 @@ func potreeconvertipfs_execute(lazfile):
 	
 	var fpotreeconvertipfs = copytouserfilesystem("res://potreework/potreeconvertipfs.py")
 	var arguments = PoolStringArray([fpotreeconvertipfs, 
-		lazfile, "--ipfs", "--reffile="+ProjectSettings.globalize_path(ipfsreffile)])
+		lazfile, "--ipfs", "--reffile="+ProjectSettings.globalize_path(ipfsreffile), 
+		"--generate-page", "--outdir", "gggg",
+		])
 	potreeconvertipfspid = OS.execute("python", arguments, false)
 	print(potreeconvertipfspid, " python ", arguments)
 	var t0 = Time.get_ticks_msec()

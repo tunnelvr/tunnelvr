@@ -1261,6 +1261,9 @@ func _on_files_dropped(files: PoolStringArray, screen: int):
 	else:
 		filecommandtextedit.text = "Only one laz file please"
 
+# eye-dome lighting discussion
+# https://forum.babylonjs.com/t/eye-dome-lighting-edl-for-point-clouds/21737/4
+
 
 func Yupdatecavefilelist():
 	var savegamefilenameoptionbutton = $Viewport/GUI/Panel/Savegamefilename
