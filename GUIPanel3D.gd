@@ -1,5 +1,25 @@
 extends StaticBody
 
+# to make new file: {"newcave":"astralroom"}  -> filecommand
+
+# To make new centreline, start with ropehang and change: 
+# "drawingtype": "CENTRELINE",
+#  {
+#  "centrelineconnection": "free",
+#  "cs": "",
+#  "drawingtype": "CENTRELINE",
+#  "geometrymode": "housahedron",
+#  "headdate": "2022-05-19T18:53:31",
+#  "position": [-5.5, 1, 6.135],
+#  "potreecolorscale": 255,
+#  "potreepointsizefactor": 400,
+#  "potreeurlmetadata": "https://ipfs.io/ipfs/QmPAErNGH7AehTYohHqf4P5j7CuEbnLoBFjUTPve3LvEqQ/pointclouds/index/metadata.json",
+#  "rotation": [-90, -0, 0],
+#  "splaystationnoderegex": ".*[^\\d]$",
+#  "stationnamecommonroot": "windsorave,",
+#  "svxp0": [0, 0, 0],
+#  "xcname": "r1",
+#}
 
 var collision_point := Vector3(0, 0, 0)
 var current_viewport_mousedown = false
