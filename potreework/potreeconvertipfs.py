@@ -72,7 +72,7 @@ if p.returncode != 0:
     exit(1)
     
 if options.ipfs:
-    unwantedlogfile = os.path.join(outdir, "log.txt")
+    unwantedlogfile = os.path.join(outdir, "pointclouds/index/log.txt" if options.generatepage else "log.txt")
     if os.path.isfile(unwantedlogfile):
         os.remove(unwantedlogfile)
     assert options.generatepage or os.path.isfile(os.path.join(outdir, "metadata.json"))
@@ -83,7 +83,7 @@ if options.ipfs:
     res = client.add(outdir, recursive=options.generatepage)
     for r in res:
         print(r)
-    ipfsmetadatafile = '{ "ipfsrefpotreemetadatafile": "%s/metadata.json" }' % res[-1]["Hash"]
+    ipfsmetadatafile = '{ "ipfsrefpotreemetadatafile": "ipfs/%s/%smetadata.json" }' % (res[-1]["Hash"], "pointclouds/index/" if options.generatepage else "")
     print(ipfsmetadatafile)
     if options.reffile:
         fout = open(options.reffile, "w")

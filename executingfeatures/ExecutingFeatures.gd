@@ -340,7 +340,8 @@ func parse3ddmpcentreline_execute(f3dfile, f3durl):
 onready var imagesystemreportslabel = get_node("/root/Spatial/GuiSystem/GUIPanel3D/Viewport/GUI/Panel/ImageSystemReports")
 
 var potreeconvertipfspid = -1
-const potreeconvertipfstimeoutMS = 15*1000
+const potreeconvertipfstimeoutMS = 60*1000
+const generatepotreejavascript = true
 func potreeconvertipfs_execute(lazfile):
 	print("entering potreeconvertipfs_execute")
 	if potreeconvertipfspid != -1:
@@ -358,11 +359,12 @@ func potreeconvertipfs_execute(lazfile):
 		dir.remove(ipfsreffile)
 	
 	var fpotreeconvertipfs = copytouserfilesystem("res://potreework/potreeconvertipfs.py")
-	var arguments = PoolStringArray([fpotreeconvertipfs, 
-		lazfile, "--ipfs", "--reffile="+ProjectSettings.globalize_path(ipfsreffile), 
-		"--generate-page", "--outdir", "gggg",
-		])
-	potreeconvertipfspid = OS.execute("python", arguments, false)
+	var arguments = [fpotreeconvertipfs, 
+		lazfile, "--ipfs", "--reffile="+ProjectSettings.globalize_path(ipfsreffile) ]
+	if generatepotreejavascript:
+		arguments.push_back("--generate-page")
+	#arguments.append_array(["--outdir", "gggg"])
+	potreeconvertipfspid = OS.execute("python", PoolStringArray(arguments), false)
 	print(potreeconvertipfspid, " python ", arguments)
 	var t0 = Time.get_ticks_msec()
 	while potreeconvertipfspid != -1 and OS.is_process_running(potreeconvertipfspid):
