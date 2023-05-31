@@ -25,12 +25,12 @@ var touchscreentype = false
 func _ready():
 	$DrawmodeButton.connect("toggled", self, "_ondrawmodebuttontoggled")
 	_ondrawmodebuttontoggled(false)
-	planviewsystem.planviewcontrols.get_node("CentrelineActivity/DelLast").connect("pressed", self, "drawndeletelast")
+	planviewsystem.planviewcontrols.get_node("CentrelineActivity/Topodraw/DelLast").connect("pressed", self, "drawndeletelast")
 	set_process(false)
 
 func _ondrawmodebuttontoggled(button_pressed: bool):
-	planviewsystem.planviewcontrols.get_node("CentrelineActivity").visible = button_pressed
-
+	planviewsystem.planpathmiddlesectionvisibility("centrelineactivity_drawmode" if button_pressed else "centrelineactivity")
+	
 func setupphoneoverlaysystem(ltouchscreentype):
 	visible = true
 	Tglobal.phoneoverlay = self
@@ -286,7 +286,7 @@ func updatescreentouchplaces0stateDraw(pressed):
 		if $DrawCurve.visible:
 			var tpts = Polynets.thincurve(drawcurvepoints, 2.0)
 			$DrawCurve.points = PoolVector2Array(tpts)
-			var linetypeoptions = planviewsystem.planviewcontrols.get_node("CentrelineActivity/LineType")
+			var linetypeoptions = planviewsystem.planviewcontrols.get_node("CentrelineActivity/Topodraw/LineType")
 			var linetype = linetypeoptions.get_item_text(linetypeoptions.selected)
 			if linetype == "*delete":
 				makeactxcdeletedata(tpts, dcrect)

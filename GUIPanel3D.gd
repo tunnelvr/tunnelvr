@@ -676,9 +676,9 @@ func _on_optionbuttongoto_selected(index):
 		PlayerDirections.colocatedplayer = null
 		PlayerDirections.colocatedflagtrail = null
 		$Viewport/GUI/Panel/OptionButtonGoto.selected = 0
-	planviewsystem.planviewcontrols.get_node("CentrelineActivity").visible = false
-	planviewsystem.planviewcontrols.get_node("PathFollow").visible = true
 		
+	planviewsystem.planpathmiddlesectionvisibility("pathfollow")
+			
 	$Viewport/GUI/Panel/PlayerList.disabled = ($Viewport/GUI/Panel/OptionButtonGoto.selected == 2)
 
 	setguipanelhide()
@@ -1265,7 +1265,7 @@ func _on_files_dropped(files: PoolStringArray, screen: int):
 	var filecommandtextedit = $Viewport/GUI/Panel/EditColorRect/TextEdit
 	if len(files) != 1:
 		filecommandtextedit.text = "Only one file please"
-	elif files[0].ends_with(".laz"):
+	elif files[0].ends_with(".laz") or files[0].ends_with(".las"):
 		if selfSpatial.playerMe.executingfeaturesavailable.has("potreeconvertipfs_files"):
 			var ipfsrefpotreemetadatafile = yield(get_node("/root/Spatial/ExecutingFeatures").potreeconvertipfs_execute(files[0]), "completed")
 			filecommandtextedit.text = ipfsrefpotreemetadatafile

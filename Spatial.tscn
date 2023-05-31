@@ -2628,64 +2628,78 @@ __meta__ = {
 [node name="CentrelineActivity" type="Control" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
 margin_left = 184.0
 margin_top = 3.0
-margin_right = 349.0
+margin_right = 461.0
 margin_bottom = 98.0
 
 [node name="ColorRect" type="ColorRect" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity"]
-margin_top = -4.0
-margin_right = 195.0
+margin_top = -1.0
+margin_right = 281.0
 margin_bottom = 93.0
-color = Color( 0.317647, 0.286275, 0.133333, 1 )
-
-[node name="Label" type="Label" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity"]
-margin_left = 1.0
-margin_top = -5.0
-margin_right = 89.0
-margin_bottom = 23.0
-custom_fonts/font = SubResource( 307 )
-text = "Topodraw"
+color = Color( 0.419608, 0.376471, 0.184314, 1 )
 
 [node name="Label2" type="Label" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity"]
-margin_left = 3.0
-margin_top = 15.0
-margin_right = 47.0
-margin_bottom = 43.0
+margin_left = 2.0
+margin_top = 1.0
+margin_right = 70.0
+margin_bottom = 52.0
 custom_fonts/font = SubResource( 307 )
-text = "CL:"
-
-[node name="OptionsCentreline" type="OptionButton" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity"]
-margin_left = 15.0
-margin_top = 45.0
-margin_right = 157.0
-margin_bottom = 67.0
-text = "normal centreline"
-items = [ "normal centreline", null, false, 0, null, "sketching centreline", null, false, 1, null, "new plan", null, false, 3, null, "new elevation", null, true, 4, null ]
-selected = 0
+text = "Centre
+Line:"
 
 [node name="CentrelineList" type="OptionButton" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity"]
-margin_left = 51.0
-margin_top = 21.0
-margin_right = 158.0
-margin_bottom = 43.0
+margin_left = 79.0
+margin_top = 3.0
+margin_right = 186.0
+margin_bottom = 25.0
 text = "--none--"
 items = [ "--none--", null, false, 0, null ]
 selected = 0
 
-[node name="LineType" type="OptionButton" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity"]
-margin_left = 89.0
-margin_top = -3.0
-margin_right = 142.0
-margin_bottom = 19.0
+[node name="OptionsCentreline" type="OptionButton" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity"]
+margin_left = 122.0
+margin_top = 28.0
+margin_right = 264.0
+margin_bottom = 50.0
+text = "normal centreline"
+items = [ "normal centreline", null, false, 0, null, "sketching centreline", null, false, 1, null, "new plan", null, false, 3, null, "new elevation", null, true, 4, null ]
+selected = 0
+
+[node name="CentrelineVisible" type="CheckBox" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity"]
+margin_left = 210.0
+margin_top = 2.0
+margin_right = 280.0
+margin_bottom = 26.0
+text = "visible"
+
+[node name="Topodraw" type="Control" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity"]
+margin_left = 4.0
+margin_top = 63.0
+margin_right = 254.0
+margin_bottom = 93.0
+
+[node name="Label" type="Label" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity/Topodraw"]
+margin_left = -1.0
+margin_top = 3.0
+margin_right = 87.0
+margin_bottom = 31.0
+custom_fonts/font = SubResource( 307 )
+text = "Topodraw"
+
+[node name="LineType" type="OptionButton" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity/Topodraw"]
+margin_left = 94.0
+margin_top = 6.0
+margin_right = 147.0
+margin_bottom = 28.0
 text = "wall"
 items = [ "wall", null, false, 0, null, "estwall", null, false, 1, null, "detail", null, false, 2, null, "pitchbound", null, false, 3, null, "ceilingbound", null, false, 4, null, "*delete", null, false, 5, null ]
 selected = 0
 
-[node name="DelLast" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity"]
-margin_left = 27.0
-margin_top = 69.0
-margin_right = 73.0
-margin_bottom = 91.0
-text = "Delete Last"
+[node name="DelLast" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity/Topodraw"]
+margin_left = 239.0
+margin_top = 6.0
+margin_right = 274.0
+margin_bottom = 28.0
+text = "Del"
 
 [node name="FloorTrim" type="Control" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
 visible = false
@@ -4651,8 +4665,8 @@ transform = Transform( 0.927973, 0.372648, 0, -0.372648, 0.927973, 0, 0, 0, 1, -
 transform = Transform( 0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 0, 0 )
 
 [node name="CPUParticles" type="CPUParticles" parent="BatFlutter/BatCentre/batflap"]
-transform = Transform( 1, -1.49012e-08, -2.22045e-16, 1.49012e-08, 1, 5.96046e-08, -6.66134e-16, -5.96046e-08, 1, 0.011, 0.873, -0.81 )
-amount = 2000
+transform = Transform( 1, -5.96046e-08, -3.55271e-15, 5.96046e-08, 1, 5.96046e-08, -6.66134e-16, -5.96046e-08, 1, 0.0109863, 0.872996, -0.81 )
+amount = 1500
 lifetime = 3.0
 lifetime_randomness = 0.25
 local_coords = false
