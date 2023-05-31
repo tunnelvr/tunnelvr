@@ -191,16 +191,13 @@ func find_executingfeaturesavailable():
 		var ffindexecutingfeaturespy = copytouserfilesystem("res://surveyscans/find_executingfeatures.py")
 		var arguments = PoolStringArray([ffindexecutingfeaturespy])
 		var output = [ ]
-		# this is where parse3ddmp_centreline gets added
 		var ffindexecutingfeaturespy_status = OS.execute("python", arguments, true, output)
-		if ffindexecutingfeaturespy_status == 0 and len(output) == 1:
-			executingfeaturesavailable = Array(output[0].split(" "))
-
-		var caddyarguments = PoolStringArray(["version"])
-		output = [ ]
-		var caddyoutputstatus = OS.execute("caddy", caddyarguments, true, output)
-		if caddyoutputstatus == 0:
-			executingfeaturesavailable.push_back("caddy")
+		if ffindexecutingfeaturespy_status == 0:
+			for outputline in output:
+				var lres = outputline.split(" ")
+				if len(lres) != 0 and lres[0] == "FOUNDEXECUTINGFEATURES:":
+					lres.remove(0)
+					executingfeaturesavailable = lres
 	return executingfeaturesavailable
 
 
@@ -293,7 +290,6 @@ func parse3ddmpcentreline_execute(f3dfile, f3durl):
 	if not dir.dir_exists("user://executingfeatures"):
 		dir.make_dir("user://executingfeatures")
 	var jcentreline = "user://executingfeatures/fcentreline.json"
-
 	var fout = File.new()
 	if fout.file_exists(jcentreline):
 		dir.remove(jcentreline)
@@ -340,6 +336,53 @@ func parse3ddmpcentreline_execute(f3dfile, f3durl):
 		yield(get_tree().create_timer(0.2), "timeout")
 		sketchsystem.actsketchchange(xcdatachunk)
 	#sketchsystem.rpc_id(id, "actsketchchangeL", [{"planview":$PlanViewSystem.planviewtodict()}]) 
+
+onready var imagesystemreportslabel = get_node("/root/Spatial/GuiSystem/GUIPanel3D/Viewport/GUI/Panel/ImageSystemReports")
+
+var potreeconvertipfspid = -1
+const potreeconvertipfstimeoutMS = 60*1000
+const generatepotreejavascript = true
+func potreeconvertipfs_execute(lazfile):
+	print("entering potreeconvertipfs_execute")
+	if potreeconvertipfspid != -1:
+		print("already busy")
+		return ""
+
+	potreeconvertipfspid = 0
+
+	var dir = Directory.new()
+	if not dir.dir_exists("user://executingfeatures"):
+		dir.make_dir("user://executingfeatures")
+	var ipfsreffile = "user://executingfeatures/ipfsreffile.txt"
+	var f = File.new()
+	if f.file_exists(ipfsreffile):
+		dir.remove(ipfsreffile)
+	
+	var fpotreeconvertipfs = copytouserfilesystem("res://potreework/potreeconvertipfs.py")
+	var arguments = [fpotreeconvertipfs, 
+		lazfile, "--ipfs", "--reffile="+ProjectSettings.globalize_path(ipfsreffile) ]
+	if generatepotreejavascript:
+		arguments.push_back("--generate-page")
+	arguments.append_array(["--outdir", "gggg"])
+	potreeconvertipfspid = OS.execute("python", PoolStringArray(arguments), false)
+	print(potreeconvertipfspid, " python ", arguments)
+	var t0 = Time.get_ticks_msec()
+	while potreeconvertipfspid != -1 and OS.is_process_running(potreeconvertipfspid):
+		var dt = Time.get_ticks_msec() - t0
+		if dt > potreeconvertipfstimeoutMS:
+			print("killing potreeconvertipfs after ", dt, "ms")
+			OS.kill(potreeconvertipfspid)
+		yield(get_tree().create_timer(0.8), "timeout")
+		imagesystemreportslabel.text = "ipfs %.1f seconds" % (dt/1000.0)
+		
+	potreeconvertipfspid = -1
+	if f.file_exists(ipfsreffile):
+		if (f.open(ipfsreffile, File.READ)) == OK:
+			var ipfsrefJ = parse_json(f.get_as_text())
+			print("We have the Converted IPFS file ", ipfsrefJ)
+			if ipfsrefJ:
+				return ipfsrefJ.get("ipfsrefpotreemetadatafile", "")
+	return ""
 
 
 func _ready():

@@ -366,8 +366,9 @@ func _ready():
 
 	planviewcontrols.get_node("CentrelineActivity/OptionsCentreline").connect("item_selected", self, "centrelineactivityoptions_selected")
 	planviewcontrols.get_node("CentrelineActivity/CentrelineList").connect("item_selected", self, "centrelineactivitylist_selected")
-	planviewcontrols.get_node("CentrelineActivity/LineType").select(0)
-
+	planviewcontrols.get_node("CentrelineActivity/Topodraw/LineType").select(0)
+	planpathmiddlesectionvisibility("centrelineactivity")
+	
 	set_process(visible)
 	assert (planviewcontrols.get_node("CheckBoxPlanTubesVisible").pressed == (($PlanView/Viewport/PlanGUI/Camera.cull_mask & CollisionLayer.VL_xcshells) != 0))
 
@@ -810,16 +811,19 @@ func _process(delta):
 			lastoptionaltxcdata.clear()
 
 
+func planpathmiddlesectionvisibility(stype):
+	planviewcontrols.get_node("FloorTrim").visible = (stype == "floortrim")
+	planviewcontrols.get_node("FloorMove").visible = (stype == "floortrim")
+	planviewcontrols.get_node("PathFollow").visible = (stype == "pathfollow")
+	planviewcontrols.get_node("CentrelineActivity").visible = (stype.begins_with("centrelineactivity"))
+	planviewcontrols.get_node("CentrelineActivity/Topodraw").visible = (stype == "centrelineactivity_drawmode")
 
 func setfloortrimmode(floorstyleid, floorlabel):
 	var pvisible = (floorstyleid != -1)
 	planviewcontrols.get_node("FloorMove/FloorStyle").selected = max(0, floorstyleid)
 	planviewcontrols.get_node("ColorRectURL/LabelXCresource").text = floorlabel
 	planviewcontrols.get_node("ColorRectURL").visible = pvisible
-	planviewcontrols.get_node("FloorTrim").visible = pvisible
-	planviewcontrols.get_node("FloorMove").visible = pvisible
-	if pvisible:
-		planviewcontrols.get_node("PathFollow").visible = false
+	planpathmiddlesectionvisibility("floortrim" if pvisible else "centrelineactivity")
 	
 func buttonfollow_toggled(button_pressed):
 	planviewcontrols.get_node("ViewSlide/ButtonSlideDown").disabled = button_pressed
@@ -969,12 +973,14 @@ func updatecentrelineactivityui():
 		if lxcdrawingcentreline.get_name() == selectedcentrelinexcname or lxcdrawingcentreline.get_name() == activecentrelinexcname:
 			selectedcentrelinexcnameIndex = CentrelineList.get_item_count()-1
 	CentrelineList.select(selectedcentrelinexcnameIndex)
-
+	
+	centrelineactivitylist_selected(selectedcentrelinexcnameIndex)
 
 const OptionsCentreline_NORMALCENTRELINE = 0
 const OptionsCentreline_SKETCHINGCENTRELINE = 1
 const OptionsCentreline_NEWPLAN = 2
 func centrelineactivityoptions_selected(index):
+	print("centrelineactivityoptions_selected called")
 	var CentrelineList = $PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity/CentrelineList
 	var selectedcentrelinexcname = CentrelineList.get_item_text(CentrelineList.selected) if CentrelineList.selected != -1 else ""
 	if index == OptionsCentreline_SKETCHINGCENTRELINE:

@@ -87,7 +87,7 @@ func loadnodedefinition(fhierarchy):
 		byteOffset = fhierarchy.get_64()
 		byteSize = fhierarchy.get_64()
 		name[0] = ("n" if ntype == 0 else  "l")
-		assert ((ntype == 0) or (childMask == 0))
+#		assert ((ntype == 0) or (childMask == 0))
 	if numPoints == 0:
 		print("zero numPoints case ", get_path())
 

@@ -1,4 +1,4 @@
-[gd_scene load_steps=383 format=2]
+[gd_scene load_steps=387 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/underground_env.tres" type="Environment" id=2]
@@ -188,6 +188,7 @@ size = Vector3( 0.2, 0.2, 0.2 )
 albedo_color = Color( 0.309804, 0.94902, 0.0784314, 1 )
 
 [sub_resource type="SpatialMaterial" id=55]
+flags_transparent = true
 flags_unshaded = true
 flags_no_depth_test = true
 albedo_color = Color( 0.937255, 0.901961, 0.0431373, 0.67451 )
@@ -1897,6 +1898,65 @@ material = SubResource( 226 )
 subdivide_width = 4
 subdivide_depth = 4
 
+[sub_resource type="QuadMesh" id=314]
+
+[sub_resource type="Shader" id=315]
+code = "shader_type spatial;
+render_mode unshaded, cull_disabled;
+
+// Proposal and explanation here https://github.com/godotengine/godot-proposals/issues/6633
+// Must be run in GLES3.
+
+uniform float Znear = 0.05; 
+uniform float Zfar = 321.0; 
+
+void vertex() {
+	// this flattens the corners of the incoming mesh to the 
+	// screen, ignoring the projection
+	POSITION = vec4(VERTEX, 0.7);
+}
+
+float sdepth(sampler2D dtex, vec2 suv, float offsx, float offsy) {
+	float db = textureLod(dtex, suv + vec2(offsx, offsy), 0).r; 
+	//float depth = Zm/(1.0 - dr11*(1.0 - Zm/ZM));
+	return Znear/(Zfar - db*Zfar + db*Znear);
+}
+
+const float diagF = 1.0/sqrt(2.0); 
+const float diagFsum = 1.0/(4.0 + 4.0*diagF); 
+uniform float Exp_scale = 350.0; 
+
+void fragment() {
+	vec2 SCREEN_PIXEL_SIZE = vec2(1.0)/VIEWPORT_SIZE; 
+	float sd0 = sdepth(DEPTH_TEXTURE, SCREEN_UV, 0.0, 0.0); 
+	float sdSum = sdepth(DEPTH_TEXTURE, SCREEN_UV, -SCREEN_PIXEL_SIZE.x, 0.0); 
+	sdSum += sdepth(DEPTH_TEXTURE, SCREEN_UV, SCREEN_PIXEL_SIZE.x, 0.0); 
+	sdSum += sdepth(DEPTH_TEXTURE, SCREEN_UV, 0.0, -SCREEN_PIXEL_SIZE.y); 
+	sdSum += sdepth(DEPTH_TEXTURE, SCREEN_UV, 0.0, SCREEN_PIXEL_SIZE.y); 
+	sdSum += sdepth(DEPTH_TEXTURE, SCREEN_UV, -SCREEN_PIXEL_SIZE.x, -SCREEN_PIXEL_SIZE.y)*diagF; 
+	sdSum += sdepth(DEPTH_TEXTURE, SCREEN_UV, -SCREEN_PIXEL_SIZE.x, SCREEN_PIXEL_SIZE.y)*diagF; 
+	sdSum += sdepth(DEPTH_TEXTURE, SCREEN_UV, SCREEN_PIXEL_SIZE.x, SCREEN_PIXEL_SIZE.y)*diagF; 
+	sdSum += sdepth(DEPTH_TEXTURE, SCREEN_UV, SCREEN_PIXEL_SIZE.x, -SCREEN_PIXEL_SIZE.y)*diagF; 
+	float sddiff = sd0 - sdSum*diagFsum; 
+	float dk = exp(-Exp_scale*max(0.0, sddiff));
+	ALBEDO = textureLod(SCREEN_TEXTURE, SCREEN_UV, 0).xyz*dk;
+	//ALBEDO.r = clamp(sd0*Zfar - 3.0, 0.0, 1.0); 
+}
+
+
+
+"
+
+[sub_resource type="ShaderMaterial" id=316]
+shader = SubResource( 315 )
+shader_param/Znear = 0.05
+shader_param/Zfar = 321.0
+shader_param/Exp_scale = 350.0
+
+[sub_resource type="SpatialMaterial" id=317]
+params_cull_mode = 2
+albedo_color = Color( 0.0470588, 0.866667, 0.529412, 1 )
+
 [sub_resource type="SpatialMaterial" id=232]
 albedo_color = Color( 1, 0.992157, 0.992157, 1 )
 metallic = 0.41
@@ -2568,64 +2628,78 @@ __meta__ = {
 [node name="CentrelineActivity" type="Control" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
 margin_left = 184.0
 margin_top = 3.0
-margin_right = 349.0
+margin_right = 461.0
 margin_bottom = 98.0
 
 [node name="ColorRect" type="ColorRect" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity"]
-margin_top = -4.0
-margin_right = 195.0
+margin_top = -1.0
+margin_right = 281.0
 margin_bottom = 93.0
-color = Color( 0.317647, 0.286275, 0.133333, 1 )
-
-[node name="Label" type="Label" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity"]
-margin_left = 1.0
-margin_top = -5.0
-margin_right = 89.0
-margin_bottom = 23.0
-custom_fonts/font = SubResource( 307 )
-text = "Topodraw"
+color = Color( 0.419608, 0.376471, 0.184314, 1 )
 
 [node name="Label2" type="Label" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity"]
-margin_left = 3.0
-margin_top = 15.0
-margin_right = 47.0
-margin_bottom = 43.0
+margin_left = 2.0
+margin_top = 1.0
+margin_right = 70.0
+margin_bottom = 52.0
 custom_fonts/font = SubResource( 307 )
-text = "CL:"
-
-[node name="OptionsCentreline" type="OptionButton" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity"]
-margin_left = 15.0
-margin_top = 45.0
-margin_right = 157.0
-margin_bottom = 67.0
-text = "normal centreline"
-items = [ "normal centreline", null, false, 0, null, "sketching centreline", null, false, 1, null, "new plan", null, false, 3, null, "new elevation", null, true, 4, null ]
-selected = 0
+text = "Centre
+Line:"
 
 [node name="CentrelineList" type="OptionButton" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity"]
-margin_left = 51.0
-margin_top = 21.0
-margin_right = 158.0
-margin_bottom = 43.0
+margin_left = 79.0
+margin_top = 3.0
+margin_right = 186.0
+margin_bottom = 25.0
 text = "--none--"
 items = [ "--none--", null, false, 0, null ]
 selected = 0
 
-[node name="LineType" type="OptionButton" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity"]
-margin_left = 89.0
-margin_top = -3.0
-margin_right = 142.0
-margin_bottom = 19.0
+[node name="OptionsCentreline" type="OptionButton" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity"]
+margin_left = 122.0
+margin_top = 28.0
+margin_right = 264.0
+margin_bottom = 50.0
+text = "normal centreline"
+items = [ "normal centreline", null, false, 0, null, "sketching centreline", null, false, 1, null, "new plan", null, false, 3, null, "new elevation", null, true, 4, null ]
+selected = 0
+
+[node name="CentrelineVisible" type="CheckBox" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity"]
+margin_left = 210.0
+margin_top = 2.0
+margin_right = 280.0
+margin_bottom = 26.0
+text = "visible"
+
+[node name="Topodraw" type="Control" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity"]
+margin_left = 4.0
+margin_top = 63.0
+margin_right = 254.0
+margin_bottom = 93.0
+
+[node name="Label" type="Label" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity/Topodraw"]
+margin_left = -1.0
+margin_top = 3.0
+margin_right = 87.0
+margin_bottom = 31.0
+custom_fonts/font = SubResource( 307 )
+text = "Topodraw"
+
+[node name="LineType" type="OptionButton" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity/Topodraw"]
+margin_left = 94.0
+margin_top = 6.0
+margin_right = 147.0
+margin_bottom = 28.0
 text = "wall"
 items = [ "wall", null, false, 0, null, "estwall", null, false, 1, null, "detail", null, false, 2, null, "pitchbound", null, false, 3, null, "ceilingbound", null, false, 4, null, "*delete", null, false, 5, null ]
 selected = 0
 
-[node name="DelLast" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity"]
-margin_left = 27.0
-margin_top = 69.0
-margin_right = 73.0
-margin_bottom = 91.0
-text = "Delete Last"
+[node name="DelLast" type="Button" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity/Topodraw"]
+margin_left = 239.0
+margin_top = 6.0
+margin_right = 274.0
+margin_bottom = 28.0
+text = "Del"
 
 [node name="FloorTrim" type="Control" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
 visible = false
@@ -4516,6 +4590,18 @@ visible = false
 light_color = Color( 0.552941, 0.478431, 0.376471, 1 )
 omni_range = 443.1
 
+[node name="ScreenShader" type="MeshInstance" parent="WorldEnvironment"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 2, -6 )
+visible = false
+mesh = SubResource( 314 )
+material/0 = SubResource( 316 )
+
+[node name="MeshInstance" type="MeshInstance" parent="WorldEnvironment"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 2, -6 )
+visible = false
+mesh = SubResource( 314 )
+material/0 = SubResource( 317 )
+
 [node name="MQTTExperiment" type="Node" parent="."]
 script = ExtResource( 50 )
 
@@ -4579,8 +4665,8 @@ transform = Transform( 0.927973, 0.372648, 0, -0.372648, 0.927973, 0, 0, 0, 1, -
 transform = Transform( 0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 0, 0 )
 
 [node name="CPUParticles" type="CPUParticles" parent="BatFlutter/BatCentre/batflap"]
-transform = Transform( 1, -1.49012e-08, -2.22045e-16, 1.49012e-08, 1, 5.96046e-08, -6.66134e-16, -5.96046e-08, 1, 0.011, 0.873, -0.81 )
-amount = 2000
+transform = Transform( 1, -5.96046e-08, -3.55271e-15, 5.96046e-08, 1, 5.96046e-08, -6.66134e-16, -5.96046e-08, 1, 0.0109863, 0.872996, -0.81 )
+amount = 1500
 lifetime = 3.0
 lifetime_randomness = 0.25
 local_coords = false

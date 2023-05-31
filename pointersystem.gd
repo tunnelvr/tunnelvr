@@ -20,8 +20,8 @@ onready var FloorLaserSpot = get_node("/root/Spatial/BodyObjects/FloorLaserSpot"
 onready var GripLaserSpot = get_node("/root/Spatial/BodyObjects/GripLaserSpot")
 
 onready var LaseSelectLinegoodcolour = LaserSelectLine.get_node("Scale/Mesh").get_surface_material(0).albedo_color
-onready var LaseSelectLinebadcolour = Color(0.30, 0.08, 0.08, 1)
-onready var LaseSelectLinedistoxcolour = Color(0.08, 0.40, 0.08, 1)
+onready var LaseSelectLinebadcolour = Color(0.30, 0.08, 0.08, 0.4)
+onready var LaseSelectLinedistoxcolour = Color(0.08, 0.40, 0.08, 0.7)
 var viewport_point = null
 
 onready var activelaserroot = LaserOrient
@@ -73,7 +73,7 @@ var handflickmotiongestureposition_shortpos_length = 0.25
 const handflickmotiongestureposition_gone = 2
 const splineamplificationfactor = 10.0
 
-var selectlinefatness = 8.0
+var selectlinefatness = 4.0
 
 func clearpointertargetmaterial():
 	if pointertargettype == "XCnode" and pointertarget != null:
