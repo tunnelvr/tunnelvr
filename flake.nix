@@ -9,13 +9,14 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     godot-source = {
-      url = "github:godotengine/godot/3.5.2-stable";
+      url = "github:godotengine/godot/4.1-stable";
       flake = false;
     };
+    android.url = "github:tadfisher/android-nixpkgs";
     flake-parts.url = "github:hercules-ci/flake-parts";
   };
 
-  outputs = { self, nixpkgs, godot-source, flake-parts }@inputs:
+  outputs = { self, nixpkgs, godot-source, android, flake-parts }@inputs:
     flake-parts.lib.mkFlake { inherit inputs; } {
       imports = [
         inputs.flake-parts.flakeModules.easyOverlay
@@ -38,7 +39,7 @@
           tunnelvr_pck = final.callPackage ./nix/tunnelvr_pck.nix { src = self; };
           tunnelvr-headless = final.callPackage ./nix/tunnelvr-headless.nix { };
           tunnelvr-godot-headless = final.callPackage ./nix/tunnelvr-godot-headless.nix { inherit godot-source; };
-          tunnelvr-godot = final.callPackage ./nix/tunnelvr-godot { inherit godot-source; };
+          tunnelvr-godot = final.callPackage ./nix/tunnelvr-godot { inherit godot-source android;};
           tunnelvr-godot-unwrapped = final.callPackage ./nix/tunnelvr-godot/unwrapped.nix { inherit godot-source; };
           tunnelvr_withPrograms = final.callPackage ./nix/tunnelvr-with-programs.nix {};
           tunnelvr-headless_withPrograms = final.callPackage ./nix/tunnelvr-headless-with-programs.nix {};
@@ -47,7 +48,8 @@
         devShells.default = pkgs.mkShell {
           buildInputs = with pkgs; [
             final.tunnelvr-godot
-            jre_headless
+            gradle
+            jdk11
             caddy survex final.Dpotreeconverter
             python310Packages.pyproj
             python310Packages.laspy
