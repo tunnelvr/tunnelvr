@@ -319,9 +319,6 @@ func checkboxrealtubesvisible_pressed():
 	pvchange["realtubesvisible"] = planviewcontrols.get_node("CheckBoxRealTubesVisible").pressed
 	actplanviewdict(pvchange) 
 
-
-
-
 func optionsbackfacecull_selected(backfacecull_index):
 	var pvchange = planviewtodict()
 	pvchange["backfacecull"] = backfacecull_index
@@ -337,6 +334,17 @@ func checkcentrelinesvisible_pressed():
 	pvchange["centrelinesvisible"] = planviewcontrols.get_node("CheckBoxCentrelinesVisible").pressed 
 	actplanviewdict(pvchange) 
 
+func centrelinevisible_pressed():
+	print("This to go through the actview interface")
+	var CentrelineList = planviewcontrols.get_node("CentrelineActivity/CentrelineList")
+	var pvchange = planviewtodict()
+	if CentrelineList.selected != -1 and CentrelineList.selected != 0:
+		var selectedcentrelinexcname = CentrelineList.get_item_text(CentrelineList.selected)
+		if planviewcontrols.get_node("CentrelineActivity/CentrelineVisible").pressed:
+			pvchange["hiddencentrelines"].erase(selectedcentrelinexcname)
+		else:
+			pvchange["hiddencentrelines"].append(selectedcentrelinexcname)
+	actplanviewdict(pvchange) 
 
 		
 func _ready():
@@ -366,6 +374,7 @@ func _ready():
 
 	planviewcontrols.get_node("CentrelineActivity/OptionsCentreline").connect("item_selected", self, "centrelineactivityoptions_selected")
 	planviewcontrols.get_node("CentrelineActivity/CentrelineList").connect("item_selected", self, "centrelineactivitylist_selected")
+	planviewcontrols.get_node("CentrelineActivity/CentrelineVisible").connect("pressed", self, "centrelinevisible_pressed")
 	planviewcontrols.get_node("CentrelineActivity/Topodraw/LineType").select(0)
 	planpathmiddlesectionvisibility("centrelineactivity")
 	
@@ -393,6 +402,10 @@ func clearsetupfileviewtree(filetreerootpath, turl):
 	
 			
 func planviewtodict():
+	var hiddencentrelines = [ ]
+	for lxcdrawingcentreline in get_tree().get_nodes_in_group("gpcentrelinegeo"):
+		if not lxcdrawingcentreline.visible:
+			 hiddencentrelines.append(lxcdrawingcentreline.get_name())
 	return { "visible":visible,
 			 "planviewactive":planviewactive, 
 			 "plantubesvisible":(($PlanView/Viewport/PlanGUI/Camera.cull_mask & CollisionLayer.VL_xcshells) != 0),
@@ -407,6 +420,8 @@ func planviewtodict():
 			 "plancamerarotation":plancamera.rotation_degrees,
 			 "plancamerasize":plancamera.size,
 			 "backfacecull":materialsettobackfacecullcartoon,
+			 "activesketchingcentrelinexcname":activesketchingcentrelinexcname,
+			 "hiddencentrelines":hiddencentrelines
 			}
 
 func planviewcameratodict():
@@ -530,6 +545,13 @@ func actplanviewdict(pvchange, resettransmitbutton=true):
 		planviewcontrols.get_node("CheckBoxPlanTubesVisible").pressed = pvchange["plantubesvisible"]
 		setcameracullmasks(pvchange["centrelinesvisible"], pvchange["plantubesvisible"])
 			
+	if "hiddencentrelines" in pvchange:
+		for lxcdrawingcentreline in get_tree().get_nodes_in_group("gpcentrelinegeo"):
+			lxcdrawingcentreline.visible = not pvchange["hiddencentrelines"].has(lxcdrawingcentreline.get_name())
+			for xctube in lxcdrawingcentreline.xctubesconn:
+				if xctube.xcname0 == lxcdrawingcentreline.get_name() and xctube.xcname1 == lxcdrawingcentreline.get_name():
+					xctube.visible = lxcdrawingcentreline.visible
+			
 	if "backfacecull" in pvchange and (materialsettobackfacecullcartoon != pvchange["backfacecull"] or not backfacecartoonValid):
 		var materialsystem = get_node("/root/Spatial/MaterialSystem")
 		planviewcontrols.get_node("OptionsBackfaceCull").selected = pvchange["backfacecull"]
@@ -563,7 +585,6 @@ func actplanviewdict(pvchange, resettransmitbutton=true):
 				materialsystem.setallbackfacecull(SpatialMaterial.CULL_BACK)
 		materialsettobackfacecullcartoon = pvchange["backfacecull"]
 		backfacecartoonValid = true
-		
 
 	if "realtubesvisible" in pvchange and Tglobal.hidecavewallstoseefloors != (not pvchange["realtubesvisible"]):
 		planviewcontrols.get_node("CheckBoxRealTubesVisible").pressed = pvchange["realtubesvisible"]
@@ -593,6 +614,10 @@ func actplanviewdict(pvchange, resettransmitbutton=true):
 				for xctubesector in xctube.get_node("XCtubesectors").get_children():
 					xctubesector.visible = true
 				xctube.setxctubepathlinevisibility(sketchsystem)
+
+	if "hiddencentrelines" in pvchange:
+		 centrelineactivitylist_selected($PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity/CentrelineList.selected)
+
 
 func planviewtransformpos(guidpaneltransform, guidpanelsize):
 	var paneltrans = $PlanView.global_transform
@@ -961,7 +986,7 @@ func planviewguipanelreleasemouse():
 	$PlanView/Viewport.input(event)
 
 # this should be transmitted with planview transmit stuff
-var activecentrelinexcname = ""
+var activesketchingcentrelinexcname = ""
 func updatecentrelineactivityui():
 	var CentrelineList = $PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity/CentrelineList
 	var selectedcentrelinexcname = CentrelineList.get_item_text(CentrelineList.selected) if CentrelineList.selected != -1 else ""
@@ -970,7 +995,7 @@ func updatecentrelineactivityui():
 	var selectedcentrelinexcnameIndex = 0
 	for lxcdrawingcentreline in get_tree().get_nodes_in_group("gpcentrelinegeo"):
 		CentrelineList.add_item(lxcdrawingcentreline.get_name())
-		if lxcdrawingcentreline.get_name() == selectedcentrelinexcname or lxcdrawingcentreline.get_name() == activecentrelinexcname:
+		if lxcdrawingcentreline.get_name() == selectedcentrelinexcname or lxcdrawingcentreline.get_name() == activesketchingcentrelinexcname:
 			selectedcentrelinexcnameIndex = CentrelineList.get_item_count()-1
 	CentrelineList.select(selectedcentrelinexcnameIndex)
 	
@@ -984,9 +1009,9 @@ func centrelineactivityoptions_selected(index):
 	var CentrelineList = $PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity/CentrelineList
 	var selectedcentrelinexcname = CentrelineList.get_item_text(CentrelineList.selected) if CentrelineList.selected != -1 else ""
 	if index == OptionsCentreline_SKETCHINGCENTRELINE:
-		activecentrelinexcname = selectedcentrelinexcname if selectedcentrelinexcname != "--none--" else ""
-	elif index == OptionsCentreline_NORMALCENTRELINE and activecentrelinexcname == selectedcentrelinexcname:
-		activecentrelinexcname = ""
+		activesketchingcentrelinexcname = selectedcentrelinexcname if selectedcentrelinexcname != "--none--" else ""
+	elif index == OptionsCentreline_NORMALCENTRELINE and activesketchingcentrelinexcname == selectedcentrelinexcname:
+		activesketchingcentrelinexcname = ""
 	elif index == OptionsCentreline_NEWPLAN:
 		var rotzminus90 = Basis(Vector3(1,0,0), Vector3(0,0,-1), Vector3(0,1,0))
 		var bbcenvec = Vector3()
@@ -1000,16 +1025,32 @@ func centrelineactivityoptions_selected(index):
 									  "S1":centrelinetransformpos.xform_inv(playermeheadpos + Vector3(0,0.1,5)) }, 
 					   "onepathpairs":[ "S0", "S1" ]
 					 }
-		activecentrelinexcname = xcdata["name"]
+		activesketchingcentrelinexcname = xcdata["name"]
 		sketchsystem.actsketchchange([ xcdata ])
 		centrelineactivitylist_selected(CentrelineList.selected)
 	
 func centrelineactivitylist_selected(index):
 	var CentrelineList = $PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity/CentrelineList
-	var selectedcentrelinexcname = CentrelineList.get_item_text(CentrelineList.selected) if CentrelineList.selected != -1 else ""
 	var OptionsCentreline = $PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity/OptionsCentreline
-	OptionsCentreline.select(OptionsCentreline_SKETCHINGCENTRELINE if selectedcentrelinexcname == activecentrelinexcname else OptionsCentreline_NORMALCENTRELINE)
-
+	var CentrelineVisible = $PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity/CentrelineVisible
+	assert (index == CentrelineList.selected)
+	if CentrelineList.selected == -1 or CentrelineList.selected == 0:
+		OptionsCentreline.select(OptionsCentreline_NORMALCENTRELINE)
+		OptionsCentreline.set_item_disabled(OptionsCentreline_NORMALCENTRELINE, true)
+		OptionsCentreline.set_item_disabled(OptionsCentreline_SKETCHINGCENTRELINE, true)
+		OptionsCentreline.set_item_disabled(OptionsCentreline_NEWPLAN, false)
+		CentrelineVisible.pressed = false
+		CentrelineVisible.disabled = true
+	else:
+		var selectedcentrelinexcname = CentrelineList.get_item_text(CentrelineList.selected)
+		OptionsCentreline.select(OptionsCentreline_SKETCHINGCENTRELINE if selectedcentrelinexcname == activesketchingcentrelinexcname else OptionsCentreline_NORMALCENTRELINE)
+		OptionsCentreline.set_item_disabled(OptionsCentreline_NORMALCENTRELINE, false)
+		OptionsCentreline.set_item_disabled(OptionsCentreline_SKETCHINGCENTRELINE, false)
+		OptionsCentreline.set_item_disabled(OptionsCentreline_NEWPLAN, true)
+		var centrelinedrawing = sketchsystem.get_node("XCdrawings").get_node_or_null(selectedcentrelinexcname)
+		CentrelineVisible.pressed = (centrelinedrawing.visible if centrelinedrawing != null else false)
+		CentrelineVisible.disabled = false
+		
 
 # * keyboard to work on phone overlay mode
 # * root of tree should give URL of the tree

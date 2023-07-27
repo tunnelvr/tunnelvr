@@ -2025,6 +2025,7 @@ albedo_color = Color( 0.941176, 0.941176, 0.0470588, 1 )
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
 enablevr = false
+forcephoneoverlay = true
 
 [node name="Players" type="Spatial" parent="."]
 
@@ -2042,6 +2043,7 @@ transform = Transform( 1, 0, -2.32831e-10, 0, 0.939693, 0.34202, 0, -0.34202, 0.
 light_energy = 1.1
 light_indirect_energy = 7.26
 light_specular = 0.43
+shadow_enabled = true
 shadow_color = Color( 0.0823529, 0.0431373, 0.254902, 1 )
 spot_range = 191.9
 spot_attenuation = 2.07053
@@ -3101,9 +3103,6 @@ margin_right = 558.796
 margin_bottom = 27.8946
 pressed = true
 text = "centrelines"
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="ImportPhotoMode" type="CheckBox" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
 anchor_right = 0.015
