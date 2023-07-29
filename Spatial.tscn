@@ -2025,7 +2025,6 @@ albedo_color = Color( 0.941176, 0.941176, 0.0470588, 1 )
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
 enablevr = false
-forcephoneoverlay = true
 
 [node name="Players" type="Spatial" parent="."]
 
@@ -2663,10 +2662,10 @@ margin_top = 28.0
 margin_right = 264.0
 margin_bottom = 50.0
 text = "normal centreline"
-items = [ "normal centreline", null, false, 0, null, "sketching centreline", null, false, 1, null, "new plan", null, false, 3, null, "new elevation", null, true, 4, null ]
+items = [ "normal centreline", null, false, 0, null, "hide centreline objects", null, false, 1, null, "sketching mode", null, false, 3, null, "show point cloud", null, true, 4, null, "unload point cloud", null, false, 4, null ]
 selected = 0
 
-[node name="CentrelineVisible" type="CheckBox" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity"]
+[node name="DCentrelineVisible" type="CheckBox" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity"]
 margin_left = 210.0
 margin_top = 2.0
 margin_right = 280.0
@@ -4681,7 +4680,7 @@ color_ramp = SubResource( 313 )
 script = ExtResource( 62 )
 
 [node name="PotreeExperiments" type="Spatial" parent="."]
-transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, -140, -90 )
+transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0 )
 script = ExtResource( 74 )
 
 [node name="PointSampleTest" type="MeshInstance" parent="PotreeExperiments"]
@@ -4691,6 +4690,7 @@ mesh = SubResource( 241 )
 material/0 = ExtResource( 64 )
 
 [node name="LoadingCube" type="MeshInstance" parent="PotreeExperiments"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 10, 0 )
 visible = false
 cast_shadow = 0
 mesh = SubResource( 245 )
