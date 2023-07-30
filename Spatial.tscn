@@ -2025,6 +2025,7 @@ albedo_color = Color( 0.941176, 0.941176, 0.0470588, 1 )
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
 enablevr = false
+forcephoneoverlay = true
 
 [node name="Players" type="Spatial" parent="."]
 
@@ -2657,20 +2658,13 @@ items = [ "--none--", null, false, 0, null ]
 selected = 0
 
 [node name="OptionsCentreline" type="OptionButton" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity"]
-margin_left = 122.0
+margin_left = 87.0
 margin_top = 28.0
-margin_right = 264.0
+margin_right = 229.0
 margin_bottom = 50.0
 text = "normal centreline"
 items = [ "normal centreline", null, false, 0, null, "hide centreline objects", null, false, 1, null, "sketching mode", null, false, 3, null, "show point cloud", null, true, 4, null, "unload point cloud", null, false, 4, null ]
 selected = 0
-
-[node name="DCentrelineVisible" type="CheckBox" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity"]
-margin_left = 210.0
-margin_top = 2.0
-margin_right = 280.0
-margin_bottom = 26.0
-text = "visible"
 
 [node name="Topodraw" type="Control" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity"]
 margin_left = 4.0

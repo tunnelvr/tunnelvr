@@ -1142,7 +1142,7 @@ func _on_resourceoptions_selected(index):
 		if nrosel == "Load Potree":
 			potreeexperiments.visible = true
 			if potreeexperiments.rootnode == null:
-				potreeexperiments.LoadPotree()
+				#potreeexperiments.LoadPotree()
 				labeltext = "Potree started"
 			else:
 				labeltext = "Potree already there"
