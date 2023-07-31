@@ -67,7 +67,6 @@ const coloctcellpointsloading = Color("#36e418e6")
 onready var ImageSystem = get_node("/root/Spatial/ImageSystem")
 
 
-
 func _ready():
 	if $PointSampleTest.visible:
 		var st = SurfaceTool.new()
@@ -129,15 +128,11 @@ func getpotreeurl():
 	return urlotreedir
 
 
-func LoadPotree():
+func LoadPotree(xcdrawingcentreline):
 	assert (rootnode == null)
-	var xcdrawingcentreline = null
-	for lxcdrawingcentreline in get_tree().get_nodes_in_group("gpcentrelinegeo"):
-		if lxcdrawingcentreline.additionalproperties != null and lxcdrawingcentreline.additionalproperties.has("potreeurlmetadata"):
-			xcdrawingcentreline = lxcdrawingcentreline
-			potreeurlmetadata = xcdrawingcentreline.additionalproperties["potreeurlmetadata"]
-			potreecolorscale = clamp(int(xcdrawingcentreline.additionalproperties.get("potreecolorscale", 65535)), 0, 65535)
-			potreepointsizefactor = clamp(int(xcdrawingcentreline.additionalproperties.get("potreepointsizefactor", 200)), 10, 100000)
+	potreeurlmetadata = xcdrawingcentreline.additionalproperties["potreeurlmetadata"]
+	potreecolorscale = clamp(int(xcdrawingcentreline.additionalproperties.get("potreecolorscale", 65535)), 0, 65535)
+	potreepointsizefactor = clamp(int(xcdrawingcentreline.additionalproperties.get("potreepointsizefactor", 200)), 10, 100000)
 	potreeurlmetadataorg = potreeurlmetadata
 	if potreeurlmetadata == null:
 		print("No potree url found")

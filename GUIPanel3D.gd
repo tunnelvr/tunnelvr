@@ -688,8 +688,9 @@ remote func copyacrosstextedit(text):
 		setguipanelvisible(sketchsystem.pointersystem.LaserOrient.global_transform)
 	$Viewport/GUI/Panel/EditColorRect/TextEdit.text = text
 	$Viewport/GUI/Panel/EditColorRect/TextEdit.grab_focus()
-	print("render_target_update_mode ", $Viewport.render_target_update_mode, " ", Viewport.UPDATE_DISABLED)
-	$Viewport.render_target_update_mode = Viewport.UPDATE_WHEN_VISIBLE
+	if $Viewport.has_meta("render_target_update_mode"):
+		print("render_target_update_mode ", $Viewport.render_target_update_mode, " ", Viewport.UPDATE_DISABLED)
+		$Viewport.render_target_update_mode = Viewport.UPDATE_WHEN_VISIBLE
 
 func buttonflagsign_pressed():
 	if sketchsystem.pointersystem.activetargetnode != null and sketchsystem.pointersystem.activetargetnodewall != null and \
@@ -960,19 +961,23 @@ var centrelineselected_forresourcefunction = null
 var xcselecteddrawing_forrsourcefunctions = null
 func _on_resourceoptions_buttondown_setavailablefunctions():
 	print("_on_resourceoptions_buttondown_setavailablefunctions")
+	var xcdrawingcentrelines = get_tree().get_nodes_in_group("gpcentrelinegeo")
 	var idxselected = $Viewport/GUI/Panel/ResourceOptions.selected
 	var nrosel = $Viewport/GUI/Panel/ResourceOptions.get_item_text(idxselected)
 	if not (nrosel in ["--resources"]):
 		$Viewport/GUI/Panel/ResourceOptions.selected = 0
 
-	var xcdrawingcentrelines = get_tree().get_nodes_in_group("gpcentrelinegeo")
 	if sketchsystem.pointersystem.activetargetnodewall != null:
 		xcselecteddrawing_forrsourcefunctions = sketchsystem.pointersystem.activetargetnodewall
 	elif sketchsystem.pointersystem.activetargetwall != null:
 		xcselecteddrawing_forrsourcefunctions = sketchsystem.pointersystem.activetargetwall
 	else:
+		var CentrelineList = planviewsystem.planviewcontrols.get_node("CentrelineActivity/CentrelineList")
 		if planviewsystem.planviewactive and planviewsystem.activetargetfloor != null:
 			xcselecteddrawing_forrsourcefunctions = planviewsystem.activetargetfloor
+		elif planviewsystem.planviewactive and CentrelineList.selected != -1 and CentrelineList.get_item_text(CentrelineList.selected) != planviewsystem.CentrelineList_none:
+			xcselecteddrawing_forrsourcefunctions = sketchsystem.get_node("XCdrawings").get_node(CentrelineList.get_item_text(CentrelineList.selected))
+			print("selecting to edit centreline: ", xcselecteddrawing_forrsourcefunctions.get_name())
 		elif len(xcdrawingcentrelines) == 1:
 			xcselecteddrawing_forrsourcefunctions = xcdrawingcentrelines[0]
 		else:
@@ -1003,21 +1008,6 @@ func _on_resourceoptions_buttondown_setavailablefunctions():
 	$Viewport/GUI/Panel/ResourceOptions.set_item_disabled(resourceoptionlookup["Centreline distort"], not bcentrelinedistortenable)
 
 	var mtext = $Viewport/GUI/Panel/EditColorRect/TextEdit.text.strip_edges()
-	var potreeexperiments = selfSpatial.get_node("PotreeExperiments")
-	var showhigloadpotreeid = resourceoptionlookup["Show/Hide/Load Potree"]
-	if potreeexperiments.rootnode == null:
-		$Viewport/GUI/Panel/ResourceOptions.set_item_text(showhigloadpotreeid, "Load Potree")
-		$Viewport/GUI/Panel/ResourceOptions.set_item_disabled(showhigloadpotreeid, (centrelineselected_forresourcefunction == null or centrelineselected_forresourcefunction.additionalproperties == null or centrelineselected_forresourcefunction.additionalproperties.get("potreeurlmetadata") == null))
-	elif not potreeexperiments.visible:
-		$Viewport/GUI/Panel/ResourceOptions.set_item_text(showhigloadpotreeid, "Show Potree")
-	elif centrelineselected_forresourcefunction == null or \
-			centrelineselected_forresourcefunction.additionalproperties == null or \
-			centrelineselected_forresourcefunction.additionalproperties.get("potreeurlmetadata") != potreeexperiments.potreeurlmetadataorg or \
-			centrelineselected_forresourcefunction.additionalproperties.get("potreecolorscale") != potreeexperiments.potreecolorscale or \
-			centrelineselected_forresourcefunction.additionalproperties.get("potreepointsizefactor") != potreeexperiments.potreepointsizefactor:
-		$Viewport/GUI/Panel/ResourceOptions.set_item_text(showhigloadpotreeid, "Remove Potree")
-	else:
-		$Viewport/GUI/Panel/ResourceOptions.set_item_text(showhigloadpotreeid, "Hide Potree")
 
 	#$Viewport/GUI/Panel/ResourceOptions.set_item_disabled(resourceoptionlookup["File command"], not (regexacceptablefilecommand.search(mtext) != null and planviewsystem.visible and planviewsystem.fileviewtree.visible)) 
 	$Viewport/GUI/Panel/ResourceOptions.set_item_disabled(resourceoptionlookup["File command"], false)
@@ -1135,36 +1125,6 @@ func _on_resourceoptions_selected(index):
 		else:
 			labeltext = "No XCdrawing selected"
 		setpanellabeltext(labeltext)
-
-	elif nrosel.count("Potree"):
-		var potreeexperiments = selfSpatial.get_node("PotreeExperiments")
-		var labeltext = ""
-		if nrosel == "Load Potree":
-			potreeexperiments.visible = true
-			if potreeexperiments.rootnode == null:
-				potreeexperiments.LoadPotree()
-				labeltext = "Potree started"
-			else:
-				labeltext = "Potree already there"
-		elif nrosel == "Remove Potree":
-			potreeexperiments.visible = false
-			if potreeexperiments.rootnode != null:
-				labeltext = "Removing Potree"
-				potreeexperiments.queuekillpotree = true
-			else:
-				labeltext = "Potree not there"
-		elif nrosel == "Show Potree":
-			if potreeexperiments.rootnode != null:
-				potreeexperiments.visible = true
-				labeltext = "Potree shown"
-			else:
-				labeltext = "Potree not there"
-		elif nrosel == "Hide Potree":
-			potreeexperiments.visible = false
-			labeltext = "Potree hidden"
-		setpanellabeltext(labeltext)
-		if labeltext == "Potree started" or labeltext == "Potree hidden":
-			setguipanelhide()
 	
 	elif nrosel == "Print resource":
 		var resourcename = $Viewport/GUI/Panel/ResourceSelector.get_item_text($Viewport/GUI/Panel/ResourceSelector.selected)

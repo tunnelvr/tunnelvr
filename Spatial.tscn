@@ -2042,6 +2042,7 @@ transform = Transform( 1, 0, -2.32831e-10, 0, 0.939693, 0.34202, 0, -0.34202, 0.
 light_energy = 1.1
 light_indirect_energy = 7.26
 light_specular = 0.43
+shadow_enabled = true
 shadow_color = Color( 0.0823529, 0.0431373, 0.254902, 1 )
 spot_range = 191.9
 spot_attenuation = 2.07053
@@ -2656,20 +2657,13 @@ items = [ "--none--", null, false, 0, null ]
 selected = 0
 
 [node name="OptionsCentreline" type="OptionButton" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity"]
-margin_left = 122.0
+margin_left = 87.0
 margin_top = 28.0
-margin_right = 264.0
+margin_right = 229.0
 margin_bottom = 50.0
 text = "normal centreline"
-items = [ "normal centreline", null, false, 0, null, "sketching centreline", null, false, 1, null, "new plan", null, false, 3, null, "new elevation", null, true, 4, null ]
+items = [ "normal centreline", null, false, 0, null, "hide centreline objects", null, false, 1, null, "sketching mode", null, false, 3, null, "show point cloud", null, true, 4, null, "unload point cloud", null, false, 4, null ]
 selected = 0
-
-[node name="CentrelineVisible" type="CheckBox" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity"]
-margin_left = 210.0
-margin_top = 2.0
-margin_right = 280.0
-margin_bottom = 26.0
-text = "visible"
 
 [node name="Topodraw" type="Control" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls/CentrelineActivity"]
 margin_left = 4.0
@@ -3101,9 +3095,6 @@ margin_right = 558.796
 margin_bottom = 27.8946
 pressed = true
 text = "centrelines"
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="ImportPhotoMode" type="CheckBox" parent="PlanViewSystem/PlanView/Viewport/PlanGUI/PlanViewControls"]
 anchor_right = 0.015
@@ -3443,7 +3434,7 @@ margin_top = 104.487
 margin_right = 360.371
 margin_bottom = 126.487
 text = "--resources"
-items = [ "--resources", null, false, 0, null, "Print XCproperties", null, false, 1, null, "Set XCproperties", null, false, 2, null, "Show/Hide/Load Potree", null, false, 4, null, "Print resource", null, false, 6, null, "Set resource", null, false, 7, null, "File command", null, false, 9, null, "Send message", null, false, 8, null, "Apply to flagsign", null, false, 9, null, "Apply to Filetree", null, false, 10, null, "Apply to Cavesave", null, false, 11, null, "Centreline distort", null, false, 11, null ]
+items = [ "--resources", null, false, 0, null, "Print XCproperties", null, false, 1, null, "Set XCproperties", null, false, 2, null, "Print resource", null, false, 6, null, "Set resource", null, false, 7, null, "File command", null, false, 9, null, "Send message", null, false, 8, null, "Apply to flagsign", null, false, 9, null, "Apply to Filetree", null, false, 10, null, "Apply to Cavesave", null, false, 11, null, "Centreline distort", null, false, 11, null ]
 selected = 0
 
 [node name="ResourceSelector" type="OptionButton" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
@@ -4547,7 +4538,6 @@ script = ExtResource( 32 )
 
 [node name="underfloor" type="StaticBody" parent="."]
 transform = Transform( 200, 0, 0, 0, 1, 0, 0, 0, 200, 0, -11.5, 0 )
-visible = false
 collision_layer = 18
 collision_mask = 0
 
@@ -4682,7 +4672,7 @@ color_ramp = SubResource( 313 )
 script = ExtResource( 62 )
 
 [node name="PotreeExperiments" type="Spatial" parent="."]
-transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, -140, -90 )
+transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0 )
 script = ExtResource( 74 )
 
 [node name="PointSampleTest" type="MeshInstance" parent="PotreeExperiments"]
@@ -4692,6 +4682,7 @@ mesh = SubResource( 241 )
 material/0 = ExtResource( 64 )
 
 [node name="LoadingCube" type="MeshInstance" parent="PotreeExperiments"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 10, 0 )
 visible = false
 cast_shadow = 0
 mesh = SubResource( 245 )

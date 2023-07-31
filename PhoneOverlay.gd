@@ -132,8 +132,8 @@ func setpointersystemray(drawpos):
 	var raytransform = Transform(Basis(), rayorigin).looking_at(rayorigin + raycameranormal*10, upvec)
 	pointersystem.handright.pointerposearvrorigin = selfSpatial.playerMe.global_transform.inverse()*raytransform
 
-func getactivecentreline():
-	var centrelinename = planviewsystem.activecentrelinexcname
+func getactivesketchingcentreline():
+	var centrelinename = planviewsystem.activesketchingcentrelinexcname
 	if centrelinename:
 		for lxcdrawingcentreline in get_tree().get_nodes_in_group("gpcentrelinegeo"):
 			if centrelinename and centrelinename == lxcdrawingcentreline.get_name():
@@ -142,7 +142,7 @@ func getactivecentreline():
 
 func makeactxcdrawndata(tpts, linetype):
 	var headcam = planviewsystem.plancamera if planviewsystem.visible else selfSpatial.playerMe.get_node("HeadCam")
-	var drawingcentreline = getactivecentreline()
+	var drawingcentreline = getactivesketchingcentreline()
 	if drawingcentreline == null:
 		return
 	var cpts = [ ]
@@ -185,7 +185,7 @@ func unusednodepoints(drawingcentreline, prevdrawinglinks):
 	return prevnodepoints
 
 func drawndeletelast():
-	var drawingcentreline = getactivecentreline()
+	var drawingcentreline = getactivesketchingcentreline()
 	if drawingcentreline:
 		var xctube = planviewsystem.sketchsystem.findxctube(drawingcentreline.name, drawingcentreline.name)
 		if xctube != null and len(xctube.xcdrawinglink) != 0:
@@ -211,7 +211,7 @@ func drawndeletelast():
 func makeactxcdeletedata(tpts, dcrect):
 	var headcam = planviewsystem.plancamera if planviewsystem.visible else selfSpatial.playerMe.get_node("HeadCam")
 	print("delete here")
-	var drawingcentreline = getactivecentreline()
+	var drawingcentreline = getactivesketchingcentreline()
 	if not drawingcentreline:
 		return
 	var spbasis = drawingcentreline.transform.basis
