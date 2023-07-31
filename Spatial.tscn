@@ -2025,7 +2025,6 @@ albedo_color = Color( 0.941176, 0.941176, 0.0470588, 1 )
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
 enablevr = false
-forcephoneoverlay = true
 
 [node name="Players" type="Spatial" parent="."]
 
@@ -4539,7 +4538,6 @@ script = ExtResource( 32 )
 
 [node name="underfloor" type="StaticBody" parent="."]
 transform = Transform( 200, 0, 0, 0, 1, 0, 0, 0, 200, 0, -11.5, 0 )
-visible = false
 collision_layer = 18
 collision_mask = 0
 
