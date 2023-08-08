@@ -1,4 +1,4 @@
-[gd_scene load_steps=387 format=2]
+[gd_scene load_steps=389 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/underground_env.tres" type="Environment" id=2]
@@ -1957,6 +1957,31 @@ shader_param/Exp_scale = 350.0
 params_cull_mode = 2
 albedo_color = Color( 0.0470588, 0.866667, 0.529412, 1 )
 
+[sub_resource type="Shader" id=318]
+code = "shader_type canvas_item;
+
+vec3 ray_dir_from_uv(vec2 uv) {
+	float PI = 3.14159265358979;
+	vec3 dir;
+	
+	float x = sin(PI * uv.y);
+	dir.y = cos(PI * uv.y);
+	
+	dir.x = x * sin(2.0 * PI * (0.5 - uv.x));
+	dir.z = x * cos(2.0 * PI * (0.5 - uv.x));
+	
+	return dir;
+}
+
+void fragment() {
+	vec3 dir = ray_dir_from_uv(UV*3.0);
+	COLOR = vec4(dir*0.5 + vec3(0.5,0.5,0.5), 1.0);
+}
+"
+
+[sub_resource type="ShaderMaterial" id=319]
+shader = SubResource( 318 )
+
 [sub_resource type="SpatialMaterial" id=232]
 albedo_color = Color( 1, 0.992157, 0.992157, 1 )
 metallic = 0.41
@@ -2035,7 +2060,7 @@ script = ExtResource( 18 )
 [node name="HeadCam" type="ARVRCamera" parent="Players/PlayerMe"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 1.86265e-09, 1.5, -0.261 )
 cull_mask = 938495
-far = 321.0
+far = 900.0
 
 [node name="HeadtorchLight" type="SpotLight" parent="Players/PlayerMe/HeadCam"]
 transform = Transform( 1, 0, -2.32831e-10, 0, 0.939693, 0.34202, 0, -0.34202, 0.939693, 0, 0.24, 0 )
@@ -4591,6 +4616,22 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 2, -6 )
 visible = false
 mesh = SubResource( 314 )
 material/0 = SubResource( 317 )
+
+[node name="SkyboxCreator" type="Viewport" parent="WorldEnvironment"]
+size = Vector2( 2048, 1024 )
+disable_3d = true
+render_target_update_mode = 1
+
+[node name="ColorRect" type="ColorRect" parent="WorldEnvironment/SkyboxCreator"]
+material = SubResource( 319 )
+margin_right = 2048.0
+margin_bottom = 1024.0
+
+[node name="CameraViewport" type="Viewport" parent="WorldEnvironment"]
+size = Vector2( 2048, 1024 )
+
+[node name="Camera" type="Camera" parent="WorldEnvironment/CameraViewport"]
+fov = 103.1
 
 [node name="MQTTExperiment" type="Node" parent="."]
 script = ExtResource( 50 )

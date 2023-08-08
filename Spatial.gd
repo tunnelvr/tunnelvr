@@ -370,3 +370,34 @@ func clearallprocessactivityforreload():
 		pointersystem.clearpointertarget()
 		pointersystem.setactivetargetwall(null)
 
+func _input(event):
+	if event is InputEventKey and event.pressed and event.scancode == KEY_3:
+		#print(get_viewport())
+		#var cam = get_viewport().get_camera()
+		#print(cam)
+		#var env = get_viewport().get_camera().environment
+		var env = $WorldEnvironment.environment
+		print(env)
+		env.background_sky = PanoramaSky.new()
+		var sky = env.background_sky
+		print(sky)
+		sky.set_panorama(null)
+		sky.set_panorama($WorldEnvironment/SkyboxCreator.get_texture())
+
+	if event is InputEventKey and event.pressed and event.scancode == KEY_4:
+		#print(get_viewport())
+		#var cam = get_viewport().get_camera()
+		#print(cam)
+		#var env = get_viewport().get_camera().environment
+		$WorldEnvironment/CameraViewport.render_target_update_mode = Viewport.UPDATE_ONCE
+		$WorldEnvironment/CameraViewport/Camera.global_transform = $Players/PlayerMe/HeadCam.global_transform
+		yield(get_tree().create_timer(0.5), "timeout")
+		var env = $WorldEnvironment.environment
+		print(env)
+		env.background_sky = PanoramaSky.new()
+		var sky = env.background_sky
+		print(sky)
+		sky.set_panorama(null)
+		sky.set_panorama($WorldEnvironment/CameraViewport.get_texture())
+		
+		
