@@ -4,8 +4,7 @@ var metadata = null
 var mdscale = Vector3(1,1,1)
 var mdoffset = Vector3(0,0,0)
 
-var highlightplaneperp = Vector3(0,0,0)
-var highlightplanedot = 0.0
+var highlightzonetransform = Transform()
 var slicedisappearthickness = 0.0
 
 var highlightdist = 0.5
@@ -34,20 +33,19 @@ var attributes_postbytes = 0
 
 onready var ImageSystem = get_node("/root/Spatial/ImageSystem")
 
-func sethighlightplaneR(lhighlightplaneperp, lhighlightplanedot):
-	highlightplaneperp = lhighlightplaneperp
-	highlightplanedot = lhighlightplanedot
-	if highlightplaneperp == Vector3(0,0,0):
+func sethighlighttransformR(lhighlightzonetransform):
+	if lhighlightzonetransform == null:
 		slicedisappearthickness = 0.0
 	elif Tglobal.housahedronmode:
+		highlightzonetransform = lhighlightzonetransform
 		slicedisappearthickness = 0.25
 	else:
+		highlightzonetransform = lhighlightzonetransform
 		slicedisappearthickness = 1000.0
 	var node = self
 	while node != null:
 		if node.pointmaterial != null:
-			node.pointmaterial.set_shader_param("highlightplaneperp", highlightplaneperp)
-			node.pointmaterial.set_shader_param("highlightplanedot", highlightplanedot)
+			node.pointmaterial.set_shader_param("highlightzonetransform", highlightzonetransform)
 			node.pointmaterial.set_shader_param("slicedisappearthickness", slicedisappearthickness)
 		node = successornode(node, not node.visible)
 	

@@ -1,9 +1,6 @@
 shader_type spatial;
 render_mode world_vertex_coords,shadows_disabled;
 
-uniform vec3 highlightplaneperp = vec3(0,1,0);
-uniform float highlightplanedot = 0.0;
-
 // parameters set for each octree node according to depth and displacement
 uniform float point_scale = 16.0;
 uniform vec3 ocellcentre = vec3(0,0,0);
@@ -19,11 +16,12 @@ const float fardist = 30.0;
 const float fardisttaper = 20.0;
 const float fardisttaperfac = -(fardisttaper*((fardisttaper + fardist)))/fardist;
 
-// pointcloud parameters based on housahedron type
+// pointcloud parameters for the highlighting zone
 uniform float colormixweight = 0.5; 
 uniform vec3 highlightcol = vec3(1,1,0);
 uniform vec3 highlightcol2 = vec3(0,1,1);
 uniform float highlightdist = 0.5;
+uniform mat4 highlightzonetransform = mat4(vec4(0.0), vec4(0.0), vec4(0.0), vec4(1.0));
 uniform float slicedisappearthickness = 100.0; 
 
 // parameters defining the colour across face of each scatter point
@@ -51,7 +49,9 @@ void vertex() {
 	}
 
 	if (slicedisappearthickness != 0.0) {
-		float distplane = dot(VERTEX, highlightplaneperp) - highlightplanedot; 
+		vec4 hlz = highlightzonetransform*vec4(VERTEX, 1.0); 
+		float distplane = hlz.x; 
+		//float distplane = dot(VERTEX, highlightplaneperp) - highlightplanedot; 
 		if (abs(distplane) >= slicedisappearthickness) {
 			POINT_SIZE = -1.0;
 		}

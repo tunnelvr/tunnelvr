@@ -107,9 +107,16 @@ func _exit_tree():
 func sethighlightplane(planetransform):
 	if rootnode != null:
 		if planetransform != null:
-			rootnode.sethighlightplaneR(planetransform.basis.z, planetransform.basis.z.dot(planetransform.origin))
+			var lhighlightplaneperp = planetransform.basis.z
+			var lhighlightplanedot = planetransform.basis.z.dot(planetransform.origin)
+			var lhighlightzonetransform = Transform(
+					Vector3(lhighlightplaneperp.x, 0.0, 0.0), 
+					Vector3(lhighlightplaneperp.y, 0.0, 0.0), 
+					Vector3(lhighlightplaneperp.z, 0.0, 0.0), 
+					Vector3(-lhighlightplanedot, 0.0, 0.0))
+			rootnode.sethighlighttransformR(lhighlightzonetransform)
 		else:
-			rootnode.sethighlightplaneR(Vector3(0,0,0), 0.0)
+			rootnode.sethighlighttransformR(null)
 
 func getpotreeurl():
 	var selfSpatial = get_node("/root/Spatial")
@@ -260,6 +267,7 @@ func updatepotreeprioritiesLoop():
 			if nnode.visible:
 				rootnode.uppernodevisibilitymask(nnode, false)
 
+		#highlightzonetransform = Transform.IDENTITY
 		while visible and len(res["pointcloudnodestoshow"]) != 0 and OS.get_ticks_msec() < ticksms_tonextupdatepriorities:
 			var nnode = res["pointcloudnodestoshow"].pop_front()
 			if not nnode.visible:
@@ -296,8 +304,7 @@ func updatepotreeprioritiesLoop():
 						lpointmaterial.set_shader_param("highlightcol", Vector3(0.8,0.0,0.8))
 						lpointmaterial.set_shader_param("highlightcol2", Vector3(0.8,0.0,0.8))
 
-					lpointmaterial.set_shader_param("highlightplaneperp", rootnode.highlightplaneperp)
-					lpointmaterial.set_shader_param("highlightplanedot", rootnode.highlightplanedot)
+					lpointmaterial.set_shader_param("highlightzonetransform", rootnode.highlightzonetransform)
 					lpointmaterial.set_shader_param("slicedisappearthickness", rootnode.slicedisappearthickness)
 					nnode.pointmaterial = lpointmaterial
 
@@ -310,8 +317,7 @@ func updatepotreeprioritiesLoop():
 					$LoadingCube.visible = false
 					
 				if not nnode.visible and nnode.mesh != null and nnode.pointmaterial != null:
-					nnode.pointmaterial.set_shader_param("highlightplaneperp", rootnode.highlightplaneperp)
-					nnode.pointmaterial.set_shader_param("highlightplanedot", rootnode.highlightplanedot)
+					nnode.pointmaterial.set_shader_param("highlightzonetransform", rootnode.highlightzonetransform)
 					nnode.pointmaterial.set_shader_param("slicedisappearthickness", rootnode.slicedisappearthickness)
 					rootnode.uppernodevisibilitymask(nnode, true)
 			
