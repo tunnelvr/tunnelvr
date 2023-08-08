@@ -88,6 +88,7 @@ func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointert
 	gripmenuactivetargettubesectorindex = activetargettubesectorindex
 	gripmenuactivetargetnode = activetargetnode
 	
+	# pointersystem.handflickmotiongestureposition_NORMAL==0
 	if (Tglobal.handflickmotiongestureposition == 0) or (activetargetnode != null and activetargetnodewall != null and activetargetnodewall.drawingtype == DRAWING_TYPE.DT_ROPEHANG):
 		var GripLaserSpot = get_node("/root/Spatial/BodyObjects/GripLaserSpot")
 		GripLaserSpot.translation = gripmenupointertargetpoint

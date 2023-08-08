@@ -67,11 +67,11 @@ var intermediatepointplanesectorindex = -1
 var intermediatepointplanelambda = -1.0
 var intermediatepointpicked = null
 
-const handflickmotiongestureposition_normal = 0
-const handflickmotiongestureposition_shortpos = 1
-var handflickmotiongestureposition_shortpos_length = 0.25
-const handflickmotiongestureposition_gone = 2
+const handflickmotiongestureposition_NORMAL = 0
+const handflickmotiongestureposition_SHORTPOS = 1
+const handflickmotiongestureposition_GONE = 2
 const splineamplificationfactor = 10.0
+var handflickmotiongestureposition_shortpos_length = 0.25
 
 var selectlinefatness = 4.0
 
@@ -303,7 +303,7 @@ func clearpointertarget():
 var prevnotificationtorusvisible = false
 func set_handflickmotiongestureposition(lhandflickmotiongestureposition):
 	Tglobal.handflickmotiongestureposition = lhandflickmotiongestureposition
-	if Tglobal.handflickmotiongestureposition == 1:
+	if Tglobal.handflickmotiongestureposition == handflickmotiongestureposition_SHORTPOS:
 		activelaserroot.get_node("LaserSpot").set_surface_material(0, materialsystem.lasermaterialN((1 if activetargetnode != null else 0) + 2))
 		LaserOrient.get_node("Length/Laser").set_surface_material(0, materialsystem.lasermaterial("laserinair"))
 		setpointertarget(activelaserroot, activelaserroot.get_node("RayCast"), handflickmotiongestureposition_shortpos_length)
@@ -427,7 +427,7 @@ func setpointertarget(laserroot, raycast, pointertargetshortdistance):
 					llaserselectlinelogicalvisibilitystate = 1
 				else:
 					llaserselectlinelogicalvisibilitystate = 2
-			elif Tglobal.handflickmotiongestureposition == 1:
+			elif Tglobal.handflickmotiongestureposition == handflickmotiongestureposition_SHORTPOS:
 				llaserselectlinelogicalvisibilitystate = 1 if clconnectcode == 0 else 2
 			
 		elif activetargetnode != null and pointertargetwall != null:
@@ -449,7 +449,7 @@ func setpointertarget(laserroot, raycast, pointertargetshortdistance):
 						llaserselectlinelogicalvisibilitystate = 1 if (pointertargetwall == activetargetwall) else 2
 				elif pointertargettype == "XCdrawing":
 					llaserselectlinelogicalvisibilitystate = 2
-				elif Tglobal.handflickmotiongestureposition == 1:
+				elif Tglobal.handflickmotiongestureposition == handflickmotiongestureposition_SHORTPOS:
 					llaserselectlinelogicalvisibilitystate = 1 if (pointertargettype == "none" or pointertargettype == "XCtubesector" or pointertargettype == "XCflatshell") else 2
 
 			elif activetargetnodewall.drawingtype == DRAWING_TYPE.DT_FLOORTEXTURE:
@@ -458,7 +458,7 @@ func setpointertarget(laserroot, raycast, pointertargetshortdistance):
 		elif pointertargettype == "IntermediatePointView":
 			llaserselectlinelogicalvisibilitystate = 1
 		elif activetargetnodewall != null and activetargetnodewall.drawingtype == DRAWING_TYPE.DT_ROPEHANG:
-			llaserselectlinelogicalvisibilitystate = 1 if ((pointertargettype == "none" and Tglobal.handflickmotiongestureposition == 1)) else 2
+			llaserselectlinelogicalvisibilitystate = 1 if ((pointertargettype == "none" and Tglobal.handflickmotiongestureposition == handflickmotiongestureposition_SHORTPOS)) else 2
 			
 		laserselectlinelogicalvisibilitystate = llaserselectlinelogicalvisibilitystate
 		LaserSelectLine.visible = (llaserselectlinelogicalvisibilitystate != 0)
@@ -496,7 +496,7 @@ func setpointertarget(laserroot, raycast, pointertargetshortdistance):
 							and (pointertarget != guipanel3d) \
 							and (pointertargettype != "PlanView") \
 							and (pointertargettype != "GripMenuItem") \
-							and (Tglobal.handflickmotiongestureposition == handflickmotiongestureposition_normal):
+							and (Tglobal.handflickmotiongestureposition == handflickmotiongestureposition_NORMAL):
 				FloorLaserSpot.get_node("RayCast").transform.origin = pointertargetpoint
 				FloorLaserSpot.get_node("RayCast").force_raycast_update()
 				if FloorLaserSpot.get_node("RayCast").is_colliding() and FloorLaserSpot.visible:
@@ -544,7 +544,7 @@ func setpointertarget(laserroot, raycast, pointertargetshortdistance):
 			lslfrom = activetargetnode.global_transform.origin
 		elif pointertargettype == "IntermediatePointView":
 			lslfrom = get_node("/root/Spatial/BodyObjects/IntermediatePointView/IntermediatePointPlaneStartingMarker").transform.origin
-		elif activetargetnode != null and pointertargettype == "none" and Tglobal.handflickmotiongestureposition == 1:
+		elif activetargetnode != null and pointertargettype == "none" and Tglobal.handflickmotiongestureposition == handflickmotiongestureposition_SHORTPOS:
 			lslfrom = activetargetnode.global_transform.origin
 		else:
 			LaserSelectLine.visible = false
@@ -680,7 +680,7 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 	initialsequencenodenameP = initialsequencenodename
 	initialsequencenodename = null
 
-	if Tglobal.handflickmotiongestureposition == 1 and activetargetnodewall != null and activetargetnodewall.drawingtype == DRAWING_TYPE.DT_ROPEHANG and \
+	if Tglobal.handflickmotiongestureposition == handflickmotiongestureposition_SHORTPOS and activetargetnodewall != null and activetargetnodewall.drawingtype == DRAWING_TYPE.DT_ROPEHANG and \
 			(pointertargettype == "none" or pointertargettype == "XCtubesector" or pointertargettype == "XCflatshell"):
 		var newnodepoint = activetargetnodewall.global_transform.xform_inv(pointertargetpoint)
 		var xcdata = null
@@ -710,7 +710,7 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 
 	elif activetargetnodewall != null and activetargetnodewall.drawingtype == DRAWING_TYPE.DT_CENTRELINE \
 			and activetargetnodewall.xccentrelineconnectstofloor(sketchsystem.get_node("XCdrawings")) != 1 \
-			and gripbuttonheld and Tglobal.handflickmotiongestureposition == 1:
+			and gripbuttonheld and Tglobal.handflickmotiongestureposition == handflickmotiongestureposition_SHORTPOS:
 
 		var tvec = pointertargetpoint - activetargetnode.global_transform.origin
 		var transformpos = activetargetnodewall.transform
@@ -801,10 +801,10 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 		#clearactivetargetnode()
 		#clearpointertarget()
 		sketchsystem.actsketchchange(xcdatalist)
-		if Tglobal.handflickmotiongestureposition == 1:
+		if Tglobal.handflickmotiongestureposition == handflickmotiongestureposition_SHORTPOS:
 			activelaserroot.get_node("LaserSpot").visible = true
 		
-	#elif Tglobal.handflickmotiongestureposition == 1:
+	#elif Tglobal.handflickmotiongestureposition == handflickmotiongestureposition_SHORTPOS:
 	#	activelaserroot.get_node("LaserSpot").set_surface_material(0, materialsystem.lasermaterialN((1 if activetargetnode != null else 0) + 2))
 	#	activelaserroot.get_node("LaserSpot").visible = true
 
@@ -813,7 +813,7 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 	elif activetargetnode != null and pointertarget == activetargetnode:
 		clearactivetargetnode()
 
-	elif activetargetnode == null and activetargetnodewall == null and Tglobal.handflickmotiongestureposition == 1 and (pointertargettype == "XCtubesector" or pointertargettype == "XCflatshell"):
+	elif activetargetnode == null and activetargetnodewall == null and Tglobal.handflickmotiongestureposition == handflickmotiongestureposition_SHORTPOS and (pointertargettype == "XCtubesector" or pointertargettype == "XCflatshell"):
 		pointertargetofstartofropehang = pointertargetwall
 		var xcdata = { "name":sketchsystem.uniqueXCname("r"), 
 					   "drawingtype":DRAWING_TYPE.DT_ROPEHANG,
@@ -824,7 +824,7 @@ func buttonpressed_vrtrigger(gripbuttonheld):
 		var xcrope = sketchsystem.get_node("XCdrawings").get_node(xcdata["name"])
 		setactivetargetnode(xcrope.get_node("XCnodes").get_node("a0"))
 
-	elif activetargetnode == null and activetargetnodewall == null and Tglobal.handflickmotiongestureposition == 0 and pointertargettype == "XCtubesector" and pointertargetwall.get_node("PathLines").visible:
+	elif activetargetnode == null and activetargetnodewall == null and Tglobal.handflickmotiongestureposition == handflickmotiongestureposition_NORMAL and pointertargettype == "XCtubesector" and pointertargetwall.get_node("PathLines").visible:
 		var pointertargettube = pointertargetwall
 		var ipbasis = pointertargettube.intermedpointplanebasis(pointertargetpoint)
 		var xcdrawing0 = sketchsystem.get_node("XCdrawings").get_node(pointertargettube.xcname0)
@@ -2097,11 +2097,11 @@ func _physics_process(delta):
 	joyposcumulative += handright.joypos*delta
 	#joyposcumulative.x += ((-1 if Input.is_key_pressed(KEY_1) else 0) + (1 if Input.is_key_pressed(KEY_2) else 0))*delta
 	if playerMe.handflickmotiongesture != 0:
-		if playerMe.handflickmotiongesture == 1:
-			set_handflickmotiongestureposition(min(Tglobal.handflickmotiongestureposition+1, handflickmotiongestureposition_gone))
+		if playerMe.handflickmotiongesture == handflickmotiongestureposition_SHORTPOS:
+			set_handflickmotiongestureposition(min(Tglobal.handflickmotiongestureposition+1, handflickmotiongestureposition_GONE))
 		else:
-			set_handflickmotiongestureposition(0)
-		playerMe.get_node("HandRight/PalmLight").visible = (Tglobal.handflickmotiongestureposition == handflickmotiongestureposition_gone)
+			set_handflickmotiongestureposition(handflickmotiongestureposition_NORMAL)
+		playerMe.get_node("HandRight/PalmLight").visible = (Tglobal.handflickmotiongestureposition == handflickmotiongestureposition_GONE)
 		playerMe.handflickmotiongesture = 0
 
 	var joyscrolldir = 0
@@ -2137,10 +2137,10 @@ func _physics_process(delta):
 					textedit.scroll_vertical += -joyscrolldir
 					joyscrolldir = 0
 			
-		elif Tglobal.handflickmotiongestureposition == handflickmotiongestureposition_gone or Tglobal.controlslocked:
+		elif Tglobal.handflickmotiongestureposition == handflickmotiongestureposition_GONE or Tglobal.controlslocked:
 			LaserOrient.visible = false
 			pointerplanviewtarget = null
-		elif Tglobal.handflickmotiongestureposition == handflickmotiongestureposition_shortpos and not (firstlasertarget != null and firstlasertarget.get_parent().get_parent().get_name() == "GripMenu"):
+		elif Tglobal.handflickmotiongestureposition == handflickmotiongestureposition_SHORTPOS and not (firstlasertarget != null and firstlasertarget.get_parent().get_parent().get_name() == "GripMenu"):
 			LaserOrient.visible = true
 			activelaserroot = LaserOrient
 			pointerplanviewtarget = null
@@ -2217,7 +2217,7 @@ func _input(event):
 			if event.pressed:
 				buttonpressed_vrby()	
 		if event.pressed and event.scancode == KEY_H:
-			set_handflickmotiongestureposition(handflickmotiongestureposition_shortpos if Tglobal.handflickmotiongestureposition == handflickmotiongestureposition_normal else handflickmotiongestureposition_normal)
+			set_handflickmotiongestureposition(handflickmotiongestureposition_SHORTPOS if Tglobal.handflickmotiongestureposition == handflickmotiongestureposition_NORMAL else handflickmotiongestureposition_NORMAL)
 
 		if event.scancode == KEY_COMMA:
 			if event.pressed:

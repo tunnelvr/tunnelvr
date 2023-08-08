@@ -157,7 +157,7 @@ func _on_button_pressed(p_button):
 			#	joyposxrotsnaphysteresis = 2
 
 	elif not Tglobal.questhandtrackingactive and p_button == BUTTONS.VR_BUTTON_BY:
-		pointersystem.set_handflickmotiongestureposition(pointersystem.handflickmotiongestureposition_shortpos if Tglobal.handflickmotiongestureposition == pointersystem.handflickmotiongestureposition_normal else pointersystem.handflickmotiongestureposition_normal)
+		pointersystem.set_handflickmotiongestureposition(pointersystem.handflickmotiongestureposition_SHORTPOS if Tglobal.handflickmotiongestureposition == pointersystem.handflickmotiongestureposition_NORMAL else pointersystem.handflickmotiongestureposition_NORMAL)
 		
 func _on_button_release(p_button):
 	if p_button == BUTTONS.VR_BUTTON_BY:
