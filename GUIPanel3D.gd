@@ -1238,8 +1238,16 @@ func _on_files_dropped(files: PoolStringArray, screen: int):
 				filecommandtextedit.text = "Uploading to other players\nnot yet implemented"
 			else:
 				filecommandtextedit.text = "Please connect to player\nrunning potreeconvertipfs"
+
+	elif files[0].ends_with(".3d"):
+		if selfSpatial.playerMe.executingfeaturesavailable.has("parse3ddmp_centreline"):
+			get_node("/root/Spatial/ExecutingFeatures").parse3ddmpcentreline_execute(files[0], "")
+			setguipanelhide()
+		else:
+			filecommandtextedit.text = "parse3ddmp_centreline feature missing"
+
 	else:
-		filecommandtextedit.text = "Only one laz file please"
+		filecommandtextedit.text = "laz/las or 3d files only"
 
 # eye-dome lighting discussion
 # https://forum.babylonjs.com/t/eye-dome-lighting-edl-for-point-clouds/21737/4
