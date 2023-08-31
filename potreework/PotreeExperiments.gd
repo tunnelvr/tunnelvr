@@ -104,19 +104,32 @@ func _exit_tree():
 		potreethread.wait_to_finish()
 		threadtoexit = false
 
-func sethighlightplane(planetransform):
+func sethighlightplaneZone(planetransform, highlightdist, cylmode):
 	if rootnode != null:
 		if planetransform != null:
-			var lhighlightplaneperp = planetransform.basis.z
-			var lhighlightplanedot = planetransform.basis.z.dot(planetransform.origin)
-			var lhighlightzonetransform = Transform(
-					Vector3(lhighlightplaneperp.x, 0.0, 0.0), 
-					Vector3(lhighlightplaneperp.y, 0.0, 0.0), 
-					Vector3(lhighlightplaneperp.z, 0.0, 0.0), 
-					Vector3(-lhighlightplanedot, 0.0, 0.0))
-			rootnode.sethighlighttransformR(lhighlightzonetransform)
+			if cylmode:
+				var cplaneperpx = planetransform.basis.x
+				var cplaneperpxdot = cplaneperpx.dot(planetransform.origin)
+				var cplaneperpy = planetransform.basis.y*2.0
+				var cplaneperpydot = cplaneperpy.dot(planetransform.origin)
+				var lhighlightzonetransform = Transform(
+						Vector3(cplaneperpx.x, cplaneperpy.x, 0.0), 
+						Vector3(cplaneperpx.y, cplaneperpy.y, 0.0), 
+						Vector3(cplaneperpx.z, cplaneperpy.z, 0.0), 
+						Vector3(-cplaneperpxdot, -cplaneperpydot, 0.0))
+				rootnode.sethighlighttransformR(lhighlightzonetransform, 1000, highlightdist)
+			else:
+				var lhighlightplaneperp = planetransform.basis.z
+				var lhighlightplanedot = planetransform.basis.z.dot(planetransform.origin)
+				var lhighlightzonetransform = Transform(
+						Vector3(lhighlightplaneperp.x, 0.0, 0.0), 
+						Vector3(lhighlightplaneperp.y, 0.0, 0.0), 
+						Vector3(lhighlightplaneperp.z, 0.0, 0.0), 
+						Vector3(-lhighlightplanedot, 0.0, 0.0))
+				rootnode.sethighlighttransformR(lhighlightzonetransform, 0.25 if Tglobal.housahedronmode else 1000.0, highlightdist)
+
 		else:
-			rootnode.sethighlighttransformR(null)
+			rootnode.sethighlighttransformR(null, 0.0, 0.0)
 
 func getpotreeurl():
 	var selfSpatial = get_node("/root/Spatial")
@@ -298,11 +311,6 @@ func updatepotreeprioritiesLoop():
 					if rootnode.attributes_rgb_prebytes != -1 and rootnode.potree_color_multfactor != 0.0:
 						colormixweight = 1.0 if Tglobal.housahedronmode else 0.9
 					lpointmaterial.set_shader_param("colormixweight", colormixweight)
-
-					if Tglobal.housahedronmode:
-						lpointmaterial.set_shader_param("highlightdist", 0.15)
-						lpointmaterial.set_shader_param("highlightcol", Vector3(0.8,0.0,0.8))
-						lpointmaterial.set_shader_param("highlightcol2", Vector3(0.8,0.0,0.8))
 
 					lpointmaterial.set_shader_param("highlightzonetransform", rootnode.highlightzonetransform)
 					lpointmaterial.set_shader_param("slicedisappearthickness", rootnode.slicedisappearthickness)

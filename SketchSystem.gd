@@ -615,7 +615,7 @@ func xcdrawingfromdata(xcdata, fromremotecall):
 			get_node("/root/Spatial/ImageSystem").fetchpaperdrawing(xcdrawing)
 
 	if xcdrawing.drawingtype == DRAWING_TYPE.DT_XCDRAWING and xcdrawing == pointersystem.activetargetwall and "transformpos" in xcdata:
-		pointersystem.potreeexperiments.sethighlightplane(xcdrawing.transform)
+		pointersystem.potreeexperiments.sethighlightplaneZone(xcdrawing.transform, 0.15 if Tglobal.housahedronmode else 0.5, false)
 
 	return xcdrawing
 

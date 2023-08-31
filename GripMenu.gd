@@ -12,6 +12,7 @@ var gripmenuactivetargetnode = null
 var previewtubematerials = { }
 var tubenamematerials = { }
 onready var materialsystem = get_node("/root/Spatial/MaterialSystem")
+onready var GripLaserSpot = get_node("/root/Spatial/BodyObjects/GripLaserSpot")
 
 var materialmatrix = [ ["simpledirt"], ["partialrock"], ["rockwater"], ["pebbles"], ["mediumrock"], 
 					   ["bluewater", "bluewaterfore", "bluewaterback"], ["hole"], ["calcite"], ["floormap"] ] # + , "holegap"]
@@ -46,7 +47,7 @@ func _ready():
 
 	
 func disableallgripmenus():
-	get_node("/root/Spatial/BodyObjects/GripLaserSpot").visible = false
+	GripLaserSpot.visible = false
 	for s in $WordButtons.get_children():
 		s.get_node("MeshInstance").visible = false
 		s.get_node("CollisionShape").disabled = true
@@ -88,9 +89,10 @@ func gripmenuon(controllertrans, pointertargetpoint, pointertargetwall, pointert
 	gripmenuactivetargettubesectorindex = activetargettubesectorindex
 	gripmenuactivetargetnode = activetargetnode
 	
-	# pointersystem.handflickmotiongestureposition_NORMAL==0
-	if (Tglobal.handflickmotiongestureposition == 0) or (activetargetnode != null and activetargetnodewall != null and activetargetnodewall.drawingtype == DRAWING_TYPE.DT_ROPEHANG):
-		var GripLaserSpot = get_node("/root/Spatial/BodyObjects/GripLaserSpot")
+	# pointersystem.handflickmotiongestureposition_NORMAL==0, handflickmotiongestureposition_SHORTPOS=1
+	if (Tglobal.handflickmotiongestureposition == 0) or \
+			(activetargetnode != null and activetargetnodewall != null and activetargetnodewall.drawingtype == DRAWING_TYPE.DT_ROPEHANG) or \
+			(Tglobal.handflickmotiongestureposition == 1):
 		GripLaserSpot.translation = gripmenupointertargetpoint
 		GripLaserSpot.visible = get_node("/root/Spatial/BodyObjects/LaserOrient/LaserSpot").visible
 	

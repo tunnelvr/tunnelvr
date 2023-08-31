@@ -215,9 +215,9 @@ func setactivetargetwall(newactivetargetwall):
 
 	if activetargetwall != null and activetargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING:
 		print("newactivetargetwall ", activetargetwall, " nodes ", activetargetwall.get_node("XCnodes").get_child_count())
-		potreeexperiments.sethighlightplane(activetargetwall.transform)
+		potreeexperiments.sethighlightplaneZone(activetargetwall.transform, 0.15 if Tglobal.housahedronmode else 0.5, false)
 	else:
-		potreeexperiments.sethighlightplane(null)
+		potreeexperiments.sethighlightplaneZone(null, 0.0, false)
 		print("newactivetargetwall notdrawing ", activetargetwall)
 	
 	LaserOrient.get_node("RayCast").collision_mask = raynormalcollisionmask()
@@ -2149,6 +2149,11 @@ func _physics_process(delta):
 			if joyscrolldir == 1 and handflickmotiongestureposition_shortpos_length <= 28.1:
 				handflickmotiongestureposition_shortpos_length += (0.25 if handflickmotiongestureposition_shortpos_length < 0.9 else (1.0 if handflickmotiongestureposition_shortpos_length < 7.9 else 2.0))
 			setpointertarget(activelaserroot, activelaserroot.get_node("RayCast"), handflickmotiongestureposition_shortpos_length)
+			#if pointertarget == null and activetargetwall == null:
+			#if not (activetargetwall != null and activetargetwall.drawingtype == DRAWING_TYPE.DT_XCDRAWING):
+			if not gripmenu.GripLaserSpot.visible:
+				potreeexperiments.sethighlightplaneZone(activelaserroot.global_transform, handflickmotiongestureposition_shortpos_length*0.4, true)
+
 		elif firstlasertarget != null and firstlasertarget.get_name() == "PlanView" and planviewsystem.checkplanviewinfront(LaserOrient) and planviewsystem.planviewactive:
 			pointerplanviewtarget = planviewsystem
 			LaserOrient.visible = true

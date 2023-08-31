@@ -48,8 +48,8 @@ void fragment() {
 	float dd = length(vec2(UV.x*2.0 - 1.0, 
 					  (bspark ? (UV.y - 0.9)*10.0 : pow(abs(UV.y - 0.3)/0.33, 4.0)))); 
 	
-    ALBEDO = min(vec3(1.0), vec3(0.4, 0.6, 0.7)*(0.3/(dd + 0.01)) + 
-				 (bspark ? vec3(0.9, 0.1, 0.6) : vec3(0.0, 0.6, 0.0)));
+    ALBEDO = min(vec3(1.0), vec3(0.9, 0.6, 0.7)*(0.3/(dd + 0.01)) + 
+				 (bspark ? vec3(0.3, 0.1, 1.0) : vec3(0.0, 0.6, 0.0)));
 	ALPHA = clamp(1.0 - dd*dd*4.0, 0.0, 1.0); 
 
 	float fadeperiod = UV.y*UV.y*0.4 + 0.01;  

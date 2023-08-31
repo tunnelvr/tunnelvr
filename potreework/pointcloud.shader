@@ -50,13 +50,13 @@ void vertex() {
 
 	if (slicedisappearthickness != 0.0) {
 		vec4 hlz = highlightzonetransform*vec4(VERTEX, 1.0); 
-		float distplane = hlz.x; 
+		float distplane = max(abs(hlz.x), abs(hlz.y)); 
 		//float distplane = dot(VERTEX, highlightplaneperp) - highlightplanedot; 
-		if (abs(distplane) >= slicedisappearthickness) {
+		if (distplane >= slicedisappearthickness) {
 			POINT_SIZE = -1.0;
 		}
-		float emissionfac = clamp(1.0 - abs(distplane)/highlightdist, 0.0, 1.0);
-		emissioncol = (distplane > 0.0 ? highlightcol : highlightcol2)*emissionfac;
+		float emissionfac = clamp((1.0 - distplane/highlightdist)*5.0, 0.0, 1.0);
+		emissioncol = (hlz.x > 0.0 ? highlightcol : highlightcol2)*emissionfac;
 	} else {
 		emissioncol = vec3(0,0,0)
 	}	
