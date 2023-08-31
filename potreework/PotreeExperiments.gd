@@ -104,19 +104,25 @@ func _exit_tree():
 		potreethread.wait_to_finish()
 		threadtoexit = false
 
+var planetransformR = null
+var highlightdistR = 0.0
 func sethighlightplaneZone(planetransform, highlightdist, cylmode):
 	if rootnode != null:
 		if planetransform != null:
 			if cylmode:
+				planetransformR = planetransform
+				highlightdistR = highlightdist
 				var cplaneperpx = planetransform.basis.x
 				var cplaneperpxdot = cplaneperpx.dot(planetransform.origin)
 				var cplaneperpy = planetransform.basis.y*2.0
 				var cplaneperpydot = cplaneperpy.dot(planetransform.origin)
+				var cplaneperpz = planetransform.basis.z*2.0
+				var cplaneperpzdot = cplaneperpz.dot(planetransform.origin)
 				var lhighlightzonetransform = Transform(
-						Vector3(cplaneperpx.x, cplaneperpy.x, 0.0), 
-						Vector3(cplaneperpx.y, cplaneperpy.y, 0.0), 
-						Vector3(cplaneperpx.z, cplaneperpy.z, 0.0), 
-						Vector3(-cplaneperpxdot, -cplaneperpydot, 0.0))
+						Vector3(cplaneperpx.x, cplaneperpy.x, cplaneperpz.x), 
+						Vector3(cplaneperpx.y, cplaneperpy.y, cplaneperpz.y), 
+						Vector3(cplaneperpx.z, cplaneperpy.z, cplaneperpz.z), 
+						Vector3(-cplaneperpxdot, -cplaneperpydot, -cplaneperpzdot))
 				rootnode.sethighlighttransformR(lhighlightzonetransform, 1000, highlightdist)
 			else:
 				var lhighlightplaneperp = planetransform.basis.z
@@ -386,8 +392,7 @@ func Dcorrectvisibilitymask():
 		print("Dcorrectvisibilitymask runn")
 	
 
-func laserplanfitting(Glaserorient, laserlength):
-	var rayradius = 0.15
+func laserplanfitting(Glaserorient, laserlength, cylmode, rayradius):
 	var raywallfilterradius = rayradius*0.6
 	var floorfilterdepth = rayradius*0.4
 		

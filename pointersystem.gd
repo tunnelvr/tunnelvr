@@ -1329,8 +1329,25 @@ func buttonreleased_vrgrip():
 	if gripbuttonpressused:
 		pass  # the trigger was pulled during the grip operation
 	
+
 	elif pointertargettype == "GripMenuItem":
-		if pointertarget.get_name() == "NewXC":
+		if pointertarget.get_name() == "NewXC" and (Tglobal.handflickmotiongestureposition == 1) and Tglobal.housahedronmode and potreeexperiments.visible:
+			var potreeplanefittrans = potreeexperiments.laserplanfitting(gripmenu.gripmenulaserorient, 50.0, true, potreeexperiments.rootnode.highlightdist)
+			if potreeplanefittrans != null:
+				var xcdata = { "name":sketchsystem.uniqueXCname("c"), 
+							   "drawingtype":DRAWING_TYPE.DT_ROPEHANG,
+							   "transformpos":Transform(Basis(), potreeplanefittrans.origin),
+							   "prevnodepoints":{ },
+							   "nextnodepoints":{ "a0":potreeplanefittrans.basis.x, 
+												  "a1":-potreeplanefittrans.basis.x },
+							   "prevonepathpairs":[ ],
+							   "newonepathpairs": [ "a0", "a1" ]
+							 }
+				var xcviz = { "xcvizstates": { xcdata["name"]:DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE } }
+				sketchsystem.actsketchchange([xcdata, xcviz])
+
+
+		elif pointertarget.get_name() == "NewXC":
 			var pt0 = gripmenu.gripmenupointertargetpoint
 			var eyept0vec = pt0 - headcam.global_transform.origin
 			var newxcvertplane = true
@@ -1339,8 +1356,9 @@ func buttonreleased_vrgrip():
 			if Tglobal.housahedronmode:
 				if potreeexperiments.visible:
 					var laserlength = gripmenu.gripmenulaserorient.origin.distance_to(gripmenu.gripmenupointertargetpoint)
-					var Glaserlength = min(15, laserlength if not is_zero_approx(laserlength) else 50)
-					potreeplanefittrans = potreeexperiments.laserplanfitting(gripmenu.gripmenulaserorient, Glaserlength)
+					var Glaserlength = min(15.0, laserlength if not is_zero_approx(laserlength) else 50.0)
+					potreeplanefittrans = potreeexperiments.laserplanfitting(gripmenu.gripmenulaserorient, Glaserlength, false, 0.15)
+
 			if potreeplanefittrans != null:
 				pt0 = potreeplanefittrans.origin
 				eyept0vec = -potreeplanefittrans.basis.z
