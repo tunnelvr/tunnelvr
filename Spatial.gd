@@ -63,7 +63,7 @@ var _openxr_configuration
 var _openxr_enabled_extensions : Array
 
 onready var playerMe = $Players/PlayerMe
-onready var mqttsystem = $MQTTExperiment
+onready var mqttsystem = null 
 
 export var forceopenVR = false
 
@@ -321,7 +321,7 @@ func _player_disconnected(id):
 	$GuiSystem/GUIPanel3D.updateplayerlist()
 	playerMe.bouncetestnetworkID = nextplayernetworkidinringskippingdoppelganger(id)
 	$GuiSystem/GUIPanel3D/Viewport/GUI/Panel/Label.text = "player "+String(id)+" disconnected"
-	get_node("/root/Spatial/MQTTExperiment").call_deferred("mqttupdatenetstatus")
+	#get_node("/root/Spatial/MQTTExperiment").call_deferred("mqttupdatenetstatus")
 		
 func setconnectiontoserveractive(b):
 	Tglobal.connectiontoserveractive = b

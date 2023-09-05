@@ -1294,8 +1294,8 @@ func buttonreleased_vrgrip():
 			if Tglobal.housahedronmode:
 				print("aflatshellname", aflatshellname)
 				var xcdrawingM = sketchsystem.get_node("XCdrawings").get_node(aflatshellname)
-				var MQTT = get_node("/root/Spatial/MQTTExperiment/MQTT")
-				if MQTT.is_connected_to_server():
+				var MQTT = get_node_or_null("/root/Spatial/MQTTExperiment/MQTT")
+				if MQTT and MQTT.is_connected_to_server():
 					var xcflatshell = xcdrawingM.get_node_or_null("XCflatshell/MeshInstance")
 					var xctubeshellmesh = xcflatshell.mesh if xcflatshell else null
 					var tfaces = xctubeshellmesh.get_faces() if xctubeshellmesh else null

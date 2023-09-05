@@ -1246,8 +1246,13 @@ func _on_files_dropped(files: PoolStringArray, screen: int):
 		else:
 			filecommandtextedit.text = "parse3ddmp_centreline feature missing"
 
+	elif files[0].ends_with(".xml"):
+		var tunnelxsystem = get_node("/root/Spatial/TunnelXSystem")
+		tunnelxsystem.loadtunnelxsketch(files[0])
+		setguipanelhide()
+
 	else:
-		filecommandtextedit.text = "laz/las or 3d files only"
+		filecommandtextedit.text = "laz/las or 3d/xml files only"
 
 # eye-dome lighting discussion
 # https://forum.babylonjs.com/t/eye-dome-lighting-edl-for-point-clouds/21737/4
@@ -1453,7 +1458,7 @@ func networkstartasserver():
 
 	if selfSpatial.playerMe.executingfeaturesavailable.has("caddy"):
 		selfSpatial.get_node("ExecutingFeatures").startcaddywebserver()
-	get_node("/root/Spatial/MQTTExperiment").mqttupdatenetstatus()
+	#get_node("/root/Spatial/MQTTExperiment").mqttupdatenetstatus()
 
 
 func _connection_failed():
@@ -1475,7 +1480,7 @@ func removeallplayersdisconnection():
 	for id in selfSpatial.players_connected_list.duplicate():
 		print("server_disconnected, calling _player_disconnected on ", id)
 		selfSpatial.call_deferred("_player_disconnected", id)
-	get_node("/root/Spatial/MQTTExperiment").mqttupdatenetstatus()
+	#get_node("/root/Spatial/MQTTExperiment").mqttupdatenetstatus()
 	
 func _server_disconnected():
 	print("\n\n***_server_disconnected ", websocketclient, "\n\n")
@@ -1495,7 +1500,7 @@ remote func recordnetworkmetrics(lnetworkmetricsreceived):
 	networkmetricsreceived = lnetworkmetricsreceived
 	var bouncetimems = networkmetricsreceived["ticksback"] - networkmetricsreceived["ticksout"]
 	#print("recordnetworkmetrics ", networkmetricsreceived)
-	selfSpatial.get_node("MQTTExperiment").fpsbounce("%d %d" % [Performance.get_monitor(Performance.TIME_FPS), bouncetimems])
+	#selfSpatial.get_node("MQTTExperiment").fpsbounce("%d %d" % [Performance.get_monitor(Performance.TIME_FPS), bouncetimems])
 		
 remote func sendbacknetworkmetrics(lnetworkmetrics, networkIDsource):
 	var playerOthername = "NetworkedPlayer"+String(networkIDsource) if networkIDsource != -11 else "Doppelganger"

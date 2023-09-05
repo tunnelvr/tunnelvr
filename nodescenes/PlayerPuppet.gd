@@ -45,7 +45,7 @@ remote func initplayerappearanceJ(playerappearance):
 		get_node("HeadCam/visorline").get_surface_material(0).albedo_color = Color(0, 0, 0.3)
 	else:
 		get_node("HeadCam/visorline").visible = false
-	get_node("/root/Spatial/MQTTExperiment").mqttupdatenetstatus()
+	#get_node("/root/Spatial/MQTTExperiment").mqttupdatenetstatus()
 	guipanel3d.updateplayerlist()
 	
 # reltime is localtime - remotetime.  More delay means message sent earlier, means bigger number. Find smallest filtering any outliers

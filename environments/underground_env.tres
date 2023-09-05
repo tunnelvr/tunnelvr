@@ -2,6 +2,9 @@
 
 [sub_resource type="ProceduralSky" id=1]
 sky_top_color = Color( 0.243137, 0.666667, 0.898039, 1 )
+ground_bottom_color = Color( 0.482353, 0.188235, 0.121569, 1 )
+ground_curve = 1.1536
+ground_energy = 1.2
 sun_latitude = 50.0
 sun_longitude = 180.0
 

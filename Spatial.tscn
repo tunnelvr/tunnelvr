@@ -1,4 +1,4 @@
-[gd_scene load_steps=389 format=2]
+[gd_scene load_steps=387 format=2]
 
 [ext_resource path="res://Spatial.gd" type="Script" id=1]
 [ext_resource path="res://environments/underground_env.tres" type="Environment" id=2]
@@ -47,9 +47,7 @@
 [ext_resource path="res://sounds/Flashpoint001b.wav" type="AudioStream" id=45]
 [ext_resource path="res://sounds/menu_click.wav" type="AudioStream" id=46]
 [ext_resource path="res://guimaterials/vrgui.theme" type="Theme" id=47]
-[ext_resource path="res://systems/MQTT.gd" type="Script" id=48]
 [ext_resource path="res://guimaterials/fetchbuttonimg.png" type="Texture" id=49]
-[ext_resource path="res://systems/testmqtt.gd" type="Script" id=50]
 [ext_resource path="res://guimaterials/clearcachebuttonimg.png" type="Texture" id=51]
 [ext_resource path="res://sounds/menu_taping.wav" type="AudioStream" id=52]
 [ext_resource path="res://guimaterials/borderedfloor.material" type="Material" id=53]
@@ -3399,9 +3397,6 @@ margin_bottom = 241.108
 text = "player0"
 items = [ "player0", null, false, 0, null ]
 selected = 0
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="OptionButtonGoto" type="OptionButton" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
 margin_left = 17.0
@@ -4633,15 +4628,6 @@ size = Vector2( 2048, 1024 )
 [node name="Camera" type="Camera" parent="WorldEnvironment/CameraViewport"]
 fov = 103.1
 
-[node name="MQTTExperiment" type="Node" parent="."]
-script = ExtResource( 50 )
-
-[node name="MQTT" type="Node" parent="MQTTExperiment"]
-script = ExtResource( 48 )
-
-[node name="Timer" type="Timer" parent="MQTTExperiment/MQTT"]
-wait_time = 30.0
-
 [node name="LightingExperiments" type="Spatial" parent="."]
 visible = false
 
@@ -4822,7 +4808,5 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 13, 2.5, -6 )
 visible = false
 
 [node name="Camera2D" type="Camera2D" parent="Lidarmodel"]
-
-[connection signal="timeout" from="MQTTExperiment/MQTT/Timer" to="MQTTExperiment/MQTT" method="ping"]
 
 [editable path="Players/PlayerMe/HandLeft/left_hand_model"]
