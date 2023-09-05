@@ -56,7 +56,7 @@ _global_script_class_icons={
 
 [application]
 
-config/name="tunnelvr_v0.8.y"
+config/name="tunnelvr_v0.8"
 run/main_scene="res://Spatial.tscn"
 boot_splash/image="res://screenshot.png"
 config/icon="res://icon.png"

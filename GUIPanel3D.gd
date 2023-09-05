@@ -1246,8 +1246,13 @@ func _on_files_dropped(files: PoolStringArray, screen: int):
 		else:
 			filecommandtextedit.text = "parse3ddmp_centreline feature missing"
 
+	elif files[0].ends_with(".xml"):
+		var tunnelxsystem = get_node("/root/Spatial/TunnelXSystem")
+		tunnelxsystem.loadtunnelxsketch(files[0])
+		setguipanelhide()
+
 	else:
-		filecommandtextedit.text = "laz/las or 3d files only"
+		filecommandtextedit.text = "laz/las or 3d/xml files only"
 
 # eye-dome lighting discussion
 # https://forum.babylonjs.com/t/eye-dome-lighting-edl-for-point-clouds/21737/4

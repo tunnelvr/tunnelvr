@@ -500,7 +500,10 @@ remote func actsketchchangeL(xcdatalist):
 			#elif xcdrawing.drawingtype == DRAWING_TYPE.DT_ROPEHANG:
 			#	xcdrawing.setdrawingvisiblecode(DRAWING_TYPE.VIZ_XCD_HIDE)
 		for xctube in xctubestoupdate.values():
-			xctube.updatetubeshell($XCdrawings)
+			if xctube.xcname0 != xctube.xcname1:
+				xctube.updatetubeshell($XCdrawings)
+			else:
+				xctube.updatetunnelxareas($XCdrawings)
 			xctube.setxctubepathlinevisibility(self)
 				
 		if xcdatalist[0]["caveworldchunk"] == xcdatalist[0]["caveworldchunkLast"]:

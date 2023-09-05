@@ -169,7 +169,7 @@ func setdrawingvisiblecode(ldrawingvisiblecode):
 		else:
 			setxcdrawingvisiblehideL((drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE) == 0)
 	elif drawingtype == DRAWING_TYPE.DT_CENTRELINE:
-		assert (drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_HIDE or get_name() == "tunnelx1")
+		assert (drawingvisiblecode == DRAWING_TYPE.VIZ_XCD_HIDE or get_name().begins_with("tunnelx"))
 		setxcdrawingvisiblehideL((drawingvisiblecode & DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE) == 0)
 
 	elif drawingtype == DRAWING_TYPE.DT_ROPEHANG:
