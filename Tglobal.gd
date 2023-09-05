@@ -15,7 +15,7 @@ var virtualkeyboardactive = false
 var questhandtracking = false
 var questhandtrackingactive = false
 
-var handflickmotiongestureposition = 0
+var handflickmotiongestureposition = 0 # pointersystem.handflickmotiongestureposition_NORMAL
 var soundsystem = null
 
 var hidecavewallstoseefloors = false

@@ -1102,18 +1102,19 @@ func centrelinelist_selected(index):
 
 	else:
 		var centrelinedrawing = sketchsystem.get_node("XCdrawings").get_node_or_null(selectedcentrelinexcname)
-		var potreeurlexists = centrelinedrawing.additionalproperties != null and centrelinedrawing.additionalproperties.has("potreeurlmetadata")
-		var potreeexperiments = selfSpatial.get_node("PotreeExperiments")
-		OptionsCentreline.set_item_disabled(OptionsCentreline_SHOWPOINTCLOUD, not (potreeurlexists and (loadedcentrelinepotree == null or selectedcentrelinexcname == loadedcentrelinepotree)))
-		OptionsCentreline.set_item_disabled(OptionsCentreline_UNLOADPOINTCLOUD, loadedcentrelinepotree == null)
-		if not centrelinedrawing.visible:
-			OptionsCentreline.select(OptionsCentreline_HIDESTUFF)
-		elif selectedcentrelinexcname == activecentrelinepotree:
-			OptionsCentreline.select(OptionsCentreline_SHOWPOINTCLOUD)
-		elif selectedcentrelinexcname == activesketchingcentrelinexcname:
-			OptionsCentreline.select(OptionsCentreline_SKETCHINGMODE)
-		else:
-			OptionsCentreline.select(OptionsCentreline_NORMALMODE)
+		if centrelinedrawing != null:
+			var potreeurlexists = centrelinedrawing.additionalproperties != null and centrelinedrawing.additionalproperties.has("potreeurlmetadata")
+			var potreeexperiments = selfSpatial.get_node("PotreeExperiments")
+			OptionsCentreline.set_item_disabled(OptionsCentreline_SHOWPOINTCLOUD, not (potreeurlexists and (loadedcentrelinepotree == null or selectedcentrelinexcname == loadedcentrelinepotree)))
+			OptionsCentreline.set_item_disabled(OptionsCentreline_UNLOADPOINTCLOUD, loadedcentrelinepotree == null)
+			if not centrelinedrawing.visible:
+				OptionsCentreline.select(OptionsCentreline_HIDESTUFF)
+			elif selectedcentrelinexcname == activecentrelinepotree:
+				OptionsCentreline.select(OptionsCentreline_SHOWPOINTCLOUD)
+			elif selectedcentrelinexcname == activesketchingcentrelinexcname:
+				OptionsCentreline.select(OptionsCentreline_SKETCHINGMODE)
+			else:
+				OptionsCentreline.select(OptionsCentreline_NORMALMODE)
 
 
 # * keyboard to work on phone overlay mode

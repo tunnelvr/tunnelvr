@@ -104,12 +104,38 @@ func _exit_tree():
 		potreethread.wait_to_finish()
 		threadtoexit = false
 
-func sethighlightplane(planetransform):
+var planetransformR = null
+var highlightdistR = 0.0
+func sethighlightplaneZone(planetransform, highlightdist, cylmode):
 	if rootnode != null:
 		if planetransform != null:
-			rootnode.sethighlightplaneR(planetransform.basis.z, planetransform.basis.z.dot(planetransform.origin))
+			if cylmode:
+				planetransformR = planetransform
+				highlightdistR = highlightdist
+				var cplaneperpx = planetransform.basis.x
+				var cplaneperpxdot = cplaneperpx.dot(planetransform.origin)
+				var cplaneperpy = planetransform.basis.y*2.0
+				var cplaneperpydot = cplaneperpy.dot(planetransform.origin)
+				var cplaneperpz = planetransform.basis.z*2.0
+				var cplaneperpzdot = cplaneperpz.dot(planetransform.origin)
+				var lhighlightzonetransform = Transform(
+						Vector3(cplaneperpx.x, cplaneperpy.x, cplaneperpz.x), 
+						Vector3(cplaneperpx.y, cplaneperpy.y, cplaneperpz.y), 
+						Vector3(cplaneperpx.z, cplaneperpy.z, cplaneperpz.z), 
+						Vector3(-cplaneperpxdot, -cplaneperpydot, -cplaneperpzdot))
+				rootnode.sethighlighttransformR(lhighlightzonetransform, 1000, highlightdist)
+			else:
+				var lhighlightplaneperp = planetransform.basis.z
+				var lhighlightplanedot = planetransform.basis.z.dot(planetransform.origin)
+				var lhighlightzonetransform = Transform(
+						Vector3(lhighlightplaneperp.x, 0.0, 0.0), 
+						Vector3(lhighlightplaneperp.y, 0.0, 0.0), 
+						Vector3(lhighlightplaneperp.z, 0.0, 0.0), 
+						Vector3(-lhighlightplanedot, 0.0, 0.0))
+				rootnode.sethighlighttransformR(lhighlightzonetransform, 0.25 if Tglobal.housahedronmode else 1000.0, highlightdist)
+
 		else:
-			rootnode.sethighlightplaneR(Vector3(0,0,0), 0.0)
+			rootnode.sethighlighttransformR(null, 0.0, 0.0)
 
 func getpotreeurl():
 	var selfSpatial = get_node("/root/Spatial")
@@ -260,6 +286,7 @@ func updatepotreeprioritiesLoop():
 			if nnode.visible:
 				rootnode.uppernodevisibilitymask(nnode, false)
 
+		#highlightzonetransform = Transform.IDENTITY
 		while visible and len(res["pointcloudnodestoshow"]) != 0 and OS.get_ticks_msec() < ticksms_tonextupdatepriorities:
 			var nnode = res["pointcloudnodestoshow"].pop_front()
 			if not nnode.visible:
@@ -291,13 +318,7 @@ func updatepotreeprioritiesLoop():
 						colormixweight = 1.0 if Tglobal.housahedronmode else 0.9
 					lpointmaterial.set_shader_param("colormixweight", colormixweight)
 
-					if Tglobal.housahedronmode:
-						lpointmaterial.set_shader_param("highlightdist", 0.15)
-						lpointmaterial.set_shader_param("highlightcol", Vector3(0.8,0.0,0.8))
-						lpointmaterial.set_shader_param("highlightcol2", Vector3(0.8,0.0,0.8))
-
-					lpointmaterial.set_shader_param("highlightplaneperp", rootnode.highlightplaneperp)
-					lpointmaterial.set_shader_param("highlightplanedot", rootnode.highlightplanedot)
+					lpointmaterial.set_shader_param("highlightzonetransform", rootnode.highlightzonetransform)
 					lpointmaterial.set_shader_param("slicedisappearthickness", rootnode.slicedisappearthickness)
 					nnode.pointmaterial = lpointmaterial
 
@@ -310,8 +331,7 @@ func updatepotreeprioritiesLoop():
 					$LoadingCube.visible = false
 					
 				if not nnode.visible and nnode.mesh != null and nnode.pointmaterial != null:
-					nnode.pointmaterial.set_shader_param("highlightplaneperp", rootnode.highlightplaneperp)
-					nnode.pointmaterial.set_shader_param("highlightplanedot", rootnode.highlightplanedot)
+					nnode.pointmaterial.set_shader_param("highlightzonetransform", rootnode.highlightzonetransform)
 					nnode.pointmaterial.set_shader_param("slicedisappearthickness", rootnode.slicedisappearthickness)
 					rootnode.uppernodevisibilitymask(nnode, true)
 			
@@ -372,8 +392,7 @@ func Dcorrectvisibilitymask():
 		print("Dcorrectvisibilitymask runn")
 	
 
-func laserplanfitting(Glaserorient, laserlength):
-	var rayradius = 0.15
+func laserplanfitting(Glaserorient, laserlength, cylmode, rayradius):
 	var raywallfilterradius = rayradius*0.6
 	var floorfilterdepth = rayradius*0.4
 		
