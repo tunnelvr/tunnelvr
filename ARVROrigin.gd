@@ -246,7 +246,7 @@ func playerappearancedict():
 			 "guardianpoly":guardianpoly, 
 			 "executingfeaturesavailable":executingfeaturesavailable,
 			 "tunnelvrversion":Tglobal.tunnelvrversion,
-			 "playermqttid":get_node("/root/Spatial/MQTTExperiment/MQTT").client_id,
+			 #"playermqttid":get_node("/root/Spatial/MQTTExperiment/MQTT").client_id,
 			 "cavesfilelist":guipanel3d.cavesfilelist()
 			}
 

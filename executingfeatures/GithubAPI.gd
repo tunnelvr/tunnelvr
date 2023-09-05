@@ -19,6 +19,7 @@ func saveresourcesinformationfile():
 	var rijsondir = Directory.new()
 	rijsondir.rename(resourcesinformationfileBAK, resourcesinformationfile)
 			
+var possiblehumannames = ["Alice", "Beth", "Cath", "Dan", "Earl", "Fred", "George", "Harry", "Ivan", "John", "Kevin", "Larry", "Martin", "Oliver", "Peter", "Quentin", "Robert", "Samuel", "Thomas", "Ulrik", "Victor", "Wayne", "Xavier", "Youngs", "Zephir"]
 func resources_readycallloadinfo():
 	var rijson = File.new()
 	if rijson.file_exists(resourcesinformationfile):
@@ -27,7 +28,6 @@ func resources_readycallloadinfo():
 	if not riattributes:
 		riattributes = { }
 		randomize()
-		var possiblehumannames = get_node("/root/Spatial/MQTTExperiment").possibleusernames
 		var randomplayerhumanname = possiblehumannames[randi()%len(possiblehumannames)]
 		var resourcedefs = { "local":    { "name":"local", "type":"localfiles", "path":"user://cavefiles/", "playername":randomplayerhumanname }, 
 							 "cavereg1": { "name":"cavereg1", "type":"svnfiles", "url":"http://cave-registry.org.uk/svn/", "path":"NorthernEngland" },

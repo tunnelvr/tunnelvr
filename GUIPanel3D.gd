@@ -1453,7 +1453,7 @@ func networkstartasserver():
 
 	if selfSpatial.playerMe.executingfeaturesavailable.has("caddy"):
 		selfSpatial.get_node("ExecutingFeatures").startcaddywebserver()
-	get_node("/root/Spatial/MQTTExperiment").mqttupdatenetstatus()
+	#get_node("/root/Spatial/MQTTExperiment").mqttupdatenetstatus()
 
 
 func _connection_failed():
@@ -1475,7 +1475,7 @@ func removeallplayersdisconnection():
 	for id in selfSpatial.players_connected_list.duplicate():
 		print("server_disconnected, calling _player_disconnected on ", id)
 		selfSpatial.call_deferred("_player_disconnected", id)
-	get_node("/root/Spatial/MQTTExperiment").mqttupdatenetstatus()
+	#get_node("/root/Spatial/MQTTExperiment").mqttupdatenetstatus()
 	
 func _server_disconnected():
 	print("\n\n***_server_disconnected ", websocketclient, "\n\n")
@@ -1495,7 +1495,7 @@ remote func recordnetworkmetrics(lnetworkmetricsreceived):
 	networkmetricsreceived = lnetworkmetricsreceived
 	var bouncetimems = networkmetricsreceived["ticksback"] - networkmetricsreceived["ticksout"]
 	#print("recordnetworkmetrics ", networkmetricsreceived)
-	selfSpatial.get_node("MQTTExperiment").fpsbounce("%d %d" % [Performance.get_monitor(Performance.TIME_FPS), bouncetimems])
+	#selfSpatial.get_node("MQTTExperiment").fpsbounce("%d %d" % [Performance.get_monitor(Performance.TIME_FPS), bouncetimems])
 		
 remote func sendbacknetworkmetrics(lnetworkmetrics, networkIDsource):
 	var playerOthername = "NetworkedPlayer"+String(networkIDsource) if networkIDsource != -11 else "Doppelganger"

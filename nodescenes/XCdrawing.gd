@@ -644,8 +644,8 @@ func mergexcrpcdata(xcdata):
 			gripmenu.setmaterialmatrix()
 
 			if Tglobal.housahedronmode:
-				var MQTT = get_node("/root/Spatial/MQTTExperiment/MQTT")
-				if not MQTT.is_connected_to_server():
+				var MQTT = get_node_or_null("/root/Spatial/MQTTExperiment/MQTT")
+				if MQTT and not MQTT.is_connected_to_server():
 					MQTT.server = "mosquitto.doesliverpool.xyz"
 					if yield(MQTT.connect_to_server(), "completed"):
 						MQTT.publish("sapjs/vr1/json", to_json({"clear":"elements"}))
