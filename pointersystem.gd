@@ -1345,7 +1345,8 @@ func buttonreleased_vrgrip():
 							 }
 				var xcviz = { "xcvizstates": { xcdata["name"]:DRAWING_TYPE.VIZ_XCD_NODES_VISIBLE } }
 				sketchsystem.actsketchchange([xcdata, xcviz])
-
+				var xcwallrope = sketchsystem.get_node("XCdrawings").get_node(xcdata["name"])
+				setactivetargetnode(xcwallrope.get_node("XCnodes").get_node("a0"))
 
 		elif pointertarget.get_name() == "NewXC":
 			var pt0 = gripmenu.gripmenupointertargetpoint
