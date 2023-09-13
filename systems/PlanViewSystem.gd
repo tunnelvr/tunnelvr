@@ -686,7 +686,7 @@ func updateplanviewentitysizes():
 		var screensize = get_node("/root").size
 		var plancameraxvec = plancamera.project_position(screensize/2 + Vector2(1, 0), elevcameradist) - plancamera.project_position(screensize/2, elevcameradist)
 		print("plancamera size xvec comparison ", plancameraxvec, " ", plancamera.size, "  ", plancameraxvec/plancamera.size)
-		sketchsystem.get_node("tunnelxoutline/blackoutline").material_override.set_shader_param("normaloffsetdistance", nodesca*0.2)
+		sketchsystem.get_node("tunnelxoutline/blackoutline").material_override.set_shader_param("normaloffsetdistance", nodesca*0.1)
 		get_node("/root/Spatial/VerletRopeSystem").update_hangingroperad(sketchsystem, nodesca*0.05)
 
 	var labelgenerator = get_node("/root/Spatial/LabelGenerator")

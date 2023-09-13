@@ -7,6 +7,7 @@ onready var HandLeft = playerMe.get_node("HandLeft")
 onready var HandRight = playerMe.get_node("HandRight")
 onready var HandLeftController = playerMe.get_node("HandLeftController")
 onready var planviewsystem = get_node("/root/Spatial/PlanViewSystem")
+onready var pointersystem = playerMe.get_node("pointersystem")
 
 var flyspeed = 5.0
 var walkspeed = 3.0
@@ -114,7 +115,7 @@ func _physics_process(delta):
 		joyposforeback += -Tglobal.phonethumbmotionposition.y*1.5
 		joyposstrafe += Tglobal.phonethumbmotionposition.x*1.5
 
-	if not Tglobal.questhandtrackingactive and not Tglobal.controlslocked:
+	if not Tglobal.questhandtrackingactive and not Tglobal.controlslocked and not (HandRight.gripbuttonheld and pointersystem.activetargetwallgrabbed != null):
 		if abs(joypossnapturn) < 0.4 and joyposxrotsnaphysteresis != 2:
 			joyposxrotsnaphysteresis = 0
 		elif joyposxrotsnaphysteresis == 0:
@@ -144,7 +145,7 @@ func _physics_process(delta):
 			playerdirectedwalkingvelocity = (-dir*joyposforeback + perpdir*joyposstrafe)*walkspeed*playerMe.playerwalkscale*housahedronslowerfactor
 			
 func _on_button_pressed(p_button):
-	var pointersystem = playerMe.get_node("pointersystem")
+
 	if p_button == BUTTONS.VR_MENU and Tglobal.arvrinterfacename == "OpenXR":
 		pointersystem.buttonpressed_vrby()
 
