@@ -382,14 +382,36 @@ func _on_switchtest(index):
 		playerMe.togglefog()
 		SwitchTest.selected = 0
 
-	elif nssel == "LoadX":
-		var tunnelxsystem = get_node("/root/Spatial/TunnelXSystem")
-#		tunnelxsystem.loadtunnelxsketch("res://assets/miscobjects/292-sketch1.xml")
-#		tunnelxsystem.loadtunnelxsketch("res://assets/miscobjects/1623-midbalc2022.xml")
-#		tunnelxsystem.loadtunnelxsketch("res://assets/miscobjects/290+291+295-Nov2022jgtfix.xml")
-		tunnelxsystem.loadtunnelxsketch("res://assets/miscobjects/SkirwithCave-sketch.xml")
+	elif nssel == "ConvCenLine":
+		var xcropeobject = sketchsystem.pointersystem.activetargetnodewall if sketchsystem.pointersystem.activetargetnode != null and sketchsystem.pointersystem.activetargetnodewall != null and sketchsystem.pointersystem.activetargetnodewall.drawingtype == DRAWING_TYPE.DT_ROPEHANG else null
+		var CentrelineList = planviewsystem.planviewcontrols.get_node("CentrelineActivity/CentrelineList")
+		var xccentreline = sketchsystem.get_node("XCdrawings").get_node(CentrelineList.get_item_text(CentrelineList.selected)) if CentrelineList.selected != -1 and CentrelineList.get_item_text(CentrelineList.selected) != planviewsystem.CentrelineList_none else null
+		print("Rope object ", xcropeobject, "  centreline object ", xccentreline)
+		if xccentreline != null and xcropeobject != null:
+			var clineinverse = xccentreline.transform.affine_inverse()
+			var p = sketchsystem.pointersystem.activetargetnode.global_transform.origin
+			var pname = p.get_name()
+			var cp = clineinverse.xform(p)
+			var cnclosest = null
+			var cndistance = -1.0
+			for lcn in xccentreline.nodepoints:
+				var lcndistance = (xccentreline.transform.xform(xccentreline.nodepoints[lcn]) - p).length()
+				if cnclosest == null or lcndistance < cndistance:
+					cnclosest = lcn
+					cndistance = lcndistance
+			print(" closest distance is ", cndistance, " for node ", cnclosest)
+			if cnclosest != null and cndistance < 0.3:
+				var newcnodes = { }
+				for ln in xcropeobject.nodepoints:
+					if ln != pname:
+						newcnodes[xcropeobject.get_name()+","+ln] = clineinverse.xform(xcropeobject.transform.xform(xcropeobject.nodepoints[ln]))
+				var xccdata = { "name":xccentreline.get_name(), 
+								"prevnodepoints":{ }, 
+								"nextnodepoints":newcnodes 
+							  }
+				sketchsystem.actsketchchange([xccdata ])
 
-
+		SwitchTest.selected = 0
 		
 	elif nssel == "Huge Spiral":
 		var xcrad = 1.5

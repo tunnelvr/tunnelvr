@@ -2047,8 +2047,6 @@ albedo_color = Color( 0.941176, 0.941176, 0.0470588, 1 )
 
 [node name="Spatial" type="Spatial"]
 script = ExtResource( 1 )
-enablevr = false
-forcephoneoverlay = true
 
 [node name="Players" type="Spatial" parent="."]
 
@@ -3362,7 +3360,7 @@ margin_top = 245.108
 margin_right = 114.216
 margin_bottom = 272.108
 text = "normal"
-items = [ "normal", null, false, 0, null, "Hide XCs", null, false, 1, null, "opt: all grey", null, false, 2, null, "opt: hide xc", null, false, 3, null, "toggle guardian", null, false, 4, null, "export OBJ", null, false, 7, null, "choke", null, false, 6, null, "swap controllers", null, false, 7, null, "lock controls", null, false, 8, null, "toggle gltf", null, false, 10, null, "Huge Spiral", null, true, 11, null, "LoadX", null, false, 12, null ]
+items = [ "normal", null, false, 0, null, "Hide XCs", null, false, 1, null, "opt: all grey", null, false, 2, null, "opt: hide xc", null, false, 3, null, "toggle guardian", null, false, 4, null, "export OBJ", null, false, 7, null, "choke", null, false, 6, null, "swap controllers", null, false, 7, null, "lock controls", null, false, 8, null, "toggle gltf", null, false, 10, null, "Huge Spiral", null, true, 11, null, "ConvCenLine", null, false, 12, null ]
 selected = 0
 __meta__ = {
 "_edit_use_anchors_": false

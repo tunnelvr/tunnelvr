@@ -31,8 +31,7 @@ func resources_readycallloadinfo():
 		var randomplayerhumanname = possiblehumannames[randi()%len(possiblehumannames)]
 		var resourcedefs = { "local":    { "name":"local", "type":"localfiles", "path":"user://cavefiles/", "playername":randomplayerhumanname }, 
 							 "cavereg1": { "name":"cavereg1", "type":"svnfiles", "url":"http://cave-registry.org.uk/svn/", "path":"NorthernEngland" },
-							 "caddyg":   { "name":"caddyg", "type":"caddyfiles", "url":"http://godot.doesliverpool.xyz:8000/", "path":"" },
-							 "ghfiles":  { "name":"ghfiles", "type":"githubapi", "apiurl":"api.github.com", "owner":"goatchurchprime", "repo":"tunnelvr_cave_data", "path":"cavedata/firstarea" }
+							 "gh1Area":  { "name":"gh1Area", "type":"githubapi", "apiurl":"api.github.com", "owner":"goatchurchprime", "repo":"tunnelvr_cave_data", "path":"cavedata/firstarea" }
 						   }
 		riattributes["resourcedefs"] = resourcedefs
 		saveresourcesinformationfile()

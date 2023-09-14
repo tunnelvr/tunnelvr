@@ -162,8 +162,8 @@ func _ready():
 			Tglobal.arvrinterface = null
 		playerMe.playerplatform = "Rift"
 				
-	elif enablevr and checkloadinterface("OpenVR"):
-		print("found openvr, initializing")
+	elif enablevr and checkloadinterface("OpenXR"):
+		print("found openxr, initializing")
 		if Tglobal.arvrinterface.initialize():
 			var viewport = get_viewport()
 			viewport.arvr = true
@@ -173,7 +173,7 @@ func _ready():
 			Engine.target_fps = 90
 			Engine.iterations_per_second = 90
 			OS.vsync_enabled = false;
-			print("  Success initializing OpenVR Interface.");
+			print("  Success initializing OpenXR Interface.");
 			playerMe.playerplatform = "Vive"
 			get_node("/root/Spatial/BodyObjects/PlayerDirections").snapturnemovementjoystick = DRAWING_TYPE.JOYPOS_RIGHTCONTROLLER_PADDOWN
 			
