@@ -452,7 +452,7 @@ func laserplanfitting(Glaserorient, laserlength, cylmode, rayradius):
 	var npotreefloorzs = 0
 	for lscanningnode in segintersectingboxestoscan:
 		var boxradius = (lscanningnode.ocellsize/2).length()
-		if potreecontactpoint.distance_to(lscanningnode.ocellorigin) < rayradius + boxradius:
+		if potreecontactpoint.distance_to(lscanningnode.ocellorigin) < rayradius + boxradius and lscanningnode.mesh != null:
 			var relsegfrom = potreecontactpoint - lscanningnode.ocellorigin
 			Nscan2s += 1
 			var surfacearrays = lscanningnode.mesh.surface_get_arrays(0)

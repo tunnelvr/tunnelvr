@@ -1073,7 +1073,7 @@ func centrelineactivityoptions_selected(index):
 	elif index == OptionsCentreline_UNLOADPOINTCLOUD:
 		pvchange["activecentrelinepotree"] = CentrelineList_unloadpotree
 		var centrelinedrawing = sketchsystem.get_node("XCdrawings").get_node(selectedcentrelinexcname)
-		OptionsCentreline.select(OptionsCentreline_NORMALMODE if centrelinedrawing.visible else OptionsCentreline_HIDESTUFF)
+		OptionsCentreline.select(OptionsCentreline_NORMALMODE if centrelinedrawing and centrelinedrawing.visible else OptionsCentreline_HIDESTUFF)
 	actplanviewdict(pvchange)
 		
 func centrelinelist_selected(index):

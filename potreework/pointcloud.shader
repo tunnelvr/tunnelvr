@@ -58,7 +58,7 @@ void vertex() {
 		float emissionfac = clamp((1.0 - distplane/highlightdist)*5.0, 0.0, 1.0);
 		emissioncol = (hlz.x > 0.0 ? highlightcol : highlightcol2)*emissionfac;
 	} else {
-		emissioncol = vec3(0,0,0)
+		emissioncol = vec3(0,0,0);
 	}	
 
 	float mixval = (1.0/(distcamera + fardisttaper) - 1.0/fardisttaper)*fardisttaperfac;
@@ -82,6 +82,7 @@ void fragment() {
 	if (rsq > 0.25+point_scale*0.002) 
 		discard;
 
+	//ALPHA = 0.6*mix(1.0, 0.0, rsq*4.0);
 	ALBEDO *= mix(vec3(1.0, 1.0, 1.0), bordercolor, rsq*3.0);
 	if (closenessfrac > 0.0) {
 		if ((abs(POINT_COORD.x*2.0-1.0) < closenessfrac) || (abs(POINT_COORD.y*2.0-1.0) < closenessfrac))

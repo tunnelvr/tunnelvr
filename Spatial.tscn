@@ -1954,6 +1954,11 @@ shader_param/Exp_scale = 350.0
 [sub_resource type="SpatialMaterial" id=317]
 params_cull_mode = 2
 albedo_color = Color( 0.0470588, 0.866667, 0.529412, 1 )
+emission_enabled = true
+emission = Color( 0, 0, 0, 1 )
+emission_energy = 1.0
+emission_operator = 0
+emission_on_uv2 = false
 
 [sub_resource type="Shader" id=318]
 code = "shader_type canvas_item;
@@ -3291,9 +3296,6 @@ margin_top = 44.0
 margin_right = 297.0
 margin_bottom = 71.0
 text = "savegame.res"
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="ButtonSave" type="Button" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
 margin_left = 318.118
@@ -3302,9 +3304,6 @@ margin_right = 372.118
 margin_bottom = 71.0561
 rect_pivot_offset = Vector2( 111.073, 28.0005 )
 text = "Save"
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="Networkstate" type="OptionButton" parent="GuiSystem/GUIPanel3D/Viewport/GUI/Panel"]
 margin_left = 22.665
@@ -4681,8 +4680,8 @@ transform = Transform( 0.927973, 0.372648, 0, -0.372648, 0.927973, 0, 0, 0, 1, -
 transform = Transform( 0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 0, 0 )
 
 [node name="CPUParticles" type="CPUParticles" parent="BatFlutter/BatCentre/batflap"]
-transform = Transform( 1, -8.9407e-08, -5.32907e-15, 8.9407e-08, 1, 5.96046e-08, -6.66134e-16, -5.96046e-08, 1, 0.0109825, 0.872995, -0.81 )
-amount = 1500
+transform = Transform( 1, -2.08616e-07, -1.77636e-14, 2.08616e-07, 1, 5.96046e-08, -6.66134e-16, -5.96046e-08, 1, 0, 0, 0 )
+amount = 150
 lifetime = 3.0
 lifetime_randomness = 0.25
 local_coords = false
