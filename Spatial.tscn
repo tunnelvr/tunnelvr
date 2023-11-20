@@ -4681,7 +4681,7 @@ transform = Transform( 0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 0, 0 )
 
 [node name="CPUParticles" type="CPUParticles" parent="BatFlutter/BatCentre/batflap"]
 transform = Transform( 1, -2.08616e-07, -1.77636e-14, 2.08616e-07, 1, 5.96046e-08, -6.66134e-16, -5.96046e-08, 1, 0, 0, 0 )
-amount = 150
+amount = 900
 lifetime = 3.0
 lifetime_randomness = 0.25
 local_coords = false
