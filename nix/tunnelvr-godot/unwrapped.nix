@@ -1,5 +1,5 @@
-{ godot, godot-source }:
-godot.overrideAttrs (_: {
+{ godot3, godot-source }:
+godot3.overrideAttrs (_: {
   version = godot-source.rev;
   src = godot-source;
   preBuild =

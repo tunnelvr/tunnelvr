@@ -24,7 +24,7 @@ symlinkJoin {
       '';
       export-templates = fetchurl {
         url = "https://downloads.tuxfamily.org/godotengine/${version.string}/Godot_v${version.string}-${version.status}_export_templates.tpz";
-        sha256 = "sha256-vmnalRgYn0gS6OfAg2FxYaCDquBTi7kZWKWXbL9zCSA=";
+        sha256 = "sha256-fufpfAGoUzcCcdGoeVIpd7sceC5p6cZLSdQ9p0SOUDg=";
         recursiveHash = true;
         # postFetch is necessary because the downloaded file has a
         # .tpz extension, meaning `fetchzip` cannot otherwise extract
@@ -41,7 +41,7 @@ symlinkJoin {
       };
     in
     ''
-      wrapProgram $out/bin/godot \
+      wrapProgram $out/bin/godot3 \
         --set tunnelvr_ANDROID_SDK "${androidenv.androidPkgs_9_0.androidsdk}/libexec/android-sdk"\
         --set tunnelvr_EXPORT_TEMPLATES "${export-templates}/templates" \
         --set tunnelvr_DEBUG_KEY "${debugKey}"

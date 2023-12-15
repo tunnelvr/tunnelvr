@@ -88,7 +88,8 @@ func delayednetworkstart():
 	yield(get_tree().create_timer(8.0), "timeout")
 	$GuiSystem/GUIPanel3D/Viewport/GUI/Panel/Networkstate.selected = 2
 	$GuiSystem/GUIPanel3D._on_networkstate_selected($GuiSystem/GUIPanel3D/Viewport/GUI/Panel/Networkstate.selected)
-
+	print("Pausing everything as we are the Server")
+	get_tree().paused = true
 	
 func _ready():
 	print("  Available Interfaces are %s: " % str(ARVRServer.get_interfaces()));
@@ -301,6 +302,10 @@ func _player_connected(id):
 			print("sending out vizstates ", xcvizstates)
 			$SketchSystem.rpc_id(id, "actsketchchangeL", [{"prevxcvizstates":{}, "xcvizstates":xcvizstates}])
 	# {dukest1resurvey2009,12s0:2, s12009211:2}
+		if OS.has_feature("Server"):
+			if get_tree().paused:
+				print("Unpausing the server godot instance")
+				get_tree().paused = false
 
 func _player_disconnected(id):
 	print("_player_disconnected ", id)
@@ -322,6 +327,10 @@ func _player_disconnected(id):
 	playerMe.bouncetestnetworkID = nextplayernetworkidinringskippingdoppelganger(id)
 	$GuiSystem/GUIPanel3D/Viewport/GUI/Panel/Label.text = "player "+String(id)+" disconnected"
 	#get_node("/root/Spatial/MQTTExperiment").call_deferred("mqttupdatenetstatus")
+	if len(players_connected_list) == 0 and OS.has_feature("Server"):
+		print("Pausing the server godot instance")
+		get_tree().paused = true
+
 		
 func setconnectiontoserveractive(b):
 	Tglobal.connectiontoserveractive = b

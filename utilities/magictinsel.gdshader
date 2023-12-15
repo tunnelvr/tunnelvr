@@ -23,7 +23,7 @@ void vertex() {
 	float fadetimefac = COLOR.g; 
 
 	vec2 streamvec = normalize((MODELVIEW_MATRIX * vec4(0.0, 1.0, 0.0, 0.0)).xy); 
-	float noiserowdisp = fract(streamvec.x*100.0); 
+	float noiserowdisp = fract(VERTEX.z*100.0); 
 	float noiserow = min(UV.y, 0.6) + 0.2*noiserowdisp; 
 	float prevnoiserow = max(noiserow - 0.2, 0.0); 
 	vec4 normnoise = texture(position_noise, vec2(noisetimefac, noiserow)); 

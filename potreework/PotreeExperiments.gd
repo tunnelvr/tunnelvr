@@ -66,7 +66,6 @@ const coloctcellpointsloading = Color("#36e418e6")
 
 onready var ImageSystem = get_node("/root/Spatial/ImageSystem")
 
-
 func _ready():
 	if $PointSampleTest.visible:
 		var st = SurfaceTool.new()

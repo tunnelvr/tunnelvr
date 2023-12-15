@@ -1,6 +1,6 @@
-{ runCommand, src, tunnelvr-godot-headless, godot-export-templates }:
+{ runCommand, src, tunnelvr-godot-headless, godot3-export-templates }:
 runCommand "tunnelvr_pck" {
-  buildInputs = [ tunnelvr-godot-headless godot-export-templates ];
+  buildInputs = [ tunnelvr-godot-headless godot3-export-templates ];
   inherit src;
 }
 ''
@@ -10,10 +10,10 @@ runCommand "tunnelvr_pck" {
   export HOME=$TMP
   export XDG_CONFIG_HOME="$TMP/.config"
   export XDG_DATA_HOME="$TMP/.local/share"
-  ln -s ${godot-export-templates} "$TMP/.local/share"
+  ln -s ${godot3-export-templates} "$TMP/.local/share"
 
   cp -r $src $TMP/src
   chmod -R u+w -- "$TMP/src"
-  godot-headless --path "$TMP/src" --export-pack "Linux/X11" tunnelvr.pck
+  godot3-headless --path "$TMP/src" --export-pack "Linux/X11" tunnelvr.pck
   mv $TMP/src/tunnelvr.pck $out
 ''
