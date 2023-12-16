@@ -208,6 +208,7 @@ func exportOBJ():
 	var fmtlname = "user://objexport/cave.mtl"
 	var fout = File.new()
 	fout.open(fobjname, File.WRITE)
+	print("saving file", fout.get_path_absolute())
 	fout.store_line("mtllib cave.mtl")
 	var materialsystem = get_node("/root/Spatial/MaterialSystem")
 	var materialdict = { }
@@ -281,8 +282,6 @@ func exportSTL():
 				var mesh = xctubesector.get_node("MeshInstance").mesh
 				var g = mesh.get_surface_count()
 				var x = mesh.surface_get_arrays(0)
-				if i == 0:
-					print(x, g)
 				var faces = mesh.get_faces()
 				vfaces.append(faces)
 				vmathashs.append(xcmathash)
@@ -290,6 +289,8 @@ func exportSTL():
 
 	var fout = File.new()
 	fout.open(fname, File.WRITE)
+	print("saving file: ", fout.get_path_absolute())
+
 	var header = "TunnelVR out".to_utf8()
 	while len(header) < 80:
 		header.append(0x20)
@@ -304,7 +305,6 @@ func exportSTL():
 			fout.store_float(faces[i+2].x); fout.store_float(-faces[i+2].z); fout.store_float(faces[i+2].y)
 			fout.store_16(vmathashs[int(i/3)]%65536)
 	fout.close()
-	print("saved ", fname, " in C:/Users/ViveOne/AppData/Roaming/Godot/app_userdata/tunnelvr")
 	$Viewport/GUI/Panel/Label.text = "Cave exported"
 
 var prevnssel = "normal"
