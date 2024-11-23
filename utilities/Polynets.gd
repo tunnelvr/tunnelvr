@@ -90,6 +90,8 @@ static func makexcdpolysDict(nodepoints, onepathpairs):
 		var polyname = "u_%d" % len(polysdict)
 		if len(singlenodeindexes) == 1 and hasnondoublenodes:
 			var ii = singlenodeindexes.pop_at(0)
+			if ii == len(poly):
+				ii = 0
 			var iip1 = 0 if ii == len(poly)-1 else ii+1
 			var iim1 = len(poly)-1 if ii == 0 else ii-1
 			if poly[iip1] == poly[iim1]:
