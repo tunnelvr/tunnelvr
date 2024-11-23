@@ -42,7 +42,7 @@ symlinkJoin {
     in
     ''
       wrapProgram $out/bin/godot3 \
-        --set tunnelvr_ANDROID_SDK "${androidenv.androidPkgs_9_0.androidsdk}/libexec/android-sdk"\
+        --set tunnelvr_ANDROID_SDK "${androidenv.androidPkgs.androidsdk}/libexec/android-sdk"\
         --set tunnelvr_EXPORT_TEMPLATES "${export-templates}/templates" \
         --set tunnelvr_DEBUG_KEY "${debugKey}"
     '';

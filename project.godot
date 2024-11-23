@@ -80,6 +80,10 @@ gdscript/warnings/integer_division=false
 singletons=[ "res://addons/godot-openxr/config/godot_openxr.gdnlib" ]
 singletons_disabled=[  ]
 
+[global]
+
+build=false
+
 [input]
 
 ui_select={

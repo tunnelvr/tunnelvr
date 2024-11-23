@@ -823,10 +823,9 @@ func _process(delta):
 								 0.5*(-1 if floormove.get_node("ButtonMoveFall").is_pressed() else 0) + (1 if floormove.get_node("ButtonMoveRise").is_pressed() else 0),
 								 (1 if floormove.get_node("ButtonMoveDown").is_pressed() else 0) + (-1 if floormove.get_node("ButtonMoveUp").is_pressed() else 0))
 		var joygrow = (-1 if floormove.get_node("ButtonShrink").is_pressed() else 0) + (1 if floormove.get_node("ButtonGrow").is_pressed() else 0)
-		if len(activetargetfloor.nodepoints) != 0:
-			joyposmove.x = 0
-			joyposmove.z = 0
-			joygrow = 0
+		#if len(activetargetfloor.nodpepoints) != 0:
+		#	joyposmove.x = 0
+		##	joygrow = 0
 		if joypostrimld != Vector2(0,0) or joypostrimru != Vector2(0,0) or joyposmove != Vector3(0,0,0) or joygrow != 0:
 			if "name" in lastoptionaltxcdata and lastoptionaltxcdata["name"] != activetargetfloor.get_name():
 				sketchsystem.actsketchchange([lastoptionaltxcdata])

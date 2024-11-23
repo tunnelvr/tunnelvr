@@ -584,7 +584,8 @@ const clientips = [ "Local-network",
 					#"192.168.43.193 JulianS9",
 					#"10.0.32.206",
 					"127.0.0.1",
-					"godot.doesliverpool.xyz" ]
+					"godot.doesliverpool.xyz",
+					"95.217.164.7" ]
 var uniqueinstancestring = ""
 func toplevelcalled_ready():
 	uniqueinstancestring = OS.get_unique_id().replace("{", "").split("-")[0].to_upper()+"_"+str(randi())
@@ -932,9 +933,10 @@ func _input(event):
 				$Viewport/GUI/Panel/ButtonPlanView.pressed = not $Viewport/GUI/Panel/ButtonPlanView.pressed
 				_on_buttonplanview_pressed()
 
-
-
-
+			# drag and drop actually fails when there are spaces in the file name
+			#elif event.scancode == KEY_6:
+				#_on_files_dropped(PoolStringArray(["/home/julian/data/cave-registry/NorthernEngland/ThreeCountiesArea/theriondata/North by North End Pot/Output/NNEPotIndex.3d"]), 0)
+			
 
 var resourceoptionlookup = { }
 func resources_readycall():
