@@ -49,9 +49,9 @@
             final.tunnelvr-godot
             jre_headless
             caddy survex final.Dpotreeconverter
-            python310Packages.pyproj
-            python310Packages.laspy
-            python310Packages.ipfshttpclient
+            python311Packages.pyproj
+            python311Packages.laspy
+            python311Packages.ipfshttpclient
           ];
         };
       };
